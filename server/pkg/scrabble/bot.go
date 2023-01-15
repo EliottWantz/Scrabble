@@ -80,7 +80,6 @@ func (ofb *OneOfNBest) PickMove(state *GameState, moves []Move) Move {
 		if len(moves) > ofb.N {
 			moves = moves[:ofb.N]
 		}
-		// # nosec
 		pick := rand.Intn(len(moves))
 		// Pick a move by random from the remaining list
 		return moves[pick]

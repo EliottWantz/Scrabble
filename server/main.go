@@ -57,7 +57,10 @@ func simulateGame(tileSet *scrabble.TileSet, dawg *scrabble.DAWG) (scoreA, score
 		} else {
 			move = bot2.GenerateMove(state)
 		}
-		g.ApplyValid(move)
+		err := g.ApplyValid(move)
+		if err != nil {
+			fmt.Println(err)
+		}
 		// fmt.Println(move)
 		if g.IsOver() {
 			// fmt.Println(g.Board)
