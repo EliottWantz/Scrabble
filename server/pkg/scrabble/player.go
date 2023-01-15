@@ -9,6 +9,7 @@ type Player struct {
 	Username string
 	Rack     *Rack
 	Score    int
+	IsBot    bool
 }
 
 func NewPlayer(username string, b *Bag) *Player {

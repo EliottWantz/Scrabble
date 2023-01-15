@@ -5,23 +5,21 @@ import (
 	"sort"
 )
 
-// Robot is an interface for automatic players that implement
-// a playing strategy to pick a move given a list of legal tile
-// moves.
+// Strategy is an interface that implements a playing strategy to pick a
+// move	given a list of legal tile moves.
 type Strategy interface {
 	PickMove(state *GameState, moves []Move) Move
 }
 
-type Bot struct {
-	*Player
+type Engine struct {
 	Strategy
 }
 
 // GenerateMove generates a list of legal tile moves, then picks a move from
 // with the current bot's strategy
-func (b *Bot) GenerateMove(state *GameState) Move {
+func (e *Engine) GenerateMove(state *GameState) Move {
 	moves := state.GenerateMoves()
-	return b.PickMove(state, moves)
+	return e.PickMove(state, moves)
 }
 
 // HighScore strategy always picks the highest-scoring move available, or
@@ -93,9 +91,8 @@ func (ofb *OneOfNBest) PickMove(state *GameState, moves []Move) Move {
 	return NewPassMove()
 }
 
-func NewBot(p *Player, s Strategy) *Bot {
-	return &Bot{
-		Player:   p,
+func NewEngine(s Strategy) *Engine {
+	return &Engine{
 		Strategy: s,
 	}
 }

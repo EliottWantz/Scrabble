@@ -8,7 +8,7 @@ import (
 	"scrabble/pkg/scrabble"
 )
 
-var numGames = flag.Int("n", 10, "Number of games to simulate")
+var numGames = flag.Int("n", 1, "Number of games to simulate")
 
 func main() {
 	start := time.Now()
@@ -16,7 +16,6 @@ func main() {
 
 	dict := scrabble.NewDictionary()
 	tileSet := scrabble.DefaultTileSet
-
 	dawg := scrabble.NewDawg(dict)
 
 	var winsA, winsB int
@@ -44,26 +43,27 @@ func main() {
 func simulateGame(tileSet *scrabble.TileSet, dawg *scrabble.DAWG) (scoreA, scoreB int) {
 	g := scrabble.NewGame(tileSet, dawg)
 
-	bot1 := scrabble.NewBot(scrabble.NewPlayer("Alphonse", g.Bag), &scrabble.HighScore{})
-	bot2 := scrabble.NewBot(scrabble.NewPlayer("Sylvestre", g.Bag), &scrabble.HighScore{})
-	g.Players[0], g.Players[1] = bot1.Player, bot2.Player
+	highScoreEngine := scrabble.NewEngine(&scrabble.HighScore{})
+	p1 := scrabble.NewPlayer("Alphonse", g.Bag)
+	p2 := scrabble.NewPlayer("Sylvestre", g.Bag)
+	g.Players[0], g.Players[1] = p1, p2
 
 	for i := 0; ; i++ {
 		state := g.State()
 		var move scrabble.Move
 		// Ask robotA or robotB to generate a move
 		if i%2 == 0 {
-			move = bot1.GenerateMove(state)
+			move = highScoreEngine.GenerateMove(state)
 		} else {
-			move = bot2.GenerateMove(state)
+			move = highScoreEngine.GenerateMove(state)
 		}
 		err := g.ApplyValid(move)
 		if err != nil {
 			fmt.Println(err)
 		}
-		// fmt.Println(move)
+		fmt.Println(move)
+		fmt.Println(g.Board)
 		if g.IsOver() {
-			// fmt.Println(g.Board)
 			fmt.Printf("Game over!\n\n")
 			break
 		}
