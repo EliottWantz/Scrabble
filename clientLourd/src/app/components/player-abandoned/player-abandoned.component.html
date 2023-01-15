@@ -1,0 +1,12 @@
+<mat-card>
+    <div class="content-dialog">
+        <mat-card-content>Votre adversaire a abandonné la partie.</mat-card-content>
+        <mat-card-content>Vous allez maintenant jouer contre le joueur virtuel débutant {{ opponent.name }}.</mat-card-content>
+        <mat-card-content> Bonne chance!</mat-card-content>
+
+        <mat-card-actions class="btn-container">
+            <button class="continue" (click)="closeModal()">Continuer</button>
+            <button class="leave" routerLink="/home" (click)="leaveGame()">Quitter</button>
+        </mat-card-actions>
+    </div>
+</mat-card>

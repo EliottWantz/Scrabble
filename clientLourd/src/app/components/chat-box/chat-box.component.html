@@ -1,0 +1,47 @@
+<div id="chatBox">
+    <cdk-virtual-scroll-viewport #chatBoxMessages id="chatBoxMessages" itemSize="20">
+        <div
+            *cdkVirtualFor="let msg of messages$ | async"
+            [ngClass]="{
+                'player-message': msg.from === 'player',
+                'opponent-message': msg.from === 'opponent',
+                'system-message': msg.from === 'system',
+                'reserve-message': msg.from === 'reserve'
+            }"
+        >
+            <p *ngIf="msg.playerName" class="message">{{ msg.playerName }}: {{ msg.data }}</p>
+            <p *ngIf="!msg.playerName && msg.from !== 'reserve' && msg.from !== 'help'" class="message">{{ msg.data }}</p>
+            <div *ngIf="msg.from === 'reserve'">
+                <div class="left-message">
+                    <p *ngFor="let char of splitReserveText(msg.data).get('left')" class="message-reserve">{{ char }} <br /></p>
+                </div>
+                <div class="right-message">
+                    <p *ngFor="let char of splitReserveText(msg.data).get('right')" class="message-reserve">{{ char }} <br /></p>
+                </div>
+            </div>
+            <div *ngIf="msg.from === 'help'" class="system-message">
+                <p *ngFor="let command of splitHelpText(msg.data)">{{ command }} <br /></p>
+            </div>
+        </div>
+    </cdk-virtual-scroll-viewport>
+
+    <form (ngSubmit)="send()" [formGroup]="chatBoxForm">
+        <mat-form-field appearance="fill">
+            <mat-label>Entrez votre message</mat-label>
+            <input
+                #chatBoxInput
+                type="text"
+                id="chatBoxInput"
+                formControlName="input"
+                autocomplete="off"
+                (keypress.enter)="submitBtn._elementRef.nativeElement.click()"
+                matInput
+                [errorStateMatcher]="messageValidator"
+            />
+            <mat-error *ngIf="input.hasError('maxlength')">Votre message <strong>excède</strong> la limite de charactères</mat-error>
+        </mat-form-field>
+        <button #submitBtn mat-mini-fab color="primary" [disabled]="!input.valid" id="submitBtn" type="submit">
+            <mat-icon>send</mat-icon>
+        </button>
+    </form>
+</div>

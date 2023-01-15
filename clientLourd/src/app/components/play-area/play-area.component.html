@@ -1,0 +1,43 @@
+<div id="play-container">
+    <!-- <div class="player-view">
+        <div class="viewOptions">
+            <div class="letters-left">Lettres disponibles en réserve : {{ lettersInReserve$ | async }}</div>
+            <app-text-slider></app-text-slider>
+        </div>
+    </div> -->
+    <div class="game-container">
+        <app-board></app-board>
+        <div class="easel-area">
+            <app-game-easel></app-game-easel>
+            <div class="play-btn">
+                <button
+                    class="play-game-btn"
+                    (click)="this.mousePlacementService.confirmPlacement()"
+                    [disabled]="
+                        (this.playerService.opponent$ | async)?.isPlaying || this.gameEnded || this.mousePlacementService.letterPositions.length <= 0
+                    "
+                >
+                    Jouer
+                </button>
+            </div>
+            <div class="play-btn">
+                <button class="play-game-btn" (click)="skipTurn()" [disabled]="(this.playerService.opponent$ | async)?.isPlaying || this.gameEnded">
+                    Passer
+                </button>
+            </div>
+        </div>
+        <div class="btn-wrapper-horizontal under-easel">
+            <button
+                *ngIf="this.easelService.exchangeLetters.length"
+                (click)="this.easelService.exchangeSelectedLetters()"
+                [disabled]="(this.playerService.opponent$ | async)?.isPlaying || this.allLettersRemaining.length < 7"
+                class="btn"
+            >
+                Échanger
+            </button>
+            <button *ngIf="this.easelService.exchangeLetters.length" (click)="this.easelService.resetAllSelectedLetters()" class="btn">
+                Annuler
+            </button>
+        </div>
+    </div>
+</div>

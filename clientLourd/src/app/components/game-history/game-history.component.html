@@ -1,0 +1,52 @@
+<div>
+    <div class="no-games-history" *ngIf="gameHistoryLenght <= 0">
+        <h1>Il n'y a présentement aucun historique disponible</h1>
+    </div>
+    <table mat-table [dataSource]="data" *ngIf="gameHistoryLenght > 0" class="games">
+        <ng-container matColumnDef="started">
+            <th mat-header-cell *matHeaderCellDef>Créé le</th>
+            <td mat-cell *matCellDef="let game">{{ game.started | date: 'M/d/yy, h:mm a' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="duration">
+            <th mat-header-cell *matHeaderCellDef>Durée</th>
+            <td mat-cell *matCellDef="let game">{{ game.duration | timer }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="creator">
+            <th mat-header-cell *matHeaderCellDef>Créateur</th>
+            <td mat-cell *matCellDef="let game">{{ game.creator.name }} <span *ngIf="game.creator?.isVirtual">(JV)</span></td>
+        </ng-container>
+
+        <ng-container matColumnDef="creatorScore">
+            <th mat-header-cell *matHeaderCellDef>Score du Créateur</th>
+            <td mat-cell *matCellDef="let creator">{{ creator.creatorScore ? creator.creatorScore : 0 }}</td>
+        </ng-container>
+        <ng-container matColumnDef="oponent">
+            <th mat-header-cell *matHeaderCellDef>Adversaire</th>
+            <td mat-cell *matCellDef="let game">{{ game.opponent?.name }} <span *ngIf="game.opponent?.isVirtual">(JV)</span></td>
+        </ng-container>
+
+        <ng-container matColumnDef="oponentScore">
+            <th mat-header-cell *matHeaderCellDef>Score de l'adversaire</th>
+            <td mat-cell *matCellDef="let oponnent">{{ oponnent.oponentScore ? oponnent.oponentScore : 0 }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="mode">
+            <th mat-header-cell *matHeaderCellDef>Mode de jeu</th>
+            <td mat-cell *matCellDef="let game">{{ game.mode === 'Classic' ? 'Classique' : 'Log2990' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="gameCompleted">
+            <th mat-header-cell *matHeaderCellDef>État de la partie</th>
+            <td mat-cell *matCellDef="let game">
+                <span class="abandon-state" *ngIf="game.gameAbandoned"> Partie abandonnée </span>
+                <span class="finish-state" *ngIf="!game.gameAbandoned"> Partie terminée </span>
+            </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+    <mat-paginator #paginator pageSize="5" [pageSizeOptions]="[3, 5, 10]"> </mat-paginator>
+</div>

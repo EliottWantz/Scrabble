@@ -1,0 +1,25 @@
+<div *ngIf="game.mode === 'Log2990'" class="objectives-informations">
+    <ng-container *ngIf="{ player: this.playerService.player$ | async, opponent: this.playerService.opponent$ | async } as players">
+        <ng-container *ngIf="players.player as Player">
+            <ng-container *ngIf="players.opponent as Player">
+                <h2>Vos objectifs privés:</h2>
+                <span [ngClass]="{ 'player-objective-completed': player.privateObjective?.isCompleted }">
+                    <div class="objective">{{ player.privateObjective?.fullName }}: {{ player.privateObjective?.points }} points</div>
+                </span>
+                <h2>Les objectifs du jeu:</h2>
+                <div *ngFor="let objective of publicObjectives">
+                    <span [ngClass]="{ 'game-objective-completed': objective.isCompleted }"
+                        >{{ objective.fullName }}: {{ objective.points }} points</span
+                    >
+                </div>
+                <h3 class="objComplete" *ngIf="!isOpponentObjectivesCompleted(opponent)">Votre adversaire n'a toujours pas complété son objectif!</h3>
+                <h3 class="objComplete" *ngIf="isOpponentObjectivesCompleted(opponent)">Votre adversaire a complété son objectif!</h3>
+                <div *ngIf="isOpponentObjectivesCompleted(opponent)">
+                    <span [ngClass]="{ 'player-objective-completed': players.opponent.privateObjective?.isCompleted }">
+                        {{ players.opponent.privateObjective?.fullName }}: {{ player.privateObjective?.points }} points
+                    </span>
+                </div>
+            </ng-container>
+        </ng-container>
+    </ng-container>
+</div>

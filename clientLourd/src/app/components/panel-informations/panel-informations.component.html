@@ -1,0 +1,23 @@
+<div class="panel-informations">
+    <div class="centered-panel">
+        <div class="panel-container slider letters-left">Lettres en réserve: {{ lettersInReserve$ | async }}</div>
+        <div class="panels">
+            <app-player-panel [player$]="this.playerService.player$" [isOpponent]="false" class="panel-container"></app-player-panel>
+            <div id="timer">
+                <div id="timer-num">
+                    {{ (timer$ | async)! | timer }}
+                </div>
+                <svg *ngIf="(timer$ | async)! / 1000 < 60 || (this.gameEnded$ | async) === false">
+                    <circle r="40" cx="50" cy="50"></circle>
+                </svg>
+            </div>
+            <app-player-panel [player$]="this.playerService.opponent$" [isOpponent]="true" class="panel-container"></app-player-panel>
+        </div>
+        <app-text-slider class="slider"></app-text-slider>
+    </div>
+
+    <button *ngIf="(this.gameEnded$ | async) === false" class="quit-game-btn" id="abandon" (click)="openQuitDialog()">Abandonner</button>
+    <a *ngIf="this.gameEnded$ | async" routerLink="/home"
+        ><button class="quit-game-btn" id="abandon" (click)="wsService.disconnect()">Quitter</button></a
+    >
+</div>

@@ -1,0 +1,44 @@
+[
+    [
+        {
+            "name": "Jamesley Joseph",
+            "img": "assets/image/thanos.jpeg",
+            "link": "https://www.linkedin.com/in/jamesley-joseph-291829198/",
+            "description": "Étudiant en 3e année en génie logiciel"
+        },
+        {
+            "name": "Eliott Schuhmacher-Wantz",
+            "img": "assets/image/bot.jpeg",
+            "link": "https://www.linkedin.com/in/eliott-schuhmacher-wantz-36309b226/",
+            "description": "Le bot"
+        }
+    ],
+    [
+        {
+            "name": "Olivier Bigonnesse",
+            "img": "assets/image/bigo.png",
+            "link": "https://github.com/OlivierBigonnesse",
+            "description": "Étudiant en 2e année en génie logiciel"
+        },
+        {
+            "name": "Abdelkrim Nahi",
+            "img": "assets/image/krim.png",
+            "link": "https://www.linkedin.com/in/abdelkrim-nahi-8695a9188/",
+            "description": "Vice president de Microsoft"
+        }
+    ],
+    [
+        {
+            "name": " Ivan Ivanov",
+            "img": "assets/image/ivan.jpeg",
+            "link": "https://www.linkedin.com/in/ivan-ivanov-931b87225/",
+            "description": "Étudiant en 2e année en génie logiciel"
+        },
+        {
+            "name": "Maxime Appert",
+            "img": "assets/image/maximus.jpeg",
+            "link": "https://www.linkedin.com/in/maxime-appert-b1759222b/",
+            "description": "celui dont on ne doit pas prononcer le nom"
+        }
+    ]
+]

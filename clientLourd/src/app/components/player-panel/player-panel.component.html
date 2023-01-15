@@ -1,0 +1,12 @@
+<div *ngIf="player$ | async as player">
+    <div class="player-panel-container" [ngClass]="{ 'player-panel-active': player.isPlaying }">
+        <h1 [style]="'color:black'">{{ player.name }}</h1>
+        <p [style]="'color:black'">Score : {{ player.score }}</p>
+        <p *ngIf="player.easel.length < 7">Lettres restantes : {{ player.easel.length }}</p>
+        <!-- <span
+            *ngIf="player.privateObjective?.name && !isOpponent"
+            [ngClass]="{ 'player-objective-completed': player.privateObjective?.isCompleted }"
+            >{{ player.privateObjective?.fullName }}</span
+        > -->
+    </div>
+</div>
