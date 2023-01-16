@@ -23,22 +23,3 @@ func NewServer() *Server {
 
 	return s
 }
-
-func (s *Server) handleAvatorUpload() fiber.Handler {
-	return func(c *fiber.Ctx) error {
-		return c.SendString("vous avez televerser votre avatar")
-	}
-}
-
-func (s *Server) handleCreateGame() fiber.Handler {
-	return func(c *fiber.Ctx) error {
-		s.GameService.StartGame()
-		return c.SendString("game has started")
-	}
-}
-
-func (s *Server) handleJoinGame() fiber.Handler {
-	return func(c *fiber.Ctx) error {
-		return c.SendString("you have join the game")
-	}
-}
