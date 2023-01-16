@@ -5,12 +5,15 @@ import (
 	"fmt"
 	"time"
 
+	"scrabble/pkg/api/repository"
 	"scrabble/pkg/scrabble"
 )
 
 var numGames = flag.Int("n", 1, "Number of games to simulate")
 
-type GameService struct{}
+type GameService struct {
+	Repo *repository.GameRepository
+}
 
 func (gs *GameService) StartGame() {
 	start := time.Now()

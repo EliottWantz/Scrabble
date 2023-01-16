@@ -20,8 +20,9 @@ type Server struct {
 
 func NewServer() *Server {
 	s := &Server{
-		App:         fiber.New(),
-		GameHandler: &handlers.GameHandler{},
+		App:            fiber.New(),
+		GameHandler:    &handlers.GameHandler{},
+		AccountHandler: &handlers.AccountHandler{},
 	}
 
 	s.setupMiddleware()
