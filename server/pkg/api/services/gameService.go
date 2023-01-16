@@ -10,7 +10,9 @@ import (
 
 var numGames = flag.Int("n", 1, "Number of games to simulate")
 
-func StartGame() {
+type GameService struct{}
+
+func (gs *GameService) StartGame() {
 	start := time.Now()
 	flag.Parse()
 
@@ -21,7 +23,7 @@ func StartGame() {
 	var winsA, winsB int
 
 	for i := 0; i < *numGames; i++ {
-		scoreA, scoreB := simulateGame(tileSet, dawg)
+		scoreA, scoreB := gs.simulateGame(tileSet, dawg)
 		if scoreA > scoreB {
 			winsA++
 		}
@@ -40,7 +42,7 @@ func StartGame() {
 	fmt.Println("Took", elapsed)
 }
 
-func simulateGame(tileSet *scrabble.TileSet, dawg *scrabble.DAWG) (scoreA, scoreB int) {
+func (gs *GameService) simulateGame(tileSet *scrabble.TileSet, dawg *scrabble.DAWG) (scoreA, scoreB int) {
 	g := scrabble.NewGame(tileSet, dawg)
 
 	highScoreEngine := scrabble.NewEngine(&scrabble.HighScore{})

@@ -1,9 +1,11 @@
 package main
 
 import (
-	"scrabble/pkg/api/rest"
+	"scrabble/pkg/api"
 )
 
 func main() {
-	rest.HttpRouter()
+	server := api.NewServer()
+
+	server.App.Listen("127.0.0.1:3000")
 }
