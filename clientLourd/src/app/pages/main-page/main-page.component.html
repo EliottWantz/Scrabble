@@ -1,0 +1,32 @@
+<div class="container justified-center">
+    <span class="animate scrabble" style="--n: 8"
+        ><span>{{ title }}</span>
+    </span>
+    <section id="server-message">
+        <div class="justifiediv">
+            <app-welcome-button
+                imageSrc="assets/image/scrabble.png"
+                letterSrc="assets/image/classique.png"
+                message="Jouer Scrabble version Classique"
+                (click)="openParameterDialog('Classic')"
+            ></app-welcome-button>
+            <app-welcome-button
+                imageSrc="assets/image/scrabble.png"
+                letterSrc="assets/image/polymtl.png"
+                message="Jouer Scrabble version Log2990"
+                (click)="openParameterDialog('Log2990')"
+            ></app-welcome-button>
+            <app-welcome-button
+                version="High Score"
+                imageSrc="assets/image/throphie.jpg"
+                letterSrc="assets/image/high-score.png"
+                message="Voir les meilleurs Scores"
+                (click)="openScoreDialog()"
+            ></app-welcome-button>
+        </div>
+    </section>
+    <div>
+        <img src="assets/image/team.png" class="team-img" (click)="openAboutUsDialog()" />
+        <!-- <h2>Notre équipe</h2> -->
+    </div>
+</div>

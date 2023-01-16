@@ -1,0 +1,36 @@
+<mat-card *ngIf="win && !draw">
+    <div class="content-dialog">
+        <mat-card-content>Félicitations vous avez gagner la partie!</mat-card-content>
+        <mat-card-content> avec {{ player.score }} points</mat-card-content>
+        <mat-card-content>Votre adversaire a eu</mat-card-content>
+        <mat-card-content> {{ opponent.score }} points</mat-card-content>
+
+        <mat-card-actions class="btn-container">
+            <button class="Genial" (click)="closeModal()">Genial!</button>
+        </mat-card-actions>
+    </div>
+</mat-card>
+
+<mat-card *ngIf="!win && !draw">
+    <div class="content-dialog">
+        <mat-card-content>Dommage vous avez perdu la partie :( </mat-card-content>
+        <mat-card-content> avec: {{ player.score }} points</mat-card-content>
+        <mat-card-content>Votre adversaire a eu </mat-card-content>
+        <mat-card-content> {{ opponent.score }} points</mat-card-content>
+
+        <mat-card-actions class="btn-container">
+            <button class="Genial" (click)="closeModal()">Ok</button>
+        </mat-card-actions>
+    </div>
+</mat-card>
+
+<mat-card *ngIf="draw && !win">
+    <div class="content-dialog">
+        <mat-card-content>La partie s'est finie en match nul!</mat-card-content>
+        <mat-card-content> {{ player.name }} et {{ opponent.name }} ont eu le meme nombre de point : {{ player.score }} points</mat-card-content>
+        <mat-card-content>Félicitations à vous deux </mat-card-content>
+        <mat-card-actions class="btn-container">
+            <button class="Genial" (click)="closeModal()">Ok</button>
+        </mat-card-actions>
+    </div>
+</mat-card>

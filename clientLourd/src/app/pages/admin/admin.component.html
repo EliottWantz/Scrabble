@@ -1,0 +1,203 @@
+<div class="container">
+    <button class="btn" routerLink="/home"><mat-icon>home</mat-icon>Retourner à la page d'accueil</button>
+
+    <h1>Réglages</h1>
+    <mat-accordion class="accordeon" multi>
+        <mat-expansion-panel [expanded]="step === 0" (opened)="step = 0">
+            <mat-expansion-panel-header>
+                <mat-panel-title> Réglage des dictionnaires </mat-panel-title>
+                <mat-panel-description> Modifier les dictionnaires disponibles dans une partie </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            <mat-radio-group
+                aria-label="Select an option"
+                (change)="dictionarySettings = $event.value; dictionaryService.uploadedDictionaryPreview = null"
+            >
+                <mat-radio-button value="modifier" [checked]="true">Modifier un dictionnaire existant</mat-radio-button>
+                <mat-radio-button value="televerser">Téléverser un nouveau dictionnaire</mat-radio-button>
+                <mat-radio-button value="telecharger">Télécharger un dictionnaire existant</mat-radio-button>
+            </mat-radio-group>
+
+            <div *ngIf="dictionarySettings === 'modifier'" class="modifyDict">
+                <h1>Modifier un dictionnaire</h1>
+                <mat-form-field appearance="fill" class="dict">
+                    <mat-label>Sélectionnez un dictionnaire </mat-label>
+                    <mat-select (selectionChange)="currDict = $event.source.value.title">
+                        <mat-option *ngFor="let dict of dictionaryService.dictHeaders" [value]="dict">{{ dict.title }}</mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <button
+                    *ngIf="!dictionaryService.waitingForDeleteConfirmation"
+                    class="btn-supprimer"
+                    (click)="deleteDictionary()"
+                    [disabled]="this.currDict === 'dictionnaire par défaut'"
+                >
+                    Supprimer le dictionnaire
+                </button>
+                <mat-spinner *ngIf="dictionaryService.waitingForDeleteConfirmation" [diameter]="30"></mat-spinner>
+
+                <div>
+                    <h2>Veuillez entrer le nouveau nom du dictionnaire</h2>
+                    <mat-form-field appearance="outline" class="input" (focusout)="newName.markAsUntouched()">
+                        <mat-label>Nouveau Titre du Dictionnaire</mat-label>
+                        <input matInput autocomplete="off" [formControl]="newName" />
+                        <mat-error *ngIf="newName.invalid">Le titre entrée existe deja </mat-error>
+                    </mat-form-field>
+                </div>
+                <div>
+                    <h2>Veuillez entrer la nouvelle description du dictionnaire</h2>
+                    <mat-form-field appearance="outline" class="input" (focusout)="newDescription.markAsUntouched()">
+                        <mat-label>Nouvelle Description du Dictionnaire</mat-label>
+                        <input matInput autocomplete="off" [formControl]="newDescription" />
+                    </mat-form-field>
+                </div>
+                <div>
+                    <h1>Accepter les modification</h1>
+                    <button
+                        *ngIf="!dictionaryService.waitingForModificationConfirmation"
+                        class="done_all"
+                        [disabled]="this.currDict === 'dictionnaire par défaut'"
+                        (click)="modifyDictionary()"
+                    >
+                        <mat-icon>done_all</mat-icon>
+                    </button>
+                    <mat-spinner *ngIf="dictionaryService.waitingForModificationConfirmation" [diameter]="30"></mat-spinner>
+                </div>
+            </div>
+            <div *ngIf="dictionarySettings === 'televerser'">
+                <span>
+                    <h1>Téléverser un Nouveau Dictionnaire</h1>
+                    <span *ngIf="dictionaryService.uploadedDictionaryPreview">
+                        <p>Dictionnaire téléversé avec succès!</p>
+                        <mat-icon class="upload_success">check_circle</mat-icon>
+                    </span>
+                </span>
+                <form #dictForm>
+                    <input
+                        type="file"
+                        class="fileInput"
+                        #dictInput
+                        accept="application/json"
+                        (input)="dictionaryService.handleDictInput(dictInput.files)"
+                    />
+                    <button mat-stroked-button class="upload" (click)="dictInput.click()">
+                        <mat-icon *ngIf="!dictionaryService.waitingForConfirmation">cloud_upload</mat-icon>
+                        <mat-spinner *ngIf="dictionaryService.waitingForConfirmation" [diameter]="30"></mat-spinner>
+                    </button>
+                    <mat-error *ngIf="dictionaryService.dictionaryErrors.invalidFileType">Le fichier sélectionné doit être de type .json</mat-error>
+                    <mat-error *ngIf="dictionaryService.dictionaryErrors.invalidTitle"
+                        >Le fichier sélectionné possède le même titre qu'un dictionnaire existant</mat-error
+                    >
+                    <mat-error *ngIf="dictionaryService.dictionaryErrors.invalidDictionaryStructure"
+                        >Le fichier sélectionné ne possède pas la structure d'un dictionnaire valide</mat-error
+                    >
+                    <mat-error *ngIf="dictionaryService.dictionaryErrors.invalidJson">Ce fichier json possède des erreurs</mat-error>
+                </form>
+                <pre *ngIf="dictionaryService.uploadedDictionaryPreview">
+                    {{ dictionaryService.uploadedDictionaryPreview | json }}
+                </pre>
+            </div>
+            <div *ngIf="dictionarySettings === 'telecharger'">
+                <h1>Télécharger un Dictionnaire Existant</h1>
+                <mat-form-field appearance="fill">
+                    <mat-label>Sélectionnez un dictionnaire</mat-label>
+                    <mat-select [(value)]="selectedDict">
+                        <mat-option *ngFor="let dict of dictionaryService.dictHeaders" [value]="dict">
+                            {{ dict.title }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <button class="download" (click)="dictionaryService.downloadDictionary(selectedDict.title)">
+                    <mat-icon *ngIf="!dictionaryService.waitingForConfirmation">cloud_upload</mat-icon>
+                    <mat-spinner *ngIf="dictionaryService.waitingForConfirmation" [diameter]="30"></mat-spinner>
+                </button>
+            </div>
+        </mat-expansion-panel>
+        <!-- Nom des joueur Virtuels -->
+        <mat-expansion-panel [expanded]="step === 1" (opened)="step = 1">
+            <mat-expansion-panel-header>
+                <mat-panel-title> Nom des Joueur virtuels </mat-panel-title>
+                <mat-panel-description> (ajouter, modifier, supprimer) le contenu des listes de nom des Joueur Virtuel </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            <mat-radio-group aria-label="Select an option" (change)="getVirtualPlayerName($event.value)">
+                <mat-radio-button value="Debutant" [checked]="true">Joueur Virtuel Debutant</mat-radio-button>
+                <mat-radio-button value="Expert">Joueur Virtuel Expert </mat-radio-button>
+            </mat-radio-group>
+            <div class="virtualPlayers" *ngFor="let virtualPlayer of virtualPlayerName" (click)="currentActive = virtualPlayer.name">
+                <div [hidden]="currentActive === virtualPlayer.name && modifyName">{{ virtualPlayer.name }}</div>
+                <mat-form-field
+                    *ngIf="modifyName && currentActive === virtualPlayer.name"
+                    autocomplete="off"
+                    appearance="outline"
+                    (focusout)="modifyName = false"
+                    class="modify-input"
+                >
+                    <input
+                        #newName
+                        matInput
+                        autocomplete="off"
+                        value="{{ virtualPlayer.name }}"
+                        (keyup.enter)="renameVirtualPlayer(virtualPlayer.name, newName.value)"
+                    />
+                </mat-form-field>
+                <div>
+                    <button
+                        *ngIf="currentActive === virtualPlayer.name"
+                        class="btn-modifier"
+                        [disabled]="virtualPlayer.isReadonly"
+                        (click)="modifyName = true"
+                    >
+                        Modifier
+                    </button>
+                    <button
+                        *ngIf="currentActive === virtualPlayer.name"
+                        class="btn-supprimer"
+                        [disabled]="virtualPlayer.isReadonly"
+                        (click)="deleteVirtualPlayer(virtualPlayer.name)"
+                    >
+                        Delete
+                    </button>
+                </div>
+            </div>
+
+            <h1>Ajoute un Joueur virtuel</h1>
+
+            <div class="addVirtualPlayerName">
+                <mat-form-field appearance="outline" (focusout)="newVirtualPlayerName.markAsUntouched()">
+                    <input matInput autocomplete="off" [formControl]="newVirtualPlayerName" (keyup.enter)="addNewVirtualPlayer()" />
+                    <mat-error *ngIf="newVirtualPlayerName.invalid">Le nom du joueur virtuel entrée n'est pas valid</mat-error>
+                </mat-form-field>
+                <button (click)="addNewVirtualPlayer()" class="queue"><mat-icon>queue</mat-icon></button>
+            </div>
+        </mat-expansion-panel>
+        <mat-expansion-panel [expanded]="step === 2" (opened)="step = 2">
+            <mat-expansion-panel-header>
+                <mat-panel-title> Historique des parties jouées </mat-panel-title>
+            </mat-expansion-panel-header>
+            <mat-spinner *ngIf="dictionaryService.waitingForResetConfirmation" [diameter]="30"></mat-spinner>
+            <app-game-history></app-game-history>
+        </mat-expansion-panel>
+
+        <!-- Reinitialisation  -->
+        <mat-expansion-panel [expanded]="step === 3" (opened)="step = 3">
+            <mat-expansion-panel-header>
+                <mat-panel-title> Réinitialiser les réglages par default </mat-panel-title>
+            </mat-expansion-panel-header>
+            <h1>Réinitialiser les réglages par default</h1>
+
+            <mat-form-field appearance="fill" class="dict">
+                <mat-label>Sélectionnez le reglage a reinitaliser </mat-label>
+                <mat-select (selectionChange)="settings = $event.source.value">
+                    <mat-option *ngFor="let setting of settingType" [value]="setting">{{ setting }}</mat-option>
+                </mat-select>
+            </mat-form-field>
+            <div>
+                <button class="reset" (click)="reset()" *ngIf="!dictionaryService.waitingForResetConfirmation" [disabled]="settings === ''">
+                    <mat-icon>rotate_left</mat-icon>
+                </button>
+                <mat-spinner *ngIf="dictionaryService.waitingForResetConfirmation" [diameter]="30"></mat-spinner>
+            </div>
+        </mat-expansion-panel>
+    </mat-accordion>
+</div>

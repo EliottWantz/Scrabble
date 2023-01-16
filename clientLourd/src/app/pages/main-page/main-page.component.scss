@@ -1,0 +1,89 @@
+/**
+  Styling for Scrabble Title
+**/
+.scrabble {
+    margin-top: 4vh;
+    display: inline-flex;
+    text-transform: uppercase;
+    font-family: monospace;
+    font-weight: bold;
+    text-align: center;
+    font-size: 60px;
+    border: 5px solid;
+    border-width: 0 5px 5px 0;
+    border-image: linear-gradient(45deg, #0000 6px, #d0cfcd 0 calc(100% - 0.707 * (1ch + 4px + 1em)), #b1b1b1 0 calc(100% - 6px), #0000 0) 5;
+}
+
+.scrabble span {
+    padding-top: 4vh;
+    height: 7vh;
+    clip-path: inset(0 calc(0.5em - 2px) 0 0);
+    margin-right: calc(2px - 0.5em);
+    letter-spacing: 1em;
+    background: linear-gradient(#dedddb 0 0) bottom/100% 2px no-repeat,
+        conic-gradient(from 90deg at 2px 2px, #0000 90deg, #dedddb 0) 0 0 / calc(1ch + 1em) 100%, #f6f4f0;
+    padding-left: 0.5em;
+}
+
+.animate span {
+    animation: t calc(0.25s * var(--n)) steps(var(--n));
+    width: calc(var(--n) * (1ch + 1em));
+}
+
+@keyframes t {
+    from {
+        width: 0;
+    }
+}
+
+.container {
+    width: 100vw;
+    height: 100vh;
+    background: rgb(208, 144, 90);
+    background: linear-gradient(150deg, rgba(208, 143, 90, 0.65) 0%, rgba(159, 205, 110, 0.3) 35%, rgba(255, 255, 255, 1) 100%);
+}
+
+/**
+
+Style for welcome-button
+**/
+
+.justifiediv {
+    margin-top: 4vh;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/**
+Style Footer
+**/
+
+.footer-item {
+    text-align: center;
+}
+
+.team-name {
+    margin-top: 0.25em;
+    margin-bottom: 0.25em;
+    color: green;
+}
+
+.footer-item p :nth-child(even) {
+    color: orange;
+}
+.footer-item p :nth-child(odd) {
+    color: blue;
+}
+
+.team-img {
+    height: 7vh;
+    width: 5w;
+    margin-bottom: 1vh;
+}
+
+.team-img:hover {
+    cursor: pointer;
+    transform: scale(1.3);
+}

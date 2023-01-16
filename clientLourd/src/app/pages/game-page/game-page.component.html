@@ -1,0 +1,17 @@
+<mat-sidenav-container class="container">
+    <div class="action-buttons">
+        <button mat-button class="btn" (click)="sidebar.toggle()"><mat-icon>view_carousel</mat-icon> Basculer le chatbox et les Objectifs</button>
+        <button mat-button class="btn" (click)="panelInformation.toggle()">
+            Basculer les informations de la partie<mat-icon>view_carousel</mat-icon>
+        </button>
+    </div>
+    <section class="play-area-container">
+        <app-play-area class="play-area" tabindex="0"></app-play-area>
+    </section>
+    <mat-sidenav #sidebar class="left" opened="true" position="start" mode="side">
+        <app-sidebar></app-sidebar>
+    </mat-sidenav>
+    <mat-sidenav #panelInformation class="right" opened="true" position="end" mode="side">
+        <app-panel-informations></app-panel-informations>
+    </mat-sidenav>
+</mat-sidenav-container>

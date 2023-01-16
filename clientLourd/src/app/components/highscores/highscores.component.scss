@@ -1,0 +1,78 @@
+::ng-deep .mat-horizontal-stepper-header-container {
+    display: none !important;
+}
+::ng-deep .mat-dialog-container {
+    box-shadow: 0 0 15px rgb(97, 241, 241);
+    background: rgb(223, 223, 223);
+    border-radius: 10px;
+}
+#primary-mat-card {
+    text-align: center;
+}
+#mode-score {
+    color: rgb(119, 101, 1);
+    font-size: 26px;
+    font-family: Roboto, 'Helvetica Neue', sans-serif;
+    padding: 1vh;
+}
+.tableTitle {
+    border: 2px solid black;
+    width: 100%;
+    color: rgb(71, 71, 71);
+    font-size: 26px;
+    font-family: Roboto, 'Helvetica Neue', sans-serif;
+}
+.scoreTable {
+    width: 100%;
+    font-family: Roboto, 'Helvetica Neue', sans-serif;
+    font-size: 16px;
+}
+
+td {
+    width: 50%;
+    border: 2px solid black;
+}
+
+.primary-mat-card {
+    height: 100%;
+}
+
+#mode-btn-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+#btn {
+    display: flex;
+    justify-content: space-between;
+}
+
+.mode-btn {
+    height: 18.5vh;
+    width: 9vw;
+    font-weight: 600;
+    font-size: 1.75vh;
+    border-width: 0.15em;
+    border-color: #496888;
+    border-radius: 0.5em;
+    border-style: solid;
+    transform-style: preserve-3d;
+}
+.mode-btn:hover {
+    cursor: pointer;
+    background: linear-gradient(150deg, rgba(208, 143, 90, 0.65) 0%, rgba(159, 205, 110, 0.3) 35%, rgba(255, 255, 255, 1) 100%);
+}
+
+.btn-close {
+    height: 30px;
+    width: 5vw;
+    background-color: skyblue;
+    color: white;
+    border-color: rgb(12, 11, 11);
+    border-radius: 20px;
+}
+
+#btn-Cancel:hover {
+    background-color: rgb(212, 2, 2);
+}

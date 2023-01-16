@@ -1,0 +1,21 @@
+.slider-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.slider {
+    display: flex;
+    align-items: center;
+}
+
+.slider-symbol {
+    font-size: 20px;
+    margin: 4px;
+}
+
+.slider-text {
+    font-weight: bold;
+    letter-spacing: 1px;
+}

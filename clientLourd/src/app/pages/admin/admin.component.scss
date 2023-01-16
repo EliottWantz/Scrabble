@@ -1,0 +1,205 @@
+.accordeon {
+    width: 70vw;
+}
+
+.container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: linear-gradient(150deg, rgba(208, 143, 90, 0.65) 0%, rgba(159, 205, 110, 0.3) 35%, rgba(255, 255, 255, 1) 100%);
+}
+
+.reset {
+    width: 40px;
+    height: 40px;
+
+    background-color: rgb(211, 156, 7);
+    color: white;
+    border-color: rgb(12, 11, 11);
+    border-radius: 50%;
+}
+.reset:hover {
+    color: rgb(211, 156, 7);
+    background-color: white;
+}
+
+.addVirtualPlayerName {
+    display: flex;
+    flex-direction: row;
+}
+
+.queue {
+    width: 3vw;
+    height: 3vw;
+    margin-left: 1vw;
+    background-color: rgb(49, 155, 0);
+    color: white;
+    border-color: rgb(12, 11, 11);
+    border-radius: 9px;
+}
+.queue:hover {
+    color: rgb(49, 155, 0);
+    background-color: white;
+}
+
+.virtualPlayers {
+    display: flex;
+
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    width: 20%;
+    border: 3px solid rgb(141, 141, 141);
+    margin: 3px;
+    border-radius: 10px;
+    background-color: grey;
+    color: white;
+}
+.virtualPlayers:hover {
+    cursor: pointer;
+}
+
+.btn-modifier {
+    height: 30px;
+    width: 5vw;
+    background-color: rgb(31, 71, 131);
+    color: white;
+    border-color: rgb(12, 11, 11);
+    border-radius: 20px;
+    margin: 3px;
+}
+
+.btn-modifier:hover {
+    background-color: rgb(35, 90, 173);
+}
+.btn-modifier:disabled {
+    cursor: default;
+    background-color: rgb(180, 180, 180);
+    color: grey;
+}
+.btn-supprimer {
+    height: 30px;
+    width: fit-content;
+    color: white;
+    background-color: rgb(145, 79, 79);
+    border-color: rgb(12, 11, 11);
+    border-radius: 20px;
+    margin: 3px;
+}
+
+.btn-supprimer:hover {
+    background-color: white;
+    color: rgb(145, 79, 79);
+}
+.btn-supprimer:disabled {
+    cursor: default;
+    background-color: rgb(180, 180, 180);
+    color: grey;
+}
+
+.download,
+.upload {
+    height: 3vw;
+    width: 10vw;
+    border-color: rgb(112, 159, 197);
+    color: rgb(112, 159, 197);
+    background-color: white;
+    border-radius: 10px;
+}
+.upload:disabled {
+    cursor: default;
+    background-color: rgb(180, 180, 180);
+    border-color: rgb(109, 109, 109);
+    color: grey;
+}
+
+.dict,
+.input {
+    width: 20%;
+}
+
+.modifyDict {
+    display: flex;
+    flex-direction: column;
+}
+
+.done_all {
+    background-color: rgb(0, 187, 146);
+    color: white;
+    height: 3vw;
+    width: 3vw;
+    border-color: rgb(112, 159, 197);
+    border-radius: 10px;
+    align-self: flex-end;
+}
+.done_all:hover {
+    color: rgb(0, 187, 146);
+    background-color: white;
+}
+
+.done_all:disabled {
+    border-color: black;
+    cursor: default;
+    color: black;
+    background-color: grey;
+}
+
+.modify-input {
+    width: 90%;
+}
+
+.gameHistory {
+    background-color: rgb(0, 187, 146);
+    color: white;
+    height: 3vw;
+    width: fit-content;
+    margin-top: 10vh;
+    border-color: rgb(112, 159, 197);
+    border-radius: 10px;
+}
+
+.gameHistory:hover {
+    color: rgb(0, 187, 146);
+    background-color: white;
+}
+.upload_success {
+    color: greenyellow;
+}
+
+.fileInput {
+    display: none;
+}
+
+.reset:disabled {
+    cursor: default;
+    background-color: rgb(180, 180, 180);
+    color: grey;
+}
+
+.btn {
+    margin: 0.5vw;
+    background-color: rgb(145, 79, 79);
+    border: 1px solid #1a1a1a;
+    border-radius: 30px;
+    padding: auto;
+    color: #ece1e1;
+    cursor: pointer;
+    font-family: Roobert, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol';
+    font-size: 12px;
+    font-weight: 600;
+    position: sticky;
+    padding: 2px 10px;
+    top: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.1rem;
+}
+
+.btn:hover {
+    background-color: white;
+    color: rgb(145, 79, 79);
+}

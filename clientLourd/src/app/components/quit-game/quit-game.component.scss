@@ -1,0 +1,45 @@
+.content-dialog {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.btn-container {
+    display: flex;
+    justify-content: space-around;
+    width: 90%;
+}
+
+::ng-deep .mat-dialog-container {
+    box-shadow: 0 0 15px rgb(97, 241, 241);
+    background: rgb(223, 223, 223);
+    border-radius: 10px;
+}
+
+.no {
+    height: 30px;
+    width: 5vw;
+    background-color: rgb(0, 182, 15);
+    color: white;
+    border-color: rgb(12, 11, 11);
+    border-radius: 20px;
+}
+
+.no:hover {
+    background-color: rgb(100, 216, 89);
+}
+
+.yes {
+    background-color: rgb(212, 2, 2);
+    color: rgb(255, 255, 255);
+    border-radius: 20px;
+    height: 30px;
+    width: 5vw;
+    text-decoration: none;
+    border: 1px solid black;
+    text-align: center;
+}
+.yes:hover {
+    background-color: rgb(236, 181, 181);
+    color: white;
+}
