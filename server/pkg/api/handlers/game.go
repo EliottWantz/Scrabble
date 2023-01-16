@@ -1,19 +1,26 @@
 package handlers
 
 import (
+	"scrabble/pkg/api/repository"
 	"scrabble/pkg/api/services"
 
 	"github.com/gofiber/fiber/v2"
 )
 
-func CreateGame(gs *services.GameService) fiber.Handler {
+type GameHandler struct {
+	service *services.GameService
+	repo    *repository.GameRepository
+}
+
+func (gh *GameHandler) CreateGame() fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		gs.StartGame()
+		gh.service.StartGame()
+		gh.repo.GetAllGames() // For exemple
 		return c.SendString("game has started")
 	}
 }
 
-func JoinGame() fiber.Handler {
+func (gh *GameHandler) JoinGame() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		return c.SendString("you have join the game")
 	}
