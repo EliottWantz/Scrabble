@@ -6,6 +6,6 @@ env:
 dotenv: ['.env']
 
 tasks:
-  run:
+  start:
     cmds:
       - watchexec -r -e go -- go run main.go
