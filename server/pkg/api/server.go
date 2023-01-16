@@ -1,6 +1,7 @@
 package api
 
 import (
+	"flag"
 	"time"
 
 	"scrabble/pkg/api/handlers"
@@ -12,18 +13,28 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/monitor"
 )
 
+var prefork = flag.Bool("Prefork", false, "Fiber prefork (multiple threads)")
+
 type Server struct {
-	App            *fiber.App
-	GameHandler    *handlers.GameHandler
-	AccountHandler *handlers.AccountHandler
+	WebSocketManager *WebSocketManager
+	App              *fiber.App
+	GameHandler      *handlers.GameHandler
+	AccountHandler   *handlers.AccountHandler
 }
 
 func NewServer() *Server {
-	s := &Server{
-		App:            fiber.New(),
-		GameHandler:    &handlers.GameHandler{},
-		AccountHandler: &handlers.AccountHandler{},
+	config := fiber.Config{
+		Prefork: *prefork,
 	}
+
+	s := &Server{
+		WebSocketManager: NewWebSocketManager(),
+		App:              fiber.New(config),
+		GameHandler:      &handlers.GameHandler{},
+		AccountHandler:   &handlers.AccountHandler{},
+	}
+
+	go s.WebSocketManager.run()
 
 	s.setupMiddleware()
 	s.setupRoutes()
@@ -37,5 +48,5 @@ func (s *Server) setupMiddleware() {
 	s.App.Use(logger.New(logger.Config{
 		Format: "[${ip}]:${port} ${status} - ${method} ${path}\n",
 	}))
-	s.App.Get("/metrics", monitor.New(monitor.Config{Title: "MyService Metrics Page"}))
+	s.App.Get("/metrics", monitor.New(monitor.Config{Title: "Scrabble Server Metrics"}))
 }
