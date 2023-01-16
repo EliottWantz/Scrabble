@@ -1,0 +1,11 @@
+version: '3'
+
+env:
+  ENV: testing
+
+dotenv: ['.env']
+
+tasks:
+  run:
+    cmds:
+      - watchexec -r -e go -- go run main.go
