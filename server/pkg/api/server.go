@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"scrabble/pkg/api/handlers"
+	"scrabble/pkg/api/ws"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -16,7 +17,7 @@ import (
 var prefork = flag.Bool("Prefork", false, "Fiber prefork (multiple threads)")
 
 type Server struct {
-	WebSocketManager *WebSocketManager
+	WebSocketManager *ws.WebSocketManager
 	App              *fiber.App
 	GameHandler      *handlers.GameHandler
 	AccountHandler   *handlers.AccountHandler
@@ -28,13 +29,11 @@ func NewServer() *Server {
 	}
 
 	s := &Server{
-		WebSocketManager: NewWebSocketManager(),
+		WebSocketManager: ws.NewWebSocketManager(),
 		App:              fiber.New(config),
 		GameHandler:      &handlers.GameHandler{},
 		AccountHandler:   &handlers.AccountHandler{},
 	}
-
-	go s.WebSocketManager.run()
 
 	s.setupMiddleware()
 	s.setupRoutes()
