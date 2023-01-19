@@ -1,6 +1,6 @@
 package ws
 
-import "github.com/google/uuid"
+import "scrabble/internal/uuid"
 
 type Action int
 

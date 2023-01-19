@@ -45,7 +45,7 @@ func (m *WebSocketManager) run() {
 			c := NewClient(conn)
 			m.clients[conn] = c
 
-			r := NewRoom()
+			r := m.createRoom()
 			r.register <- c
 			log.Println("connection registered:", conn.RemoteAddr())
 
@@ -76,8 +76,8 @@ func (m *WebSocketManager) HandleConn() fiber.Handler {
 
 		for {
 			log.Println("waiting for packet")
-			var p Packet
-			err := conn.ReadJSON(&p)
+			p := &Packet{}
+			err := conn.ReadJSON(p)
 			if err != nil {
 				log.Println(err)
 				if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
@@ -88,19 +88,24 @@ func (m *WebSocketManager) HandleConn() fiber.Handler {
 
 			log.Println("got packet:", p)
 			if c, ok := m.clients[conn]; ok {
-				m.handlePacket(c, &p)
+				err := m.handlePacket(c, p)
+				log.Println(err)
 			}
 		}
 	})
 }
 
-func (m *WebSocketManager) handlePacket(c *client, p *Packet) {
+func (m *WebSocketManager) handlePacket(c *client, p *Packet) error {
 	switch p.Action {
 	case 0:
-		return
+		return nil
 	case ActionJoinRoom:
-		m.joinRoom(c, uuid.UUID{})
+		err := m.joinRoom(c, p.RoomID)
+		if err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
 func (m *WebSocketManager) createRoom() *Room {
@@ -111,23 +116,10 @@ func (m *WebSocketManager) createRoom() *Room {
 }
 
 func (m *WebSocketManager) joinRoom(c *client, rID uuid.UUID) error {
-	var (
-		r  *Room
-		ok bool
-	)
-
-	if rID == uuid.Nil {
-		log.Println("No id")
-		r = m.createRoom()
-		rID = r.id
-	}
-
 	log.Println("id =", rID)
-	if r == nil {
-		r, ok = m.rooms[rID]
-		if !ok {
-			return fmt.Errorf("%w: %s", ErrNoRoomWithUUID, rID.String())
-		}
+	r, ok := m.rooms[rID]
+	if !ok {
+		return fmt.Errorf("%w: %s", ErrNoRoomWithUUID, rID.String())
 	}
 
 	log.Println("room:", r)

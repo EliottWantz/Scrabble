@@ -34,6 +34,9 @@ func (r *Room) run() {
 	for {
 		select {
 		case c := <-r.register:
+			if _, ok := r.clients[c.conn]; ok {
+				log.Printf("client %s already in romm %s", c.conn.RemoteAddr(), r.id)
+			}
 			r.clients[c.conn] = c
 			log.Printf("client %s registered in room %s", c.conn.RemoteAddr(), r.id)
 
