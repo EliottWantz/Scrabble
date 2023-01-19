@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"log"
 
+	"scrabble/internal/uuid"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
-	"github.com/google/uuid"
 )
 
 var (

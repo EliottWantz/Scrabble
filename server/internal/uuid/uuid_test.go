@@ -1,4 +1,4 @@
-package ws
+package uuid
 
 import (
 	"encoding/json"
@@ -7,7 +7,7 @@ import (
 )
 
 type Data struct {
-	RoomID ID `json:"roomId,omitempty"`
+	RoomID UUID `json:"roomId,omitempty"`
 }
 
 func TestEmptyID(t *testing.T) {
@@ -22,6 +22,9 @@ func TestEmptyID(t *testing.T) {
 		fmt.Printf("%s", err)
 	}
 	fmt.Println(d.RoomID)
+	if d.RoomID != Nil {
+		t.Error()
+	}
 }
 
 func TestRealID(t *testing.T) {
