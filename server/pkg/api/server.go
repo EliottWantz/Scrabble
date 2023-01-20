@@ -17,7 +17,7 @@ import (
 var prefork = flag.Bool("Prefork", false, "Fiber prefork (multiple threads)")
 
 type Server struct {
-	WebSocketManager *ws.WebSocketManager
+	WebSocketManager *ws.Manager
 	App              *fiber.App
 	GameHandler      *handlers.GameHandler
 	AccountHandler   *handlers.AccountHandler
@@ -29,7 +29,7 @@ func NewServer() *Server {
 	}
 
 	s := &Server{
-		WebSocketManager: ws.NewWebSocketManager(),
+		WebSocketManager: ws.NewManager(),
 		App:              fiber.New(config),
 		GameHandler:      &handlers.GameHandler{},
 		AccountHandler:   &handlers.AccountHandler{},

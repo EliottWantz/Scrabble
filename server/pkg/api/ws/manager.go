@@ -15,18 +15,19 @@ var (
 	ErrInvalidUUID = errors.New("uuid is invalid")
 	ErrNilUUID     = errors.New("uuid is nil")
 
-	ErrNoRoomWithUUID = errors.New("no room found with given uuid")
+	ErrNoRoomWithUUID      = errors.New("no room found with given uuid")
+	ErrClientAlreadyExists = errors.New("client already exists with conn")
 )
 
-type WebSocketManager struct {
+type Manager struct {
 	clients    map[*websocket.Conn]*client
 	register   chan *websocket.Conn
 	unregister chan *websocket.Conn
 	rooms      map[uuid.UUID]*Room
 }
 
-func NewWebSocketManager() *WebSocketManager {
-	m := &WebSocketManager{
+func NewManager() *Manager {
+	m := &Manager{
 		clients:    make(map[*websocket.Conn]*client),
 		register:   make(chan *websocket.Conn),
 		unregister: make(chan *websocket.Conn),
@@ -38,16 +39,29 @@ func NewWebSocketManager() *WebSocketManager {
 	return m
 }
 
-func (m *WebSocketManager) run() {
+func (m *Manager) HandleConn() fiber.Handler {
+	return websocket.New(func(conn *websocket.Conn) {
+		defer func() {
+			m.unregister <- conn
+			conn.Close()
+		}()
+
+		m.register <- conn
+	})
+}
+
+func (m *Manager) run() {
 	for {
 		select {
 		case conn := <-m.register:
-			c := NewClient(conn)
+			c := NewClient(conn, m)
 			m.clients[conn] = c
 
+			c.run()
+
+			log.Println("connection registered:", conn.RemoteAddr())
 			r := m.createRoom()
 			r.register <- c
-			log.Println("connection registered:", conn.RemoteAddr())
 
 		case conn := <-m.unregister:
 			c, ok := m.clients[conn]
@@ -65,57 +79,14 @@ func (m *WebSocketManager) run() {
 	}
 }
 
-func (m *WebSocketManager) HandleConn() fiber.Handler {
-	return websocket.New(func(conn *websocket.Conn) {
-		defer func() {
-			m.unregister <- conn
-			conn.Close()
-		}()
-
-		m.register <- conn
-
-		for {
-			log.Println("waiting for packet")
-			p := &Packet{}
-			err := conn.ReadJSON(p)
-			if err != nil {
-				log.Println(err)
-				if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-					log.Println("read error:", err)
-				}
-				return
-			}
-
-			log.Println("got packet:", p)
-			if c, ok := m.clients[conn]; ok {
-				err := m.handlePacket(c, p)
-				log.Println(err)
-			}
-		}
-	})
-}
-
-func (m *WebSocketManager) handlePacket(c *client, p *Packet) error {
-	switch p.Action {
-	case 0:
-		return nil
-	case ActionJoinRoom:
-		err := m.joinRoom(c, p.RoomID)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (m *WebSocketManager) createRoom() *Room {
+func (m *Manager) createRoom() *Room {
 	r := NewRoom()
 	m.rooms[r.id] = r
 
 	return r
 }
 
-func (m *WebSocketManager) joinRoom(c *client, rID uuid.UUID) error {
+func (m *Manager) joinRoom(c *client, rID uuid.UUID) error {
 	log.Println("id =", rID)
 	r, ok := m.rooms[rID]
 	if !ok {
