@@ -17,10 +17,10 @@ var (
 )
 
 type Manager struct {
-	operator
 	clients    map[*websocket.Conn]*client
 	rooms      map[uuid.UUID]*Room
 	unregister chan *websocket.Conn
+	operator
 }
 
 func NewManager() *Manager {
@@ -28,6 +28,7 @@ func NewManager() *Manager {
 		clients:    make(map[*websocket.Conn]*client),
 		rooms:      make(map[uuid.UUID]*Room),
 		unregister: make(chan *websocket.Conn),
+		operator:   newOperator(),
 	}
 
 	go m.run()

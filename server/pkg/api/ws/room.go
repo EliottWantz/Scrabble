@@ -10,14 +10,14 @@ import (
 
 type Room struct {
 	id      uuid.UUID
-	clients map[*websocket.Conn]*client
+	clients map[uuid.UUID]*client
 	operator
 }
 
 func NewRoom() *Room {
 	r := &Room{
 		id:       uuid.New(),
-		clients:  make(map[*websocket.Conn]*client),
+		clients:  make(map[uuid.UUID]*client),
 		operator: newOperator(),
 	}
 
@@ -27,16 +27,16 @@ func NewRoom() *Room {
 }
 
 func (r *Room) add(c *client) {
-	if _, ok := r.clients[c.conn]; ok {
+	if _, ok := r.clients[c.id]; ok {
 		log.Printf("client %s already in romm %s", c.conn.RemoteAddr(), r.id)
 		return
 	}
-	r.clients[c.conn] = c
+	r.clients[c.id] = c
 	log.Printf("client %s registered in room %s", c.conn.RemoteAddr(), r.id)
 }
 
 func (r *Room) remove(c *client) {
-	delete(r.clients, c.conn)
+	delete(r.clients, c.id)
 	log.Println("connection unregistered")
 }
 
