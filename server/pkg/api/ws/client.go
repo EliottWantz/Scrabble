@@ -26,17 +26,17 @@ func NewClient(conn *websocket.Conn, m *Manager) *client {
 	}
 }
 
-func (c *client) run() {
+func (c *client) listen() {
 	for {
 		log.Println("waiting for packet")
 		p := &Packet{}
 		err := c.conn.ReadJSON(p)
 		if err != nil {
-			log.Println(err)
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				log.Println("read error:", err)
+				return
 			}
-			return
+			continue
 		}
 
 		log.Println("got packet:", p)
@@ -61,7 +61,7 @@ func (c *client) handlePacket(p *Packet) error {
 			return fmt.Errorf("%w: no room found with id %s", ErrInvalidUUID, p.RoomID)
 		}
 
-		r.ops <- func() { r.broadcast(p) }
+		r.ops <- func() error { return r.broadcast(p) }
 	}
 	return nil
 }
@@ -72,7 +72,7 @@ func (c *client) joinRoom(rID uuid.UUID) error {
 		return fmt.Errorf("%w: no room found with id %s", ErrInvalidUUID, rID)
 	}
 
-	r.ops <- func() { r.add(c) }
+	r.ops <- func() error { return r.addClient(c) }
 
 	return nil
 }

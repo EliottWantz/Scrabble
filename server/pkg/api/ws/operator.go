@@ -1,6 +1,8 @@
 package ws
 
-type operation func()
+import "log"
+
+type operation func() error
 
 type operator struct {
 	ops chan operation
@@ -14,6 +16,8 @@ func newOperator() operator {
 
 func (o *operator) run() {
 	for op := range o.ops {
-		op()
+		if err := op(); err != nil {
+			log.Println(err)
+		}
 	}
 }
