@@ -3,7 +3,6 @@ package ws
 import (
 	"fmt"
 	"log"
-	"sync"
 
 	"scrabble/internal/uuid"
 
@@ -14,7 +13,6 @@ type client struct {
 	id      uuid.UUID
 	manager *Manager
 	conn    *websocket.Conn
-	mu      sync.Mutex
 	operator
 }
 

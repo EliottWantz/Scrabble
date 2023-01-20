@@ -51,13 +51,9 @@ func (r *Room) removeClient(id uuid.UUID) error {
 func (r *Room) broadcast(p *Packet) error {
 	log.Println("broadcasting packet:", p)
 	for _, c := range r.clients {
-		// c.queueOp(func() error { return c.sendPacket(p) })
-		go func(c *client) {
-			c.mu.Lock()
-			defer c.mu.Unlock()
-			c.sendPacket(p)
-		}(c)
-		// c.sendPacket(p)
+		go func(c *client, p *Packet) {
+			c.queueOp(func() error { return c.sendPacket(p) })
+		}(c, p)
 	}
 
 	return nil
