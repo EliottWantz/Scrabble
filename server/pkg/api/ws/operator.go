@@ -21,3 +21,7 @@ func (o *operator) run() {
 		}
 	}
 }
+
+func (o *operator) queueOp(op operation) {
+	o.ops <- op
+}

@@ -11,22 +11,30 @@ import (
 )
 
 type client struct {
-	id        uuid.UUID
-	manager   *Manager
-	conn      *websocket.Conn
-	isClosing bool
-	mu        sync.Mutex
+	id      uuid.UUID
+	manager *Manager
+	conn    *websocket.Conn
+	mu      sync.Mutex
+	operator
 }
 
 func NewClient(conn *websocket.Conn, m *Manager) *client {
 	return &client{
-		id:      uuid.New(),
-		conn:    conn,
-		manager: m,
+		id:       uuid.New(),
+		conn:     conn,
+		manager:  m,
+		operator: newOperator(),
 	}
 }
 
-func (c *client) listen() {
+func (c *client) sendPacket(p *Packet) error {
+	if err := c.conn.WriteJSON(p); err != nil {
+		return fmt.Errorf("write error: %w", err)
+	}
+	return nil
+}
+
+func (c *client) read() {
 	for {
 		log.Println("waiting for packet")
 		p := &Packet{}
@@ -40,9 +48,7 @@ func (c *client) listen() {
 		}
 
 		log.Println("got packet:", p)
-		if err = c.handlePacket(p); err != nil {
-			log.Println(err)
-		}
+		c.queueOp(func() error { return c.handlePacket(p) })
 	}
 }
 
@@ -61,7 +67,7 @@ func (c *client) handlePacket(p *Packet) error {
 			return fmt.Errorf("%w: no room found with id %s", ErrInvalidUUID, p.RoomID)
 		}
 
-		r.ops <- func() error { return r.broadcast(p) }
+		r.queueOp(func() error { return r.broadcast(p) })
 	}
 	return nil
 }
@@ -72,7 +78,7 @@ func (c *client) joinRoom(rID uuid.UUID) error {
 		return fmt.Errorf("%w: no room found with id %s", ErrInvalidUUID, rID)
 	}
 
-	r.ops <- func() error { return r.addClient(c) }
+	r.queueOp(func() error { return r.addClient(c) })
 
 	return nil
 }

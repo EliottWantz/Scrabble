@@ -38,13 +38,14 @@ func (m *Manager) HandleConn() fiber.Handler {
 		c := NewClient(conn, m)
 
 		defer func() {
-			m.ops <- func() error { return m.removeClient(c.id) }
+			m.queueOp(func() error { return m.removeClient(c.id) })
 			conn.Close()
 		}()
 
-		m.ops <- func() error { return m.addClient(c) }
+		m.queueOp(func() error { return m.addClient(c) })
 
-		c.listen() // Infinite for loop that reads and writes
+		go c.operator.run()
+		c.read() // Infinite for loop that reads and writes
 	})
 }
 
@@ -55,7 +56,7 @@ func (m *Manager) addClient(c *client) error {
 	c.id = r.id
 	m.clients[c.id] = c
 
-	r.ops <- func() error { return r.addClient(c) }
+	r.queueOp(func() error { return r.addClient(c) })
 
 	log.Println("connection registered:", c.conn.RemoteAddr())
 
@@ -68,7 +69,7 @@ func (m *Manager) removeClient(id uuid.UUID) error {
 	}
 
 	for _, r := range m.rooms {
-		r.ops <- func() error { return r.removeClient(id) }
+		r.queueOp(func() error { return r.removeClient(id) })
 	}
 
 	delete(m.clients, id)

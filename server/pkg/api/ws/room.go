@@ -5,8 +5,6 @@ import (
 	"log"
 
 	"scrabble/internal/uuid"
-
-	"github.com/gofiber/websocket/v2"
 )
 
 type Room struct {
@@ -44,31 +42,22 @@ func (r *Room) removeClient(id uuid.UUID) error {
 	log.Printf("client %s removed from room %s", id, r.id)
 
 	if len(r.clients) == 0 {
-		r.manager.ops <- func() error { return r.manager.deleteRoom(id) }
+		r.manager.queueOp(func() error { return r.manager.deleteRoom(id) })
 	}
 
 	return nil
 }
 
 func (r *Room) broadcast(p *Packet) error {
-	log.Println("received packet:", p)
+	log.Println("broadcasting packet:", p)
 	for _, c := range r.clients {
-		go func(c *client) { // send to each client in parallel so we don't block on a slow client
+		// c.queueOp(func() error { return c.sendPacket(p) })
+		go func(c *client) {
 			c.mu.Lock()
 			defer c.mu.Unlock()
-			if c.isClosing {
-				return
-			}
-
-			if err := c.conn.WriteJSON(p); err != nil {
-				c.isClosing = true
-				log.Println("write error:", err)
-
-				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
-				c.conn.Close()
-				r.ops <- func() error { return r.removeClient(c.id) }
-			}
+			c.sendPacket(p)
 		}(c)
+		// c.sendPacket(p)
 	}
 
 	return nil
