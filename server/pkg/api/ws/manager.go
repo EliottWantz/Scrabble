@@ -2,7 +2,6 @@ package ws
 
 import (
 	"errors"
-	"fmt"
 	"log"
 
 	"scrabble/internal/uuid"
@@ -18,20 +17,17 @@ var (
 )
 
 type Manager struct {
-	clients      map[*websocket.Conn]*client
-	rooms        map[uuid.UUID]*Room
-	unregister   chan *websocket.Conn
-	shutdown     chan struct{}
-	shutdownInit chan struct{}
+	operator
+	clients    map[*websocket.Conn]*client
+	rooms      map[uuid.UUID]*Room
+	unregister chan *websocket.Conn
 }
 
 func NewManager() *Manager {
 	m := &Manager{
-		clients:      make(map[*websocket.Conn]*client),
-		rooms:        make(map[uuid.UUID]*Room),
-		unregister:   make(chan *websocket.Conn),
-		shutdown:     make(chan struct{}),
-		shutdownInit: make(chan struct{}),
+		clients:    make(map[*websocket.Conn]*client),
+		rooms:      make(map[uuid.UUID]*Room),
+		unregister: make(chan *websocket.Conn),
 	}
 
 	go m.run()
@@ -42,37 +38,35 @@ func NewManager() *Manager {
 func (m *Manager) HandleConn() fiber.Handler {
 	return websocket.New(func(conn *websocket.Conn) {
 		defer func() {
-			m.unregister <- conn
+			m.do(func() { m.remove(conn) })
 			conn.Close()
 		}()
 
-		c := m.add(conn)
+		c, err := m.add(conn)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		// Infinite for loop that reads and writes
 		c.run()
 	})
 }
 
-func (m *Manager) run() {
-	for {
-		select {
-		case conn := <-m.unregister:
-			m.remove(conn)
-		case <-m.shutdown:
-			return
-		}
+func (m *Manager) add(conn *websocket.Conn) (*client, error) {
+	if _, ok := m.clients[conn]; ok {
+		return nil, ErrClientAlreadyExists
 	}
-}
 
-func (m *Manager) add(conn *websocket.Conn) *client {
-	c := NewClient(conn, m)
-	m.clients[conn] = c
+	r := m.createRoom()
+	c := m.createClient(conn)
+	c.id = r.id
+
+	r.do(func() { r.add(c) })
 
 	log.Println("connection registered:", conn.RemoteAddr())
-	r := m.createRoom()
-	r.do(func() {
-		r.add(c)
-	})
 
-	return c
+	return c, nil
 }
 
 func (m *Manager) remove(conn *websocket.Conn) {
@@ -90,16 +84,12 @@ func (m *Manager) remove(conn *websocket.Conn) {
 }
 
 func (m *Manager) Shutdown() {
-	close(m.shutdownInit)
-
-	defer close(m.shutdown)
-
 	for c := range m.clients {
 		delete(m.clients, c)
 		c.Close()
 	}
 
-	<-m.shutdown
+	close(m.ops)
 }
 
 func (m *Manager) createRoom() *Room {
@@ -109,17 +99,9 @@ func (m *Manager) createRoom() *Room {
 	return r
 }
 
-func (m *Manager) joinRoom(c *client, rID uuid.UUID) error {
-	log.Println("id =", rID)
-	r, ok := m.rooms[rID]
-	if !ok {
-		return fmt.Errorf("%w: no room found with id %s", ErrInvalidUUID, rID)
-	}
+func (m *Manager) createClient(conn *websocket.Conn) *client {
+	c := NewClient(conn, m)
+	m.clients[conn] = c
 
-	log.Println("room:", r)
-
-	r.do(func() { r.add(c) })
-	log.Println("client should be in room")
-
-	return nil
+	return c
 }

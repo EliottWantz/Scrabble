@@ -5,7 +5,8 @@ import "scrabble/internal/uuid"
 type Action int
 
 const (
-	ActionJoinRoom Action = iota + 1
+	ActionNoAction Action = iota
+	ActionJoinRoom
 	ActionBroadCast
 )
 

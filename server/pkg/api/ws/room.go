@@ -11,16 +11,14 @@ import (
 type Room struct {
 	id      uuid.UUID
 	clients map[*websocket.Conn]*client
-	ops     chan operation
+	operator
 }
-
-type operation func()
 
 func NewRoom() *Room {
 	r := &Room{
-		id:      uuid.New(),
-		clients: make(map[*websocket.Conn]*client),
-		ops:     make(chan operation),
+		id:       uuid.New(),
+		clients:  make(map[*websocket.Conn]*client),
+		operator: newOperator(),
 	}
 
 	go r.run()
@@ -28,19 +26,10 @@ func NewRoom() *Room {
 	return r
 }
 
-func (r *Room) run() {
-	for op := range r.ops {
-		op()
-	}
-}
-
-func (r *Room) do(fn operation) {
-	r.ops <- fn
-}
-
 func (r *Room) add(c *client) {
 	if _, ok := r.clients[c.conn]; ok {
 		log.Printf("client %s already in romm %s", c.conn.RemoteAddr(), r.id)
+		return
 	}
 	r.clients[c.conn] = c
 	log.Printf("client %s registered in room %s", c.conn.RemoteAddr(), r.id)
