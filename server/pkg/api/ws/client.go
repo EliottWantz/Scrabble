@@ -61,9 +61,7 @@ func (c *client) handlePacket(p *Packet) error {
 			return fmt.Errorf("%w: no room found with id %s", ErrInvalidUUID, p.RoomID)
 		}
 
-		r.do(func() {
-			r.broadcast(p)
-		})
+		r.ops <- func() { r.broadcast(p) }
 	}
 	return nil
 }
@@ -74,7 +72,7 @@ func (c *client) joinRoom(rID uuid.UUID) error {
 		return fmt.Errorf("%w: no room found with id %s", ErrInvalidUUID, rID)
 	}
 
-	r.do(func() { r.add(c) })
+	r.ops <- func() { r.add(c) }
 
 	return nil
 }

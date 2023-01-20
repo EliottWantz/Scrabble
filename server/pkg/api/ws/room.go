@@ -56,7 +56,7 @@ func (r *Room) broadcast(p *Packet) {
 
 				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
 				c.conn.Close()
-				r.do(func() { r.remove(c) })
+				r.ops <- func() { r.remove(c) }
 			}
 		}(c)
 	}

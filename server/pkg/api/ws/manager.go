@@ -38,7 +38,7 @@ func NewManager() *Manager {
 func (m *Manager) HandleConn() fiber.Handler {
 	return websocket.New(func(conn *websocket.Conn) {
 		defer func() {
-			m.do(func() { m.remove(conn) })
+			m.ops <- func() { m.remove(conn) }
 			conn.Close()
 		}()
 
@@ -62,7 +62,7 @@ func (m *Manager) add(conn *websocket.Conn) (*client, error) {
 	c := m.createClient(conn)
 	c.id = r.id
 
-	r.do(func() { r.add(c) })
+	r.ops <- func() { r.add(c) }
 
 	log.Println("connection registered:", conn.RemoteAddr())
 
@@ -76,7 +76,7 @@ func (m *Manager) remove(conn *websocket.Conn) {
 	}
 
 	for _, r := range m.rooms {
-		r.do(func() { r.remove(c) })
+		r.ops <- func() { r.remove(c) }
 	}
 
 	delete(m.clients, conn)

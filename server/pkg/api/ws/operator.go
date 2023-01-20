@@ -17,7 +17,3 @@ func (o *operator) run() {
 		op()
 	}
 }
-
-func (o *operator) do(fn operation) {
-	o.ops <- fn
-}
