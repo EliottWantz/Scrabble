@@ -9,20 +9,18 @@ import (
 )
 
 type Room struct {
-	id         uuid.UUID
-	clients    map[*websocket.Conn]*client
-	register   chan *client
-	unregister chan *client
-	broadcast  chan Packet
+	id      uuid.UUID
+	clients map[*websocket.Conn]*client
+	ops     chan operation
 }
+
+type operation func()
 
 func NewRoom() *Room {
 	r := &Room{
-		id:         uuid.New(),
-		clients:    make(map[*websocket.Conn]*client),
-		register:   make(chan *client),
-		unregister: make(chan *client),
-		broadcast:  make(chan Packet),
+		id:      uuid.New(),
+		clients: make(map[*websocket.Conn]*client),
+		ops:     make(chan operation),
 	}
 
 	go r.run()
@@ -31,40 +29,46 @@ func NewRoom() *Room {
 }
 
 func (r *Room) run() {
-	for {
-		select {
-		case c := <-r.register:
-			if _, ok := r.clients[c.conn]; ok {
-				log.Printf("client %s already in romm %s", c.conn.RemoteAddr(), r.id)
+	for op := range r.ops {
+		op()
+	}
+}
+
+func (r *Room) do(fn operation) {
+	r.ops <- fn
+}
+
+func (r *Room) add(c *client) {
+	if _, ok := r.clients[c.conn]; ok {
+		log.Printf("client %s already in romm %s", c.conn.RemoteAddr(), r.id)
+	}
+	r.clients[c.conn] = c
+	log.Printf("client %s registered in room %s", c.conn.RemoteAddr(), r.id)
+}
+
+func (r *Room) remove(c *client) {
+	delete(r.clients, c.conn)
+	log.Println("connection unregistered")
+}
+
+func (r *Room) broadcast(p *Packet) {
+	log.Println("received packet:", p)
+	for _, c := range r.clients {
+		go func(c *client) { // send to each client in parallel so we don't block on a slow client
+			c.mu.Lock()
+			defer c.mu.Unlock()
+			if c.isClosing {
+				return
 			}
-			r.clients[c.conn] = c
-			log.Printf("client %s registered in room %s", c.conn.RemoteAddr(), r.id)
 
-		case c := <-r.unregister:
-			delete(r.clients, c.conn)
+			if err := c.conn.WriteJSON(p); err != nil {
+				c.isClosing = true
+				log.Println("write error:", err)
 
-			log.Println("connection unregistered")
-
-		case packet := <-r.broadcast:
-			log.Println("received packet:", packet)
-			for _, c := range r.clients {
-				go func(c *client) { // send to each client in parallel so we don't block on a slow client
-					c.mu.Lock()
-					defer c.mu.Unlock()
-					if c.isClosing {
-						return
-					}
-
-					if err := c.conn.WriteJSON(packet); err != nil {
-						c.isClosing = true
-						log.Println("write error:", err)
-
-						c.conn.WriteMessage(websocket.CloseMessage, []byte{})
-						c.conn.Close()
-						r.unregister <- c
-					}
-				}(c)
+				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
+				c.conn.Close()
+				r.do(func() { r.remove(c) })
 			}
-		}
+		}(c)
 	}
 }

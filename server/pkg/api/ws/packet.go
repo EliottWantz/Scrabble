@@ -6,6 +6,7 @@ type Action int
 
 const (
 	ActionJoinRoom Action = iota + 1
+	ActionBroadCast
 )
 
 type Packet struct {

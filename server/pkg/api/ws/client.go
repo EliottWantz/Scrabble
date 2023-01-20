@@ -1,6 +1,7 @@
 package ws
 
 import (
+	"fmt"
 	"log"
 	"sync"
 
@@ -8,10 +9,10 @@ import (
 )
 
 type client struct {
+	manager   *Manager
 	conn      *websocket.Conn
 	isClosing bool
 	mu        sync.Mutex
-	manager   *Manager
 }
 
 func NewClient(conn *websocket.Conn, m *Manager) *client {
@@ -49,6 +50,15 @@ func (c *client) handlePacket(p *Packet) error {
 		if err != nil {
 			return err
 		}
+	case ActionBroadCast:
+		r, ok := c.manager.rooms[p.RoomID]
+		if !ok {
+			return fmt.Errorf("%w: no room found with id %s", ErrInvalidUUID, p.RoomID)
+		}
+
+		r.do(func() {
+			r.broadcast(p)
+		})
 	}
 	return nil
 }

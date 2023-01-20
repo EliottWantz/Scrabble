@@ -14,5 +14,9 @@ func main() {
 
 	server := api.NewServer()
 
-	server.App.Listen(fmt.Sprintf("127.0.0.1:%s", *port))
+	err := server.App.Listen(fmt.Sprintf("127.0.0.1:%s", *port))
+	if err != nil {
+		server.WebSocketManager.Shutdown()
+		server.App.Shutdown()
+	}
 }

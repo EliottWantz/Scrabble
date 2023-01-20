@@ -3,7 +3,6 @@ package api
 import "github.com/gofiber/fiber/v2"
 
 func (s *Server) setupRoutes() {
-	s.App.Static("/", "./home.html") // Page for websocket testing
 	s.App.Get("/ws", s.WebSocketManager.HandleConn())
 
 	api := s.App.Group("/api")
