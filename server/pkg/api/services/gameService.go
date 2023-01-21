@@ -55,13 +55,8 @@ func (gs *GameService) simulateGame(tileSet *scrabble.TileSet, dawg *scrabble.DA
 
 	for i := 0; ; i++ {
 		state := g.State()
-		var move scrabble.Move
 		// Ask robotA or robotB to generate a move
-		if i%2 == 0 {
-			move = highScoreEngine.GenerateMove(state)
-		} else {
-			move = highScoreEngine.GenerateMove(state)
-		}
+		move := highScoreEngine.GenerateMove(state)
 		err := g.ApplyValid(move)
 		if err != nil {
 			fmt.Println(err)

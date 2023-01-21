@@ -194,17 +194,6 @@ func (ean *ExtendAfterNavigator) check(letter rune) Match {
 	// Finally, test the cross-checks
 	if ean.axis.Allows(ean.index, letter) {
 		// The tile successfully completes any cross-words
-		/*
-			// DEBUG: verify that the cross-checks hold
-			sq := ean.axis.squares[ean.index]
-			left, right := ean.axis.state.Board.CrossWords(sq.Row, sq.Col, !ean.axis.horizontal)
-			if left != "" || right != "" {
-				word := left + string(letter) + right
-				if !ean.axis.state.Dawg.Find(word) {
-					panic("Cross-check violation!")
-				}
-			}
-		*/
 		return MacthRackTile
 	}
 	return MatchNo
