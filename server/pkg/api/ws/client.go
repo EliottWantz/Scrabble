@@ -25,17 +25,10 @@ func NewClient(conn *websocket.Conn, m *Manager) *client {
 	}
 }
 
-func (c *client) sendPacket(p *Packet) error {
-	if err := c.conn.WriteJSON(p); err != nil {
-		return fmt.Errorf("write error: %w", err)
-	}
-	return nil
-}
-
 func (c *client) read() {
 	for {
 		log.Println("waiting for packet")
-		p := &Packet{}
+		p := &packet{}
 		err := c.conn.ReadJSON(p)
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
@@ -50,7 +43,7 @@ func (c *client) read() {
 	}
 }
 
-func (c *client) handlePacket(p *Packet) error {
+func (c *client) handlePacket(p *packet) error {
 	switch p.Action {
 	case ActionNoAction:
 		return nil
@@ -65,9 +58,24 @@ func (c *client) handlePacket(p *Packet) error {
 			return fmt.Errorf("%w: no room found with id %s", ErrInvalidUUID, p.RoomID)
 		}
 
-		r.queueOp(func() error { return r.broadcast(p) })
+		return c.to(r).emit(ActionNoAction, p.Data)
+		// r.queueOp(func() error { return r.broadcast(p) })
 	}
 	return nil
+}
+
+func (c *client) sendPacket(p *packet) error {
+	if err := c.conn.WriteJSON(p); err != nil {
+		return fmt.Errorf("write error: %w", err)
+	}
+	return nil
+}
+
+func (c *client) to(r *room) *roomBroadCaster {
+	return &roomBroadCaster{
+		room: r,
+		from: c.id,
+	}
 }
 
 func (c *client) joinRoom(rID uuid.UUID) error {

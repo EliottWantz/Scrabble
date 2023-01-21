@@ -10,7 +10,7 @@ const (
 	ActionBroadCast
 )
 
-type Packet struct {
+type packet struct {
 	Action Action    `json:"action,omitempty"`
 	RoomID uuid.UUID `json:"roomId,omitempty"`
 	Data   any       `json:"data,omitempty"`

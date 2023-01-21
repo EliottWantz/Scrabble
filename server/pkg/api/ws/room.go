@@ -7,15 +7,15 @@ import (
 	"scrabble/internal/uuid"
 )
 
-type Room struct {
+type room struct {
 	id      uuid.UUID
 	manager *Manager
 	clients map[uuid.UUID]*client
 	operator
 }
 
-func NewRoom(m *Manager) *Room {
-	r := &Room{
+func NewRoom(m *Manager) *room {
+	r := &room{
 		id:       uuid.New(),
 		manager:  m,
 		clients:  make(map[uuid.UUID]*client),
@@ -27,7 +27,7 @@ func NewRoom(m *Manager) *Room {
 	return r
 }
 
-func (r *Room) addClient(c *client) error {
+func (r *room) addClient(c *client) error {
 	if _, ok := r.clients[c.id]; ok {
 		return fmt.Errorf("client %s already in romm %s", c.conn.RemoteAddr(), r.id)
 	}
@@ -37,23 +37,12 @@ func (r *Room) addClient(c *client) error {
 	return nil
 }
 
-func (r *Room) removeClient(id uuid.UUID) error {
+func (r *room) removeClient(id uuid.UUID) error {
 	delete(r.clients, id)
 	log.Printf("client %s removed from room %s", id, r.id)
 
 	if len(r.clients) == 0 {
 		r.manager.queueOp(func() error { return r.manager.deleteRoom(id) })
-	}
-
-	return nil
-}
-
-func (r *Room) broadcast(p *Packet) error {
-	log.Println("broadcasting packet:", p)
-	for _, c := range r.clients {
-		go func(c *client, p *Packet) {
-			c.queueOp(func() error { return c.sendPacket(p) })
-		}(c, p)
 	}
 
 	return nil

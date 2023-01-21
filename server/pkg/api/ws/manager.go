@@ -15,7 +15,7 @@ var ErrInvalidUUID = errors.New("uuid is invalid")
 
 type Manager struct {
 	clients    map[uuid.UUID]*client
-	rooms      map[uuid.UUID]*Room
+	rooms      map[uuid.UUID]*room
 	unregister chan *websocket.Conn
 	operator
 }
@@ -23,7 +23,7 @@ type Manager struct {
 func NewManager() *Manager {
 	m := &Manager{
 		clients:    make(map[uuid.UUID]*client),
-		rooms:      make(map[uuid.UUID]*Room),
+		rooms:      make(map[uuid.UUID]*room),
 		unregister: make(chan *websocket.Conn),
 		operator:   newOperator(),
 	}

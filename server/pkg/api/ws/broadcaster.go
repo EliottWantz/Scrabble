@@ -1,13 +1,19 @@
 package ws
 
-import "scrabble/internal/uuid"
+import (
+	"errors"
+
+	"scrabble/internal/uuid"
+)
+
+var ErrNoRoom = errors.New("no room to broadcast to")
 
 type Emitter interface {
-	emit(to uuid.UUID, op operation)
+	emit(a Action, msg any) error
 }
 
 type Listener interface {
-	on(act Action, op operation)
+	on(a Action, op operation)
 }
 
 type BroadCaster interface {
@@ -16,16 +22,34 @@ type BroadCaster interface {
 }
 
 type roomBroadCaster struct {
-	room *Room
+	room *room
 	from uuid.UUID
-	to   uuid.UUID
-	msg  any
 }
 
 var _ BroadCaster = (*roomBroadCaster)(nil)
 
-func (rbc *roomBroadCaster) emit(to uuid.UUID, op operation) {
-	panic("not implemented") // TODO: Implement
+func (rbc *roomBroadCaster) emit(a Action, msg any) error {
+	if rbc.room == nil {
+		return ErrNoRoom
+	}
+
+	p := &packet{
+		Action: a,
+		RoomID: rbc.room.id,
+		Data:   msg,
+	}
+
+	for _, c := range rbc.room.clients {
+		if c.id == rbc.from {
+			continue
+		}
+
+		go func(c *client, p *packet) {
+			c.queueOp(func() error { return c.sendPacket(p) })
+		}(c, p)
+	}
+
+	return nil
 }
 
 func (rbc *roomBroadCaster) on(act Action, op operation) {
