@@ -3,6 +3,7 @@ package ws
 import (
 	"fmt"
 	"log"
+	"sync"
 
 	"scrabble/internal/uuid"
 
@@ -14,6 +15,7 @@ type client struct {
 	manager *Manager
 	conn    *websocket.Conn
 	operator
+	mu sync.Mutex
 }
 
 func NewClient(conn *websocket.Conn, m *Manager) *client {
@@ -59,20 +61,21 @@ func (c *client) handlePacket(p *packet) error {
 		}
 
 		return c.to(r).emit(ActionNoAction, p.Data)
-		// r.queueOp(func() error { return r.broadcast(p) })
 	}
 	return nil
 }
 
 func (c *client) sendPacket(p *packet) error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	if err := c.conn.WriteJSON(p); err != nil {
 		return fmt.Errorf("write error: %w", err)
 	}
 	return nil
 }
 
-func (c *client) to(r *room) *roomBroadCaster {
-	return &roomBroadCaster{
+func (c *client) to(r *room) *broadCaster {
+	return &broadCaster{
 		room: r,
 		from: c.id,
 	}

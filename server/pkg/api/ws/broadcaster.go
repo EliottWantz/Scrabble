@@ -8,50 +8,29 @@ import (
 
 var ErrNoRoom = errors.New("no room to broadcast to")
 
-type Emitter interface {
-	emit(a Action, msg any) error
-}
-
-type Listener interface {
-	on(a Action, op operation)
-}
-
-type BroadCaster interface {
-	Emitter
-	Listener
-}
-
-type roomBroadCaster struct {
+type broadCaster struct {
 	room *room
 	from uuid.UUID
 }
 
-var _ BroadCaster = (*roomBroadCaster)(nil)
-
-func (rbc *roomBroadCaster) emit(a Action, msg any) error {
-	if rbc.room == nil {
+func (bc *broadCaster) emit(a Action, msg any) error {
+	if bc.room == nil {
 		return ErrNoRoom
 	}
 
 	p := &packet{
 		Action: a,
-		RoomID: rbc.room.id,
+		RoomID: bc.room.id,
 		Data:   msg,
 	}
 
-	for _, c := range rbc.room.clients {
-		if c.id == rbc.from {
+	for _, c := range bc.room.clients {
+		if c.id == bc.from {
 			continue
 		}
 
-		go func(c *client, p *packet) {
-			c.queueOp(func() error { return c.sendPacket(p) })
-		}(c, p)
+		c.queueOp(func() error { return c.sendPacket(p) })
 	}
 
 	return nil
-}
-
-func (rbc *roomBroadCaster) on(act Action, op operation) {
-	panic("not implemented") // TODO: Implement
 }
