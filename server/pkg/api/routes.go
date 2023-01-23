@@ -3,7 +3,7 @@ package api
 import "github.com/gofiber/fiber/v2"
 
 func (s *Server) setupRoutes() {
-	s.App.Get("/ws", s.WebSocketManager.HandleConn())
+	s.App.Get("/ws", s.WebSocketManager.Accept())
 
 	api := s.App.Group("/api")
 	api.Get("/", func(c *fiber.Ctx) error {

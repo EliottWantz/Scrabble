@@ -2,34 +2,32 @@ package ws
 
 import (
 	"errors"
-
-	"scrabble/internal/uuid"
 )
 
-var ErrNoRoom = errors.New("no room to broadcast to")
+var ErrRoomNotRegistered = errors.New("room is not registered")
 
 type broadCaster struct {
 	room *room
-	from uuid.UUID
+	from string
 }
 
 func (bc *broadCaster) emit(a Action, msg any) error {
 	if bc.room == nil {
-		return ErrNoRoom
+		return ErrRoomNotRegistered
 	}
 
 	p := &packet{
 		Action: a,
-		RoomID: bc.room.id,
+		RoomID: bc.room.ID,
 		Data:   msg,
 	}
 
-	for _, c := range bc.room.clients {
-		if c.id == bc.from {
+	for _, c := range bc.room.Clients {
+		if c.ID == bc.from {
 			continue
 		}
 
-		c.queueOp(func() error { return c.sendPacket(p) })
+		c.sendPacket(p)
 	}
 
 	return nil

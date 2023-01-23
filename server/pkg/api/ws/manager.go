@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"log"
 
-	"scrabble/internal/uuid"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
 )
@@ -14,80 +12,136 @@ import (
 var ErrInvalidUUID = errors.New("uuid is invalid")
 
 type Manager struct {
-	clients    map[uuid.UUID]*client
-	rooms      map[uuid.UUID]*room
-	unregister chan *websocket.Conn
-	operator
+	Clients  map[string]*client
+	Rooms    map[string]*room
+	Operator operator
 }
 
 func NewManager() *Manager {
 	m := &Manager{
-		clients:    make(map[uuid.UUID]*client),
-		rooms:      make(map[uuid.UUID]*room),
-		unregister: make(chan *websocket.Conn),
-		operator:   newOperator(),
+		Clients:  make(map[string]*client),
+		Rooms:    make(map[string]*room),
+		Operator: newOperator(),
 	}
 
-	go m.operator.run()
+	go m.Operator.run()
 
 	return m
 }
 
-func (m *Manager) HandleConn() fiber.Handler {
+func (m *Manager) Accept() fiber.Handler {
 	return websocket.New(func(conn *websocket.Conn) {
-		c := NewClient(conn, m)
+		c, err := NewClient(conn, m)
+		if err != nil {
+			return
+		}
 
-		defer func() {
-			m.queueOp(func() error { return m.removeClient(c.id) })
-			conn.Close()
-		}()
+		defer m.removeClient(c.ID)
 
-		m.queueOp(func() error { return m.addClient(c) })
+		m.addClient(c)
 
-		go c.operator.run()
-		c.read() // Infinite for loop that reads and writes
+		c.read() // Infinite for loop that reads incoming packets
 	})
 }
 
-func (m *Manager) addClient(c *client) error {
-	r := NewRoom(m)
-	m.rooms[r.id] = r
-
-	c.id = r.id
-	m.clients[c.id] = c
-
-	r.queueOp(func() error { return r.addClient(c) })
-
-	log.Println("connection registered:", c.conn.RemoteAddr())
-
-	return nil
+func (m *Manager) getClient(cID string) (*client, error) {
+	c, ok := m.Clients[cID]
+	if !ok {
+		return c, fmt.Errorf("%s: client %s not registered", ErrInvalidUUID, cID)
+	}
+	return c, nil
 }
 
-func (m *Manager) removeClient(id uuid.UUID) error {
-	if _, ok := m.clients[id]; !ok {
-		return fmt.Errorf("%w: client %s doesn't exists", ErrInvalidUUID, id)
+func (m *Manager) getRoom(rID string) (*room, error) {
+	r, ok := m.Rooms[rID]
+	if !ok {
+		return r, fmt.Errorf("%s: room %s doesn't exist", ErrInvalidUUID, rID)
 	}
+	return r, nil
+}
 
-	for _, r := range m.rooms {
-		r.queueOp(func() error { return r.removeClient(id) })
+func (m *Manager) addClient(c *client) {
+	if c == nil {
+		return
 	}
+	m.Operator.queueOp(func() {
+		r, err := NewRoom(m)
+		if err != nil {
+			log.Println(err)
+			return
+		}
 
-	delete(m.clients, id)
-	log.Println("connection unregistered")
+		m.Rooms[r.ID] = r
 
-	return nil
+		c.ID = r.ID
+		m.Clients[c.ID] = c
+
+		r.addClient(c.ID)
+
+		log.Printf("%s: client %s registered", c.Conn.RemoteAddr(), c.ID)
+	})
+}
+
+func (m *Manager) removeClient(cID string) {
+	m.Operator.queueOp(func() {
+		c, err := m.getClient(cID)
+		if err != nil {
+			log.Printf("removeClient: %s", err)
+			return
+		}
+
+		for _, r := range c.Rooms {
+			r.removeClient(c.ID)
+		}
+
+		close(c.Operator.ops)
+		delete(m.Clients, c.ID)
+		log.Printf("client %s disconnected", c.ID)
+		c.Conn.Close()
+	})
+}
+
+func (m *Manager) removeRoom(rID string) {
+	m.Operator.queueOp(func() {
+		r, err := m.getRoom(rID)
+		if err != nil {
+			log.Printf("removeRoom: %s", err)
+			return
+		}
+
+		close(r.Operator.ops)
+		delete(m.Rooms, r.ID)
+		log.Printf("room %s removed", r.ID)
+	})
+}
+
+func (m *Manager) broadcast(a Action, p *packet, senderID string) {
+	m.Operator.queueOp(func() {
+		r, err := m.getRoom(p.RoomID)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		for _, client := range r.Clients {
+			// Don't send packet to the sender
+			if client.ID == senderID {
+				continue
+			}
+
+			err := client.sendPacket(p)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+		}
+	})
 }
 
 func (m *Manager) Shutdown() {
-	for id, c := range m.clients {
-		delete(m.clients, id)
-		c.conn.Close()
+	log.Println("Shutting down manager")
+	for cID := range m.Clients {
+		m.removeClient(cID)
 	}
-
-	close(m.ops)
-}
-
-func (m *Manager) deleteRoom(id uuid.UUID) error {
-	delete(m.rooms, id)
-	return nil
+	close(m.Operator.ops)
 }

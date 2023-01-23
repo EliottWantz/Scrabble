@@ -5,33 +5,42 @@ import (
 	"log"
 	"sync"
 
-	"scrabble/internal/uuid"
-
 	"github.com/gofiber/websocket/v2"
+	"github.com/google/uuid"
 )
 
 type client struct {
-	id      uuid.UUID
-	manager *Manager
-	conn    *websocket.Conn
-	operator
-	mu sync.Mutex
+	ID       string
+	Manager  *Manager
+	Conn     *websocket.Conn
+	Rooms    map[string]*room
+	Operator operator
+	mu       sync.Mutex
 }
 
-func NewClient(conn *websocket.Conn, m *Manager) *client {
-	return &client{
-		id:       uuid.New(),
-		conn:     conn,
-		manager:  m,
-		operator: newOperator(),
+func NewClient(conn *websocket.Conn, m *Manager) (*client, error) {
+	id, err := uuid.NewRandom()
+	if err != nil {
+		return nil, err
 	}
+
+	c := &client{
+		ID:       id.String(),
+		Manager:  m,
+		Conn:     conn,
+		Rooms:    map[string]*room{},
+		Operator: newOperator(),
+	}
+
+	go c.Operator.run()
+
+	return c, nil
 }
 
 func (c *client) read() {
 	for {
-		log.Println("waiting for packet")
 		p := &packet{}
-		err := c.conn.ReadJSON(p)
+		err := c.Conn.ReadJSON(p)
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				log.Println("read error:", err)
@@ -41,53 +50,56 @@ func (c *client) read() {
 		}
 
 		log.Println("got packet:", p)
-		c.queueOp(func() error { return c.handlePacket(p) })
+		c.handlePacket(p)
 	}
 }
 
-func (c *client) handlePacket(p *packet) error {
-	switch p.Action {
-	case ActionNoAction:
-		return nil
-	case ActionJoinRoom:
-		err := c.joinRoom(p.RoomID)
-		if err != nil {
-			return err
+func (c *client) handlePacket(p *packet) {
+	c.Operator.queueOp(func() {
+		switch p.Action {
+		case ActionNoAction:
+			log.Println("no action:", p)
+		case ActionMessage:
+			c.Manager.broadcast(ActionNoAction, p, c.ID)
+		case ActionJoinRoom:
+			err := c.joinRoom(p.RoomID)
+			if err != nil {
+				log.Println("ActionJoinRoom:", err)
+			}
+		case ActionLeaveRoom:
+			err := c.leaveRoom(p.RoomID)
+			log.Println("ActionLeaveRoom:", err)
 		}
-	case ActionBroadCast:
-		r, ok := c.manager.rooms[p.RoomID]
-		if !ok {
-			return fmt.Errorf("%w: no room found with id %s", ErrInvalidUUID, p.RoomID)
-		}
-
-		return c.to(r).emit(ActionNoAction, p.Data)
-	}
-	return nil
+	})
 }
 
 func (c *client) sendPacket(p *packet) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	if err := c.conn.WriteJSON(p); err != nil {
+	if err := c.Conn.WriteJSON(p); err != nil {
 		return fmt.Errorf("write error: %w", err)
 	}
 	return nil
 }
 
-func (c *client) to(r *room) *broadCaster {
-	return &broadCaster{
-		room: r,
-		from: c.id,
+func (c *client) joinRoom(rID string) error {
+	r, err := c.Manager.getRoom(rID)
+	if err != nil {
+		return err
 	}
+
+	r.addClient(c.ID)
+
+	return nil
 }
 
-func (c *client) joinRoom(rID uuid.UUID) error {
-	r, ok := c.manager.rooms[rID]
+func (c *client) leaveRoom(rID string) error {
+	r, ok := c.Manager.Rooms[rID]
 	if !ok {
 		return fmt.Errorf("%w: no room found with id %s", ErrInvalidUUID, rID)
 	}
 
-	r.queueOp(func() error { return r.addClient(c) })
+	r.removeClient(c.ID)
 
 	return nil
 }

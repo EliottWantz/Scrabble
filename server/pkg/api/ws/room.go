@@ -1,49 +1,69 @@
 package ws
 
 import (
-	"fmt"
 	"log"
 
-	"scrabble/internal/uuid"
+	"github.com/google/uuid"
 )
 
 type room struct {
-	id      uuid.UUID
-	manager *Manager
-	clients map[uuid.UUID]*client
-	operator
+	ID       string
+	Manager  *Manager
+	Clients  map[string]*client
+	Operator operator
 }
 
-func NewRoom(m *Manager) *room {
+func NewRoom(m *Manager) (*room, error) {
+	id, err := uuid.NewRandom()
+	if err != nil {
+		return nil, err
+	}
+
 	r := &room{
-		id:       uuid.New(),
-		manager:  m,
-		clients:  make(map[uuid.UUID]*client),
-		operator: newOperator(),
+		ID:       id.String(),
+		Manager:  m,
+		Clients:  make(map[string]*client),
+		Operator: newOperator(),
 	}
 
-	go r.operator.run()
+	go r.Operator.run()
 
-	return r
+	return r, nil
 }
 
-func (r *room) addClient(c *client) error {
-	if _, ok := r.clients[c.id]; ok {
-		return fmt.Errorf("client %s already in romm %s", c.conn.RemoteAddr(), r.id)
-	}
-	r.clients[c.id] = c
-	log.Printf("client %s registered in room %s", c.conn.RemoteAddr(), r.id)
+func (r *room) addClient(cID string) {
+	r.Operator.queueOp(func() {
+		_, ok := r.Clients[cID]
+		if ok {
+			log.Printf("client %s already in room %s", cID, r.ID)
+			return
+		}
 
-	return nil
+		c, err := r.Manager.getClient(cID)
+		if err != nil {
+			log.Printf("addClient: %s", err)
+			return
+		}
+
+		r.Clients[cID] = c
+		c.Rooms[r.ID] = r
+		log.Printf("client %s registered in room %s", c.ID, r.ID)
+	})
 }
 
-func (r *room) removeClient(id uuid.UUID) error {
-	delete(r.clients, id)
-	log.Printf("client %s removed from room %s", id, r.id)
+func (r *room) removeClient(cID string) {
+	r.Operator.queueOp(func() {
+		c, ok := r.Clients[cID]
+		if !ok {
+			log.Printf("%s: client %s not in room, not removing", ErrInvalidUUID, c.ID)
+			return
+		}
 
-	if len(r.clients) == 0 {
-		r.manager.queueOp(func() error { return r.manager.deleteRoom(id) })
-	}
+		delete(r.Clients, c.ID)
+		log.Printf("client %s removed from room %s", c.ID, r.ID)
 
-	return nil
+		if len(r.Clients) == 0 {
+			r.Manager.removeRoom(r.ID)
+		}
+	})
 }
