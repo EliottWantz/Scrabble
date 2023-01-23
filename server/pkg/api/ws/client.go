@@ -3,19 +3,16 @@ package ws
 import (
 	"fmt"
 	"log"
-	"sync"
 
 	"github.com/gofiber/websocket/v2"
 	"github.com/google/uuid"
 )
 
 type client struct {
-	ID       string
-	Manager  *Manager
-	Conn     *websocket.Conn
-	Rooms    map[string]*room
-	Operator operator
-	mu       sync.Mutex
+	ID      string
+	Manager *Manager
+	Conn    *websocket.Conn
+	Rooms   map[string]*room
 }
 
 func NewClient(conn *websocket.Conn, m *Manager) (*client, error) {
@@ -25,14 +22,11 @@ func NewClient(conn *websocket.Conn, m *Manager) (*client, error) {
 	}
 
 	c := &client{
-		ID:       id.String(),
-		Manager:  m,
-		Conn:     conn,
-		Rooms:    map[string]*room{},
-		Operator: newOperator(),
+		ID:      id.String(),
+		Manager: m,
+		Conn:    conn,
+		Rooms:   make(map[string]*room),
 	}
-
-	go c.Operator.run()
 
 	return c, nil
 }
@@ -55,27 +49,23 @@ func (c *client) read() {
 }
 
 func (c *client) handlePacket(p *packet) {
-	c.Operator.queueOp(func() {
-		switch p.Action {
-		case ActionNoAction:
-			log.Println("no action:", p)
-		case ActionMessage:
-			c.Manager.broadcast(ActionNoAction, p, c.ID)
-		case ActionJoinRoom:
-			err := c.joinRoom(p.RoomID)
-			if err != nil {
-				log.Println("ActionJoinRoom:", err)
-			}
-		case ActionLeaveRoom:
-			err := c.leaveRoom(p.RoomID)
-			log.Println("ActionLeaveRoom:", err)
+	switch p.Action {
+	case ActionNoAction:
+		log.Println("no action:", p)
+	case ActionMessage:
+		c.Manager.broadcast(ActionNoAction, p, c.ID)
+	case ActionJoinRoom:
+		err := c.joinRoom(p.RoomID)
+		if err != nil {
+			log.Println("ActionJoinRoom:", err)
 		}
-	})
+	case ActionLeaveRoom:
+		err := c.leaveRoom(p.RoomID)
+		log.Println("ActionLeaveRoom:", err)
+	}
 }
 
 func (c *client) sendPacket(p *packet) error {
-	c.mu.Lock()
-	defer c.mu.Unlock()
 	if err := c.Conn.WriteJSON(p); err != nil {
 		return fmt.Errorf("write error: %w", err)
 	}

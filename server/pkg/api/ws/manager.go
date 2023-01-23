@@ -12,19 +12,15 @@ import (
 var ErrInvalidUUID = errors.New("uuid is invalid")
 
 type Manager struct {
-	Clients  map[string]*client
-	Rooms    map[string]*room
-	Operator operator
+	Clients map[string]*client
+	Rooms   map[string]*room
 }
 
 func NewManager() *Manager {
 	m := &Manager{
-		Clients:  make(map[string]*client),
-		Rooms:    make(map[string]*room),
-		Operator: newOperator(),
+		Clients: make(map[string]*client),
+		Rooms:   make(map[string]*room),
 	}
-
-	go m.Operator.run()
 
 	return m
 }
@@ -36,7 +32,7 @@ func (m *Manager) Accept() fiber.Handler {
 			return
 		}
 
-		defer m.removeClient(c.ID)
+		defer m.removeClient(c)
 
 		m.addClient(c)
 
@@ -64,84 +60,67 @@ func (m *Manager) addClient(c *client) {
 	if c == nil {
 		return
 	}
-	m.Operator.queueOp(func() {
-		r, err := NewRoom(m)
-		if err != nil {
-			log.Println(err)
-			return
-		}
+	r, err := NewRoom(m)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 
-		m.Rooms[r.ID] = r
+	m.Rooms[r.ID] = r
 
-		c.ID = r.ID
-		m.Clients[c.ID] = c
+	c.ID = r.ID
+	m.Clients[c.ID] = c
 
-		r.addClient(c.ID)
+	r.addClient(c.ID)
 
-		log.Printf("%s: client %s registered", c.Conn.RemoteAddr(), c.ID)
-	})
+	log.Printf("client %s registered", c.ID)
 }
 
-func (m *Manager) removeClient(cID string) {
-	m.Operator.queueOp(func() {
-		c, err := m.getClient(cID)
-		if err != nil {
-			log.Printf("removeClient: %s", err)
-			return
-		}
+func (m *Manager) removeClient(c *client) {
+	for _, r := range c.Rooms {
+		r.removeClient(c.ID)
+	}
 
-		for _, r := range c.Rooms {
-			r.removeClient(c.ID)
-		}
-
-		close(c.Operator.ops)
-		delete(m.Clients, c.ID)
-		log.Printf("client %s disconnected", c.ID)
-		c.Conn.Close()
-	})
+	delete(m.Clients, c.ID)
+	log.Printf("client %s disconnected", c.ID)
+	c.Conn.Close()
 }
 
 func (m *Manager) removeRoom(rID string) {
-	m.Operator.queueOp(func() {
-		r, err := m.getRoom(rID)
-		if err != nil {
-			log.Printf("removeRoom: %s", err)
-			return
-		}
+	r, err := m.getRoom(rID)
+	if err != nil {
+		log.Printf("removeRoom: %s", err)
+		return
+	}
 
-		close(r.Operator.ops)
-		delete(m.Rooms, r.ID)
-		log.Printf("room %s removed", r.ID)
-	})
+	delete(m.Rooms, r.ID)
+	log.Printf("room %s removed", r.ID)
 }
 
 func (m *Manager) broadcast(a Action, p *packet, senderID string) {
-	m.Operator.queueOp(func() {
-		r, err := m.getRoom(p.RoomID)
+	r, err := m.getRoom(p.RoomID)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	for _, client := range r.Clients {
+		// Don't send packet to the sender
+		if client.ID == senderID {
+			continue
+		}
+
+		err := client.sendPacket(p)
 		if err != nil {
 			log.Println(err)
 			return
 		}
-
-		for _, client := range r.Clients {
-			// Don't send packet to the sender
-			if client.ID == senderID {
-				continue
-			}
-
-			err := client.sendPacket(p)
-			if err != nil {
-				log.Println(err)
-				return
-			}
-		}
-	})
+	}
 }
 
 func (m *Manager) Shutdown() {
 	log.Println("Shutting down manager")
-	for cID := range m.Clients {
-		m.removeClient(cID)
+	for _, c := range m.Clients {
+		m.removeClient(c)
 	}
-	close(m.Operator.ops)
 }
