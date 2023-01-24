@@ -2,7 +2,9 @@ package ws
 
 import (
 	"fmt"
+	"io"
 	"log"
+	"net"
 
 	"github.com/gofiber/websocket/v2"
 	"github.com/google/uuid"
@@ -39,10 +41,22 @@ func (c *client) read() {
 		err := c.Conn.ReadJSON(p)
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				// log.Println("read error:", err)
-				c.logger.Println("read error:", err)
+				c.logger.Printf("websocket.UnexpectedCloseError: %T %+v", err, err)
 				return
 			}
+			if err == io.ErrUnexpectedEOF {
+				log.Printf("io.ErrUnexpectedEOF: %T %+v", err, err)
+				return
+			}
+			if err == net.ErrClosed {
+				log.Printf("net.ErrClosed: %T %+v", err, err)
+				return
+			}
+			if _, ok := err.(net.Error); ok {
+				log.Printf("net.Error: %T %+v", err, err)
+				return
+			}
+			log.Printf("Another error: %T %+v", err, err)
 			continue
 		}
 
