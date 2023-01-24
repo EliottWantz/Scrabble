@@ -43,7 +43,7 @@ func (r *room) addClient(cID string) error {
 	}
 
 	r.Clients.Store(cID, c)
-	// c.Rooms[r.ID] = r
+	c.Rooms.Store(r.ID, r)
 	r.logger.Printf("client %s added in room", c.ID)
 
 	return nil

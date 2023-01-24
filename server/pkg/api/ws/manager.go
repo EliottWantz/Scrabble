@@ -34,7 +34,10 @@ func (m *Manager) Accept() fiber.Handler {
 
 		defer m.removeClient(c)
 
-		m.addClient(c)
+		err = m.addClient(c)
+		if err != nil {
+			return
+		}
 
 		c.read() // Infinite for loop that reads incoming packets
 	})
@@ -74,13 +77,15 @@ func (m *Manager) addClient(c *client) error {
 	r.addClient(c.ID)
 
 	m.logger.Printf("client %s registered", c.ID)
+	m.logger.Printf("Room size: %d", m.Rooms.Size())
 	return nil
 }
 
 func (m *Manager) removeClient(c *client) error {
-	for _, r := range c.Rooms {
+	c.Rooms.Range(func(rID string, r *room) bool {
 		r.removeClient(c.ID)
-	}
+		return true
+	})
 
 	m.Clients.Delete(c.ID)
 	err := c.Conn.Close()
@@ -89,6 +94,7 @@ func (m *Manager) removeClient(c *client) error {
 	}
 
 	m.logger.Printf("client %s removed", c.ID)
+	m.logger.Printf("Room size: %d", m.Rooms.Size())
 	return nil
 }
 
@@ -118,7 +124,7 @@ func (m *Manager) broadcast(a Action, p *Packet, senderID string) error {
 
 		err := c.sendPacket(p)
 		if err != nil {
-			c.logger.Printf("broadcast: %s", err)
+			log.Printf("broadcast: %s", err)
 		}
 
 		return true

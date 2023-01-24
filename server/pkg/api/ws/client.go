@@ -9,14 +9,14 @@ import (
 
 	"github.com/gofiber/websocket/v2"
 	"github.com/google/uuid"
+	"github.com/puzpuzpuz/xsync/v2"
 )
 
 type client struct {
 	ID      string
 	Manager *Manager
 	Conn    *websocket.Conn
-	Rooms   map[string]*room
-	logger  *log.Logger
+	Rooms   *xsync.MapOf[string, *room]
 }
 
 func NewClient(conn *websocket.Conn, m *Manager) (*client, error) {
@@ -29,9 +29,8 @@ func NewClient(conn *websocket.Conn, m *Manager) (*client, error) {
 		ID:      id.String(),
 		Manager: m,
 		Conn:    conn,
-		Rooms:   make(map[string]*room),
+		Rooms:   xsync.NewMapOf[*room](),
 	}
-	c.logger = log.New(log.Writer(), "[Client "+c.ID+"] ", log.LstdFlags)
 
 	return c, nil
 }
@@ -43,22 +42,22 @@ func (c *client) read() {
 		if err != nil {
 			var syntaxError *json.SyntaxError
 			if errors.As(err, &syntaxError) {
-				c.logger.Printf("websocket.UnexpectedCloseError: %T %+v", err, err)
+				log.Printf("websocket.UnexpectedCloseError: %T %+v", err, err)
 				continue
 			}
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				c.logger.Printf("websocket.UnexpectedCloseError: %T %+v", err, err)
+				log.Printf("websocket.UnexpectedCloseError: %T %+v", err, err)
 				return
 			}
 			if _, ok := err.(net.Error); ok {
-				c.logger.Printf("net.Error: %T %+v", err, err)
+				log.Printf("net.Error: %T %+v", err, err)
 				return
 			}
-			c.logger.Printf("Another error: %T %+v", err, err)
+			log.Printf("Another error: %T %+v", err, err)
 			return
 		}
 
-		c.logger.Println("got packet:", p)
+		log.Println("got packet:", p)
 		c.handlePacket(p)
 	}
 }
@@ -66,17 +65,17 @@ func (c *client) read() {
 func (c *client) handlePacket(p *Packet) error {
 	switch p.Action {
 	case ActionNoAction:
-		c.logger.Println("no action:", p)
+		log.Println("no action:", p)
 	case ActionMessage:
 		c.Manager.broadcast(ActionNoAction, p, c.ID)
 	case ActionJoinRoom:
 		err := c.joinRoom(p.RoomID)
 		if err != nil {
-			return fmt.Errorf("%s ActionJoinRoom: %w", c.logger.Prefix(), err)
+			return fmt.Errorf("%s ActionJoinRoom: %w", log.Prefix(), err)
 		}
 	case ActionLeaveRoom:
 		if err := c.leaveRoom(p.RoomID); err != nil {
-			return fmt.Errorf("%s ActionLeaveRoom: %w", c.logger.Prefix(), err)
+			return fmt.Errorf("%s ActionLeaveRoom: %w", log.Prefix(), err)
 		}
 	}
 
@@ -85,7 +84,7 @@ func (c *client) handlePacket(p *Packet) error {
 
 func (c *client) sendPacket(p *Packet) error {
 	if err := c.Conn.WriteJSON(p); err != nil {
-		return fmt.Errorf("%s - sendPacket: %w", c.logger.Prefix(), err)
+		return fmt.Errorf("%s - sendPacket: %w", log.Prefix(), err)
 	}
 	return nil
 }
@@ -93,7 +92,7 @@ func (c *client) sendPacket(p *Packet) error {
 func (c *client) joinRoom(rID string) error {
 	r, err := c.Manager.getRoom(rID)
 	if err != nil {
-		return fmt.Errorf("%s joinRoom: %w", c.logger.Prefix(), err)
+		return fmt.Errorf("%s joinRoom: %w", log.Prefix(), err)
 	}
 
 	r.addClient(c.ID)
@@ -104,11 +103,11 @@ func (c *client) joinRoom(rID string) error {
 func (c *client) leaveRoom(rID string) error {
 	r, err := c.Manager.getRoom(rID)
 	if err != nil {
-		return fmt.Errorf("%s leaveRoom: %w", c.logger.Prefix(), err)
+		return fmt.Errorf("%s leaveRoom: %w", log.Prefix(), err)
 	}
 
 	if err = r.removeClient(c.ID); err != nil {
-		return fmt.Errorf("%s leaveRoom: %w", c.logger.Prefix(), err)
+		return fmt.Errorf("%s leaveRoom: %w", log.Prefix(), err)
 	}
 
 	return nil
