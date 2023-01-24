@@ -9,7 +9,7 @@ const (
 	ActionLeaveRoom
 )
 
-type packet struct {
+type Packet struct {
 	Action Action `json:"action,omitempty"`
 	RoomID string `json:"roomId,omitempty"`
 	Data   any    `json:"data,omitempty"`

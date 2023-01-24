@@ -13,6 +13,7 @@ type client struct {
 	Manager *Manager
 	Conn    *websocket.Conn
 	Rooms   map[string]*room
+	logger  *log.Logger
 }
 
 func NewClient(conn *websocket.Conn, m *Manager) (*client, error) {
@@ -27,47 +28,52 @@ func NewClient(conn *websocket.Conn, m *Manager) (*client, error) {
 		Conn:    conn,
 		Rooms:   make(map[string]*room),
 	}
+	c.logger = log.New(log.Writer(), "[Client "+c.ID+"] ", log.LstdFlags)
 
 	return c, nil
 }
 
 func (c *client) read() {
 	for {
-		p := &packet{}
+		p := &Packet{}
 		err := c.Conn.ReadJSON(p)
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Println("read error:", err)
+				// log.Println("read error:", err)
+				c.logger.Println("read error:", err)
 				return
 			}
 			continue
 		}
 
-		log.Println("got packet:", p)
+		c.logger.Println("got packet:", p)
 		c.handlePacket(p)
 	}
 }
 
-func (c *client) handlePacket(p *packet) {
+func (c *client) handlePacket(p *Packet) error {
 	switch p.Action {
 	case ActionNoAction:
-		log.Println("no action:", p)
+		c.logger.Println("no action:", p)
 	case ActionMessage:
 		c.Manager.broadcast(ActionNoAction, p, c.ID)
 	case ActionJoinRoom:
 		err := c.joinRoom(p.RoomID)
 		if err != nil {
-			log.Println("ActionJoinRoom:", err)
+			return fmt.Errorf("%s ActionJoinRoom: %w", c.logger.Prefix(), err)
 		}
 	case ActionLeaveRoom:
-		err := c.leaveRoom(p.RoomID)
-		log.Println("ActionLeaveRoom:", err)
+		if err := c.leaveRoom(p.RoomID); err != nil {
+			return fmt.Errorf("%s ActionLeaveRoom: %w", c.logger.Prefix(), err)
+		}
 	}
+
+	return nil
 }
 
-func (c *client) sendPacket(p *packet) error {
+func (c *client) sendPacket(p *Packet) error {
 	if err := c.Conn.WriteJSON(p); err != nil {
-		return fmt.Errorf("write error: %w", err)
+		return fmt.Errorf("%s - sendPacket: %w", c.logger.Prefix(), err)
 	}
 	return nil
 }
@@ -75,7 +81,7 @@ func (c *client) sendPacket(p *packet) error {
 func (c *client) joinRoom(rID string) error {
 	r, err := c.Manager.getRoom(rID)
 	if err != nil {
-		return err
+		return fmt.Errorf("%s joinRoom: %w", c.logger.Prefix(), err)
 	}
 
 	r.addClient(c.ID)
@@ -84,12 +90,14 @@ func (c *client) joinRoom(rID string) error {
 }
 
 func (c *client) leaveRoom(rID string) error {
-	r, ok := c.Manager.Rooms[rID]
-	if !ok {
-		return fmt.Errorf("%w: no room found with id %s", ErrInvalidUUID, rID)
+	r, err := c.Manager.getRoom(rID)
+	if err != nil {
+		return fmt.Errorf("%s leaveRoom: %w", c.logger.Prefix(), err)
 	}
 
-	r.removeClient(c.ID)
+	if err = r.removeClient(c.ID); err != nil {
+		return fmt.Errorf("%s leaveRoom: %w", c.logger.Prefix(), err)
+	}
 
 	return nil
 }

@@ -1,34 +1,34 @@
 package ws
 
-import (
-	"errors"
-)
+// import (
+// 	"errors"
+// )
 
-var ErrRoomNotRegistered = errors.New("room is not registered")
+// var ErrRoomNotRegistered = errors.New("room is not registered")
 
-type broadCaster struct {
-	room *room
-	from string
-}
+// type broadCaster struct {
+// 	room *room
+// 	from string
+// }
 
-func (bc *broadCaster) emit(a Action, msg any) error {
-	if bc.room == nil {
-		return ErrRoomNotRegistered
-	}
+// func (bc *broadCaster) emit(a Action, msg any) error {
+// 	if bc.room == nil {
+// 		return ErrRoomNotRegistered
+// 	}
 
-	p := &packet{
-		Action: a,
-		RoomID: bc.room.ID,
-		Data:   msg,
-	}
+// 	p := &packet{
+// 		Action: a,
+// 		RoomID: bc.room.ID,
+// 		Data:   msg,
+// 	}
 
-	for _, c := range bc.room.Clients {
-		if c.ID == bc.from {
-			continue
-		}
+// 	for _, c := range bc.room.Clients {
+// 		if c.ID == bc.from {
+// 			continue
+// 		}
 
-		c.sendPacket(p)
-	}
+// 		c.sendPacket(p)
+// 	}
 
-	return nil
-}
+// 	return nil
+// }

@@ -1,25 +1,25 @@
 package ws
 
 import (
-	"errors"
 	"fmt"
 	"log"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
+	"github.com/puzpuzpuz/xsync/v2"
 )
 
-var ErrInvalidUUID = errors.New("uuid is invalid")
-
 type Manager struct {
-	Clients map[string]*client
-	Rooms   map[string]*room
+	Clients *xsync.MapOf[string, *client]
+	Rooms   *xsync.MapOf[string, *room]
+	logger  *log.Logger
 }
 
 func NewManager() *Manager {
 	m := &Manager{
-		Clients: make(map[string]*client),
-		Rooms:   make(map[string]*room),
+		Clients: xsync.NewMapOf[*client](),
+		Rooms:   xsync.NewMapOf[*room](),
+		logger:  log.New(log.Writer(), "[Manager] ", log.LstdFlags),
 	}
 
 	return m
@@ -41,86 +41,96 @@ func (m *Manager) Accept() fiber.Handler {
 }
 
 func (m *Manager) getClient(cID string) (*client, error) {
-	c, ok := m.Clients[cID]
+	c, ok := m.Clients.Load(cID)
 	if !ok {
-		return c, fmt.Errorf("%s: client %s not registered", ErrInvalidUUID, cID)
+		return nil, fmt.Errorf("%s - getClient: client with id %s not registered", m.logger.Prefix(), cID)
 	}
 	return c, nil
 }
 
 func (m *Manager) getRoom(rID string) (*room, error) {
-	r, ok := m.Rooms[rID]
+	r, ok := m.Rooms.Load(rID)
 	if !ok {
-		return r, fmt.Errorf("%s: room %s doesn't exist", ErrInvalidUUID, rID)
+		return nil, fmt.Errorf("%s - getRoom: room with id %s not registered", m.logger.Prefix(), rID)
 	}
 	return r, nil
 }
 
-func (m *Manager) addClient(c *client) {
+func (m *Manager) addClient(c *client) error {
 	if c == nil {
-		return
+		return fmt.Errorf("%s - addClient: client is nil", m.logger.Prefix())
 	}
+
 	r, err := NewRoom(m)
 	if err != nil {
-		log.Println(err)
-		return
+		return fmt.Errorf("%s - addClient: %w", m.logger.Prefix(), err)
 	}
 
-	m.Rooms[r.ID] = r
-
+	// Client should have that same ID as the default room he is in
 	c.ID = r.ID
-	m.Clients[c.ID] = c
+	m.Rooms.Store(r.ID, r)
+	m.Clients.Store(c.ID, c)
 
 	r.addClient(c.ID)
 
-	log.Printf("client %s registered", c.ID)
+	m.logger.Printf("client %s registered", c.ID)
+	return nil
 }
 
-func (m *Manager) removeClient(c *client) {
+func (m *Manager) removeClient(c *client) error {
 	for _, r := range c.Rooms {
 		r.removeClient(c.ID)
 	}
 
-	delete(m.Clients, c.ID)
-	log.Printf("client %s disconnected", c.ID)
-	c.Conn.Close()
+	m.Clients.Delete(c.ID)
+	err := c.Conn.Close()
+	if err != nil {
+		return fmt.Errorf("%s - removeClient: %w", m.logger.Prefix(), err)
+	}
+
+	m.logger.Printf("client %s removed", c.ID)
+	return nil
 }
 
-func (m *Manager) removeRoom(rID string) {
+func (m *Manager) removeRoom(rID string) error {
 	r, err := m.getRoom(rID)
 	if err != nil {
-		log.Printf("removeRoom: %s", err)
-		return
+		return fmt.Errorf("%s - removeRoom: %w", m.logger.Prefix(), err)
 	}
 
-	delete(m.Rooms, r.ID)
-	log.Printf("room %s removed", r.ID)
+	m.Rooms.Delete(r.ID)
+	m.logger.Printf("room %s removed", r.ID)
+
+	return nil
 }
 
-func (m *Manager) broadcast(a Action, p *packet, senderID string) {
+func (m *Manager) broadcast(a Action, p *Packet, senderID string) error {
 	r, err := m.getRoom(p.RoomID)
 	if err != nil {
-		log.Println(err)
-		return
+		return fmt.Errorf("%s - broadcast: %w", m.logger.Prefix(), err)
 	}
 
-	for _, client := range r.Clients {
+	r.Clients.Range(func(cID string, c *client) bool {
 		// Don't send packet to the sender
-		if client.ID == senderID {
-			continue
+		if cID == senderID {
+			return true
 		}
 
-		err := client.sendPacket(p)
+		err := c.sendPacket(p)
 		if err != nil {
-			log.Println(err)
-			return
+			c.logger.Printf("broadcast: %s", err)
 		}
-	}
+
+		return true
+	})
+
+	return nil
 }
 
 func (m *Manager) Shutdown() {
-	log.Println("Shutting down manager")
-	for _, c := range m.Clients {
+	m.logger.Println("Shutting down manager")
+	m.Clients.Range(func(cID string, c *client) bool {
 		m.removeClient(c)
-	}
+		return true
+	})
 }
