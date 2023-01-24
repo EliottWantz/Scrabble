@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"os"
 
 	"scrabble/pkg/api"
 )
@@ -15,7 +16,13 @@ func main() {
 
 	server := api.NewServer()
 
-	err := server.App.Listen(fmt.Sprintf("127.0.0.1:%s", *port))
+	var err error
+	envPort := os.Getenv("PORT")
+	if envPort != "" {
+		err = server.App.Listen(fmt.Sprintf(":%s", envPort))
+	} else {
+		err = server.App.Listen(fmt.Sprintf("127.0.0.1:%s", *port))
+	}
 	if err != nil {
 		log.Println(err)
 		server.WebSocketManager.Shutdown()
