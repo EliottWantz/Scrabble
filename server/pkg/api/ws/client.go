@@ -1,8 +1,9 @@
 package ws
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
-	"io"
 	"log"
 	"net"
 
@@ -40,24 +41,21 @@ func (c *client) read() {
 		p := &Packet{}
 		err := c.Conn.ReadJSON(p)
 		if err != nil {
+			var syntaxError *json.SyntaxError
+			if errors.As(err, &syntaxError) {
+				c.logger.Printf("websocket.UnexpectedCloseError: %T %+v", err, err)
+				continue
+			}
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				c.logger.Printf("websocket.UnexpectedCloseError: %T %+v", err, err)
 				return
 			}
-			if err == io.ErrUnexpectedEOF {
-				log.Printf("io.ErrUnexpectedEOF: %T %+v", err, err)
-				return
-			}
-			if err == net.ErrClosed {
-				log.Printf("net.ErrClosed: %T %+v", err, err)
-				return
-			}
 			if _, ok := err.(net.Error); ok {
-				log.Printf("net.Error: %T %+v", err, err)
+				c.logger.Printf("net.Error: %T %+v", err, err)
 				return
 			}
-			log.Printf("Another error: %T %+v", err, err)
-			continue
+			c.logger.Printf("Another error: %T %+v", err, err)
+			return
 		}
 
 		c.logger.Println("got packet:", p)
