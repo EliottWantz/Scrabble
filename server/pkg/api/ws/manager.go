@@ -10,10 +10,9 @@ import (
 )
 
 type Manager struct {
-	Clients     *xsync.MapOf[string, *client]
-	Rooms       *xsync.MapOf[string, *room]
-	logger      *log.Logger
-	defaultRoom *room
+	Clients *xsync.MapOf[string, *client]
+	Rooms   *xsync.MapOf[string, *room]
+	logger  *log.Logger
 }
 
 func NewManager() *Manager {
@@ -22,8 +21,6 @@ func NewManager() *Manager {
 		Rooms:   xsync.NewMapOf[*room](),
 		logger:  log.New(log.Writer(), "[Manager] ", log.LstdFlags),
 	}
-	defRoom, _ := NewRoom(m)
-	m.defaultRoom = defRoom
 
 	return m
 }
@@ -38,7 +35,6 @@ func (m *Manager) Accept() fiber.Handler {
 		defer m.removeClient(c)
 
 		m.addClient(c)
-		m.defaultRoom.addClient(c.ID)
 
 		c.read() // Infinite for loop that reads incoming packets
 	})
@@ -77,7 +73,7 @@ func (m *Manager) addClient(c *client) error {
 
 	r.addClient(c.ID)
 
-	// m.logger.Printf("client %s registered", c.ID)
+	m.logger.Printf("client %s registered", c.ID)
 	return nil
 }
 
