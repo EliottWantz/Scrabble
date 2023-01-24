@@ -6,12 +6,14 @@ require (
 	github.com/gofiber/fiber/v2 v2.41.0
 	github.com/gofiber/websocket/v2 v2.1.2
 	github.com/google/uuid v1.3.0
+	github.com/puzpuzpuz/xsync/v2 v2.4.0
 	golang.org/x/exp v0.0.0-20230105202349-8879d0199aa3
 )
 
 require (
 	github.com/andybalholm/brotli v1.0.4 // indirect
 	github.com/fasthttp/websocket v1.5.0 // indirect
+	github.com/gorilla/websocket v1.5.0
 	github.com/klauspost/compress v1.15.14 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.17 // indirect
