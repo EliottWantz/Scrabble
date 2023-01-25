@@ -32,9 +32,9 @@ func NewRoom(m *Manager) (*room, error) {
 }
 
 func (r *room) addClient(cID string) error {
-	_, ok := r.Clients.Load(cID)
-	if ok {
-		return fmt.Errorf("%s - addClient: client %s already in room", r.logger.Prefix(), cID)
+	c, _ := r.getClient(cID)
+	if c != nil {
+		return fmt.Errorf("addClient: client %s already in room", cID)
 	}
 
 	c, err := r.Manager.getClient(cID)
@@ -50,9 +50,9 @@ func (r *room) addClient(cID string) error {
 }
 
 func (r *room) removeClient(cID string) error {
-	c, ok := r.Clients.Load(cID)
-	if !ok {
-		return fmt.Errorf("%s - removeClient: client %s not in room", r.logger.Prefix(), cID)
+	c, err := r.getClient(cID)
+	if err != nil {
+		return fmt.Errorf("%s - removeClient: %w", r.logger.Prefix(), err)
 	}
 
 	r.Clients.Delete(cID)
@@ -64,4 +64,13 @@ func (r *room) removeClient(cID string) error {
 	}
 
 	return nil
+}
+
+func (r *room) getClient(cID string) (*client, error) {
+	c, ok := r.Clients.Load(cID)
+	if !ok {
+		return nil, fmt.Errorf("%s - getClient: client %s not in room", r.logger.Prefix(), cID)
+	}
+
+	return c, nil
 }
