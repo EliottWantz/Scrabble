@@ -69,7 +69,7 @@ func (c *client) handlePacket(p *Packet) error {
 	case ActionNoAction:
 		log.Println("no action:", p)
 	case ActionMessage:
-		if err := c.Manager.broadcast(ActionNoAction, p, c.ID); err != nil {
+		if err := c.Manager.broadcast(p, c.ID); err != nil {
 			return fmt.Errorf("%s ActionMessage: %w", log.Prefix(), err)
 		}
 	case ActionJoinRoom:

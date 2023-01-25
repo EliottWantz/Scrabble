@@ -74,3 +74,21 @@ func (r *room) getClient(cID string) (*client, error) {
 
 	return c, nil
 }
+
+func (r *room) broadcast(p *Packet, senderID string) error {
+	r.Clients.ForEach(func(cID string, c *client) bool {
+		// Don't send packet to the sender
+		if cID == senderID {
+			return true
+		}
+
+		err := c.sendPacket(p)
+		if err != nil {
+			log.Printf("broadcast: %s", err)
+		}
+
+		return true
+	})
+
+	return nil
+}

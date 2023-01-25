@@ -116,25 +116,13 @@ func (m *Manager) removeRoom(rID string) error {
 	return nil
 }
 
-func (m *Manager) broadcast(a Action, p *Packet, senderID string) error {
+func (m *Manager) broadcast(p *Packet, senderID string) error {
 	r, err := m.getRoom(p.RoomID)
 	if err != nil {
 		return fmt.Errorf("%s - broadcast: %w", m.logger.Prefix(), err)
 	}
 
-	r.Clients.ForEach(func(cID string, c *client) bool {
-		// Don't send packet to the sender
-		if cID == senderID {
-			return true
-		}
-
-		err := c.sendPacket(p)
-		if err != nil {
-			log.Printf("broadcast: %s", err)
-		}
-
-		return true
-	})
+	r.broadcast(p, senderID)
 
 	return nil
 }
