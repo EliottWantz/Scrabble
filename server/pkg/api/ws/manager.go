@@ -32,7 +32,11 @@ func (m *Manager) Accept() fiber.Handler {
 			return
 		}
 
-		defer m.removeClient(c)
+		defer func() {
+			if err := m.removeClient(c); err != nil {
+				m.logger.Println(err)
+			}
+		}()
 
 		err = m.addClient(c)
 		if err != nil {
@@ -74,7 +78,9 @@ func (m *Manager) addClient(c *client) error {
 	m.Rooms.Store(r.ID, r)
 	m.Clients.Store(c.ID, c)
 
-	r.addClient(c.ID)
+	if err := r.addClient(c.ID); err != nil {
+		return fmt.Errorf("%s - addClient: %w", m.logger.Prefix(), err)
+	}
 
 	m.logger.Printf("client %s registered", c.ID)
 	m.logger.Printf("Room size: %d", m.Rooms.Size())
@@ -83,7 +89,7 @@ func (m *Manager) addClient(c *client) error {
 
 func (m *Manager) removeClient(c *client) error {
 	c.Rooms.Range(func(rID string, r *room) bool {
-		r.removeClient(c.ID)
+		_ = r.removeClient(c.ID)
 		return true
 	})
 
@@ -136,7 +142,7 @@ func (m *Manager) broadcast(a Action, p *Packet, senderID string) error {
 func (m *Manager) Shutdown() {
 	m.logger.Println("Shutting down manager")
 	m.Clients.Range(func(cID string, c *client) bool {
-		m.removeClient(c)
+		_ = m.removeClient(c)
 		return true
 	})
 }

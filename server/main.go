@@ -26,6 +26,9 @@ func main() {
 	if err != nil {
 		log.Println(err)
 		server.WebSocketManager.Shutdown()
-		server.App.Shutdown()
+		err = server.App.Shutdown()
+		if err != nil {
+			log.Println(err)
+		}
 	}
 }

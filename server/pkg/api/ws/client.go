@@ -58,7 +58,9 @@ func (c *client) read() {
 		}
 
 		log.Println("got packet:", p)
-		c.handlePacket(p)
+		if err := c.handlePacket(p); err != nil {
+			log.Printf("handlePacket: %T %+v", err, err)
+		}
 	}
 }
 
@@ -67,10 +69,11 @@ func (c *client) handlePacket(p *Packet) error {
 	case ActionNoAction:
 		log.Println("no action:", p)
 	case ActionMessage:
-		c.Manager.broadcast(ActionNoAction, p, c.ID)
+		if err := c.Manager.broadcast(ActionNoAction, p, c.ID); err != nil {
+			return fmt.Errorf("%s ActionMessage: %w", log.Prefix(), err)
+		}
 	case ActionJoinRoom:
-		err := c.joinRoom(p.RoomID)
-		if err != nil {
+		if err := c.joinRoom(p.RoomID); err != nil {
 			return fmt.Errorf("%s ActionJoinRoom: %w", log.Prefix(), err)
 		}
 	case ActionLeaveRoom:
@@ -95,7 +98,9 @@ func (c *client) joinRoom(rID string) error {
 		return fmt.Errorf("%s joinRoom: %w", log.Prefix(), err)
 	}
 
-	r.addClient(c.ID)
+	if err := r.addClient(c.ID); err != nil {
+		return fmt.Errorf("%s joinRoom: %w", log.Prefix(), err)
+	}
 
 	return nil
 }
