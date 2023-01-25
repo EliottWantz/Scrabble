@@ -122,6 +122,10 @@ func (m *Manager) broadcast(p *Packet, senderID string) error {
 		return fmt.Errorf("%s - broadcast: %w", m.logger.Prefix(), err)
 	}
 
+	if !r.has(senderID) {
+		return fmt.Errorf("%s - broadcast: sender %s not in room %s", m.logger.Prefix(), senderID, p.RoomID)
+	}
+
 	r.broadcast(p, senderID)
 
 	return nil

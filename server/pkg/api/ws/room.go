@@ -92,3 +92,8 @@ func (r *room) broadcast(p *Packet, senderID string) error {
 
 	return nil
 }
+
+func (r *room) has(cID string) bool {
+	_, err := r.getClient(cID)
+	return err == nil
+}
