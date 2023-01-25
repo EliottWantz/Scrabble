@@ -9,20 +9,17 @@ import (
 	"scrabble/pkg/api"
 )
 
-var port = flag.String("Port", "3000", "The port to listen on")
-
 func main() {
 	flag.Parse()
 
 	server := api.NewServer()
 
-	var err error
 	envPort := os.Getenv("PORT")
-	if envPort != "" {
-		err = server.App.Listen(fmt.Sprintf(":%s", envPort))
-	} else {
-		err = server.App.Listen(fmt.Sprintf("127.0.0.1:%s", *port))
+	if envPort == "" {
+		envPort = "3000"
 	}
+	fmt.Println("Listening on", "addr := 0.0.0.0:", envPort)
+	err := server.App.Listen(fmt.Sprintf("0.0.0.0:%s", envPort))
 	if err != nil {
 		log.Println(err)
 		server.WebSocketManager.Shutdown()
