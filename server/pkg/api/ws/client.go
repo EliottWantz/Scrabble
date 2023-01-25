@@ -7,16 +7,16 @@ import (
 	"log"
 	"net"
 
+	"github.com/alphadose/haxmap"
 	"github.com/gofiber/websocket/v2"
 	"github.com/google/uuid"
-	"github.com/puzpuzpuz/xsync/v2"
 )
 
 type client struct {
 	ID      string
 	Manager *Manager
 	Conn    *websocket.Conn
-	Rooms   *xsync.MapOf[string, *room]
+	Rooms   *haxmap.Map[string, *room]
 }
 
 func NewClient(conn *websocket.Conn, m *Manager) (*client, error) {
@@ -29,7 +29,7 @@ func NewClient(conn *websocket.Conn, m *Manager) (*client, error) {
 		ID:      id.String(),
 		Manager: m,
 		Conn:    conn,
-		Rooms:   xsync.NewMapOf[*room](),
+		Rooms:   haxmap.New[string, *room](),
 	}
 
 	return c, nil

@@ -3,10 +3,10 @@ module scrabble
 go 1.19
 
 require (
+	github.com/alphadose/haxmap v1.2.0
 	github.com/gofiber/fiber/v2 v2.41.0
 	github.com/gofiber/websocket/v2 v2.1.2
 	github.com/google/uuid v1.3.0
-	github.com/puzpuzpuz/xsync/v2 v2.4.0
 	golang.org/x/exp v0.0.0-20230105202349-8879d0199aa3
 )
 
