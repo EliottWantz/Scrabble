@@ -1,53 +1,49 @@
 package api
 
 import (
-	"flag"
 	"time"
 
-	"scrabble/pkg/api/handlers"
+	"scrabble/config"
+	"scrabble/pkg/api/account"
+	"scrabble/pkg/api/game"
+	"scrabble/pkg/api/storage"
 	"scrabble/pkg/api/ws"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/gofiber/fiber/v2/middleware/limiter"
-	"github.com/gofiber/fiber/v2/middleware/logger"
-	"github.com/gofiber/fiber/v2/middleware/monitor"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-var prefork = flag.Bool("Prefork", false, "Fiber prefork (multiple threads)")
+var CONNECTION_TIMEOUT = 10 * time.Second
 
 type Server struct {
 	WebSocketManager *ws.Manager
 	App              *fiber.App
-	GameHandler      *handlers.GameHandler
-	AccountHandler   *handlers.AccountHandler
+	GameCtrl         *game.Controller
+	AccountCtrl      *account.Controller
 	DB               *mongo.Database
 }
 
-func NewServer() *Server {
-	config := fiber.Config{
-		Prefork: *prefork,
+func NewServer(cfg config.Config) (*Server, error) {
+	db, err := storage.OpenDB(cfg.MONGODB_URI, cfg.MONGODB_NAME, CONNECTION_TIMEOUT)
+	if err != nil {
+		return nil, err
 	}
 
 	s := &Server{
 		WebSocketManager: ws.NewManager(),
-		App:              fiber.New(config),
-		GameHandler:      &handlers.GameHandler{},
-		AccountHandler:   &handlers.AccountHandler{},
+		App:              fiber.New(),
+		GameCtrl:         game.NewController(db.Collection("games")),
+		AccountCtrl:      account.NewController(db.Collection("users")),
+		DB:               db,
 	}
 
 	s.setupMiddleware()
 	s.setupRoutes()
 
-	return s
+	return s, nil
 }
 
-func (s *Server) setupMiddleware() {
-	s.App.Use(cors.New())
-	s.App.Use(limiter.New(limiter.Config{Max: 500, Expiration: 30 * time.Second}))
-	s.App.Use(logger.New(logger.Config{
-		Format: "[${ip}]:${port} ${status} - ${method} ${path}\n",
-	}))
-	s.App.Get("/metrics", monitor.New(monitor.Config{Title: "Scrabble Server Metrics"}))
+func (s *Server) GracefulShutdown() {
+	_ = storage.CloseDB(s.DB)
+	_ = s.App.Shutdown()
 }

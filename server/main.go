@@ -1,31 +1,50 @@
 package main
 
 import (
-	"flag"
 	"fmt"
-	"log"
 	"os"
+	"os/signal"
+	"syscall"
 
+	"scrabble/config"
 	"scrabble/pkg/api"
 )
 
 func main() {
-	flag.Parse()
-
-	server := api.NewServer()
-
-	envPort := os.Getenv("PORT")
-	if envPort == "" {
-		envPort = "3000"
-	}
-	fmt.Println("Listening on", "addr := 0.0.0.0:", envPort)
-	err := server.App.Listen(fmt.Sprintf("0.0.0.0:%s", envPort))
+	err := run()
 	if err != nil {
-		log.Println(err)
-		server.WebSocketManager.Shutdown()
-		err = server.App.Shutdown()
-		if err != nil {
-			log.Println(err)
-		}
+		fmt.Printf("error: %v\n", err)
+		os.Exit(1)
 	}
+}
+
+func run() error {
+	// load config
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		return err
+	}
+
+	server, err := api.NewServer(cfg)
+	if err != nil {
+		return err
+	}
+
+	go GracefulShutdown(server.GracefulShutdown)
+
+	err = server.App.Listen("0.0.0.0:" + cfg.PORT)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func GracefulShutdown(cleanup func()) {
+	quit := make(chan os.Signal, 1)
+	defer close(quit)
+
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	cleanup()
 }

@@ -1,21 +1,20 @@
-package services
+package game
 
 import (
 	"flag"
 	"fmt"
 	"time"
 
-	"scrabble/pkg/api/repository"
 	"scrabble/pkg/scrabble"
 )
 
 var numGames = flag.Int("n", 1, "Number of games to simulate")
 
-type GameService struct {
-	Repo *repository.GameRepository
+type Service struct {
+	repo *Repository
 }
 
-func (gs *GameService) StartGame() {
+func (gs *Service) StartGame() {
 	start := time.Now()
 	flag.Parse()
 
@@ -45,7 +44,7 @@ func (gs *GameService) StartGame() {
 	fmt.Println("Took", elapsed)
 }
 
-func (gs *GameService) simulateGame(tileSet *scrabble.TileSet, dawg *scrabble.DAWG) (scoreA, scoreB int) {
+func (gs *Service) simulateGame(tileSet *scrabble.TileSet, dawg *scrabble.DAWG) (scoreA, scoreB int) {
 	g := scrabble.NewGame(tileSet, dawg)
 
 	highScoreEngine := scrabble.NewEngine(&scrabble.HighScore{})
