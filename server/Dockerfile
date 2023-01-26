@@ -8,12 +8,10 @@ RUN go mod download
 COPY . .
 
 ENV CGO_ENABLED=0 GOOS=linux GOARCH=amd64
-RUN go build -ldflags '-s -w' -o bin/out
+RUN go build -ldflags '-s -w' -o out
 
 FROM scratch
 
-COPY --from=builder ["/build/bin/out", "/bin/out"]
+COPY --from=builder ["/build/out", "/out"]
 
-ENV GO_ENV=production
-
-CMD ["/bin/out"]
+CMD ["/out"]
