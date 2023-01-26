@@ -12,6 +12,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/monitor"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var prefork = flag.Bool("Prefork", false, "Fiber prefork (multiple threads)")
@@ -21,6 +22,7 @@ type Server struct {
 	App              *fiber.App
 	GameHandler      *handlers.GameHandler
 	AccountHandler   *handlers.AccountHandler
+	DB               *mongo.Database
 }
 
 func NewServer() *Server {
