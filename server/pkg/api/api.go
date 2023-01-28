@@ -1,6 +1,7 @@
 package api
 
 import (
+	"log"
 	"time"
 
 	"scrabble/config"
@@ -15,7 +16,7 @@ import (
 
 var CONNECTION_TIMEOUT = 10 * time.Second
 
-type Server struct {
+type API struct {
 	WebSocketManager *ws.Manager
 	App              *fiber.App
 	GameCtrl         *game.Controller
@@ -23,13 +24,13 @@ type Server struct {
 	DB               *mongo.Database
 }
 
-func NewServer(cfg config.Config) (*Server, error) {
+func New(cfg config.Config) (*API, error) {
 	db, err := storage.OpenDB(cfg.MONGODB_URI, cfg.MONGODB_NAME, CONNECTION_TIMEOUT)
 	if err != nil {
 		return nil, err
 	}
 
-	s := &Server{
+	api := &API{
 		WebSocketManager: ws.NewManager(),
 		App:              fiber.New(),
 		GameCtrl:         game.NewController(db.Collection("games")),
@@ -37,13 +38,19 @@ func NewServer(cfg config.Config) (*Server, error) {
 		DB:               db,
 	}
 
-	s.setupMiddleware()
-	s.setupRoutes()
+	api.setupMiddleware()
+	api.setupRoutes()
 
-	return s, nil
+	return api, nil
 }
 
-func (s *Server) GracefulShutdown() {
-	_ = storage.CloseDB(s.DB)
-	_ = s.App.Shutdown()
+func (api *API) GracefulShutdown() {
+	err := storage.CloseDB(api.DB)
+	if err != nil {
+		log.Println(err)
+	}
+	err = api.App.Shutdown()
+	if err != nil {
+		log.Println(err)
+	}
 }

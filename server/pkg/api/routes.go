@@ -10,16 +10,16 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/monitor"
 )
 
-func (s *Server) setupMiddleware() {
-	s.App.Use(cors.New())
-	s.App.Use(limiter.New(limiter.Config{Max: 500, Expiration: 30 * time.Second}))
-	s.App.Use(logger.New(logger.Config{
+func (api *API) setupMiddleware() {
+	api.App.Use(cors.New())
+	api.App.Use(limiter.New(limiter.Config{Max: 500, Expiration: 30 * time.Second}))
+	api.App.Use(logger.New(logger.Config{
 		Format: "[${ip}]:${port} ${status} - ${method} ${path}\n",
 	}))
-	s.App.Get("/metrics", monitor.New(monitor.Config{Title: "Scrabble Server Metrics"}))
+	api.App.Get("/metrics", monitor.New(monitor.Config{Title: "Scrabble Server Metrics"}))
 }
 
-func (s *Server) setupRoutes() {
+func (s *API) setupRoutes() {
 	s.App.Get("/metrics", monitor.New(monitor.Config{Title: "Scrabble Server Metrics"}))
 
 	s.App.Get("/ws", s.WebSocketManager.Accept())
@@ -34,8 +34,8 @@ func (s *Server) setupRoutes() {
 	s.setupGameRoutes()
 }
 
-func (s *Server) setupGameRoutes() {
-	game := s.App.Group("/api/game")
-	game.Post("/start", s.GameCtrl.CreateGame())
-	game.Post("/join", s.GameCtrl.JoinGame())
+func (api *API) setupGameRoutes() {
+	game := api.App.Group("/api/game")
+	game.Post("/start", api.GameCtrl.CreateGame())
+	game.Post("/join", api.GameCtrl.JoinGame())
 }

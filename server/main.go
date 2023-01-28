@@ -25,7 +25,7 @@ func run() error {
 		return err
 	}
 
-	server, err := api.NewServer(cfg)
+	server, err := api.New(cfg)
 	if err != nil {
 		return err
 	}
