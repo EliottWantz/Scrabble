@@ -19,6 +19,27 @@ func NewController(db *mongo.Database) *Controller {
 	}
 }
 
+type LoginRequest struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+func (ctrl *Controller) Login(c *fiber.Ctx) error {
+	var req LoginRequest
+	err := c.BodyParser(&req)
+	if err != nil {
+		return c.SendStatus(fiber.StatusInternalServerError)
+	}
+	token, err := ctrl.svc.Login(req.Username, req.Password)
+	if err != nil {
+		return c.SendStatus(fiber.StatusInternalServerError)
+	}
+
+	return c.JSON(fiber.Map{
+		"token": token,
+	})
+}
+
 func (c *Controller) Authorize(username, password string) error {
 	return c.svc.Authorize(username, password)
 }
