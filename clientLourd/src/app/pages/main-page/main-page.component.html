@@ -2,6 +2,13 @@
     <span class="animate scrabble" style="--n: 8"
         ><span>{{ title }}</span>
     </span>
+
+    <section>
+        <div id="rightdiv">
+            <button mat-raised-button (click)="openLoginDialog()">Se connecter</button>
+        </div>
+    </section>
+
     <section id="server-message">
         <div class="justifiediv">
             <app-welcome-button
