@@ -17,6 +17,9 @@ tasks:
   start:
     cmds:
       - ./bin/out
-  echos:
+  mongo:up:
     cmds:
-      - echo $ENV $MONGODB_NAME
+      - docker compose -f ./mongo-docker.yml up -d
+  mongo:down:
+    cmds:
+      - docker compose -f ./mongo-docker.yml down

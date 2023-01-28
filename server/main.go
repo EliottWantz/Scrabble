@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -13,8 +13,7 @@ import (
 func main() {
 	err := run()
 	if err != nil {
-		fmt.Printf("error: %v\n", err)
-		os.Exit(1)
+		log.Fatalf("error: %v\n", err)
 	}
 }
 
@@ -30,21 +29,21 @@ func run() error {
 		return err
 	}
 
-	go GracefulShutdown(server.GracefulShutdown)
+	errChan := make(chan error, 1)
+	go func() {
+		err = server.App.Listen("0.0.0.0:" + cfg.PORT)
+		if err != nil {
+			errChan <- err
+		}
+	}()
 
-	err = server.App.Listen("0.0.0.0:" + cfg.PORT)
-	if err != nil {
-		return err
-	}
+	go func() {
+		quit := make(chan os.Signal, 1)
+		signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+		sig := <-quit
+		log.Println(sig, "shutting down")
+		errChan <- server.App.Shutdown()
+	}()
 
-	return nil
-}
-
-func GracefulShutdown(cleanup func()) {
-	quit := make(chan os.Signal, 1)
-	defer close(quit)
-
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	<-quit
-	cleanup()
+	return <-errChan
 }

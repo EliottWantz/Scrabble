@@ -1,7 +1,6 @@
 package api
 
 import (
-	"log"
 	"time"
 
 	"scrabble/config"
@@ -44,13 +43,16 @@ func New(cfg config.Config) (*API, error) {
 	return api, nil
 }
 
-func (api *API) GracefulShutdown() {
+func (api *API) Shutdown() error {
 	err := storage.CloseDB(api.DB)
 	if err != nil {
-		log.Println(err)
+		return err
 	}
-	err = api.App.Shutdown()
+
+	err = api.App.ShutdownWithTimeout(time.Second * 10)
 	if err != nil {
-		log.Println(err)
+		return err
 	}
+
+	return nil
 }
