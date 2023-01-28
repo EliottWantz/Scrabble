@@ -19,7 +19,7 @@ tasks:
       - ./bin/out
   mongo:up:
     cmds:
-      - docker compose -f ./mongo-docker.yml up -d
+      - docker compose -f ./docker-compose.yaml up -d
   mongo:down:
     cmds:
-      - docker compose -f ./mongo-docker.yml down
+      - docker compose -f ./docker-compose.yaml down
