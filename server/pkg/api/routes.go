@@ -1,9 +1,11 @@
 package api
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/basicauth"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -24,18 +26,21 @@ func (s *API) setupRoutes() {
 
 	s.App.Get("/ws", s.WebSocketManager.Accept())
 
-	api := s.App.Group("/api")
-	api.Get("/", func(c *fiber.Ctx) error {
+	s.App.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("Hello api")
 	})
+	api := s.App.Group("/api")
+	protected := api.Group("/").Use(basicauth.New(basicauth.Config{
+		Users: map[string]string{
+			"john":  "doe",
+			"admin": "123456",
+		},
+	}))
 
-	api.Post("/db/avatar", s.AccountCtrl.UploadAvatar())
-
-	s.setupGameRoutes()
-}
-
-func (api *API) setupGameRoutes() {
-	game := api.App.Group("/api/game")
-	game.Post("/start", api.GameCtrl.CreateGame())
-	game.Post("/join", api.GameCtrl.JoinGame())
+	protected.Get("/user", func(c *fiber.Ctx) error {
+		fmt.Println("user basic auth:", c.Get("Authorization"))
+		fmt.Println("username:", c.Locals("username"))
+		fmt.Println("password:", c.Locals("password"))
+		return c.SendString("Hello user, you are allowed")
+	})
 }
