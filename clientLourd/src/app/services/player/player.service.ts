@@ -14,10 +14,12 @@ export class PlayerService {
     playerId: string;
     player$: Observable<Player>;
     opponent$: Observable<Player>;
+    isConnected: Boolean;
 
     constructor(private gameService: GameService, private wsService: WebsocketService, private eventBus: EventBusService) {}
 
     init(): void {
+        this.isConnected = false;
         this.playerId = this.gameService.playerId;
         this.player$ = this.gameService.game$.pipe(
             map((game) => {
