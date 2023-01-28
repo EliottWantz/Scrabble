@@ -32,8 +32,8 @@ func New(cfg config.Config) (*API, error) {
 	api := &API{
 		WebSocketManager: ws.NewManager(),
 		App:              fiber.New(),
-		GameCtrl:         game.NewController(db.Collection("games")),
-		AccountCtrl:      account.NewController(db.Collection("users")),
+		GameCtrl:         game.NewController(db),
+		AccountCtrl:      account.NewController(db),
 		DB:               db,
 	}
 

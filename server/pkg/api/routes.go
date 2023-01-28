@@ -21,26 +21,30 @@ func (api *API) setupMiddleware() {
 	api.App.Get("/metrics", monitor.New(monitor.Config{Title: "Scrabble Server Metrics"}))
 }
 
-func (s *API) setupRoutes() {
-	s.App.Get("/metrics", monitor.New(monitor.Config{Title: "Scrabble Server Metrics"}))
+func (api *API) setupRoutes() {
+	api.App.Get("/metrics", monitor.New(monitor.Config{Title: "Scrabble Server Metrics"}))
 
-	s.App.Get("/ws", s.WebSocketManager.Accept())
+	api.App.Get("/ws", api.WebSocketManager.Accept())
 
-	s.App.Get("/", func(c *fiber.Ctx) error {
+	api.App.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("Hello api")
 	})
-	api := s.App.Group("/api")
-	protected := api.Group("/").Use(basicauth.New(basicauth.Config{
-		Users: map[string]string{
-			"john":  "doe",
-			"admin": "123456",
-		},
+
+	apiRoute := api.App.Group("/api")
+	protected := apiRoute.Group("/").Use(basicauth.New(basicauth.Config{
+		Authorizer: api.Authorize,
 	}))
 
 	protected.Get("/user", func(c *fiber.Ctx) error {
-		fmt.Println("user basic auth:", c.Get("Authorization"))
-		fmt.Println("username:", c.Locals("username"))
-		fmt.Println("password:", c.Locals("password"))
 		return c.SendString("Hello user, you are allowed")
 	})
+}
+
+func (api *API) Authorize(username, password string) bool {
+	fmt.Println("username:", username)
+	fmt.Println("password:", password)
+	if err := api.AccountCtrl.Authorize(username, password); err != nil {
+		return false
+	}
+	return true
 }

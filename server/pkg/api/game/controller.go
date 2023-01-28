@@ -9,8 +9,14 @@ type Controller struct {
 	svc *Service
 }
 
-func NewController(coll *mongo.Collection) *Controller {
-	return &Controller{svc: &Service{repo: &Repository{coll: coll}}}
+func NewController(db *mongo.Database) *Controller {
+	return &Controller{
+		svc: &Service{
+			repo: &Repository{
+				coll: db.Collection("games"),
+			},
+		},
+	}
 }
 
 func (ctrl *Controller) CreateGame() fiber.Handler {
