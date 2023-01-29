@@ -38,7 +38,6 @@ class RegisterScreen extends StatelessWidget {
                     keyboardType: TextInputType.text,
                     labelText: 'Adresse courriel',
                     placeholder: 'Entrer une adresse courriel',
-                    color: Colors.black,
                   ),
                   const Gap(20.0),
                   InputField(
@@ -46,11 +45,9 @@ class RegisterScreen extends StatelessWidget {
                     keyboardType: TextInputType.text,
                     labelText: 'Pseudonyme',
                     placeholder: 'Entrer votre pseudonyme',
-                    color: Colors.black,
                   ),
                   const Gap(20.0),
                   InputField(
-                    color: Colors.black,
                     controller: controller.registerPasswordController,
                     keyboardType: TextInputType.emailAddress,
                     labelText: 'Password',

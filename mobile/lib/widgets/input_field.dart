@@ -5,7 +5,6 @@ class InputField extends StatelessWidget {
   final TextInputType keyboardType;
   final String labelText;
   final String placeholder;
-  final Color color;
   final double fontSize;
   final bool password;
   final String? Function(String?)? validator;
@@ -15,7 +14,6 @@ class InputField extends StatelessWidget {
     this.keyboardType = TextInputType.text,
     this.labelText = '',
     this.placeholder = '',
-    this.color = Colors.white,
     this.fontSize = 22.0,
     this.password = false,
     this.validator,
@@ -29,26 +27,22 @@ class InputField extends StatelessWidget {
         contentPadding: EdgeInsets.symmetric(vertical: 10.0),
         focusedBorder: UnderlineInputBorder(
           borderSide: BorderSide(
-            color: this.color,
           ),
         ),
         enabledBorder: UnderlineInputBorder(
           borderSide: BorderSide(
-            color: this.color,
           ),
         ),
         floatingLabelBehavior: FloatingLabelBehavior.always,
         labelText: this.labelText,
         labelStyle: TextStyle(
           fontSize: fontSize - 2,
-          color: color,
           height: 0.2,
           fontWeight: FontWeight.normal,
         ),
         hintText: this.placeholder,
         hintStyle: TextStyle(
           fontSize: fontSize,
-          color: color,
           fontWeight: FontWeight.normal,
         ),
         filled: true,
@@ -56,7 +50,6 @@ class InputField extends StatelessWidget {
       ),
       controller: this.controller,
       style: TextStyle(
-        color: color,
         fontSize: fontSize,
         fontWeight: FontWeight.normal,
       ),

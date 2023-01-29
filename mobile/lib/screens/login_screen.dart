@@ -40,11 +40,10 @@ class LoginScreen extends StatelessWidget {
                     keyboardType: TextInputType.text,
                     labelText: 'Adresse courriel',
                     placeholder: 'Entrer une adresse courriel',
-                    color: Colors.black,
+
                   ),
                   const Gap(20.0),
                   InputField(
-                    color: Colors.black,
                     controller: controller.loginPasswordController,
                     keyboardType: TextInputType.emailAddress,
                     labelText: 'Password',
