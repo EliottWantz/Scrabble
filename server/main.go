@@ -4,7 +4,6 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	"syscall"
 
 	"scrabble/config"
 	"scrabble/pkg/api"
@@ -39,7 +38,7 @@ func run() error {
 
 	go func() {
 		quit := make(chan os.Signal, 1)
-		signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+		signal.Notify(quit, os.Interrupt)
 		sig := <-quit
 		log.Println(sig, "shutting down")
 		errChan <- server.App.Shutdown()

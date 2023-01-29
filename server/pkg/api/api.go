@@ -1,6 +1,7 @@
 package api
 
 import (
+	"log"
 	"time"
 
 	"scrabble/config"
@@ -13,7 +14,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-var CONNECTION_TIMEOUT = 10 * time.Second
+var CONNECTION_TIMEOUT = time.Second * 5
 
 type API struct {
 	WebSocketManager *ws.Manager
@@ -24,10 +25,12 @@ type API struct {
 }
 
 func New(cfg config.Config) (*API, error) {
+	log.Println("Opening database...")
 	db, err := storage.OpenDB(cfg.MONGODB_URI, cfg.MONGODB_NAME, CONNECTION_TIMEOUT)
 	if err != nil {
 		return nil, err
 	}
+	log.Println("Database opened.")
 
 	api := &API{
 		WebSocketManager: ws.NewManager(),

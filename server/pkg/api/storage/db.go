@@ -12,10 +12,9 @@ import (
 var ErrNoDocumentsFound = errors.New("no documents found")
 
 func OpenDB(uri, dbName string, timeout time.Duration) (*mongo.Database, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
-	defer cancel()
-
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
+	opts := options.Client().ApplyURI(uri)
+	opts.SetTimeout(timeout)
+	client, err := mongo.Connect(context.Background(), opts)
 	if err != nil {
 		return nil, err
 	}
