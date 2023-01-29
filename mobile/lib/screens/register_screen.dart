@@ -19,7 +19,7 @@ class RegisterScreen extends StatelessWidget {
           title: 'authRegisterAppBar'.tr, callback: () {
         settingsService.switchTheme();
         controller.currentIcon.value =
-            Get.isDarkMode ? Icons.wb_sunny : Icons.brightness_2;
+            Get.isDarkMode ? Icons.brightness_2 : Icons.wb_sunny;
       }),
       body: SafeArea(
         minimum: const EdgeInsets.all(40),
