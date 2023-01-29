@@ -1,6 +1,7 @@
 import 'package:client_leger/api/api_provider.dart';
 import 'package:client_leger/api/api_repository.dart';
 import 'package:client_leger/app_theme.dart';
+import 'package:client_leger/lang/tanslation_service.dart';
 import 'package:client_leger/routes/app_pages.dart';
 import 'package:client_leger/routes/app_routes.dart';
 import 'package:client_leger/services/settings_service.dart';
@@ -28,6 +29,9 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       initialRoute: Routes.AUTH,
       getPages: AppPages.routes,
+      locale: TranslationService.locale,
+      fallbackLocale: TranslationService.fallbackLocale,
+      translations: TranslationService(),
     );
   }
 }
