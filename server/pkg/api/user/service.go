@@ -47,7 +47,6 @@ func (s *Service) SignUp(username, password string) (string, error) {
 		Id:       uuid.NewString(),
 		Username: username,
 		Password: password,
-		Token:    signed,
 	}
 
 	if err := s.repo.Insert(a); err != nil {
