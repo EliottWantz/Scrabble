@@ -17,12 +17,11 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CommonWidget.authAppBar(
-          context, controller, controller.currentIcon,
+      appBar: CommonWidget.authAppBar(controller.currentIcon,
           title: 'Connexion a PolyScrabble', callback: () {
         settingsService.switchTheme();
         controller.currentIcon.value =
-            Get.isDarkMode ? Icons.brightness_2 : Icons.wb_sunny;
+            Get.isDarkMode ? Icons.wb_sunny : Icons.brightness_2;
       }),
       body: SafeArea(
         minimum: const EdgeInsets.all(40),

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class SettingsService extends GetxService {
-  bool isDarkMode = false;
+  bool isDarkMode = Get.isDarkMode;
   bool isFrench = true;
 
   final StorageService storageService;

@@ -18,18 +18,7 @@ class AuthController extends GetxController {
   final loginEmailController = TextEditingController();
   final loginPasswordController = TextEditingController();
 
-  var currentIcon = Get.isDarkMode ? Icons.brightness_2.obs : Icons.wb_sunny.obs;
-
-
-  @override
-  void onClose() {
-    super.onClose();
-    registerEmailController.dispose();
-    registerPasswordController.dispose();
-    loginEmailController.dispose();
-    loginPasswordController.dispose();
-  }
-
+  var currentIcon = Get.isDarkMode ? Icons.wb_sunny.obs : Icons.brightness_2.obs;
 
   void login() {
     if (loginFormKey.currentState!.validate()) {

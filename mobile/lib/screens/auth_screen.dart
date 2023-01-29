@@ -15,8 +15,7 @@ class AuthScreen extends GetView<AuthController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CommonWidget.authAppBar(
-          context, controller, controller.currentIcon, callback: () {
+      appBar: CommonWidget.authAppBar(controller.currentIcon, callback: () {
         settingsService.switchTheme();
         controller.currentIcon.value =
             Get.isDarkMode ? Icons.brightness_2 : Icons.wb_sunny;
