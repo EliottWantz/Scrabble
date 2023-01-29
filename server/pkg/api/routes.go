@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -23,29 +22,23 @@ func (api *API) setupMiddleware() {
 }
 
 func (api *API) setupRoutes() {
-	// api.App.Get("/metrics", monitor.New(monitor.Config{Title: "Scrabble Server Metrics"}))
+	api.App.Get("/ws", api.WebSocketManager.Accept())
 
-	// api.App.Get("/ws", api.WebSocketManager.Accept())
+	router := api.App.Group("/api")
 
-	// api.App.Get("/", func(c *fiber.Ctx) error {
-	// 	return c.SendString("Hello api")
-	// })
-
-	apiRoute := api.App.Group("/api")
-	apiRoute.Post("/login", api.AccountCtrl.Login)
-
-	// protected := apiRoute.Group("/").Use(basicauth.New(basicauth.Config{
-	// 	Authorizer: api.Authorize,
-	// }))
-	// protected.Get("/user", func(c *fiber.Ctx) error {
-	// 	return c.SendString("Hello user, you are allowed")
-	// })
-
-	apiRoute.Get("/accessible", accessible)
-	r := apiRoute.Group("/restricted")
-	r.Use(jwtware.New(jwtware.Config{
-		SigningKey: []byte("secret"),
-	}))
+	router.Get("/", func(c *fiber.Ctx) error {
+		return c.SendString("Hello api")
+	})
+	router.Get("/accessible", accessible)
+	router.Post("/login", api.UserCtrl.Login)
+	r := router.Group("/restricted").Use(
+		jwtware.New(
+			jwtware.Config{
+				SigningKey: []byte("secret"),
+				ContextKey: "token",
+			},
+		),
+	)
 	r.Get("/", restricted)
 }
 
@@ -54,17 +47,11 @@ func accessible(c *fiber.Ctx) error {
 }
 
 func restricted(c *fiber.Ctx) error {
-	user := c.Locals("user").(*jwt.Token)
-	claims := user.Claims.(jwt.MapClaims)
-	name := claims["name"].(string)
-	return c.SendString("Welcome " + name)
-}
-
-func (api *API) Authorize(username, password string) bool {
-	fmt.Println("username:", username)
-	fmt.Println("password:", password)
-	if err := api.AccountCtrl.Authorize(username, password); err != nil {
-		return false
-	}
-	return true
+	token := c.Locals("token").(*jwt.Token)
+	claims := token.Claims.(jwt.MapClaims)
+	username := claims["username"].(string)
+	return c.JSON(fiber.Map{
+		"message": "Welcome " + username,
+		"token":   token,
+	})
 }

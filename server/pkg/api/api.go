@@ -4,9 +4,9 @@ import (
 	"time"
 
 	"scrabble/config"
-	"scrabble/pkg/api/account"
 	"scrabble/pkg/api/game"
 	"scrabble/pkg/api/storage"
+	"scrabble/pkg/api/user"
 	"scrabble/pkg/api/ws"
 
 	"github.com/gofiber/fiber/v2"
@@ -19,7 +19,7 @@ type API struct {
 	WebSocketManager *ws.Manager
 	App              *fiber.App
 	GameCtrl         *game.Controller
-	AccountCtrl      *account.Controller
+	UserCtrl         *user.Controller
 	DB               *mongo.Database
 }
 
@@ -33,7 +33,7 @@ func New(cfg config.Config) (*API, error) {
 		WebSocketManager: ws.NewManager(),
 		App:              fiber.New(),
 		GameCtrl:         game.NewController(db),
-		AccountCtrl:      account.NewController(db),
+		UserCtrl:         user.NewController(db),
 		DB:               db,
 	}
 
