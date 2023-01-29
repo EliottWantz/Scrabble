@@ -7,11 +7,22 @@ import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 
 class AuthScreen extends GetView<AuthController> {
-  const AuthScreen({super.key});
+  AuthScreen({super.key});
+
+  final SettingsService settingsService = Get.find();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        actions: [
+          IconButton(
+              onPressed: () {
+                settingsService.switchTheme();
+              },
+              icon: _buildIcon())
+        ],
+      ),
       body: SafeArea(
         minimum: const EdgeInsets.symmetric(horizontal: 30.0),
         child: Center(
@@ -46,12 +57,16 @@ class AuthScreen extends GetView<AuthController> {
                   },
                 ),
                 const Gap(62.0),
-                const Text('')
+                const Text(''),
               ],
             ),
           ),
         ),
       ),
     );
+  }
+
+  Icon _buildIcon() {
+    return Get.isDarkMode ? Icon(Icons.brightness_2) : Icon(Icons.wb_sunny);
   }
 }
