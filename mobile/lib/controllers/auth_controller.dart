@@ -11,11 +11,13 @@ class AuthController extends GetxController {
   final GlobalKey<FormState> registerFormKey = GlobalKey<FormState>();
   final registerEmailController = TextEditingController();
   final registerPasswordController = TextEditingController();
+  final registerUsernameController = TextEditingController();
 
   // Login
   final GlobalKey<FormState> loginFormKey = GlobalKey<FormState>();
   final loginEmailController = TextEditingController();
   final loginPasswordController = TextEditingController();
+
 
   @override
   void onClose() {

@@ -42,6 +42,14 @@ class RegisterScreen extends StatelessWidget {
                   ),
                   const Gap(20.0),
                   InputField(
+                    controller: controller.registerUsernameController,
+                    keyboardType: TextInputType.text,
+                    labelText: 'Pseudonyme',
+                    placeholder: 'Entrer votre pseudonyme',
+                    color: Colors.black,
+                  ),
+                  const Gap(20.0),
+                  InputField(
                     color: Colors.black,
                     controller: controller.registerPasswordController,
                     keyboardType: TextInputType.emailAddress,

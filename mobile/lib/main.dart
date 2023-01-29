@@ -24,6 +24,7 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       title: 'PolyScrabble',
       theme: ThemeConfig.lightTheme,
+      defaultTransition: Transition.fade,
       debugShowCheckedModeBanner: false,
       initialRoute: Routes.AUTH,
       getPages: AppPages.routes,
