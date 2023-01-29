@@ -16,7 +16,7 @@ class RegisterScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CommonWidget.authAppBar(controller.currentIcon,
-          title: 'Inscription a PolyScrabble', callback: () {
+          title: 'authRegisterAppBar'.tr, callback: () {
         settingsService.switchTheme();
         controller.currentIcon.value =
             Get.isDarkMode ? Icons.wb_sunny : Icons.brightness_2;
@@ -31,35 +31,35 @@ class RegisterScreen extends StatelessWidget {
               child: Column(
                 children: [
                   Gap(Get.height / 4),
-                  const Text(
-                    'Bienvenue parmis nous, veuillez vous inscrire',
+                  Text(
+                    'authRegisterWelcome'.tr,
                   ),
                   const Gap(20.0),
                   InputField(
                     controller: controller.registerEmailController,
                     keyboardType: TextInputType.text,
-                    labelText: 'Adresse courriel',
-                    placeholder: 'Entrer une adresse courriel',
+                    labelText: 'authEmailLabel'.tr,
+                    placeholder: 'authEmailPlaceholder'.tr,
                   ),
                   const Gap(20.0),
                   InputField(
                     controller: controller.registerUsernameController,
                     keyboardType: TextInputType.text,
-                    labelText: 'Pseudonyme',
-                    placeholder: 'Entrer votre pseudonyme',
+                    labelText: 'authUsernameLabel'.tr,
+                    placeholder: 'authUsernamePlaceholder'.tr,
                   ),
                   const Gap(20.0),
                   InputField(
                     controller: controller.registerPasswordController,
                     keyboardType: TextInputType.emailAddress,
-                    labelText: 'Password',
-                    placeholder: 'Entrer votre mot de passe',
+                    labelText: 'authPasswordLabel'.tr,
+                    placeholder: 'authPasswordPlaceholder'.tr,
                     password: true,
                     validator: (value) {},
                   ),
                   const Gap(50.0),
                   CustomButton(
-                    text: 'S\'inscrire',
+                    text: 'authRegisterBtn'.tr,
                     onPressed: () {},
                   ),
                 ],

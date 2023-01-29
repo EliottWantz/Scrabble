@@ -32,12 +32,12 @@ class AuthScreen extends GetView<AuthController> {
                   image: AssetImage('assets/images/scrabble.png'),
                 ),
                 const Gap(20.0),
-                const Text('Bienvenue a PolyScrabble'),
+                Text('authWelcome'.tr),
                 const Gap(10.0),
-                const Text('Commençons'),
+                Text('authStart'.tr),
                 const Gap(50.0),
                 CustomButton(
-                  text: 'Se connecter',
+                  text: 'authLoginBtn'.tr,
                   width: Get.width / 3,
                   onPressed: () {
                     Get.toNamed(Routes.AUTH + Routes.LOGIN,
@@ -46,7 +46,7 @@ class AuthScreen extends GetView<AuthController> {
                 ),
                 const Gap(20.0),
                 CustomButton(
-                  text: 'S\'inscrire',
+                  text: 'authRegisterBtn'.tr,
                   width: Get.width / 3,
                   onPressed: () {
                     Get.toNamed(Routes.AUTH + Routes.REGISTER,

@@ -1,5 +1,4 @@
 import 'package:client_leger/controllers/auth_controller.dart';
-import 'package:client_leger/routes/app_routes.dart';
 import 'package:client_leger/services/settings_service.dart';
 import 'package:client_leger/widgets/common.dart';
 import 'package:client_leger/widgets/custom_button.dart';
@@ -18,7 +17,7 @@ class LoginScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CommonWidget.authAppBar(controller.currentIcon,
-          title: 'Connexion a PolyScrabble', callback: () {
+          title: 'authLoginAppBar'.tr, callback: () {
         settingsService.switchTheme();
         controller.currentIcon.value =
             Get.isDarkMode ? Icons.wb_sunny : Icons.brightness_2;
@@ -33,28 +32,28 @@ class LoginScreen extends StatelessWidget {
               child: Column(
                 children: [
                   Gap(Get.height / 4),
-                  const Text(
-                    'Content de vous revoir, veuillez vous connecter',
+                  Text(
+                    'authLoginWelcome'.tr,
                   ),
                   const Gap(20.0),
                   InputField(
                     controller: controller.loginEmailController,
                     keyboardType: TextInputType.text,
-                    labelText: 'Adresse courriel',
-                    placeholder: 'Entrer une adresse courriel',
+                    labelText: 'authEmailLabel'.tr,
+                    placeholder: 'authEmailPlaceholder'.tr,
                   ),
                   const Gap(20.0),
                   InputField(
                     controller: controller.loginPasswordController,
                     keyboardType: TextInputType.emailAddress,
-                    labelText: 'Password',
-                    placeholder: 'Entrer votre mot de passe',
+                    labelText: 'authPasswordLabel'.tr,
+                    placeholder: 'authPasswordPlaceholder'.tr,
                     password: true,
                     validator: (value) {},
                   ),
                   const Gap(50.0),
                   CustomButton(
-                    text: 'Se connecter',
+                    text: 'authLoginBtn'.tr,
                     onPressed: () {
                       controller.login(context);
                     },
