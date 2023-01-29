@@ -31,9 +31,11 @@ func (s *Service) SignUp(username, password string) (string, error) {
 		return "", ErrUserAlreadyExists
 	}
 
-	claims := jwt.MapClaims{
-		"username": username,
-		"exp":      time.Now().Add(time.Hour * 72).Unix(),
+	claims := JWTClaims{
+		Username: username,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Second * 10)),
+		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
