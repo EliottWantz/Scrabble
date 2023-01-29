@@ -31,10 +31,15 @@ func (s *Service) SignUp(username, password string) (string, error) {
 		return "", ErrUserAlreadyExists
 	}
 
+	hashedPassword, err := auth.HashPassword(password)
+	if err != nil {
+		return "", err
+	}
+
 	a := &User{
-		Id:       uuid.NewString(),
-		Username: username,
-		Password: password,
+		Id:             uuid.NewString(),
+		Username:       username,
+		HashedPassword: hashedPassword,
 	}
 
 	if err := s.repo.Insert(a); err != nil {
@@ -56,7 +61,7 @@ func (s *Service) Login(username, password string) (string, error) {
 		return "", ErrUserNotFound
 	}
 
-	if u.Password != password {
+	if !auth.PasswordsMatch(password, u.HashedPassword) {
 		return "", ErrPasswordMismatch
 	}
 
