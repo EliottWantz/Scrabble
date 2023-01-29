@@ -56,7 +56,7 @@ class LoginScreen extends StatelessWidget {
                   CustomButton(
                     text: 'Se connecter',
                     onPressed: () {
-                      controller.login();
+                      controller.login(context);
                     },
                   )
                 ],

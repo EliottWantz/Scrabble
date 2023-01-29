@@ -1,5 +1,6 @@
 import 'package:client_leger/api/api_repository.dart';
 import 'package:client_leger/routes/app_routes.dart';
+import 'package:client_leger/utils/app_focus.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -20,7 +21,8 @@ class AuthController extends GetxController {
 
   var currentIcon = Get.isDarkMode ? Icons.wb_sunny.obs : Icons.brightness_2.obs;
 
-  void login() {
+  void login(BuildContext context) {
+    AppFocus.unfocus(context);
     if (loginFormKey.currentState!.validate()) {
       Get.toNamed(Routes.HOME);
     }
