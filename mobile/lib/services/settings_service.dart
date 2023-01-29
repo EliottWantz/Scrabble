@@ -7,16 +7,18 @@ class SettingsService extends GetxService {
   bool isDarkMode = false;
   bool isFrench = true;
 
-  StorageService storageService = Get.find();
+  final StorageService storageService;
+  SettingsService({required this.storageService});
+
 
   switchTheme() {
     isDarkMode = Get.isDarkMode ? false : true;
     Get.changeTheme(
         isDarkMode ? ThemeConfig.darkTheme : ThemeConfig.lightTheme);
-    storageService.write('key', isDarkMode);
+    storageService.write('isDarkMode', isDarkMode);
   }
 
   bool loadTheme() {
-    return storageService.read('key') ?? false;
+    return storageService.read('isDarkMode') ?? false;
   }
 }

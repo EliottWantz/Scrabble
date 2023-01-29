@@ -36,6 +36,6 @@ Future<void> initGlobalServices() async {
   await Get.putAsync(() => StorageService().init());
   Get.put(ApiProvider(), permanent: true);
   Get.put(ApiRepository(apiProvider: Get.find()), permanent: true);
-  Get.put(SettingsService());
+  Get.put(SettingsService(storageService: Get.find()));
 }
 

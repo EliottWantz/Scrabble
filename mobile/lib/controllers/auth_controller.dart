@@ -18,6 +18,8 @@ class AuthController extends GetxController {
   final loginEmailController = TextEditingController();
   final loginPasswordController = TextEditingController();
 
+  var currentIcon = Get.isDarkMode ? Icons.brightness_2.obs : Icons.wb_sunny.obs;
+
 
   @override
   void onClose() {

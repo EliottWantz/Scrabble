@@ -15,12 +15,14 @@ class AuthScreen extends GetView<AuthController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        elevation: 0.0,
         actions: [
           IconButton(
               onPressed: () {
                 settingsService.switchTheme();
+                controller.currentIcon.value =  Get.isDarkMode ? Icons.brightness_2 : Icons.wb_sunny;
               },
-              icon: _buildIcon())
+              icon: Obx(() => Icon(controller.currentIcon.value)))
         ],
       ),
       body: SafeArea(
@@ -64,9 +66,5 @@ class AuthScreen extends GetView<AuthController> {
         ),
       ),
     );
-  }
-
-  Icon _buildIcon() {
-    return Get.isDarkMode ? Icon(Icons.brightness_2) : Icon(Icons.wb_sunny);
   }
 }
