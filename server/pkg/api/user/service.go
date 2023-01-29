@@ -2,6 +2,7 @@ package user
 
 import (
 	"errors"
+	"log"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -11,15 +12,23 @@ import (
 var (
 	ErrPasswordMismatch  = errors.New("password mismatch")
 	ErrUserAlreadyExists = errors.New("user already exists")
+	ErrUserNotFound      = errors.New("user not found")
 )
 
 type Service struct {
 	repo *Repository
 }
 
-func (s *Service) Login(username, password string) (*User, error) {
+func (s *Service) SignUp(username, password string) (string, error) {
+	if username == "" {
+		return "", errors.New("empty username")
+	}
+	if password == "" {
+		return "", errors.New("empty password")
+	}
+
 	if _, err := s.repo.Find(username); err == nil {
-		return nil, ErrUserAlreadyExists
+		return "", ErrUserAlreadyExists
 	}
 
 	claims := jwt.MapClaims{
@@ -30,7 +39,8 @@ func (s *Service) Login(username, password string) (*User, error) {
 
 	signed, err := token.SignedString([]byte("secret"))
 	if err != nil {
-		return nil, err
+		log.Println("error:", err)
+		return "", err
 	}
 
 	a := &User{
@@ -40,10 +50,28 @@ func (s *Service) Login(username, password string) (*User, error) {
 		Token:    signed,
 	}
 
-	// Create account in database
 	if err := s.repo.Insert(a); err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return a, nil
+	return signed, nil
+}
+
+func (s *Service) Login(username, password string) (string, error) {
+	if _, err := s.repo.Find(username); err != nil {
+		return "", ErrUserNotFound
+	}
+
+	claims := jwt.MapClaims{
+		"username": username,
+		"exp":      time.Now().Add(time.Hour * 72).Unix(),
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	signed, err := token.SignedString([]byte("secret"))
+	if err != nil {
+		return "", err
+	}
+
+	return signed, nil
 }

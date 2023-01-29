@@ -2,6 +2,7 @@ package user
 
 import (
 	"errors"
+	"log"
 
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -21,27 +22,59 @@ func NewController(db *mongo.Database) *Controller {
 	}
 }
 
+type SignupRequest struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type SignupResponse struct {
+	Token string `json:"token"`
+}
+
+// Sign up a new user
+func (ctrl *Controller) SignUp(c *fiber.Ctx) error {
+	req := SignupRequest{}
+	if err := c.BodyParser(&req); err != nil {
+		return fiber.ErrBadRequest
+	}
+
+	token, err := ctrl.svc.SignUp(req.Username, req.Password)
+	if err != nil {
+		log.Println(err)
+		if errors.Is(err, ErrUserAlreadyExists) {
+			return fiber.ErrConflict
+		}
+		return fiber.ErrInternalServerError
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(SignupResponse{Token: token})
+}
+
 type LoginRequest struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
+}
+
+type LoginResponse struct {
+	Token string `json:"token"`
 }
 
 func (ctrl *Controller) Login(c *fiber.Ctx) error {
 	var req LoginRequest
 	err := c.BodyParser(&req)
 	if err != nil {
-		return c.SendStatus(fiber.StatusInternalServerError)
+		return fiber.ErrInternalServerError
 	}
 	token, err := ctrl.svc.Login(req.Username, req.Password)
 	if err != nil {
-		if errors.Is(err, ErrUserAlreadyExists) {
-			return c.SendStatus(fiber.StatusConflict)
+		if errors.Is(err, ErrUserNotFound) {
+			return fiber.ErrConflict
 		}
-		return c.SendStatus(fiber.StatusInternalServerError)
+		return fiber.ErrInternalServerError
 	}
 
-	return c.JSON(fiber.Map{
-		"token": token,
+	return c.JSON(LoginResponse{
+		Token: token,
 	})
 }
 

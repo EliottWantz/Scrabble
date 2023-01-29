@@ -43,3 +43,13 @@ func (r *Repository) Insert(a *User) error {
 
 	return nil
 }
+
+func (r *Repository) Delete(username string) error {
+	_, err := r.coll.DeleteOne(context.TODO(), bson.M{"username": username})
+	if err != nil {
+		log.Println("Delete error:", err)
+		return err
+	}
+
+	return nil
+}
