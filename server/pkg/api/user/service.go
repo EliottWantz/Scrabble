@@ -3,9 +3,9 @@ package user
 import (
 	"errors"
 	"log"
-	"time"
 
-	"github.com/golang-jwt/jwt/v4"
+	"scrabble/pkg/api/user/auth"
+
 	"github.com/google/uuid"
 )
 
@@ -31,20 +31,6 @@ func (s *Service) SignUp(username, password string) (string, error) {
 		return "", ErrUserAlreadyExists
 	}
 
-	claims := JWTClaims{
-		Username: username,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Second * 10)),
-		},
-	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	signed, err := token.SignedString([]byte("secret"))
-	if err != nil {
-		log.Println("error:", err)
-		return "", err
-	}
-
 	a := &User{
 		Id:       uuid.NewString(),
 		Username: username,
@@ -55,12 +41,13 @@ func (s *Service) SignUp(username, password string) (string, error) {
 		return "", err
 	}
 
-	return signed, nil
-}
+	signed, err := auth.GenerateJWT(username)
+	if err != nil {
+		log.Println("error:", err)
+		return "", err
+	}
 
-type JWTClaims struct {
-	Username string `json:"username"`
-	jwt.RegisteredClaims
+	return signed, nil
 }
 
 func (s *Service) Login(username, password string) (string, error) {
@@ -73,18 +60,14 @@ func (s *Service) Login(username, password string) (string, error) {
 		return "", ErrPasswordMismatch
 	}
 
-	claims := JWTClaims{
-		Username: username,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Second * 10)),
-		},
-	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	signed, err := token.SignedString([]byte("secret"))
+	signed, err := auth.GenerateJWT(username)
 	if err != nil {
 		return "", err
 	}
 
 	return signed, nil
+}
+
+func (s *Service) Revalidate(tokenStr string) (string, error) {
+	return auth.RevalidateJWT(tokenStr)
 }

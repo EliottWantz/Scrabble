@@ -32,6 +32,7 @@ func (api *API) setupRoutes() {
 	router.Get("/accessible", accessible)
 	router.Post("/login", api.UserCtrl.Login)
 	router.Post("/signup", api.UserCtrl.SignUp)
+	router.Post("/revalidate", api.UserCtrl.Revalidate)
 	r := router.Group("/restricted").Use(
 		jwtware.New(
 			jwtware.Config{

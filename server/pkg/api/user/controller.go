@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v4"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -51,12 +52,13 @@ func (ctrl *Controller) SignUp(c *fiber.Ctx) error {
 }
 
 type LoginRequest struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Username string `json:"username,omitempty"`
+	Password string `json:"password,omitempty"`
 }
 
 type LoginResponse struct {
-	Token string `json:"token"`
+	Token string `json:"token,omitempty"`
+	Error string `json:"error,omitempty"`
 }
 
 func (ctrl *Controller) Login(c *fiber.Ctx) error {
@@ -69,7 +71,9 @@ func (ctrl *Controller) Login(c *fiber.Ctx) error {
 	token, err := ctrl.svc.Login(req.Username, req.Password)
 	if err != nil {
 		if errors.Is(err, ErrUserNotFound) {
-			return fiber.ErrConflict
+			return c.Status(fiber.StatusConflict).JSON(
+				LoginResponse{Error: "user not found with given username"},
+			)
 		}
 		if errors.Is(err, ErrPasswordMismatch) {
 			return fiber.ErrUnauthorized
@@ -78,6 +82,42 @@ func (ctrl *Controller) Login(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(LoginResponse{
+		Token: token,
+	})
+}
+
+type RevalidateRequest struct {
+	Token string `json:"token,omitempty"`
+}
+type RevalidateResponse struct {
+	Token string `json:"token,omitempty"`
+	Error string `json:"error,omitempty"`
+}
+
+// Revalidate jwt token
+func (ctrl *Controller) Revalidate(c *fiber.Ctx) error {
+	var req RevalidateRequest
+	err := c.BodyParser(&req)
+	if err != nil {
+		return fiber.ErrInternalServerError
+	}
+
+	token, err := ctrl.svc.Revalidate(req.Token)
+	if err != nil {
+		log.Println(err)
+		if errors.Is(err, jwt.ErrSignatureInvalid) {
+			return fiber.ErrUnauthorized
+		}
+		if errors.Is(err, fiber.ErrUnauthorized) {
+			return fiber.ErrUnauthorized
+		}
+		if errors.Is(err, jwt.ErrTokenExpired) || errors.Is(err, jwt.ErrSignatureInvalid) {
+			return fiber.ErrUnauthorized
+		}
+		return fiber.ErrInternalServerError
+	}
+
+	return c.JSON(RevalidateResponse{
 		Token: token,
 	})
 }
