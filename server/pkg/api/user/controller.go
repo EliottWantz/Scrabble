@@ -65,10 +65,14 @@ func (ctrl *Controller) Login(c *fiber.Ctx) error {
 	if err != nil {
 		return fiber.ErrInternalServerError
 	}
+
 	token, err := ctrl.svc.Login(req.Username, req.Password)
 	if err != nil {
 		if errors.Is(err, ErrUserNotFound) {
 			return fiber.ErrConflict
+		}
+		if errors.Is(err, ErrPasswordMismatch) {
+			return fiber.ErrUnauthorized
 		}
 		return fiber.ErrInternalServerError
 	}

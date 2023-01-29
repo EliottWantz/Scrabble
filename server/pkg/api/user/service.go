@@ -56,14 +56,26 @@ func (s *Service) SignUp(username, password string) (string, error) {
 	return signed, nil
 }
 
+type JWTClaims struct {
+	Username string `json:"username"`
+	jwt.RegisteredClaims
+}
+
 func (s *Service) Login(username, password string) (string, error) {
-	if _, err := s.repo.Find(username); err != nil {
+	u, err := s.repo.Find(username)
+	if err != nil {
 		return "", ErrUserNotFound
 	}
 
-	claims := jwt.MapClaims{
-		"username": username,
-		"exp":      time.Now().Add(time.Hour * 72).Unix(),
+	if u.Password != password {
+		return "", ErrPasswordMismatch
+	}
+
+	claims := JWTClaims{
+		Username: username,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Second * 10)),
+		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
