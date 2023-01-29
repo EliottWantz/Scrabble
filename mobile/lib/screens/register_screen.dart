@@ -1,4 +1,6 @@
 import 'package:client_leger/controllers/auth_controller.dart';
+import 'package:client_leger/services/settings_service.dart';
+import 'package:client_leger/widgets/common.dart';
 import 'package:client_leger/widgets/custom_button.dart';
 import 'package:client_leger/widgets/input_field.dart';
 import 'package:flutter/material.dart';
@@ -8,17 +10,18 @@ import 'package:get/get.dart';
 class RegisterScreen extends StatelessWidget {
   RegisterScreen({Key? key}) : super(key: key);
   final AuthController controller = Get.arguments;
+  final SettingsService settingsService = Get.find();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: const Text(
-          'Inscription a PolyScrabble',
-        ),
-        elevation: 0.0,
-      ),
+      appBar: CommonWidget.authAppBar(
+          context, controller, controller.currentIcon,
+          title: 'Inscription a PolyScrabble', callback: () {
+        settingsService.switchTheme();
+        controller.currentIcon.value =
+            Get.isDarkMode ? Icons.brightness_2 : Icons.wb_sunny;
+      }),
       body: SafeArea(
         minimum: const EdgeInsets.all(40),
         child: Form(
@@ -53,15 +56,12 @@ class RegisterScreen extends StatelessWidget {
                     labelText: 'Password',
                     placeholder: 'Entrer votre mot de passe',
                     password: true,
-                    validator: (value) {
-                    },
+                    validator: (value) {},
                   ),
                   const Gap(50.0),
                   CustomButton(
                     text: 'S\'inscrire',
-                    onPressed: () {
-
-                    },
+                    onPressed: () {},
                   ),
                 ],
               ),

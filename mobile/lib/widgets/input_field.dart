@@ -24,23 +24,21 @@ class InputField extends StatelessWidget {
     return TextFormField(
       decoration: InputDecoration(
         fillColor: Colors.transparent,
-        contentPadding: EdgeInsets.symmetric(vertical: 10.0),
-        focusedBorder: UnderlineInputBorder(
-          borderSide: BorderSide(
-          ),
+        contentPadding: const EdgeInsets.symmetric(vertical: 10.0),
+        focusedBorder: const UnderlineInputBorder(
+          borderSide: BorderSide(),
         ),
-        enabledBorder: UnderlineInputBorder(
-          borderSide: BorderSide(
-          ),
+        enabledBorder: const UnderlineInputBorder(
+          borderSide: BorderSide(),
         ),
         floatingLabelBehavior: FloatingLabelBehavior.always,
-        labelText: this.labelText,
+        labelText: labelText,
         labelStyle: TextStyle(
           fontSize: fontSize - 2,
           height: 0.2,
           fontWeight: FontWeight.normal,
         ),
-        hintText: this.placeholder,
+        hintText: placeholder,
         hintStyle: TextStyle(
           fontSize: fontSize,
           fontWeight: FontWeight.normal,
@@ -48,15 +46,15 @@ class InputField extends StatelessWidget {
         filled: true,
         isDense: true,
       ),
-      controller: this.controller,
+      controller: controller,
       style: TextStyle(
         fontSize: fontSize,
         fontWeight: FontWeight.normal,
       ),
-      keyboardType: this.keyboardType,
-      obscureText: this.password,
+      keyboardType: keyboardType,
+      obscureText: password,
       autocorrect: false,
-      validator: this.validator,
+      validator: validator,
     );
   }
 }

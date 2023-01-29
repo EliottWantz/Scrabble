@@ -1,6 +1,7 @@
 import 'package:client_leger/controllers/auth_controller.dart';
 import 'package:client_leger/routes/app_routes.dart';
 import 'package:client_leger/services/settings_service.dart';
+import 'package:client_leger/widgets/common.dart';
 import 'package:client_leger/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -14,17 +15,12 @@ class AuthScreen extends GetView<AuthController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0.0,
-        actions: [
-          IconButton(
-              onPressed: () {
-                settingsService.switchTheme();
-                controller.currentIcon.value =  Get.isDarkMode ? Icons.brightness_2 : Icons.wb_sunny;
-              },
-              icon: Obx(() => Icon(controller.currentIcon.value)))
-        ],
-      ),
+      appBar: CommonWidget.authAppBar(
+          context, controller, controller.currentIcon, callback: () {
+        settingsService.switchTheme();
+        controller.currentIcon.value =
+            Get.isDarkMode ? Icons.brightness_2 : Icons.wb_sunny;
+      }),
       body: SafeArea(
         minimum: const EdgeInsets.symmetric(horizontal: 30.0),
         child: Center(
