@@ -1,0 +1,25 @@
+version: "3"
+
+dotenv:
+  - .env
+
+tasks:
+  dev:
+    cmds:
+      - watchexec -r -c -e go -- go run main.go
+  build:
+    env:
+      GOOS: linux
+      GOARCH: amd64
+      CGO_ENABLED: 0
+    cmds:
+      - go build -ldflags '-s -w' -o bin/out
+  start:
+    cmds:
+      - ./bin/out
+  mongo:up:
+    cmds:
+      - docker compose -f ./docker-compose.yaml up -d
+  mongo:down:
+    cmds:
+      - docker compose -f ./docker-compose.yaml down

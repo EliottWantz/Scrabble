@@ -83,7 +83,6 @@ func (b *Bag) DrawTile() (*Tile, error) {
 		return nil, ErrBagEmpty
 	}
 
-	// # nosec
 	i := rand.Intn(tileCount)
 	tile := b.Tiles[i]
 

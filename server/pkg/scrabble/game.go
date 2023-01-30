@@ -151,32 +151,27 @@ func (g *Game) State() *GameState {
 func (gs *GameState) GenerateMoves() []Move {
 	leftParts := gs.DAWG.FindLeftParts(gs.Rack.AsString())
 
-	// results := make(chan []Move, BoardSize*2)
-	resultsChan := make(chan []Move, BoardSize*2)
+	resultsCh := make(chan []Move)
 
-	// Start the 30 goroutines (columns and rows = 2 * BoardSize)
-	// Horizontal rows
-	for row := 0; row < BoardSize; row++ {
-		go gs.GenerateMovesOnAxis(row, true, leftParts, resultsChan)
-	}
-	// Vertical columns
-	for col := 0; col < BoardSize; col++ {
-		go gs.GenerateMovesOnAxis(col, false, leftParts, resultsChan)
+	for i := 0; i < BoardSize; i++ {
+		go func(row int) {
+			gs.GenerateMovesOnAxis(row, true, leftParts, resultsCh)
+		}(i)
+		go func(col int) {
+			gs.GenerateMovesOnAxis(col, false, leftParts, resultsCh)
+		}(i)
 	}
 
-	// Collect move candidates from all goroutines and
-	// append them to the moves list
-	moves := make([]Move, 0)
+	var moves []Move
 	for i := 0; i < BoardSize*2; i++ {
-		moves = append(moves, <-resultsChan...)
+		moves = append(moves, <-resultsCh...)
 	}
 
 	return moves
 }
 
-func (gs *GameState) GenerateMovesOnAxis(index int, horizontal bool, leftParts [][]*LeftPart, resultsChan chan<- []Move) {
+func (gs *GameState) GenerateMovesOnAxis(index int, horizontal bool, leftParts [][]*LeftPart, moveCh chan<- []Move) {
 	var axis Axis
 	axis.Init(gs, index, horizontal)
-	// Generate a list of moves and send it on the result channel
-	resultsChan <- axis.GenerateMoves(leftParts)
+	moveCh <- axis.GenerateMoves(leftParts)
 }

@@ -91,7 +91,7 @@ func (a *Axis) CrossCheck(s *Square) []rune {
 	// Check whether the cross word(s) limit the set of allowed
 	// letters in this anchor square
 	prev, after := a.state.Board.CrossWordFragments(s.Position, !a.horizontal)
-	if len(prev) == 0 && len(after) == 0 {
+	if prev == "" && after == "" {
 		// No cross word, so no cross check constraint
 		return a.rack
 	}
@@ -130,7 +130,7 @@ func (a *Axis) GenerateMoves(leftParts [][]*LeftPart) []Move {
 
 // genMovesFromAnchor returns the available moves that use the given square
 // within the Axis as an anchor
-func (a *Axis) genMovesFromAnchor(anchor int, maxLeft int, leftParts [][]*LeftPart) []Move {
+func (a *Axis) genMovesFromAnchor(anchor, maxLeft int, leftParts [][]*LeftPart) []Move {
 	// Are there letters before the anchor? If so, extend before the anchor
 	if maxLeft == 0 && anchor > 0 && a.squares[anchor-1].Tile != nil {
 		return a.extendBefore(anchor)
@@ -178,7 +178,7 @@ func (a *Axis) extendBefore(anchor int) []Move {
 }
 
 // extendAfter finds all moves where we can place tiles after the anchor
-func (a *Axis) extendAfter(anchor int, maxLeft int, leftParts [][]*LeftPart) []Move {
+func (a *Axis) extendAfter(anchor, maxLeft int, leftParts [][]*LeftPart) []Move {
 	// We are not completing an existing previous part
 	// Extend tiles from the anchor and after
 	DAWG := a.state.DAWG
