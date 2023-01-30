@@ -16,6 +16,18 @@ require (
 )
 
 require (
+	github.com/alecthomas/chroma v0.9.1 // indirect
+	github.com/danwakefield/fnmatch v0.0.0-20160403171240-cbb64ac3d964 // indirect
+	github.com/dlclark/regexp2 v1.4.0 // indirect
+	github.com/fatih/color v1.12.0 // indirect
+	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
+	go.opencensus.io v0.23.0 // indirect
+	golang.org/x/term v0.4.0 // indirect
+	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
+)
+
+require (
+	cdr.dev/slog v1.4.1
 	github.com/andybalholm/brotli v1.0.4 // indirect
 	github.com/fasthttp/websocket v1.5.1 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
