@@ -1,6 +1,0 @@
-cat
-cats
-fact
-facts
-facet
-facets

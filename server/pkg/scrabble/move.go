@@ -433,7 +433,7 @@ func (move *ExchangeMove) Apply(game *Game) error {
 			// rack's tiles
 			return err
 		}
-		if err = rack.Remove(tile.Letter); err != nil {
+		if err := rack.Remove(tile.Letter); err != nil {
 			// Should not happen because moves.Letters are built using
 			// rack's tiles
 			return err
