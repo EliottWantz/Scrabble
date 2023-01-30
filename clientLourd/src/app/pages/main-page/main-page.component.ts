@@ -4,7 +4,7 @@ import { AboutUsComponent } from '@app/components/about-us/about-us.component';
 import { HighscoresComponent } from '@app/components/highscores/highscores.component';
 import { ParametersComponent } from '@app/components/parameters/parameters.component';
 import { GameMode } from '@common/game-mode';
-import { PlayerService } from '@app/services/player/player.service';
+import { AuthentificationService } from '@app/services/authentification/authentification.service';
 import { LoginComponent } from '@app/components/login-component/login.component';
 
 @Component({
@@ -16,7 +16,7 @@ export class MainPageComponent {
     readonly title: string = 'Scrabble';
     isJoining: boolean = false;
 
-    constructor(public dialog: MatDialog, public playerService: PlayerService) {}
+    constructor(public dialog: MatDialog, public authentificationService: AuthentificationService) {}
     openParameterDialog(mode: string): void {
         const gameMode: GameMode = mode === GameMode.Classic ? GameMode.Classic : GameMode.Log2990;
         this.dialog.open(ParametersComponent, {
@@ -36,6 +36,6 @@ export class MainPageComponent {
     }
 
     isConnected(): Boolean {
-        return this.playerService.isConnected;
+        return this.authentificationService.isConnected;
     }
 }
