@@ -6,7 +6,7 @@ import (
 )
 
 func Test_room_addClient(t *testing.T) {
-	m := NewManager()
+	m, _ := NewManager()
 	m.Clients.Set("1", &client{ID: "1"})
 	m.Clients.Set("2", &client{ID: "2"})
 	m.Clients.Set("3", &client{ID: "3"})
@@ -27,7 +27,7 @@ func Test_room_addClient(t *testing.T) {
 }
 
 func Benchmark_room_addClient(b *testing.B) {
-	m := NewManager()
+	m, _ := NewManager()
 	m.Clients.Set("1", &client{ID: "1"})
 	m.Clients.Set("2", &client{ID: "2"})
 	m.Clients.Set("3", &client{ID: "3"})

@@ -2,7 +2,6 @@ package user
 
 import (
 	"errors"
-	"log"
 
 	"scrabble/pkg/api/user/auth"
 
@@ -48,7 +47,6 @@ func (s *Service) SignUp(username, password string) (string, error) {
 
 	signed, err := auth.GenerateJWT(username)
 	if err != nil {
-		log.Println("error:", err)
 		return "", err
 	}
 

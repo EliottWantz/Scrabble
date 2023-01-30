@@ -1,18 +1,23 @@
 package main
 
 import (
-	"log"
 	"os"
 	"os/signal"
 
 	"scrabble/config"
 	"scrabble/pkg/api"
+
+	"golang.org/x/exp/slog"
 )
 
 func main() {
+	// Default log handler
+	slog.SetDefault(slog.Default())
+
 	err := run()
 	if err != nil {
-		log.Fatalf("error: %v\n", err)
+		slog.Error("main error", err)
+		os.Exit(1)
 	}
 }
 
@@ -40,7 +45,7 @@ func run() error {
 		quit := make(chan os.Signal, 1)
 		signal.Notify(quit, os.Interrupt)
 		sig := <-quit
-		log.Println(sig, "shutting down")
+		slog.Info("shutting down", "signal", sig)
 		errChan <- server.App.Shutdown()
 	}()
 

@@ -1,7 +1,6 @@
 package api
 
 import (
-	"log"
 	"time"
 
 	"scrabble/config"
@@ -12,6 +11,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/mongo"
+	"golang.org/x/exp/slog"
 )
 
 var CONNECTION_TIMEOUT = time.Second * 5
@@ -25,20 +25,26 @@ type API struct {
 }
 
 func New(cfg config.Config) (*API, error) {
-	log.Println("Opening database...")
+	slog.Info("Opening database...")
 	db, err := storage.OpenDB(cfg.MONGODB_URI, cfg.MONGODB_NAME, CONNECTION_TIMEOUT)
 	if err != nil {
 		return nil, err
 	}
-	log.Println("Database opened.")
+	slog.Info("Database opened.")
 
 	api := &API{
-		WebSocketManager: ws.NewManager(),
-		App:              fiber.New(),
-		GameCtrl:         game.NewController(db),
-		UserCtrl:         user.NewController(db),
-		DB:               db,
+		App:      fiber.New(),
+		GameCtrl: game.NewController(db),
+		UserCtrl: user.NewController(db),
+		DB:       db,
 	}
+
+	ws, err := ws.NewManager()
+	if err != nil {
+		return nil, err
+	}
+
+	api.WebSocketManager = ws
 
 	api.setupMiddleware()
 	api.setupRoutes()
