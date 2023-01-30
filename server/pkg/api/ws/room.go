@@ -60,7 +60,9 @@ func (r *room) removeClient(cID string) error {
 
 	if r.Clients.Len() == 0 {
 		err := r.Manager.removeRoom(r.ID)
-		return fmt.Errorf("%s - removeClient: %w", r.logger.Prefix(), err)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -82,7 +84,7 @@ func (r *room) broadcast(p *Packet, senderID string) error {
 			return true
 		}
 
-		err := c.sendPacket(p)
+		err := c.send(p)
 		if err != nil {
 			log.Printf("broadcast: %s", err)
 		}

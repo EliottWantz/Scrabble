@@ -1,16 +1,15 @@
 package ws
 
 import (
-	"encoding/json"
 	"errors"
-	"fmt"
 	"log"
-	"net"
 
 	"github.com/alphadose/haxmap"
 	"github.com/gofiber/websocket/v2"
 	"github.com/google/uuid"
 )
+
+var ErrLeavingOwnRoom = errors.New("trying to leave own room")
 
 type client struct {
 	ID      string
@@ -35,84 +34,61 @@ func NewClient(conn *websocket.Conn, m *Manager) (*client, error) {
 	return c, nil
 }
 
-func (c *client) read() {
-	for {
-		p := &Packet{}
-		err := c.Conn.ReadJSON(p)
-		if err != nil {
-			var syntaxError *json.SyntaxError
-			if errors.As(err, &syntaxError) {
-				log.Printf("websocket.UnexpectedCloseError: %T %+v", err, err)
-				continue
-			}
-			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Printf("websocket.UnexpectedCloseError: %T %+v", err, err)
-				return
-			}
-			if _, ok := err.(net.Error); ok {
-				log.Printf("net.Error: %T %+v", err, err)
-				return
-			}
-			log.Printf("Another error: %T %+v", err, err)
-			return
-		}
-
-		log.Println("got packet:", p)
-		if err := c.handlePacket(p); err != nil {
-			log.Printf("handlePacket: %T %+v", err, err)
-		}
+func (c *client) receive() (*Packet, error) {
+	p := &Packet{}
+	err := c.Conn.ReadJSON(p)
+	if err != nil {
+		return nil, err
 	}
+	return p, nil
+}
+
+func (c *client) send(p *Packet) error {
+	if err := c.Conn.WriteJSON(p); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (c *client) handlePacket(p *Packet) error {
 	switch p.Action {
-	case ActionNoAction:
+	case "":
 		log.Println("no action:", p)
-	case ActionMessage:
-		if err := c.Manager.broadcast(p, c.ID); err != nil {
-			return fmt.Errorf("%s ActionMessage: %w", log.Prefix(), err)
-		}
-	case ActionJoinRoom:
-		if err := c.joinRoom(p.RoomID); err != nil {
-			return fmt.Errorf("%s ActionJoinRoom: %w", log.Prefix(), err)
-		}
-	case ActionLeaveRoom:
-		if err := c.leaveRoom(p.RoomID); err != nil {
-			return fmt.Errorf("%s ActionLeaveRoom: %w", log.Prefix(), err)
-		}
+	case "broadcast":
+		return c.Manager.broadcast(p, c.ID)
+	case "join":
+		return c.joinRoom(p.RoomID)
+	case "leave":
+		return c.leaveRoom(p.RoomID)
 	}
 
-	return nil
-}
-
-func (c *client) sendPacket(p *Packet) error {
-	if err := c.Conn.WriteJSON(p); err != nil {
-		return fmt.Errorf("%s - sendPacket: %w", log.Prefix(), err)
-	}
 	return nil
 }
 
 func (c *client) joinRoom(rID string) error {
 	r, err := c.Manager.getRoom(rID)
 	if err != nil {
-		return fmt.Errorf("%s joinRoom: %w", log.Prefix(), err)
+		return err
 	}
 
 	if err := r.addClient(c.ID); err != nil {
-		return fmt.Errorf("%s joinRoom: %w", log.Prefix(), err)
+		return err
 	}
 
 	return nil
 }
 
 func (c *client) leaveRoom(rID string) error {
+	if rID == c.ID {
+		return ErrLeavingOwnRoom
+	}
 	r, err := c.Manager.getRoom(rID)
 	if err != nil {
-		return fmt.Errorf("%s leaveRoom: %w", log.Prefix(), err)
+		return err
 	}
 
 	if err = r.removeClient(c.ID); err != nil {
-		return fmt.Errorf("%s leaveRoom: %w", log.Prefix(), err)
+		return err
 	}
 
 	return nil

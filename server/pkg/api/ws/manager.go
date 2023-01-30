@@ -1,6 +1,8 @@
 package ws
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 
@@ -43,7 +45,26 @@ func (m *Manager) Accept() fiber.Handler {
 			return
 		}
 
-		c.read() // Infinite for loop that reads incoming packets
+		// Read and handle messages from the client
+		for {
+			p, err := c.receive()
+			if err != nil {
+				log.Printf("error: %T %+v", err, err)
+				var syntaxError *json.SyntaxError
+				if errors.As(err, &syntaxError) {
+					log.Printf("json.SyntaxError: %T %+v", err, err)
+					continue
+				}
+				return
+			}
+
+			go func() {
+				log.Println("got packet:", p)
+				if err := c.handlePacket(p); err != nil {
+					log.Printf("handlePacket: %T %+v", err, err)
+				}
+			}()
+		}
 	})
 }
 
