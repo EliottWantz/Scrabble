@@ -12,22 +12,10 @@ require (
 	github.com/google/uuid v1.3.0
 	go.mongodb.org/mongo-driver v1.11.1
 	golang.org/x/crypto v0.5.0
-	golang.org/x/exp v0.0.0-20230129154200-a960b3787bd2
+	golang.org/x/exp v0.0.0-20230130200758-8bd7c9d05862
 )
 
 require (
-	github.com/alecthomas/chroma v0.9.1 // indirect
-	github.com/danwakefield/fnmatch v0.0.0-20160403171240-cbb64ac3d964 // indirect
-	github.com/dlclark/regexp2 v1.4.0 // indirect
-	github.com/fatih/color v1.12.0 // indirect
-	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
-	go.opencensus.io v0.23.0 // indirect
-	golang.org/x/term v0.4.0 // indirect
-	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
-)
-
-require (
-	cdr.dev/slog v1.4.1
 	github.com/andybalholm/brotli v1.0.4 // indirect
 	github.com/fasthttp/websocket v1.5.1 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
