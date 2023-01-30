@@ -1,12 +1,15 @@
-#btn-Cancel:hover {
-    background-color: rgb(212, 2, 2);
+#btn-cancel {
+    margin-top: 2%px;
 }
 
-.btn-close {
-    height: 30px;
-    width: 5vw;
-    background-color: skyblue;
-    color: white;
-    border-color: rgb(12, 11, 11);
-    border-radius: 20px;
+#btn-submit {
+    margin-left: 10px;
+}
+
+#btn-view {
+    float: right;
+}
+
+.fields {
+    margin-right: 10px;
 }

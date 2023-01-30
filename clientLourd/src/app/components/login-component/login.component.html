@@ -1,16 +1,47 @@
-<form class="example-form">
-<mat-form-field class="example-full-width" appearance="fill">
-<mat-label>User Name</mat-label>
-<input matInput placeholder="Enter your name" name="usename"
-[(ngModel)] ="username">
-</mat-form-field>
-<mat-form-field class="example-full-width" appearance="fill">
-<mat-label>Password</mat-label>
-<input matInput placeholder="Enter your password" value="" name="password" type="password" [(ngModel)]= "password">
-</mat-form-field>
-<button mat-raised-button color="primary" (click)="submit()">Submit</button>
-<span *ngIf="show"> <button mat-button color="accent">Login success !!</button></span>
-</form>
-<div id="btn">
-    <button id="btn-Cancel" class="btn-close" (click)="closeModal()">Quitter</button>
+<div *ngIf="hasAccount">
+    <form>
+        <mat-form-field class="fields" appearance="fill">
+            <mat-label>Nom d'utilisateur</mat-label>
+            <input matInput placeholder="Entrez votre nom d'utilisateur" name="usename" [(ngModel)] ="username">
+            <div style="color: red;"> Name is required.</div>
+        </mat-form-field>
+        
+        <mat-form-field class="fields" appearance="fill">
+            <mat-label>Mot de passe</mat-label>
+            <input matInput placeholder="Entrez votre mot de passe" value="" name="password" type="password" [(ngModel)]= "password">
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" (click)="connect()">Envoyer</button>
+    </form>
+        
+    <div>
+        <button mat-raised-button color="warn" id="btn-cancel" (click)="closeModal()">Quitter</button>
+        <button mat-raised-button color="primary" id="btn-view" (click)="switchView()">Créer un compte</button>
+    </div>
+</div>
+
+<div *ngIf="!hasAccount">
+    <form>
+        <mat-form-field class="fields" appearance="fill">
+            <mat-label>Nom d'utilisateur</mat-label>
+            <input matInput placeholder="Enter your name" name="usename" [(ngModel)] ="username">
+        </mat-form-field>
+        
+        <mat-form-field class="fields" appearance="fill">
+            <mat-label>Mot de passe</mat-label>
+            <input matInput placeholder="Enter your password" value="" name="password" type="password" [(ngModel)]= "password">
+        </mat-form-field>
+
+        <mat-form-field class="fields" appearance="fill">
+            <mat-label>Adresse courriel</mat-label>
+            <input matInput placeholder="Entrez votre adresse courriel" value="" name="email" type="email" [(ngModel)]= "email">
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" (click)="createAccount()">Envoyer</button>
+    </form>
+    
+    <div>
+        <button mat-raised-button color="warn" id="btn-cancel" (click)="closeModal()">Quitter</button>
+        <button mat-raised-button color="primary" id="btn-view" (click)="switchView()">Se connecter</button>
+    </div>
 </div>
