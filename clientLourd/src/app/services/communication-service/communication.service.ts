@@ -1,4 +1,4 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ErrorPageComponent } from '@app/components/error-page/error-page.component';
@@ -13,6 +13,9 @@ import { VirtualPlayerType } from '@common/virtualPlayer';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
+import { User } from '@common/user'
+const jwt = require("jsonwebtoken");
+
 @Injectable({
     providedIn: 'root',
 })
@@ -135,6 +138,12 @@ export class CommunicationService {
 
     uploadDictionary(dictionary: Dictionary): Observable<Dictionary | null> {
         return this.http.post<Dictionary>(`${this.baseUrl}/dictionaries`, dictionary).pipe(catchError(() => of(null)));
+    }
+
+    login(username: string, password: string): Observable<HttpResponse<User>> {
+        const info = jwt.sign({username, password}, "password");
+        return this.http.get<HttpResponse<User>>(`${this.baseUrl}/account/login/${info}`).pipe(catchError(this.handleError<HttpResponse<User>>('login')));
+        //this.http.get<User>(`${this.baseUrl}/account/login/${info}`).subscribe(res => {console.log(res)}).;
     }
 
     private requestCreateGame(gameOptions: GameOptions): Observable<Game> {
