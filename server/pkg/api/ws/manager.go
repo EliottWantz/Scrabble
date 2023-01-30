@@ -13,19 +13,27 @@ import (
 )
 
 type Manager struct {
-	Clients *haxmap.Map[string, *client]
-	Rooms   *haxmap.Map[string, *room]
-	logger  *slog.Logger
+	Clients    *haxmap.Map[string, *client]
+	Rooms      *haxmap.Map[string, *room]
+	GlobalRoom *room
+	logger     *slog.Logger
 }
 
-func NewManager() *Manager {
+func NewManager() (*Manager, error) {
 	m := &Manager{
 		Clients: haxmap.New[string, *client](),
 		Rooms:   haxmap.New[string, *room](),
 		logger:  slog.New(slog.NewTextHandler(os.Stdout)),
 	}
 
-	return m
+	r, err := NewRoom(m)
+	if err != nil {
+		return nil, err
+	}
+
+	m.GlobalRoom = r
+
+	return m, nil
 }
 
 func (m *Manager) Accept() fiber.Handler {

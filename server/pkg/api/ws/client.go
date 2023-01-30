@@ -2,11 +2,12 @@ package ws
 
 import (
 	"errors"
-	"log"
+	"os"
 
 	"github.com/alphadose/haxmap"
 	"github.com/gofiber/websocket/v2"
 	"github.com/google/uuid"
+	"golang.org/x/exp/slog"
 )
 
 var ErrLeavingOwnRoom = errors.New("trying to leave own room")
@@ -16,6 +17,7 @@ type client struct {
 	Manager *Manager
 	Conn    *websocket.Conn
 	Rooms   *haxmap.Map[string, *room]
+	logger  *slog.Logger
 }
 
 func NewClient(conn *websocket.Conn, m *Manager) (*client, error) {
@@ -30,6 +32,7 @@ func NewClient(conn *websocket.Conn, m *Manager) (*client, error) {
 		Conn:    conn,
 		Rooms:   haxmap.New[string, *room](),
 	}
+	c.logger = slog.New(slog.NewTextHandler(os.Stdout)).With("client", c.ID)
 
 	return c, nil
 }
@@ -53,13 +56,14 @@ func (c *client) send(p *Packet) error {
 func (c *client) handlePacket(p *Packet) error {
 	switch p.Action {
 	case "":
-		log.Println("no action:", p)
+		c.logger.Info("received packet with no action")
 	case "broadcast":
 		return c.Manager.broadcast(p, c.ID)
 	case "join":
 		return c.joinRoom(p.RoomID)
 	case "leave":
-		return c.leaveRoom(p.RoomID)
+		return errors.New("not implemented")
+		// return c.leaveRoom(p.RoomID)
 	}
 
 	return nil

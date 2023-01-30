@@ -2,11 +2,11 @@ package user
 
 import (
 	"errors"
-	"log"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
 	"go.mongodb.org/mongo-driver/mongo"
+	"golang.org/x/exp/slog"
 )
 
 type Controller struct {
@@ -41,7 +41,7 @@ func (ctrl *Controller) SignUp(c *fiber.Ctx) error {
 
 	token, err := ctrl.svc.SignUp(req.Username, req.Password)
 	if err != nil {
-		log.Println(err)
+		slog.Error("Error signing up user", err)
 		if errors.Is(err, ErrUserAlreadyExists) {
 			return fiber.ErrConflict
 		}
@@ -104,7 +104,7 @@ func (ctrl *Controller) Revalidate(c *fiber.Ctx) error {
 
 	token, err := ctrl.svc.Revalidate(req.Token)
 	if err != nil {
-		log.Println(err)
+		slog.Error("Error revalidating token", err)
 		if errors.Is(err, jwt.ErrSignatureInvalid) {
 			return fiber.ErrUnauthorized
 		}

@@ -6,7 +6,7 @@ import (
 )
 
 func TestManager_addClient(t *testing.T) {
-	m := NewManager()
+	m, _ := NewManager()
 
 	var wg sync.WaitGroup
 	for i := 0; i < 5; i++ {
