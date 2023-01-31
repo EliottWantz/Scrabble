@@ -5,6 +5,7 @@ import (
 
 	"scrabble/pkg/api/user/auth"
 
+	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
 
@@ -18,12 +19,15 @@ type Service struct {
 	repo *Repository
 }
 
-func (s *Service) SignUp(username, password string) (string, error) {
+func (s *Service) SignUp(username, password, email string) (string, error) {
 	if username == "" {
-		return "", errors.New("empty username")
+		return "", fiber.NewError(fiber.StatusUnprocessableEntity, "username can't be blank")
 	}
 	if password == "" {
-		return "", errors.New("empty password")
+		return "", fiber.NewError(fiber.StatusUnprocessableEntity, "password can't be blank")
+	}
+	if email == "" {
+		return "", fiber.NewError(fiber.StatusUnprocessableEntity, "email can't be blank")
 	}
 
 	if _, err := s.repo.Find(username); err == nil {
