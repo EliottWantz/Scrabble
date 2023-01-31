@@ -13,4 +13,5 @@ const Map<String, String> en_US = {
   "authStart": "Commençons",
   "authLoginBtn": "Se connecter",
   "authRegisterBtn": "S'inscrire",
+
 };

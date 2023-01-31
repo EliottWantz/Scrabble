@@ -1,4 +1,5 @@
 import 'package:client_leger/controllers/auth_controller.dart';
+import 'package:client_leger/routes/app_routes.dart';
 import 'package:client_leger/services/settings_service.dart';
 import 'package:client_leger/widgets/common.dart';
 import 'package:client_leger/widgets/custom_button.dart';
@@ -60,7 +61,9 @@ class RegisterScreen extends StatelessWidget {
                   const Gap(50.0),
                   CustomButton(
                     text: 'authRegisterBtn'.tr,
-                    onPressed: () {},
+                    onPressed: () {
+                      Get.toNamed(Routes.AVATAR_SELECTION,arguments: controller);
+                    },
                   ),
                 ],
               ),
