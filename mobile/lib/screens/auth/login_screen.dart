@@ -46,13 +46,12 @@ class LoginScreen extends StatelessWidget {
                     labelText: 'authPasswordLabel'.tr,
                     placeholder: 'authPasswordPlaceholder'.tr,
                     password: true,
-                    validator: (value) {},
                   ),
                   const Gap(50.0),
                   CustomButton(
                     text: 'authLoginBtn'.tr,
-                    onPressed: () {
-                      controller.login(context);
+                    onPressed: () async {
+                      await controller.login(context);
                     },
                   )
                 ],

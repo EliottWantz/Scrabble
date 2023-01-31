@@ -1,3 +1,4 @@
+import 'package:client_leger/api/api_provider.dart';
 import 'package:client_leger/api/api_repository.dart';
 import 'package:client_leger/routes/app_routes.dart';
 import 'package:client_leger/utils/app_focus.dart';
@@ -8,7 +9,8 @@ import 'package:client_leger/services/settings_service.dart';
 class AuthController extends GetxController {
   final ApiRepository apiRepository;
   final SettingsService settingsService;
-  AuthController({required this.apiRepository,required this.settingsService});
+
+  AuthController({required this.apiRepository, required this.settingsService});
 
   // Register
   final GlobalKey<FormState> registerFormKey = GlobalKey<FormState>();
@@ -21,19 +23,19 @@ class AuthController extends GetxController {
   final loginEmailController = TextEditingController();
   final loginPasswordController = TextEditingController();
 
-  Rx<IconData> getIconTheme () {
+  Rx<IconData> getIconTheme() {
     return settingsService.currentThemeIcon;
   }
 
-  void onThemeChange(){
+  void onThemeChange() {
     settingsService.switchTheme();
   }
 
-  void login(BuildContext context) {
+  Future<void> login(BuildContext context) async {
     AppFocus.unfocus(context);
     if (loginFormKey.currentState!.validate()) {
-      Get.toNamed(Routes.HOME);
+      final request = LoginRequest(email: 'email', password: 'password');
+      await apiRepository.login(request);
     }
-    }
-
+  }
 }
