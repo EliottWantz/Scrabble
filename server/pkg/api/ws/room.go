@@ -1,12 +1,16 @@
 package ws
 
 import (
-	"fmt"
-	"os"
+	"errors"
 
 	"github.com/alphadose/haxmap"
 	"github.com/google/uuid"
 	"golang.org/x/exp/slog"
+)
+
+var (
+	ErrAlreadyInRoom = errors.New("client already in room")
+	ErrNotInRoom     = errors.New("client not in room")
 )
 
 type room struct {
@@ -19,7 +23,7 @@ type room struct {
 func NewRoom(m *Manager) (*room, error) {
 	id, err := uuid.NewRandom()
 	if err != nil {
-		return nil, fmt.Errorf("NewRoom: %w", err)
+		return nil, err
 	}
 
 	r := &room{
@@ -27,7 +31,7 @@ func NewRoom(m *Manager) (*room, error) {
 		Manager: m,
 		Clients: haxmap.New[string, *client](),
 	}
-	r.logger = slog.New(slog.NewTextHandler(os.Stdout)).With("room", r.ID)
+	r.logger = slog.With("room", r.ID)
 
 	return r, nil
 }
@@ -35,7 +39,7 @@ func NewRoom(m *Manager) (*room, error) {
 func (r *room) addClient(cID string) error {
 	c, _ := r.getClient(cID)
 	if c != nil {
-		return fmt.Errorf("client %s already in room", cID)
+		return ErrAlreadyInRoom
 	}
 
 	c, err := r.Manager.getClient(cID)
@@ -72,7 +76,7 @@ func (r *room) removeClient(cID string) error {
 func (r *room) getClient(cID string) (*client, error) {
 	c, ok := r.Clients.Get(cID)
 	if !ok {
-		return nil, fmt.Errorf("client %s not in room", cID)
+		return nil, ErrNotInRoom
 	}
 
 	return c, nil
@@ -85,10 +89,7 @@ func (r *room) broadcast(p *Packet, senderID string) error {
 			return true
 		}
 
-		err := c.send(p)
-		if err != nil {
-			r.logger.Error("client failed to send packet", err, "client", cID)
-		}
+		c.send(p)
 
 		return true
 	})

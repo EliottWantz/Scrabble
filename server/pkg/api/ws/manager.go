@@ -1,10 +1,7 @@
 package ws
 
 import (
-	"encoding/json"
-	"errors"
 	"fmt"
-	"os"
 
 	"github.com/alphadose/haxmap"
 	"github.com/gofiber/fiber/v2"
@@ -23,7 +20,7 @@ func NewManager() (*Manager, error) {
 	m := &Manager{
 		Clients: haxmap.New[string, *client](),
 		Rooms:   haxmap.New[string, *room](),
-		logger:  slog.New(slog.NewTextHandler(os.Stdout)),
+		logger:  slog.With("component", "manager"),
 	}
 
 	r, err := NewRoom(m)
@@ -38,50 +35,27 @@ func NewManager() (*Manager, error) {
 
 func (m *Manager) Accept() fiber.Handler {
 	return websocket.New(func(conn *websocket.Conn) {
-		c, err := NewClient(conn, m)
+		c, err := m.addClient(conn)
 		if err != nil {
+			m.logger.Error("add client", err)
 			return
 		}
 
 		defer func() {
 			if err := m.removeClient(c); err != nil {
-				m.logger.Error("remove client error", err)
+				m.logger.Error("remove client", err)
 			}
 		}()
 
-		err = m.addClient(c)
-		if err != nil {
-			m.logger.Error("add client error", err)
-			return
-		}
-
-		// Read and handle messages from the client
-		for {
-			p, err := c.receive()
-			if err != nil {
-				m.logger.Error("receive error", err)
-				var syntaxError *json.SyntaxError
-				if errors.As(err, &syntaxError) {
-					m.logger.Info("json syntax error in packet", syntaxError)
-					continue
-				}
-				return
-			}
-
-			go func() {
-				m.logger.Info("received packet", p)
-				if err := c.handlePacket(p); err != nil {
-					m.logger.Error("handlePacket error", err)
-				}
-			}()
-		}
+		go c.write()
+		c.read()
 	})
 }
 
 func (m *Manager) getClient(cID string) (*client, error) {
 	c, ok := m.Clients.Get(cID)
 	if !ok {
-		return nil, fmt.Errorf("getClient: client with id %s not registered", cID)
+		return nil, fmt.Errorf("client with id %s not registered", cID)
 	}
 	return c, nil
 }
@@ -89,28 +63,29 @@ func (m *Manager) getClient(cID string) (*client, error) {
 func (m *Manager) getRoom(rID string) (*room, error) {
 	r, ok := m.Rooms.Get(rID)
 	if !ok {
-		return nil, fmt.Errorf("getRoom: room with id %s not registered", rID)
+		return nil, fmt.Errorf("room with id %s not registered", rID)
 	}
 	return r, nil
 }
 
-func (m *Manager) addClient(c *client) error {
-	if c == nil {
-		return fmt.Errorf("addClient: client is nil")
-	}
-
+func (m *Manager) addClient(coon *websocket.Conn) (*client, error) {
 	r, err := NewRoom(m)
 	if err != nil {
-		return fmt.Errorf("addClient: %w", err)
+		return nil, err
 	}
 
 	// Client should have that same ID as the default room he is in
-	c.ID = r.ID
+	c := NewClient(coon, r.ID, m)
+
 	m.Rooms.Set(r.ID, r)
 	m.Clients.Set(c.ID, c)
 
 	if err := r.addClient(c.ID); err != nil {
-		return fmt.Errorf("addClient: %w", err)
+		return c, err
+	}
+
+	if err = m.GlobalRoom.addClient(c.ID); err != nil {
+		return c, err
 	}
 
 	m.logger.Info(
@@ -119,7 +94,8 @@ func (m *Manager) addClient(c *client) error {
 		"room_id", r.ID,
 		"room_size", m.Rooms.Len(),
 	)
-	return nil
+
+	return c, nil
 }
 
 func (m *Manager) removeClient(c *client) error {
@@ -154,21 +130,6 @@ func (m *Manager) removeRoom(rID string) error {
 		"room_id", r.ID,
 		"room_size", m.Rooms.Len(),
 	)
-
-	return nil
-}
-
-func (m *Manager) broadcast(p *Packet, senderID string) error {
-	r, err := m.getRoom(p.RoomID)
-	if err != nil {
-		return fmt.Errorf("broadcast: %w", err)
-	}
-
-	if !r.has(senderID) {
-		return fmt.Errorf("broadcast: sender %s not in room %s", senderID, p.RoomID)
-	}
-
-	r.broadcast(p, senderID)
 
 	return nil
 }

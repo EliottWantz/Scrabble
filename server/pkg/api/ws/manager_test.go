@@ -13,8 +13,7 @@ func TestManager_addClient(t *testing.T) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			c, _ := NewClient(nil, m)
-			m.addClient(c)
+			m.addClient(nil)
 		}()
 	}
 	wg.Wait()
