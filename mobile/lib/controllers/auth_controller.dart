@@ -3,10 +3,12 @@ import 'package:client_leger/routes/app_routes.dart';
 import 'package:client_leger/utils/app_focus.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:client_leger/services/settings_service.dart';
 
 class AuthController extends GetxController {
   final ApiRepository apiRepository;
-  AuthController({required this.apiRepository});
+  final SettingsService settingsService;
+  AuthController({required this.apiRepository,required this.settingsService});
 
   // Register
   final GlobalKey<FormState> registerFormKey = GlobalKey<FormState>();
@@ -19,7 +21,13 @@ class AuthController extends GetxController {
   final loginEmailController = TextEditingController();
   final loginPasswordController = TextEditingController();
 
-  var currentIcon = Get.isDarkMode ? Icons.wb_sunny.obs : Icons.brightness_2.obs;
+  Rx<IconData> getIconTheme () {
+    return settingsService.currentThemeIcon;
+  }
+
+  void onThemeChange(){
+    settingsService.switchTheme();
+  }
 
   void login(BuildContext context) {
     AppFocus.unfocus(context);

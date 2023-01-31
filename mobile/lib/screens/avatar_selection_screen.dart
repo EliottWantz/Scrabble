@@ -9,15 +9,12 @@ import 'package:get/get.dart';
 class AvatarSelectionScreen extends StatelessWidget {
   AvatarSelectionScreen({Key? key}) : super(key: key);
   final AuthController controller = Get.arguments;
-  final SettingsService settingsService = Get.find();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CommonWidget.authAppBar(controller.currentIcon, callback: () {
-        settingsService.switchTheme();
-        controller.currentIcon.value =
-            Get.isDarkMode ? Icons.brightness_2 : Icons.wb_sunny;
+      appBar: CommonWidget.authAppBar(controller.getIconTheme(), callback: () {
+        controller.onThemeChange();
       }, title: 'Choix de l\'avatar'),
       body: SafeArea(
         minimum: EdgeInsets.symmetric(horizontal: 40.0),

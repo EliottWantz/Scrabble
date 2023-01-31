@@ -16,11 +16,9 @@ class RegisterScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CommonWidget.authAppBar(controller.currentIcon,
+      appBar: CommonWidget.authAppBar(controller.getIconTheme(),
           title: 'authRegisterAppBar'.tr, callback: () {
-        settingsService.switchTheme();
-        controller.currentIcon.value =
-            Get.isDarkMode ? Icons.brightness_2 : Icons.wb_sunny;
+        controller.onThemeChange();
       }),
       body: SafeArea(
         minimum: const EdgeInsets.all(40),
@@ -62,7 +60,8 @@ class RegisterScreen extends StatelessWidget {
                   CustomButton(
                     text: 'authRegisterBtn'.tr,
                     onPressed: () {
-                      Get.toNamed(Routes.AVATAR_SELECTION,arguments: controller);
+                      Get.toNamed(Routes.AVATAR_SELECTION,
+                          arguments: controller);
                     },
                   ),
                 ],

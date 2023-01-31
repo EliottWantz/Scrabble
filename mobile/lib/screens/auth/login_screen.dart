@@ -11,16 +11,13 @@ class LoginScreen extends StatelessWidget {
   LoginScreen({Key? key}) : super(key: key);
 
   final AuthController controller = Get.arguments;
-  final SettingsService settingsService = Get.find();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CommonWidget.authAppBar(controller.currentIcon,
+      appBar: CommonWidget.authAppBar(controller.getIconTheme(),
           title: 'authLoginAppBar'.tr, callback: () {
-        settingsService.switchTheme();
-        controller.currentIcon.value =
-            Get.isDarkMode ? Icons.brightness_2 : Icons.wb_sunny;
+        controller.onThemeChange();
       }),
       body: SafeArea(
         minimum: const EdgeInsets.all(40),

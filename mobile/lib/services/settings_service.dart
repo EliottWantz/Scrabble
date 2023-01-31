@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 class SettingsService extends GetxService {
   bool isDarkMode = Get.isDarkMode;
   bool isFrench = true;
+  Rx<IconData> currentThemeIcon = Get.isDarkMode ? Icons.wb_sunny.obs : Icons.brightness_2.obs;
 
   final StorageService storageService;
   SettingsService({required this.storageService});
@@ -15,6 +16,7 @@ class SettingsService extends GetxService {
     isDarkMode = Get.isDarkMode ? false : true;
     Get.changeTheme(
         isDarkMode ? ThemeConfig.darkTheme : ThemeConfig.lightTheme);
+    currentThemeIcon.value = Get.isDarkMode ? Icons.brightness_2 : Icons.wb_sunny;
     storageService.write('isDarkMode', isDarkMode);
   }
 
