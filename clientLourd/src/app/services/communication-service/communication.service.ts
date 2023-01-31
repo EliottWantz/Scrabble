@@ -14,7 +14,7 @@ import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { User } from '@common/user'
-const jwt = require("jsonwebtoken");
+//const jwt = require("jsonwebtoken");
 
 @Injectable({
     providedIn: 'root',
@@ -140,9 +140,15 @@ export class CommunicationService {
         return this.http.post<Dictionary>(`${this.baseUrl}/dictionaries`, dictionary).pipe(catchError(() => of(null)));
     }
 
-    login(username: string, password: string): Observable<HttpResponse<User>> {
-        const info = jwt.sign({username, password}, "password");
-        return this.http.get<HttpResponse<User>>(`${this.baseUrl}/account/login/${info}`).pipe(catchError(this.handleError<HttpResponse<User>>('login')));
+    login(user: User): Observable<HttpResponse<User>> {
+        //const info = jwt.sign({username, password}, "password");
+        return this.http.post<HttpResponse<User>>(`${this.baseUrl}/login`, user).pipe(catchError(this.handleError<HttpResponse<User>>('login')));
+        //this.http.get<User>(`${this.baseUrl}/account/login/${info}`).subscribe(res => {console.log(res)}).;
+    }
+
+    createAccount(user: User): Observable<HttpResponse<User>> {
+        //const info = jwt.sign({username, password}, "password");
+        return this.http.post<HttpResponse<User>>(`${this.baseUrl}/signup`, user).pipe(catchError(this.handleError<HttpResponse<User>>('login')));
         //this.http.get<User>(`${this.baseUrl}/account/login/${info}`).subscribe(res => {console.log(res)}).;
     }
 

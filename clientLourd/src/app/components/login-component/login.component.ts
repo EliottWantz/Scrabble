@@ -1,6 +1,7 @@
 import { Component } from "@angular/core";
 import { MatDialog } from '@angular/material/dialog';
 import { AuthentificationService } from "@app/services/authentification/authentification.service";
+import { User } from "@common/user";
 
 export const SMALLEST = -1;
 
@@ -24,12 +25,28 @@ export class LoginComponent {
   }
   
   createAccount() {
+    const user: User = {
+      username: this.username,
+      password: this.password,
+      email: this.email,
+      isConnected: false,
+    }
+    const succeeded: Boolean = this.authService.createAccount(user);
+    if (succeeded) {
+      console.log(this.authService.user);
+    }
     console.log("user name is " + this.username);
     this.clear();
   }
 
   connect() {
-    const succeeded: Boolean = this.authService.login(this.username, this.password);
+    const user: User = {
+      username: this.username,
+      password: this.password,
+      email: this.email,
+      isConnected: false,
+    }
+    const succeeded: Boolean = this.authService.login(user);
     if (succeeded) {
       console.log(this.authService.user);
     }
