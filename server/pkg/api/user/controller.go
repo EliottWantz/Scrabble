@@ -24,9 +24,10 @@ func NewController(db *mongo.Database) *Controller {
 }
 
 type SignupRequest struct {
-	Username string `json:"username,omitempty"`
-	Password string `json:"password,omitempty"`
-	Email    string `json:"email,omitempty"`
+	Username  string `json:"username,omitempty"`
+	Password  string `json:"password,omitempty"`
+	Email     string `json:"email,omitempty"`
+	AvatarURL string `json:"avatarUrl,omitempty"`
 }
 
 type SignupResponse struct {
@@ -40,7 +41,7 @@ func (ctrl *Controller) SignUp(c *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	token, err := ctrl.svc.SignUp(req.Username, req.Password, req.Email)
+	token, err := ctrl.svc.SignUp(req)
 	if err != nil {
 		slog.Error("sign up user", err)
 		if errors.Is(err, ErrUserAlreadyExists) {

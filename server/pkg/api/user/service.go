@@ -19,29 +19,29 @@ type Service struct {
 	repo *Repository
 }
 
-func (s *Service) SignUp(username, password, email string) (string, error) {
-	if username == "" {
+func (s *Service) SignUp(req SignupRequest) (string, error) {
+	if req.Username == "" {
 		return "", fiber.NewError(fiber.StatusUnprocessableEntity, "username can't be blank")
 	}
-	if password == "" {
+	if req.Password == "" {
 		return "", fiber.NewError(fiber.StatusUnprocessableEntity, "password can't be blank")
 	}
-	if email == "" {
+	if req.Email == "" {
 		return "", fiber.NewError(fiber.StatusUnprocessableEntity, "email can't be blank")
 	}
 
-	if _, err := s.repo.Find(username); err == nil {
+	if _, err := s.repo.Find(req.Username); err == nil {
 		return "", ErrUserAlreadyExists
 	}
 
-	hashedPassword, err := auth.HashPassword(password)
+	hashedPassword, err := auth.HashPassword(req.Password)
 	if err != nil {
 		return "", err
 	}
 
 	a := &User{
 		Id:             uuid.NewString(),
-		Username:       username,
+		Username:       req.Username,
 		HashedPassword: hashedPassword,
 	}
 
@@ -49,7 +49,7 @@ func (s *Service) SignUp(username, password, email string) (string, error) {
 		return "", err
 	}
 
-	signed, err := auth.GenerateJWT(username)
+	signed, err := auth.GenerateJWT(req.Username)
 	if err != nil {
 		return "", err
 	}
