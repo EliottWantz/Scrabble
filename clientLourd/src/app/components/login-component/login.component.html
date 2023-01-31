@@ -2,12 +2,12 @@
     <form>
         <mat-form-field class="fields" appearance="fill">
             <mat-label>Nom d'utilisateur</mat-label>
-            <input matInput placeholder="Entrez votre nom d'utilisateur" name="usename" [(ngModel)] ="username">
+            <input matInput placeholder="Entrez votre nom d'utilisateur" name="usename" [(ngModel)] ="username" required>
         </mat-form-field>
         
         <mat-form-field class="fields" appearance="fill">
             <mat-label>Mot de passe</mat-label>
-            <input matInput placeholder="Entrez votre mot de passe" value="" name="password" type="password" [(ngModel)]= "password">
+            <input matInput placeholder="Entrez votre mot de passe" value="" name="password" type="password" [(ngModel)]= "password" required>
         </mat-form-field>
 
         <button mat-raised-button color="primary" (click)="connect()">Envoyer</button>
@@ -23,17 +23,17 @@
     <form>
         <mat-form-field class="fields" appearance="fill">
             <mat-label>Nom d'utilisateur</mat-label>
-            <input matInput placeholder="Enter your name" name="usename" [(ngModel)] ="username">
+            <input matInput placeholder="Enter your name" name="usename" [(ngModel)] ="username" required>
         </mat-form-field>
         
         <mat-form-field class="fields" appearance="fill">
             <mat-label>Mot de passe</mat-label>
-            <input matInput placeholder="Enter your password" value="" name="password" type="password" [(ngModel)]= "password">
+            <input matInput placeholder="Enter your password" value="" name="password" type="password" [(ngModel)]= "password" required>
         </mat-form-field>
 
         <mat-form-field class="fields" appearance="fill">
             <mat-label>Adresse courriel</mat-label>
-            <input matInput placeholder="Entrez votre adresse courriel" value="" name="email" type="email" [(ngModel)]= "email">
+            <input matInput placeholder="Entrez votre adresse courriel" value="" name="email" type="email" [(ngModel)]= "email" required>
         </mat-form-field>
 
         <button mat-raised-button color="primary" (click)="createAccount()">Envoyer</button>
