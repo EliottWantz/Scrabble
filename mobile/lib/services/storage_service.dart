@@ -14,7 +14,11 @@ class StorageService extends GetxService {
     return _box.read(key);
   }
 
-  void write(String key, dynamic value) async {
+  Future<void> remove(String key) async {
+    await _box.remove(key);
+  }
+
+  Future<void> write(String key, dynamic value) async {
     await _box.write(key, value);
   }
 }

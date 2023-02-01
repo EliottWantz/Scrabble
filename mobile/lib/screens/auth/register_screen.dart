@@ -16,7 +16,7 @@ class RegisterScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CommonWidget.authAppBar(controller.getIconTheme(),
+      appBar: CommonWidget.generalAppBar(controller.getIconTheme(),
           title: 'authRegisterAppBar'.tr, callback: () {
         controller.onThemeChange();
       }),
@@ -59,9 +59,8 @@ class RegisterScreen extends StatelessWidget {
                   const Gap(50.0),
                   CustomButton(
                     text: 'authRegisterBtn'.tr,
-                    onPressed: () {
-                      Get.toNamed(Routes.AVATAR_SELECTION,
-                          arguments: controller);
+                    onPressed: ()async {
+                      await controller.onRegister(context);
                     },
                   ),
                 ],

@@ -13,7 +13,7 @@ class AvatarSelectionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CommonWidget.authAppBar(controller.getIconTheme(), callback: () {
+      appBar: CommonWidget.generalAppBar(controller.getIconTheme(), callback: () {
         controller.onThemeChange();
       }, title: 'Choix de l\'avatar'),
       body: SafeArea(

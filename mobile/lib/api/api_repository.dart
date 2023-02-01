@@ -1,29 +1,13 @@
 import 'dart:async';
 
+import 'package:client_leger/models/requests/login_request.dart';
+import 'package:client_leger/models/requests/register_request.dart';
+import 'package:client_leger/models/response/login_response.dart';
+import 'package:client_leger/models/response/register_response.dart';
+import 'package:flutter/cupertino.dart';
+
 import 'api_provider.dart';
 
-import 'dart:convert';
-
-class LoginResponse {
-  LoginResponse({
-    required this.token,
-  });
-
-  String token;
-
-  factory LoginResponse.fromRawJson(String str) =>
-      LoginResponse.fromJson(json.decode(str));
-
-  String toRawJson() => json.encode(toJson());
-
-  factory LoginResponse.fromJson(Map<String, dynamic> json) => LoginResponse(
-    token: json["token"],
-  );
-
-  Map<String, dynamic> toJson() => {
-    "token": token,
-  };
-}
 
 class ApiRepository {
   ApiRepository({required this.apiProvider});
@@ -36,12 +20,12 @@ class ApiRepository {
       return LoginResponse.fromJson(res.body);
     }
   }
-  //
-  // Future<RegisterResponse?> register(RegisterRequest data) async {
-  //   final res = await apiProvider.register('/api/register', data);
-  //   if (res.statusCode == 200) {
-  //     return RegisterResponse.fromJson(res.body);
-  //   }
-  // }
+
+  Future<RegisterResponse?> register(RegisterRequest data) async {
+    final res = await apiProvider.register('/signup', data);
+    if (res.statusCode == 200) {
+      return RegisterResponse.fromJson(res.body);
+    }
+  }
 
 }

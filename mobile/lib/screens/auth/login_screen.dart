@@ -15,7 +15,7 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CommonWidget.authAppBar(controller.getIconTheme(),
+      appBar: CommonWidget.generalAppBar(controller.getIconTheme(),
           title: 'authLoginAppBar'.tr, callback: () {
         controller.onThemeChange();
       }),
@@ -34,15 +34,15 @@ class LoginScreen extends StatelessWidget {
                   ),
                   const Gap(20.0),
                   InputField(
-                    controller: controller.loginEmailController,
+                    controller: controller.loginUsernameController,
                     keyboardType: TextInputType.text,
-                    labelText: 'authEmailLabel'.tr,
-                    placeholder: 'authEmailPlaceholder'.tr,
+                    labelText: 'authUsernameLabel'.tr,
+                    placeholder: 'authUsernamePlaceholder'.tr,
                   ),
                   const Gap(20.0),
                   InputField(
                     controller: controller.loginPasswordController,
-                    keyboardType: TextInputType.emailAddress,
+                    keyboardType: TextInputType.text,
                     labelText: 'authPasswordLabel'.tr,
                     placeholder: 'authPasswordPlaceholder'.tr,
                     password: true,
@@ -51,7 +51,7 @@ class LoginScreen extends StatelessWidget {
                   CustomButton(
                     text: 'authLoginBtn'.tr,
                     onPressed: () async {
-                      await controller.login(context);
+                      await controller.onLogin(context);
                     },
                   )
                 ],

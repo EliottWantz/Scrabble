@@ -1,4 +1,5 @@
 import 'package:client_leger/bindings/auth_binding.dart';
+import 'package:client_leger/middlewares/auth_middleware.dart';
 import 'package:client_leger/screens/auth/auth_screen.dart';
 import 'package:client_leger/screens/avatar_selection_screen.dart';
 import 'package:client_leger/screens/home_screen.dart';
@@ -14,18 +15,14 @@ class AppPages {
       page: () => AuthScreen(),
       binding: AuthBinding(),
       children: [
-        GetPage(
-            name: Routes.REGISTER,
-            page: () => RegisterScreen()),
+        GetPage(name: Routes.REGISTER, page: () => RegisterScreen()),
         GetPage(name: Routes.LOGIN, page: () => LoginScreen()),
       ],
     ),
     GetPage(
-      name: Routes.HOME,
-      page: () => HomeScreen(),
-    ),
-    GetPage(
-        name: Routes.AVATAR_SELECTION,
-        page: () => AvatarSelectionScreen()),
+        name: Routes.HOME,
+        page: () => HomeScreen(),
+        middlewares: [AuthGuard()]),
+    GetPage(name: Routes.AVATAR_SELECTION, page: () => AvatarSelectionScreen()),
   ];
 }

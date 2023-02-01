@@ -15,7 +15,7 @@ class AuthScreen extends GetView<AuthController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CommonWidget.authAppBar(controller.getIconTheme(), callback: () {
+      appBar: CommonWidget.generalAppBar(controller.getIconTheme(), callback: () {
         controller.onThemeChange();
       }),
       body: SafeArea(

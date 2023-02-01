@@ -1,16 +1,19 @@
-import 'package:client_leger/api/api_provider.dart';
 import 'package:client_leger/api/api_repository.dart';
+import 'package:client_leger/models/requests/login_request.dart';
+import 'package:client_leger/models/requests/register_request.dart';
 import 'package:client_leger/routes/app_routes.dart';
+import 'package:client_leger/services/auth_service.dart';
 import 'package:client_leger/utils/app_focus.dart';
+import 'package:client_leger/utils/dialog_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:client_leger/services/settings_service.dart';
 
 class AuthController extends GetxController {
-  final ApiRepository apiRepository;
   final SettingsService settingsService;
+  final AuthService authService;
 
-  AuthController({required this.apiRepository, required this.settingsService});
+  AuthController({required this.settingsService,required this.authService});
 
   // Register
   final GlobalKey<FormState> registerFormKey = GlobalKey<FormState>();
@@ -20,7 +23,7 @@ class AuthController extends GetxController {
 
   // Login
   final GlobalKey<FormState> loginFormKey = GlobalKey<FormState>();
-  final loginEmailController = TextEditingController();
+  final loginUsernameController = TextEditingController();
   final loginPasswordController = TextEditingController();
 
   Rx<IconData> getIconTheme() {
@@ -31,11 +34,27 @@ class AuthController extends GetxController {
     settingsService.switchTheme();
   }
 
-  Future<void> login(BuildContext context) async {
+  Future<void> onLogin(BuildContext context) async {
     AppFocus.unfocus(context);
     if (loginFormKey.currentState!.validate()) {
-      final request = LoginRequest(email: 'email', password: 'password');
-      await apiRepository.login(request);
+      final request = LoginRequest(
+          username: loginUsernameController.text,
+          password: loginPasswordController.text);
+      // await authService.login(request);
+      Get.toNamed(Routes.HOME);
+    }
+  }
+
+  Future<void> onRegister(BuildContext context) async {
+    AppFocus.unfocus(context);
+    if (registerFormKey.currentState!.validate()) {
+      final request = RegisterRequest(
+          email: registerEmailController.text,
+          username: registerUsernameController.text,
+          password: registerPasswordController.text);
+      // await authService.register(request);
+      Get.toNamed(Routes.AVATAR_SELECTION,
+          arguments: this);
     }
   }
 }

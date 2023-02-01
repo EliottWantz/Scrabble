@@ -51,6 +51,7 @@ class DialogHelper {
           ),
         ),
       ),
+      barrierDismissible: false,
     );
   }
 

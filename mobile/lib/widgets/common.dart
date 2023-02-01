@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class CommonWidget {
-  static AppBar authAppBar(Rx<IconData> themeIcon,
+  static AppBar generalAppBar(Rx<IconData> themeIcon,
       {void Function()? callback,String? title}) {
     return AppBar(
       elevation: 0.0,
