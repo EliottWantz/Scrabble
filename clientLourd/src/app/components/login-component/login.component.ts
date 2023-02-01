@@ -17,7 +17,6 @@ export class LoginComponent {
   submitted = false;
   returnUrl: string;
   loginView: Boolean = false;
-  isConnected: Boolean = false;
   hasError: Boolean = false;
   username: string;
   password: string;
@@ -26,7 +25,7 @@ export class LoginComponent {
       private authenticationService: AuthentificationService,
       private matDialog: MatDialog) 
     {
-        if (this.authenticationService.getIsConnected()) {
+        if (this.authenticationService.getIsConnected) {
             this.closeModal();
         }
         this.username = "";
@@ -34,7 +33,7 @@ export class LoginComponent {
   }
 
   ngOnInit() {
-    if (this.authenticationService.getIsConnected()) {
+    if (this.authenticationService.getIsConnected) {
       this.closeModal();
     }
     this.username = "";
@@ -49,11 +48,9 @@ export class LoginComponent {
     }
 
     this.authenticationService.login(this.username, this.password).pipe(first()).subscribe(() => {
-      this.isConnected = true;
       this.closeModal()
     }, 
     (error: Error) => {
-      this.isConnected = false;
       this.hasError = true;
       console.log(error);
     });

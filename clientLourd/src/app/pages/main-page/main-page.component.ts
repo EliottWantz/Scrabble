@@ -36,6 +36,10 @@ export class MainPageComponent {
     }
 
     isConnected(): Boolean {
-        return this.authentificationService.getIsConnected();
+        return this.authentificationService.getIsConnected;
+    }
+
+    logout(): void{
+        this.authentificationService.logout();
     }
 }

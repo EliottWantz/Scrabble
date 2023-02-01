@@ -20,12 +20,12 @@ export class AuthentificationService {
         this.isConnected = false;
     }
 
-    public getIsConnected(): Boolean {
-        return this.isConnected;
-    }
-
     public get currentUserValue(): User {
         return this.currentUserSubject.value;
+    }
+
+    public get getIsConnected(): Boolean {
+        return this.isConnected;
     }
 
     login(username: string, password: string) {
@@ -38,5 +38,17 @@ export class AuthentificationService {
                 this.isConnected = true;
                 return user;
             }));
+    }
+
+    logout() {
+        this.isConnected = false;
+        this.http.post<any>(`${this.baseUrl}/logout`, this.currentUserSubject.value.username);
+        localStorage.removeItem('currentUser');
+        this.currentUserSubject.next({id: 0,
+            username: "",
+            password: "",
+            email: "",
+            token: ""
+        });
     }
 }
