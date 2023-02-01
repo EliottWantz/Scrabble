@@ -1,44 +1,42 @@
 import { Injectable } from '@angular/core';
-import { CommunicationService } from '../communication-service/communication.service';
 import { User } from '@common/user';
-//import { Observable, Subject } from 'rxjs';
-import { HttpStatusCode } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { environment } from 'src/environments/environment';
+import { map } from 'rxjs/operators';
 
 @Injectable({
     providedIn: 'root',
 })
 export class AuthentificationService {
-    isConnected: Boolean;
-    user: User;
-    constructor(private communicationService: CommunicationService) {
+    private currentUserSubject: BehaviorSubject<User>;
+    public currentUser: Observable<User>;
+    private isConnected: Boolean;
+    private readonly baseUrl: string = environment.serverUrl;
+
+    constructor(private http: HttpClient) {
+        this.currentUserSubject = new BehaviorSubject<User>(JSON.parse(localStorage.getItem('currentUser') || '{}'));
+        this.currentUser = this.currentUserSubject.asObservable();
         this.isConnected = false;
     }
 
-    login(user: User): Boolean {
-        let isGood: Boolean = false;
-        this.communicationService.login(user).subscribe((res) => {
-            if (res.status == HttpStatusCode.Ok && res.body) {
-                this.user = res.body;
-                isGood = true;
-            }
-            else if (res.status == HttpStatusCode.Ok) {
-                isGood = true;
-            }
-        })
-        return isGood;
+    public getIsConnected(): Boolean {
+        return this.isConnected;
     }
 
-    createAccount(user: User): Boolean {
-        let isGood: Boolean = false;
-        this.communicationService.createAccount(user).subscribe((res) => {
-            if (res.status == HttpStatusCode.Ok && res.body) {
-                this.user = res.body;
-                isGood = true;
-            }
-            else if (res.status == HttpStatusCode.Ok) {
-                isGood = true;
-            }
-        })
-        return isGood;
+    public get currentUserValue(): User {
+        return this.currentUserSubject.value;
+    }
+
+    login(username: string, password: string) {
+        return this.http.post<User>(`${this.baseUrl}/login`, { username, password })
+            .pipe(map(user => {
+                // store user details and jwt token in local storage to keep user logged in between page refreshes
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                this.currentUserSubject.next(user);
+                console.log(user);
+                this.isConnected = true;
+                return user;
+            }));
     }
 }
