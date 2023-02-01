@@ -3,10 +3,12 @@ package user
 import (
 	"errors"
 
+	"scrabble/config"
 	"scrabble/pkg/api/user/auth"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
+	"github.com/imagekit-developer/imagekit-go"
 )
 
 var (
@@ -17,6 +19,20 @@ var (
 
 type Service struct {
 	repo *Repository
+	ik   *imagekit.ImageKit
+}
+
+func NewService(cfg *config.Config, repo *Repository) *Service {
+	ik := imagekit.NewFromParams(imagekit.NewParams{
+		PrivateKey:  cfg.IMAGEKIT_PRIVATE_KEY,
+		PublicKey:   cfg.IMAGEKIT_PUBLIC_KEY,
+		UrlEndpoint: cfg.IMAGEKIT_ENDPOINT_URL,
+	})
+
+	return &Service{
+		repo: repo,
+		ik:   ik,
+	}
 }
 
 func (s *Service) SignUp(req SignupRequest) (string, error) {
@@ -77,4 +93,13 @@ func (s *Service) Login(username, password string) (string, error) {
 
 func (s *Service) Revalidate(tokenStr string) (string, error) {
 	return auth.RevalidateJWT(tokenStr)
+}
+
+func (s *Service) GetUser(ID string) (*User, error) {
+	u, err := s.repo.Find(ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return u, nil
 }

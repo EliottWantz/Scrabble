@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"scrabble/config"
-	"scrabble/pkg/api/user/avatar"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
@@ -13,18 +12,12 @@ import (
 )
 
 type Controller struct {
-	svc       *Service
-	avatarSvc *avatar.Service
+	svc *Service
 }
 
-func NewController(db *mongo.Database, cfg *config.Config) *Controller {
+func NewController(cfg *config.Config, db *mongo.Database) *Controller {
 	return &Controller{
-		svc: &Service{
-			repo: &Repository{
-				coll: db.Collection("users"),
-			},
-		},
-		avatarSvc: avatar.NewService(cfg),
+		svc: NewService(cfg, NewRepository(db)),
 	}
 }
 
@@ -133,9 +126,31 @@ func (ctrl *Controller) Revalidate(c *fiber.Ctx) error {
 	})
 }
 
+type GetUserResponse struct {
+	User  *User  `json:"user,omitempty"`
+	Error string `json:"error,omitempty"`
+}
+
+func (ctrl *Controller) GetUser(c *fiber.Ctx) error {
+	ID := c.Params("id")
+	if ID == "" {
+		return fiber.ErrBadRequest
+	}
+
+	user, err := ctrl.svc.GetUser(ID)
+	if err != nil {
+		slog.Error("Error getting user", err)
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(GetUserResponse{
+		User: user,
+	})
+}
+
 type UploadAvatarRequest struct {
-	AvatarURL string `json:"avatarUrl,omitempty"`
-	Username  string `json:"username,omitempty"`
+	ID        string `json:"id,omitempty"`
+	AvatarUrl string `json:"avatarUrl,omitempty"`
 }
 
 type UploadAvatarResponse struct {
@@ -150,12 +165,12 @@ func (ctrl *Controller) UploadAvatar(c *fiber.Ctx) error {
 		return fiber.ErrInternalServerError
 	}
 
-	url, err := ctrl.avatarSvc.UploadAvatar(req.AvatarURL, req.Username)
+	url, err := ctrl.svc.UploadAvatar(req.ID, req.AvatarUrl)
 	if err != nil {
 		var fiberErr *fiber.Error
 		if ok := errors.As(err, &fiberErr); ok {
 			return c.Status(fiberErr.Code).JSON(
-				GetAvatarResponse{
+				UploadAvatarResponse{
 					Error: fiberErr.Message,
 				},
 			)
@@ -174,40 +189,40 @@ func (ctrl *Controller) UploadAvatar(c *fiber.Ctx) error {
 	)
 }
 
-type GetAvatarRequest struct {
-	Username string `json:"username,omitempty"`
-}
+// type GetAvatarRequest struct {
+// 	Username string `json:"username,omitempty"`
+// }
 
-type GetAvatarResponse struct {
-	AvatarURL string `json:"avatarUrl,omitempty"`
-	Error     string `json:"error,omitempty"`
-}
+// type GetAvatarResponse struct {
+// 	AvatarURL string `json:"avatarUrl,omitempty"`
+// 	Error     string `json:"error,omitempty"`
+// }
 
-func (ctrl *Controller) GetAvatar(c *fiber.Ctx) error {
-	var req GetAvatarRequest
-	err := c.BodyParser(&req)
-	if err != nil {
-		return fiber.ErrInternalServerError
-	}
+// func (ctrl *Controller) GetAvatar(c *fiber.Ctx) error {
+// 	var req GetAvatarRequest
+// 	err := c.BodyParser(&req)
+// 	if err != nil {
+// 		return fiber.ErrInternalServerError
+// 	}
 
-	url, err := ctrl.avatarSvc.GetAvatar(req.Username)
-	if err != nil {
-		var fiberErr *fiber.Error
-		if ok := errors.As(err, &fiberErr); ok {
-			return c.Status(fiberErr.Code).JSON(
-				GetAvatarResponse{
-					Error: fiberErr.Message,
-				},
-			)
-		}
-		return c.Status(fiber.StatusInternalServerError).JSON(
-			GetAvatarResponse{
-				Error: err.Error(),
-			},
-		)
-	}
+// 	url, err := ctrl.svc.GetAvatar(req.Username)
+// 	if err != nil {
+// 		var fiberErr *fiber.Error
+// 		if ok := errors.As(err, &fiberErr); ok {
+// 			return c.Status(fiberErr.Code).JSON(
+// 				GetAvatarResponse{
+// 					Error: fiberErr.Message,
+// 				},
+// 			)
+// 		}
+// 		return c.Status(fiber.StatusInternalServerError).JSON(
+// 			GetAvatarResponse{
+// 				Error: err.Error(),
+// 			},
+// 		)
+// 	}
 
-	return c.JSON(GetAvatarResponse{
-		AvatarURL: url,
-	})
-}
+// 	return c.JSON(GetAvatarResponse{
+// 		AvatarURL: url,
+// 	})
+// }

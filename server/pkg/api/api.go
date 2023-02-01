@@ -35,7 +35,7 @@ func New(cfg *config.Config) (*API, error) {
 	api := &API{
 		App:      fiber.New(),
 		GameCtrl: game.NewController(db),
-		UserCtrl: user.NewController(db, cfg),
+		UserCtrl: user.NewController(cfg, db),
 		DB:       db,
 	}
 

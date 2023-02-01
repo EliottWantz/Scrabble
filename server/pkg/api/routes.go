@@ -9,7 +9,6 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/monitor"
 	jwtware "github.com/gofiber/jwt/v3"
-	"github.com/golang-jwt/jwt/v4"
 )
 
 func (api *API) setupMiddleware() {
@@ -24,18 +23,16 @@ func (api *API) setupMiddleware() {
 func (api *API) setupRoutes() {
 	api.App.Get("/ws", api.WebSocketManager.Accept())
 
+	// Public routes
 	router := api.App.Group("/api")
-
 	router.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("Hello api")
 	})
-	router.Get("/accessible", accessible)
-	router.Post("/login", api.UserCtrl.Login)
 	router.Post("/signup", api.UserCtrl.SignUp)
-	router.Post("/avatar", api.UserCtrl.UploadAvatar)
-	router.Get("/avatar", api.UserCtrl.GetAvatar)
-	router.Post("/revalidate", api.UserCtrl.Revalidate)
-	r := router.Group("/restricted").Use(
+	router.Post("/login", api.UserCtrl.Login)
+
+	// Proctected routes
+	router.Use(
 		jwtware.New(
 			jwtware.Config{
 				SigningKey: []byte("secret"),
@@ -43,19 +40,7 @@ func (api *API) setupRoutes() {
 			},
 		),
 	)
-	r.Get("/", restricted)
-}
-
-func accessible(c *fiber.Ctx) error {
-	return c.SendString("Accessible")
-}
-
-func restricted(c *fiber.Ctx) error {
-	token := c.Locals("token").(*jwt.Token)
-	claims := token.Claims.(jwt.MapClaims)
-	username := claims["username"].(string)
-	return c.JSON(fiber.Map{
-		"message": "Welcome " + username,
-		"token":   token,
-	})
+	router.Post("/avatar", api.UserCtrl.UploadAvatar)
+	router.Post("/revalidate", api.UserCtrl.Revalidate)
+	router.Get("/user/:id", api.UserCtrl.GetUser)
 }

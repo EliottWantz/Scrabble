@@ -12,11 +12,17 @@ type Repository struct {
 	coll *mongo.Collection
 }
 
-func (r *Repository) Find(username string) (*User, error) {
+func NewRepository(db *mongo.Database) *Repository {
+	return &Repository{
+		coll: db.Collection("users"),
+	}
+}
+
+func (r *Repository) Find(ID string) (*User, error) {
 	u := &User{}
 	res := r.coll.FindOne(
 		context.TODO(),
-		bson.M{"username": username},
+		bson.M{"_id": ID},
 	)
 	if err := res.Err(); err != nil {
 		return nil, err
@@ -26,18 +32,33 @@ func (r *Repository) Find(username string) (*User, error) {
 		return nil, err
 	}
 
-	slog.Info("Find user", "user", u)
+	slog.Info("Find user", "user", u.Username)
 
 	return u, nil
 }
 
-func (r *Repository) Insert(a *User) error {
-	res, err := r.coll.InsertOne(context.TODO(), a)
+func (r *Repository) Insert(u *User) error {
+	_, err := r.coll.InsertOne(context.TODO(), u)
 	if err != nil {
 		return err
 	}
 
-	slog.Info("Insert user", "user", res)
+	slog.Info("Inserted user", "user", u.Username)
+
+	return nil
+}
+
+func (r *Repository) Update(u *User) error {
+	_, err := r.coll.UpdateOne(
+		context.TODO(),
+		bson.M{"_id": u.Id},
+		bson.M{"$set": u},
+	)
+	if err != nil {
+		return err
+	}
+
+	slog.Info("Updated user", "user", u.Username)
 
 	return nil
 }
@@ -47,6 +68,8 @@ func (r *Repository) Delete(username string) error {
 	if err != nil {
 		return err
 	}
+
+	slog.Info("Deleted user", "user", username)
 
 	return nil
 }
