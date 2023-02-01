@@ -13,8 +13,6 @@ import { VirtualPlayerType } from '@common/virtualPlayer';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
-import { User } from '@common/user'
-//const jwt = require("jsonwebtoken");
 
 @Injectable({
     providedIn: 'root',
@@ -140,18 +138,6 @@ export class CommunicationService {
         return this.http.post<Dictionary>(`${this.baseUrl}/dictionaries`, dictionary).pipe(catchError(() => of(null)));
     }
 
-    login(user: User): Observable<HttpResponse<User>> {
-        //const info = jwt.sign({username, password}, "password");
-        return this.http.post<HttpResponse<User>>(`${this.baseUrl}/login`, user).pipe(catchError(this.handleError<HttpResponse<User>>('login')));
-        //this.http.get<User>(`${this.baseUrl}/account/login/${info}`).subscribe(res => {console.log(res)}).;
-    }
-
-    createAccount(user: User): Observable<HttpResponse<User>> {
-        //const info = jwt.sign({username, password}, "password");
-        return this.http.post<HttpResponse<User>>(`${this.baseUrl}/signup`, user).pipe(catchError(this.handleError<HttpResponse<User>>('login')));
-        //this.http.get<User>(`${this.baseUrl}/account/login/${info}`).subscribe(res => {console.log(res)}).;
-    }
-
     private requestCreateGame(gameOptions: GameOptions): Observable<Game> {
         return this.http.post<Game>(`${this.baseUrl}/game/init/multi`, gameOptions).pipe(catchError(this.handleError<Game>('createGame')));
     }
@@ -165,7 +151,7 @@ export class CommunicationService {
     private requestGameReconnection(oldId: string, newId: string, gameId: string): Observable<Game> {
         return this.http.post<Game>(`${this.baseUrl}/game/reconnect`, { oldId, newId, gameId }).pipe(catchError(this.handleError<Game>('reconnect')));
     }
-    private handleError<T>(request: string, result?: T): (error: Error) => Observable<T> {
+    public handleError<T>(request: string, result?: T): (error: Error) => Observable<T> {
         return (err: Error) => {
             if (err instanceof HttpErrorResponse && err.statusText === 'Unknown Error') {
                 this.dialog.closeAll();
