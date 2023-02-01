@@ -152,6 +152,14 @@ func (ctrl *Controller) UploadAvatar(c *fiber.Ctx) error {
 
 	url, err := ctrl.avatarSvc.UploadAvatar(req.AvatarURL, req.Username)
 	if err != nil {
+		var fiberErr *fiber.Error
+		if ok := errors.As(err, &fiberErr); ok {
+			return c.Status(fiberErr.Code).JSON(
+				GetAvatarResponse{
+					Error: fiberErr.Message,
+				},
+			)
+		}
 		return c.Status(fiber.StatusInternalServerError).JSON(
 			UploadAvatarResponse{
 				Error: err.Error(),
@@ -170,6 +178,11 @@ type GetAvatarRequest struct {
 	Username string `json:"username,omitempty"`
 }
 
+type GetAvatarResponse struct {
+	AvatarURL string `json:"avatarUrl,omitempty"`
+	Error     string `json:"error,omitempty"`
+}
+
 func (ctrl *Controller) GetAvatar(c *fiber.Ctx) error {
 	var req GetAvatarRequest
 	err := c.BodyParser(&req)
@@ -177,14 +190,24 @@ func (ctrl *Controller) GetAvatar(c *fiber.Ctx) error {
 		return fiber.ErrInternalServerError
 	}
 
-	res, err := ctrl.avatarSvc.GetAvatar(req.Username)
+	url, err := ctrl.avatarSvc.GetAvatar(req.Username)
 	if err != nil {
+		var fiberErr *fiber.Error
+		if ok := errors.As(err, &fiberErr); ok {
+			return c.Status(fiberErr.Code).JSON(
+				GetAvatarResponse{
+					Error: fiberErr.Message,
+				},
+			)
+		}
 		return c.Status(fiber.StatusInternalServerError).JSON(
-			fiber.Map{
-				"error": err.Error(),
+			GetAvatarResponse{
+				Error: err.Error(),
 			},
 		)
 	}
 
-	return c.SendString(res.String())
+	return c.JSON(GetAvatarResponse{
+		AvatarURL: url,
+	})
 }
