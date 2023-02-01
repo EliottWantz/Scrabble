@@ -31,6 +31,10 @@ class AuthService extends GetxService {
 
   bool isUserLoggedIn() {
     final token = storageService.read('jwt_token');
-    return JwtDecoder.isExpired(token) == false;
+    try {
+      return JwtDecoder.isExpired(token) == false;
+    } catch(e) {
+      return false;
+    }
   }
 }

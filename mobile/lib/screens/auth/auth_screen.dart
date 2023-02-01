@@ -1,6 +1,7 @@
 import 'package:client_leger/controllers/auth_controller.dart';
 import 'package:client_leger/routes/app_routes.dart';
 import 'package:client_leger/services/settings_service.dart';
+import 'package:client_leger/utils/dialog_helper.dart';
 import 'package:client_leger/widgets/common.dart';
 import 'package:client_leger/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
@@ -11,11 +12,20 @@ class AuthScreen extends GetView<AuthController> {
   AuthScreen({super.key});
 
   final SettingsService settingsService = Get.find();
+  var error = Get.arguments;
 
   @override
   Widget build(BuildContext context) {
+    Future.delayed(
+        Duration.zero,
+        () => {
+              if (error != null && error!.isNotEmpty)
+                {DialogHelper.showErrorDialog(title: error!), error = ''}
+            });
+
     return Scaffold(
-      appBar: CommonWidget.generalAppBar(controller.getIconTheme(), callback: () {
+      appBar:
+          CommonWidget.generalAppBar(controller.getIconTheme(), callback: () {
         controller.onThemeChange();
       }),
       body: SafeArea(

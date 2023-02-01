@@ -15,6 +15,12 @@ class AuthController extends GetxController {
 
   AuthController({required this.settingsService,required this.authService});
 
+  @override
+  void onInit() {
+
+    super.onInit();
+  }
+
   // Register
   final GlobalKey<FormState> registerFormKey = GlobalKey<FormState>();
   final registerEmailController = TextEditingController();
@@ -41,7 +47,7 @@ class AuthController extends GetxController {
           username: loginUsernameController.text,
           password: loginPasswordController.text);
       // await authService.login(request);
-      Get.toNamed(Routes.HOME);
+      Get.offAllNamed(Routes.HOME);
     }
   }
 
