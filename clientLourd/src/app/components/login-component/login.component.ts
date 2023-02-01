@@ -1,7 +1,9 @@
 import { Component } from "@angular/core";
 import { MatDialog } from '@angular/material/dialog';
 import { AuthentificationService } from "@app/services/authentification/authentification.service";
-import { User } from "@common/user";
+//import { User } from "@common/user";
+import { FormGroup } from "@angular/forms";
+import { first } from 'rxjs/operators';
 
 export const SMALLEST = -1;
 
@@ -11,57 +13,54 @@ export const SMALLEST = -1;
   styleUrls: ["./login.component.scss"],
 })
 export class LoginComponent {
-  hasAccount: Boolean;
+  loginForm: FormGroup;
+  submitted = false;
+  returnUrl: string;
+  loginView: Boolean = false;
+  isConnected: Boolean = false;
+  hasError: Boolean = false;
   username: string;
   password: string;
-  email: string;
-  show: boolean;
-  constructor(private matDialog: MatDialog, private authService: AuthentificationService) {
-    this.hasAccount = true;
-    this.username = "";
-    this.password = "";
-    this.email = "";
-    this.show = false;
-  }
-  
-  createAccount() {
-    const user: User = {
-      username: this.username,
-      password: this.password,
-      email: this.email,
-      isConnected: false,
-    }
-    const succeeded: Boolean = this.authService.createAccount(user);
-    if (succeeded) {
-      console.log(this.authService.user);
-    }
-    console.log("user name is " + this.username);
-    this.clear();
+
+  constructor(
+      private authenticationService: AuthentificationService,
+      private matDialog: MatDialog) 
+    {
+        if (this.authenticationService.getIsConnected()) {
+            this.closeModal();
+        }
+        this.username = "";
+        this.password = "";
   }
 
-  connect() {
-    const user: User = {
-      username: this.username,
-      password: this.password,
-      email: this.email,
-      isConnected: false,
+  ngOnInit() {
+    if (this.authenticationService.getIsConnected()) {
+      this.closeModal();
     }
-    const succeeded: Boolean = this.authService.login(user);
-    if (succeeded) {
-      console.log(this.authService.user);
-    }
-    console.log("user name is " + this.username);
-    this.clear();
-  }
-
-  clear() {
     this.username = "";
     this.password = "";
-    this.show = true;
+  }
+
+  onSubmit() {
+    this.submitted = true;
+
+    if (this.username == "" || this.password == "") {
+      return;
+    }
+
+    this.authenticationService.login(this.username, this.password).pipe(first()).subscribe(() => {
+      this.isConnected = true;
+      this.closeModal()
+    }, 
+    (error: Error) => {
+      this.isConnected = false;
+      this.hasError = true;
+      console.log(error);
+    });
   }
 
   switchView(): void {
-    this.hasAccount = !this.hasAccount;
+    this.loginView = !this.loginView;
   }
 
   closeModal(): void {
