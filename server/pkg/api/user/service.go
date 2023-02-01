@@ -46,7 +46,7 @@ func (s *Service) SignUp(req SignupRequest) (*User, string, error) {
 		return nil, "", fiber.NewError(fiber.StatusUnprocessableEntity, "email can't be blank")
 	}
 
-	if _, err := s.repo.Find(req.Username); err == nil {
+	if _, err := s.repo.FindByUsername(req.Username); err == nil {
 		return nil, "", ErrUserAlreadyExists
 	}
 
