@@ -36,6 +36,6 @@ export class MainPageComponent {
     }
 
     isConnected(): Boolean {
-        return this.authentificationService.isConnected;
+        return this.authentificationService.getIsConnected();
     }
 }

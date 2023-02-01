@@ -4,8 +4,11 @@
     </span>
 
     <section>
-        <div id="rightdiv">
+        <div id="rightdiv" *ngIf="!isConnected()">
             <button mat-raised-button (click)="openLoginDialog()">Se connecter</button>
+        </div>
+        <div id="rightdiv" *ngIf="isConnected()">
+            <button mat-raised-button (click)="openLoginDialog()">Déconnexion</button>
         </div>
     </section>
 
