@@ -21,8 +21,8 @@ class ApiRepository {
     }
   }
 
-  Future<RegisterResponse?> register(RegisterRequest data) async {
-    final res = await apiProvider.register('/signup', data);
+  Future<RegisterResponse?> signup(RegisterRequest data) async {
+    final res = await apiProvider.signup('/signup', data);
     if (res.statusCode == 200) {
       return RegisterResponse.fromJson(res.body);
     }

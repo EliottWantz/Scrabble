@@ -1,5 +1,7 @@
 import 'package:client_leger/controllers/auth_controller.dart';
+import 'package:client_leger/services/auth_service.dart';
 import 'package:client_leger/services/settings_service.dart';
+import 'package:client_leger/services/storage_service.dart';
 import 'package:client_leger/widgets/common.dart';
 import 'package:client_leger/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +11,7 @@ import 'package:get/get.dart';
 class AvatarSelectionScreen extends StatelessWidget {
   AvatarSelectionScreen({Key? key}) : super(key: key);
   final AuthController controller = Get.arguments;
+  final StorageService storageService = Get.find();
 
   @override
   Widget build(BuildContext context) {

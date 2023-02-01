@@ -13,12 +13,12 @@ class AuthService extends GetxService {
 
   Future<void> login(LoginRequest loginRequest) async {
     var res = await apiRepository.login(loginRequest);
-    await _setSession(res!.token);
+    if(res?.token != null) await _setSession(res!.token);
   }
 
   Future<void> register(RegisterRequest registerRequest) async {
-    var res = await apiRepository.register(registerRequest);
-    await _setSession(res!.token);
+    var res = await apiRepository.signup(registerRequest);
+    if(res?.token != null) await _setSession(res!.token);
   }
 
   Future<void> logout() async {

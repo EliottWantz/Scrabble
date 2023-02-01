@@ -52,7 +52,7 @@ class AuthController extends GetxController {
           email: registerEmailController.text,
           username: registerUsernameController.text,
           password: registerPasswordController.text);
-      // await authService.register(request);
+      await authService.register(request);
       Get.toNamed(Routes.AVATAR_SELECTION,
           arguments: this);
     }
