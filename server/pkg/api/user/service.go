@@ -35,46 +35,46 @@ func NewService(cfg *config.Config, repo *Repository) *Service {
 	}
 }
 
-func (s *Service) SignUp(req SignupRequest) (string, error) {
+func (s *Service) SignUp(req SignupRequest) (*User, string, error) {
 	if req.Username == "" {
-		return "", fiber.NewError(fiber.StatusUnprocessableEntity, "username can't be blank")
+		return nil, "", fiber.NewError(fiber.StatusUnprocessableEntity, "username can't be blank")
 	}
 	if req.Password == "" {
-		return "", fiber.NewError(fiber.StatusUnprocessableEntity, "password can't be blank")
+		return nil, "", fiber.NewError(fiber.StatusUnprocessableEntity, "password can't be blank")
 	}
 	if req.Email == "" {
-		return "", fiber.NewError(fiber.StatusUnprocessableEntity, "email can't be blank")
+		return nil, "", fiber.NewError(fiber.StatusUnprocessableEntity, "email can't be blank")
 	}
 
 	if _, err := s.repo.Find(req.Username); err == nil {
-		return "", ErrUserAlreadyExists
+		return nil, "", ErrUserAlreadyExists
 	}
 
 	hashedPassword, err := auth.HashPassword(req.Password)
 	if err != nil {
-		return "", err
+		return nil, "", err
 	}
 
-	a := &User{
+	u := &User{
 		Id:             uuid.NewString(),
 		Username:       req.Username,
 		HashedPassword: hashedPassword,
 	}
 
-	if err := s.repo.Insert(a); err != nil {
-		return "", err
+	if err := s.repo.Insert(u); err != nil {
+		return nil, "", err
 	}
 
 	signed, err := auth.GenerateJWT(req.Username)
 	if err != nil {
-		return "", err
+		return nil, "", err
 	}
 
-	return signed, nil
+	return u, signed, nil
 }
 
 func (s *Service) Login(username, password string) (string, error) {
-	u, err := s.repo.Find(username)
+	u, err := s.repo.FindByUsername(username)
 	if err != nil {
 		return "", ErrUserNotFound
 	}

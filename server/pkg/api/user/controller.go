@@ -29,7 +29,8 @@ type SignupRequest struct {
 }
 
 type SignupResponse struct {
-	Token string `json:"token"`
+	User  *User  `json:"user,omitempty"`
+	Token string `json:"token,omitempty"`
 }
 
 // Sign up a new user
@@ -39,7 +40,7 @@ func (ctrl *Controller) SignUp(c *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	token, err := ctrl.svc.SignUp(req)
+	user, token, err := ctrl.svc.SignUp(req)
 	if err != nil {
 		slog.Error("sign up user", err)
 		if errors.Is(err, ErrUserAlreadyExists) {
@@ -52,7 +53,12 @@ func (ctrl *Controller) SignUp(c *fiber.Ctx) error {
 		return fiber.ErrInternalServerError
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(SignupResponse{Token: token})
+	return c.Status(fiber.StatusCreated).JSON(
+		SignupResponse{
+			User:  user,
+			Token: token,
+		},
+	)
 }
 
 type LoginRequest struct {
