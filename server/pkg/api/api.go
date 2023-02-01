@@ -24,7 +24,7 @@ type API struct {
 	DB               *mongo.Database
 }
 
-func New(cfg config.Config) (*API, error) {
+func New(cfg *config.Config) (*API, error) {
 	slog.Info("Opening database...")
 	db, err := storage.OpenDB(cfg.MONGODB_URI, cfg.MONGODB_NAME, CONNECTION_TIMEOUT)
 	if err != nil {
@@ -35,7 +35,7 @@ func New(cfg config.Config) (*API, error) {
 	api := &API{
 		App:      fiber.New(),
 		GameCtrl: game.NewController(db),
-		UserCtrl: user.NewController(db),
+		UserCtrl: user.NewController(db, cfg),
 		DB:       db,
 	}
 

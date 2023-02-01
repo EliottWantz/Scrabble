@@ -3,6 +3,9 @@ package user
 import (
 	"errors"
 
+	"scrabble/config"
+	"scrabble/pkg/api/user/avatar"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -10,16 +13,18 @@ import (
 )
 
 type Controller struct {
-	svc *Service
+	svc       *Service
+	avatarSvc *avatar.Service
 }
 
-func NewController(db *mongo.Database) *Controller {
+func NewController(db *mongo.Database, cfg *config.Config) *Controller {
 	return &Controller{
 		svc: &Service{
 			repo: &Repository{
 				coll: db.Collection("users"),
 			},
 		},
+		avatarSvc: avatar.NewService(cfg),
 	}
 }
 
@@ -128,8 +133,58 @@ func (ctrl *Controller) Revalidate(c *fiber.Ctx) error {
 	})
 }
 
-func (ctrl *Controller) UploadAvatar() fiber.Handler {
-	return func(c *fiber.Ctx) error {
-		return c.SendString("vous avez televerser votre avatar")
+type UploadAvatarRequest struct {
+	AvatarURL string `json:"avatarUrl,omitempty"`
+	Username  string `json:"username,omitempty"`
+}
+
+type UploadAvatarResponse struct {
+	AvatarURL string `json:"avatarUrl,omitempty"`
+	Error     string `json:"error,omitempty"`
+}
+
+func (ctrl *Controller) UploadAvatar(c *fiber.Ctx) error {
+	var req UploadAvatarRequest
+	err := c.BodyParser(&req)
+	if err != nil {
+		return fiber.ErrInternalServerError
 	}
+
+	url, err := ctrl.avatarSvc.UploadAvatar(req.AvatarURL, req.Username)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(
+			UploadAvatarResponse{
+				Error: err.Error(),
+			},
+		)
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(
+		UploadAvatarResponse{
+			AvatarURL: url,
+		},
+	)
+}
+
+type GetAvatarRequest struct {
+	Username string `json:"username,omitempty"`
+}
+
+func (ctrl *Controller) GetAvatar(c *fiber.Ctx) error {
+	var req GetAvatarRequest
+	err := c.BodyParser(&req)
+	if err != nil {
+		return fiber.ErrInternalServerError
+	}
+
+	res, err := ctrl.avatarSvc.GetAvatar(req.Username)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(
+			fiber.Map{
+				"error": err.Error(),
+			},
+		)
+	}
+
+	return c.SendString(res.String())
 }
