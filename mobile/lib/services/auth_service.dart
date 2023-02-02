@@ -1,6 +1,7 @@
 import 'package:client_leger/api/api_repository.dart';
 import 'package:client_leger/models/requests/login_request.dart';
 import 'package:client_leger/models/requests/register_request.dart';
+import 'package:client_leger/models/response/login_response.dart';
 import 'package:client_leger/services/storage_service.dart';
 import 'package:get/get.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
@@ -13,12 +14,14 @@ class AuthService extends GetxService {
 
   Future<void> login(LoginRequest loginRequest) async {
     var res = await apiRepository.login(loginRequest);
-    if(res?.token != null) await _setSession(res!.token);
+    if (res == null) return;
+    if (res.token != null) await _setSession(res.token as String);
   }
 
   Future<void> register(RegisterRequest registerRequest) async {
     var res = await apiRepository.signup(registerRequest);
-    if(res?.token != null) await _setSession(res!.token);
+    if (res == null) return;
+    if (res.token != null) await _setSession(res.token as String);
   }
 
   Future<void> logout() async {
@@ -33,7 +36,7 @@ class AuthService extends GetxService {
     final token = storageService.read('jwt_token');
     try {
       return JwtDecoder.isExpired(token) == false;
-    } catch(e) {
+    } catch (e) {
       return false;
     }
   }

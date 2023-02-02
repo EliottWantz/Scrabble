@@ -5,9 +5,25 @@ import 'package:get/get_connect/http/src/response/response.dart';
 
 FutureOr<dynamic> responseInterceptor(
     Request request, Response response) async {
-  if (response.statusCode != (200 | 201)) {
-    DialogHelper.showErrorDialog(description: 'Une erreur est survenue');
-    return;
+  DialogHelper.hideLoading();
+  if (response.statusCode! >= 400) {
+    handleErrorStatus(response);
+    throw Exception('${response.statusText}');
   }
   return response;
+}
+
+void handleErrorStatus(Response response) {
+  switch (response.statusCode) {
+    case 401:
+      DialogHelper.showErrorDialog(
+          title: 'Erreur 401',
+          description: 'Erreur dans la saisie du mot de passe');
+      break;
+    default:
+      DialogHelper.showErrorDialog(
+          title: 'Erreur ${response.statusCode}',
+          description: '${response.statusText}');
+  }
+  return;
 }

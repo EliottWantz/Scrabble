@@ -4,10 +4,8 @@ import 'package:client_leger/models/requests/login_request.dart';
 import 'package:client_leger/models/requests/register_request.dart';
 import 'package:client_leger/models/response/login_response.dart';
 import 'package:client_leger/models/response/register_response.dart';
-import 'package:flutter/cupertino.dart';
 
 import 'api_provider.dart';
-
 
 class ApiRepository {
   ApiRepository({required this.apiProvider});
@@ -23,9 +21,8 @@ class ApiRepository {
 
   Future<RegisterResponse?> signup(RegisterRequest data) async {
     final res = await apiProvider.signup('/signup', data);
-    if (res.statusCode == 200) {
+    if (res.statusCode == 201) {
       return RegisterResponse.fromJson(res.body);
     }
   }
-
 }

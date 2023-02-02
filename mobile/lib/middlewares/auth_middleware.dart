@@ -10,7 +10,7 @@ class AuthGuard extends GetMiddleware {
   RouteSettings? redirect(String? route) {
     return authService.isUserLoggedIn()
         ? null
-        : const RouteSettings(name: Routes.AUTH,arguments:'Vous n\'etes pas autorisé');
+        : const RouteSettings(name: Routes.AUTH);
   }
 
 }

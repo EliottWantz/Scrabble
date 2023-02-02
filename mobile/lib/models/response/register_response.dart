@@ -1,12 +1,13 @@
 import 'dart:convert';
 
-class RegisterResponse {
-  RegisterResponse({
-    required this.token,required this.error
-  });
+import 'package:client_leger/models/user.dart';
 
-  String token;
-  String error;
+class RegisterResponse {
+  RegisterResponse({this.token, this.error, this.user});
+
+  String? token;
+  String? error;
+  User? user;
 
   factory RegisterResponse.fromRawJson(String str) =>
       RegisterResponse.fromJson(json.decode(str));
@@ -16,11 +17,13 @@ class RegisterResponse {
   factory RegisterResponse.fromJson(Map<String, dynamic> json) =>
       RegisterResponse(
         token: json["token"],
+        user: User.fromJson(json["user"]),
         error: json["error"],
       );
 
   Map<String, dynamic> toJson() => {
-    "token": token,
-    "error": error,
-  };
+        "token": token,
+        "user": user!.toJson(),
+        "error": error,
+      };
 }

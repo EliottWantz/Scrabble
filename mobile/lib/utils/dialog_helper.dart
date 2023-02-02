@@ -36,7 +36,7 @@ class DialogHelper {
     );
   }
 
-  static void showLoading([String? message]) {
+  static Future<void> showLoading([String? message]) async {
     Get.dialog(
       Dialog(
         child: Padding(
@@ -53,6 +53,7 @@ class DialogHelper {
       ),
       barrierDismissible: false,
     );
+    await Future.delayed(const Duration(seconds: 2));
   }
 
   static void hideLoading() {

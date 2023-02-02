@@ -12,17 +12,8 @@ class AuthScreen extends GetView<AuthController> {
   AuthScreen({super.key});
 
   final SettingsService settingsService = Get.find();
-  var error = Get.arguments;
-
   @override
   Widget build(BuildContext context) {
-    Future.delayed(
-        Duration.zero,
-        () => {
-              if (error != null && error!.isNotEmpty)
-                {DialogHelper.showErrorDialog(title: error!), error = ''}
-            });
-
     return Scaffold(
       appBar:
           CommonWidget.generalAppBar(controller.getIconTheme(), callback: () {

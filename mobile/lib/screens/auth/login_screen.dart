@@ -4,6 +4,7 @@ import 'package:client_leger/widgets/common.dart';
 import 'package:client_leger/widgets/custom_button.dart';
 import 'package:client_leger/widgets/input_field.dart';
 import 'package:flutter/material.dart';
+import 'package:form_validator/form_validator.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 
@@ -34,11 +35,14 @@ class LoginScreen extends StatelessWidget {
                   ),
                   const Gap(20.0),
                   InputField(
-                    controller: controller.loginUsernameController,
-                    keyboardType: TextInputType.text,
-                    labelText: 'authUsernameLabel'.tr,
-                    placeholder: 'authUsernamePlaceholder'.tr,
-                  ),
+                      controller: controller.loginUsernameController,
+                      keyboardType: TextInputType.text,
+                      labelText: 'authUsernameLabel'.tr,
+                      placeholder: 'authUsernamePlaceholder'.tr,
+                      validator: ValidationBuilder(
+                              requiredMessage: 'Le champ ne peut pas être vide')
+                          .minLength(3, 'trop petit')
+                          .build()),
                   const Gap(20.0),
                   InputField(
                     controller: controller.loginPasswordController,
@@ -46,6 +50,12 @@ class LoginScreen extends StatelessWidget {
                     labelText: 'authPasswordLabel'.tr,
                     placeholder: 'authPasswordPlaceholder'.tr,
                     password: true,
+                    validator: ValidationBuilder(
+                            requiredMessage: 'Le champ ne peut pas être vide')
+                        .regExp(
+                            RegExp(r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{3,}$'),
+                            'Veuillez entrez un mot de passe valide')
+                        .build(),
                   ),
                   const Gap(50.0),
                   CustomButton(

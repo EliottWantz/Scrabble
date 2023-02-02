@@ -59,7 +59,7 @@ class RegisterScreen extends StatelessWidget {
                   const Gap(50.0),
                   CustomButton(
                     text: 'authRegisterBtn'.tr,
-                    onPressed: ()async {
+                    onPressed: () async {
                       await controller.onRegister(context);
                     },
                   ),

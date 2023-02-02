@@ -13,11 +13,10 @@ class AuthController extends GetxController {
   final SettingsService settingsService;
   final AuthService authService;
 
-  AuthController({required this.settingsService,required this.authService});
+  AuthController({required this.settingsService, required this.authService});
 
   @override
   void onInit() {
-
     super.onInit();
   }
 
@@ -46,8 +45,11 @@ class AuthController extends GetxController {
       final request = LoginRequest(
           username: loginUsernameController.text,
           password: loginPasswordController.text);
-      // await authService.login(request);
-      Get.offAllNamed(Routes.HOME);
+      await DialogHelper.showLoading('Connexion au serveur');
+      await authService.login(request);
+      if (authService.isUserLoggedIn()) {
+        Get.offAllNamed(Routes.HOME);
+      }
     }
   }
 
@@ -58,9 +60,11 @@ class AuthController extends GetxController {
           email: registerEmailController.text,
           username: registerUsernameController.text,
           password: registerPasswordController.text);
+      await DialogHelper.showLoading('Connexion au serveur');
       await authService.register(request);
-      Get.toNamed(Routes.AVATAR_SELECTION,
-          arguments: this);
+      if (authService.isUserLoggedIn()) {
+        Get.offAllNamed(Routes.AVATAR_SELECTION, arguments: this);
+      }
     }
   }
 }

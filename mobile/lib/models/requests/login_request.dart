@@ -15,12 +15,12 @@ class LoginRequest {
   String toRawJson() => json.encode(toJson());
 
   factory LoginRequest.fromJson(Map<String, dynamic> json) => LoginRequest(
-    username: json["email"],
+    username: json["username"],
     password: json["password"],
   );
 
   Map<String, dynamic> toJson() => {
-    "email": username,
+    "username": username,
     "password": password,
   };
 }
