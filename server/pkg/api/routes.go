@@ -12,11 +12,22 @@ import (
 )
 
 func (api *API) setupMiddleware() {
-	api.App.Use(cors.New())
-	api.App.Use(limiter.New(limiter.Config{Max: 500, Expiration: 30 * time.Second}))
-	api.App.Use(logger.New(logger.Config{
-		Format: "[${ip}]:${port} ${status} - ${method} ${path}\n",
-	}))
+	api.App.Use(
+		cors.New(),
+		limiter.New(
+			limiter.Config{
+				Max:        500,
+				Expiration: 30 * time.Second,
+			},
+		),
+		logger.New(
+			logger.Config{
+				Format:     "${time} | ${ip}:${port} | ${latency} | ${method} | ${status} | ${path}\n",
+				TimeFormat: "2006/01/02 15:04:05",
+			},
+		),
+	)
+
 	api.App.Get("/metrics", monitor.New(monitor.Config{Title: "Scrabble Server Metrics"}))
 }
 
