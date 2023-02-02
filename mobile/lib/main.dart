@@ -8,11 +8,16 @@ import 'package:client_leger/services/auth_service.dart';
 import 'package:client_leger/services/settings_service.dart';
 import 'package:client_leger/services/storage_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 Future<void> main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await initGlobalServices();
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.landscapeRight,
+    DeviceOrientation.landscapeLeft,
+  ]);
   runApp(MyApp());
 }
 
