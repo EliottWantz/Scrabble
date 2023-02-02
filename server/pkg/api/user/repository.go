@@ -2,44 +2,82 @@ package user
 
 import (
 	"context"
-	"log"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"golang.org/x/exp/slog"
 )
 
 type Repository struct {
 	coll *mongo.Collection
 }
 
-func (r *Repository) Find(username string) (*User, error) {
-	a := &User{}
+func NewRepository(db *mongo.Database) *Repository {
+	return &Repository{
+		coll: db.Collection("users"),
+	}
+}
+
+func (r *Repository) Find(ID string) (*User, error) {
+	u := &User{}
+	res := r.coll.FindOne(
+		context.TODO(),
+		bson.M{"_id": ID},
+	)
+	if err := res.Err(); err != nil {
+		return nil, err
+	}
+
+	if err := res.Decode(u); err != nil {
+		return nil, err
+	}
+
+	slog.Info("Find user", "user", u.Username)
+
+	return u, nil
+}
+
+func (r *Repository) FindByUsername(username string) (*User, error) {
+	u := &User{}
 	res := r.coll.FindOne(
 		context.TODO(),
 		bson.M{"username": username},
 	)
 	if err := res.Err(); err != nil {
-		log.Println("Find error:", err)
 		return nil, err
 	}
 
-	if err := res.Decode(a); err != nil {
-		log.Println("Find decode error:", err)
+	if err := res.Decode(u); err != nil {
 		return nil, err
 	}
 
-	log.Println("Find:", a)
+	slog.Info("Find user", "user", u.Username)
 
-	return a, nil
+	return u, nil
 }
 
-func (r *Repository) Insert(a *User) error {
-	res, err := r.coll.InsertOne(context.TODO(), a)
+func (r *Repository) Insert(u *User) error {
+	_, err := r.coll.InsertOne(context.TODO(), u)
 	if err != nil {
-		log.Println("Insert error:", err)
 		return err
 	}
-	log.Println("Insert:", res)
+
+	slog.Info("Inserted user", "user", u.Username)
+
+	return nil
+}
+
+func (r *Repository) Update(u *User) error {
+	_, err := r.coll.UpdateOne(
+		context.TODO(),
+		bson.M{"_id": u.Id},
+		bson.M{"$set": u},
+	)
+	if err != nil {
+		return err
+	}
+
+	slog.Info("Updated user", "user", u.Username)
 
 	return nil
 }
@@ -47,9 +85,10 @@ func (r *Repository) Insert(a *User) error {
 func (r *Repository) Delete(username string) error {
 	_, err := r.coll.DeleteOne(context.TODO(), bson.M{"username": username})
 	if err != nil {
-		log.Println("Delete error:", err)
 		return err
 	}
+
+	slog.Info("Deleted user", "user", username)
 
 	return nil
 }

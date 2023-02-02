@@ -2,55 +2,60 @@ package ws
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/alphadose/haxmap"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
+	"golang.org/x/exp/slog"
 )
 
 type Manager struct {
-	Clients *haxmap.Map[string, *client]
-	Rooms   *haxmap.Map[string, *room]
-	logger  *log.Logger
+	Clients    *haxmap.Map[string, *client]
+	Rooms      *haxmap.Map[string, *room]
+	GlobalRoom *room
+	logger     *slog.Logger
 }
 
-func NewManager() *Manager {
+func NewManager() (*Manager, error) {
 	m := &Manager{
 		Clients: haxmap.New[string, *client](),
 		Rooms:   haxmap.New[string, *room](),
-		logger:  log.New(log.Writer(), "[Manager] ", log.LstdFlags),
+		logger:  slog.With("component", "manager"),
 	}
 
-	return m
+	r, err := NewRoom(m)
+	if err != nil {
+		return nil, err
+	}
+
+	m.GlobalRoom = r
+
+	return m, nil
 }
 
 func (m *Manager) Accept() fiber.Handler {
 	return websocket.New(func(conn *websocket.Conn) {
-		c, err := NewClient(conn, m)
+		c, err := m.addClient(conn)
 		if err != nil {
+			m.logger.Error("add client", err)
 			return
 		}
 
 		defer func() {
 			if err := m.removeClient(c); err != nil {
-				m.logger.Println(err)
+				m.logger.Error("remove client", err)
 			}
 		}()
 
-		err = m.addClient(c)
-		if err != nil {
-			return
-		}
-
-		c.read() // Infinite for loop that reads incoming packets
+		go c.write()
+		c.read()
 	})
 }
 
 func (m *Manager) getClient(cID string) (*client, error) {
 	c, ok := m.Clients.Get(cID)
 	if !ok {
-		return nil, fmt.Errorf("%s - getClient: client with id %s not registered", m.logger.Prefix(), cID)
+		return nil, fmt.Errorf("client with id %s not registered", cID)
 	}
 	return c, nil
 }
@@ -58,33 +63,39 @@ func (m *Manager) getClient(cID string) (*client, error) {
 func (m *Manager) getRoom(rID string) (*room, error) {
 	r, ok := m.Rooms.Get(rID)
 	if !ok {
-		return nil, fmt.Errorf("%s - getRoom: room with id %s not registered", m.logger.Prefix(), rID)
+		return nil, fmt.Errorf("room with id %s not registered", rID)
 	}
 	return r, nil
 }
 
-func (m *Manager) addClient(c *client) error {
-	if c == nil {
-		return fmt.Errorf("%s - addClient: client is nil", m.logger.Prefix())
-	}
-
+func (m *Manager) addClient(coon *websocket.Conn) (*client, error) {
 	r, err := NewRoom(m)
 	if err != nil {
-		return fmt.Errorf("%s - addClient: %w", m.logger.Prefix(), err)
+		return nil, err
 	}
 
 	// Client should have that same ID as the default room he is in
-	c.ID = r.ID
+	c := NewClient(coon, r.ID, m)
+
 	m.Rooms.Set(r.ID, r)
 	m.Clients.Set(c.ID, c)
 
 	if err := r.addClient(c.ID); err != nil {
-		return fmt.Errorf("%s - addClient: %w", m.logger.Prefix(), err)
+		return c, err
 	}
 
-	m.logger.Printf("client %s registered", c.ID)
-	m.logger.Printf("Room size: %d", m.Rooms.Len())
-	return nil
+	if err = m.GlobalRoom.addClient(c.ID); err != nil {
+		return c, err
+	}
+
+	m.logger.Info(
+		"client registered",
+		"client_id", c.ID,
+		"room_id", r.ID,
+		"room_size", m.Rooms.Len(),
+	)
+
+	return c, nil
 }
 
 func (m *Manager) removeClient(c *client) error {
@@ -96,43 +107,35 @@ func (m *Manager) removeClient(c *client) error {
 	m.Clients.Del(c.ID)
 	err := c.Conn.Close()
 	if err != nil {
-		return fmt.Errorf("%s - removeClient: %w", m.logger.Prefix(), err)
+		return fmt.Errorf("removeClient: %w", err)
 	}
 
-	m.logger.Printf("client %s removed", c.ID)
-	m.logger.Printf("Room size: %d", m.Rooms.Len())
+	m.logger.Info(
+		"client removed",
+		"client_id", c.ID,
+		"room_size", m.Rooms.Len(),
+	)
 	return nil
 }
 
 func (m *Manager) removeRoom(rID string) error {
 	r, err := m.getRoom(rID)
 	if err != nil {
-		return fmt.Errorf("%s - removeRoom: %w", m.logger.Prefix(), err)
+		return fmt.Errorf("removeRoom: %w", err)
 	}
 
 	m.Rooms.Del(r.ID)
-	m.logger.Printf("room %s removed", r.ID)
-
-	return nil
-}
-
-func (m *Manager) broadcast(p *Packet, senderID string) error {
-	r, err := m.getRoom(p.RoomID)
-	if err != nil {
-		return fmt.Errorf("%s - broadcast: %w", m.logger.Prefix(), err)
-	}
-
-	if !r.has(senderID) {
-		return fmt.Errorf("%s - broadcast: sender %s not in room %s", m.logger.Prefix(), senderID, p.RoomID)
-	}
-
-	r.broadcast(p, senderID)
+	m.logger.Info(
+		"room removed",
+		"room_id", r.ID,
+		"room_size", m.Rooms.Len(),
+	)
 
 	return nil
 }
 
 func (m *Manager) Shutdown() {
-	m.logger.Println("Shutting down manager")
+	m.logger.Info("Shutting down manager")
 	m.Clients.ForEach(func(cID string, c *client) bool {
 		_ = m.removeClient(c)
 		return true
