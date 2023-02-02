@@ -29,7 +29,7 @@ class LoginScreen extends StatelessWidget {
               width: 600,
               child: Column(
                 children: [
-                  Gap(Get.height / 4),
+                  Gap(Get.height / 6),
                   Text(
                     'authLoginWelcome'.tr,
                   ),
@@ -63,7 +63,8 @@ class LoginScreen extends StatelessWidget {
                     onPressed: () async {
                       await controller.onLogin(context);
                     },
-                  )
+                  ),
+                  const Gap(50.0),
                 ],
               ),
             ),

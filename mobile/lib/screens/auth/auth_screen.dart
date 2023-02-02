@@ -12,6 +12,7 @@ class AuthScreen extends GetView<AuthController> {
   AuthScreen({super.key});
 
   final SettingsService settingsService = Get.find();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -19,14 +20,14 @@ class AuthScreen extends GetView<AuthController> {
           CommonWidget.generalAppBar(controller.getIconTheme(), callback: () {
         controller.onThemeChange();
       }),
-      body: SafeArea(
-        minimum: const EdgeInsets.symmetric(horizontal: 30.0),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 40.0),
         child: Center(
           child: SizedBox(
             width: 700,
             child: Column(
               children: [
-                Gap(Get.height / 4),
+                Gap(Get.height / 6),
                 const Image(
                   image: AssetImage('assets/images/scrabble.png'),
                 ),
