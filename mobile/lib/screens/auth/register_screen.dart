@@ -5,6 +5,7 @@ import 'package:client_leger/widgets/common.dart';
 import 'package:client_leger/widgets/custom_button.dart';
 import 'package:client_leger/widgets/input_field.dart';
 import 'package:flutter/material.dart';
+import 'package:form_validator/form_validator.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 
@@ -20,8 +21,8 @@ class RegisterScreen extends StatelessWidget {
           title: 'authRegisterAppBar'.tr, callback: () {
         controller.onThemeChange();
       }),
-      body: SafeArea(
-        minimum: const EdgeInsets.all(40),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 40.0),
         child: Form(
           key: controller.registerFormKey,
           child: Center(
@@ -39,6 +40,10 @@ class RegisterScreen extends StatelessWidget {
                     keyboardType: TextInputType.text,
                     labelText: 'authEmailLabel'.tr,
                     placeholder: 'authEmailPlaceholder'.tr,
+                    validator: ValidationBuilder(
+                            requiredMessage: 'Le champ ne peut pas être vide')
+                        .email('Entrer un courriel valide')
+                        .build(),
                   ),
                   const Gap(20.0),
                   InputField(
@@ -46,6 +51,10 @@ class RegisterScreen extends StatelessWidget {
                     keyboardType: TextInputType.text,
                     labelText: 'authUsernameLabel'.tr,
                     placeholder: 'authUsernamePlaceholder'.tr,
+                    validator: ValidationBuilder(
+                            requiredMessage: 'Le champ ne peut pas être vide')
+                        .minLength(3, 'trop petit')
+                        .build(),
                   ),
                   const Gap(20.0),
                   InputField(
@@ -54,7 +63,12 @@ class RegisterScreen extends StatelessWidget {
                     labelText: 'authPasswordLabel'.tr,
                     placeholder: 'authPasswordPlaceholder'.tr,
                     password: true,
-                    validator: (value) {},
+                    validator: ValidationBuilder(
+                            requiredMessage: 'Le champ ne peut pas être vide')
+                        .regExp(
+                            RegExp(r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{3,}$'),
+                            'Veuillez entrez un mot de passe valide')
+                        .build(),
                   ),
                   const Gap(50.0),
                   CustomButton(
