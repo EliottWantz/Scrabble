@@ -21,10 +21,10 @@ class RegisterScreen extends StatelessWidget {
           title: 'authRegisterAppBar'.tr, callback: () {
         controller.onThemeChange();
       }),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 40.0),
-        child: Form(
-          key: controller.registerFormKey,
+      body: Form(
+        key: controller.registerFormKey,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 40.0),
           child: Center(
             child: SizedBox(
               width: 600,

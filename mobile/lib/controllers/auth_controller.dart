@@ -46,6 +46,8 @@ class AuthController extends GetxController {
           username: loginUsernameController.text,
           password: loginPasswordController.text);
       await DialogHelper.showLoading('Connexion au serveur');
+      Get.offAllNamed(Routes.HOME);
+      DialogHelper.hideLoading();
       await authService.login(request);
       if (authService.isUserLoggedIn()) {
         Get.offAllNamed(Routes.HOME);

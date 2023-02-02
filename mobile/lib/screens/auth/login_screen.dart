@@ -20,10 +20,10 @@ class LoginScreen extends StatelessWidget {
           title: 'authLoginAppBar'.tr, callback: () {
         controller.onThemeChange();
       }),
-      body: SafeArea(
-        minimum: const EdgeInsets.all(40),
-        child: Form(
-          key: controller.loginFormKey,
+      body: Form(
+        key: controller.loginFormKey,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 40.0),
           child: Center(
             child: SizedBox(
               width: 600,
