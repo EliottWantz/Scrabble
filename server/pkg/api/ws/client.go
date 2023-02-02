@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/alphadose/haxmap"
 	"github.com/gofiber/websocket/v2"
@@ -18,8 +19,8 @@ type client struct {
 	Conn      *websocket.Conn
 	Rooms     *haxmap.Map[string, *room]
 	logger    *slog.Logger
-	sendCh    chan *Packet
-	receiveCh chan *Packet
+	sendCh    chan *packet
+	receiveCh chan *packet
 }
 
 func NewClient(conn *websocket.Conn, cID string, m *Manager) *client {
@@ -28,8 +29,8 @@ func NewClient(conn *websocket.Conn, cID string, m *Manager) *client {
 		Manager:   m,
 		Conn:      conn,
 		Rooms:     haxmap.New[string, *room](),
-		sendCh:    make(chan *Packet, 10),
-		receiveCh: make(chan *Packet, 10),
+		sendCh:    make(chan *packet, 10),
+		receiveCh: make(chan *packet, 10),
 	}
 	c.logger = slog.With("client", c.ID)
 
@@ -44,7 +45,7 @@ func (c *client) write() {
 	}
 }
 
-func (c *client) send(p *Packet) {
+func (c *client) send(p *packet) {
 	c.sendCh <- p
 }
 
@@ -52,7 +53,7 @@ func (c *client) read() {
 	go c.receive()
 
 	for {
-		p := &Packet{}
+		p := &packet{}
 		err := c.Conn.ReadJSON(p)
 		if err != nil {
 			var syntaxError *json.SyntaxError
@@ -69,6 +70,7 @@ func (c *client) read() {
 			return
 		}
 
+		p.Timestamp = time.Now().Format(time.TimeOnly)
 		c.receiveCh <- p
 	}
 }
@@ -82,7 +84,7 @@ func (c *client) receive() {
 	}
 }
 
-func (c *client) handlePacket(p *Packet) error {
+func (c *client) handlePacket(p *packet) error {
 	switch p.Action {
 	case "":
 		c.logger.Info("received packet with no action")
@@ -97,7 +99,7 @@ func (c *client) handlePacket(p *Packet) error {
 	return nil
 }
 
-func (c *client) broadcast(p *Packet) error {
+func (c *client) broadcast(p *packet) error {
 	r, err := c.Manager.getRoom(p.RoomID)
 	if err != nil {
 		return fmt.Errorf("broadcast: %w", err)

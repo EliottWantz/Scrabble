@@ -82,7 +82,7 @@ func (r *room) getClient(cID string) (*client, error) {
 	return c, nil
 }
 
-func (r *room) broadcast(p *Packet, senderID string) error {
+func (r *room) broadcast(p *packet, senderID string) error {
 	r.Clients.ForEach(func(cID string, c *client) bool {
 		// Don't send packet to the sender
 		if cID == senderID {

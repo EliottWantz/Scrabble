@@ -29,6 +29,10 @@ func NewManager() (*Manager, error) {
 	}
 
 	m.GlobalRoom = r
+	err = m.addRoom(r)
+	if err != nil {
+		return nil, err
+	}
 
 	return m, nil
 }
@@ -113,6 +117,16 @@ func (m *Manager) removeClient(c *client) error {
 	m.logger.Info(
 		"client removed",
 		"client_id", c.ID,
+		"room_size", m.Rooms.Len(),
+	)
+	return nil
+}
+
+func (m *Manager) addRoom(r *room) error {
+	m.Rooms.Set(r.ID, r)
+	m.logger.Info(
+		"room registered",
+		"room_id", r.ID,
 		"room_size", m.Rooms.Len(),
 	)
 	return nil
