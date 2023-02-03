@@ -19,7 +19,7 @@ class AvatarSelectionScreen extends StatelessWidget {
         builder: (BuildContext context) => Scaffold(
               body: Row(
                 children: [
-                  appSideBar(
+                  AppSideBar(
                       controller: controller.sideBarController,
                       isAuthScreen: true),
                   Expanded(

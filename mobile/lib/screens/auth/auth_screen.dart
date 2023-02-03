@@ -18,7 +18,7 @@ class AuthScreen extends GetView<AuthController> {
         builder: (BuildContext context) => Scaffold(
               body: Row(
                 children: [
-                  appSideBar(controller: controller.sideBarController, isAuthScreen: true),
+                  AppSideBar(controller: controller.sideBarController, isAuthScreen: true),
                   Expanded(
                     child: _buildItems(
                       context,

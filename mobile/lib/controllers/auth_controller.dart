@@ -6,6 +6,7 @@ import 'package:client_leger/services/auth_service.dart';
 import 'package:client_leger/utils/app_focus.dart';
 import 'package:client_leger/utils/dialog_helper.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:client_leger/services/settings_service.dart';
 import 'package:sidebarx/sidebarx.dart';
@@ -18,6 +19,8 @@ class AuthController extends GetxController {
 
   @override
   void onInit() {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+        overlays: [SystemUiOverlay.bottom]);
     super.onInit();
   }
 
@@ -32,7 +35,7 @@ class AuthController extends GetxController {
   final loginUsernameController = TextEditingController();
   final loginPasswordController = TextEditingController();
 
-  final sideBarController = SidebarXController(selectedIndex: 0, extended: true);
+  final sideBarController = SidebarXController(selectedIndex: 0, extended: false);
 
   Rx<IconData> getIconTheme() {
     return settingsService.currentThemeIcon;

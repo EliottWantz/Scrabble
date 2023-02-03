@@ -7,8 +7,8 @@ import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:sidebarx/sidebarx.dart';
 
-class appSideBar extends StatelessWidget {
-  appSideBar({
+class AppSideBar extends StatelessWidget {
+  AppSideBar({
     Key? key,
     required SidebarXController controller,
     required bool isAuthScreen,
@@ -24,7 +24,9 @@ class appSideBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SidebarX(
-        showToggleButton: _isAuthScreen == false,
+      collapseIcon: Icons.menu_open,
+        extendIcon: Icons.menu,
+        showToggleButton: true,
         controller: _controller,
         theme: sideBarUtils.sideBarTheme,
         extendedTheme: sideBarUtils.sideBarThemeExt,
@@ -195,9 +197,8 @@ class appSideBar extends StatelessWidget {
       return [
         SidebarXItem(
           icon: Icons.home,
-          label: 'Connexion',
+          label: 'Home',
           onTap: () {
-            debugPrint('Home');
           },
         ),
         const SidebarXItem(

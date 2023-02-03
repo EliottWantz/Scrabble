@@ -11,7 +11,7 @@ import 'package:sidebarx/sidebarx.dart';
 class HomeScreen extends GetView<HomeController> {
   HomeScreen({Key? key}) : super(key: key);
 
-  final _controller = SidebarXController(selectedIndex: 0, extended: true);
+  final sidebarController = SidebarXController(selectedIndex: 0, extended: false);
   final _key = GlobalKey<ScaffoldState>();
 
   @override
@@ -21,7 +21,7 @@ class HomeScreen extends GetView<HomeController> {
               key: _key,
               body: Row(
                 children: [
-                  appSideBar(controller: _controller, isAuthScreen: false),
+                  AppSideBar(controller: sidebarController, isAuthScreen: false),
                   Expanded(
                     child: Center(
                       child: _buildItems(
@@ -37,10 +37,10 @@ class HomeScreen extends GetView<HomeController> {
   Widget _buildItems(BuildContext context) {
     final theme = Theme.of(context);
     return AnimatedBuilder(
-        animation: _controller,
+        animation: sidebarController,
         builder: (context, child) {
-          final pageTitle = _getTitleByIndex(_controller.selectedIndex);
-          switch (_controller.selectedIndex) {
+          final pageTitle = _getTitleByIndex(sidebarController.selectedIndex);
+          switch (sidebarController.selectedIndex) {
             case 0:
               return const MainMenuScreen();
             case 1:
