@@ -18,7 +18,7 @@ class AuthScreen extends GetView<AuthController> {
         builder: (BuildContext context) => Scaffold(
               body: Row(
                 children: [
-                  AppSideBar(controller: controller.sideBarController, isAuthScreen: true),
+                  AppSideBar(controller: controller.sideBarController),
                   Expanded(
                     child: _buildItems(
                       context,
@@ -65,7 +65,6 @@ class AuthScreen extends GetView<AuthController> {
                       },
                     ),
                     const Gap(62.0),
-                    const Text(''),
                   ],
                 ),
               ),

@@ -12,13 +12,10 @@ class AppSideBar extends StatelessWidget {
   AppSideBar({
     Key? key,
     required SidebarXController controller,
-    required bool isAuthScreen,
   })  : _controller = controller,
-        _isAuthScreen = isAuthScreen,
         super(key: key);
 
   final SidebarXController _controller;
-  final bool _isAuthScreen;
   final SettingsService settingsService = Get.find();
   final AuthService authService = Get.find();
 

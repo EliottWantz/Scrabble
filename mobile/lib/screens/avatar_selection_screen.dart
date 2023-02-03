@@ -20,8 +20,7 @@ class AvatarSelectionScreen extends StatelessWidget {
               body: Row(
                 children: [
                   AppSideBar(
-                      controller: controller.sideBarController,
-                      isAuthScreen: true),
+                      controller: controller.sideBarController,),
                   Expanded(
                     child: _buildItems(
                       context,

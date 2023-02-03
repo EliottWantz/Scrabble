@@ -21,7 +21,7 @@ class HomeScreen extends GetView<HomeController> {
               key: _key,
               body: Row(
                 children: [
-                  AppSideBar(controller: sidebarController, isAuthScreen: false),
+                  AppSideBar(controller: sidebarController),
                   Expanded(
                     child: Center(
                       child: _buildItems(
