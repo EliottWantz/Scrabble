@@ -1,6 +1,7 @@
 import 'package:client_leger/routes/app_routes.dart';
 import 'package:client_leger/services/auth_service.dart';
 import 'package:client_leger/services/settings_service.dart';
+import 'package:client_leger/utils/dialog_helper.dart';
 import 'package:client_leger/utils/sidebar_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -24,7 +25,7 @@ class AppSideBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SidebarX(
-      collapseIcon: Icons.menu_open,
+        collapseIcon: Icons.menu_open,
         extendIcon: Icons.menu,
         showToggleButton: true,
         controller: _controller,
@@ -47,9 +48,9 @@ class AppSideBar extends StatelessWidget {
           if (ModalRoute.of(context)!.settings.name == '/auth' ||
               ModalRoute.of(context)!.settings.name == '/auth/login' ||
               ModalRoute.of(context)!.settings.name == '/auth/register') {
-            return _buildHeaderAuth();
+            return _buildHeaderAuth(extended);
           } else {
-            return _buildHeaderHome();
+            return _buildHeaderHome(extended);
           }
         },
         items: _buildListItems(context));
@@ -107,8 +108,7 @@ class AppSideBar extends StatelessWidget {
               const Gap(40),
               InkWell(
                 onTap: () async {
-                  await authService.logout();
-                  Get.offAllNamed(Routes.AUTH);
+                  await DialogHelper.showLogoutDialog(authService.logout);
                 },
                 child: const Icon(
                   Icons.logout,
@@ -162,7 +162,7 @@ class AppSideBar extends StatelessWidget {
     );
   }
 
-  Widget _buildHeaderAuth() {
+  Widget _buildHeaderAuth(bool extended) {
     return SizedBox(
       height: 80,
       child: Padding(
@@ -182,12 +182,19 @@ class AppSideBar extends StatelessWidget {
     );
   }
 
-  Widget _buildHeaderHome() {
+  Widget _buildHeaderHome(bool extended) {
     return SizedBox(
-      height: 100,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Image.asset('assets/images/avatar.png'),
+      height: 120,
+      child: Column(
+        children: [
+          Padding(
+            padding: EdgeInsets.all(16.0),
+            child: CircleAvatar(
+              radius: 40,
+              child: Image.asset('assets/images/avatar.png'),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -198,8 +205,7 @@ class AppSideBar extends StatelessWidget {
         SidebarXItem(
           icon: Icons.home,
           label: 'Home',
-          onTap: () {
-          },
+          onTap: () {},
         ),
         const SidebarXItem(
           icon: Icons.person,
@@ -224,16 +230,14 @@ class AppSideBar extends StatelessWidget {
           label: 'Inscription',
         ),
       ];
-    }
-    else if (ModalRoute.of(context)!.settings.name == '/avatar-selection') {
+    } else if (ModalRoute.of(context)!.settings.name == '/avatar-selection') {
       return [
         const SidebarXItem(
           icon: Icons.home,
           label: 'Choix de l\'avatar',
         ),
       ];
-    }
-    else {
+    } else {
       return [
         const SidebarXItem(
           icon: Icons.home,

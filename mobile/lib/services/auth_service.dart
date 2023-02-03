@@ -2,6 +2,7 @@ import 'package:client_leger/api/api_repository.dart';
 import 'package:client_leger/models/requests/login_request.dart';
 import 'package:client_leger/models/requests/register_request.dart';
 import 'package:client_leger/models/response/login_response.dart';
+import 'package:client_leger/routes/app_routes.dart';
 import 'package:client_leger/services/storage_service.dart';
 import 'package:get/get.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
@@ -26,6 +27,7 @@ class AuthService extends GetxService {
 
   Future<void> logout() async {
     await storageService.remove('jwt_token');
+    Get.offAllNamed(Routes.AUTH);
   }
 
   Future<void> _setSession(String token) async {
