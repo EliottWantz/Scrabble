@@ -18,8 +18,9 @@ var (
 )
 
 type Service struct {
-	repo *Repository
-	ik   *imagekit.ImageKit
+	repo    *Repository
+	ik      *imagekit.ImageKit
+	JWTAuth *auth.JWTAuth
 }
 
 func NewService(cfg *config.Config, repo *Repository) *Service {
@@ -30,8 +31,9 @@ func NewService(cfg *config.Config, repo *Repository) *Service {
 	})
 
 	return &Service{
-		repo: repo,
-		ik:   ik,
+		repo:    repo,
+		ik:      ik,
+		JWTAuth: auth.NewJWTAuth(cfg.JWT_SIGN_KEY),
 	}
 }
 
@@ -65,7 +67,7 @@ func (s *Service) SignUp(req SignupRequest) (*User, string, error) {
 		return nil, "", err
 	}
 
-	signed, err := auth.GenerateJWT(req.Username)
+	signed, err := s.JWTAuth.GenerateJWT(req.Username)
 	if err != nil {
 		return nil, "", err
 	}
@@ -83,7 +85,7 @@ func (s *Service) Login(username, password string) (string, error) {
 		return "", ErrPasswordMismatch
 	}
 
-	signed, err := auth.GenerateJWT(username)
+	signed, err := s.JWTAuth.GenerateJWT(username)
 	if err != nil {
 		return "", err
 	}
@@ -92,7 +94,7 @@ func (s *Service) Login(username, password string) (string, error) {
 }
 
 func (s *Service) Revalidate(tokenStr string) (string, error) {
-	return auth.RevalidateJWT(tokenStr)
+	return s.JWTAuth.RevalidateJWT(tokenStr)
 }
 
 func (s *Service) GetUser(ID string) (*User, error) {

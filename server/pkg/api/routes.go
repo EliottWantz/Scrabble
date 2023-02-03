@@ -3,6 +3,8 @@ package api
 import (
 	"time"
 
+	"scrabble/config"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
@@ -31,7 +33,7 @@ func (api *API) setupMiddleware() {
 	api.App.Get("/metrics", monitor.New(monitor.Config{Title: "Scrabble Server Metrics"}))
 }
 
-func (api *API) setupRoutes() {
+func (api *API) setupRoutes(cfg *config.Config) {
 	api.App.Get("/ws", api.WebSocketManager.Accept())
 
 	// Public routes
@@ -46,7 +48,7 @@ func (api *API) setupRoutes() {
 	router.Use(
 		jwtware.New(
 			jwtware.Config{
-				SigningKey: []byte("secret"),
+				SigningKey: []byte(cfg.JWT_SIGN_KEY),
 				ContextKey: "token",
 			},
 		),

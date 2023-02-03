@@ -12,6 +12,7 @@ type Config struct {
 	IMAGEKIT_ENDPOINT_URL string `env:"IMAGEKIT_ENDPOINT_URL,notEmpty"`
 	IMAGEKIT_PUBLIC_KEY   string `env:"IMAGEKIT_PUBLIC_KEY,notEmpty"`
 	IMAGEKIT_PRIVATE_KEY  string `env:"IMAGEKIT_PRIVATE_KEY,notEmpty"`
+	JWT_SIGN_KEY          string `env:"JWT_SIGN_KEY,notEmpty"`
 	PORT                  string `env:"PORT" envDefault:"3000"`
 }
 
