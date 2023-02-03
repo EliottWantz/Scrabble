@@ -8,6 +8,7 @@ import 'package:client_leger/utils/dialog_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:client_leger/services/settings_service.dart';
+import 'package:sidebarx/sidebarx.dart';
 
 class AuthController extends GetxController {
   final SettingsService settingsService;
@@ -30,6 +31,8 @@ class AuthController extends GetxController {
   final GlobalKey<FormState> loginFormKey = GlobalKey<FormState>();
   final loginUsernameController = TextEditingController();
   final loginPasswordController = TextEditingController();
+
+  final sideBarController = SidebarXController(selectedIndex: 0, extended: true);
 
   Rx<IconData> getIconTheme() {
     return settingsService.currentThemeIcon;
