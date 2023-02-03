@@ -25,4 +25,11 @@ class ApiRepository {
       return RegisterResponse.fromJson(res.body);
     }
   }
+
+  // Future<RegisterResponse?> logout(RegisterRequest data) async {
+  //   final res = await apiProvider.signup('/signup', data);
+  //   if (res.statusCode == 201) {
+  //     return RegisterResponse.fromJson(res.body);
+  //   }
+  // }
 }

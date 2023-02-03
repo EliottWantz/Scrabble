@@ -1,4 +1,7 @@
 import 'package:client_leger/controllers/home_controller.dart';
+import 'package:client_leger/screens/main_menu_screen.dart';
+import 'package:client_leger/screens/profile_screen.dart';
+import 'package:client_leger/screens/settings_screen.dart';
 import 'package:client_leger/utils/dialog_helper.dart';
 import 'package:client_leger/widgets/app_sidebar.dart';
 import 'package:flutter/material.dart';
@@ -38,6 +41,12 @@ class HomeScreen extends GetView<HomeController> {
         builder: (context, child) {
           final pageTitle = _getTitleByIndex(_controller.selectedIndex);
           switch (_controller.selectedIndex) {
+            case 0:
+              return const MainMenuScreen();
+            case 1:
+              return const ProfileScreen();
+            case 2:
+              return const SettingsScreen();
             default:
               return Text(
                 pageTitle,
