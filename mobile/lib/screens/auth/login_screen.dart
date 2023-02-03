@@ -1,14 +1,11 @@
 import 'package:client_leger/controllers/auth_controller.dart';
-import 'package:client_leger/services/settings_service.dart';
 import 'package:client_leger/widgets/app_sidebar.dart';
-import 'package:client_leger/widgets/common.dart';
 import 'package:client_leger/widgets/custom_button.dart';
 import 'package:client_leger/widgets/input_field.dart';
 import 'package:flutter/material.dart';
 import 'package:form_validator/form_validator.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
-import 'package:sidebarx/sidebarx.dart';
 
 class LoginScreen extends StatelessWidget {
   LoginScreen({Key? key}) : super(key: key);
