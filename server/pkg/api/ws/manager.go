@@ -20,7 +20,7 @@ func NewManager() (*Manager, error) {
 	m := &Manager{
 		Clients: haxmap.New[string, *client](),
 		Rooms:   haxmap.New[string, *room](),
-		logger:  slog.With("component", "manager"),
+		logger:  slog.Default(),
 	}
 
 	r, err := NewRoom(m)
@@ -133,6 +133,10 @@ func (m *Manager) addRoom(r *room) error {
 }
 
 func (m *Manager) removeRoom(rID string) error {
+	if rID == m.GlobalRoom.ID {
+		return fmt.Errorf("can't remove global room")
+	}
+
 	r, err := m.getRoom(rID)
 	if err != nil {
 		return fmt.Errorf("removeRoom: %w", err)
