@@ -1,70 +1,53 @@
 package main
 
 import (
-	"flag"
-	"fmt"
-	"time"
+	"os"
+	"os/signal"
 
-	"scrabble/pkg/scrabble"
+	"scrabble/config"
+	"scrabble/pkg/api"
+
+	"golang.org/x/exp/slog"
 )
 
-var numGames = flag.Int("n", 10, "Number of games to simulate")
-
 func main() {
-	start := time.Now()
-	flag.Parse()
+	// Default log handler
+	slog.SetDefault(slog.Default())
 
-	dict := scrabble.NewDictionary()
-	tileSet := scrabble.DefaultTileSet
-
-	dawg := scrabble.NewDawg(dict)
-
-	var winsA, winsB int
-
-	for i := 0; i < *numGames; i++ {
-		scoreA, scoreB := simulateGame(tileSet, dawg)
-		if scoreA > scoreB {
-			winsA++
-		}
-		if scoreB > scoreA {
-			winsB++
-		}
+	err := run()
+	if err != nil {
+		slog.Error("main error", err)
+		os.Exit(1)
 	}
-
-	elapsed := time.Since(start)
-	fmt.Printf("%v games were played\nRobot A won %v games, and Robot B won %v games; %v games were draws.\n",
-		*numGames,
-		winsA,
-		winsB,
-		*numGames-winsA-winsB,
-	)
-	fmt.Println("Took", elapsed)
 }
 
-func simulateGame(tileSet *scrabble.TileSet, dawg *scrabble.DAWG) (scoreA, scoreB int) {
-	g := scrabble.NewGame(tileSet, dawg)
-
-	bot1 := scrabble.NewBot(scrabble.NewPlayer("Alphonse", g.Bag), &scrabble.HighScore{})
-	bot2 := scrabble.NewBot(scrabble.NewPlayer("Sylvestre", g.Bag), &scrabble.HighScore{})
-	g.Players[0], g.Players[1] = bot1.Player, bot2.Player
-
-	for i := 0; ; i++ {
-		state := g.State()
-		var move scrabble.Move
-		// Ask robotA or robotB to generate a move
-		if i%2 == 0 {
-			move = bot1.GenerateMove(state)
-		} else {
-			move = bot2.GenerateMove(state)
-		}
-		g.ApplyValid(move)
-		// fmt.Println(move)
-		if g.IsOver() {
-			// fmt.Println(g.Board)
-			fmt.Printf("Game over!\n\n")
-			break
-		}
+func run() error {
+	// load config
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		return err
 	}
-	scoreA, scoreB = g.Players[0].Score, g.Players[1].Score
-	return scoreA, scoreB
+
+	server, err := api.New(cfg)
+	if err != nil {
+		return err
+	}
+
+	errChan := make(chan error, 1)
+	go func() {
+		err = server.App.Listen("0.0.0.0:" + cfg.PORT)
+		if err != nil {
+			errChan <- err
+		}
+	}()
+
+	go func() {
+		quit := make(chan os.Signal, 1)
+		signal.Notify(quit, os.Interrupt)
+		sig := <-quit
+		slog.Info("shutting down", "signal", sig)
+		errChan <- server.App.Shutdown()
+	}()
+
+	return <-errChan
 }
