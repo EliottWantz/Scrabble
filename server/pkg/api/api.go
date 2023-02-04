@@ -14,7 +14,7 @@ import (
 	"golang.org/x/exp/slog"
 )
 
-var CONNECTION_TIMEOUT = time.Second * 5
+var CONNECTION_TIMEOUT = time.Second * 15
 
 type API struct {
 	WebSocketManager *ws.Manager
