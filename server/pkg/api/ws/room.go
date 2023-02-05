@@ -36,6 +36,17 @@ func NewRoom(m *Manager) (*room, error) {
 	return r, nil
 }
 
+func NewRoomWithID(m *Manager, ID string) *room {
+	r := &room{
+		ID:      ID,
+		Manager: m,
+		Clients: haxmap.New[string, *client](),
+	}
+	r.logger = slog.With("room", r.ID)
+
+	return r
+}
+
 func (r *room) addClient(cID string) error {
 	c, _ := r.getClient(cID)
 	if c != nil {

@@ -24,16 +24,18 @@ func NewService(cfg *config.Config, repo *Repository) *Service {
 	}
 }
 
-func (s *Service) SignUp(req SignupRequest) (*User, error) {
+// Login up a new user, signup if doesn't exist
+func (s *Service) Login(req LoginRequest) (*User, error) {
 	if req.Username == "" {
 		return nil, fiber.NewError(fiber.StatusUnprocessableEntity, "username can't be blank")
 	}
 
-	if _, err := s.repo.FindByUsername(req.Username); err == nil {
-		return nil, ErrUserAlreadyExists
+	u, err := s.repo.FindByUsername(req.Username)
+	if err == nil {
+		return u, nil
 	}
 
-	u := &User{
+	u = &User{
 		Id:       uuid.NewString(),
 		Username: req.Username,
 	}

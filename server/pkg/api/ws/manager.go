@@ -38,9 +38,9 @@ func NewManager() (*Manager, error) {
 	return m, nil
 }
 
-func (m *Manager) Accept() fiber.Handler {
+func (m *Manager) Accept(cID string) fiber.Handler {
 	return websocket.New(func(conn *websocket.Conn) {
-		c, err := m.addClient(conn)
+		c, err := m.addClient(conn, cID)
 		if err != nil {
 			m.logger.Error("add client", err)
 			return
@@ -53,7 +53,12 @@ func (m *Manager) Accept() fiber.Handler {
 		}()
 
 		go c.write()
-		c.send(&packet{Action: "joinedGlobalRoom", RoomID: m.GlobalRoom.ID, Timestamp: time.Now().Format(time.TimeOnly)})
+		c.send(&packet{
+			Action:    "joinedGlobalRoom",
+			RoomID:    m.GlobalRoom.ID,
+			Timestamp: time.Now().Format(time.TimeOnly),
+			From:      "MANAGER",
+		})
 		c.read()
 	})
 }
@@ -74,11 +79,8 @@ func (m *Manager) getRoom(rID string) (*room, error) {
 	return r, nil
 }
 
-func (m *Manager) addClient(coon *websocket.Conn) (*client, error) {
-	r, err := NewRoom(m)
-	if err != nil {
-		return nil, err
-	}
+func (m *Manager) addClient(coon *websocket.Conn, cID string) (*client, error) {
+	r := NewRoomWithID(m, cID)
 
 	// Client should have that same ID as the default room he is in
 	c := NewClient(coon, r.ID, m)
@@ -90,7 +92,7 @@ func (m *Manager) addClient(coon *websocket.Conn) (*client, error) {
 		return c, err
 	}
 
-	if err = m.GlobalRoom.addClient(c.ID); err != nil {
+	if err := m.GlobalRoom.addClient(c.ID); err != nil {
 		return c, err
 	}
 

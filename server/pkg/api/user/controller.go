@@ -20,27 +20,24 @@ func NewController(cfg *config.Config, db *mongo.Database) *Controller {
 	}
 }
 
-type SignupRequest struct {
+type LoginRequest struct {
 	Username string `json:"username,omitempty"`
 }
 
-type SignupResponse struct {
+type LoginResponse struct {
 	User *User `json:"user,omitempty"`
 }
 
-// Sign up a new user
-func (ctrl *Controller) SignUp(c *fiber.Ctx) error {
-	req := SignupRequest{}
+// Login up a new user, signup if doesn't exist
+func (ctrl *Controller) Login(c *fiber.Ctx) error {
+	req := LoginRequest{}
 	if err := c.BodyParser(&req); err != nil {
 		return fiber.ErrBadRequest
 	}
 
-	user, err := ctrl.svc.SignUp(req)
+	user, err := ctrl.svc.Login(req)
 	if err != nil {
 		slog.Error("sign up user", err)
-		if errors.Is(err, ErrUserAlreadyExists) {
-			return fiber.ErrConflict
-		}
 		var fiberErr *fiber.Error
 		if ok := errors.As(err, &fiberErr); ok {
 			return err
@@ -49,7 +46,7 @@ func (ctrl *Controller) SignUp(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(
-		SignupResponse{
+		LoginResponse{
 			User: user,
 		},
 	)
