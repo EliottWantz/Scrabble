@@ -2,7 +2,6 @@ package ws
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/alphadose/haxmap"
 	"github.com/gofiber/fiber/v2"
@@ -54,10 +53,8 @@ func (m *Manager) Accept(cID string) fiber.Handler {
 
 		go c.write()
 		c.send(&packet{
-			Action:    "joinedGlobalRoom",
-			RoomID:    m.GlobalRoom.ID,
-			Timestamp: time.Now().Format(time.TimeOnly),
-			From:      "MANAGER",
+			Event:  "joinedGlobalRoom",
+			RoomID: m.GlobalRoom.ID,
 		})
 		c.read()
 	})

@@ -85,7 +85,7 @@ func (c *client) receive() {
 }
 
 func (c *client) handlePacket(p *packet) error {
-	switch p.Action {
+	switch p.Event {
 	case "":
 		c.logger.Info("received packet with no action")
 	case "broadcast":
