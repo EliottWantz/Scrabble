@@ -95,10 +95,14 @@ func (r *room) getClient(cID string) (*client, error) {
 
 func (r *room) broadcast(p *packet, senderID string) error {
 	r.Clients.ForEach(func(cID string, c *client) bool {
+		// Actually send the packet to the client so that it can handle it
+		// properly, i.e. get the confirmation that the packet has been sent,
+		// and have the timestamp
+
 		// Don't send packet to the sender
-		if cID == senderID {
-			return true
-		}
+		// if cID == senderID {
+		// 	return true
+		// }
 
 		c.send(p)
 
