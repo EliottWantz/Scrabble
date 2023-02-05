@@ -6,6 +6,9 @@ dotenv:
 tasks:
   dev:
     cmds:
+      - go run main.go
+  dev:watch:
+    cmds:
       - watchexec -r -c -e go -- go run main.go
   build:
     env:

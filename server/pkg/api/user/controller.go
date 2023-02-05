@@ -2,34 +2,35 @@ package user
 
 import (
 	"errors"
-	"log"
+
+	"scrabble/config"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
 	"go.mongodb.org/mongo-driver/mongo"
+	"golang.org/x/exp/slog"
 )
 
 type Controller struct {
 	svc *Service
 }
 
-func NewController(db *mongo.Database) *Controller {
+func NewController(cfg *config.Config, db *mongo.Database) *Controller {
 	return &Controller{
-		svc: &Service{
-			repo: &Repository{
-				coll: db.Collection("users"),
-			},
-		},
+		svc: NewService(cfg, NewRepository(db)),
 	}
 }
 
 type SignupRequest struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Username  string `json:"username,omitempty"`
+	Password  string `json:"password,omitempty"`
+	Email     string `json:"email,omitempty"`
+	AvatarURL string `json:"avatarUrl,omitempty"`
 }
 
 type SignupResponse struct {
-	Token string `json:"token"`
+	User  *User  `json:"user,omitempty"`
+	Token string `json:"token,omitempty"`
 }
 
 // Sign up a new user
@@ -39,16 +40,25 @@ func (ctrl *Controller) SignUp(c *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	token, err := ctrl.svc.SignUp(req.Username, req.Password)
+	user, token, err := ctrl.svc.SignUp(req)
 	if err != nil {
-		log.Println(err)
+		slog.Error("sign up user", err)
 		if errors.Is(err, ErrUserAlreadyExists) {
 			return fiber.ErrConflict
+		}
+		var fiberErr *fiber.Error
+		if ok := errors.As(err, &fiberErr); ok {
+			return err
 		}
 		return fiber.ErrInternalServerError
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(SignupResponse{Token: token})
+	return c.Status(fiber.StatusCreated).JSON(
+		SignupResponse{
+			User:  user,
+			Token: token,
+		},
+	)
 }
 
 type LoginRequest struct {
@@ -104,7 +114,7 @@ func (ctrl *Controller) Revalidate(c *fiber.Ctx) error {
 
 	token, err := ctrl.svc.Revalidate(req.Token)
 	if err != nil {
-		log.Println(err)
+		slog.Error("Error revalidating token", err)
 		if errors.Is(err, jwt.ErrSignatureInvalid) {
 			return fiber.ErrUnauthorized
 		}
@@ -122,8 +132,103 @@ func (ctrl *Controller) Revalidate(c *fiber.Ctx) error {
 	})
 }
 
-func (ctrl *Controller) UploadAvatar() fiber.Handler {
-	return func(c *fiber.Ctx) error {
-		return c.SendString("vous avez televerser votre avatar")
-	}
+type GetUserResponse struct {
+	User  *User  `json:"user,omitempty"`
+	Error string `json:"error,omitempty"`
 }
+
+func (ctrl *Controller) GetUser(c *fiber.Ctx) error {
+	ID := c.Params("id")
+	if ID == "" {
+		return fiber.ErrBadRequest
+	}
+
+	user, err := ctrl.svc.GetUser(ID)
+	if err != nil {
+		slog.Error("Error getting user", err)
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(GetUserResponse{
+		User: user,
+	})
+}
+
+type UploadAvatarRequest struct {
+	ID        string `json:"id,omitempty"`
+	AvatarUrl string `json:"avatarUrl,omitempty"`
+}
+
+type UploadAvatarResponse struct {
+	AvatarURL string `json:"avatarUrl,omitempty"`
+	Error     string `json:"error,omitempty"`
+}
+
+func (ctrl *Controller) UploadAvatar(c *fiber.Ctx) error {
+	var req UploadAvatarRequest
+	err := c.BodyParser(&req)
+	if err != nil {
+		return fiber.ErrInternalServerError
+	}
+
+	url, err := ctrl.svc.UploadAvatar(req.ID, req.AvatarUrl)
+	if err != nil {
+		var fiberErr *fiber.Error
+		if ok := errors.As(err, &fiberErr); ok {
+			return c.Status(fiberErr.Code).JSON(
+				UploadAvatarResponse{
+					Error: fiberErr.Message,
+				},
+			)
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(
+			UploadAvatarResponse{
+				Error: err.Error(),
+			},
+		)
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(
+		UploadAvatarResponse{
+			AvatarURL: url,
+		},
+	)
+}
+
+// type GetAvatarRequest struct {
+// 	Username string `json:"username,omitempty"`
+// }
+
+// type GetAvatarResponse struct {
+// 	AvatarURL string `json:"avatarUrl,omitempty"`
+// 	Error     string `json:"error,omitempty"`
+// }
+
+// func (ctrl *Controller) GetAvatar(c *fiber.Ctx) error {
+// 	var req GetAvatarRequest
+// 	err := c.BodyParser(&req)
+// 	if err != nil {
+// 		return fiber.ErrInternalServerError
+// 	}
+
+// 	url, err := ctrl.svc.GetAvatar(req.Username)
+// 	if err != nil {
+// 		var fiberErr *fiber.Error
+// 		if ok := errors.As(err, &fiberErr); ok {
+// 			return c.Status(fiberErr.Code).JSON(
+// 				GetAvatarResponse{
+// 					Error: fiberErr.Message,
+// 				},
+// 			)
+// 		}
+// 		return c.Status(fiber.StatusInternalServerError).JSON(
+// 			GetAvatarResponse{
+// 				Error: err.Error(),
+// 			},
+// 		)
+// 	}
+
+// 	return c.JSON(GetAvatarResponse{
+// 		AvatarURL: url,
+// 	})
+// }

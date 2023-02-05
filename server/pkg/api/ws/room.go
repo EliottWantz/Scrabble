@@ -1,24 +1,29 @@
 package ws
 
 import (
-	"fmt"
-	"log"
+	"errors"
 
 	"github.com/alphadose/haxmap"
 	"github.com/google/uuid"
+	"golang.org/x/exp/slog"
+)
+
+var (
+	ErrAlreadyInRoom = errors.New("client already in room")
+	ErrNotInRoom     = errors.New("client not in room")
 )
 
 type room struct {
 	ID      string
 	Manager *Manager
 	Clients *haxmap.Map[string, *client]
-	logger  *log.Logger
+	logger  *slog.Logger
 }
 
 func NewRoom(m *Manager) (*room, error) {
 	id, err := uuid.NewRandom()
 	if err != nil {
-		return nil, fmt.Errorf("NewRoom: %w", err)
+		return nil, err
 	}
 
 	r := &room{
@@ -26,7 +31,7 @@ func NewRoom(m *Manager) (*room, error) {
 		Manager: m,
 		Clients: haxmap.New[string, *client](),
 	}
-	r.logger = log.New(log.Writer(), "[Room "+id.String()+"] ", log.LstdFlags)
+	r.logger = slog.With("room", r.ID)
 
 	return r, nil
 }
@@ -34,17 +39,17 @@ func NewRoom(m *Manager) (*room, error) {
 func (r *room) addClient(cID string) error {
 	c, _ := r.getClient(cID)
 	if c != nil {
-		return fmt.Errorf("addClient: client %s already in room", cID)
+		return ErrAlreadyInRoom
 	}
 
 	c, err := r.Manager.getClient(cID)
 	if err != nil {
-		return fmt.Errorf("%s - addClient: %w", r.logger.Prefix(), err)
+		return err
 	}
 
 	r.Clients.Set(cID, c)
 	c.Rooms.Set(r.ID, r)
-	r.logger.Printf("client %s added in room", c.ID)
+	r.logger.Info("client added in room", "client", c.ID)
 
 	return nil
 }
@@ -52,15 +57,17 @@ func (r *room) addClient(cID string) error {
 func (r *room) removeClient(cID string) error {
 	c, err := r.getClient(cID)
 	if err != nil {
-		return fmt.Errorf("%s - removeClient: %w", r.logger.Prefix(), err)
+		return err
 	}
 
 	r.Clients.Del(cID)
-	r.logger.Printf("client %s removed from room", c.ID)
+	r.logger.Info("client removed from room", "client", c.ID)
 
 	if r.Clients.Len() == 0 {
 		err := r.Manager.removeRoom(r.ID)
-		return fmt.Errorf("%s - removeClient: %w", r.logger.Prefix(), err)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -69,23 +76,20 @@ func (r *room) removeClient(cID string) error {
 func (r *room) getClient(cID string) (*client, error) {
 	c, ok := r.Clients.Get(cID)
 	if !ok {
-		return nil, fmt.Errorf("%s - getClient: client %s not in room", r.logger.Prefix(), cID)
+		return nil, ErrNotInRoom
 	}
 
 	return c, nil
 }
 
-func (r *room) broadcast(p *Packet, senderID string) error {
+func (r *room) broadcast(p *packet, senderID string) error {
 	r.Clients.ForEach(func(cID string, c *client) bool {
 		// Don't send packet to the sender
 		if cID == senderID {
 			return true
 		}
 
-		err := c.sendPacket(p)
-		if err != nil {
-			log.Printf("broadcast: %s", err)
-		}
+		c.send(p)
 
 		return true
 	})

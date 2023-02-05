@@ -1,16 +1,8 @@
 package ws
 
-type Action int
-
-const (
-	ActionNoAction Action = iota
-	ActionMessage
-	ActionJoinRoom
-	ActionLeaveRoom
-)
-
-type Packet struct {
-	Action Action `json:"action,omitempty"`
-	RoomID string `json:"roomId,omitempty"`
-	Data   any    `json:"data,omitempty"`
+type packet struct {
+	Action    string `json:"action,omitempty"`
+	RoomID    string `json:"roomId,omitempty"`
+	Timestamp string `json:"timestamp,omitempty"`
+	Data      any    `json:"data,omitempty"`
 }

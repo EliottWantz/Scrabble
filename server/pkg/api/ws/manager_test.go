@@ -6,15 +6,14 @@ import (
 )
 
 func TestManager_addClient(t *testing.T) {
-	m := NewManager()
+	m, _ := NewManager()
 
 	var wg sync.WaitGroup
 	for i := 0; i < 5; i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			c, _ := NewClient(nil, m)
-			m.addClient(c)
+			m.addClient(nil)
 		}()
 	}
 	wg.Wait()

@@ -2,11 +2,13 @@ package user
 
 import (
 	"errors"
-	"log"
 
+	"scrabble/config"
 	"scrabble/pkg/api/user/auth"
 
+	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
+	"github.com/imagekit-developer/imagekit-go"
 )
 
 var (
@@ -16,47 +18,65 @@ var (
 )
 
 type Service struct {
-	repo *Repository
+	repo    *Repository
+	ik      *imagekit.ImageKit
+	JWTAuth *auth.JWTAuth
 }
 
-func (s *Service) SignUp(username, password string) (string, error) {
-	if username == "" {
-		return "", errors.New("empty username")
+func NewService(cfg *config.Config, repo *Repository) *Service {
+	ik := imagekit.NewFromParams(imagekit.NewParams{
+		PrivateKey:  cfg.IMAGEKIT_PRIVATE_KEY,
+		PublicKey:   cfg.IMAGEKIT_PUBLIC_KEY,
+		UrlEndpoint: cfg.IMAGEKIT_ENDPOINT_URL,
+	})
+
+	return &Service{
+		repo:    repo,
+		ik:      ik,
+		JWTAuth: auth.NewJWTAuth(cfg.JWT_SIGN_KEY),
 	}
-	if password == "" {
-		return "", errors.New("empty password")
+}
+
+func (s *Service) SignUp(req SignupRequest) (*User, string, error) {
+	if req.Username == "" {
+		return nil, "", fiber.NewError(fiber.StatusUnprocessableEntity, "username can't be blank")
+	}
+	if req.Password == "" {
+		return nil, "", fiber.NewError(fiber.StatusUnprocessableEntity, "password can't be blank")
+	}
+	if req.Email == "" {
+		return nil, "", fiber.NewError(fiber.StatusUnprocessableEntity, "email can't be blank")
 	}
 
-	if _, err := s.repo.Find(username); err == nil {
-		return "", ErrUserAlreadyExists
+	if _, err := s.repo.FindByUsername(req.Username); err == nil {
+		return nil, "", ErrUserAlreadyExists
 	}
 
-	hashedPassword, err := auth.HashPassword(password)
+	hashedPassword, err := auth.HashPassword(req.Password)
 	if err != nil {
-		return "", err
+		return nil, "", err
 	}
 
-	a := &User{
+	u := &User{
 		Id:             uuid.NewString(),
-		Username:       username,
+		Username:       req.Username,
 		HashedPassword: hashedPassword,
 	}
 
-	if err := s.repo.Insert(a); err != nil {
-		return "", err
+	if err := s.repo.Insert(u); err != nil {
+		return nil, "", err
 	}
 
-	signed, err := auth.GenerateJWT(username)
+	signed, err := s.JWTAuth.GenerateJWT(req.Username)
 	if err != nil {
-		log.Println("error:", err)
-		return "", err
+		return nil, "", err
 	}
 
-	return signed, nil
+	return u, signed, nil
 }
 
 func (s *Service) Login(username, password string) (string, error) {
-	u, err := s.repo.Find(username)
+	u, err := s.repo.FindByUsername(username)
 	if err != nil {
 		return "", ErrUserNotFound
 	}
@@ -65,7 +85,7 @@ func (s *Service) Login(username, password string) (string, error) {
 		return "", ErrPasswordMismatch
 	}
 
-	signed, err := auth.GenerateJWT(username)
+	signed, err := s.JWTAuth.GenerateJWT(username)
 	if err != nil {
 		return "", err
 	}
@@ -74,5 +94,14 @@ func (s *Service) Login(username, password string) (string, error) {
 }
 
 func (s *Service) Revalidate(tokenStr string) (string, error) {
-	return auth.RevalidateJWT(tokenStr)
+	return s.JWTAuth.RevalidateJWT(tokenStr)
+}
+
+func (s *Service) GetUser(ID string) (*User, error) {
+	u, err := s.repo.Find(ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return u, nil
 }
