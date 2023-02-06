@@ -10,12 +10,16 @@ type Packet struct {
 	Payload json.RawMessage `json:"payload,omitempty"`
 }
 
-func NewPacket(event string, payload any) *Packet {
-	p, _ := json.Marshal(payload)
+func NewPacket(event string, payload any) (*Packet, error) {
+	p, err := json.Marshal(payload)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Packet{
 		Event:   event,
 		Payload: p,
-	}
+	}, nil
 }
 
 // Client events payloads

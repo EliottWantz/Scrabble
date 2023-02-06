@@ -10,10 +10,11 @@ import (
 )
 
 type Manager struct {
-	Clients    *haxmap.Map[string, *Client]
-	Rooms      *haxmap.Map[string, *Room]
-	GlobalRoom *Room
-	logger     *slog.Logger
+	Clients          *haxmap.Map[string, *Client]
+	Rooms            *haxmap.Map[string, *Room]
+	GlobalRoom       *Room
+	globalRoomPacket *Packet
+	logger           *slog.Logger
 }
 
 func NewManager() (*Manager, error) {
@@ -34,6 +35,18 @@ func NewManager() (*Manager, error) {
 		return nil, err
 	}
 
+	p, err := NewPacket(
+		ServerEventJoinedGlobalRoom,
+		&JoinedGlobalRoomPayload{
+			RoomID: m.GlobalRoom.ID,
+		},
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create global room packet: %v", err)
+	}
+
+	m.globalRoomPacket = p
+
 	return m, nil
 }
 
@@ -52,10 +65,7 @@ func (m *Manager) Accept(cID string) fiber.Handler {
 		}()
 
 		go c.write()
-		c.send(NewPacket(
-			ServerEventJoinedGlobalRoom,
-			&JoinedGlobalRoomPayload{RoomID: m.GlobalRoom.ID},
-		))
+		c.send(m.globalRoomPacket)
 		c.read()
 	})
 }
