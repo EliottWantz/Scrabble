@@ -43,6 +43,7 @@ dependencies:
   form_validator: ^2.1.1
   sidebarx: ^0.14.0
   chat_bubbles: ^1.4.1
+  socket_io_client: ^1.0.2
 
 dev_dependencies:
   flutter_test:
