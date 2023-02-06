@@ -76,7 +76,7 @@ func (c *Client) read() {
 
 func (c *Client) receive() {
 	for p := range c.receiveCh {
-		c.logger.Info("received packet", "packet", p)
+		c.logger.Info("received packet", "event", p.Event)
 		if err := c.handlePacket(p); err != nil {
 			c.logger.Error("handlePacket", err)
 		}
@@ -138,26 +138,25 @@ func (c *Client) leaveRoom(p *Packet) error {
 }
 
 func (c *Client) broadcast(p *Packet) error {
-	req := BroadcastPayload{}
-	if err := json.Unmarshal(p.Payload, &req); err != nil {
+	payload := BroadcastPayload{}
+	if err := json.Unmarshal(p.Payload, &payload); err != nil {
 		return err
 	}
 
-	r, err := c.Manager.getRoom(req.RoomID)
+	r, err := c.Manager.getRoom(payload.RoomID)
 	if err != nil {
 		return fmt.Errorf("broadcast: %w", err)
 	}
 
 	if !r.has(c.ID) {
-		return fmt.Errorf("%w %s", ErrNotInRoom, req.RoomID)
+		return fmt.Errorf("%w %s", ErrNotInRoom, payload.RoomID)
 	}
 
-	req.Timestamp = time.Now()
-	payload, err := json.Marshal(req)
-	if err != nil {
-		return fmt.Errorf("can't create broadcast payload: %w", err)
+	payload.Timestamp = time.Now()
+	if err := p.marshallPayload(payload); err != nil {
+		return err
 	}
-	p.Payload = payload
+
 	r.broadcast(p, c.ID)
 
 	return nil

@@ -2,6 +2,7 @@ package ws
 
 import (
 	"encoding/json"
+	"fmt"
 	"time"
 )
 
@@ -20,6 +21,16 @@ func NewPacket(event string, payload any) (*Packet, error) {
 		Event:   event,
 		Payload: p,
 	}, nil
+}
+
+func (p *Packet) marshallPayload(payload any) error {
+	raw, err := json.Marshal(payload)
+	if err != nil {
+		return fmt.Errorf("can't create broadcast payload: %w", err)
+	}
+	p.Payload = raw
+
+	return nil
 }
 
 // Client events payloads
