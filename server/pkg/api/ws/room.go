@@ -2,6 +2,7 @@ package ws
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/alphadose/haxmap"
 	"github.com/google/uuid"
@@ -66,6 +67,10 @@ func (r *Room) addClient(cID string) error {
 }
 
 func (r *Room) removeClient(cID string) error {
+	if r.ID == r.Manager.GlobalRoom.ID {
+		return fmt.Errorf("cannot remove client from global room")
+	}
+
 	c, err := r.getClient(cID)
 	if err != nil {
 		return err

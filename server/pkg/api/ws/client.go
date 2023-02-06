@@ -99,12 +99,12 @@ func (c *Client) handlePacket(p *Packet) error {
 }
 
 func (c *Client) joinRoom(p *Packet) error {
-	req := JoinPayload{}
-	if err := json.Unmarshal(p.Payload, &req); err != nil {
-		return err
+	payload := JoinPayload{}
+	if err := json.Unmarshal(p.Payload, &payload); err != nil {
+		return fmt.Errorf("failed to unmarshal JoinPayload: %w", err)
 	}
 
-	r, err := c.Manager.getRoom(req.RoomID)
+	r, err := c.Manager.getRoom(payload.RoomID)
 	if err != nil {
 		return err
 	}
@@ -117,15 +117,15 @@ func (c *Client) joinRoom(p *Packet) error {
 }
 
 func (c *Client) leaveRoom(p *Packet) error {
-	req := LeavePayload{}
-	if err := json.Unmarshal(p.Payload, &req); err != nil {
-		return err
+	payload := LeavePayload{}
+	if err := json.Unmarshal(p.Payload, &payload); err != nil {
+		return fmt.Errorf("failed to unmarshal LeavePayload: %v", err)
 	}
 
-	if req.RoomID == c.ID {
+	if payload.RoomID == c.ID {
 		return ErrLeavingOwnRoom
 	}
-	r, err := c.Manager.getRoom(req.RoomID)
+	r, err := c.Manager.getRoom(payload.RoomID)
 	if err != nil {
 		return err
 	}
@@ -140,7 +140,7 @@ func (c *Client) leaveRoom(p *Packet) error {
 func (c *Client) broadcast(p *Packet) error {
 	payload := BroadcastPayload{}
 	if err := json.Unmarshal(p.Payload, &payload); err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal BroadcastPayload: %w", err)
 	}
 
 	r, err := c.Manager.getRoom(payload.RoomID)
