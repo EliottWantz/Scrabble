@@ -7,6 +7,7 @@ import 'package:client_leger/routes/app_routes.dart';
 import 'package:client_leger/services/auth_service.dart';
 import 'package:client_leger/services/settings_service.dart';
 import 'package:client_leger/services/storage_service.dart';
+import 'package:client_leger/services/websocket_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -47,7 +48,8 @@ class MyApp extends StatelessWidget {
 Future<void> initGlobalServices() async {
   await Get.putAsync(() => StorageService().init());
   Get.put(ApiProvider(), permanent: true);
+  Get.put(WebsocketService(), permanent: true);
   Get.put(ApiRepository(apiProvider: Get.find()), permanent: true);
   Get.put(SettingsService(storageService: Get.find()));
-  Get.put(AuthService(storageService: Get.find(), apiRepository: Get.find()));
+  Get.put(AuthService(storageService: Get.find(), apiRepository: Get.find(), websocketService: Get.find()));
 }

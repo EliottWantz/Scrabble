@@ -1,8 +1,13 @@
 import 'package:chat_bubbles/chat_bubbles.dart';
+import 'package:client_leger/services/websocket_service.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class Chatbox extends StatelessWidget {
-  const Chatbox({super.key});
+  Chatbox({super.key});
+
+  WebsocketService chatController = Get.put(WebsocketService());
+
 
   @override
   Widget build(BuildContext context) {
