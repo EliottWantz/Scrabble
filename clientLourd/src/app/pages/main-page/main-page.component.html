@@ -1,16 +1,13 @@
 <div class="container justified-center">
-    <span class="animate scrabble" style="--n: 8"
-        ><span>{{ title }}</span>
-    </span>
-
-    <section>
-        <div id="rightdiv" *ngIf="!isConnected()">
-            <button mat-raised-button (click)="openLoginDialog()">Se connecter</button>
+    <div id="header">
+        <span class="animate scrabble" style="--n: 8">
+            <span>{{ title }}</span>
+        </span>
+        <div id="rightdiv">
+            <button *ngIf="!isConnected()" mat-raised-button class="pull-right" (click)="openLoginDialog()" id="login-button">Se connecter</button>
+            <button *ngIf="isConnected()" mat-raised-button class="pull-right" (click)="logout()" id="login-button">Déconnexion</button>
         </div>
-        <div id="rightdiv" *ngIf="isConnected()">
-            <button mat-raised-button (click)="logout()">Déconnexion</button>
-        </div>
-    </section>
+    </div>
 
     <section id="server-message">
         <div class="justifiediv">

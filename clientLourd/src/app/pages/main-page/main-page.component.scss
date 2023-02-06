@@ -58,11 +58,33 @@ Style for welcome-button
 
 /**
 
-Style for login-button
+Position for div of the login-button
 **/
 
 #rightdiv {
-    float:right;
+    width: 100vw;
+    position: absolute;
+    top: 50%;
+}
+
+/**
+
+Position for login-button
+**/
+
+#login-button {
+    float: right;
+    margin-right: 1vw;
+}
+
+/**
+
+Style for Header
+**/
+#header {
+    position: relative;
+    display: inline-flex;
+    justify-content: center;
 }
 
 /**
