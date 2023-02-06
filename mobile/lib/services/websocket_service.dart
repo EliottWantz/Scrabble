@@ -1,3 +1,4 @@
+import 'package:client_leger/models/chat_message.dart';
 import 'package:get/get.dart';
 // import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:client_leger/api/api_constants.dart';
@@ -19,5 +20,10 @@ class WebsocketService extends GetxService {
     // socket.onDisconnect((_) => print('Connection Disconnection'));
     // socket.onConnectError((err) => print(err));
     // socket.onError((err) => print(err));
+  }
+
+  sendMessage(String data) {
+    final message = ChatMessage(data: data);
+    socket.sink.add(message);
   }
 }
