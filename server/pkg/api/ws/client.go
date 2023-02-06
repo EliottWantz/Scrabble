@@ -152,7 +152,7 @@ func (c *Client) broadcast(p *Packet) error {
 		return fmt.Errorf("%w %s", ErrNotInRoom, req.RoomID)
 	}
 
-	req.Timestamp = time.Now().Format(time.TimeOnly)
+	req.Timestamp = time.Now()
 	payload, err := json.Marshal(req)
 	if err != nil {
 		return fmt.Errorf("can't create broadcast payload: %w", err)

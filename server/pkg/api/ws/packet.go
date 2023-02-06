@@ -1,6 +1,9 @@
 package ws
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"time"
+)
 
 type Packet struct {
 	Event   string          `json:"event,omitempty"`
@@ -22,10 +25,10 @@ type JoinPayload struct {
 type LeavePayload = JoinPayload
 
 type BroadcastPayload struct {
-	RoomID    string `json:"roomId,omitempty"`
-	Message   string `json:"message,omitempty"`
-	From      string `json:"from,omitempty"`
-	Timestamp string `json:"timestamp,omitempty"`
+	RoomID    string    `json:"roomId,omitempty"`
+	Message   string    `json:"message,omitempty"`
+	From      string    `json:"from,omitempty"`
+	Timestamp time.Time `json:"timestamp,omitempty"`
 }
 
 // Server events payloads
