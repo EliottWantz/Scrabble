@@ -39,6 +39,7 @@ func (api *API) setupRoutes(cfg *config.Config) {
 		return c.SendString("Hello api")
 	})
 	router.Post("/login", api.UserCtrl.Login)
+	router.Post("/logout", api.UserCtrl.Logout(api.WebSocketManager))
 	router.Get("/user/:id", api.UserCtrl.GetUser)
 
 	ws := api.App.Group("/ws")

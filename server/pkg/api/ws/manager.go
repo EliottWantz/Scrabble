@@ -66,6 +66,7 @@ func (m *Manager) Accept(cID string) fiber.Handler {
 
 		go c.write()
 		c.send(m.globalRoomPacket)
+
 		c.read()
 	})
 }
@@ -113,9 +114,24 @@ func (m *Manager) addClient(coon *websocket.Conn, cID string) (*Client, error) {
 	return c, nil
 }
 
+func (m *Manager) RemoveClient(cID string) error {
+	c, err := m.getClient(cID)
+	if err != nil {
+		return err
+	}
+
+	close(c.receiveCh)
+	close(c.sendCh)
+	c.Conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+	return nil
+}
+
 func (m *Manager) removeClient(c *Client) error {
 	c.Rooms.ForEach(func(rID string, r *Room) bool {
-		_ = r.removeClient(c.ID)
+		if err := r.removeClient(c.ID); err != nil {
+			r.logger.Error("failed to remove client from room", err, "client_id", c.ID)
+		}
+
 		return true
 	})
 
@@ -126,7 +142,7 @@ func (m *Manager) removeClient(c *Client) error {
 	}
 
 	m.logger.Info(
-		"client removed",
+		"client disconnected",
 		"client_id", c.ID,
 		"room_size", m.Rooms.Len(),
 	)
