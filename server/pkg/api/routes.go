@@ -1,6 +1,7 @@
 package api
 
 import (
+	"net/http"
 	"time"
 
 	"scrabble/config"
@@ -10,7 +11,6 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/monitor"
-	jwtware "github.com/gofiber/jwt/v3"
 )
 
 func (api *API) setupMiddleware() {
@@ -34,26 +34,20 @@ func (api *API) setupMiddleware() {
 }
 
 func (api *API) setupRoutes(cfg *config.Config) {
-	api.App.Get("/ws", api.WebSocketManager.Accept())
-
-	// Public routes
 	router := api.App.Group("/api")
 	router.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("Hello api")
 	})
-	router.Post("/signup", api.UserCtrl.SignUp)
 	router.Post("/login", api.UserCtrl.Login)
-
-	// Proctected routes
-	router.Use(
-		jwtware.New(
-			jwtware.Config{
-				SigningKey: []byte(cfg.JWT_SIGN_KEY),
-				ContextKey: "token",
-			},
-		),
-	)
-	router.Post("/avatar", api.UserCtrl.UploadAvatar)
-	router.Post("/revalidate", api.UserCtrl.Revalidate)
 	router.Get("/user/:id", api.UserCtrl.GetUser)
+
+	ws := api.App.Group("/ws")
+	ws.Get("/", func(c *fiber.Ctx) error {
+		ID := c.Query("id")
+		if ID == "" {
+			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "Missing id"})
+		}
+		return api.WebSocketManager.Accept(ID)(c)
+	})
+	ws.Post("/room/join", api.WebSocketManager.JoinRoom)
 }

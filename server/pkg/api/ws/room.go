@@ -2,6 +2,7 @@ package ws
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/alphadose/haxmap"
 	"github.com/google/uuid"
@@ -13,30 +14,41 @@ var (
 	ErrNotInRoom     = errors.New("client not in room")
 )
 
-type room struct {
+type Room struct {
 	ID      string
 	Manager *Manager
-	Clients *haxmap.Map[string, *client]
+	Clients *haxmap.Map[string, *Client]
 	logger  *slog.Logger
 }
 
-func NewRoom(m *Manager) (*room, error) {
+func NewRoom(m *Manager) (*Room, error) {
 	id, err := uuid.NewRandom()
 	if err != nil {
 		return nil, err
 	}
 
-	r := &room{
+	r := &Room{
 		ID:      id.String(),
 		Manager: m,
-		Clients: haxmap.New[string, *client](),
+		Clients: haxmap.New[string, *Client](),
 	}
 	r.logger = slog.With("room", r.ID)
 
 	return r, nil
 }
 
-func (r *room) addClient(cID string) error {
+func NewRoomWithID(m *Manager, ID string) *Room {
+	r := &Room{
+		ID:      ID,
+		Manager: m,
+		Clients: haxmap.New[string, *Client](),
+	}
+	r.logger = slog.With("room", r.ID)
+
+	return r
+}
+
+func (r *Room) addClient(cID string) error {
 	c, _ := r.getClient(cID)
 	if c != nil {
 		return ErrAlreadyInRoom
@@ -54,7 +66,11 @@ func (r *room) addClient(cID string) error {
 	return nil
 }
 
-func (r *room) removeClient(cID string) error {
+func (r *Room) removeClient(cID string) error {
+	if r.ID == r.Manager.GlobalRoom.ID {
+		return fmt.Errorf("cannot remove client from global room")
+	}
+
 	c, err := r.getClient(cID)
 	if err != nil {
 		return err
@@ -73,7 +89,7 @@ func (r *room) removeClient(cID string) error {
 	return nil
 }
 
-func (r *room) getClient(cID string) (*client, error) {
+func (r *Room) getClient(cID string) (*Client, error) {
 	c, ok := r.Clients.Get(cID)
 	if !ok {
 		return nil, ErrNotInRoom
@@ -82,12 +98,16 @@ func (r *room) getClient(cID string) (*client, error) {
 	return c, nil
 }
 
-func (r *room) broadcast(p *packet, senderID string) error {
-	r.Clients.ForEach(func(cID string, c *client) bool {
+func (r *Room) broadcast(p *Packet, senderID string) error {
+	r.Clients.ForEach(func(cID string, c *Client) bool {
+		// Actually send the packet to the client so that it can handle it
+		// properly, i.e. get the confirmation that the packet has been sent,
+		// and have the timestamp
+
 		// Don't send packet to the sender
-		if cID == senderID {
-			return true
-		}
+		// if cID == senderID {
+		// 	return true
+		// }
 
 		c.send(p)
 
@@ -97,7 +117,7 @@ func (r *room) broadcast(p *packet, senderID string) error {
 	return nil
 }
 
-func (r *room) has(cID string) bool {
+func (r *Room) has(cID string) bool {
 	_, err := r.getClient(cID)
 	return err == nil
 }
