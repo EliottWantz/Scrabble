@@ -11,7 +11,10 @@ import (
 	"golang.org/x/exp/slog"
 )
 
-var ErrLeavingOwnRoom = errors.New("trying to leave own room")
+var (
+	ErrLeavingOwnRoom     = errors.New("trying to leave own room")
+	ErrLeavingGloabalRoom = errors.New("client trying to leave global room")
+)
 
 type Client struct {
 	ID        string
@@ -125,6 +128,10 @@ func (c *Client) leaveRoom(p *Packet) error {
 	if payload.RoomID == c.ID {
 		return ErrLeavingOwnRoom
 	}
+	if payload.RoomID == c.Manager.GlobalRoom.ID {
+		return ErrLeavingGloabalRoom
+	}
+
 	r, err := c.Manager.getRoom(payload.RoomID)
 	if err != nil {
 		return err

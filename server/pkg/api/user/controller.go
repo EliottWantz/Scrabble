@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"scrabble/config"
+	"scrabble/pkg/api/ws"
 
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -50,6 +51,32 @@ func (ctrl *Controller) Login(c *fiber.Ctx) error {
 			User: user,
 		},
 	)
+}
+
+type LogoutRequest struct {
+	ID string `json:"id,omitempty"`
+}
+type LogoutResponse struct {
+	Error string `json:"error,omitempty"`
+}
+
+func (ctrl *Controller) Logout(ws *ws.Manager) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		req := LogoutRequest{}
+		if err := c.BodyParser(&req); err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(LogoutResponse{
+				Error: err.Error(),
+			})
+		}
+
+		if err := ws.RemoveClient(req.ID); err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(LogoutResponse{
+				Error: err.Error(),
+			})
+		}
+
+		return c.SendStatus(fiber.StatusOK)
+	}
 }
 
 type GetUserResponse struct {
