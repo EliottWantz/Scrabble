@@ -1,22 +1,23 @@
 import 'package:get/get.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
+// import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:client_leger/api/api_constants.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:web_socket_channel/status.dart' as status;
 
 class WebsocketService extends GetxService {
-  late IO.Socket socket;
+  late WebSocketChannel socket;
   late String room;
 
+  // var channel = WebSocketChannel.connect(wsUrl);
+
   connect() {
-    socket = IO.io(ApiConstants.wsUrl, <String, dynamic>{
-      'autoConnect': false,
-      'transports': ['websocket'],
-    });
-    socket.connect();
-    socket.onConnect((_) {
-      print('Connection established');
-    });
-    socket.onDisconnect((_) => print('Connection Disconnection'));
-    socket.onConnectError((err) => print(err));
-    socket.onError((err) => print(err));
+    socket = WebSocketChannel.connect(Uri.parse(ApiConstants.wsUrl));
+    // socket.connect();
+    // socket.onConnect((_) {
+    //   print('Connection established');
+    // });
+    // socket.onDisconnect((_) => print('Connection Disconnection'));
+    // socket.onConnectError((err) => print(err));
+    // socket.onError((err) => print(err));
   }
 }
