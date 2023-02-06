@@ -1,16 +1,34 @@
 package ws
 
-type packet struct {
-	Event     string `json:"event,omitempty"`
-	RoomID    string `json:"roomId,omitempty"`
-	From      string `json:"from,omitempty"`
-	Timestamp string `json:"timestamp,omitempty"`
-	Data      any    `json:"data,omitempty"`
+import "encoding/json"
+
+type Packet struct {
+	Event   string          `json:"event,omitempty"`
+	Payload json.RawMessage `json:"payload,omitempty"`
 }
 
-const (
-	EventNoEvent   = ""
-	EventJoin      = "join"
-	EventLeave     = "leave"
-	EventBroadcast = "broadcast"
-)
+func NewPacket(event string, payload any) *Packet {
+	p, _ := json.Marshal(payload)
+	return &Packet{
+		Event:   event,
+		Payload: p,
+	}
+}
+
+// Client events payloads
+type JoinPayload struct {
+	RoomID string `json:"roomId,omitempty"`
+}
+type LeavePayload = JoinPayload
+
+type BroadcastPayload struct {
+	RoomID    string `json:"roomId,omitempty"`
+	Message   string `json:"message,omitempty"`
+	From      string `json:"from,omitempty"`
+	Timestamp string `json:"timestamp,omitempty"`
+}
+
+// Server events payloads
+type JoinedGlobalRoomPayload struct {
+	RoomID string `json:"roomId,omitempty"`
+}
