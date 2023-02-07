@@ -6,6 +6,7 @@ import 'package:client_leger/screens/home_screen.dart';
 import 'package:client_leger/screens/auth/login_screen.dart';
 import 'package:client_leger/screens/auth/register_screen.dart';
 import 'package:get/get.dart';
+import '../bindings/chatbox_binding.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -22,6 +23,7 @@ class AppPages {
     GetPage(
         name: Routes.HOME,
         page: () => HomeScreen(),
+        binding: ChatBoxBinding(),
         middlewares: [AuthGuard()]),
     GetPage(name: Routes.AVATAR_SELECTION, page: () => AvatarSelectionScreen()),
   ];

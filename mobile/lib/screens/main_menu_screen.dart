@@ -1,3 +1,4 @@
+import 'package:client_leger/widgets/chatbox.dart';
 import 'package:flutter/material.dart';
 
 class MainMenuScreen extends StatelessWidget {
@@ -14,6 +15,7 @@ class MainMenuScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: const [
               Text('Main',style: TextStyle(fontSize: 30),),
+              ChatBox()
             ],
           ),
         ),
