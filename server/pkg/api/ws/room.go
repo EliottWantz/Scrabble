@@ -2,6 +2,7 @@ package ws
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/alphadose/haxmap"
 	"github.com/google/uuid"
@@ -93,6 +94,12 @@ func (r *Room) getClient(cID string) (*Client, error) {
 }
 
 func (r *Room) broadcast(p *Packet, senderID string) error {
+	r.logger.Info("inserting packet in db")
+	err := r.Manager.repo.InsertOne(r.ID, p.Payload)
+	if err != nil {
+		return fmt.Errorf("failed to insert message in db: %w", err)
+	}
+
 	r.Clients.ForEach(func(cID string, c *Client) bool {
 		// Actually send the packet to the client so that it can handle it
 		// properly, i.e. get the confirmation that the packet has been sent,
