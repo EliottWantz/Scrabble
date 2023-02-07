@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { map } from 'rxjs/operators';
+import { first } from 'rxjs/operators';
 
 @Injectable({
     providedIn: 'root',
@@ -13,6 +14,7 @@ export class AuthentificationService {
     public currentUser: Observable<User>;
     private isConnected: Boolean;
     private readonly baseUrl: string = environment.serverUrl;
+    private user: User;
 
     constructor(private http: HttpClient) {
         this.currentUserSubject = new BehaviorSubject<User>(JSON.parse(localStorage.getItem('currentUser') || '{}'));
@@ -36,19 +38,23 @@ export class AuthentificationService {
                 this.currentUserSubject.next(user);
                 console.log(user);
                 this.isConnected = true;
+                this.user = user;
                 return user;
             }));
     }
 
     logout() {
-        this.isConnected = false;
-        this.http.post<any>(`${this.baseUrl}/logout`, this.currentUserSubject.value.username);
-        localStorage.removeItem('currentUser');
-        this.currentUserSubject.next({id: 0,
-            username: "",
-            password: "",
-            email: "",
-            token: ""
-        });
+        console.log(this.user);
+        return this.http.post<any>(`${this.baseUrl}/logout`, this.user.id).pipe(first()).subscribe(() => {
+            this.isConnected = false;
+            localStorage.removeItem('currentUser');
+            this.currentUserSubject.next({
+                id: 0,
+                username: ""
+            });
+            this.isConnected = false;
+        }, (error: Error) => {
+            console.log(error);
+        });;
     }
 }
