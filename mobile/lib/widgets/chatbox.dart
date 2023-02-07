@@ -14,13 +14,31 @@ class ChatBox extends GetView<ChatBoxController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16.0),
-        itemBuilder: (context, item) {
-          final index = item ~/ 2;
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            Form( child: TextFormField(controller: controller.textController) ),
+            // StreamBuilder(
+            //     stream: messageController.channel!.stream,
+            //     builder: (context,snapshot){
+            //       return Text(snapshot.hasData ? '${snapshot.data}' : '');
+            //     }),
+            TextButton(onPressed: (){
+              controller.sendMessage();
+            }, child: Text("Send")),
+          ],
+        ),
+      ),
+    );
+    // return Scaffold(
+    //   body: ListView.builder(
+    //     padding: const EdgeInsets.all(16.0),
+    //     itemBuilder: (context, item) {
+    //       final index = item ~/ 2;
           // return _buildMessage(_chatMessages[index]);
-        }
-      )
+      //   }
+      // )
 
       //   resizeToAvoidBottomInset: false,
       //   body: SingleChildScrollView(
@@ -58,7 +76,7 @@ class ChatBox extends GetView<ChatBoxController> {
           //   })
           // )
         // ],
-      );
+      // );
     //     )
     // );
   }

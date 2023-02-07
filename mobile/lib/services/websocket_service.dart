@@ -22,8 +22,8 @@ class WebsocketService extends GetxService {
         queryParameters: { 'id': username }
     ));
     username = username;
-    final message = {'event': 'broadcast','payload': 'hello'};
-    print(jsonEncode(message));
+    // final message = {'event': 'broadcast','payload': 'hello'};
+    // print(jsonEncode(message));
     socket.stream.listen(
           (data) {
         print(data);
@@ -39,9 +39,22 @@ class WebsocketService extends GetxService {
     switch(decodedData['event']) {
       case 'joinedGlobalRoom': {
         roomId = decodedData['payload']['roomId'];
+        print('event joinedGlobalRoom');
       }
       break;
-      default: {}
+      case 'broadcast': {
+        roomId = decodedData['payload']['roomId'];
+        print('event broadcast');
+      }
+      break;
+      case '': {
+        roomId = decodedData['payload']['roomId'];
+        print('event empty');
+      }
+      break;
+      default: {
+        print('no event in package received');
+      }
       break;
     }
   }

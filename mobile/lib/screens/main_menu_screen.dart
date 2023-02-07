@@ -1,7 +1,9 @@
+import 'package:client_leger/controllers/chatbox_controller.dart';
 import 'package:client_leger/widgets/chatbox.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
-class MainMenuScreen extends StatelessWidget {
+class MainMenuScreen extends GetView<ChatBoxController> {
   const MainMenuScreen({Key? key}) : super(key: key);
 
   @override
@@ -11,15 +13,19 @@ class MainMenuScreen extends StatelessWidget {
       child: Center(
         child: SizedBox(
           width: 300,
-          child: Column(
+          child: Container (
+            height: 200,
+            child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
+            children: [
               Text('Main',style: TextStyle(fontSize: 30),),
-              ChatBox()
+              TextButton(onPressed: (){
+                controller.sendMessage();
+              }, child: Text('TextButton'))
             ],
           ),
         ),
       ),
-    );
+    ),);
   }
 }
