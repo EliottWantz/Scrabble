@@ -6,7 +6,6 @@ import (
 	"github.com/alphadose/haxmap"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
-	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/exp/slog"
 )
 
@@ -16,15 +15,13 @@ type Manager struct {
 	GlobalRoom       *Room
 	globalRoomPacket *Packet
 	logger           *slog.Logger
-	repo             *Repository
 }
 
-func NewManager(db *mongo.Database) (*Manager, error) {
+func NewManager() (*Manager, error) {
 	m := &Manager{
 		Clients: haxmap.New[string, *Client](),
 		Rooms:   haxmap.New[string, *Room](),
 		logger:  slog.Default(),
-		repo:    NewRepository(db),
 	}
 
 	m.GlobalRoom = NewRoomWithID(m, "global")
@@ -64,28 +61,8 @@ func (m *Manager) Accept(cID string) fiber.Handler {
 
 		go c.write()
 		c.send(m.globalRoomPacket)
-		go m.sendLatestMessages(m.GlobalRoom.ID, c)
-
 		c.read()
 	})
-}
-
-func (m *Manager) sendLatestMessages(rID string, c *Client) error {
-	msgs, err := m.repo.GetLatestWithSkip(rID, 0)
-	if err != nil {
-		return err
-	}
-
-	for _, msg := range msgs {
-		p := &Packet{Event: ClientEventBroadcast}
-		err := p.setPayload(msg)
-		if err != nil {
-			return err
-		}
-		c.send(p)
-	}
-
-	return nil
 }
 
 func (m *Manager) getClient(cID string) (*Client, error) {
