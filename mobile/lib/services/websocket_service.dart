@@ -13,8 +13,6 @@ class WebsocketService extends GetxService {
   late String roomId;
   late String username;
 
-  // var channel = WebSocketChannel.connect(wsUrl);
-
   connect(String username) {
     socket = WebSocketChannel.connect(Uri(
         scheme: ApiConstants.wsScheme,
@@ -23,13 +21,6 @@ class WebsocketService extends GetxService {
         path: ApiConstants.wsPath,
         queryParameters: { 'id': username }
     ));
-    // socket.connect();
-    // socket.onConnect((_) {
-    //   print('Connection established');
-    // });
-    // socket.onDisconnect((_) => print('Connection Disconnection'));
-    // socket.onConnectError((err) => print(err));
-    // socket.onError((err) => print(err));
     username = username;
     final message = {'event': 'broadcast','payload': 'hello'};
     print(jsonEncode(message));
@@ -44,12 +35,18 @@ class WebsocketService extends GetxService {
 
   handleData(String data) {
     final decodedData = jsonDecode(data);
-    roomId = decodedData['payload']['roomId'];
-    // sendMessage('broadcast', 'hello');
+
+    switch(decodedData['event']) {
+      case 'joinedGlobalRoom': {
+        roomId = decodedData['payload']['roomId'];
+      }
+      break;
+      default: {}
+      break;
+    }
   }
 
   sendMessage(String event, String payload) {
-    // final message = ChatMessage(event: event,payload: payload);
     // final timestamp = DateFormat('y-M-d H:m:s').format(DateTime.now());
     final message = {
       'event': 'broadcast',

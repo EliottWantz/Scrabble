@@ -56,7 +56,6 @@ class AuthController extends GetxController {
       // if (authService.isUserLoggedIn()) {
         Get.offAllNamed(Routes.HOME);
       // }
-      // Get.toNamed(Routes.HOME);
     }
   }
 
