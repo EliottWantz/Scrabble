@@ -27,13 +27,8 @@ func NewManager(db *mongo.Database) (*Manager, error) {
 		repo:    NewRepository(db),
 	}
 
-	r, err := NewRoom(m)
-	if err != nil {
-		return nil, err
-	}
-
-	m.GlobalRoom = r
-	err = m.addRoom(r)
+	m.GlobalRoom = NewRoomWithID(m, "global")
+	err := m.addRoom(m.GlobalRoom)
 	if err != nil {
 		return nil, err
 	}
@@ -76,17 +71,18 @@ func (m *Manager) Accept(cID string) fiber.Handler {
 }
 
 func (m *Manager) sendLatestMessages(rID string, c *Client) error {
-	msgs, err := m.repo.GetMessages(rID)
+	msgs, err := m.repo.GetLatestWithSkip(rID, 0)
 	if err != nil {
 		return err
 	}
-	fmt.Println("sending latest messages", msgs)
 
 	for _, msg := range msgs {
-		c.send(&Packet{
-			Event:   ClientEventBroadcast,
-			Payload: msg.Payload,
-		})
+		p := &Packet{Event: ClientEventBroadcast}
+		err := p.setPayload(msg)
+		if err != nil {
+			return err
+		}
+		c.send(p)
 	}
 
 	return nil

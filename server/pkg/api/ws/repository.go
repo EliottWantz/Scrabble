@@ -2,7 +2,6 @@ package ws
 
 import (
 	"context"
-	"encoding/json"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -19,53 +18,50 @@ func NewRepository(db *mongo.Database) *Repository {
 	}
 }
 
-type StoredMessage struct {
-	RoomID  string          `bson:"roomId"`
-	Payload json.RawMessage `bson:"payload"`
+type Bucket struct {
+	RoomID  string        `bson:"roomId"`
+	Count   int           `bson:"count"`
+	History []ChatMessage `bson:"history"`
 }
 
-func newStoredMessage(roomID string, payload json.RawMessage) StoredMessage {
-	return StoredMessage{
-		RoomID:  roomID,
-		Payload: payload,
-	}
-}
-
-func (r *Repository) InsertOne(roomID string, payload json.RawMessage) error {
-	_, err := r.coll.InsertOne(
+// Insert the stored message into the bucket of id roomID. Each bucket holds
+// 20 messages.
+func (r *Repository) InsertOne(roomID string, msg *ChatMessage) error {
+	_, err := r.coll.UpdateOne(
 		context.Background(),
-		newStoredMessage(roomID, payload))
+		bson.M{
+			"roomId": roomID,
+			"count": bson.M{
+				"$lt": 20,
+			},
+		},
+		bson.M{
+			"$push": bson.M{
+				"history": msg,
+			},
+			"$inc": bson.M{
+				"count": 1,
+			},
+		},
+		options.Update().SetUpsert(true),
+	)
+
 	return err
 }
 
-// Function that get the last 20 messages from a given room
-// func (r *Repository) GetMessages(roomID string) ([]StoredMessage, error) {
-// 	var messages []StoredMessage
-// 	err := r.coll.Find(
-// 		context.Background(),
-// 		bson.M{
-// 			"roomId": roomID,
-// 		}).Sort("-timestamp").Limit(20).All(&messages)
-// 	return messages, err
-// }
-
-// Function that get the last 2 messages from a given room
-func (r *Repository) GetMessages(roomID string) ([]StoredMessage, error) {
-	opts := options.Find().SetBatchSize(2)
-	cursor, err := r.coll.Find(
+func (r *Repository) GetLatestWithSkip(roomID string, skip int) ([]ChatMessage, error) {
+	var b Bucket
+	err := r.coll.FindOne(
 		context.Background(),
 		bson.M{
 			"roomId": roomID,
 		},
-		opts)
+		options.FindOne().SetSort(
+			bson.D{{Key: "_id", Value: -1}},
+		).SetSkip(int64(skip)),
+	).Decode(&b)
 	if err != nil {
 		return nil, err
 	}
-	var messages []StoredMessage
-	for cursor.Next(context.Background()) {
-		var message StoredMessage
-		cursor.Decode(&message)
-		messages = append(messages, message)
-	}
-	return messages, nil
+	return b.History, nil
 }

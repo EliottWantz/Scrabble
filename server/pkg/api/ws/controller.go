@@ -1,6 +1,8 @@
 package ws
 
 import (
+	"strconv"
+
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -33,4 +35,21 @@ func (m *Manager) JoinRoom(c *fiber.Ctx) error {
 	}
 
 	return c.SendStatus(fiber.StatusOK)
+}
+
+func (m *Manager) GetMessages(c *fiber.Ctx) error {
+	roomID := c.Query("roomId", m.GlobalRoom.ID)
+	skip, err := strconv.Atoi(c.Query("skip", "0"))
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid skip value")
+	}
+
+	msgs, err := m.repo.GetLatestWithSkip(roomID, skip)
+	if err != nil {
+		return err
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"messages": msgs,
+	})
 }
