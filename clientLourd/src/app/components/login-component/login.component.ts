@@ -3,7 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { AuthentificationService } from "@app/services/authentification/authentification.service";
 //import { User } from "@common/user";
 import { FormGroup } from "@angular/forms";
-import { first } from 'rxjs/operators';
+//import { first } from 'rxjs/operators';
 
 export const SMALLEST = -1;
 
@@ -19,7 +19,7 @@ export class LoginComponent {
   loginView: Boolean = false;
   hasError: Boolean = false;
   username: string;
-  password: string;
+  //password: string;
 
   constructor(
       private authenticationService: AuthentificationService,
@@ -29,7 +29,7 @@ export class LoginComponent {
             this.closeModal();
         }
         this.username = "";
-        this.password = "";
+        //this.password = "";
   }
 
   ngOnInit() {
@@ -37,23 +37,23 @@ export class LoginComponent {
       this.closeModal();
     }
     this.username = "";
-    this.password = "";
+    //this.password = "";
   }
 
   onSubmit() {
     this.submitted = true;
 
-    if (this.username == "" || this.password == "") {
+    if (this.username == ""/* || this.password == ""*/) {
       return;
     }
 
-    this.authenticationService.login(this.username, this.password).pipe(first()).subscribe(() => {
-      this.closeModal()
-    }, 
-    (error: Error) => {
+    this.authenticationService.login(this.username/*, this.password*/);
+    if (this.authenticationService.currentUserValue.id != "0") {
+      this.switchView();
+      this.closeModal();
+    } else {
       this.hasError = true;
-      console.log(error);
-    });
+    }
   }
 
   switchView(): void {
