@@ -3,12 +3,13 @@ import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ErrorPageComponent } from '@app/components/error-page/error-page.component';
 import { WebsocketService } from '@app/services/socket/websocket.service';
-import { StorageService } from '@app/services/storage/storage.service';
+//import { StorageService } from '@app/services/storage/storage.service';
 import { DictHeaders, Dictionary } from '@common/dictionary';
 import { Game, GameOptions, JoinMultiplayerOption, ReconnectionInfo } from '@common/game';
 import { GameMode } from '@common/game-mode';
 import { GameHistory, PlayerInfo, VirtualPlayerName } from '@common/player';
 import { PlayerScore } from '@common/player-score';
+import { User } from '@common/user';
 import { VirtualPlayerType } from '@common/virtualPlayer';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -22,12 +23,17 @@ export class CommunicationService {
 
     constructor(private readonly http: HttpClient, private wsService: WebsocketService, public dialog: MatDialog) {}
 
-    async connect(playerName: string): Promise<string> {
-        this.wsService.connect(playerName);
+    async connect(playerId: string): Promise<string> {
+        this.wsService.connect(playerId);
         return new Promise<string>((resolve) => {
-            this.wsService.socket.on('connect', () => {
-                StorageService.setPlayerInfo({ id: this.wsService.socket.id, name: playerName });
-                resolve(this.wsService.socket.id);
+            this.wsService.socket.addEventListener("message", ({ data }) => {
+                const packet = JSON.parse(data);
+              
+                switch (packet.type) {
+                  case "connect":
+                    resolve(playerId);
+                    break;
+                }
             });
         });
     }
@@ -53,6 +59,20 @@ export class CommunicationService {
     async startGame(gameId: string): Promise<void> {
         return this.requestStartGame(gameId).toPromise();
     }
+
+    login(username: string): Observable<{user: User}> {
+        return this.http.post<{user: User}>(`${this.baseUrl}/login`, { username/*, password*/ })
+        .pipe(catchError(this.handleError<{user: User}>('login')));
+    }
+
+    logout(id: string): Observable<void> {
+        return this.http.post<any>(`${this.baseUrl}/logout`, id).pipe(catchError(this.handleError<void>('logout')));
+    }
+
+    socketConnection(id: string): Observable<void> {
+        return this.http.get<any>(`http://127.0.0.1:3000/ws/?id=${id}`).pipe(catchError(this.handleError<void>('socket connection')));
+    }
+
     convertToSolo(gameId: string, oponentName: string, level: string): Observable<void> {
         const virtualPlayerType: VirtualPlayerType = level === VirtualPlayerType.debutant ? VirtualPlayerType.debutant : VirtualPlayerType.expert;
         return this.http

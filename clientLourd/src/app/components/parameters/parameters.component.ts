@@ -265,40 +265,40 @@ export class ParametersComponent implements OnInit {
     }
 
     private handleDictionnaryDeleted(): void {
-        this.gameService.wsService.socket.on('nonExistingDict', () => {
-            this.nonExistingDict = true;
-            this.stepper.selectedIndex = STEPPER_PAGE_IDX.nonExistingDict;
-        });
+        // this.gameService.wsService.socket.on('nonExistingDict', () => {
+            // this.nonExistingDict = true;
+            // this.stepper.selectedIndex = STEPPER_PAGE_IDX.nonExistingDict;
+        // });
     }
 
     private handleCreatorLeftEvent(): void {
-        this.gameService.wsService.socket.on('playerLeft', () => {
-            this.gameService.wsService.leaveRoom();
-            this.stepper.selectedIndex = STEPPER_PAGE_IDX.gameListPage;
-            this.nonExistingDict = false;
-        });
+        // this.gameService.wsService.socket.on('playerLeft', () => {
+            // this.gameService.wsService.leaveRoom();
+            // this.stepper.selectedIndex = STEPPER_PAGE_IDX.gameListPage;
+            // this.nonExistingDict = false;
+        // });
     }
 
     private handleOpponentLeftEvent(): void {
-        this.gameService.wsService.socket.on('playerLeft', () => {
-            this.waiting = true;
-            this.nonExistingDict = false;
-        });
+        // this.gameService.wsService.socket.on('playerLeft', () => {
+            // this.waiting = true;
+            // this.nonExistingDict = false;
+        // });
     }
 
     private handleOpponentJoinedEvent(): void {
-        this.gameService.wsService.socket.on('playerJoined', (player) => {
-            this.waiting = false;
-            this.opponent = player;
-        });
+        // this.gameService.wsService.socket.on('playerJoined', (player) => {
+            // this.waiting = false;
+            // this.opponent = player;
+        // });
     }
 
     private handleRejectEvent(gameId: string): void {
-        this.gameService.wsService.socket.on('rejected', (player) => {
-            this.reject = true;
-            this.opponent = player;
-            this.gameService.wsService.socket.emit('leaveRoom', gameId);
-            this.stepper.selectedIndex = STEPPER_PAGE_IDX.rejectedPage;
-        });
+        // this.gameService.wsService.socket.on('rejected', (player) => {
+            // this.reject = true;
+            // this.opponent = player;
+            // this.gameService.wsService.socket.emit('leaveRoom', gameId);
+            // this.stepper.selectedIndex = STEPPER_PAGE_IDX.rejectedPage;
+        // });
     }
 }

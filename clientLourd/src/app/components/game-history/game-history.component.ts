@@ -25,8 +25,8 @@ export class GameHistoryComponent {
         });
         this.gameService.wsService.connect('Admin');
 
-        this.gameService.wsService.socket.on('resetHistory', (history) => {
-            this.data = new MatTableDataSource<GameHistory>(history);
-        });
+        // this.gameService.wsService.socket.on('resetHistory', (history) => {
+            // this.data = new MatTableDataSource<GameHistory>(history);
+        // });
     }
 }

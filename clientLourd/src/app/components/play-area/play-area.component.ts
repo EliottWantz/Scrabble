@@ -1,9 +1,9 @@
 import { Component, HostListener, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { PlayerAbandonedComponent } from '@app/components/player-abandoned/player-abandoned.component';
+//import { PlayerAbandonedComponent } from '@app/components/player-abandoned/player-abandoned.component';
 import { QuitGameComponent } from '@app/components/quit-game/quit-game.component';
-import { WinGameComponent } from '@app/components/win-game/win-game.component';
-import { ChatService } from '@app/services/chat/chat.service';
+//import { WinGameComponent } from '@app/components/win-game/win-game.component';
+//import { ChatService } from '@app/services/chat/chat.service';
 import { EaselService } from '@app/services/easel/easel.service';
 import { EventBusService } from '@app/services/events/event-bus.service';
 import { GameService } from '@app/services/game/game.service';
@@ -31,7 +31,7 @@ export class PlayAreaComponent implements OnInit {
         public gameService: GameService,
         public playerService: PlayerService,
         public mousePlacementService: MousePlacementService,
-        private chatService: ChatService,
+        //private chatService: ChatService,
         private eventBus: EventBusService,
         private timerService: TimerService,
         public easelService: EaselService,
@@ -40,7 +40,7 @@ export class PlayAreaComponent implements OnInit {
             this.allLettersRemaining = game.letterReserve;
             this.gameEnded = game.hasEnded;
         });
-        this.gameService.wsService.socket.on('playerAbandoned', () => this.openPlayerAbandonedDialog());
+        // this.gameService.wsService.socket.on('playerAbandoned', () => this.openPlayerAbandonedDialog());
         this.playerService.init();
         this.mousePlacementService.init();
         this.timerService.init();
@@ -80,22 +80,22 @@ export class PlayAreaComponent implements OnInit {
         this.lettersInReserve$ = this.gameService.game$.pipe(map((game) => game.letterReserve.length));
         this.playerService.player$.subscribe((player) => (this.player = player));
         this.playerService.opponent$.subscribe((player) => (this.opponent = player));
-        this.gameService.wsService.socket.on('endOfGame', () => {
-            const endGameMessage: string = ''.concat(
-                'Fin de partie - ',
-                this.allLettersRemaining.join(''),
-                '\n',
-                this.player.name,
-                ':',
-                this.player.easel.map((l) => l.character).join(''),
-                '\n',
-                this.opponent.name,
-                ':',
-                this.opponent.easel.map((l) => l.character).join(''),
-            );
-            this.chatService.addSystemMessage(endGameMessage);
-            this.openEndGameDialog();
-        });
+        // this.gameService.wsService.socket.on('endOfGame', () => {
+            // const endGameMessage: string = ''.concat(
+                // 'Fin de partie - ',
+                // this.allLettersRemaining.join(''),
+                // '\n',
+                // this.player.name,
+                // ':',
+                // this.player.easel.map((l) => l.character).join(''),
+                // '\n',
+                // this.opponent.name,
+                // ':',
+                // this.opponent.easel.map((l) => l.character).join(''),
+            // );
+            // this.chatService.addSystemMessage(endGameMessage);
+            // this.openEndGameDialog();
+        // });
     }
 
     openQuitDialog(): void {
@@ -107,11 +107,11 @@ export class PlayAreaComponent implements OnInit {
         this.gameService.wsService.sendCommand({ fullCommand: '!passer', name: 'passer' });
     }
 
-    private openEndGameDialog(): void {
+    /*private openEndGameDialog(): void {
         this.modal.open(WinGameComponent);
-    }
+    }*/
 
-    private openPlayerAbandonedDialog(): void {
+    /*private openPlayerAbandonedDialog(): void {
         this.modal.open(PlayerAbandonedComponent);
-    }
+    }*/
 }

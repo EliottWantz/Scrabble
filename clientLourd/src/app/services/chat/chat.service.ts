@@ -6,10 +6,10 @@ import { WebsocketService } from '@app/services/socket/websocket.service';
 import { StorageService } from '@app/services/storage/storage.service';
 import { TimerService } from '@app/services/timer/timer.service';
 import { ChatMessage } from '@common/chatMessage';
-import { PlayableWord } from '@common/clue';
-import { ClueCommand, Command, CommandError, CommandName, ExchangeCommand, PlaceCommand } from '@common/command';
+//import { PlayableWord } from '@common/clue';
+import { /*ClueCommand, */Command, CommandError, CommandName,/* ExchangeCommand, */PlaceCommand } from '@common/command';
 import { ALPHABET } from '@common/grid/letterCount';
-import { INDEX_ROW } from '@common/grid/row-index';
+//import { INDEX_ROW } from '@common/grid/row-index';
 import { Player } from '@common/player';
 import { BehaviorSubject } from 'rxjs';
 
@@ -38,10 +38,10 @@ export class ChatService {
         this.timerService.timer$.subscribe((timer) => {
             if (!timer && this.player.isPlaying) this.sendMessage('!passer');
         });
-        this.wsService.socket.on('message', (message) => this.addNewMessage(message));
-        this.handleCommandSuccess();
-        this.handleCommandShadowPlace();
-        this.handleBadPositionCommand();
+        // this.wsService.socket.on('message', (message) => this.addNewMessage(message));
+        // this.handleCommandSuccess();
+        // this.handleCommandShadowPlace();
+        // this.handleBadPositionCommand();
     }
 
     async send(inputValue: string) {
@@ -100,24 +100,24 @@ export class ChatService {
         this.addNewMessage(errorMessage);
     }
 
-    private handleBadPositionCommand(): void {
-        this.wsService.socket.on('badPlaceCommandPosition', () => {
-            this.addSystemMessage('Vous ne pouvez pas placer votre mot ici');
-            this.wsService.requestGameUpdate();
-        });
-    }
+    //private handleBadPositionCommand(): void {
+        // this.wsService.socket.on('badPlaceCommandPosition', () => {
+            // this.addSystemMessage('Vous ne pouvez pas placer votre mot ici');
+            // this.wsService.requestGameUpdate();
+        // });
+    //}
 
-    private handleCommandShadowPlace(): void {
-        this.wsService.socket.on('shadowPlaceLetters', (command) => {
-            this.sendMessage(command.fullCommand);
-            const bufferGame = this.gameService.game$.getValue();
-            this.wsService.shadowPlaceLetters(command as PlaceCommand, bufferGame, this.player.id);
-            setTimeout(() => {
-                this.addSystemMessage('Un ou plusieurs nouveaux mots créés ne sont pas dans le dictionnaire');
-                this.wsService.requestGameUpdate();
-            }, PLACE_LETTERS_TIMEOUT);
-        });
-    }
+    //private handleCommandShadowPlace(): void {
+        // this.wsService.socket.on('shadowPlaceLetters', (command) => {
+            // this.sendMessage(command.fullCommand);
+            // const bufferGame = this.gameService.game$.getValue();
+            // this.wsService.shadowPlaceLetters(command as PlaceCommand, bufferGame, this.player.id);
+            // setTimeout(() => {
+                // this.addSystemMessage('Un ou plusieurs nouveaux mots créés ne sont pas dans le dictionnaire');
+                // this.wsService.requestGameUpdate();
+            // }, PLACE_LETTERS_TIMEOUT);
+        // });
+    //}
 
     private sendMessage(data: string, opponentVersion?: string): void {
         const message: ChatMessage = {
@@ -153,7 +153,7 @@ export class ChatService {
         this.addNewMessage(message);
     }
 
-    private showPlayableWords(data: string, playableWords: PlayableWord[]): void {
+    /*private showPlayableWords(data: string, playableWords: PlayableWord[]): void {
         const message: ChatMessage = {
             data,
             from: 'player',
@@ -172,7 +172,7 @@ export class ChatService {
             ${playableWord.word} Score: ${playableWord.score}`;
             this.addSystemMessage(clueMessage);
         }
-    }
+    }*/
 
     private addNewMessage(message: ChatMessage): void {
         const messages = this.messages$.getValue().concat(message);
@@ -213,15 +213,15 @@ export class ChatService {
         }, PLACE_LETTERS_TIMEOUT);
     }
 
-    private handleCommandSuccess(): void {
-        this.wsService.socket.on('commandSuccess', (success, command) => {
-            if (!success) return this.showError(CommandError.Impossible);
-            if (command.name === 'échanger')
-                this.sendMessage(command.fullCommand, `!${command.name} ${(command as ExchangeCommand).letters.length} lettres`);
-            else if (command.name === 'indice') this.showPlayableWords(command.fullCommand, (command as ClueCommand).playableWords);
-            else this.sendMessage(command.fullCommand);
-        });
-    }
+    //private handleCommandSuccess(): void {
+        // this.wsService.socket.on('commandSuccess', (success, command) => {
+            // if (!success) return this.showError(CommandError.Impossible);
+            // if (command.name === 'échanger')
+                // this.sendMessage(command.fullCommand, `!${command.name} ${(command as ExchangeCommand).letters.length} lettres`);
+            // else if (command.name === 'indice') this.showPlayableWords(command.fullCommand, (command as ClueCommand).playableWords);
+            // else this.sendMessage(command.fullCommand);
+        // });
+    //}
 
     private updateState(state: ChatMessage[]): void {
         this.messages$.next(state);

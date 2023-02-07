@@ -101,24 +101,24 @@ export class GameService {
     }
 
     private handleStartGameEvent(): void {
-        this.wsService.socket.on('startGame', (game: Game) => {
+        /*this.wsService.socket.on('startGame', (game: Game) => {
             StorageService.setCurrentGame(game.id);
             this.wsService.socket.off('updateGamesAvailable');
             this.game$.next(game);
             this.dialog.closeAll();
             this.router.navigate(['/game']);
-        });
+        });*/
     }
     private handleUpdateGameEvent(): void {
-        this.wsService.socket.on('updateGame', (game: Game) => {
-            this.game$.next(game);
-        });
+        // this.wsService.socket.on('updateGame', (game: Game) => {
+            // this.game$.next(game);
+        // });
     }
     private handleUpdateGamesAvailable(): void {
-        this.wsService.socket.on('updateGamesAvailable', async () => {
-            const games = await this.commService.requestAllGames().toPromise();
-            this.allGames$.next(games);
-        });
+        // this.wsService.socket.on('updateGamesAvailable', async () => {
+            // const games = await this.commService.requestAllGames().toPromise();
+            // this.allGames$.next(games);
+        // });
     }
     private fetchAllGames(): void {
         this.commService.requestAllGames().subscribe((games) => this.allGames$.next(games));

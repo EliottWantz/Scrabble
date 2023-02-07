@@ -1,4 +1,7 @@
-<div class="container justified-center">
+<button *ngIf="!isConnected()" mat-raised-button class="pull-right" (click)="openLoginDialog()" id="login-button">Se connecter</button>
+            <button *ngIf="isConnected()" mat-raised-button class="pull-right" (click)="logout()" id="login-button">Déconnexion</button>
+<!--
+    <div class="container justified-center">
     <div id="header">
         <span class="animate scrabble" style="--n: 8">
             <span>{{ title }}</span>
@@ -34,6 +37,7 @@
     </section>
     <div>
         <img src="assets/image/team.png" class="team-img" (click)="openAboutUsDialog()" />
-        <!-- <h2>Notre équipe</h2> -->
+        <h2>Notre équipe</h2>
     </div>
 </div>
+-->

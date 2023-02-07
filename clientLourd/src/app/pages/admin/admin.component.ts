@@ -78,19 +78,19 @@ export class AdminComponent implements OnInit {
     }
 
     private handleVirtualPlayerChange(): void {
-        this.gameService.wsService.socket.on('virtualPlayerChange', (virtualPlayers: VirtualPlayerName[]) => {
-            this.virtualPlayerName = virtualPlayers.filter((p) => p.type === this.virtualPlayerType);
-            this.newVirtualPlayerName.setValue('');
-            this.newVirtualPlayerName.markAsUntouched();
-        });
+        // this.gameService.wsService.socket.on('virtualPlayerChange', (virtualPlayers: VirtualPlayerName[]) => {
+            // this.virtualPlayerName = virtualPlayers.filter((p) => p.type === this.virtualPlayerType);
+            // this.newVirtualPlayerName.setValue('');
+            // this.newVirtualPlayerName.markAsUntouched();
+        // });
     }
 
     private handleNewDict(): void {
-        this.gameService.wsService.socket.on('newDict', (dict) => {
-            this.dictionaryService.dictHeaders = dict;
-            this.newDescription.setValue('');
-            this.newName.setValue('');
-        });
+        // this.gameService.wsService.socket.on('newDict', (dict) => {
+            // this.dictionaryService.dictHeaders = dict;
+            // this.newDescription.setValue('');
+            // this.newName.setValue('');
+        // });
     }
 
     private nameValidation(): ValidatorFn {
