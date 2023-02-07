@@ -145,7 +145,7 @@ func (c *Client) leaveRoom(p *Packet) error {
 }
 
 func (c *Client) broadcast(p *Packet) error {
-	payload := BroadcastPayload{}
+	payload := ChatMessage{}
 	if err := json.Unmarshal(p.Payload, &payload); err != nil {
 		return fmt.Errorf("failed to unmarshal BroadcastPayload: %w", err)
 	}
@@ -160,7 +160,12 @@ func (c *Client) broadcast(p *Packet) error {
 	}
 
 	payload.Timestamp = time.Now()
-	if err := p.marshallPayload(payload); err != nil {
+
+	if err := r.Manager.repo.InsertOne(r.ID, &payload); err != nil {
+		return fmt.Errorf("failed to insert message in db: %w", err)
+	}
+
+	if err := p.setPayload(payload); err != nil {
 		return err
 	}
 

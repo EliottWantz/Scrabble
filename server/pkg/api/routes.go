@@ -41,6 +41,7 @@ func (api *API) setupRoutes(cfg *config.Config) {
 	router.Post("/login", api.UserCtrl.Login)
 	router.Post("/logout", api.UserCtrl.Logout(api.WebSocketManager))
 	router.Get("/user/:id", api.UserCtrl.GetUser)
+	router.Get("/msgs", api.WebSocketManager.GetMessages)
 
 	ws := api.App.Group("/ws")
 	ws.Get("/", func(c *fiber.Ctx) error {

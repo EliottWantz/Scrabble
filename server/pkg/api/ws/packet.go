@@ -23,7 +23,7 @@ func NewPacket(event string, payload any) (*Packet, error) {
 	}, nil
 }
 
-func (p *Packet) marshallPayload(payload any) error {
+func (p *Packet) setPayload(payload any) error {
 	raw, err := json.Marshal(payload)
 	if err != nil {
 		return fmt.Errorf("can't create broadcast payload: %w", err)
@@ -39,11 +39,11 @@ type JoinPayload struct {
 }
 type LeavePayload = JoinPayload
 
-type BroadcastPayload struct {
-	RoomID    string    `json:"roomId,omitempty"`
-	Message   string    `json:"message,omitempty"`
-	From      string    `json:"from,omitempty"`
-	Timestamp time.Time `json:"timestamp,omitempty"`
+type ChatMessage struct {
+	RoomID    string    `json:"roomId,omitempty" bson:"roomId"`
+	Message   string    `json:"message,omitempty" bson:"message"`
+	From      string    `json:"from,omitempty" bson:"from"`
+	Timestamp time.Time `json:"timestamp,omitempty" bson:"timestamp"`
 }
 
 // Server events payloads

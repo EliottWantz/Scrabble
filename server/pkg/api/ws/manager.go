@@ -6,6 +6,7 @@ import (
 	"github.com/alphadose/haxmap"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
+	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/exp/slog"
 )
 
@@ -15,22 +16,19 @@ type Manager struct {
 	GlobalRoom       *Room
 	globalRoomPacket *Packet
 	logger           *slog.Logger
+	repo             *Repository
 }
 
-func NewManager() (*Manager, error) {
+func NewManager(db *mongo.Database) (*Manager, error) {
 	m := &Manager{
 		Clients: haxmap.New[string, *Client](),
 		Rooms:   haxmap.New[string, *Room](),
 		logger:  slog.Default(),
+		repo:    NewRepository(db),
 	}
 
-	r, err := NewRoom(m)
-	if err != nil {
-		return nil, err
-	}
-
-	m.GlobalRoom = r
-	err = m.addRoom(r)
+	m.GlobalRoom = NewRoomWithID(m, "global")
+	err := m.addRoom(m.GlobalRoom)
 	if err != nil {
 		return nil, err
 	}
@@ -66,9 +64,28 @@ func (m *Manager) Accept(cID string) fiber.Handler {
 
 		go c.write()
 		c.send(m.globalRoomPacket)
+		go m.sendLatestMessages(m.GlobalRoom.ID, c)
 
 		c.read()
 	})
+}
+
+func (m *Manager) sendLatestMessages(rID string, c *Client) error {
+	msgs, err := m.repo.GetLatestWithSkip(rID, 0)
+	if err != nil {
+		return err
+	}
+
+	for _, msg := range msgs {
+		p := &Packet{Event: ClientEventBroadcast}
+		err := p.setPayload(msg)
+		if err != nil {
+			return err
+		}
+		c.send(p)
+	}
+
+	return nil
 }
 
 func (m *Manager) getClient(cID string) (*Client, error) {
@@ -120,8 +137,6 @@ func (m *Manager) RemoveClient(cID string) error {
 		return err
 	}
 
-	close(c.receiveCh)
-	close(c.sendCh)
 	c.Conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 	return nil
 }
