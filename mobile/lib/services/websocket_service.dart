@@ -45,7 +45,7 @@ class WebsocketService extends GetxService {
   handleData(String data) {
     final decodedData = jsonDecode(data);
     roomId = decodedData['payload']['roomId'];
-    sendMessage('broadcast', 'hello');
+    // sendMessage('broadcast', 'hello');
   }
 
   sendMessage(String event, String payload) {
