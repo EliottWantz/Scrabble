@@ -46,13 +46,13 @@ export class AuthentificationService {
     logout() {
         console.log(this.user);
         return this.http.post<any>(`${this.baseUrl}/logout`, this.user.id).pipe(first()).subscribe(() => {
-            this.isConnected = false;
             localStorage.removeItem('currentUser');
             this.currentUserSubject.next({
                 id: 0,
                 username: ""
             });
             this.isConnected = false;
+            this.user = {id: 0, username: ""};
         }, (error: Error) => {
             console.log(error);
         });;
