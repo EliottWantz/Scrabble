@@ -1,9 +1,13 @@
 class ChatMessage {
-  // String playerName;
-  String data;
+  String event;
+  String payload;
 
   ChatMessage({
-    // required this.playerName,
-    required this.data
+    required this.event,
+    required this.payload
   });
+
+  // factory ChatMessage.fromJson(dynamic json) {
+  //   return ChatMessage(json['event'] as String, json['payload'] as String);
+  // }
 }

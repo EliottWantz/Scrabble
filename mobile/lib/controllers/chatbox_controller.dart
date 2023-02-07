@@ -11,7 +11,7 @@ class ChatBoxController extends GetxController {
 
   void sendMessage() {
     if (textController.text.isNotEmpty) {
-      websocketService.sendMessage(textController.text);
+      websocketService.sendMessage('broadcast', textController.text);
     }
   }
 }

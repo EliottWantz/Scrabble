@@ -45,6 +45,7 @@ dependencies:
   chat_bubbles: ^1.4.1
 #  socket_io_client: ^1.0.2
   web_socket_channel: ^2.1.0
+  intl: ^0.18.0
 
 dev_dependencies:
   flutter_test:
