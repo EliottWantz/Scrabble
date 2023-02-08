@@ -25,7 +25,8 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	User *User `json:"user,omitempty"`
+	User  *User  `json:"user,omitempty"`
+	Error string `json:"error,omitempty"`
 }
 
 // Login up a new user, signup if doesn't exist
@@ -37,10 +38,12 @@ func (ctrl *Controller) Login(c *fiber.Ctx) error {
 
 	user, err := ctrl.svc.Login(req)
 	if err != nil {
-		slog.Error("sign up user", err)
+		slog.Error("login user", err)
 		var fiberErr *fiber.Error
 		if ok := errors.As(err, &fiberErr); ok {
-			return err
+			return c.Status(fiberErr.Code).JSON(LoginResponse{
+				Error: err.Error(),
+			})
 		}
 		return fiber.ErrInternalServerError
 	}
