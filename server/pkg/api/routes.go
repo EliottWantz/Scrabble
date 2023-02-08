@@ -1,46 +1,55 @@
 package api
 
 import (
+	"net/http"
 	"time"
+
+	"scrabble/config"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/monitor"
-	jwtware "github.com/gofiber/jwt/v3"
 )
 
 func (api *API) setupMiddleware() {
-	api.App.Use(cors.New())
-	api.App.Use(limiter.New(limiter.Config{Max: 500, Expiration: 30 * time.Second}))
-	api.App.Use(logger.New(logger.Config{
-		Format: "[${ip}]:${port} ${status} - ${method} ${path}\n",
-	}))
+	api.App.Use(
+		cors.New(),
+		limiter.New(
+			limiter.Config{
+				Max:        500,
+				Expiration: 30 * time.Second,
+			},
+		),
+		logger.New(
+			logger.Config{
+				Format:     "${time} | ${ip}:${port} | ${latency} | ${method} | ${status} | ${path}\n",
+				TimeFormat: "2006/01/02 15:04:05",
+			},
+		),
+	)
+
 	api.App.Get("/metrics", monitor.New(monitor.Config{Title: "Scrabble Server Metrics"}))
 }
 
-func (api *API) setupRoutes() {
-	api.App.Get("/ws", api.WebSocketManager.Accept())
-
-	// Public routes
+func (api *API) setupRoutes(cfg *config.Config) {
 	router := api.App.Group("/api")
 	router.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("Hello api")
 	})
-	router.Post("/signup", api.UserCtrl.SignUp)
 	router.Post("/login", api.UserCtrl.Login)
-
-	// Proctected routes
-	router.Use(
-		jwtware.New(
-			jwtware.Config{
-				SigningKey: []byte("secret"),
-				ContextKey: "token",
-			},
-		),
-	)
-	router.Post("/avatar", api.UserCtrl.UploadAvatar)
-	router.Post("/revalidate", api.UserCtrl.Revalidate)
+	router.Post("/logout", api.UserCtrl.Logout(api.WebSocketManager))
 	router.Get("/user/:id", api.UserCtrl.GetUser)
+	router.Get("/msgs", api.WebSocketManager.GetMessages)
+
+	ws := api.App.Group("/ws")
+	ws.Get("/", func(c *fiber.Ctx) error {
+		ID := c.Query("id")
+		if ID == "" {
+			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "Missing id"})
+		}
+		return api.WebSocketManager.Accept(ID)(c)
+	})
+	ws.Post("/room/join", api.WebSocketManager.JoinRoom)
 }

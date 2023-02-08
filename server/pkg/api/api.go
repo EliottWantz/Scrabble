@@ -14,7 +14,7 @@ import (
 	"golang.org/x/exp/slog"
 )
 
-var CONNECTION_TIMEOUT = time.Second * 5
+var CONNECTION_TIMEOUT = time.Second * 15
 
 type API struct {
 	WebSocketManager *ws.Manager
@@ -39,7 +39,7 @@ func New(cfg *config.Config) (*API, error) {
 		DB:       db,
 	}
 
-	ws, err := ws.NewManager()
+	ws, err := ws.NewManager(db)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +47,7 @@ func New(cfg *config.Config) (*API, error) {
 	api.WebSocketManager = ws
 
 	api.setupMiddleware()
-	api.setupRoutes()
+	api.setupRoutes(cfg)
 
 	return api, nil
 }
