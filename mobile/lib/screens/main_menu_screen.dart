@@ -14,14 +14,14 @@ class MainMenuScreen extends GetView<ChatBoxController> {
         child: SizedBox(
           width: 300,
           child: Container (
-            height: 200,
             child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('Main',style: TextStyle(fontSize: 30),),
+              // Text('Main',style: TextStyle(fontSize: 30),),
               TextButton(onPressed: (){
                 controller.sendMessage();
-              }, child: Text('TextButton'))
+              }, child: Text('TextButton')),
+              Obx(() => Text(controller.websocketService.messages.value[1]))
             ],
           ),
         ),

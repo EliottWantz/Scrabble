@@ -4,6 +4,7 @@ import 'package:client_leger/models/chat_message.dart';
 import 'package:get/get.dart';
 // import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:client_leger/api/api_constants.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/status.dart' as status;
@@ -12,6 +13,7 @@ class WebsocketService extends GetxService {
   late WebSocketChannel socket;
   late String roomId;
   late String username;
+  late RxList<String> messages = ['initial hello'].obs;
 
   connect(String username) {
     socket = WebSocketChannel.connect(Uri(
@@ -44,6 +46,8 @@ class WebsocketService extends GetxService {
       break;
       case 'broadcast': {
         roomId = decodedData['payload']['roomId'];
+        messages.obs.value.add(decodedData['payload']['message']);
+        print(messages.obs.value);
         print('event broadcast');
       }
       break;
