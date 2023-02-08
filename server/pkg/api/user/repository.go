@@ -13,7 +13,7 @@ var (
 )
 
 type Repository struct {
-	users map[string]*User
+	users map[string]*User // map[username]*User
 	mu    sync.RWMutex
 }
 
@@ -23,10 +23,17 @@ func NewRepository() *Repository {
 	}
 }
 
-func (r *Repository) Find(ID string) (*User, error) {
+func (r *Repository) Has(username string) bool {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
-	u, ok := r.users[ID]
+	_, ok := r.users[username]
+	return ok
+}
+
+func (r *Repository) Find(username string) (*User, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	u, ok := r.users[username]
 	if !ok {
 		return nil, ErrUserNotFound
 	}
@@ -39,10 +46,12 @@ func (r *Repository) Find(ID string) (*User, error) {
 func (r *Repository) Insert(u *User) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	_, ok := r.users[u.ID]
+	_, ok := r.users[u.Username]
 	if ok {
 		return ErrUserAlreadyExists
 	}
+
+	r.users[u.Username] = u
 
 	slog.Info("Inserted user", "user", u.Username)
 
@@ -53,18 +62,18 @@ func (r *Repository) Update(u *User) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	r.users[u.ID] = u
+	r.users[u.Username] = u
 	slog.Info("Updated user", "user", u.Username)
 
 	return nil
 }
 
-func (r *Repository) Delete(ID string) error {
+func (r *Repository) Delete(username string) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	delete(r.users, ID)
-	slog.Info("Deleted user", "user", ID)
+	delete(r.users, username)
+	slog.Info("Deleted user", "user", username)
 
 	return nil
 }

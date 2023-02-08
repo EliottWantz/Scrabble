@@ -5,6 +5,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
+	"golang.org/x/exp/slog"
 )
 
 type Service struct {
@@ -23,12 +24,12 @@ func (s *Service) Login(req LoginRequest) (*User, error) {
 		return nil, fiber.NewError(fiber.StatusUnprocessableEntity, "username can't be blank")
 	}
 
-	u, err := s.repo.Find(req.Username)
-	if err == nil {
-		return u, nil
+	slog.Info("Login user", "username", req.Username)
+	if s.repo.Has(req.Username) {
+		return nil, fiber.NewError(fiber.StatusConflict, "user already exists")
 	}
 
-	u = &User{
+	u := &User{
 		ID:       uuid.NewString(),
 		Username: req.Username,
 	}
