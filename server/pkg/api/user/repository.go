@@ -39,7 +39,7 @@ func (r *Repository) Find(ID string) (*User, error) {
 func (r *Repository) Insert(u *User) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	u, ok := r.users[u.ID]
+	_, ok := r.users[u.ID]
 	if ok {
 		return ErrUserAlreadyExists
 	}
