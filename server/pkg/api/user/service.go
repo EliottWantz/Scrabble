@@ -1,104 +1,60 @@
 package user
 
 import (
-	"errors"
-
 	"scrabble/config"
-	"scrabble/pkg/api/user/auth"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
-	"github.com/imagekit-developer/imagekit-go"
-)
-
-var (
-	ErrPasswordMismatch  = errors.New("password mismatch")
-	ErrUserAlreadyExists = errors.New("user already exists")
-	ErrUserNotFound      = errors.New("user not found")
+	"golang.org/x/exp/slog"
 )
 
 type Service struct {
 	repo *Repository
-	ik   *imagekit.ImageKit
 }
 
 func NewService(cfg *config.Config, repo *Repository) *Service {
-	ik := imagekit.NewFromParams(imagekit.NewParams{
-		PrivateKey:  cfg.IMAGEKIT_PRIVATE_KEY,
-		PublicKey:   cfg.IMAGEKIT_PUBLIC_KEY,
-		UrlEndpoint: cfg.IMAGEKIT_ENDPOINT_URL,
-	})
-
 	return &Service{
 		repo: repo,
-		ik:   ik,
 	}
 }
 
-func (s *Service) SignUp(req SignupRequest) (*User, string, error) {
-	if req.Username == "" {
-		return nil, "", fiber.NewError(fiber.StatusUnprocessableEntity, "username can't be blank")
-	}
-	if req.Password == "" {
-		return nil, "", fiber.NewError(fiber.StatusUnprocessableEntity, "password can't be blank")
-	}
-	if req.Email == "" {
-		return nil, "", fiber.NewError(fiber.StatusUnprocessableEntity, "email can't be blank")
-	}
-
-	if _, err := s.repo.FindByUsername(req.Username); err == nil {
-		return nil, "", ErrUserAlreadyExists
-	}
-
-	hashedPassword, err := auth.HashPassword(req.Password)
-	if err != nil {
-		return nil, "", err
+// Login up a new user, signup if doesn't exist
+func (s *Service) Login(username string) (*User, error) {
+	slog.Info("Login user", "username", username)
+	if s.repo.Has(username) {
+		return nil, fiber.NewError(fiber.StatusConflict, "user already exists")
 	}
 
 	u := &User{
-		Id:             uuid.NewString(),
-		Username:       req.Username,
-		HashedPassword: hashedPassword,
+		ID:       uuid.NewString(),
+		Username: username,
 	}
 
 	if err := s.repo.Insert(u); err != nil {
-		return nil, "", err
+		return nil, err
 	}
 
-	signed, err := auth.GenerateJWT(req.Username)
-	if err != nil {
-		return nil, "", err
-	}
-
-	return u, signed, nil
+	return u, nil
 }
 
-func (s *Service) Login(username, password string) (string, error) {
-	u, err := s.repo.FindByUsername(username)
-	if err != nil {
-		return "", ErrUserNotFound
+func (s *Service) Logout(req LogoutRequest) error {
+	if !s.repo.Has(req.Username) {
+		return fiber.NewError(fiber.StatusNotFound, "user not found")
 	}
 
-	if !auth.PasswordsMatch(password, u.HashedPassword) {
-		return "", ErrPasswordMismatch
+	if err := s.repo.Delete(req.Username); err != nil {
+		return err
 	}
 
-	signed, err := auth.GenerateJWT(username)
-	if err != nil {
-		return "", err
-	}
+	slog.Info("Logout user", "id", req.Username)
 
-	return signed, nil
-}
-
-func (s *Service) Revalidate(tokenStr string) (string, error) {
-	return auth.RevalidateJWT(tokenStr)
+	return nil
 }
 
 func (s *Service) GetUser(ID string) (*User, error) {
 	u, err := s.repo.Find(ID)
 	if err != nil {
-		return nil, err
+		return nil, ErrUserNotFound
 	}
 
 	return u, nil

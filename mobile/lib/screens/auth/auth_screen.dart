@@ -56,14 +56,14 @@ class AuthScreen extends GetView<AuthController> {
                       },
                     ),
                     const Gap(20.0),
-                    CustomButton(
-                      text: 'authRegisterBtn'.tr,
-                      width: Get.width / 3,
-                      onPressed: () {
-                        Get.toNamed(Routes.AUTH + Routes.REGISTER,
-                            arguments: controller);
-                      },
-                    ),
+                    // CustomButton(
+                    //   text: 'authRegisterBtn'.tr,
+                    //   width: Get.width / 3,
+                    //   onPressed: () {
+                    //     Get.toNamed(Routes.AUTH + Routes.REGISTER,
+                    //         arguments: controller);
+                    //   },
+                    // ),
                     const Gap(62.0),
                   ],
                 ),
