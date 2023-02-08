@@ -11,7 +11,7 @@ import 'package:sidebarx/sidebarx.dart';
 class HomeScreen extends GetView<HomeController> {
   HomeScreen({Key? key}) : super(key: key);
 
-  final sidebarController = SidebarXController(selectedIndex: 0, extended: false);
+  final sidebarController = SidebarXController(selectedIndex: 0, extended: true);
   final _key = GlobalKey<ScaffoldState>();
 
   @override

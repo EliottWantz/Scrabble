@@ -35,7 +35,7 @@ class AuthController extends GetxController {
   final loginUsernameController = TextEditingController();
   final loginPasswordController = TextEditingController();
 
-  final sideBarController = SidebarXController(selectedIndex: 0, extended: false);
+  final sideBarController = SidebarXController(selectedIndex: 0, extended: true);
 
   Rx<IconData> getIconTheme() {
     return settingsService.currentThemeIcon;
@@ -69,7 +69,7 @@ class AuthController extends GetxController {
       await DialogHelper.showLoading('Connexion au serveur');
       await authService.register(request);
       if (authService.isUserLoggedIn()) {
-        Get.offAllNamed(Routes.AVATAR_SELECTION, arguments: this);
+        Get.offAllNamed(Routes.AVATAR_SELECTION);
       }
     }
   }

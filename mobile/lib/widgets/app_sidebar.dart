@@ -24,7 +24,7 @@ class AppSideBar extends StatelessWidget {
     return SidebarX(
         collapseIcon: Icons.menu_open,
         extendIcon: Icons.menu,
-        showToggleButton: true,
+        showToggleButton: false,
         controller: _controller,
         theme: sideBarUtils.sideBarTheme,
         extendedTheme: sideBarUtils.sideBarThemeExt,
@@ -201,17 +201,17 @@ class AppSideBar extends StatelessWidget {
       return [
         SidebarXItem(
           icon: Icons.home,
-          label: 'Home',
+          label: 'PolyScrabble',
           onTap: () {},
         ),
-        const SidebarXItem(
-          icon: Icons.person,
-          label: 'Profile',
-        ),
-        const SidebarXItem(
-          icon: Icons.settings,
-          label: 'Settings',
-        ),
+        // const SidebarXItem(
+        //   icon: Icons.person,
+        //   label: 'Profile',
+        // ),
+        // const SidebarXItem(
+        //   icon: Icons.settings,
+        //   label: 'Settings',
+        // ),
       ];
     } else if (ModalRoute.of(context)!.settings.name == '/auth/login') {
       return [
@@ -238,7 +238,7 @@ class AppSideBar extends StatelessWidget {
       return [
         const SidebarXItem(
           icon: Icons.home,
-          label: 'Home',
+          label: 'PolyScrabble',
         ),
       ];
     }
