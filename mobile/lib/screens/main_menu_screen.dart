@@ -21,7 +21,8 @@ class MainMenuScreen extends GetView<ChatBoxController> {
               TextButton(onPressed: (){
                 controller.sendMessage();
               }, child: Text('TextButton')),
-              Obx(() => Text(controller.websocketService.messages.value[1]))
+              Obx(() => Text(controller.websocketService.messages.value[1])),
+              Obx(() => Text(controller.websocketService.timestamp.value))
             ],
           ),
         ),

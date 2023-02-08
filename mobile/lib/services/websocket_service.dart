@@ -14,6 +14,7 @@ class WebsocketService extends GetxService {
   late String roomId;
   late String username;
   late RxList<String> messages = ['initial hello'].obs;
+  late RxString timestamp = ''.obs;
 
   connect(String username) {
     socket = WebSocketChannel.connect(Uri(
@@ -47,7 +48,11 @@ class WebsocketService extends GetxService {
       case 'broadcast': {
         roomId = decodedData['payload']['roomId'];
         messages.obs.value.add(decodedData['payload']['message']);
-        print(messages.obs.value);
+        // final DateTime timestamp = decodedData['payload']['timestamp'];
+        final parsedTimestamp = DateTime.parse(decodedData['payload']['timestamp']);
+        timestamp.value = DateFormat.Hms().format(parsedTimestamp);
+        // print(decodedData['payload']['timestamp']);
+        // print(decodedData['payload']['message'].runtimeType);
         print('event broadcast');
       }
       break;
