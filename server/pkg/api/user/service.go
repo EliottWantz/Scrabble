@@ -1,17 +1,10 @@
 package user
 
 import (
-	"errors"
-
 	"scrabble/config"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
-)
-
-var (
-	ErrUserAlreadyExists = errors.New("user already exists")
-	ErrUserNotFound      = errors.New("user not found")
 )
 
 type Service struct {
@@ -30,13 +23,13 @@ func (s *Service) Login(req LoginRequest) (*User, error) {
 		return nil, fiber.NewError(fiber.StatusUnprocessableEntity, "username can't be blank")
 	}
 
-	u, err := s.repo.FindByUsername(req.Username)
+	u, err := s.repo.Find(req.Username)
 	if err == nil {
 		return u, nil
 	}
 
 	u = &User{
-		Id:       uuid.NewString(),
+		ID:       uuid.NewString(),
 		Username: req.Username,
 	}
 

@@ -7,7 +7,6 @@ import (
 	"scrabble/pkg/api/ws"
 
 	"github.com/gofiber/fiber/v2"
-	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/exp/slog"
 )
 
@@ -15,9 +14,9 @@ type Controller struct {
 	svc *Service
 }
 
-func NewController(cfg *config.Config, db *mongo.Database) *Controller {
+func NewController(cfg *config.Config) *Controller {
 	return &Controller{
-		svc: NewService(cfg, NewRepository(db)),
+		svc: NewService(cfg, NewRepository()),
 	}
 }
 
