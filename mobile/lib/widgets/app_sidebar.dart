@@ -41,15 +41,15 @@ class AppSideBar extends StatelessWidget {
         headerDivider: const Divider(
           color: Colors.white,
         ),
-        headerBuilder: (context, extended) {
-          if (ModalRoute.of(context)!.settings.name == '/auth' ||
-              ModalRoute.of(context)!.settings.name == '/auth/login' ||
-              ModalRoute.of(context)!.settings.name == '/auth/register') {
-            return _buildHeaderAuth(extended);
-          } else {
-            return _buildHeaderHome(extended);
-          }
-        },
+        // headerBuilder: (context, extended) {
+        //   if (ModalRoute.of(context)!.settings.name == '/auth' ||
+        //       ModalRoute.of(context)!.settings.name == '/auth/login' ||
+        //       ModalRoute.of(context)!.settings.name == '/auth/register') {
+        //     return _buildHeaderAuth(extended);
+        //   } else {
+        //     return _buildHeaderHome(extended);
+        //   }
+        // },
         items: _buildListItems(context));
   }
 
