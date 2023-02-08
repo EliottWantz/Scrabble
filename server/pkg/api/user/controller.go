@@ -36,7 +36,11 @@ func (ctrl *Controller) Login(c *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	user, err := ctrl.svc.Login(req)
+	if req.Username == "" {
+		return fiber.NewError(fiber.StatusUnprocessableEntity, "username can't be blank")
+	}
+
+	user, err := ctrl.svc.Login(req.Username)
 	if err != nil {
 		slog.Error("login user", err)
 		var fiberErr *fiber.Error
@@ -56,7 +60,8 @@ func (ctrl *Controller) Login(c *fiber.Ctx) error {
 }
 
 type LogoutRequest struct {
-	ID string `json:"id,omitempty"`
+	ID       string `json:"id,omitempty"`
+	Username string `json:"username,omitempty"`
 }
 type LogoutResponse struct {
 	Error string `json:"error,omitempty"`
@@ -72,6 +77,12 @@ func (ctrl *Controller) Logout(ws *ws.Manager) fiber.Handler {
 		}
 
 		if err := ws.RemoveClient(req.ID); err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(LogoutResponse{
+				Error: err.Error(),
+			})
+		}
+
+		if err := ctrl.svc.Logout(req); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(LogoutResponse{
 				Error: err.Error(),
 			})
