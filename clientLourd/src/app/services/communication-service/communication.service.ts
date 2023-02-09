@@ -65,8 +65,8 @@ export class CommunicationService {
         .pipe(catchError(this.handleError<{user: User}>('login')));
     }
 
-    logout(id: string): Observable<void> {
-        return this.http.post<any>(`${this.baseUrl}/logout`, id).pipe(catchError(this.handleError<void>('logout')));
+    logout(user: User): Observable<void> {
+        return this.http.post<any>(`${this.baseUrl}/logout`, user).pipe(catchError(this.handleError<void>('logout')));
     }
 
     socketConnection(id: string): Observable<void> {
