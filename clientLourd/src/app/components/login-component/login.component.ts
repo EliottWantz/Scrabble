@@ -40,16 +40,20 @@ export class LoginComponent {
     //this.password = "";
   }
 
-  async onSubmit() {
+  onSubmit() {
     this.submitted = true;
 
     if (this.username == ""/* || this.password == ""*/) {
       return;
     }
-
     this.authenticationService.login(this.username/*, this.password*/);
-    this.switchView();
-    this.closeModal();
+    if (!this.authenticationService.getIsConnected) {
+      this.hasError = true;
+    }
+  }
+
+  isConnected(): Boolean {
+    return this.authenticationService.getIsConnected;
   }
 
   switchView(): void {
@@ -57,6 +61,7 @@ export class LoginComponent {
   }
 
   closeModal(): void {
+    this.hasError = false;
     this.matDialog.closeAll();
   }
 }

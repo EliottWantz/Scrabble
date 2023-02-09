@@ -34,15 +34,17 @@ export class AuthentificationService {
 
     login(username: string/*, password: string*/) {
         this.commService.login(username).subscribe(user => {
-            this.isConnected = true;
-            this.currentUserSubject.next(user.user);
-            StorageService.setUserInfo(user.user);
+            if (user) {
+                this.isConnected = true;
+                this.currentUserSubject.next(user.user);
+                StorageService.setUserInfo(user.user);
 
-            this.commService.connect(this.currentUserValue.id).then(() => {
-                console.log('good');
-            }).catch((error) => {
-                console.log(error);
-            });
+                this.commService.connect(this.currentUserValue.id).then(() => {
+                    console.log('good');
+                }).catch((error) => {
+                    console.log(error);
+                });
+            }
         }, (error: Error) => {
             console.log(error);
         });

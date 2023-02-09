@@ -60,17 +60,13 @@ export class CommunicationService {
         return this.requestStartGame(gameId).toPromise();
     }
 
-    login(username: string): Observable<{user: User}> {
+    login(username: string): Observable<{user: User} | null> {
         return this.http.post<{user: User}>(`${this.baseUrl}/login`, { username/*, password*/ })
         .pipe(catchError(this.handleError<{user: User}>('login')));
     }
 
     logout(user: User): Observable<void> {
         return this.http.post<any>(`${this.baseUrl}/logout`, user).pipe(catchError(this.handleError<void>('logout')));
-    }
-
-    socketConnection(id: string): Observable<void> {
-        return this.http.get<any>(`http://127.0.0.1:3000/ws/?id=${id}`).pipe(catchError(this.handleError<void>('socket connection')));
     }
 
     convertToSolo(gameId: string, oponentName: string, level: string): Observable<void> {

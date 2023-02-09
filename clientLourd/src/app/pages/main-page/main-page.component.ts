@@ -36,7 +36,10 @@ export class MainPageComponent {
     }
 
     isConnected(): Boolean {
-        return this.authentificationService.currentUserValue.id != "0";
+        if (this.authentificationService.getIsConnected) {
+            this.dialog.closeAll();
+        }
+        return this.authentificationService.getIsConnected;
     }
 
     logout(): void{

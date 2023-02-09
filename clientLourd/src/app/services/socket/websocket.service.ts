@@ -19,7 +19,6 @@ export class WebsocketService {
 
     connect(playerId: string): void {
         this.socket = new WebSocket(`ws://localhost:3000/ws/?id=${playerId}`);
-        console.log(this.socket);
         this.handleSocket();
     }
 
