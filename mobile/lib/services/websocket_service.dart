@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:client_leger/models/chat_message.dart';
+import 'package:client_leger/models/response/chat_message_response.dart';
 import 'package:get/get.dart';
 // import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:client_leger/api/api_constants.dart';
@@ -13,7 +13,7 @@ class WebsocketService extends GetxService {
   late WebSocketChannel socket;
   late String roomId;
   late String username;
-  late RxList<String> messages = ['initial hello'].obs;
+  late RxList<ChatMessageResponse> messages = <ChatMessageResponse>[].obs;
   late RxString timestamp = ''.obs;
 
   connect(String username) {
@@ -30,37 +30,41 @@ class WebsocketService extends GetxService {
     socket.stream.listen(
           (data) {
         print(data);
-        handleData(data);
-      },
+        if (jsonDecode(data)['event'] == 'broadcast') {
+          handleData(ChatMessageResponse.fromRawJson(data));
+        }
+        // handleData(data);
+          },
       onError: (error) => print(error),
     );
   }
 
-  handleData(String data) {
-    final decodedData = jsonDecode(data);
+  handleData(ChatMessageResponse data) {
+    // final decodedData = jsonDecode(data);
+    print(data.payload!.message);
 
-    switch(decodedData['event']) {
-      case 'joinedGlobalRoom': {
-        roomId = decodedData['payload']['roomId'];
-        print('event joinedGlobalRoom');
-      }
-      break;
+    switch(data.event) {
+      // case 'joinedGlobalRoom': {
+      //   roomId = data.payload!.roomId;
+      //   print('event joinedGlobalRoom');
+      // }
+      // break;
       case 'broadcast': {
-        roomId = decodedData['payload']['roomId'];
-        messages.obs.value.add(decodedData['payload']['message']);
+        roomId = data.payload!.roomId;
+        messages.obs.value.add(data);
         // final DateTime timestamp = decodedData['payload']['timestamp'];
-        final parsedTimestamp = DateTime.parse(decodedData['payload']['timestamp']);
+        final parsedTimestamp = DateTime.parse(data.payload!.timestamp);
         timestamp.value = DateFormat.Hms().format(parsedTimestamp);
         // print(decodedData['payload']['timestamp']);
         // print(decodedData['payload']['message'].runtimeType);
         print('event broadcast');
       }
       break;
-      case '': {
-        roomId = decodedData['payload']['roomId'];
-        print('event empty');
-      }
-      break;
+      // case '': {
+      //   roomId = decodedData['payload']['roomId'];
+      //   print('event empty');
+      // }
+      // break;
       default: {
         print('no event in package received');
       }
@@ -73,8 +77,8 @@ class WebsocketService extends GetxService {
     final message = {
       'event': 'broadcast',
       'payload': {
-        'RoomId': roomId,
-        'Message': 'hello',
+        'RoomId': 'global',
+        'Message': 'hello 2',
         'From': 'test123'
       }
     };
