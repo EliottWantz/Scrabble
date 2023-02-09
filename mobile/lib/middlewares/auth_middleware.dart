@@ -9,12 +9,14 @@ class AuthGuard extends GetMiddleware {
 
   @override
   RouteSettings? redirect(String? route) {
-    if (authService.isUserLoggedIn()) {
-      return null;
-    } else if (Get.isRegistered<AuthController>()) {
-      Get.lazyReplace<AuthController>(() =>
-          AuthController(settingsService: Get.find(), authService: Get.find()));
-      return const RouteSettings(name: Routes.AUTH);
-    }
+    //   if (authService.isUserLoggedIn()) {
+    //     return null;
+    //   } else if (Get.isRegistered<AuthController>()) {
+    //     Get.lazyReplace<AuthController>(() =>
+    //         AuthController(settingsService: Get.find(), authService: Get.find()));
+    //   }
+    //   return const RouteSettings(name: Routes.AUTH);
+    // }
+    return null;
   }
 }

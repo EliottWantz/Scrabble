@@ -35,7 +35,8 @@ class AuthController extends GetxController {
   final loginUsernameController = TextEditingController();
   final loginPasswordController = TextEditingController();
 
-  final sideBarController = SidebarXController(selectedIndex: 0, extended: true);
+  final sideBarController =
+      SidebarXController(selectedIndex: 0, extended: true);
 
   Rx<IconData> getIconTheme() {
     return settingsService.currentThemeIcon;
@@ -49,13 +50,12 @@ class AuthController extends GetxController {
     AppFocus.unfocus(context);
     if (loginFormKey.currentState!.validate()) {
       final request = LoginRequest(
-          username: loginUsernameController.text,
-          password: loginPasswordController.text);
+          username: loginUsernameController.text);
       await DialogHelper.showLoading('Connexion au serveur');
       await authService.login(request);
-      // if (authService.isUserLoggedIn()) {
+      if (authService.isUserLoggedIn()) {
         Get.offAllNamed(Routes.HOME);
-      // }
+      }
     }
   }
 
@@ -67,10 +67,10 @@ class AuthController extends GetxController {
           username: registerUsernameController.text,
           password: registerPasswordController.text);
       await DialogHelper.showLoading('Connexion au serveur');
-      await authService.register(request);
-      if (authService.isUserLoggedIn()) {
-        Get.offAllNamed(Routes.AVATAR_SELECTION);
-      }
+      // await authService.register(request);
+      // if (authService.isUserLoggedIn()) {
+      //   Get.offAllNamed(Routes.AVATAR_SELECTION);
+      // }
     }
   }
 }
