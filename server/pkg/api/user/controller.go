@@ -7,7 +7,6 @@ import (
 	"scrabble/pkg/api/ws"
 
 	"github.com/gofiber/fiber/v2"
-	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/exp/slog"
 )
 
@@ -15,9 +14,9 @@ type Controller struct {
 	svc *Service
 }
 
-func NewController(cfg *config.Config, db *mongo.Database) *Controller {
+func NewController(cfg *config.Config) *Controller {
 	return &Controller{
-		svc: NewService(cfg, NewRepository(db)),
+		svc: NewService(cfg, NewRepository()),
 	}
 }
 
@@ -26,7 +25,8 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	User *User `json:"user,omitempty"`
+	User  *User  `json:"user,omitempty"`
+	Error string `json:"error,omitempty"`
 }
 
 // Login up a new user, signup if doesn't exist
@@ -36,12 +36,18 @@ func (ctrl *Controller) Login(c *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	user, err := ctrl.svc.Login(req)
+	if req.Username == "" {
+		return fiber.NewError(fiber.StatusUnprocessableEntity, "username can't be blank")
+	}
+
+	user, err := ctrl.svc.Login(req.Username)
 	if err != nil {
-		slog.Error("sign up user", err)
+		slog.Error("login user", err)
 		var fiberErr *fiber.Error
 		if ok := errors.As(err, &fiberErr); ok {
-			return err
+			return c.Status(fiberErr.Code).JSON(LoginResponse{
+				Error: err.Error(),
+			})
 		}
 		return fiber.ErrInternalServerError
 	}
@@ -54,7 +60,8 @@ func (ctrl *Controller) Login(c *fiber.Ctx) error {
 }
 
 type LogoutRequest struct {
-	ID string `json:"id,omitempty"`
+	ID       string `json:"id,omitempty"`
+	Username string `json:"username,omitempty"`
 }
 type LogoutResponse struct {
 	Error string `json:"error,omitempty"`
@@ -70,6 +77,12 @@ func (ctrl *Controller) Logout(ws *ws.Manager) fiber.Handler {
 		}
 
 		if err := ws.RemoveClient(req.ID); err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(LogoutResponse{
+				Error: err.Error(),
+			})
+		}
+
+		if err := ctrl.svc.Logout(req); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(LogoutResponse{
 				Error: err.Error(),
 			})

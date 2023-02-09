@@ -3,7 +3,6 @@ package ws
 import (
 	"encoding/json"
 	"fmt"
-	"time"
 )
 
 type Packet struct {
@@ -40,10 +39,10 @@ type JoinPayload struct {
 type LeavePayload = JoinPayload
 
 type ChatMessage struct {
-	RoomID    string    `json:"roomId,omitempty" bson:"roomId"`
-	Message   string    `json:"message,omitempty" bson:"message"`
-	From      string    `json:"from,omitempty" bson:"from"`
-	Timestamp time.Time `json:"timestamp,omitempty" bson:"timestamp"`
+	RoomID    string `json:"roomId,omitempty" bson:"roomId"`
+	Message   string `json:"message,omitempty" bson:"message"`
+	From      string `json:"from,omitempty" bson:"from"`
+	Timestamp string `json:"timestamp,omitempty" bson:"timestamp"`
 }
 
 // Server events payloads

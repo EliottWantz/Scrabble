@@ -159,11 +159,7 @@ func (c *Client) broadcast(p *Packet) error {
 		return fmt.Errorf("%w %s", ErrNotInRoom, payload.RoomID)
 	}
 
-	payload.Timestamp = time.Now()
-
-	if err := r.Manager.repo.InsertOne(r.ID, &payload); err != nil {
-		return fmt.Errorf("failed to insert message in db: %w", err)
-	}
+	payload.Timestamp = time.Now().Format(time.DateTime)
 
 	if err := p.setPayload(payload); err != nil {
 		return err

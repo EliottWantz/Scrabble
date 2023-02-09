@@ -1,17 +1,11 @@
 package user
 
 import (
-	"errors"
-
 	"scrabble/config"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
-)
-
-var (
-	ErrUserAlreadyExists = errors.New("user already exists")
-	ErrUserNotFound      = errors.New("user not found")
+	"golang.org/x/exp/slog"
 )
 
 type Service struct {
@@ -25,19 +19,15 @@ func NewService(cfg *config.Config, repo *Repository) *Service {
 }
 
 // Login up a new user, signup if doesn't exist
-func (s *Service) Login(req LoginRequest) (*User, error) {
-	if req.Username == "" {
-		return nil, fiber.NewError(fiber.StatusUnprocessableEntity, "username can't be blank")
+func (s *Service) Login(username string) (*User, error) {
+	slog.Info("Login user", "username", username)
+	if s.repo.Has(username) {
+		return nil, fiber.NewError(fiber.StatusConflict, "user already exists")
 	}
 
-	u, err := s.repo.FindByUsername(req.Username)
-	if err == nil {
-		return u, nil
-	}
-
-	u = &User{
-		Id:       uuid.NewString(),
-		Username: req.Username,
+	u := &User{
+		ID:       uuid.NewString(),
+		Username: username,
 	}
 
 	if err := s.repo.Insert(u); err != nil {
@@ -45,6 +35,20 @@ func (s *Service) Login(req LoginRequest) (*User, error) {
 	}
 
 	return u, nil
+}
+
+func (s *Service) Logout(req LogoutRequest) error {
+	if !s.repo.Has(req.Username) {
+		return fiber.NewError(fiber.StatusNotFound, "user not found")
+	}
+
+	if err := s.repo.Delete(req.Username); err != nil {
+		return err
+	}
+
+	slog.Info("Logout user", "id", req.Username)
+
+	return nil
 }
 
 func (s *Service) GetUser(ID string) (*User, error) {

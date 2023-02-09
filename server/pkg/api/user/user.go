@@ -1,6 +1,6 @@
 package user
 
 type User struct {
-	Id       string `bson:"_id,omitempty" json:"id,omitempty"`
+	ID       string `bson:"_id,omitempty" json:"id,omitempty"`
 	Username string `bson:"username" json:"username,omitempty"`
 }
