@@ -4,7 +4,6 @@ import (
 	"scrabble/config"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 	"golang.org/x/exp/slog"
 )
 
@@ -25,7 +24,7 @@ func (s *Service) Login(username string) (*User, error) {
 	}
 
 	u := &User{
-		ID:       uuid.NewString(),
+		ID:       username,
 		Username: username,
 	}
 
@@ -38,16 +37,16 @@ func (s *Service) Login(username string) (*User, error) {
 	return u, nil
 }
 
-func (s *Service) Logout(req LogoutRequest) error {
-	if !s.repo.Has(req.Username) {
+func (s *Service) Logout(username string) error {
+	if !s.repo.Has(username) {
 		return fiber.NewError(fiber.StatusNotFound, "user not found")
 	}
 
-	if err := s.repo.Delete(req.Username); err != nil {
+	if err := s.repo.Delete(username); err != nil {
 		return err
 	}
 
-	slog.Info("Logout user", "username", req.Username)
+	slog.Info("Logout user", "username", username)
 
 	return nil
 }
