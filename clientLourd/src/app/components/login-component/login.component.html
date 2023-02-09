@@ -1,5 +1,6 @@
 <h2>Connexion</h2>
     <form>
+        <strong *ngIf="hasError" id="error"> Nom d'utilisateur déjà utilisé</strong>
         <div class="form-group">
             <mat-form-field class="fields" appearance="fill">
                 <mat-label for="username">Nom d'utilisateur</mat-label>
