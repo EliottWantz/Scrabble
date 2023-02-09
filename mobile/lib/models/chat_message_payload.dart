@@ -2,13 +2,13 @@ class ChatMessagePayload {
   String roomId;
   String message;
   String from;
-  String timestamp;
+  String? timestamp;
 
   ChatMessagePayload({
     required this.roomId,
     required this.message,
     required this.from,
-    required this.timestamp
+    this.timestamp
   });
 
   factory ChatMessagePayload.fromJson(Map<dynamic, dynamic> json) => ChatMessagePayload(

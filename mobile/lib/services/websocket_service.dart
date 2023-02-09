@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:client_leger/models/chat_message_payload.dart';
+import 'package:client_leger/models/requests/chat_message_request.dart';
 import 'package:client_leger/models/response/chat_message_response.dart';
 import 'package:get/get.dart';
 // import 'package:socket_io_client/socket_io_client.dart' as IO;
@@ -54,7 +56,7 @@ class WebsocketService extends GetxService {
         roomId = data.payload!.roomId;
         messages.obs.value.add(data);
         // final DateTime timestamp = decodedData['payload']['timestamp'];
-        final parsedTimestamp = DateTime.parse(data.payload!.timestamp);
+        final parsedTimestamp = DateTime.parse(data.payload!.timestamp!);
         timestamp.value = DateFormat.Hms().format(parsedTimestamp);
         print(messages.value.length);
         itemCount.value = messages.value.length;
@@ -77,16 +79,20 @@ class WebsocketService extends GetxService {
     }
   }
 
-  sendMessage(String event, String payload) {
+  sendMessage(String event, ChatMessagePayload payload) {
     // final timestamp = DateFormat('y-M-d H:m:s').format(DateTime.now());
-    final message = {
-      'event': 'broadcast',
-      'payload': {
-        'RoomId': 'global',
-        'Message': 'hello 2',
-        'From': 'test123'
-      }
-    };
-    socket.sink.add(jsonEncode(message));
+    final chatMessageRequest = ChatMessageRequest(
+      event: 'broadcast',
+      payload: payload,
+    );
+    // final message = {
+    //   'event': 'broadcast',
+    //   'payload': {
+    //     'RoomId': 'global',
+    //     'Message': 'hello 2',
+    //     'From': 'test123'
+    //   }
+    // };
+    socket.sink.add(chatMessageRequest.toRawJson());
   }
 }
