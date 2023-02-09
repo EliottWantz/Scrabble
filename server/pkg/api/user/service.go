@@ -20,7 +20,6 @@ func NewService(cfg *config.Config, repo *Repository) *Service {
 
 // Login up a new user, signup if doesn't exist
 func (s *Service) Login(username string) (*User, error) {
-	slog.Info("Login user", "username", username)
 	if s.repo.Has(username) {
 		return nil, fiber.NewError(fiber.StatusConflict, "user already exists")
 	}
@@ -34,6 +33,8 @@ func (s *Service) Login(username string) (*User, error) {
 		return nil, err
 	}
 
+	slog.Info("Login user", "username", username)
+
 	return u, nil
 }
 
@@ -46,7 +47,7 @@ func (s *Service) Logout(req LogoutRequest) error {
 		return err
 	}
 
-	slog.Info("Logout user", "id", req.Username)
+	slog.Info("Logout user", "username", req.Username)
 
 	return nil
 }

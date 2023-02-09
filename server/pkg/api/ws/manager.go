@@ -114,7 +114,10 @@ func (m *Manager) RemoveClient(cID string) error {
 		return err
 	}
 
-	return c.Conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+	return c.Conn.WriteMessage(
+		websocket.CloseMessage,
+		websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""),
+	)
 }
 
 func (m *Manager) removeClient(c *Client) error {
