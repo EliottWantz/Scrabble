@@ -33,14 +33,14 @@ export class LoginComponent {
   }
 
   ngOnInit() {
-    if (this.authenticationService.getIsConnected) {
+    if (this.authenticationService.currentUserValue.id != '0') {
       this.closeModal();
     }
     this.username = "";
     //this.password = "";
   }
 
-  onSubmit() {
+  async onSubmit() {
     this.submitted = true;
 
     if (this.username == ""/* || this.password == ""*/) {
@@ -48,12 +48,8 @@ export class LoginComponent {
     }
 
     this.authenticationService.login(this.username/*, this.password*/);
-    if (this.authenticationService.currentUserValue.id != "0") {
-      this.switchView();
-      this.closeModal();
-    } else {
-      this.hasError = true;
-    }
+    this.switchView();
+    this.closeModal();
   }
 
   switchView(): void {
