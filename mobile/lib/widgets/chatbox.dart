@@ -23,28 +23,37 @@ class ChatBox extends GetView<ChatBoxController> {
     //   ],
     // );
       // Text(controller.websocketService.itemCount.value.toString());
-    return Obx(() =>ListView.builder(
-      itemCount: controller.websocketService.messages.value.length,
-      shrinkWrap: true,
-      padding: EdgeInsets.only(top: 10,bottom: 10),
-      physics: NeverScrollableScrollPhysics(),
-      itemBuilder: (context, index){
-        return Container(
-          padding: EdgeInsets.only(left: 14,right: 14,top: 10,bottom: 10),
-          child: Align(
-            alignment: (controller.isCurrentUserMessage(controller.websocketService.messages.value[index].payload!.from)?Alignment.topRight:Alignment.topLeft),
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                color: (controller.isCurrentUserMessage(controller.websocketService.messages.value[index].payload!.from)?Colors.blue[200]:Colors.grey.shade200),
+    return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Obx(() =>ListView.builder(
+          itemCount: controller.websocketService.messages.value.length,
+          shrinkWrap: true,
+          padding: EdgeInsets.only(top: 10,bottom: 10),
+          physics: NeverScrollableScrollPhysics(),
+          itemBuilder: (context, index){
+            return Container(
+              padding: EdgeInsets.only(left: 14,right: 14,top: 10,bottom: 10),
+              child: Align(
+                alignment: (controller.isCurrentUserMessage(controller.websocketService.messages.value[index].payload!.from)?Alignment.topRight:Alignment.topLeft),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    color: (controller.isCurrentUserMessage(controller.websocketService.messages.value[index].payload!.from)?Colors.blue[200]:Colors.grey.shade200),
+                  ),
+                  padding: EdgeInsets.all(16),
+                  child: Text(controller.websocketService.messages.value[index].payload!.message, style: TextStyle(fontSize: 15)),
+                ),
               ),
-              padding: EdgeInsets.all(16),
-              child: Text(controller.websocketService.messages.value[index].payload!.message, style: TextStyle(fontSize: 15)),
-            ),
-          ),
-        );
-      },
-    ));
+            );
+          },
+        )),
+          TextButton(onPressed: (){
+            controller.sendMessage();
+          }, child: Text('TextButton'))
+        ]
+
+    );
 
 
 
