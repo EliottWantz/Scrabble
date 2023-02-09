@@ -28,6 +28,7 @@ class ChatBoxController extends GetxController {
       print('send message');
       print(chatMessagePayload);
       websocketService.sendMessage('broadcast', chatMessagePayload);
+      messageTextEditingController.text = '';
     }
   }
 
