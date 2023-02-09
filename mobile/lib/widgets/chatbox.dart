@@ -7,9 +7,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
 class ChatBox extends GetView<ChatBoxController> {
-  const ChatBox({super.key});
-
-  // final _chatMessages = <ChatMessage>[];
+  ChatBox({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -23,9 +21,14 @@ class ChatBox extends GetView<ChatBoxController> {
     //   ],
     // );
       // Text(controller.websocketService.itemCount.value.toString());
-    return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+    return ListView(
+      reverse: true,
+        shrinkWrap: true,
+        // mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          TextButton(onPressed: (){
+            controller.sendMessage();
+          }, child: Text('TextButton')),
           Obx(() =>ListView.builder(
           itemCount: controller.websocketService.messages.value.length,
           shrinkWrap: true,
@@ -47,10 +50,7 @@ class ChatBox extends GetView<ChatBoxController> {
               ),
             );
           },
-        )),
-          TextButton(onPressed: (){
-            controller.sendMessage();
-          }, child: Text('TextButton'))
+        ))
         ]
 
     );
