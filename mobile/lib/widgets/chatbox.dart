@@ -63,7 +63,12 @@ class ChatBox extends GetView<ChatBoxController> {
                       color: (controller.isCurrentUserMessage(controller.websocketService.messages.value[index].payload!.from)?Colors.blue[200]:Colors.grey.shade200),
                     ),
                     padding: EdgeInsets.all(16),
-                    child: Text(controller.websocketService.messages.value[index].payload!.message, style: TextStyle(fontSize: 15)),
+                    child: Column (
+                        children: [
+                          Text(controller.websocketService.messages.value[index].payload!.message, style: TextStyle(fontSize: 15)),
+                          Text(controller.websocketService.messages.value[index].payload!.timestamp as String, style : TextStyle(fontSize: 15)),
+                        ],
+                    )
                   ),
                 ),
               );
