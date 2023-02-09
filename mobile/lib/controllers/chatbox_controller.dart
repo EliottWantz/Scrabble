@@ -2,12 +2,19 @@ import 'package:client_leger/services/websocket_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 
-class ChatBoxController extends GetxController {
-  final WebsocketService websocketService;
+import 'package:client_leger/services/storage_service.dart';
 
-  ChatBoxController({required this.websocketService});
+class ChatBoxController extends GetxController {
+  final WebsocketService websocketService = Get.find();
+  final StorageService storageService = Get.find();
+
+  late RxInt itemCount = 0.obs;
 
   TextEditingController textController = TextEditingController();
+
+  bool isCurrentUserMessage(String username) {
+    return storageService.read('username') == username;
+  }
 
   void sendMessage() {
     print('sendmessage');

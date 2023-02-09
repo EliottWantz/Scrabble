@@ -15,6 +15,7 @@ class WebsocketService extends GetxService {
   late String username;
   late RxList<ChatMessageResponse> messages = <ChatMessageResponse>[].obs;
   late RxString timestamp = ''.obs;
+  late RxInt itemCount = 0.obs;
 
   connect(String username) {
     socket = WebSocketChannel.connect(Uri(
@@ -55,8 +56,12 @@ class WebsocketService extends GetxService {
         // final DateTime timestamp = decodedData['payload']['timestamp'];
         final parsedTimestamp = DateTime.parse(data.payload!.timestamp);
         timestamp.value = DateFormat.Hms().format(parsedTimestamp);
+        print(messages.value.length);
+        itemCount.value = messages.value.length;
+        print(itemCount.value);
         // print(decodedData['payload']['timestamp']);
         // print(decodedData['payload']['message'].runtimeType);
+        print(messages.value);
         print('event broadcast');
       }
       break;

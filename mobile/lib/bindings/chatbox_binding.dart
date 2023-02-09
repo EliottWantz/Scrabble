@@ -5,7 +5,7 @@ class ChatBoxBinding implements Bindings {
   @override
   void dependencies() {
     Get.lazyPut<ChatBoxController>(
-        () => ChatBoxController(websocketService: Get.find())
+        () => ChatBoxController()
     );
   }
 }
