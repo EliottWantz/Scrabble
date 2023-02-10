@@ -1,5 +1,5 @@
 export const environment = {
-    production: true,
-    serverUrl: 'http://127.0.0.1:3000/api', // TODO: Add remote server URL
-    wsUrl: 'http://127.0.0.1:3000/ws',
+  production: true,
+  serverUrl: "https://scrabble-production.up.railway.app/api", // TODO: Add remote server URL
+  wsUrl: "wss://scrabble-production.up.railway.app/ws",
 };

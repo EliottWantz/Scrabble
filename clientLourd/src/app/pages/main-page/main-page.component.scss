@@ -72,11 +72,15 @@ Position for div of the login-button
 Position for login-button
 **/
 
-#login-button {
-    //float: right;
-    //margin-right: 1vw;
-    top: 50%;
-    left: 50%;
+#main {
+    height: 100%;
+    width: 100%;
+    display: grid;
+    grid-template-rows: auto 1fr ;
+}
+
+nav {
+    padding: 1rem;
 }
 
 /**
