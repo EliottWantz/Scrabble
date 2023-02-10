@@ -55,29 +55,29 @@ class AppSideBar extends StatelessWidget {
 
   Widget _buildFooterAuth() {
     return SizedBox(
-      height: 150,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Center(
-          child: Column(
-            children: [
-              const Divider(color: Colors.white),
-              const Gap(20),
-              InkWell(
-                  onTap: () {
-                    settingsService.switchTheme();
-                  },
-                  child: Obx(
-                    () => Icon(
-                      settingsService.currentThemeIcon.value,
-                      size: 20,
-                      color: Colors.white,
-                    ),
-                  )),
-            ],
-          ),
-        ),
-      ),
+      // height: 150,
+      // child: Padding(
+      //   padding: const EdgeInsets.all(16.0),
+      //   child: Center(
+      //     child: Column(
+      //       children: [
+      //         const Divider(color: Colors.white),
+      //         const Gap(20),
+      //         InkWell(
+      //             onTap: () {
+      //               settingsService.switchTheme();
+      //             },
+      //             child: Obx(
+      //               () => Icon(
+      //                 settingsService.currentThemeIcon.value,
+      //                 size: 20,
+      //                 color: Colors.white,
+      //               ),
+      //             )),
+      //       ],
+      //     ),
+      //   ),
+      // ),
     );
   }
 
@@ -91,18 +91,18 @@ class AppSideBar extends StatelessWidget {
             children: [
               const Divider(color: Colors.white),
               const Gap(20),
-              InkWell(
-                  onTap: () {
-                    settingsService.switchTheme();
-                  },
-                  child: Obx(
-                    () => Icon(
-                      settingsService.currentThemeIcon.value,
-                      size: 20,
-                      color: Colors.white,
-                    ),
-                  )),
-              const Gap(40),
+              // InkWell(
+              //     onTap: () {
+              //       settingsService.switchTheme();
+              //     },
+              //     child: Obx(
+              //       () => Icon(
+              //         settingsService.currentThemeIcon.value,
+              //         size: 20,
+              //         color: Colors.white,
+              //       ),
+              //     )),
+              // const Gap(40),
               InkWell(
                 onTap: () async {
                   await DialogHelper.showLogoutDialog(authService.logout);
@@ -130,18 +130,18 @@ class AppSideBar extends StatelessWidget {
             children: [
               const Divider(color: Colors.white),
               const Gap(20),
-              InkWell(
-                  onTap: () {
-                    settingsService.switchTheme();
-                  },
-                  child: Obx(
-                    () => Icon(
-                      settingsService.currentThemeIcon.value,
-                      size: 20,
-                      color: Colors.white,
-                    ),
-                  )),
-              const Gap(40),
+              // InkWell(
+              //     onTap: () {
+              //       settingsService.switchTheme();
+              //     },
+              //     child: Obx(
+              //       () => Icon(
+              //         settingsService.currentThemeIcon.value,
+              //         size: 20,
+              //         color: Colors.white,
+              //       ),
+              //     )),
+              // const Gap(40),
               InkWell(
                 onTap: () {
                   Get.back();
