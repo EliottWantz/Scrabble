@@ -7,6 +7,8 @@ import 'package:get/get.dart';
 class MainMenuScreen extends GetView<ChatBoxController> {
   MainMenuScreen({Key? key}) : super(key: key);
 
+  final FocusNode messageInputFocusNode = FocusNode();
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -23,6 +25,11 @@ class MainMenuScreen extends GetView<ChatBoxController> {
                   children: [
                     Expanded(
                       child: TextField(
+                        focusNode: messageInputFocusNode,
+                        onSubmitted: (_) {
+                          controller.sendMessage();
+                          messageInputFocusNode.requestFocus();
+                        },
                         controller: controller.messageTextEditingController,
                         decoration: const InputDecoration(
                             hintText: "entrez un message",
