@@ -5,7 +5,13 @@ import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 
 class MainMenuScreen extends GetView<ChatBoxController> {
-  const MainMenuScreen({Key? key}) : super(key: key);
+  MainMenuScreen({Key? key}) : super(key: key);
+
+  final ScrollController scrollController = ScrollController();
+
+  void _scrollDown() {
+    scrollController.jumpTo(scrollController.position.maxScrollExtent);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +23,7 @@ class MainMenuScreen extends GetView<ChatBoxController> {
             width: 600,
             child: Column(
               children: [
-                ChatBox(),
+                ChatBox(scrollController: scrollController,),
                 Gap(50),
                 Row(
                   children: [
@@ -35,6 +41,7 @@ class MainMenuScreen extends GetView<ChatBoxController> {
                     TextButton(
                         onPressed: () {
                           controller.sendMessage();
+                          _scrollDown();
                         },
                         child: Text('TextButton')),
                   ],

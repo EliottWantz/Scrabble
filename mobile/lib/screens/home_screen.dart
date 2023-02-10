@@ -42,7 +42,7 @@ class HomeScreen extends GetView<HomeController> {
           final pageTitle = _getTitleByIndex(sidebarController.selectedIndex);
           switch (sidebarController.selectedIndex) {
             case 0:
-              return const MainMenuScreen();
+              return MainMenuScreen();
             case 1:
               return const ProfileScreen();
             case 2:

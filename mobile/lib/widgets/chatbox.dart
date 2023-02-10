@@ -7,7 +7,8 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
 class ChatBox extends GetView<ChatBoxController> {
-  ChatBox({super.key});
+  final ScrollController scrollController;
+  const ChatBox({super.key, required this.scrollController});
 
   @override
   Widget build(BuildContext context) {
@@ -25,6 +26,7 @@ class ChatBox extends GetView<ChatBoxController> {
           child: Container(
             decoration: BoxDecoration(border: Border.all(color: Colors.black)),
             child: ListView.builder(
+              controller: scrollController,
               reverse: false,
               itemCount: controller.websocketService.messages.value.length,
               shrinkWrap: true,
