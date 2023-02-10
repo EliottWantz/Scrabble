@@ -66,6 +66,10 @@ class ChatBox extends GetView<ChatBoxController> {
                         child: Column(
                           children: [
                             Text(
+                              controller.websocketService.messages
+                                  .value[index].payload!.from
+                            ),
+                            Text(
                                 controller.websocketService.messages
                                     .value[index].payload!.message,
                                 style: TextStyle(fontSize: 15)),
