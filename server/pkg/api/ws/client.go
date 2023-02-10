@@ -159,7 +159,7 @@ func (c *Client) broadcast(p *Packet) error {
 		return fmt.Errorf("%w %s", ErrNotInRoom, payload.RoomID)
 	}
 
-	payload.Timestamp = time.Now().Format(time.DateTime)
+	payload.Timestamp = time.Now().UTC()
 
 	if err := p.setPayload(payload); err != nil {
 		return err

@@ -11,12 +11,12 @@ import (
 )
 
 type Controller struct {
-	svc *Service
+	Svc *Service
 }
 
 func NewController(cfg *config.Config) *Controller {
 	return &Controller{
-		svc: NewService(cfg, NewRepository()),
+		Svc: NewService(cfg, NewRepository()),
 	}
 }
 
@@ -40,7 +40,7 @@ func (ctrl *Controller) Login(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusUnprocessableEntity, "username can't be blank")
 	}
 
-	user, err := ctrl.svc.Login(req.Username)
+	user, err := ctrl.Svc.Login(req.Username)
 	if err != nil {
 		slog.Error("login user", err)
 		var fiberErr *fiber.Error
@@ -82,7 +82,7 @@ func (ctrl *Controller) Logout(ws *ws.Manager) fiber.Handler {
 			})
 		}
 
-		if err := ctrl.svc.Logout(req); err != nil {
+		if err := ctrl.Svc.Logout(req.Username); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(LogoutResponse{
 				Error: err.Error(),
 			})
@@ -103,7 +103,7 @@ func (ctrl *Controller) GetUser(c *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	user, err := ctrl.svc.GetUser(ID)
+	user, err := ctrl.Svc.GetUser(ID)
 	if err != nil {
 		slog.Error("Error getting user", err)
 		return fiber.NewError(fiber.StatusInternalServerError, err.Error())

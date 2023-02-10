@@ -45,7 +45,7 @@ func NewManager() (*Manager, error) {
 	return m, nil
 }
 
-func (m *Manager) Accept(cID string) fiber.Handler {
+func (m *Manager) Accept(cID string, deleteFn func(string) error) fiber.Handler {
 	return websocket.New(func(conn *websocket.Conn) {
 		c, err := m.addClient(conn, cID)
 		if err != nil {
@@ -56,6 +56,9 @@ func (m *Manager) Accept(cID string) fiber.Handler {
 		defer func() {
 			if err := m.removeClient(c); err != nil {
 				m.logger.Error("remove client", err)
+			}
+			if err := deleteFn(cID); err != nil {
+				m.logger.Error("deleteFn", err)
 			}
 		}()
 
@@ -114,7 +117,10 @@ func (m *Manager) RemoveClient(cID string) error {
 		return err
 	}
 
-	return c.Conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+	return c.Conn.WriteMessage(
+		websocket.CloseMessage,
+		websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""),
+	)
 }
 
 func (m *Manager) removeClient(c *Client) error {
