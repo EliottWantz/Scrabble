@@ -47,9 +47,11 @@ export class LoginComponent {
       return;
     }
     this.authenticationService.login(this.username/*, this.password*/);
-    if (!this.authenticationService.getIsConnected) {
-      this.hasError = true;
-    }
+    setTimeout(() => {
+      if (!this.authenticationService.getIsConnected) {
+        this.hasError = true;
+      }
+    }, 100);
   }
 
   isConnected(): Boolean {
