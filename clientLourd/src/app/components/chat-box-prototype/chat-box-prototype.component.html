@@ -1,5 +1,5 @@
 <div id="chatBox" #chatBox>
-  <div id="chatBoxBody">
+  <div id="chatBoxBody" #chatBoxBody>
     <div id="chatBoxMessages" #chatBoxMessages itemSize="100">
       <div *ngFor="let msg of messages$ | async">
         <p class="message">
@@ -29,7 +29,6 @@
         id="chatBoxInput"
         formControlName="input"
         autocomplete="off"
-        autofocus
         (keypress.enter)="submitBtn._elementRef.nativeElement.click()"
         matInput
         [errorStateMatcher]="messageValidator"

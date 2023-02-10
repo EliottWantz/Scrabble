@@ -28,7 +28,7 @@ import {
   styleUrls: ["./chat-box-prototype.component.scss"],
 })
 export class ChatBoxPrototypeComponent implements OnInit, AfterViewInit {
-  @ViewChild("chatBoxMessages") chatBoxMessagesContainer: ElementRef;
+  @ViewChild("chatBoxBody") chatBoxMessagesContainer: ElementRef;
   // @ViewChild("chatBoxMessages")
   // chatBoxMessagesContainer: CdkVirtualScrollViewport;
   chatBoxForm: FormGroup;
@@ -56,7 +56,23 @@ export class ChatBoxPrototypeComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
     setTimeout(() => {
       this.chatBoxInput.nativeElement.focus();
-      this.scrollBottom();
+      // this.messages$.subscribe(() => {
+      //   this.scrollBottom();
+      // })
+      this.chatBoxMessagesContainer.nativeElement.scrollTop =
+        this.chatBoxMessagesContainer.nativeElement.scrollHeight;
+      console.log(
+        "scrollTop",
+        this.chatBoxMessagesContainer.nativeElement.scrollTop
+      );
+      console.log(
+        "scrollHeight",
+        this.chatBoxMessagesContainer.nativeElement.scrollHeight
+      );
+      // this.scrollBottom();
+      // this.messages$.subscribe(() => {
+      //   this.scrollBottom();
+      // });
     });
   }
 
@@ -86,9 +102,8 @@ export class ChatBoxPrototypeComponent implements OnInit, AfterViewInit {
               { hour12: false }
             ),
           };
-          console.log(this.messages$.value);
+          // console.log(this.messages$.value);
           this.messages$.next([...this.messages$.value, message]);
-          //   this.messages.push(message);
           this.scrollBottom();
         }
       }
@@ -97,7 +112,7 @@ export class ChatBoxPrototypeComponent implements OnInit, AfterViewInit {
   }
   async send(msg: string): Promise<void> {
     if (!msg) return;
-    console.log("Sending message: " + msg);
+    // console.log("Sending message: " + msg);
     const payload: BroadcastPayload = {
       roomId: this.globalRoomId,
       from: this.user.username,
@@ -119,13 +134,31 @@ export class ChatBoxPrototypeComponent implements OnInit, AfterViewInit {
   }
 
   private scrollBottom(): void {
-    const shouldScroll =
+    // const shouldScroll =
+    //   this.chatBoxMessagesContainer.nativeElement.scrollTop +
+    //     this.chatBoxMessagesContainer.nativeElement.clientHeight !==
+    //   this.chatBoxMessagesContainer.nativeElement.scrollHeight;
+    // console.log(shouldScroll);
+    console.log(
+      "scrollTop",
+      this.chatBoxMessagesContainer.nativeElement.scrollTop
+    );
+    console.log(
+      "scrollHeight",
+      this.chatBoxMessagesContainer.nativeElement.scrollHeight
+    );
+    console.log(
+      "clientHeight",
+      this.chatBoxMessagesContainer.nativeElement.clientHeight
+    );
+    console.log(
+      "scrollTop + clientHeight",
       this.chatBoxMessagesContainer.nativeElement.scrollTop +
-        this.chatBoxMessagesContainer.nativeElement.clientHeight !==
+        this.chatBoxMessagesContainer.nativeElement.clientHeight
+    );
+    // if (shouldScroll) {
+    this.chatBoxMessagesContainer.nativeElement.scrollTop =
       this.chatBoxMessagesContainer.nativeElement.scrollHeight;
-    if (shouldScroll) {
-      this.chatBoxMessagesContainer.nativeElement.scrollTop =
-        this.chatBoxMessagesContainer.nativeElement.scrollHeight;
-    }
+    // }
   }
 }
