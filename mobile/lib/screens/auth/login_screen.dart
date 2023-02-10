@@ -19,7 +19,8 @@ class LoginScreen extends StatelessWidget {
               body: Row(
                 children: [
                   AppSideBar(
-                      controller: controller.sideBarController,),
+                    controller: controller.sideBarController,
+                  ),
                   Expanded(
                     child: _buildItems(
                       context,
@@ -55,7 +56,6 @@ class LoginScreen extends StatelessWidget {
                           validator: ValidationBuilder(
                                   requiredMessage:
                                       'Le champ ne peut pas être vide')
-                              .minLength(3, 'trop petit')
                               .build()),
                       // const Gap(20.0),
                       // InputField(
