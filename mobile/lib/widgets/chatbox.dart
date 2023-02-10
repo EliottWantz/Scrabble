@@ -20,76 +20,63 @@ class ChatBox extends GetView<ChatBoxController> {
     //     Obx(() => Text(controller.websocketService.itemCount.value.toString())),
     //   ],
     // );
-      // Text(controller.websocketService.itemCount.value.toString());
-    return ListView(
-      reverse: true,
-        shrinkWrap: true,
-        // mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child:TextField(
-                  controller: controller.messageTextEditingController,
-                  decoration: const InputDecoration(
-                      hintText: "entrez un message",
-                      labelText: "entrez un message",
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(
-                              Radius.circular(8)
-                          )
-                      )
+    // Text(controller.websocketService.itemCount.value.toString());
+    return Obx(() => Expanded(
+          child: Container(
+            decoration: BoxDecoration(border: Border.all(color: Colors.black)),
+            child: ListView.builder(
+              reverse: false,
+              itemCount: controller.websocketService.messages.value.length,
+              shrinkWrap: true,
+              padding: EdgeInsets.only(top: 10, bottom: 10),
+              itemBuilder: (context, index) {
+                return Container(
+                  padding: EdgeInsets.only(
+                      left: 14, right: 14, top: 10, bottom: 10),
+                  child: Align(
+                    alignment: (controller.isCurrentUserMessage(controller
+                            .websocketService
+                            .messages
+                            .value[index]
+                            .payload!
+                            .from)
+                        ? Alignment.topRight
+                        : Alignment.topLeft),
+                    child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          color: (controller.isCurrentUserMessage(controller
+                                  .websocketService
+                                  .messages
+                                  .value[index]
+                                  .payload!
+                                  .from)
+                              ? Colors.blue[200]
+                              : Colors.grey.shade200),
+                        ),
+                        padding: EdgeInsets.all(16),
+                        child: Column(
+                          children: [
+                            Text(
+                                controller.websocketService.messages
+                                    .value[index].payload!.message,
+                                style: TextStyle(fontSize: 15)),
+                            Text(
+                                controller
+                                    .websocketService
+                                    .messages
+                                    .value[index]
+                                    .payload!
+                                    .timestamp as String,
+                                style: TextStyle(fontSize: 15)),
+                          ],
+                        )),
                   ),
-                ),
-              ),
-              TextButton(onPressed: (){
-                controller.sendMessage();
-              }, child: Text('TextButton')),
-            ],
+                );
+              },
+            ),
           ),
-          Obx(() =>ListView.builder(
-            itemCount: controller.websocketService.messages.value.length,
-            shrinkWrap: true,
-            padding: EdgeInsets.only(top: 10,bottom: 10),
-            physics: NeverScrollableScrollPhysics(),
-            itemBuilder: (context, index) {
-              return Container(
-                padding: EdgeInsets.only(left: 14,right: 14,top: 10,bottom: 10),
-                child: Align(
-                  alignment: (controller.isCurrentUserMessage(controller.websocketService.messages.value[index].payload!.from)?Alignment.topRight:Alignment.topLeft),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      color: (controller.isCurrentUserMessage(controller.websocketService.messages.value[index].payload!.from)?Colors.blue[200]:Colors.grey.shade200),
-                    ),
-                    padding: EdgeInsets.all(16),
-                    child: Column (
-                        children: [
-                          Text(controller.websocketService.messages.value[index].payload!.message, style: TextStyle(fontSize: 15)),
-                          Text(controller.websocketService.messages.value[index].payload!.timestamp as String, style : TextStyle(fontSize: 15)),
-                        ],
-                    )
-                  ),
-                ),
-              );
-            },
-          ))
-        ]
-
-    );
-
-
-
-
-
-
-
-
-
-
-
-
-
+        ));
 
     // return Scaffold(
     //   body: Padding(
