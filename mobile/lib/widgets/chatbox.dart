@@ -71,11 +71,7 @@ class ChatBox extends GetView<ChatBoxController> {
                                 style: TextStyle(fontSize: 15)),
                             Text(
                                 controller
-                                    .websocketService
-                                    .messages
-                                    .value[index]
-                                    .payload!
-                                    .timestamp as String,
+                                    .getLocalTime(index),
                                 style: TextStyle(fontSize: 15)),
                           ],
                         )),

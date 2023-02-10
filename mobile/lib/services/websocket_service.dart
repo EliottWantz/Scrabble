@@ -56,8 +56,8 @@ class WebsocketService extends GetxService {
         roomId = data.payload!.roomId;
         messages.obs.value.add(data);
         // final DateTime timestamp = decodedData['payload']['timestamp'];
-        final parsedTimestamp = DateTime.parse(data.payload!.timestamp!);
-        timestamp.value = DateFormat.Hms().format(parsedTimestamp);
+        // final parsedTimestamp = DateTime.parse(data.payload!.timestamp!);
+        // timestamp.value = DateFormat.Hms().format(parsedTimestamp);
         print(messages.value.length);
         itemCount.value = messages.value.length;
         print(itemCount.value);

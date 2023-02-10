@@ -23,6 +23,17 @@ class ChatBoxController extends GetxController {
     return storageService.read('username') == username;
   }
 
+  String getLocalTime(int index) {
+    final DateTime localDatetime = websocketService.messages.value[index].payload!.timestamp!.toLocal();
+    return DateFormat("hh:mm:ss").format(localDatetime);
+    // final int hour = localDatetime.hour;
+    // final int minute = localDatetime.minute;
+    // final int second = localDatetime.second;
+
+    // DateTime localTimestamp = websocketService.messages.value[index].payload!.timestamp!.toLocal();
+    // print(localTimestamp);
+  }
+
   void sendMessage() {
   if (messageTextEditingController.text.isNotEmpty) {
       final chatMessagePayload = ChatMessagePayload(

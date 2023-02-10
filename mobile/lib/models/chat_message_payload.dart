@@ -1,8 +1,10 @@
+import 'package:intl/intl.dart';
+
 class ChatMessagePayload {
   String roomId;
   String message;
   String from;
-  String? timestamp;
+  DateTime? timestamp;
 
   ChatMessagePayload({
     required this.roomId,
@@ -15,7 +17,8 @@ class ChatMessagePayload {
       roomId: json["roomId"],
       message: json["message"],
       from: json["from"],
-      timestamp: json["timestamp"]
+      // timestamp: DateFormat("yyyy-dd-mmThh:mm:ss").parse(json["timestamp"], true)
+      timestamp: DateTime.parse(json["timestamp"])
   );
 
   Map<String, dynamic> toJson() => {
