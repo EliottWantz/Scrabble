@@ -15,6 +15,7 @@ import { CountdownModule } from 'ngx-countdown';
 import { AboutUsComponent } from './components/about-us/about-us.component';
 import { BoardComponent } from './components/board/board.component';
 import { ChatBoxComponent } from './components/chat-box/chat-box.component';
+import { ChatBoxPrototypeComponent } from './components/chat-box-prototype/chat-box-prototype.component';
 import { ErrorPageComponent } from './components/error-page/error-page.component';
 import { GameEaselComponent } from './components/game-easel/game-easel.component';
 import { GameHistoryComponent } from './components/game-history/game-history.component';
@@ -64,6 +65,7 @@ import { MatButtonModule } from '@angular/material/button';
     PlayerAbandonedComponent,
     ObjectivesComponent,
     LoginComponent,
+    ChatBoxPrototypeComponent,
   ],
   imports: [
     AppMaterialModule,

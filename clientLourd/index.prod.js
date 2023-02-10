@@ -19,7 +19,7 @@ function initWindow() {
   appWindow.setMenuBarVisibility(false);
 
   // Initialize the DevTools.
-  // appWindow.webContents.openDevTools()
+  appWindow.webContents.openDevTools()
 
   appWindow.on("closed", function () {
     appWindow = null;

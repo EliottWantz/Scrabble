@@ -1,0 +1,44 @@
+:host {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    max-height: 80%;
+}
+
+#chatBox {
+    padding: 0 0.15rem;
+    height: 100%;
+    width: 100%;
+}
+
+#chatBoxMessages {
+    overflow: auto;
+    width: 95%;
+    background-color: rgb(255, 255, 255);
+    font-size: 1.25rem;
+    margin: 1rem 0;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.message {
+    word-wrap: break-word;
+    margin: 0 auto;
+    max-width: 80%;
+    width: max-content;
+}
+
+form {
+    padding: 0 0.75rem;
+    display: flex;
+    align-items: center;
+}
+
+form > mat-form-field {
+    margin-right: 0.5rem;
+    width: 95%;
+}
+
+form > button {
+    margin-bottom: 1rem;
+}

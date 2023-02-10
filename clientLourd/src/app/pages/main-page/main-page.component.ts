@@ -4,7 +4,7 @@ import { AboutUsComponent } from '@app/components/about-us/about-us.component';
 import { HighscoresComponent } from '@app/components/highscores/highscores.component';
 import { ParametersComponent } from '@app/components/parameters/parameters.component';
 import { GameMode } from '@common/game-mode';
-import { AuthentificationService } from '@app/services/authentification/authentification.service';
+import { AuthentificationService} from '@app/services/authentification/authentification.service';
 import { LoginComponent } from '@app/components/login-component/login.component';
 
 @Component({

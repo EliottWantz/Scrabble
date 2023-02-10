@@ -1,5 +1,8 @@
 <button *ngIf="!isConnected()" mat-raised-button color="primary" (click)="openLoginDialog()" id="login-button">Se connecter</button>
             <button *ngIf="isConnected()" mat-raised-button color="warn" (click)="logout()" id="login-button">Déconnexion</button>
+<div *ngIf="isConnected()">
+    <app-chat-box-prototype></app-chat-box-prototype>
+</div>
 <!--
     <div class="container justified-center">
     <div id="header">
