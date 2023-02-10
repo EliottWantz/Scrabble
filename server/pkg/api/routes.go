@@ -47,6 +47,6 @@ func (api *API) setupRoutes(cfg *config.Config) {
 		if ID == "" {
 			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "Missing id"})
 		}
-		return api.WebSocketManager.Accept(ID)(c)
+		return api.WebSocketManager.Accept(ID, api.UserCtrl.Svc.Logout)(c)
 	})
 }
