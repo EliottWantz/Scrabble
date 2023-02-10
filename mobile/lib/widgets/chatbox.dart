@@ -3,15 +3,20 @@ import 'package:client_leger/controllers/chatbox_controller.dart';
 import 'package:client_leger/services/websocket_service.dart';
 import 'package:client_leger/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
 class ChatBox extends GetView<ChatBoxController> {
-  final ScrollController scrollController;
-  const ChatBox({super.key, required this.scrollController});
+  const ChatBox({super.key});
 
   @override
   Widget build(BuildContext context) {
+    controller.websocketService.messages.listen((p0) {
+      SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+        controller.scrollDown();
+      });
+    });
     // return Column(
     //   mainAxisAlignment: MainAxisAlignment.center,
     //   children: [
@@ -22,11 +27,12 @@ class ChatBox extends GetView<ChatBoxController> {
     //   ],
     // );
     // Text(controller.websocketService.itemCount.value.toString());
-    return Obx(() => Expanded(
+    return Obx(() =>
+        Expanded(
           child: Container(
             decoration: BoxDecoration(border: Border.all(color: Colors.black)),
             child: ListView.builder(
-              controller: scrollController,
+              controller: controller.scrollController,
               reverse: false,
               itemCount: controller.websocketService.messages.value.length,
               shrinkWrap: true,
@@ -37,22 +43,22 @@ class ChatBox extends GetView<ChatBoxController> {
                       left: 14, right: 14, top: 10, bottom: 10),
                   child: Align(
                     alignment: (controller.isCurrentUserMessage(controller
-                            .websocketService
-                            .messages
-                            .value[index]
-                            .payload!
-                            .from)
+                        .websocketService
+                        .messages
+                        .value[index]
+                        .payload!
+                        .from)
                         ? Alignment.topRight
                         : Alignment.topLeft),
                     child: Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(20),
                           color: (controller.isCurrentUserMessage(controller
-                                  .websocketService
-                                  .messages
-                                  .value[index]
-                                  .payload!
-                                  .from)
+                              .websocketService
+                              .messages
+                              .value[index]
+                              .payload!
+                              .from)
                               ? Colors.blue[200]
                               : Colors.grey.shade200),
                         ),

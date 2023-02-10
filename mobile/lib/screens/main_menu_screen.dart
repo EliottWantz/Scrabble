@@ -7,12 +7,6 @@ import 'package:get/get.dart';
 class MainMenuScreen extends GetView<ChatBoxController> {
   MainMenuScreen({Key? key}) : super(key: key);
 
-  final ScrollController scrollController = ScrollController();
-
-  void _scrollDown() {
-    scrollController.jumpTo(scrollController.position.maxScrollExtent);
-  }
-
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -23,7 +17,7 @@ class MainMenuScreen extends GetView<ChatBoxController> {
             width: 600,
             child: Column(
               children: [
-                ChatBox(scrollController: scrollController,),
+                ChatBox(),
                 Gap(50),
                 Row(
                   children: [
@@ -38,12 +32,12 @@ class MainMenuScreen extends GetView<ChatBoxController> {
                                     BorderRadius.all(Radius.circular(8)))),
                       ),
                     ),
+                    Gap(10),
                     TextButton(
                         onPressed: () {
                           controller.sendMessage();
-                          _scrollDown();
                         },
-                        child: Text('TextButton')),
+                        child: Text('Envoyer')),
                   ],
                 )
               ],

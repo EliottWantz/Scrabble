@@ -9,8 +9,13 @@ import 'package:intl/intl.dart';
 class ChatBoxController extends GetxController {
   final WebsocketService websocketService = Get.find();
   final StorageService storageService = Get.find();
+  final ScrollController scrollController = ScrollController();
 
   late RxInt itemCount = 0.obs;
+
+  void scrollDown() {
+    scrollController.jumpTo(scrollController.position.maxScrollExtent);
+  }
 
   TextEditingController messageTextEditingController = TextEditingController();
 
