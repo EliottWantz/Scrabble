@@ -20,15 +20,42 @@
   overflow-y: auto;
   position: absolute;
   inset: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
 }
 
 .message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   word-wrap: break-word;
-  margin: 1rem auto;
+  margin: 1rem 0;
   font-size: 3ch;
   max-width: 80%;
   width: max-content;
   line-height: normal;
+  padding: 1rem;
+  border-radius: 0.75rem;
+}
+
+.message p {
+  margin: 0;
+}
+
+.message.sent {
+  background-color: #9ed3ff;
+  align-self: flex-end;
+}
+
+.message.received {
+  background-color: #f0f0f0;
+  color: rgb(41, 41, 41);
+  box-shadow: 0.25rem 0.25rem 1.5rem rgba(0, 0, 0, 0.05);
+}
+
+.message .timestamp {
+  font-size: 1.5ch;
 }
 
 form {

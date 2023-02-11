@@ -1,23 +1,18 @@
 <div id="chatBox" #chatBox>
   <div id="chatBoxBody" #chatBoxBody>
-    <div id="chatBoxMessages" #chatBoxMessages itemSize="100">
-      <div *ngFor="let msg of messages$ | async">
-        <p class="message">
-          {{ msg.from }}: {{ msg.message }} {{ msg.timestamp }}
-        </p>
+    <div id="chatBoxMessages" #chatBoxMessages>
+      <div
+        class="message"
+        *ngFor="let msg of messages$ | async"
+        [ngClass]="{
+          sent: msg.from === user.id,
+          received: msg.from !== user.id
+        }"
+      >
+        <p>{{ msg.from }}: {{ msg.message }}</p>
+        <p class="timestamp">{{ msg.timestamp }}</p>
       </div>
     </div>
-    <!-- <cdk-virtual-scroll-viewport
-      #chatBoxMessages
-      id="chatBoxMessages"
-      itemSize="20"
-    >
-      <div *cdkVirtualFor="let msg of messages$ | async">
-        <p class="message">
-          {{ msg.from }}: {{ msg.message }} {{ msg.timestamp }}
-        </p>
-      </div>
-    </cdk-virtual-scroll-viewport> -->
   </div>
 
   <form (ngSubmit)="send(chatBoxInput.value)" [formGroup]="chatBoxForm">
