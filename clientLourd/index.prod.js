@@ -1,4 +1,5 @@
 const { app, BrowserWindow } = require("electron");
+const path = require("path");
 
 let appWindow;
 
@@ -13,13 +14,14 @@ function initWindow() {
   appWindow.maximize();
 
   // Electron Build Path
-  const path = `file://${__dirname}/dist/client/index.html`;
-  appWindow.loadURL(path);
+  // const path = `file://${__dirname}/dist/client/index.html`;
+  const indexPath = `file://${path.join(__dirname, "dist/client/index.html")}`;
+  appWindow.loadURL(indexPath);
 
   appWindow.setMenuBarVisibility(false);
 
   // Initialize the DevTools.
-  appWindow.webContents.openDevTools()
+  appWindow.webContents.openDevTools();
 
   appWindow.on("closed", function () {
     appWindow = null;

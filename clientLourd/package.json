@@ -1,7 +1,7 @@
 {
   "name": "client",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "index.prod.js",
   "scripts": {
     "start": "ng serve --open",
     "build": "ng build",
@@ -13,8 +13,9 @@
     "lint": "ng lint --format stylish",
     "lint:fix": "npm run lint -- --fix",
     "start:electron": "concurrently -k \"ng serve\" \"npm run starting:electron\"",
-    "build:electron": "ng build && electron-packager . --asar --ignore=/node_modules --ignore=/e2e --ignore=/src --overwrite --out=./build",
-    "starting:electron": "wait-on http://localhost:4200 && electron ."
+    "build:electron": "ng build --optimization && electron-packager . --asar --ignore=/node_modules --ignore=/e2e --ignore=/src --overwrite --out=./build",
+    "starting:electron": "wait-on http://localhost:4200 && electron .",
+    "build:release": "ng build --optimization && electron-packager ./dist --overwrite --out=./build"
   },
   "private": true,
   "dependencies": {
