@@ -28,7 +28,7 @@ import {
   styleUrls: ["./chat-box-prototype.component.scss"],
 })
 export class ChatBoxPrototypeComponent implements OnInit, AfterViewInit {
-  @ViewChild("chatBoxBody") chatBoxMessagesContainer: ElementRef;
+  @ViewChild("chatBoxMessages") chatBoxMessagesContainer: ElementRef;
   // @ViewChild("chatBoxMessages")
   // chatBoxMessagesContainer: CdkVirtualScrollViewport;
   chatBoxForm: FormGroup;
@@ -105,6 +105,9 @@ export class ChatBoxPrototypeComponent implements OnInit, AfterViewInit {
           // console.log(this.messages$.value);
           this.messages$.next([...this.messages$.value, message]);
           this.scrollBottom();
+          setTimeout(() => {
+            this.scrollBottom();
+          });
         }
       }
     };
