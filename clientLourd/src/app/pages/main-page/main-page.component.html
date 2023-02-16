@@ -18,6 +18,11 @@
     >
       Déconnexion
     </button>
+
+    <a *ngIf="isConnected()" href="/profile" id="login-button">
+      HELLO
+      <!-- <img src=""> -->
+    </a>
   </nav>
   <app-chat-box-prototype *ngIf="isConnected()"></app-chat-box-prototype>
 </div>
