@@ -5,6 +5,7 @@ import { GamePageGuard } from "@app/guards/game-page.guard";
 import { AdminComponent } from "@app/pages/admin/admin.component";
 import { GamePageComponent } from "@app/pages/game-page/game-page.component";
 import { MainPageComponent } from "@app/pages/main-page/main-page.component";
+import { ProfilePageComponent } from "@app/pages/profile-page/profile-page.component";
 import { ConnectionResolver } from "@app/services/connection-resolvers/connection-resolver.service";
 
 export const routes: Routes = [
@@ -20,6 +21,7 @@ export const routes: Routes = [
   { path: "errorPage", component: ErrorPageComponent },
 
   { path: "**", redirectTo: "/home" },
+  { path: "profile", component: ProfilePageComponent}
 ];
 
 @NgModule({
