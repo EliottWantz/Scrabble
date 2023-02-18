@@ -9,6 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"github.com/imagekit-developer/imagekit-go"
+	"golang.org/x/exp/slog"
 )
 
 var (
@@ -60,6 +61,7 @@ func (s *Service) SignUp(req SignupRequest) (*User, string, error) {
 	u := &User{
 		Id:             uuid.NewString(),
 		Username:       req.Username,
+		Email:          req.Email,
 		HashedPassword: hashedPassword,
 	}
 
@@ -91,6 +93,20 @@ func (s *Service) Login(username, password string) (string, error) {
 	}
 
 	return signed, nil
+}
+
+func (s *Service) Logout(ID string) error {
+	if !s.repo.Has(ID) {
+		return fiber.NewError(fiber.StatusNotFound, "user not found")
+	}
+
+	if err := s.repo.Delete(ID); err != nil {
+		return err
+	}
+
+	slog.Info("Logout user", "id", ID)
+
+	return nil
 }
 
 func (s *Service) Revalidate(tokenStr string) (string, error) {

@@ -10,26 +10,21 @@ import (
 )
 
 type Manager struct {
-	Clients    *haxmap.Map[string, *client]
-	Rooms      *haxmap.Map[string, *room]
-	GlobalRoom *room
+	Clients    *haxmap.Map[string, *Client]
+	Rooms      *haxmap.Map[string, *Room]
+	GlobalRoom *Room
 	logger     *slog.Logger
 }
 
 func NewManager() (*Manager, error) {
 	m := &Manager{
-		Clients: haxmap.New[string, *client](),
-		Rooms:   haxmap.New[string, *room](),
-		logger:  slog.With("component", "manager"),
+		Clients: haxmap.New[string, *Client](),
+		Rooms:   haxmap.New[string, *Room](),
+		logger:  slog.Default(),
 	}
 
-	r, err := NewRoom(m)
-	if err != nil {
-		return nil, err
-	}
-
-	m.GlobalRoom = r
-	err = m.addRoom(r)
+	m.GlobalRoom = NewRoomWithID(m, "global")
+	err := m.addRoom(m.GlobalRoom)
 	if err != nil {
 		return nil, err
 	}
@@ -37,9 +32,9 @@ func NewManager() (*Manager, error) {
 	return m, nil
 }
 
-func (m *Manager) Accept() fiber.Handler {
+func (m *Manager) Accept(cID string) fiber.Handler {
 	return websocket.New(func(conn *websocket.Conn) {
-		c, err := m.addClient(conn)
+		c, err := m.addClient(conn, cID)
 		if err != nil {
 			m.logger.Error("add client", err)
 			return
@@ -56,7 +51,7 @@ func (m *Manager) Accept() fiber.Handler {
 	})
 }
 
-func (m *Manager) getClient(cID string) (*client, error) {
+func (m *Manager) getClient(cID string) (*Client, error) {
 	c, ok := m.Clients.Get(cID)
 	if !ok {
 		return nil, fmt.Errorf("client with id %s not registered", cID)
@@ -64,7 +59,7 @@ func (m *Manager) getClient(cID string) (*client, error) {
 	return c, nil
 }
 
-func (m *Manager) getRoom(rID string) (*room, error) {
+func (m *Manager) getRoom(rID string) (*Room, error) {
 	r, ok := m.Rooms.Get(rID)
 	if !ok {
 		return nil, fmt.Errorf("room with id %s not registered", rID)
@@ -72,11 +67,8 @@ func (m *Manager) getRoom(rID string) (*room, error) {
 	return r, nil
 }
 
-func (m *Manager) addClient(coon *websocket.Conn) (*client, error) {
-	r, err := NewRoom(m)
-	if err != nil {
-		return nil, err
-	}
+func (m *Manager) addClient(coon *websocket.Conn, cID string) (*Client, error) {
+	r := NewRoomWithID(m, cID)
 
 	// Client should have that same ID as the default room he is in
 	c := NewClient(coon, r.ID, m)
@@ -88,7 +80,7 @@ func (m *Manager) addClient(coon *websocket.Conn) (*client, error) {
 		return c, err
 	}
 
-	if err = m.GlobalRoom.addClient(c.ID); err != nil {
+	if err := m.GlobalRoom.addClient(c.ID); err != nil {
 		return c, err
 	}
 
@@ -96,15 +88,30 @@ func (m *Manager) addClient(coon *websocket.Conn) (*client, error) {
 		"client registered",
 		"client_id", c.ID,
 		"room_id", r.ID,
-		"room_size", m.Rooms.Len(),
+		"room_number", m.Rooms.Len(),
 	)
 
 	return c, nil
 }
 
-func (m *Manager) removeClient(c *client) error {
-	c.Rooms.ForEach(func(rID string, r *room) bool {
-		_ = r.removeClient(c.ID)
+func (m *Manager) RemoveClient(cID string) error {
+	c, err := m.getClient(cID)
+	if err != nil {
+		return err
+	}
+
+	return c.Conn.WriteMessage(
+		websocket.CloseMessage,
+		websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""),
+	)
+}
+
+func (m *Manager) removeClient(c *Client) error {
+	c.Rooms.ForEach(func(rID string, r *Room) bool {
+		if err := r.removeClient(c.ID); err != nil {
+			r.logger.Error("failed to remove client from room", err, "client_id", c.ID)
+		}
+
 		return true
 	})
 
@@ -115,24 +122,28 @@ func (m *Manager) removeClient(c *client) error {
 	}
 
 	m.logger.Info(
-		"client removed",
+		"client disconnected",
 		"client_id", c.ID,
-		"room_size", m.Rooms.Len(),
+		"room_number", m.Rooms.Len(),
 	)
 	return nil
 }
 
-func (m *Manager) addRoom(r *room) error {
+func (m *Manager) addRoom(r *Room) error {
 	m.Rooms.Set(r.ID, r)
 	m.logger.Info(
 		"room registered",
 		"room_id", r.ID,
-		"room_size", m.Rooms.Len(),
+		"room_number", m.Rooms.Len(),
 	)
 	return nil
 }
 
 func (m *Manager) removeRoom(rID string) error {
+	if rID == m.GlobalRoom.ID {
+		return fmt.Errorf("can't remove global room")
+	}
+
 	r, err := m.getRoom(rID)
 	if err != nil {
 		return fmt.Errorf("removeRoom: %w", err)
@@ -142,7 +153,7 @@ func (m *Manager) removeRoom(rID string) error {
 	m.logger.Info(
 		"room removed",
 		"room_id", r.ID,
-		"room_size", m.Rooms.Len(),
+		"room_number", m.Rooms.Len(),
 	)
 
 	return nil
@@ -150,7 +161,7 @@ func (m *Manager) removeRoom(rID string) error {
 
 func (m *Manager) Shutdown() {
 	m.logger.Info("Shutting down manager")
-	m.Clients.ForEach(func(cID string, c *client) bool {
+	m.Clients.ForEach(func(cID string, c *Client) bool {
 		_ = m.removeClient(c)
 		return true
 	})

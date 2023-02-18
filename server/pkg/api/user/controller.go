@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"scrabble/config"
+	"scrabble/pkg/api/ws"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
@@ -94,6 +95,39 @@ func (ctrl *Controller) Login(c *fiber.Ctx) error {
 	return c.JSON(LoginResponse{
 		Token: token,
 	})
+}
+
+type LogoutRequest struct {
+	ID       string `json:"id,omitempty"`
+	Username string `json:"username,omitempty"`
+}
+type LogoutResponse struct {
+	Error string `json:"error,omitempty"`
+}
+
+func (ctrl *Controller) Logout(ws *ws.Manager) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		req := LogoutRequest{}
+		if err := c.BodyParser(&req); err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(LogoutResponse{
+				Error: err.Error(),
+			})
+		}
+
+		if err := ws.RemoveClient(req.ID); err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(LogoutResponse{
+				Error: err.Error(),
+			})
+		}
+
+		if err := ctrl.svc.Logout(req.ID); err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(LogoutResponse{
+				Error: err.Error(),
+			})
+		}
+
+		return c.SendStatus(fiber.StatusOK)
+	}
 }
 
 type RevalidateRequest struct {
@@ -194,41 +228,3 @@ func (ctrl *Controller) UploadAvatar(c *fiber.Ctx) error {
 		},
 	)
 }
-
-// type GetAvatarRequest struct {
-// 	Username string `json:"username,omitempty"`
-// }
-
-// type GetAvatarResponse struct {
-// 	AvatarURL string `json:"avatarUrl,omitempty"`
-// 	Error     string `json:"error,omitempty"`
-// }
-
-// func (ctrl *Controller) GetAvatar(c *fiber.Ctx) error {
-// 	var req GetAvatarRequest
-// 	err := c.BodyParser(&req)
-// 	if err != nil {
-// 		return fiber.ErrInternalServerError
-// 	}
-
-// 	url, err := ctrl.svc.GetAvatar(req.Username)
-// 	if err != nil {
-// 		var fiberErr *fiber.Error
-// 		if ok := errors.As(err, &fiberErr); ok {
-// 			return c.Status(fiberErr.Code).JSON(
-// 				GetAvatarResponse{
-// 					Error: fiberErr.Message,
-// 				},
-// 			)
-// 		}
-// 		return c.Status(fiber.StatusInternalServerError).JSON(
-// 			GetAvatarResponse{
-// 				Error: err.Error(),
-// 			},
-// 		)
-// 	}
-
-// 	return c.JSON(GetAvatarResponse{
-// 		AvatarURL: url,
-// 	})
-// }

@@ -1,6 +1,7 @@
 package api
 
 import (
+	"net/http"
 	"time"
 
 	"scrabble/config"
@@ -34,8 +35,6 @@ func (api *API) setupMiddleware() {
 }
 
 func (api *API) setupRoutes(cfg *config.Config) {
-	api.App.Get("/ws", api.WebSocketManager.Accept())
-
 	// Public routes
 	router := api.App.Group("/api")
 	router.Get("/", func(c *fiber.Ctx) error {
@@ -43,6 +42,7 @@ func (api *API) setupRoutes(cfg *config.Config) {
 	})
 	router.Post("/signup", api.UserCtrl.SignUp)
 	router.Post("/login", api.UserCtrl.Login)
+	router.Post("/logout", api.UserCtrl.Logout(api.WebSocketManager))
 
 	// Proctected routes
 	router.Use(
@@ -53,7 +53,15 @@ func (api *API) setupRoutes(cfg *config.Config) {
 			},
 		),
 	)
+	ws := api.App.Group("/ws")
+	ws.Get("/", func(c *fiber.Ctx) error {
+		ID := c.Query("id")
+		if ID == "" {
+			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "Missing id"})
+		}
+		return api.WebSocketManager.Accept(ID)(c)
+	})
+
 	router.Post("/avatar", api.UserCtrl.UploadAvatar)
-	router.Post("/revalidate", api.UserCtrl.Revalidate)
 	router.Get("/user/:id", api.UserCtrl.GetUser)
 }

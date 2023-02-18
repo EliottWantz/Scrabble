@@ -56,6 +56,25 @@ func (r *Repository) FindByUsername(username string) (*User, error) {
 	return u, nil
 }
 
+func (r *Repository) Has(ID string) bool {
+	u := &User{}
+	res := r.coll.FindOne(
+		context.TODO(),
+		bson.M{"_id": ID},
+	)
+	if err := res.Err(); err != nil {
+		return false
+	}
+
+	if err := res.Decode(u); err != nil {
+		return false
+	}
+
+	slog.Info("Find user", "user", u.Username)
+
+	return true
+}
+
 func (r *Repository) Insert(u *User) error {
 	_, err := r.coll.InsertOne(context.TODO(), u)
 	if err != nil {
