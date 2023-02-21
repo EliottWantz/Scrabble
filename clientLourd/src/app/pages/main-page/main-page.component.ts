@@ -15,11 +15,12 @@ import { LoginComponent } from "@app/components/login-component/login.component"
 export class MainPageComponent {
   readonly title: string = "Scrabble";
   isJoining: boolean = false;
+  public username: string;
 
   constructor(
     public dialog: MatDialog,
     public authentificationService: AuthentificationService
-  ) {}
+  ) {this.username = "";}
   openParameterDialog(mode: string): void {
     const gameMode: GameMode =
       mode === GameMode.Classic ? GameMode.Classic : GameMode.Log2990;

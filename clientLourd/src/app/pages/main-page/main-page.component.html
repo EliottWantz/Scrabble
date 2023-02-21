@@ -1,4 +1,5 @@
-<div id="main">
+<!--
+  <div id="main">
   <nav>
     <button
       *ngIf="!isConnected()"
@@ -21,11 +22,68 @@
 
     <a *ngIf="isConnected()" href="/profile" id="login-button">
       HELLO
-      <!-- <img src=""> -->
+      <img src="">
     </a>
   </nav>
   <app-chat-box-prototype *ngIf="isConnected()"></app-chat-box-prototype>
 </div>
+-->
+
+<div class="container">
+  <div class="row">
+    <div class="column">
+      <mat-card class="card">
+        <mat-card-header class="">
+          <mat-card-title>
+            Modifier le profil
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <img width="50%" src="https://st3.depositphotos.com/15648834/17930/v/600/depositphotos_179308454-stock-illustration-unknown-person-silhouette-glasses-profile.jpg">
+          <div class="">Edogaru</div>
+          <div class="">edogaru@mail.com.my</div>
+          <div class="form">
+            <mat-form-field appearance="fill">
+              <mat-label>Nom d'utilisateur</mat-label>
+              <input matInput placeholder="Entrez votre nom d'utilisateur" name="usename" [(ngModel)] ="username">
+            </mat-form-field>
+          </div>
+          
+          <div class="form">
+            <mat-form-field appearance="fill">
+              <mat-label class="labels">Email </mat-label>
+              <input matInput type="email" class="form-control" value="" placeholder="Email">
+            </mat-form-field>
+          </div>
+          <button mat-raised-button color="primary" type="button">Enregistrer</button>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  
+    <div class="column">
+      <mat-card class="card">
+        <mat-card-title>
+          Statistiques
+        </mat-card-title>
+        <mat-card-content>
+          2 victoires
+        </mat-card-content>
+      </mat-card>
+    </div>
+  
+    <div class="column">
+      <mat-card class="card">
+        <mat-card-title>
+          Activité de l'utilisateur
+        </mat-card-title>
+        <mat-card-content>
+          Connexion à 18h
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>
+
 <!--
     <div class="container justified-center">
     <div id="header">
