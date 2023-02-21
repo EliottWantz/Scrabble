@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/gofiber/fiber/v2"
 	"github.com/imagekit-developer/imagekit-go/api/uploader"
 	"golang.org/x/exp/slog"
 )
@@ -12,8 +13,7 @@ import (
 func (s *Service) UploadAvatar(ID, avatarUrl string) (string, error) {
 	user, err := s.repo.Find(ID)
 	if err != nil {
-		slog.Error("find user "+ID, err)
-		return "", err
+		return "", fiber.NewError(fiber.StatusNotFound, "user not found")
 	}
 
 	ctx, close := context.WithTimeout(context.Background(), 10*time.Second)
@@ -24,25 +24,16 @@ func (s *Service) UploadAvatar(ID, avatarUrl string) (string, error) {
 		UseUniqueFileName: &useUniqueFileName,
 	})
 	if err != nil {
-		return "", err
+		return "", fiber.NewError(fiber.StatusInternalServerError, "failed to upload avatar")
 	}
 
 	user.AvatarURL = res.Data.Url
 	err = s.repo.Update(user)
 	if err != nil {
-		return "", err
+		return "", fiber.NewError(fiber.StatusInternalServerError, "failed to update user")
 	}
 
 	slog.Info("uploaded avatar", "avatarUrl", res.Data.Url)
 
 	return res.Data.Url, nil
 }
-
-// func (s *Service) GetAvatar(username string) (string, error) {
-// 	user, err := s.repo.Find(username)
-// 	if err != nil {
-// 		return "", err
-// 	}
-
-// 	return user.AvatarURL, nil
-// }

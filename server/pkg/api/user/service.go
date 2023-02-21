@@ -38,12 +38,12 @@ func NewService(cfg *config.Config, repo *Repository) *Service {
 
 func (s *Service) SignUp(username, password, email string, authSvc *auth.Service) (*User, string, error) {
 	if _, err := s.repo.FindByUsername(username); err == nil {
-		return nil, "", ErrUserAlreadyExists
+		return nil, "", fiber.NewError(fiber.StatusUnprocessableEntity, "username already exists")
 	}
 
 	hashedPassword, err := auth.HashPassword(password)
 	if err != nil {
-		return nil, "", err
+		return nil, "", fiber.NewError(fiber.StatusInternalServerError, "failed to hash password")
 	}
 
 	u := &User{
@@ -54,33 +54,33 @@ func (s *Service) SignUp(username, password, email string, authSvc *auth.Service
 	}
 
 	if err := s.repo.Insert(u); err != nil {
-		return nil, "", err
+		return nil, "", fiber.NewError(fiber.StatusInternalServerError, "failed to insert user")
 	}
 
 	signed, err := authSvc.GenerateJWT(username)
 	if err != nil {
-		return nil, "", err
+		return nil, "", fiber.NewError(fiber.StatusInternalServerError, "failed to generate token")
 	}
 
 	return u, signed, nil
 }
 
-func (s *Service) Login(username, password string, authSvc *auth.Service) (string, error) {
+func (s *Service) Login(username, password string, authSvc *auth.Service) (*User, string, error) {
 	u, err := s.repo.FindByUsername(username)
 	if err != nil {
-		return "", ErrUserNotFound
+		return nil, "", fiber.NewError(fiber.StatusNotFound, "user not found")
 	}
 
 	if !auth.PasswordsMatch(password, u.HashedPassword) {
-		return "", ErrPasswordMismatch
+		return nil, "", fiber.NewError(fiber.StatusUnauthorized, "password mismatch")
 	}
 
 	signed, err := authSvc.GenerateJWT(username)
 	if err != nil {
-		return "", err
+		return nil, "", fiber.NewError(fiber.StatusInternalServerError, "failed to generate token")
 	}
 
-	return signed, nil
+	return u, signed, nil
 }
 
 func (s *Service) Logout(ID string) error {
@@ -89,7 +89,7 @@ func (s *Service) Logout(ID string) error {
 	}
 
 	if err := s.repo.Delete(ID); err != nil {
-		return err
+		return fiber.NewError(fiber.StatusInternalServerError, "failed to delete user")
 	}
 
 	slog.Info("Logout user", "id", ID)
@@ -100,7 +100,7 @@ func (s *Service) Logout(ID string) error {
 func (s *Service) GetUser(ID string) (*User, error) {
 	u, err := s.repo.Find(ID)
 	if err != nil {
-		return nil, err
+		return nil, fiber.NewError(fiber.StatusNotFound, "user not found")
 	}
 
 	return u, nil

@@ -1,15 +1,12 @@
 package user
 
 import (
-	"errors"
-
 	"scrabble/config"
 	"scrabble/pkg/api/auth"
 	"scrabble/pkg/api/ws"
 
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/mongo"
-	"golang.org/x/exp/slog"
 )
 
 type User struct {
@@ -49,30 +46,22 @@ type SignupResponse struct {
 func (ctrl *Controller) SignUp(c *fiber.Ctx) error {
 	req := SignupRequest{}
 	if err := c.BodyParser(&req); err != nil {
-		return fiber.ErrBadRequest
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
 
 	if req.Username == "" {
-		return fiber.NewError(fiber.StatusUnprocessableEntity, "username can't be blank")
+		return fiber.NewError(fiber.StatusBadRequest, "username can't be blank")
 	}
 	if req.Password == "" {
-		return fiber.NewError(fiber.StatusUnprocessableEntity, "password can't be blank")
+		return fiber.NewError(fiber.StatusBadRequest, "password can't be blank")
 	}
 	if req.Email == "" {
-		return fiber.NewError(fiber.StatusUnprocessableEntity, "email can't be blank")
+		return fiber.NewError(fiber.StatusBadRequest, "email can't be blank")
 	}
 
 	user, token, err := ctrl.svc.SignUp(req.Username, req.Password, req.Email, ctrl.authSvc)
 	if err != nil {
-		slog.Error("sign up user", err)
-		if errors.Is(err, ErrUserAlreadyExists) {
-			return fiber.ErrConflict
-		}
-		var fiberErr *fiber.Error
-		if ok := errors.As(err, &fiberErr); ok {
-			return err
-		}
-		return fiber.ErrInternalServerError
+		return err
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(
@@ -89,31 +78,24 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
+	User  *User  `json:"user,omitempty"`
 	Token string `json:"token,omitempty"`
-	Error string `json:"error,omitempty"`
 }
 
 func (ctrl *Controller) Login(c *fiber.Ctx) error {
 	var req LoginRequest
 	err := c.BodyParser(&req)
 	if err != nil {
-		return fiber.ErrInternalServerError
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
 
-	token, err := ctrl.svc.Login(req.Username, req.Password, ctrl.authSvc)
+	u, token, err := ctrl.svc.Login(req.Username, req.Password, ctrl.authSvc)
 	if err != nil {
-		if errors.Is(err, ErrUserNotFound) {
-			return c.Status(fiber.StatusConflict).JSON(
-				LoginResponse{Error: "user not found with given username"},
-			)
-		}
-		if errors.Is(err, ErrPasswordMismatch) {
-			return fiber.ErrUnauthorized
-		}
-		return fiber.ErrInternalServerError
+		return err
 	}
 
 	return c.JSON(LoginResponse{
+		User:  u,
 		Token: token,
 	})
 }
@@ -122,29 +104,20 @@ type LogoutRequest struct {
 	ID       string `json:"id,omitempty"`
 	Username string `json:"username,omitempty"`
 }
-type LogoutResponse struct {
-	Error string `json:"error,omitempty"`
-}
 
 func (ctrl *Controller) Logout(ws *ws.Manager) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		req := LogoutRequest{}
 		if err := c.BodyParser(&req); err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(LogoutResponse{
-				Error: err.Error(),
-			})
+			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
 		if err := ws.RemoveClient(req.ID); err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(LogoutResponse{
-				Error: err.Error(),
-			})
+			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
 		if err := ctrl.svc.Logout(req.ID); err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(LogoutResponse{
-				Error: err.Error(),
-			})
+			return err
 		}
 
 		return c.SendStatus(fiber.StatusOK)
@@ -152,20 +125,18 @@ func (ctrl *Controller) Logout(ws *ws.Manager) fiber.Handler {
 }
 
 type GetUserResponse struct {
-	User  *User  `json:"user,omitempty"`
-	Error string `json:"error,omitempty"`
+	User *User `json:"user,omitempty"`
 }
 
 func (ctrl *Controller) GetUser(c *fiber.Ctx) error {
 	ID := c.Params("id")
 	if ID == "" {
-		return fiber.ErrBadRequest
+		return fiber.NewError(fiber.StatusBadRequest, "no id given")
 	}
 
 	user, err := ctrl.svc.GetUser(ID)
 	if err != nil {
-		slog.Error("Error getting user", err)
-		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+		return err
 	}
 
 	return c.JSON(GetUserResponse{
@@ -180,31 +151,25 @@ type UploadAvatarRequest struct {
 
 type UploadAvatarResponse struct {
 	AvatarURL string `json:"avatarUrl,omitempty"`
-	Error     string `json:"error,omitempty"`
 }
 
 func (ctrl *Controller) UploadAvatar(c *fiber.Ctx) error {
 	var req UploadAvatarRequest
 	err := c.BodyParser(&req)
 	if err != nil {
-		return fiber.ErrInternalServerError
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+
+	if req.ID == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "no id given")
+	}
+	if req.AvatarUrl == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "no avatar url given")
 	}
 
 	url, err := ctrl.svc.UploadAvatar(req.ID, req.AvatarUrl)
 	if err != nil {
-		var fiberErr *fiber.Error
-		if ok := errors.As(err, &fiberErr); ok {
-			return c.Status(fiberErr.Code).JSON(
-				UploadAvatarResponse{
-					Error: fiberErr.Message,
-				},
-			)
-		}
-		return c.Status(fiber.StatusInternalServerError).JSON(
-			UploadAvatarResponse{
-				Error: err.Error(),
-			},
-		)
+		return err
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(
