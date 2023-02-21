@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"scrabble/config"
-	"scrabble/pkg/api/user/auth"
+	"scrabble/pkg/api/auth"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
@@ -19,9 +19,8 @@ var (
 )
 
 type Service struct {
-	repo    *Repository
-	ik      *imagekit.ImageKit
-	JWTAuth *auth.JWTAuth
+	repo *Repository
+	ik   *imagekit.ImageKit
 }
 
 func NewService(cfg *config.Config, repo *Repository) *Service {
@@ -32,36 +31,25 @@ func NewService(cfg *config.Config, repo *Repository) *Service {
 	})
 
 	return &Service{
-		repo:    repo,
-		ik:      ik,
-		JWTAuth: auth.NewJWTAuth(cfg.JWT_SIGN_KEY),
+		repo: repo,
+		ik:   ik,
 	}
 }
 
-func (s *Service) SignUp(req SignupRequest) (*User, string, error) {
-	if req.Username == "" {
-		return nil, "", fiber.NewError(fiber.StatusUnprocessableEntity, "username can't be blank")
-	}
-	if req.Password == "" {
-		return nil, "", fiber.NewError(fiber.StatusUnprocessableEntity, "password can't be blank")
-	}
-	if req.Email == "" {
-		return nil, "", fiber.NewError(fiber.StatusUnprocessableEntity, "email can't be blank")
-	}
-
-	if _, err := s.repo.FindByUsername(req.Username); err == nil {
+func (s *Service) SignUp(username, password, email string, authSvc *auth.Service) (*User, string, error) {
+	if _, err := s.repo.FindByUsername(username); err == nil {
 		return nil, "", ErrUserAlreadyExists
 	}
 
-	hashedPassword, err := auth.HashPassword(req.Password)
+	hashedPassword, err := auth.HashPassword(password)
 	if err != nil {
 		return nil, "", err
 	}
 
 	u := &User{
 		Id:             uuid.NewString(),
-		Username:       req.Username,
-		Email:          req.Email,
+		Username:       username,
+		Email:          email,
 		HashedPassword: hashedPassword,
 	}
 
@@ -69,7 +57,7 @@ func (s *Service) SignUp(req SignupRequest) (*User, string, error) {
 		return nil, "", err
 	}
 
-	signed, err := s.JWTAuth.GenerateJWT(req.Username)
+	signed, err := authSvc.GenerateJWT(username)
 	if err != nil {
 		return nil, "", err
 	}
@@ -77,7 +65,7 @@ func (s *Service) SignUp(req SignupRequest) (*User, string, error) {
 	return u, signed, nil
 }
 
-func (s *Service) Login(username, password string) (string, error) {
+func (s *Service) Login(username, password string, authSvc *auth.Service) (string, error) {
 	u, err := s.repo.FindByUsername(username)
 	if err != nil {
 		return "", ErrUserNotFound
@@ -87,7 +75,7 @@ func (s *Service) Login(username, password string) (string, error) {
 		return "", ErrPasswordMismatch
 	}
 
-	signed, err := s.JWTAuth.GenerateJWT(username)
+	signed, err := authSvc.GenerateJWT(username)
 	if err != nil {
 		return "", err
 	}
@@ -107,10 +95,6 @@ func (s *Service) Logout(ID string) error {
 	slog.Info("Logout user", "id", ID)
 
 	return nil
-}
-
-func (s *Service) Revalidate(tokenStr string) (string, error) {
-	return s.JWTAuth.RevalidateJWT(tokenStr)
 }
 
 func (s *Service) GetUser(ID string) (*User, error) {

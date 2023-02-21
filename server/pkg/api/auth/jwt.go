@@ -6,12 +6,12 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-type JWTAuth struct {
+type Service struct {
 	secret []byte
 }
 
-func NewJWTAuth(secret string) *JWTAuth {
-	return &JWTAuth{
+func NewService(secret string) *Service {
+	return &Service{
 		secret: []byte(secret),
 	}
 }
@@ -30,12 +30,12 @@ func NewClaims(username string) *JWTClaims {
 	}
 }
 
-func (a *JWTAuth) GenerateJWT(username string) (string, error) {
+func (a *Service) GenerateJWT(username string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, NewClaims(username))
 	return token.SignedString(a.secret)
 }
 
-func (a *JWTAuth) RevalidateJWT(tokenStr string) (string, error) {
+func (a *Service) RevalidateJWT(tokenStr string) (string, error) {
 	claims := &JWTClaims{}
 	token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
 		return a.secret, nil

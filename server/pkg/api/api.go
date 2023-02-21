@@ -46,7 +46,6 @@ func New(cfg *config.Config) (*API, error) {
 
 	api.WebSocketManager = ws
 
-	api.setupMiddleware()
 	api.setupRoutes(cfg)
 
 	return api, nil

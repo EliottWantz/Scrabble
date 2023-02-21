@@ -14,7 +14,7 @@ import (
 	jwtware "github.com/gofiber/jwt/v3"
 )
 
-func (api *API) setupMiddleware() {
+func (api *API) setupRoutes(cfg *config.Config) {
 	api.App.Use(
 		cors.New(),
 		limiter.New(
@@ -32,20 +32,19 @@ func (api *API) setupMiddleware() {
 	)
 
 	api.App.Get("/metrics", monitor.New(monitor.Config{Title: "Scrabble Server Metrics"}))
-}
 
-func (api *API) setupRoutes(cfg *config.Config) {
+	r := api.App.Group("/api")
+
 	// Public routes
-	router := api.App.Group("/api")
-	router.Get("/", func(c *fiber.Ctx) error {
+	r.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("Hello api")
 	})
-	router.Post("/signup", api.UserCtrl.SignUp)
-	router.Post("/login", api.UserCtrl.Login)
-	router.Post("/logout", api.UserCtrl.Logout(api.WebSocketManager))
+	r.Post("/signup", api.UserCtrl.SignUp)
+	r.Post("/login", api.UserCtrl.Login)
+	r.Post("/logout", api.UserCtrl.Logout(api.WebSocketManager))
 
 	// Proctected routes
-	router.Use(
+	r.Use(
 		jwtware.New(
 			jwtware.Config{
 				SigningKey: []byte(cfg.JWT_SIGN_KEY),
@@ -62,6 +61,6 @@ func (api *API) setupRoutes(cfg *config.Config) {
 		return api.WebSocketManager.Accept(ID)(c)
 	})
 
-	router.Post("/avatar", api.UserCtrl.UploadAvatar)
-	router.Get("/user/:id", api.UserCtrl.GetUser)
+	r.Post("/avatar", api.UserCtrl.UploadAvatar)
+	r.Get("/user/:id", api.UserCtrl.GetUser)
 }
