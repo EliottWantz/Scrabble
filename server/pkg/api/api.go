@@ -39,7 +39,7 @@ func New(cfg *config.Config) (*API, error) {
 		DB:       db,
 	}
 
-	ws, err := ws.NewManager()
+	ws, err := ws.NewManager(db)
 	if err != nil {
 		return nil, err
 	}

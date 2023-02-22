@@ -101,8 +101,7 @@ func (ctrl *Controller) Login(c *fiber.Ctx) error {
 }
 
 type LogoutRequest struct {
-	ID       string `json:"id,omitempty"`
-	Username string `json:"username,omitempty"`
+	ID string `json:"id,omitempty"`
 }
 
 func (ctrl *Controller) Logout(ws *ws.Manager) fiber.Handler {
