@@ -61,7 +61,7 @@ func (api *API) setupRoutes(cfg *config.Config) {
 		return api.WebSocketManager.Accept(ID)(c)
 	})
 	ws.Post("/room/join", api.WebSocketManager.JoinRoom)
-	ws.Get("/room/messages/:id", api.WebSocketManager.GetMessages)
+	ws.Get("/room/messages/:roomId", api.WebSocketManager.GetMessages)
 	r.Post("/avatar", api.UserCtrl.UploadAvatar)
 	r.Get("/user/:id", api.UserCtrl.GetUser)
 }

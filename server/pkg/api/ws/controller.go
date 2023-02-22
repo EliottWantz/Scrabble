@@ -44,7 +44,10 @@ type GetMessagesResponse struct {
 }
 
 func (m *Manager) GetMessages(c *fiber.Ctx) error {
-	roomID := c.Params("roomId", m.GlobalRoom.ID)
+	roomID := c.Params("roomId")
+	if roomID == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "Room ID is required")
+	}
 	skip, err := strconv.Atoi(c.Query("skip", "0"))
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, "Invalid bucket skip value")

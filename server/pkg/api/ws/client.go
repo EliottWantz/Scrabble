@@ -79,7 +79,7 @@ func (c *Client) read() {
 
 func (c *Client) receive() {
 	for p := range c.receiveCh {
-		c.logger.Info("received packet", "packet", p)
+		c.logger.Info("received packet", "event", p.Event)
 		if err := c.handlePacket(p); err != nil {
 			c.logger.Error("handlePacket", err)
 		}
@@ -149,6 +149,7 @@ func (c *Client) broadcast(p *Packet) error {
 	if err := json.Unmarshal(p.Payload, &payload); err != nil {
 		return fmt.Errorf("failed to unmarshal BroadcastPayload: %w", err)
 	}
+	slog.Info("broadcast", "payload", payload)
 
 	r, err := c.Manager.getRoom(payload.RoomID)
 	if err != nil {
@@ -162,13 +163,14 @@ func (c *Client) broadcast(p *Packet) error {
 	payload.Timestamp = time.Now().UTC()
 
 	if err := r.Manager.repo.InsertOne(r.ID, &payload); err != nil {
-		return fmt.Errorf("failed to insert message in db: %w", err)
+		// return fmt.Errorf("failed to insert message in db: %w", err)
+		slog.Error("failed to insert message in db", err)
 	}
 
 	if err := p.setPayload(payload); err != nil {
 		return err
 	}
-	r.broadcast(p, c.ID)
+	r.broadcast(p)
 
 	return nil
 }

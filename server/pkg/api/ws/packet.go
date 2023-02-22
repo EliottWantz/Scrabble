@@ -26,7 +26,7 @@ func NewPacket(event string, payload any) (*Packet, error) {
 func (p *Packet) setPayload(payload any) error {
 	raw, err := json.Marshal(payload)
 	if err != nil {
-		return fmt.Errorf("can't create broadcast payload: %w", err)
+		return fmt.Errorf("can't create payload: %w", err)
 	}
 	p.Payload = raw
 
