@@ -73,7 +73,7 @@ func (r *Room) removeClient(cID string) error {
 	r.Clients.Del(cID)
 	r.logger.Info("client removed from room", "client", c.ID)
 
-	if r.Clients.Len() == 0 {
+	if r.Clients.Len() == 0 && r.ID != r.Manager.GlobalRoom.ID {
 		if err := r.Manager.removeRoom(r.ID); err != nil {
 			return err
 		}

@@ -64,12 +64,6 @@ func (c *Client) read() {
 				c.logger.Info("json syntax error in packet", syntaxError)
 				continue
 			}
-			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure, websocket.CloseNoStatusReceived) {
-				c.logger.Error("client read packet", err)
-				return
-			}
-
-			c.logger.Info("client disconnected")
 			return
 		}
 

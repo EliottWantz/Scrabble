@@ -44,7 +44,7 @@ type GetMessagesResponse struct {
 }
 
 func (m *Manager) GetMessages(c *fiber.Ctx) error {
-	roomID := c.Params("roomId")
+	roomID := c.Params("id")
 	if roomID == "" {
 		return fiber.NewError(fiber.StatusBadRequest, "Room ID is required")
 	}
@@ -70,4 +70,17 @@ func (m *Manager) GetMessages(c *fiber.Ctx) error {
 		HasMore:  hasMore,
 		Messages: msgs,
 	})
+}
+
+type LogoutRequest struct {
+	ID string `json:"id,omitempty"`
+}
+
+func (m *Manager) Logout(c *fiber.Ctx) error {
+	req := LogoutRequest{}
+	if err := c.BodyParser(&req); err != nil {
+		return err
+	}
+
+	return m.Disconnect(req.ID)
 }

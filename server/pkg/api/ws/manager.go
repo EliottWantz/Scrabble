@@ -60,7 +60,6 @@ func (m *Manager) sendLatestMessages(rID string, c *Client) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println("sending latest messages", msgs)
 
 	for _, msg := range msgs {
 		p := &Packet{Event: ClientEventBroadcast}
@@ -117,7 +116,7 @@ func (m *Manager) addClient(coon *websocket.Conn, cID string) (*Client, error) {
 	return c, nil
 }
 
-func (m *Manager) RemoveClient(cID string) error {
+func (m *Manager) Disconnect(cID string) error {
 	c, err := m.getClient(cID)
 	if err != nil {
 		return err

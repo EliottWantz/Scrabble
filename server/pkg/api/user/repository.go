@@ -5,7 +5,6 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
-	"golang.org/x/exp/slog"
 )
 
 type Repository struct {
@@ -32,8 +31,6 @@ func (r *Repository) Find(ID string) (*User, error) {
 		return nil, err
 	}
 
-	slog.Info("Find user", "user", u.Username)
-
 	return u, nil
 }
 
@@ -50,8 +47,6 @@ func (r *Repository) FindByUsername(username string) (*User, error) {
 	if err := res.Decode(u); err != nil {
 		return nil, err
 	}
-
-	slog.Info("Find user", "user", u.Username)
 
 	return u, nil
 }
@@ -70,8 +65,6 @@ func (r *Repository) Has(ID string) bool {
 		return false
 	}
 
-	slog.Info("Find user", "user", u.Username)
-
 	return true
 }
 
@@ -80,8 +73,6 @@ func (r *Repository) Insert(u *User) error {
 	if err != nil {
 		return err
 	}
-
-	slog.Info("Inserted user", "user", u.Username)
 
 	return nil
 }
@@ -96,18 +87,14 @@ func (r *Repository) Update(u *User) error {
 		return err
 	}
 
-	slog.Info("Updated user", "user", u.Username)
-
 	return nil
 }
 
-func (r *Repository) Delete(username string) error {
-	_, err := r.coll.DeleteOne(context.TODO(), bson.M{"username": username})
+func (r *Repository) Delete(ID string) error {
+	_, err := r.coll.DeleteOne(context.TODO(), bson.M{"_id": ID})
 	if err != nil {
 		return err
 	}
-
-	slog.Info("Deleted user", "user", username)
 
 	return nil
 }
