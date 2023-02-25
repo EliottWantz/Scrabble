@@ -147,30 +147,26 @@ func (ctrl *Controller) GetUser(c *fiber.Ctx) error {
 	})
 }
 
-type UploadAvatarRequest struct {
-	ID        string `json:"id,omitempty"`
-	AvatarUrl string `json:"avatarUrl,omitempty"`
-}
-
 type UploadAvatarResponse struct {
 	AvatarURL string `json:"avatarUrl,omitempty"`
 }
 
 func (ctrl *Controller) UploadAvatar(c *fiber.Ctx) error {
-	var req UploadAvatarRequest
-	err := c.BodyParser(&req)
+	ID := c.Params("id")
+	if ID == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "no user id given")
+	}
+
+	fileHeader, err := c.FormFile("avatar")
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "no avatar given")
+	}
+	file, err := fileHeader.Open()
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
 
-	if req.ID == "" {
-		return fiber.NewError(fiber.StatusBadRequest, "no id given")
-	}
-	if req.AvatarUrl == "" {
-		return fiber.NewError(fiber.StatusBadRequest, "no avatar url given")
-	}
-
-	url, err := ctrl.svc.UploadAvatar(req.ID, req.AvatarUrl)
+	url, err := ctrl.svc.UploadAvatar(ID, file)
 	if err != nil {
 		return err
 	}

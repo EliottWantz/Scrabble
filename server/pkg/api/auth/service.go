@@ -27,8 +27,8 @@ func NewClaims(userID string) *JWTClaims {
 	return &JWTClaims{
 		UserID: userID,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Second * 20)),
-			// ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24 * 30)),
+			// ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Second * 20)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24 * 30)),
 		},
 	}
 }
@@ -55,8 +55,8 @@ func (s *Service) VerifyJWT(tokenStr string) (*JWTClaims, error) {
 }
 
 func (s *Service) RefreshJWT(tokenStr string, claims *JWTClaims) (string, error) {
-	claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(time.Second * 20))
-	// claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(time.Hour * 24 * 30))
+	// claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(time.Second * 20))
+	claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(time.Hour * 24 * 30))
 	token := jwt.NewWithClaims(s.signingMethod, claims)
 	return token.SignedString(s.secret)
 }

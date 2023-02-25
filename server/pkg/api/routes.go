@@ -66,7 +66,7 @@ func (api *API) setupRoutes(cfg *config.Config) {
 			return c.Next()
 		},
 	)
-	r.Post("/avatar", api.UserCtrl.UploadAvatar)
+	r.Post("/avatar/:id", api.UserCtrl.UploadAvatar)
 	r.Get("/user/:id", api.UserCtrl.GetUser)
 
 	r.Post("/chat/room/join", api.WebSocketManager.JoinRoom)
