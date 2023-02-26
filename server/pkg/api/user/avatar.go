@@ -31,9 +31,11 @@ func (s *Service) UploadAvatar(ID string, avatar io.ReadSeeker) (*Avatar, error)
 		ContentType: "image/png",
 	}
 
-	_, err = s.fileSvc.Delete(ctx, user.Avatar.FileID)
-	if err != nil {
-		return nil, fiber.NewError(fiber.StatusInternalServerError, "failed to delete previous avatar")
+	if user.Avatar.FileID != "" {
+		_, err = s.fileSvc.Delete(ctx, user.Avatar.FileID)
+		if err != nil {
+			return nil, fiber.NewError(fiber.StatusInternalServerError, "failed to delete previous avatar")
+		}
 	}
 
 	fID, err := s.uploadSvc.File(ctx, params)
