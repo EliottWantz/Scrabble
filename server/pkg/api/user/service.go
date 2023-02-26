@@ -8,7 +8,9 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
-	"github.com/imagekit-developer/imagekit-go"
+	"github.com/uploadcare/uploadcare-go/file"
+	"github.com/uploadcare/uploadcare-go/ucare"
+	"github.com/uploadcare/uploadcare-go/upload"
 	"golang.org/x/exp/slog"
 )
 
@@ -19,21 +21,36 @@ var (
 )
 
 type Service struct {
-	repo *Repository
-	ik   *imagekit.ImageKit
+	repo         *Repository
+	uploadClient ucare.Client
+	uploadSvc    upload.Service
+	fileSvc      file.Service
+	uploadURL    string
 }
 
-func NewService(cfg *config.Config, repo *Repository) *Service {
-	ik := imagekit.NewFromParams(imagekit.NewParams{
-		PrivateKey:  cfg.IMAGEKIT_PRIVATE_KEY,
-		PublicKey:   cfg.IMAGEKIT_PUBLIC_KEY,
-		UrlEndpoint: cfg.IMAGEKIT_ENDPOINT_URL,
-	})
+func NewService(cfg *config.Config, repo *Repository) (*Service, error) {
+	creds := ucare.APICreds{
+		SecretKey: cfg.UPLOAD_CARE_SECRET_KEY,
+		PublicKey: cfg.UPLOAD_CARE_PUBLIC_KEY,
+	}
+
+	conf := &ucare.Config{
+		SignBasedAuthentication: true,
+		APIVersion:              ucare.APIv06,
+	}
+
+	client, err := ucare.NewClient(creds, conf)
+	if err != nil {
+		return nil, err
+	}
 
 	return &Service{
-		repo: repo,
-		ik:   ik,
-	}
+		repo:         repo,
+		uploadClient: client,
+		uploadSvc:    upload.NewService(client),
+		fileSvc:      file.NewService(client),
+		uploadURL:    cfg.UPLOAD_CARE_UPLOAD_URL,
+	}, nil
 }
 
 func (s *Service) SignUp(username, password, email string) (*User, error) {

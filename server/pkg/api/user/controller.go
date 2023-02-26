@@ -14,11 +14,16 @@ type Controller struct {
 	authSvc *auth.Service
 }
 
-func NewController(cfg *config.Config, db *mongo.Database) *Controller {
-	return &Controller{
-		svc:     NewService(cfg, NewRepository(db)),
-		authSvc: auth.NewService(cfg.JWT_SIGN_KEY),
+func NewController(cfg *config.Config, db *mongo.Database) (*Controller, error) {
+	svc, err := NewService(cfg, NewRepository(db))
+	if err != nil {
+		return nil, err
 	}
+
+	return &Controller{
+		svc:     svc,
+		authSvc: auth.NewService(cfg.JWT_SIGN_KEY),
+	}, nil
 }
 
 type SignupRequest struct {
@@ -148,7 +153,7 @@ func (ctrl *Controller) GetUser(c *fiber.Ctx) error {
 }
 
 type UploadAvatarResponse struct {
-	AvatarURL string `json:"avatarUrl,omitempty"`
+	*Avatar
 }
 
 func (ctrl *Controller) UploadAvatar(c *fiber.Ctx) error {
@@ -166,14 +171,14 @@ func (ctrl *Controller) UploadAvatar(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
 
-	url, err := ctrl.svc.UploadAvatar(ID, file)
+	avatar, err := ctrl.svc.UploadAvatar(ID, file)
 	if err != nil {
 		return err
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(
 		UploadAvatarResponse{
-			AvatarURL: url,
+			avatar,
 		},
 	)
 }
