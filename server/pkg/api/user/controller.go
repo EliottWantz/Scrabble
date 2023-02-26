@@ -177,3 +177,17 @@ func (ctrl *Controller) UploadAvatar(c *fiber.Ctx) error {
 		},
 	)
 }
+
+func (ctrl *Controller) DeleteAvatar(c *fiber.Ctx) error {
+	ID := c.Params("id")
+	if ID == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "no user id given")
+	}
+
+	err := ctrl.svc.DeleteAvatar(ID)
+	if err != nil {
+		return err
+	}
+
+	return c.SendStatus(fiber.StatusNoContent)
+}

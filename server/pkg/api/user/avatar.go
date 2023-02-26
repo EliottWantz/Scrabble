@@ -25,12 +25,12 @@ func (s *Service) UploadAvatar(ID string, avatar io.Reader) (string, error) {
 	ctx, close := context.WithTimeout(context.Background(), 10*time.Second)
 	defer close()
 
-	if user.Avatar.FileID != "" {
-		_, err = s.ik.Media.DeleteFile(ctx, user.Avatar.FileID)
-		if err != nil {
-			return "", fiber.NewError(fiber.StatusInternalServerError, "failed to delete previous avatar")
-		}
-	}
+	// if user.Avatar.FileID != "" {
+	// 	_, err = s.ik.Media.DeleteFile(ctx, user.Avatar.FileID)
+	// 	if err != nil {
+	// 		return "", fiber.NewError(fiber.StatusInternalServerError, "failed to delete previous avatar")
+	// 	}
+	// }
 
 	useUniqueFileName := false
 	res, err := s.ik.Uploader.Upload(ctx, avatar, uploader.UploadParam{
@@ -47,7 +47,28 @@ func (s *Service) UploadAvatar(ID string, avatar io.Reader) (string, error) {
 		return "", fiber.NewError(fiber.StatusInternalServerError, "failed to update user")
 	}
 
+	slog.Info("res info", "res", res)
+
 	slog.Info("uploaded avatar", "URL", res.Data.Url, "FileID", res.Data.FileId)
 
 	return res.Data.Url, nil
+}
+
+func (s *Service) DeleteAvatar(ID string) error {
+	user, err := s.repo.Find(ID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusNotFound, "user not found")
+	}
+
+	ctx, close := context.WithTimeout(context.Background(), 10*time.Second)
+	defer close()
+
+	res, err := s.ik.Media.DeleteFile(ctx, user.Avatar.FileID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, "failed to delete previous avatar")
+	}
+
+	slog.Info("res info", "res", res)
+
+	return nil
 }
