@@ -6,6 +6,7 @@ import 'package:client_leger/lang/tanslation_service.dart';
 import 'package:client_leger/routes/app_pages.dart';
 import 'package:client_leger/routes/app_routes.dart';
 import 'package:client_leger/services/auth_service.dart';
+import 'package:client_leger/services/avatar_service.dart';
 import 'package:client_leger/services/settings_service.dart';
 import 'package:client_leger/services/storage_service.dart';
 import 'package:client_leger/services/websocket_service.dart';
@@ -37,7 +38,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeConfig.lightTheme,
       defaultTransition: Transition.fade,
       debugShowCheckedModeBanner: false,
-      initialRoute: Routes.AUTH,
+      initialRoute: Routes.AVATAR_SELECTION,
       getPages: AppPages.routes,
       locale: TranslationService.locale,
       fallbackLocale: TranslationService.fallbackLocale,
@@ -53,4 +54,5 @@ Future<void> initGlobalServices() async {
   Get.put(ApiRepository(apiProvider: Get.find()), permanent: true);
   Get.put(SettingsService(storageService: Get.find()));
   Get.put(AuthService(storageService: Get.find(), apiRepository: Get.find(), websocketService: Get.find()));
+  Get.put(AvatarService());
 }

@@ -1,4 +1,5 @@
 import 'package:client_leger/bindings/auth_binding.dart';
+import 'package:client_leger/bindings/avatar_selection_binding.dart';
 import 'package:client_leger/middlewares/auth_middleware.dart';
 import 'package:client_leger/screens/auth/auth_screen.dart';
 import 'package:client_leger/screens/avatar_selection_screen.dart';
@@ -26,6 +27,6 @@ class AppPages {
         binding: ChatBoxBinding(),
         // middlewares: [AuthGuard()]),
     ),
-    GetPage(name: Routes.AVATAR_SELECTION, page: () => AvatarSelectionScreen()),
+    GetPage(name: Routes.AVATAR_SELECTION, page: () => AvatarSelectionScreen(),binding: AvatarSelectionBinding()),
   ];
 }

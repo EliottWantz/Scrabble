@@ -188,7 +188,7 @@ class AppSideBar extends StatelessWidget {
             padding: EdgeInsets.all(16.0),
             child: CircleAvatar(
               radius: 40,
-              child: Image.asset('assets/images/avatar.png'),
+              child: Image.asset('assets/images/avatar(7).png'),
             ),
           ),
         ],
