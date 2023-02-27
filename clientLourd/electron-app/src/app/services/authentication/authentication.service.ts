@@ -6,7 +6,7 @@ import { CommunicationService } from "@app/services/communication/communication.
 import { StorageService } from "../storage/storage.service";
 import { environment } from "src/environments/environment";
 
-//TODO: Logout, Web-socket service https://www.bezkoder.com/angular-14-jwt-auth/#Login_Component
+//TODO: Logout, Web-socket service, login component, register component https://www.bezkoder.com/angular-14-jwt-auth/#Login_Component
 
 @Injectable({
     providedIn: 'root',
