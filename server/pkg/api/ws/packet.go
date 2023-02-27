@@ -45,6 +45,7 @@ type ChatMessage struct {
 	RoomID    string    `json:"roomId,omitempty" bson:"roomId"`
 	Message   string    `json:"message,omitempty" bson:"message"`
 	From      string    `json:"from,omitempty" bson:"from"`
+	FromID    string    `json:"fromId,omitempty" bson:"fromId"`
 	Timestamp time.Time `json:"timestamp,omitempty" bson:"timestamp"`
 }
 
@@ -53,8 +54,3 @@ type JoinedRoomPayload struct {
 	RoomID string             `json:"roomId,omitempty"`
 	Users  []*user.PublicUser `json:"users,omitempty"`
 }
-
-// type UsersInRoomPayload struct {
-// 	RoomID string             `json:"roomId,omitempty"`
-// 	Users  []*user.PublicUser `json:"users,omitempty"`
-// }
