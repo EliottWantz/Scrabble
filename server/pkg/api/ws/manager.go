@@ -6,22 +6,24 @@ import (
 	"github.com/alphadose/haxmap"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
+	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/exp/slog"
 )
 
 type Manager struct {
-	Clients          *haxmap.Map[string, *Client]
-	Rooms            *haxmap.Map[string, *Room]
-	GlobalRoom       *Room
-	globalRoomPacket *Packet
-	logger           *slog.Logger
+	Clients    *haxmap.Map[string, *Client]
+	Rooms      *haxmap.Map[string, *Room]
+	GlobalRoom *Room
+	logger     *slog.Logger
+	repo       *Repository
 }
 
-func NewManager() (*Manager, error) {
+func NewManager(db *mongo.Database) (*Manager, error) {
 	m := &Manager{
 		Clients: haxmap.New[string, *Client](),
 		Rooms:   haxmap.New[string, *Room](),
 		logger:  slog.Default(),
+		repo:    NewRepository(db),
 	}
 
 	m.GlobalRoom = NewRoomWithID(m, "global")
@@ -30,22 +32,10 @@ func NewManager() (*Manager, error) {
 		return nil, err
 	}
 
-	p, err := NewPacket(
-		ServerEventJoinedGlobalRoom,
-		&JoinedGlobalRoomPayload{
-			RoomID: m.GlobalRoom.ID,
-		},
-	)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create global room packet: %v", err)
-	}
-
-	m.globalRoomPacket = p
-
 	return m, nil
 }
 
-func (m *Manager) Accept(cID string, deleteFn func(string) error) fiber.Handler {
+func (m *Manager) Accept(cID string) fiber.Handler {
 	return websocket.New(func(conn *websocket.Conn) {
 		c, err := m.addClient(conn, cID)
 		if err != nil {
@@ -57,15 +47,30 @@ func (m *Manager) Accept(cID string, deleteFn func(string) error) fiber.Handler 
 			if err := m.removeClient(c); err != nil {
 				m.logger.Error("remove client", err)
 			}
-			if err := deleteFn(cID); err != nil {
-				m.logger.Error("deleteFn", err)
-			}
 		}()
 
 		go c.write()
-		c.send(m.globalRoomPacket)
+		go m.sendLatestMessages(m.GlobalRoom.ID, c)
 		c.read()
 	})
+}
+
+func (m *Manager) sendLatestMessages(rID string, c *Client) error {
+	msgs, err := m.repo.GetLatestWithSkip(rID, 0)
+	if err != nil {
+		return err
+	}
+
+	for _, msg := range msgs {
+		p := &Packet{Event: ClientEventBroadcast}
+		err := p.setPayload(msg)
+		if err != nil {
+			return err
+		}
+		c.send(p)
+	}
+
+	return nil
 }
 
 func (m *Manager) getClient(cID string) (*Client, error) {
@@ -105,13 +110,13 @@ func (m *Manager) addClient(coon *websocket.Conn, cID string) (*Client, error) {
 		"client registered",
 		"client_id", c.ID,
 		"room_id", r.ID,
-		"room_size", m.Rooms.Len(),
+		"room_number", m.Rooms.Len(),
 	)
 
 	return c, nil
 }
 
-func (m *Manager) RemoveClient(cID string) error {
+func (m *Manager) Disconnect(cID string) error {
 	c, err := m.getClient(cID)
 	if err != nil {
 		return err
@@ -141,7 +146,7 @@ func (m *Manager) removeClient(c *Client) error {
 	m.logger.Info(
 		"client disconnected",
 		"client_id", c.ID,
-		"room_size", m.Rooms.Len(),
+		"room_number", m.Rooms.Len(),
 	)
 	return nil
 }
@@ -151,7 +156,7 @@ func (m *Manager) addRoom(r *Room) error {
 	m.logger.Info(
 		"room registered",
 		"room_id", r.ID,
-		"room_size", m.Rooms.Len(),
+		"room_number", m.Rooms.Len(),
 	)
 	return nil
 }
@@ -170,7 +175,7 @@ func (m *Manager) removeRoom(rID string) error {
 	m.logger.Info(
 		"room removed",
 		"room_id", r.ID,
-		"room_size", m.Rooms.Len(),
+		"room_number", m.Rooms.Len(),
 	)
 
 	return nil

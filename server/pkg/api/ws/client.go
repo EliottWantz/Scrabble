@@ -61,15 +61,9 @@ func (c *Client) read() {
 		if err != nil {
 			var syntaxError *json.SyntaxError
 			if errors.As(err, &syntaxError) {
-				c.logger.Warn("json syntax error in packet", "msg", syntaxError)
+				c.logger.Info("json syntax error in packet", syntaxError)
 				continue
 			}
-			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure, websocket.CloseNoStatusReceived) {
-				c.logger.Error("client read packet", err)
-				return
-			}
-
-			c.logger.Error("read error", err)
 			return
 		}
 
@@ -149,6 +143,7 @@ func (c *Client) broadcast(p *Packet) error {
 	if err := json.Unmarshal(p.Payload, &payload); err != nil {
 		return fmt.Errorf("failed to unmarshal BroadcastPayload: %w", err)
 	}
+	slog.Info("broadcast", "payload", payload)
 
 	r, err := c.Manager.getRoom(payload.RoomID)
 	if err != nil {
@@ -161,11 +156,15 @@ func (c *Client) broadcast(p *Packet) error {
 
 	payload.Timestamp = time.Now().UTC()
 
+	if err := r.Manager.repo.InsertOne(r.ID, &payload); err != nil {
+		// return fmt.Errorf("failed to insert message in db: %w", err)
+		slog.Error("failed to insert message in db", err)
+	}
+
 	if err := p.setPayload(payload); err != nil {
 		return err
 	}
-
-	r.broadcast(p, c.ID)
+	r.broadcast(p)
 
 	return nil
 }

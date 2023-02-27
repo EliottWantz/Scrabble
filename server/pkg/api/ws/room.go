@@ -17,23 +17,12 @@ type Room struct {
 	ID      string
 	Manager *Manager
 	Clients *haxmap.Map[string, *Client]
+	SendCh  chan *Packet
 	logger  *slog.Logger
 }
 
-func NewRoom(m *Manager) (*Room, error) {
-	id, err := uuid.NewRandom()
-	if err != nil {
-		return nil, err
-	}
-
-	r := &Room{
-		ID:      id.String(),
-		Manager: m,
-		Clients: haxmap.New[string, *Client](),
-	}
-	r.logger = slog.With("room", r.ID)
-
-	return r, nil
+func NewRoom(m *Manager) *Room {
+	return NewRoomWithID(m, uuid.NewString())
 }
 
 func NewRoomWithID(m *Manager, ID string) *Room {
@@ -41,15 +30,25 @@ func NewRoomWithID(m *Manager, ID string) *Room {
 		ID:      ID,
 		Manager: m,
 		Clients: haxmap.New[string, *Client](),
+		SendCh:  make(chan *Packet, 10),
 	}
 	r.logger = slog.With("room", r.ID)
+
+	go func() {
+		for p := range r.SendCh {
+			r.Clients.ForEach(func(cID string, c *Client) bool {
+				c.send(p)
+				return true
+			})
+		}
+	}()
 
 	return r
 }
 
 func (r *Room) addClient(cID string) error {
-	c, _ := r.getClient(cID)
-	if c != nil {
+	_, err := r.getClient(cID)
+	if err == nil {
 		return ErrAlreadyInRoom
 	}
 
@@ -92,23 +91,8 @@ func (r *Room) getClient(cID string) (*Client, error) {
 	return c, nil
 }
 
-func (r *Room) broadcast(p *Packet, senderID string) error {
-	r.Clients.ForEach(func(cID string, c *Client) bool {
-		// Actually send the packet to the client so that it can handle it
-		// properly, i.e. get the confirmation that the packet has been sent,
-		// and have the timestamp
-
-		// Don't send packet to the sender
-		// if cID == senderID {
-		// 	return true
-		// }
-
-		c.send(p)
-
-		return true
-	})
-
-	return nil
+func (r *Room) broadcast(p *Packet) {
+	r.SendCh <- p
 }
 
 func (r *Room) has(cID string) bool {

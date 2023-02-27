@@ -1,79 +1,100 @@
 package user
 
 import (
-	"errors"
-	"sync"
+	"context"
 
-	"golang.org/x/exp/slog"
-)
-
-var (
-	ErrUserAlreadyExists = errors.New("user already exists")
-	ErrUserNotFound      = errors.New("user not found")
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Repository struct {
-	users map[string]*User // map[username]*User
-	mu    sync.RWMutex
+	coll *mongo.Collection
 }
 
-func NewRepository() *Repository {
+func NewRepository(db *mongo.Database) *Repository {
 	return &Repository{
-		users: make(map[string]*User),
+		coll: db.Collection("users"),
 	}
 }
 
-func (r *Repository) Has(username string) bool {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
-	_, ok := r.users[username]
-	return ok
-}
-
-func (r *Repository) Find(username string) (*User, error) {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
-	u, ok := r.users[username]
-	if !ok {
-		return nil, ErrUserNotFound
+func (r *Repository) Find(ID string) (*User, error) {
+	u := &User{}
+	res := r.coll.FindOne(
+		context.TODO(),
+		bson.M{"_id": ID},
+	)
+	if err := res.Err(); err != nil {
+		return nil, err
 	}
 
-	slog.Info("Find user", "user", u.Username)
+	if err := res.Decode(u); err != nil {
+		return nil, err
+	}
 
 	return u, nil
 }
 
-func (r *Repository) Insert(u *User) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	_, ok := r.users[u.Username]
-	if ok {
-		return ErrUserAlreadyExists
+func (r *Repository) FindByUsername(username string) (*User, error) {
+	u := &User{}
+	res := r.coll.FindOne(
+		context.TODO(),
+		bson.M{"username": username},
+	)
+	if err := res.Err(); err != nil {
+		return nil, err
 	}
 
-	r.users[u.Username] = u
+	if err := res.Decode(u); err != nil {
+		return nil, err
+	}
 
-	slog.Info("Inserted user", "user", u.Username)
+	return u, nil
+}
+
+func (r *Repository) Has(ID string) bool {
+	u := &User{}
+	res := r.coll.FindOne(
+		context.TODO(),
+		bson.M{"_id": ID},
+	)
+	if err := res.Err(); err != nil {
+		return false
+	}
+
+	if err := res.Decode(u); err != nil {
+		return false
+	}
+
+	return true
+}
+
+func (r *Repository) Insert(u *User) error {
+	_, err := r.coll.InsertOne(context.TODO(), u)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
 
 func (r *Repository) Update(u *User) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
-	r.users[u.Username] = u
-	slog.Info("Updated user", "user", u.Username)
+	_, err := r.coll.UpdateOne(
+		context.TODO(),
+		bson.M{"_id": u.Id},
+		bson.M{"$set": u},
+	)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
 
-func (r *Repository) Delete(username string) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
-	delete(r.users, username)
-	slog.Info("Deleted user", "user", username)
+func (r *Repository) Delete(ID string) error {
+	_, err := r.coll.DeleteOne(context.TODO(), bson.M{"_id": ID})
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
