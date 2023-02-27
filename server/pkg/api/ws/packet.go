@@ -9,8 +9,8 @@ import (
 )
 
 type Packet struct {
-	Event   string          `json:"event,omitempty"`
-	Payload json.RawMessage `json:"payload,omitempty"`
+	Event   string          `json:"event"`
+	Payload json.RawMessage `json:"payload"`
 }
 
 func NewPacket(event string, payload any) (*Packet, error) {
@@ -37,20 +37,55 @@ func (p *Packet) setPayload(payload any) error {
 
 // Client events payloads
 type JoinPayload struct {
-	RoomID string `json:"roomId,omitempty"`
+	RoomID string `json:"roomId"`
 }
 type LeavePayload = JoinPayload
 
 type ChatMessage struct {
-	RoomID    string    `json:"roomId,omitempty" bson:"roomId"`
-	Message   string    `json:"message,omitempty" bson:"message"`
-	From      string    `json:"from,omitempty" bson:"from"`
-	FromID    string    `json:"fromId,omitempty" bson:"fromId"`
-	Timestamp time.Time `json:"timestamp,omitempty" bson:"timestamp"`
+	RoomID    string    `json:"roomId" bson:"roomId"`
+	Message   string    `json:"message" bson:"message"`
+	From      string    `json:"from" bson:"from"`
+	FromID    string    `json:"fromId" bson:"fromId"`
+	Timestamp time.Time `json:"timestamp" bson:"timestamp"`
 }
 
 // Server events payloads
 type JoinedRoomPayload struct {
-	RoomID string             `json:"roomId,omitempty"`
-	Users  []*user.PublicUser `json:"users,omitempty"`
+	RoomID   string            `json:"roomId"`
+	Name     string            `json:"name"`
+	Users    []user.PublicUser `json:"users"`
+	Messages []ChatMessage     `json:"messages"`
+}
+
+func NewJoinedRoomPacket(payload JoinedRoomPayload) (*Packet, error) {
+	p, err := NewPacket(ServerEventJoinedRoom, payload)
+	if err != nil {
+		return nil, err
+	}
+	return p, nil
+}
+
+type UserJoinedPayload struct {
+	RoomID string          `json:"roomId"`
+	User   user.PublicUser `json:"user"`
+}
+
+func NewUserJoinedPacket(payload UserJoinedPayload) (*Packet, error) {
+	p, err := NewPacket(ServerEventUserJoined, payload)
+	if err != nil {
+		return nil, err
+	}
+	return p, nil
+}
+
+type ListUsersPayload struct {
+	Users []user.PublicUser `json:"users"`
+}
+
+func NewListUsersPacket(payload ListUsersPayload) (*Packet, error) {
+	p, err := NewPacket(ServerEventListUsers, payload)
+	if err != nil {
+		return nil, err
+	}
+	return p, nil
 }

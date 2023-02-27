@@ -24,7 +24,7 @@ func (m *Manager) JoinRoom(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, "User ID is required")
 	}
 
-	room, err := m.getRoom(req.RoomID)
+	room, err := m.GetRoom(req.RoomID)
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, "Room not found")
 	}
@@ -82,5 +82,5 @@ func (m *Manager) Logout(c *fiber.Ctx) error {
 		return err
 	}
 
-	return m.Disconnect(req.ID)
+	return m.DisconnectClient(req.ID)
 }

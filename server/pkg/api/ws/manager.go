@@ -32,43 +32,54 @@ func NewManager(messageRepo *MessageRepository, roomRepo *RoomRepository, userRe
 	}
 
 	m.GlobalRoom = NewRoomWithID(m, "global")
-	err := m.addRoom(m.GlobalRoom)
-	if err != nil {
-		return nil, err
-	}
+	m.AddRoom(m.GlobalRoom)
 
 	return m, nil
 }
 
 func (m *Manager) Accept(cID string) fiber.Handler {
 	return websocket.New(func(conn *websocket.Conn) {
-		c, err := m.addClient(conn, cID)
+		c := NewClient(conn, cID, m)
+		err := m.AddClient(conn, c)
 		if err != nil {
 			m.logger.Error("add client", err)
 			return
 		}
 
-		defer func() {
-			if err := m.removeClient(c); err != nil {
-				m.logger.Error("remove client", err)
+		{
+			users, err := m.ListUsers()
+			if err != nil {
+				m.logger.Error("list users", err)
 			}
-		}()
+			p, err := NewPacket(ServerEventListUsers, ListUsersPayload{Users: users})
+			if err != nil {
+				m.logger.Error("list users", err)
+			}
+			c.send(p)
+		}
 
-		go c.write()
-		go m.sendLatestMessages(m.GlobalRoom.ID, c)
-		c.read()
+		<-c.quitCh
+		if err := m.RemoveClient(c); err != nil {
+			m.logger.Error("remove client", err)
+		}
 	})
 }
 
-func (m *Manager) sendLatestMessages(rID string, c *Client) error {
+func (m *Manager) Broadcast(p *Packet) {
+	m.Clients.ForEach(func(cID string, c *Client) bool {
+		c.send(p)
+		return true
+	})
+}
+
+func (m *Manager) SendLatestMessages(rID string, c *Client) error {
 	msgs, err := m.MessageRepo.LatestMessage(rID, 0)
 	if err != nil {
 		return err
 	}
 
 	for _, msg := range msgs {
-		p := &Packet{Event: ClientEventBroadcast}
-		err := p.setPayload(msg)
+		p, err := NewPacket(ClientEventBroadcast, msg)
 		if err != nil {
 			return err
 		}
@@ -78,37 +89,36 @@ func (m *Manager) sendLatestMessages(rID string, c *Client) error {
 	return nil
 }
 
-func (m *Manager) getClient(cID string) (*Client, error) {
-	c, ok := m.Clients.Get(cID)
-	if !ok {
-		return nil, fmt.Errorf("client with id %s not registered", cID)
+func (m *Manager) ListUsers() ([]user.PublicUser, error) {
+	var pubUsers []user.PublicUser
+	users, err := m.UserRepo.FindAll()
+	if err != nil {
+		return nil, err
 	}
-	return c, nil
+
+	for _, u := range users {
+		pubUser := user.PublicUser{
+			ID:       u.ID,
+			Username: u.Username,
+			Avatar:   u.Avatar,
+		}
+		pubUsers = append(pubUsers, pubUser)
+	}
+
+	return pubUsers, nil
 }
 
-func (m *Manager) getRoom(rID string) (*Room, error) {
-	r, ok := m.Rooms.Get(rID)
-	if !ok {
-		return nil, fmt.Errorf("room with id %s not registered", rID)
-	}
-	return r, nil
-}
-
-func (m *Manager) addClient(coon *websocket.Conn, cID string) (*Client, error) {
-	r := NewRoomWithID(m, cID)
-
-	// Client should have that same ID as the default room he is in
-	c := NewClient(coon, r.ID, m)
-
-	m.Rooms.Set(r.ID, r)
+func (m *Manager) AddClient(conn *websocket.Conn, c *Client) error {
+	r := NewRoomWithID(m, c.ID)
+	m.AddRoom(r)
 	m.Clients.Set(c.ID, c)
 
 	if err := r.addClient(c.ID); err != nil {
-		return c, err
+		return err
 	}
 
 	if err := m.GlobalRoom.addClient(c.ID); err != nil {
-		return c, err
+		return err
 	}
 
 	m.logger.Info(
@@ -118,22 +128,18 @@ func (m *Manager) addClient(coon *websocket.Conn, cID string) (*Client, error) {
 		"room_number", m.Rooms.Len(),
 	)
 
+	return nil
+}
+
+func (m *Manager) GetClient(cID string) (*Client, error) {
+	c, ok := m.Clients.Get(cID)
+	if !ok {
+		return nil, fmt.Errorf("client with id %s not registered", cID)
+	}
 	return c, nil
 }
 
-func (m *Manager) Disconnect(cID string) error {
-	c, err := m.getClient(cID)
-	if err != nil {
-		return err
-	}
-
-	return c.Conn.WriteMessage(
-		websocket.CloseMessage,
-		websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""),
-	)
-}
-
-func (m *Manager) removeClient(c *Client) error {
+func (m *Manager) RemoveClient(c *Client) error {
 	c.Rooms.ForEach(func(rID string, r *Room) bool {
 		if err := r.removeClient(c.ID); err != nil {
 			r.logger.Error("failed to remove client from room", err, "client_id", c.ID)
@@ -156,22 +162,41 @@ func (m *Manager) removeClient(c *Client) error {
 	return nil
 }
 
-func (m *Manager) addRoom(r *Room) error {
+func (m *Manager) DisconnectClient(cID string) error {
+	c, err := m.GetClient(cID)
+	if err != nil {
+		return err
+	}
+
+	return c.Conn.WriteMessage(
+		websocket.CloseMessage,
+		websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""),
+	)
+}
+
+func (m *Manager) AddRoom(r *Room) {
 	m.Rooms.Set(r.ID, r)
 	m.logger.Info(
 		"room registered",
 		"room_id", r.ID,
 		"room_number", m.Rooms.Len(),
 	)
-	return nil
 }
 
-func (m *Manager) removeRoom(rID string) error {
+func (m *Manager) GetRoom(rID string) (*Room, error) {
+	r, ok := m.Rooms.Get(rID)
+	if !ok {
+		return nil, fmt.Errorf("room with id %s not registered", rID)
+	}
+	return r, nil
+}
+
+func (m *Manager) RemoveRoom(rID string) error {
 	if rID == m.GlobalRoom.ID {
 		return fmt.Errorf("can't remove global room")
 	}
 
-	r, err := m.getRoom(rID)
+	r, err := m.GetRoom(rID)
 	if err != nil {
 		return fmt.Errorf("removeRoom: %w", err)
 	}
@@ -189,7 +214,7 @@ func (m *Manager) removeRoom(rID string) error {
 func (m *Manager) Shutdown() {
 	m.logger.Info("Shutting down manager")
 	m.Clients.ForEach(func(cID string, c *Client) bool {
-		_ = m.removeClient(c)
+		_ = m.RemoveClient(c)
 		return true
 	})
 }

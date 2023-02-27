@@ -24,6 +24,7 @@ type Client struct {
 	logger    *slog.Logger
 	sendCh    chan *Packet
 	receiveCh chan *Packet
+	quitCh    chan struct{}
 }
 
 func NewClient(conn *websocket.Conn, cID string, m *Manager) *Client {
@@ -34,8 +35,12 @@ func NewClient(conn *websocket.Conn, cID string, m *Manager) *Client {
 		Rooms:     haxmap.New[string, *Room](),
 		sendCh:    make(chan *Packet, 10),
 		receiveCh: make(chan *Packet, 10),
+		quitCh:    make(chan struct{}),
 	}
 	c.logger = slog.With("client", c.ID)
+
+	go c.write()
+	go c.read()
 
 	return c
 }
@@ -64,6 +69,7 @@ func (c *Client) read() {
 				c.logger.Info("json syntax error in packet", syntaxError)
 				continue
 			}
+			c.quitCh <- struct{}{}
 			return
 		}
 
@@ -101,7 +107,7 @@ func (c *Client) joinRoom(p *Packet) error {
 		return fmt.Errorf("failed to unmarshal JoinPayload: %w", err)
 	}
 
-	r, err := c.Manager.getRoom(payload.RoomID)
+	r, err := c.Manager.GetRoom(payload.RoomID)
 	if err != nil {
 		return err
 	}
@@ -126,7 +132,7 @@ func (c *Client) leaveRoom(p *Packet) error {
 		return ErrLeavingGloabalRoom
 	}
 
-	r, err := c.Manager.getRoom(payload.RoomID)
+	r, err := c.Manager.GetRoom(payload.RoomID)
 	if err != nil {
 		return err
 	}
@@ -145,7 +151,7 @@ func (c *Client) broadcast(p *Packet) error {
 	}
 	slog.Info("broadcast", "payload", payload)
 
-	r, err := c.Manager.getRoom(payload.RoomID)
+	r, err := c.Manager.GetRoom(payload.RoomID)
 	if err != nil {
 		return fmt.Errorf("broadcast: %w", err)
 	}
@@ -164,7 +170,7 @@ func (c *Client) broadcast(p *Packet) error {
 	if err := p.setPayload(payload); err != nil {
 		return err
 	}
-	r.send(p)
+	r.broadcast(p)
 
 	return nil
 }

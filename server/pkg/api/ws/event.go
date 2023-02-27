@@ -10,6 +10,8 @@ var (
 
 // Server events
 var (
-	ServerEventJoinedRoom = "joinedRoom"
-	// ServerEventUsersInRoom = "usersInRoom"
+	ServerEventJoinedRoom  = "joinedRoom"
+	ServerEventUserJoined  = "userJoined"
+	ServerEventListUsers   = "listUsers"
+	ServerEventUsersInRoom = "usersInRoom"
 )
