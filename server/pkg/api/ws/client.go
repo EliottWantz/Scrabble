@@ -156,7 +156,7 @@ func (c *Client) broadcast(p *Packet) error {
 
 	payload.Timestamp = time.Now().UTC()
 
-	if err := r.Manager.repo.InsertOne(r.ID, &payload); err != nil {
+	if err := r.Manager.MessageRepo.InsertOne(r.ID, &payload); err != nil {
 		// return fmt.Errorf("failed to insert message in db: %w", err)
 		slog.Error("failed to insert message in db", err)
 	}
@@ -164,7 +164,7 @@ func (c *Client) broadcast(p *Packet) error {
 	if err := p.setPayload(payload); err != nil {
 		return err
 	}
-	r.broadcast(p)
+	r.send(p)
 
 	return nil
 }

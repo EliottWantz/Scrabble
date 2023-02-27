@@ -2,21 +2,14 @@ package game
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Controller struct {
 	svc *Service
 }
 
-func NewController(db *mongo.Database) *Controller {
-	return &Controller{
-		svc: &Service{
-			repo: &Repository{
-				coll: db.Collection("games"),
-			},
-		},
-	}
+func NewController(svc *Service) *Controller {
+	return &Controller{svc: svc}
 }
 
 func (ctrl *Controller) CreateGame() fiber.Handler {

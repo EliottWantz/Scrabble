@@ -54,11 +54,11 @@ func (m *Manager) GetMessages(c *fiber.Ctx) error {
 	}
 
 	hasMore := true
-	msgs, err := m.repo.GetLatestWithSkip(roomID, skip)
+	msgs, err := m.MessageRepo.LatestMessage(roomID, skip)
 	if err != nil {
 		skip--
 		hasMore = false
-		msgs, err = m.repo.GetLatestWithSkip(roomID, skip)
+		msgs, err = m.MessageRepo.LatestMessage(roomID, skip)
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, "Failed to get messages: "+err.Error())
 		}

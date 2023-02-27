@@ -8,13 +8,23 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type Repository struct {
+type MessageRepository struct {
 	coll *mongo.Collection
 }
 
-func NewRepository(db *mongo.Database) *Repository {
-	return &Repository{
+type RoomRepository struct {
+	coll *mongo.Collection
+}
+
+func NewMessageRepository(db *mongo.Database) *MessageRepository {
+	return &MessageRepository{
 		coll: db.Collection("messages"),
+	}
+}
+
+func NewRoomRepository(db *mongo.Database) *RoomRepository {
+	return &RoomRepository{
+		coll: db.Collection("rooms"),
 	}
 }
 
@@ -26,7 +36,7 @@ type Bucket struct {
 
 // Insert the stored message into the bucket of id roomID. Each bucket holds
 // 20 messages.
-func (r *Repository) InsertOne(roomID string, msg *ChatMessage) error {
+func (r *MessageRepository) InsertOne(roomID string, msg *ChatMessage) error {
 	_, err := r.coll.UpdateOne(
 		context.Background(),
 		bson.M{
@@ -49,7 +59,7 @@ func (r *Repository) InsertOne(roomID string, msg *ChatMessage) error {
 	return err
 }
 
-func (r *Repository) GetLatestWithSkip(roomID string, skip int) ([]ChatMessage, error) {
+func (r *MessageRepository) LatestMessage(roomID string, skip int) ([]ChatMessage, error) {
 	var b Bucket
 	if err := r.coll.FindOne(
 		context.Background(),

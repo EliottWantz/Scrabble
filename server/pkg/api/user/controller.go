@@ -1,11 +1,9 @@
 package user
 
 import (
-	"scrabble/config"
 	"scrabble/pkg/api/auth"
 
 	"github.com/gofiber/fiber/v2"
-	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/exp/slog"
 )
 
@@ -14,16 +12,8 @@ type Controller struct {
 	authSvc *auth.Service
 }
 
-func NewController(cfg *config.Config, db *mongo.Database) (*Controller, error) {
-	svc, err := NewService(cfg, NewRepository(db))
-	if err != nil {
-		return nil, err
-	}
-
-	return &Controller{
-		svc:     svc,
-		authSvc: auth.NewService(cfg.JWT_SIGN_KEY),
-	}, nil
+func NewController(svc *Service, authSvc *auth.Service) *Controller {
+	return &Controller{svc: svc, authSvc: authSvc}
 }
 
 type SignupRequest struct {
@@ -60,7 +50,7 @@ func (ctrl *Controller) SignUp(c *fiber.Ctx) error {
 		return err
 	}
 
-	token, err := ctrl.authSvc.GenerateJWT(user.Id)
+	token, err := ctrl.authSvc.GenerateJWT(user.ID)
 	if err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, "failed to generate token")
 	}
@@ -103,7 +93,7 @@ func (ctrl *Controller) Login(c *fiber.Ctx) error {
 			return err
 		}
 
-		token, err = ctrl.authSvc.GenerateJWT(u.Id)
+		token, err = ctrl.authSvc.GenerateJWT(u.ID)
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, "failed to generate token")
 		}

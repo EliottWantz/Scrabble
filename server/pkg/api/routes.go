@@ -39,7 +39,7 @@ func (api *API) setupRoutes(cfg *config.Config) {
 		if ID == "" {
 			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "Missing id"})
 		}
-		return api.WebSocketManager.Accept(ID)(c)
+		return api.Ctrls.WebSocketManager.Accept(ID)(c)
 	})
 
 	r := api.App.Group("/api")
@@ -47,9 +47,9 @@ func (api *API) setupRoutes(cfg *config.Config) {
 	r.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("Hello api")
 	})
-	r.Post("/signup", api.UserCtrl.SignUp)
-	r.Post("/login", api.UserCtrl.Login)
-	r.Post("/logout", api.WebSocketManager.Logout)
+	r.Post("/signup", api.Ctrls.UserCtrl.SignUp)
+	r.Post("/login", api.Ctrls.UserCtrl.Login)
+	r.Post("/logout", api.Ctrls.WebSocketManager.Logout)
 
 	// Proctected routes
 	r.Use(
@@ -66,10 +66,10 @@ func (api *API) setupRoutes(cfg *config.Config) {
 			return c.Next()
 		},
 	)
-	r.Post("/avatar/:id", api.UserCtrl.UploadAvatar)
-	r.Delete("/avatar/:id", api.UserCtrl.DeleteAvatar)
-	r.Get("/user/:id", api.UserCtrl.GetUser)
+	r.Post("/avatar/:id", api.Ctrls.UserCtrl.UploadAvatar)
+	r.Delete("/avatar/:id", api.Ctrls.UserCtrl.DeleteAvatar)
+	r.Get("/user/:id", api.Ctrls.UserCtrl.GetUser)
 
-	r.Post("/chat/room/join", api.WebSocketManager.JoinRoom)
-	r.Get("/chat/room/:id/messages", api.WebSocketManager.GetMessages)
+	r.Post("/chat/room/join", api.Ctrls.WebSocketManager.JoinRoom)
+	r.Get("/chat/room/:id/messages", api.Ctrls.WebSocketManager.GetMessages)
 }

@@ -64,7 +64,7 @@ func (s *Service) SignUp(username, password, email string) (*User, error) {
 	}
 
 	u := &User{
-		Id:             uuid.NewString(),
+		ID:             uuid.NewString(),
 		Username:       username,
 		Email:          email,
 		HashedPassword: hashedPassword,
