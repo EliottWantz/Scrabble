@@ -1,0 +1,127 @@
+<!--
+  <div id="main">
+  <nav>
+    <button
+      *ngIf="!isConnected()"
+      mat-raised-button
+      color="primary"
+      (click)="openLoginDialog()"
+      id="login-button"
+    >
+      Se connecter
+    </button>
+    <button
+      *ngIf="isConnected()"
+      mat-raised-button
+      color="warn"
+      (click)="logout()"
+      id="login-button"
+    >
+      Déconnexion
+    </button>
+
+    <a *ngIf="isConnected()" href="/profile" id="login-button">
+      HELLO
+      <img src="">
+    </a>
+  </nav>
+  <app-chat-box-prototype *ngIf="isConnected()"></app-chat-box-prototype>
+</div>
+-->
+
+<div class="container">
+  <div class="row">
+    <div class="column">
+      <mat-card class="card">
+        <mat-card-header class="">
+          <mat-card-title>
+            Modifier le profil
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <img width="50%" src="https://st3.depositphotos.com/15648834/17930/v/600/depositphotos_179308454-stock-illustration-unknown-person-silhouette-glasses-profile.jpg">
+          <div class="">Edogaru</div>
+          <div class="form">
+            <mat-form-field appearance="fill">
+              <mat-label>Nom d'utilisateur</mat-label>
+              <input matInput placeholder="Entrez votre nom d'utilisateur" name="usename" [(ngModel)] ="username">
+            </mat-form-field>
+          </div>
+          
+          <div style="margin-top: 1%;">edogaru@mail.com.my</div>
+          <div class="form">
+            <mat-form-field appearance="fill">
+              <mat-label class="labels">Email </mat-label>
+              <input matInput type="email" class="form-control" value="" placeholder="Email">
+            </mat-form-field>
+          </div>
+          <button mat-raised-button color="primary" type="button">Enregistrer</button>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  
+    <div class="column">
+      <mat-card class="card">
+        <mat-card-title>
+          Statistiques
+        </mat-card-title>
+        <mat-card-content>
+          2 victoires
+        </mat-card-content>
+      </mat-card>
+    </div>
+  
+    <div class="column">
+      <mat-card class="card">
+        <mat-card-title>
+          Activité de l'utilisateur
+        </mat-card-title>
+        <mat-card-content>
+          Connexion à 18h
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>
+
+<!--
+    <div class="container justified-center">
+    <div id="header">
+        <span class="animate scrabble" style="--n: 8">
+            <span>{{ title }}</span>
+        </span>
+        <div id="rightdiv">
+            <button *ngIf="!isConnected()" mat-raised-button class="pull-right" (click)="openLoginDialog()" id="login-button">Se connecter</button>
+            <button *ngIf="isConnected()" mat-raised-button class="pull-right" (click)="logout()" id="login-button">Déconnexion</button>
+        </div>
+    </div>
+
+    <section id="server-message">
+        <div class="justifiediv">
+            <app-welcome-button
+                imageSrc="assets/image/scrabble.png"
+                letterSrc="assets/image/classique.png"
+                message="Jouer Scrabble version Classique"
+                (click)="openParameterDialog('Classic')"
+            ></app-welcome-button>
+            <app-welcome-button
+                imageSrc="assets/image/scrabble.png"
+                letterSrc="assets/image/polymtl.png"
+                message="Jouer Scrabble version Log2990"
+                (click)="openParameterDialog('Log2990')"
+            ></app-welcome-button>
+            <app-welcome-button
+                version="High Score"
+                imageSrc="assets/image/throphie.jpg"
+                letterSrc="assets/image/high-score.png"
+                message="Voir les meilleurs Scores"
+                (click)="openScoreDialog()"
+            ></app-welcome-button>
+        </div>
+    </section>
+    <div>
+        <img src="assets/image/team.png" class="team-img" (click)="openAboutUsDialog()" />
+        <h2>Notre équipe</h2>
+    </div>
+</div>
+-->
