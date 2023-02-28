@@ -1,24 +1,19 @@
 package user
 
 import (
-	"errors"
-
-	"scrabble/config"
+	"scrabble/pkg/api/auth"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/golang-jwt/jwt/v4"
-	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/exp/slog"
 )
 
 type Controller struct {
-	svc *Service
+	svc     *Service
+	authSvc *auth.Service
 }
 
-func NewController(cfg *config.Config, db *mongo.Database) *Controller {
-	return &Controller{
-		svc: NewService(cfg, NewRepository(db)),
-	}
+func NewController(svc *Service, authSvc *auth.Service) *Controller {
+	return &Controller{svc: svc, authSvc: authSvc}
 }
 
 type SignupRequest struct {
@@ -37,20 +32,27 @@ type SignupResponse struct {
 func (ctrl *Controller) SignUp(c *fiber.Ctx) error {
 	req := SignupRequest{}
 	if err := c.BodyParser(&req); err != nil {
-		return fiber.ErrBadRequest
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
 
-	user, token, err := ctrl.svc.SignUp(req)
+	if req.Username == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "username can't be blank")
+	}
+	if req.Password == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "password can't be blank")
+	}
+	if req.Email == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "email can't be blank")
+	}
+
+	user, err := ctrl.svc.SignUp(req.Username, req.Password, req.Email)
 	if err != nil {
-		slog.Error("sign up user", err)
-		if errors.Is(err, ErrUserAlreadyExists) {
-			return fiber.ErrConflict
-		}
-		var fiberErr *fiber.Error
-		if ok := errors.As(err, &fiberErr); ok {
-			return err
-		}
-		return fiber.ErrInternalServerError
+		return err
+	}
+
+	token, err := ctrl.authSvc.GenerateJWT(user.ID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, "failed to generate token")
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(
@@ -64,89 +66,75 @@ func (ctrl *Controller) SignUp(c *fiber.Ctx) error {
 type LoginRequest struct {
 	Username string `json:"username,omitempty"`
 	Password string `json:"password,omitempty"`
+	Token    string `json:"token,omitempty"`
 }
 
 type LoginResponse struct {
+	User  *User  `json:"user,omitempty"`
 	Token string `json:"token,omitempty"`
-	Error string `json:"error,omitempty"`
 }
 
 func (ctrl *Controller) Login(c *fiber.Ctx) error {
 	var req LoginRequest
 	err := c.BodyParser(&req)
 	if err != nil {
-		return fiber.ErrInternalServerError
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	slog.Info("login request", "req", req)
+
+	var (
+		u     *User
+		token string
+	)
+
+	if req.Username != "" && req.Password != "" {
+		// Login with username and password
+		if u, err = ctrl.svc.Login(req.Username, req.Password); err != nil {
+			return err
+		}
+
+		token, err = ctrl.authSvc.GenerateJWT(u.ID)
+		if err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, "failed to generate token")
+		}
+	} else if req.Token != "" {
+		// Login with token
+		claims, err := ctrl.authSvc.VerifyJWT(req.Token)
+		if err != nil {
+			return fiber.NewError(fiber.StatusUnauthorized, "invalid token")
+		}
+
+		// Refresh token
+		if token, err = ctrl.authSvc.RefreshJWT(req.Token, claims); err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, "failed to refresh token")
+		}
+
+		if u, err = ctrl.svc.GetUser(claims.UserID); err != nil {
+			return err
+		}
 	}
 
-	token, err := ctrl.svc.Login(req.Username, req.Password)
-	if err != nil {
-		if errors.Is(err, ErrUserNotFound) {
-			return c.Status(fiber.StatusConflict).JSON(
-				LoginResponse{Error: "user not found with given username"},
-			)
-		}
-		if errors.Is(err, ErrPasswordMismatch) {
-			return fiber.ErrUnauthorized
-		}
-		return fiber.ErrInternalServerError
-	}
+	slog.Info("response", "user", u, "token", token)
 
 	return c.JSON(LoginResponse{
-		Token: token,
-	})
-}
-
-type RevalidateRequest struct {
-	Token string `json:"token,omitempty"`
-}
-type RevalidateResponse struct {
-	Token string `json:"token,omitempty"`
-	Error string `json:"error,omitempty"`
-}
-
-// Revalidate jwt token
-func (ctrl *Controller) Revalidate(c *fiber.Ctx) error {
-	var req RevalidateRequest
-	err := c.BodyParser(&req)
-	if err != nil {
-		return fiber.ErrInternalServerError
-	}
-
-	token, err := ctrl.svc.Revalidate(req.Token)
-	if err != nil {
-		slog.Error("Error revalidating token", err)
-		if errors.Is(err, jwt.ErrSignatureInvalid) {
-			return fiber.ErrUnauthorized
-		}
-		if errors.Is(err, fiber.ErrUnauthorized) {
-			return fiber.ErrUnauthorized
-		}
-		if errors.Is(err, jwt.ErrTokenExpired) || errors.Is(err, jwt.ErrSignatureInvalid) {
-			return fiber.ErrUnauthorized
-		}
-		return fiber.ErrInternalServerError
-	}
-
-	return c.JSON(RevalidateResponse{
+		User:  u,
 		Token: token,
 	})
 }
 
 type GetUserResponse struct {
-	User  *User  `json:"user,omitempty"`
-	Error string `json:"error,omitempty"`
+	User *User `json:"user,omitempty"`
 }
 
 func (ctrl *Controller) GetUser(c *fiber.Ctx) error {
 	ID := c.Params("id")
 	if ID == "" {
-		return fiber.ErrBadRequest
+		return fiber.NewError(fiber.StatusBadRequest, "no id given")
 	}
 
 	user, err := ctrl.svc.GetUser(ID)
 	if err != nil {
-		slog.Error("Error getting user", err)
-		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+		return err
 	}
 
 	return c.JSON(GetUserResponse{
@@ -154,81 +142,47 @@ func (ctrl *Controller) GetUser(c *fiber.Ctx) error {
 	})
 }
 
-type UploadAvatarRequest struct {
-	ID        string `json:"id,omitempty"`
-	AvatarUrl string `json:"avatarUrl,omitempty"`
-}
-
 type UploadAvatarResponse struct {
-	AvatarURL string `json:"avatarUrl,omitempty"`
-	Error     string `json:"error,omitempty"`
+	*Avatar
 }
 
 func (ctrl *Controller) UploadAvatar(c *fiber.Ctx) error {
-	var req UploadAvatarRequest
-	err := c.BodyParser(&req)
-	if err != nil {
-		return fiber.ErrInternalServerError
+	ID := c.Params("id")
+	if ID == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "no user id given")
 	}
 
-	url, err := ctrl.svc.UploadAvatar(req.ID, req.AvatarUrl)
+	fileHeader, err := c.FormFile("avatar")
 	if err != nil {
-		var fiberErr *fiber.Error
-		if ok := errors.As(err, &fiberErr); ok {
-			return c.Status(fiberErr.Code).JSON(
-				UploadAvatarResponse{
-					Error: fiberErr.Message,
-				},
-			)
-		}
-		return c.Status(fiber.StatusInternalServerError).JSON(
-			UploadAvatarResponse{
-				Error: err.Error(),
-			},
-		)
+		return fiber.NewError(fiber.StatusBadRequest, "no avatar given")
+	}
+	file, err := fileHeader.Open()
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+
+	avatar, err := ctrl.svc.UploadAvatar(ID, file)
+	if err != nil {
+		return err
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(
 		UploadAvatarResponse{
-			AvatarURL: url,
+			avatar,
 		},
 	)
 }
 
-// type GetAvatarRequest struct {
-// 	Username string `json:"username,omitempty"`
-// }
+func (ctrl *Controller) DeleteAvatar(c *fiber.Ctx) error {
+	ID := c.Params("id")
+	if ID == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "no user id given")
+	}
 
-// type GetAvatarResponse struct {
-// 	AvatarURL string `json:"avatarUrl,omitempty"`
-// 	Error     string `json:"error,omitempty"`
-// }
+	err := ctrl.svc.DeleteAvatar(ID)
+	if err != nil {
+		return err
+	}
 
-// func (ctrl *Controller) GetAvatar(c *fiber.Ctx) error {
-// 	var req GetAvatarRequest
-// 	err := c.BodyParser(&req)
-// 	if err != nil {
-// 		return fiber.ErrInternalServerError
-// 	}
-
-// 	url, err := ctrl.svc.GetAvatar(req.Username)
-// 	if err != nil {
-// 		var fiberErr *fiber.Error
-// 		if ok := errors.As(err, &fiberErr); ok {
-// 			return c.Status(fiberErr.Code).JSON(
-// 				GetAvatarResponse{
-// 					Error: fiberErr.Message,
-// 				},
-// 			)
-// 		}
-// 		return c.Status(fiber.StatusInternalServerError).JSON(
-// 			GetAvatarResponse{
-// 				Error: err.Error(),
-// 			},
-// 		)
-// 	}
-
-// 	return c.JSON(GetAvatarResponse{
-// 		AvatarURL: url,
-// 	})
-// }
+	return c.SendStatus(fiber.StatusNoContent)
+}

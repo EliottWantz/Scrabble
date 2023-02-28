@@ -4,11 +4,14 @@ import (
 	"errors"
 
 	"scrabble/config"
-	"scrabble/pkg/api/user/auth"
+	"scrabble/pkg/api/auth"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
-	"github.com/imagekit-developer/imagekit-go"
+	"github.com/uploadcare/uploadcare-go/file"
+	"github.com/uploadcare/uploadcare-go/ucare"
+	"github.com/uploadcare/uploadcare-go/upload"
+	"golang.org/x/exp/slog"
 )
 
 var (
@@ -18,89 +21,93 @@ var (
 )
 
 type Service struct {
-	repo    *Repository
-	ik      *imagekit.ImageKit
-	JWTAuth *auth.JWTAuth
+	repo         *Repository
+	uploadClient ucare.Client
+	uploadSvc    upload.Service
+	fileSvc      file.Service
+	uploadURL    string
 }
 
-func NewService(cfg *config.Config, repo *Repository) *Service {
-	ik := imagekit.NewFromParams(imagekit.NewParams{
-		PrivateKey:  cfg.IMAGEKIT_PRIVATE_KEY,
-		PublicKey:   cfg.IMAGEKIT_PUBLIC_KEY,
-		UrlEndpoint: cfg.IMAGEKIT_ENDPOINT_URL,
-	})
+func NewService(cfg *config.Config, repo *Repository) (*Service, error) {
+	creds := ucare.APICreds{
+		SecretKey: cfg.UPLOAD_CARE_SECRET_KEY,
+		PublicKey: cfg.UPLOAD_CARE_PUBLIC_KEY,
+	}
+
+	conf := &ucare.Config{
+		SignBasedAuthentication: true,
+		APIVersion:              ucare.APIv06,
+	}
+
+	client, err := ucare.NewClient(creds, conf)
+	if err != nil {
+		return nil, err
+	}
 
 	return &Service{
-		repo:    repo,
-		ik:      ik,
-		JWTAuth: auth.NewJWTAuth(cfg.JWT_SIGN_KEY),
-	}
+		repo:         repo,
+		uploadClient: client,
+		uploadSvc:    upload.NewService(client),
+		fileSvc:      file.NewService(client),
+		uploadURL:    cfg.UPLOAD_CARE_UPLOAD_URL,
+	}, nil
 }
 
-func (s *Service) SignUp(req SignupRequest) (*User, string, error) {
-	if req.Username == "" {
-		return nil, "", fiber.NewError(fiber.StatusUnprocessableEntity, "username can't be blank")
-	}
-	if req.Password == "" {
-		return nil, "", fiber.NewError(fiber.StatusUnprocessableEntity, "password can't be blank")
-	}
-	if req.Email == "" {
-		return nil, "", fiber.NewError(fiber.StatusUnprocessableEntity, "email can't be blank")
+func (s *Service) SignUp(username, password, email string) (*User, error) {
+	if _, err := s.repo.FindByUsername(username); err == nil {
+		return nil, fiber.NewError(fiber.StatusUnprocessableEntity, "username already exists")
 	}
 
-	if _, err := s.repo.FindByUsername(req.Username); err == nil {
-		return nil, "", ErrUserAlreadyExists
-	}
-
-	hashedPassword, err := auth.HashPassword(req.Password)
+	hashedPassword, err := auth.HashPassword(password)
 	if err != nil {
-		return nil, "", err
+		return nil, fiber.NewError(fiber.StatusInternalServerError, "failed to hash password")
 	}
 
 	u := &User{
-		Id:             uuid.NewString(),
-		Username:       req.Username,
+		ID:             uuid.NewString(),
+		Username:       username,
+		Email:          email,
 		HashedPassword: hashedPassword,
 	}
 
 	if err := s.repo.Insert(u); err != nil {
-		return nil, "", err
+		return nil, fiber.NewError(fiber.StatusInternalServerError, "failed to insert user")
 	}
 
-	signed, err := s.JWTAuth.GenerateJWT(req.Username)
-	if err != nil {
-		return nil, "", err
-	}
-
-	return u, signed, nil
+	return u, nil
 }
 
-func (s *Service) Login(username, password string) (string, error) {
+func (s *Service) Login(username, password string) (*User, error) {
 	u, err := s.repo.FindByUsername(username)
 	if err != nil {
-		return "", ErrUserNotFound
+		return nil, fiber.NewError(fiber.StatusNotFound, "user not found")
 	}
 
 	if !auth.PasswordsMatch(password, u.HashedPassword) {
-		return "", ErrPasswordMismatch
+		return nil, fiber.NewError(fiber.StatusUnauthorized, "password mismatch")
 	}
 
-	signed, err := s.JWTAuth.GenerateJWT(username)
-	if err != nil {
-		return "", err
-	}
-
-	return signed, nil
+	return u, nil
 }
 
-func (s *Service) Revalidate(tokenStr string) (string, error) {
-	return s.JWTAuth.RevalidateJWT(tokenStr)
+func (s *Service) Logout(ID string) error {
+	if !s.repo.Has(ID) {
+		return fiber.NewError(fiber.StatusNotFound, "user not found")
+	}
+
+	if err := s.repo.Delete(ID); err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, "failed to delete user")
+	}
+
+	slog.Info("Logout user", "id", ID)
+
+	return nil
 }
 
 func (s *Service) GetUser(ID string) (*User, error) {
 	u, err := s.repo.Find(ID)
 	if err != nil {
-		return nil, err
+		return nil, fiber.NewError(fiber.StatusNotFound, "user not found")
 	}
 
 	return u, nil

@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"scrabble/config"
+	"scrabble/pkg/api/auth"
 	"scrabble/pkg/api/game"
 	"scrabble/pkg/api/storage"
 	"scrabble/pkg/api/user"
@@ -17,11 +18,31 @@ import (
 var CONNECTION_TIMEOUT = time.Second * 15
 
 type API struct {
-	WebSocketManager *ws.Manager
-	App              *fiber.App
+	App    *fiber.App
+	logger *slog.Logger
+	Ctrls  Controllers
+	Svcs   Services
+	Repos  Repositories
+	DB     *mongo.Database
+}
+
+type Controllers struct {
 	GameCtrl         *game.Controller
 	UserCtrl         *user.Controller
-	DB               *mongo.Database
+	WebSocketManager *ws.Manager
+}
+
+type Services struct {
+	GameSvc *game.Service
+	UserSvc *user.Service
+	AuthSvc *auth.Service
+}
+
+type Repositories struct {
+	GameRepo    *game.Repository
+	UserRepo    *user.Repository
+	MessageRepo *ws.MessageRepository
+	RoomRepo    *ws.RoomRepository
 }
 
 func New(cfg *config.Config) (*API, error) {
@@ -32,21 +53,62 @@ func New(cfg *config.Config) (*API, error) {
 	}
 	slog.Info("Database opened.")
 
+	var repositories Repositories
+	{
+		gameRepo := game.NewRepository(db)
+		userRepo := user.NewRepository(db)
+		messageRepo := ws.NewMessageRepository(db)
+		roomRepo := ws.NewRoomRepository(db)
+
+		repositories = Repositories{
+			GameRepo:    gameRepo,
+			UserRepo:    userRepo,
+			MessageRepo: messageRepo,
+			RoomRepo:    roomRepo,
+		}
+	}
+
+	var services Services
+	{
+		userSvc, err := user.NewService(cfg, repositories.UserRepo)
+		if err != nil {
+			return nil, err
+		}
+		gameSvc := game.NewService(repositories.GameRepo)
+		authSvc := auth.NewService(cfg.JWT_SIGN_KEY)
+
+		services = Services{
+			GameSvc: gameSvc,
+			UserSvc: userSvc,
+			AuthSvc: authSvc,
+		}
+	}
+
+	var controllers Controllers
+	{
+		wsManager, err := ws.NewManager(repositories.MessageRepo, repositories.RoomRepo, repositories.UserRepo)
+		if err != nil {
+			return nil, err
+		}
+		gameCtrl := game.NewController(services.GameSvc)
+		userCtrl := user.NewController(services.UserSvc, services.AuthSvc)
+
+		controllers = Controllers{
+			GameCtrl:         gameCtrl,
+			UserCtrl:         userCtrl,
+			WebSocketManager: wsManager,
+		}
+	}
+
 	api := &API{
-		App:      fiber.New(),
-		GameCtrl: game.NewController(db),
-		UserCtrl: user.NewController(cfg, db),
-		DB:       db,
+		App:    fiber.New(),
+		logger: slog.Default(),
+		Ctrls:  controllers,
+		Svcs:   services,
+		Repos:  repositories,
+		DB:     db,
 	}
 
-	ws, err := ws.NewManager()
-	if err != nil {
-		return nil, err
-	}
-
-	api.WebSocketManager = ws
-
-	api.setupMiddleware()
 	api.setupRoutes(cfg)
 
 	return api, nil
