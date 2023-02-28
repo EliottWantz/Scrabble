@@ -34,16 +34,16 @@ func (r *RoomRepository) Insert(room *Room) error {
 }
 
 func (r *RoomRepository) Get(roomID string) (*RoomDB, error) {
-	var roomDB *RoomDB
+	var roomDB RoomDB
 	err := r.coll.FindOne(
 		context.Background(),
 		bson.M{"_id": roomID},
-	).Decode(roomDB)
+	).Decode(&roomDB)
 	if err != nil {
 		return nil, err
 	}
 
-	return roomDB, nil
+	return &roomDB, nil
 }
 
 func (r *RoomRepository) Update(room *Room) error {

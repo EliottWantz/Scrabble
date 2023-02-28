@@ -92,7 +92,6 @@ func (r *Room) addClient(cID string) error {
 		}
 		payload.Messages = msgs
 
-		slog.Info("packet", "name", payload.Name, "users", payload.Users, "msg", payload.Messages)
 		p, err := NewJoinedRoomPacket(payload)
 		if err != nil {
 			r.logger.Error("creating packet", err)
@@ -127,13 +126,6 @@ func (r *Room) addClient(cID string) error {
 }
 
 func (r *Room) removeClient(cID string) error {
-	if r.ID == cID {
-		return ErrLeavingOwnRoom
-	}
-	if r.ID == r.Manager.GlobalRoom.ID {
-		return ErrLeavingGloabalRoom
-	}
-
 	c, err := r.getClient(cID)
 	if err != nil {
 		return err

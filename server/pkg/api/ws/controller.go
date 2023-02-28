@@ -63,6 +63,13 @@ func (m *Manager) LeaveRoom(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, "User ID is required")
 	}
 
+	if req.RoomID == req.UserID {
+		return ErrLeavingOwnRoom
+	}
+	if req.RoomID == m.GlobalRoom.ID {
+		return ErrLeavingGloabalRoom
+	}
+
 	r, err := m.GetRoom(req.RoomID)
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, "Room not found")

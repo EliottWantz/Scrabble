@@ -33,24 +33,8 @@ func NewManager(messageRepo *MessageRepository, roomRepo *RoomRepository, userRe
 		UserRepo:    userRepo,
 	}
 
-	{
-		r := m.CreateRoomWithID("global", "Global")
-		m.GlobalRoom = r
-
-		roomDB, err := m.RoomRepo.Get("global")
-		if err != nil {
-			if errors.Is(err, mongo.ErrNoDocuments) {
-				// global room doesn't exist in db, insert it
-				if m.RoomRepo.Insert(r); err != nil {
-					return nil, err
-				}
-			}
-		} else {
-			// global room exists in db, use it
-			r.ClientIDs = roomDB.UsersIDs
-		}
-
-	}
+	r := m.CreateRoomWithID("global", "Global")
+	m.GlobalRoom = r
 
 	return m, nil
 }
@@ -64,17 +48,15 @@ func (m *Manager) Accept(cID, name string) fiber.Handler {
 			return
 		}
 
-		{
-			users, err := m.ListUsers()
-			if err != nil {
-				m.logger.Error("list users", err)
-			}
-			p, err := NewPacket(ServerEventListUsers, ListUsersPayload{Users: users})
-			if err != nil {
-				m.logger.Error("list users", err)
-			}
-			c.send(p)
+		users, err := m.ListUsers()
+		if err != nil {
+			m.logger.Error("list users", err)
 		}
+		p, err := NewPacket(ServerEventListUsers, ListUsersPayload{Users: users})
+		if err != nil {
+			m.logger.Error("list users", err)
+		}
+		c.send(p)
 
 		<-c.quitCh
 		if err := m.RemoveClient(c); err != nil {
@@ -110,7 +92,7 @@ func (m *Manager) ListUsers() ([]user.PublicUser, error) {
 }
 
 func (m *Manager) AddClient(c *Client, name string) error {
-	r := m.CreateRoomWithID(name, c.ID)
+	r := m.CreateRoomWithID(c.ID, name)
 	m.Clients.Set(c.ID, c)
 
 	if err := r.addClient(c.ID); err != nil {
@@ -188,13 +170,29 @@ func (m *Manager) CreateRoomWithID(ID, name string) *Room {
 	return r
 }
 
-func (m *Manager) AddRoom(r *Room) {
+func (m *Manager) AddRoom(r *Room) error {
+	slog.Info("adding room", "room_id", r.ID)
+	roomDB, err := m.RoomRepo.Get(r.ID)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			// global room doesn't exist in db, insert it
+			if m.RoomRepo.Insert(r) != nil {
+				return nil
+			}
+		}
+	} else {
+		// global room exists in db, use it
+		r.ClientIDs = roomDB.UsersIDs
+	}
 	m.Rooms.Set(r.ID, r)
 	m.logger.Info(
 		"room registered",
 		"room_id", r.ID,
 		"room_number", m.Rooms.Len(),
+		"room_users", r.ClientIDs,
 	)
+
+	return nil
 }
 
 func (m *Manager) GetRoom(rID string) (*Room, error) {
