@@ -5,8 +5,8 @@ import { ProfilePageComponent } from '@app/pages/profile-page/profile-page.compo
 import { LoginPageComponent } from '@app/pages/login-page/login-page.component';
 
 const routes: Routes = [
-  { path: 'home', component: MainPageComponent },
   { path: '', redirectTo: '/home', pathMatch: 'full' },
+  { path: 'home', component: MainPageComponent },
   { path: 'profile', component: ProfilePageComponent },
   { path: 'login', component: LoginPageComponent }
 ];
