@@ -33,11 +33,11 @@ func NewClient(conn *websocket.Conn, cID string, m *Manager) *Client {
 		Manager:   m,
 		Conn:      conn,
 		Rooms:     haxmap.New[string, *Room](),
+		logger:    slog.With("client", cID),
 		sendCh:    make(chan *Packet, 10),
 		receiveCh: make(chan *Packet, 10),
 		quitCh:    make(chan struct{}),
 	}
-	c.logger = slog.With("client", c.ID)
 
 	go c.write()
 	go c.read()

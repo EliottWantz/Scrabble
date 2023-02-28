@@ -16,28 +16,29 @@ var (
 )
 
 type Room struct {
-	ID      string
-	Name    string
-	Manager *Manager
-	Clients *haxmap.Map[string, *Client]
-	logger  *slog.Logger
+	ID        string
+	Name      string
+	Manager   *Manager
+	Clients   *haxmap.Map[string, *Client]
+	ClientIDs []string
+	logger    *slog.Logger
 }
 
-func NewRoom(m *Manager, name string) (*Room, error) {
+func NewRoom(m *Manager, name string) *Room {
 	return NewRoomWithID(m, uuid.NewString(), name)
 }
 
-func NewRoomWithID(m *Manager, ID, name string) (*Room, error) {
+func NewRoomWithID(m *Manager, ID, name string) *Room {
 	r := &Room{
-		ID:      ID,
-		Name:    name,
-		Manager: m,
-		Clients: haxmap.New[string, *Client](),
+		ID:        ID,
+		Name:      name,
+		Manager:   m,
+		Clients:   haxmap.New[string, *Client](),
+		ClientIDs: make([]string, 0),
+		logger:    slog.With("room", ID),
 	}
-	r.logger = slog.With("room", r.ID)
 
-	err := m.RoomRepo.Insert(r)
-	return r, err
+	return r
 }
 
 func (r *Room) broadcast(p *Packet) {
