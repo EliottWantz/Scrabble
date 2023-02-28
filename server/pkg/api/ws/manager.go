@@ -95,11 +95,11 @@ func (m *Manager) AddClient(c *Client, name string) error {
 	r := m.CreateRoomWithID(c.ID, name)
 	m.Clients.Set(c.ID, c)
 
-	if err := r.addClient(c.ID); err != nil {
+	if err := r.AddClient(c.ID); err != nil {
 		return err
 	}
 
-	if err := m.GlobalRoom.addClient(c.ID); err != nil {
+	if err := m.GlobalRoom.AddClient(c.ID); err != nil {
 		return err
 	}
 
@@ -123,7 +123,7 @@ func (m *Manager) GetClient(cID string) (*Client, error) {
 
 func (m *Manager) RemoveClient(c *Client) error {
 	c.Rooms.ForEach(func(rID string, r *Room) bool {
-		if err := r.removeClient(c.ID); err != nil {
+		if err := r.RemoveClient(c.ID); err != nil {
 			r.logger.Error("failed to remove client from room", err, "client_id", c.ID)
 		}
 
@@ -171,7 +171,6 @@ func (m *Manager) CreateRoomWithID(ID, name string) *Room {
 }
 
 func (m *Manager) AddRoom(r *Room) error {
-	slog.Info("adding room", "room_id", r.ID)
 	roomDB, err := m.RoomRepo.Get(r.ID)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {

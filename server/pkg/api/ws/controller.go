@@ -27,7 +27,7 @@ func (m *Manager) JoinRoom(c *fiber.Ctx) error {
 		}
 		// Create a new room with the given name and add the user to it
 		r := m.CreateRoom(req.RoomName)
-		if err := r.addClient(req.UserID); err != nil {
+		if err := r.AddClient(req.UserID); err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, "Failed to add client in new room"+err.Error())
 		}
 	} else {
@@ -37,7 +37,7 @@ func (m *Manager) JoinRoom(c *fiber.Ctx) error {
 			return fiber.NewError(fiber.StatusBadRequest, "Room not found")
 		}
 
-		if err = r.addClient(req.UserID); err != nil {
+		if err = r.AddClient(req.UserID); err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, "Failed to join room: "+err.Error())
 		}
 	}
@@ -64,10 +64,10 @@ func (m *Manager) LeaveRoom(c *fiber.Ctx) error {
 	}
 
 	if req.RoomID == req.UserID {
-		return ErrLeavingOwnRoom
+		return fiber.NewError(fiber.StatusBadRequest, "You cannot leave your own room")
 	}
 	if req.RoomID == m.GlobalRoom.ID {
-		return ErrLeavingGloabalRoom
+		return fiber.NewError(fiber.StatusBadRequest, "You cannot leave the global room")
 	}
 
 	r, err := m.GetRoom(req.RoomID)
@@ -75,7 +75,7 @@ func (m *Manager) LeaveRoom(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, "Room not found")
 	}
 
-	if err = r.removeClient(req.UserID); err != nil {
+	if err = r.RemoveClient(req.UserID); err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, "Failed to leave room: "+err.Error())
 	}
 

@@ -41,14 +41,14 @@ func NewRoomWithID(m *Manager, ID, name string) *Room {
 	return r
 }
 
-func (r *Room) broadcast(p *Packet) {
+func (r *Room) Broadcast(p *Packet) {
 	r.Clients.ForEach(func(cID string, c *Client) bool {
 		c.send(p)
 		return true
 	})
 }
 
-func (r *Room) broadcastSkipSelf(p *Packet, selfID string) {
+func (r *Room) BroadcastSkipSelf(p *Packet, selfID string) {
 	r.Clients.ForEach(func(cID string, c *Client) bool {
 		if c.ID != selfID {
 			c.send(p)
@@ -57,8 +57,8 @@ func (r *Room) broadcastSkipSelf(p *Packet, selfID string) {
 	})
 }
 
-func (r *Room) addClient(cID string) error {
-	_, err := r.getClient(cID)
+func (r *Room) AddClient(cID string) error {
+	_, err := r.GetClient(cID)
 	if err == nil {
 		return ErrAlreadyInRoom
 	}
@@ -119,14 +119,14 @@ func (r *Room) addClient(cID string) error {
 			r.logger.Error("creating packet", err)
 			return nil
 		}
-		r.broadcastSkipSelf(p, c.ID)
+		r.BroadcastSkipSelf(p, c.ID)
 	}
 
 	return nil
 }
 
-func (r *Room) removeClient(cID string) error {
-	c, err := r.getClient(cID)
+func (r *Room) RemoveClient(cID string) error {
+	c, err := r.GetClient(cID)
 	if err != nil {
 		return err
 	}
@@ -134,16 +134,21 @@ func (r *Room) removeClient(cID string) error {
 	r.Clients.Del(cID)
 	r.logger.Info("client removed from room", "client", c.ID)
 
-	if r.Clients.Len() == 0 && r.ID != r.Manager.GlobalRoom.ID {
+	if r.Clients.Len() == 0 && r.ID != r.Manager.GlobalRoom.ID && r.ID != c.ID {
 		if err := r.Manager.RemoveRoom(r.ID); err != nil {
 			return err
 		}
+		return r.Manager.RoomRepo.Delete(r.ID)
+	}
+
+	if err := r.Manager.RoomRepo.Update(r); err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func (r *Room) getClient(cID string) (*Client, error) {
+func (r *Room) GetClient(cID string) (*Client, error) {
 	c, ok := r.Clients.Get(cID)
 	if !ok {
 		return nil, ErrNotInRoom
@@ -153,7 +158,7 @@ func (r *Room) getClient(cID string) (*Client, error) {
 }
 
 func (r *Room) has(cID string) bool {
-	_, err := r.getClient(cID)
+	_, err := r.GetClient(cID)
 	return err == nil
 }
 

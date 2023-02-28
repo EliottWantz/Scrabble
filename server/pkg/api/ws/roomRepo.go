@@ -61,3 +61,12 @@ func (r *RoomRepository) Update(room *Room) error {
 
 	return err
 }
+
+func (r *RoomRepository) Delete(roomID string) error {
+	_, err := r.coll.DeleteOne(
+		context.Background(),
+		bson.M{"_id": roomID},
+	)
+
+	return err
+}

@@ -123,7 +123,7 @@ func (c *Client) broadcast(p *Packet) error {
 	if err := p.setPayload(payload); err != nil {
 		return err
 	}
-	r.broadcast(p)
+	r.Broadcast(p)
 
 	return nil
 }
