@@ -3,27 +3,32 @@ package ws
 import (
 	"fmt"
 
+	"scrabble/pkg/api/user"
+
 	"github.com/alphadose/haxmap"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
-	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/exp/slog"
 )
 
 type Manager struct {
-	Clients    *haxmap.Map[string, *Client]
-	Rooms      *haxmap.Map[string, *Room]
-	GlobalRoom *Room
-	logger     *slog.Logger
-	repo       *Repository
+	Clients     *haxmap.Map[string, *Client]
+	Rooms       *haxmap.Map[string, *Room]
+	GlobalRoom  *Room
+	logger      *slog.Logger
+	MessageRepo *MessageRepository
+	RoomRepo    *RoomRepository
+	UserRepo    *user.Repository
 }
 
-func NewManager(db *mongo.Database) (*Manager, error) {
+func NewManager(messageRepo *MessageRepository, roomRepo *RoomRepository, userRepo *user.Repository) (*Manager, error) {
 	m := &Manager{
-		Clients: haxmap.New[string, *Client](),
-		Rooms:   haxmap.New[string, *Room](),
-		logger:  slog.Default(),
-		repo:    NewRepository(db),
+		Clients:     haxmap.New[string, *Client](),
+		Rooms:       haxmap.New[string, *Room](),
+		logger:      slog.Default(),
+		MessageRepo: messageRepo,
+		RoomRepo:    roomRepo,
+		UserRepo:    userRepo,
 	}
 
 	m.GlobalRoom = NewRoomWithID(m, "global")
@@ -56,7 +61,7 @@ func (m *Manager) Accept(cID string) fiber.Handler {
 }
 
 func (m *Manager) sendLatestMessages(rID string, c *Client) error {
-	msgs, err := m.repo.GetLatestWithSkip(rID, 0)
+	msgs, err := m.MessageRepo.LatestMessage(rID, 0)
 	if err != nil {
 		return err
 	}

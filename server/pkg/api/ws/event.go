@@ -10,5 +10,6 @@ var (
 
 // Server events
 var (
-	ServerEventJoinedGlobalRoom = "joinedGlobalRoom"
+	ServerEventJoinedRoom = "joinedRoom"
+	// ServerEventUsersInRoom = "usersInRoom"
 )

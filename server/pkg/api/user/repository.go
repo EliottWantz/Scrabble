@@ -80,7 +80,7 @@ func (r *Repository) Insert(u *User) error {
 func (r *Repository) Update(u *User) error {
 	_, err := r.coll.UpdateOne(
 		context.TODO(),
-		bson.M{"_id": u.Id},
+		bson.M{"_id": u.ID},
 		bson.M{"$set": u},
 	)
 	if err != nil {

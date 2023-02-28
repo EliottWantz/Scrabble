@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"time"
+
+	"scrabble/pkg/api/user"
 )
 
 type Packet struct {
@@ -14,7 +16,7 @@ type Packet struct {
 func NewPacket(event string, payload any) (*Packet, error) {
 	p, err := json.Marshal(payload)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("can't create payload: %w", err)
 	}
 
 	return &Packet{
@@ -43,10 +45,12 @@ type ChatMessage struct {
 	RoomID    string    `json:"roomId,omitempty" bson:"roomId"`
 	Message   string    `json:"message,omitempty" bson:"message"`
 	From      string    `json:"from,omitempty" bson:"from"`
+	FromID    string    `json:"fromId,omitempty" bson:"fromId"`
 	Timestamp time.Time `json:"timestamp,omitempty" bson:"timestamp"`
 }
 
 // Server events payloads
-type JoinedGlobalRoomPayload struct {
-	RoomID string `json:"roomId,omitempty"`
+type JoinedRoomPayload struct {
+	RoomID string             `json:"roomId,omitempty"`
+	Users  []*user.PublicUser `json:"users,omitempty"`
 }

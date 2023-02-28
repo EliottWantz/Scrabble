@@ -2,6 +2,9 @@ package ws
 
 import (
 	"errors"
+	"fmt"
+
+	"scrabble/pkg/api/user"
 
 	"github.com/alphadose/haxmap"
 	"github.com/google/uuid"
@@ -46,6 +49,10 @@ func NewRoomWithID(m *Manager, ID string) *Room {
 	return r
 }
 
+func (r *Room) send(p *Packet) {
+	r.SendCh <- p
+}
+
 func (r *Room) addClient(cID string) error {
 	_, err := r.getClient(cID)
 	if err == nil {
@@ -60,6 +67,17 @@ func (r *Room) addClient(cID string) error {
 	r.Clients.Set(cID, c)
 	c.Rooms.Set(r.ID, r)
 	r.logger.Info("client added in room", "client", c.ID)
+
+	{
+		p, err := NewPacket(ServerEventJoinedRoom, JoinedRoomPayload{
+			RoomID: r.ID,
+			Users:  r.ListUsers(),
+		})
+		if err != nil {
+			return fmt.Errorf("creating packet: %w", err)
+		}
+		r.send(p)
+	}
 
 	return nil
 }
@@ -91,11 +109,26 @@ func (r *Room) getClient(cID string) (*Client, error) {
 	return c, nil
 }
 
-func (r *Room) broadcast(p *Packet) {
-	r.SendCh <- p
-}
-
 func (r *Room) has(cID string) bool {
 	_, err := r.getClient(cID)
 	return err == nil
+}
+
+func (r *Room) ListUsers() []*user.PublicUser {
+	users := make([]*user.PublicUser, 0, r.Clients.Len())
+	r.Clients.ForEach(func(cID string, c *Client) bool {
+		res, err := r.Manager.UserRepo.Find(cID)
+		if err != nil {
+			r.logger.Error("list users", err)
+		}
+		pubUser := &user.PublicUser{
+			ID:       res.ID,
+			Username: res.Username,
+			Avatar:   res.Avatar,
+		}
+		users = append(users, pubUser)
+		return true
+	})
+
+	return users
 }
