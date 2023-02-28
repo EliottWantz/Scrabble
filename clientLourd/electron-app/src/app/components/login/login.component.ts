@@ -1,6 +1,6 @@
 import { Component } from "@angular/core";
-import { FormBuilder, FormGroup, Validators } from "@angular/forms";
-import { AuthService } from "@app/services/authentication/authentication.service";
+//import { FormBuilder, FormGroup, Validators } from "@angular/forms";
+import { AuthenticationService } from "@app/services/authentication/authentication.service";
 import { Router } from "@angular/router"
 import { StorageService } from "@app/services/storage/storage.service";
 
@@ -16,10 +16,10 @@ export class LoginComponent {
     isLoginFailed = false;
     errorMessage = '';
     
-    constructor(private authService: AuthService, private storageService: StorageService, private router: Router) { }
+    constructor(private authService: AuthenticationService, private storageService: StorageService, private router: Router) { }
     
     ngOnInit(): void {
-        if (this.storageService.isLoggedIn()) {
+        if (this.authService.isLoggedIn) {
             this.isLoggedIn = true;
         }
     }
