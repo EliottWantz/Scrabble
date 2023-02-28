@@ -26,8 +26,11 @@ func (m *Manager) JoinRoom(c *fiber.Ctx) error {
 			return fiber.NewError(fiber.StatusBadRequest, "Room ID is required")
 		}
 		// Create a new room with the given name and add the user to it
-		r := m.CreateRoom(req.RoomName)
-		if err := r.addClient(req.UserID); err != nil {
+		r, err := m.CreateRoom(req.RoomName)
+		if err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, "Failed to add create new room"+err.Error())
+		}
+		if err = r.addClient(req.UserID); err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, "Failed to add client in new room"+err.Error())
 		}
 	} else {

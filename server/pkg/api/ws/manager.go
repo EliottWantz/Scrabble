@@ -31,7 +31,11 @@ func NewManager(messageRepo *MessageRepository, roomRepo *RoomRepository, userRe
 		UserRepo:    userRepo,
 	}
 
-	m.GlobalRoom = NewRoomWithID(m, "global", "Global")
+	r, err := NewRoomWithID(m, "global", "Global")
+	if err != nil {
+		return nil, err
+	}
+	m.GlobalRoom = r
 	m.AddRoom(m.GlobalRoom)
 
 	return m, nil
@@ -92,8 +96,10 @@ func (m *Manager) ListUsers() ([]user.PublicUser, error) {
 }
 
 func (m *Manager) AddClient(c *Client, name string) error {
-	r := NewRoomWithID(m, c.ID, name)
-	m.AddRoom(r)
+	r, err := m.CreateRoomWithID(name, c.ID)
+	if err != nil {
+		return err
+	}
 	m.Clients.Set(c.ID, c)
 
 	if err := r.addClient(c.ID); err != nil {
@@ -157,10 +163,24 @@ func (m *Manager) DisconnectClient(cID string) error {
 	)
 }
 
-func (m *Manager) CreateRoom(name string) *Room {
-	r := NewRoom(m, name)
+func (m *Manager) CreateRoom(name string) (*Room, error) {
+	r, err := NewRoom(m, name)
+	if err != nil {
+		return nil, err
+	}
+
 	m.AddRoom(r)
-	return r
+	return r, nil
+}
+
+func (m *Manager) CreateRoomWithID(name string, ID string) (*Room, error) {
+	r, err := NewRoomWithID(m, ID, name)
+	if err != nil {
+		return nil, err
+	}
+
+	m.AddRoom(r)
+	return r, nil
 }
 
 func (m *Manager) AddRoom(r *Room) {

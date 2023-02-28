@@ -23,11 +23,11 @@ type Room struct {
 	logger  *slog.Logger
 }
 
-func NewRoom(m *Manager, name string) *Room {
+func NewRoom(m *Manager, name string) (*Room, error) {
 	return NewRoomWithID(m, uuid.NewString(), name)
 }
 
-func NewRoomWithID(m *Manager, ID, name string) *Room {
+func NewRoomWithID(m *Manager, ID, name string) (*Room, error) {
 	r := &Room{
 		ID:      ID,
 		Name:    name,
@@ -36,7 +36,8 @@ func NewRoomWithID(m *Manager, ID, name string) *Room {
 	}
 	r.logger = slog.With("room", r.ID)
 
-	return r
+	err := m.RoomRepo.Insert(r)
+	return r, err
 }
 
 func (r *Room) broadcast(p *Packet) {
@@ -69,6 +70,11 @@ func (r *Room) addClient(cID string) error {
 	r.Clients.Set(cID, c)
 	c.Rooms.Set(r.ID, r)
 	r.logger.Info("client added in room", "client", c.ID)
+
+	err = r.Manager.RoomRepo.Update(r)
+	if err != nil {
+		return err
+	}
 
 	{
 		payload := JoinedRoomPayload{
@@ -175,4 +181,14 @@ func (r *Room) ListUsers() []user.PublicUser {
 	})
 
 	return users
+}
+
+func (r *Room) ListClientIDs() []string {
+	clientIDs := make([]string, 0, r.Clients.Len())
+	r.Clients.ForEach(func(cID string, c *Client) bool {
+		clientIDs = append(clientIDs, c.ID)
+		return true
+	})
+
+	return clientIDs
 }
