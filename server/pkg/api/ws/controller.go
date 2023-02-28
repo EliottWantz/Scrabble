@@ -7,8 +7,9 @@ import (
 )
 
 type JoinRoomRequest struct {
-	UserID string `json:"userId,omitempty"`
-	RoomID string `json:"roomId,omitempty"`
+	UserID   string `json:"userId,omitempty"`
+	RoomID   string `json:"roomId,omitempty"`
+	RoomName string `json:"roomName,omitempty"`
 }
 
 func (m *Manager) JoinRoom(c *fiber.Ctx) error {

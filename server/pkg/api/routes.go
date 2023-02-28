@@ -70,5 +70,6 @@ func (api *API) setupRoutes(cfg *config.Config) {
 	r.Get("/user/:id", api.Ctrls.UserCtrl.GetUser)
 
 	r.Post("/chat/room/join", api.Ctrls.WebSocketManager.JoinRoom)
+	r.Post("/chat/room/leave", api.Ctrls.WebSocketManager.LeaveRoom)
 	r.Get("/chat/room/:id/messages", api.Ctrls.WebSocketManager.GetMessages)
 }

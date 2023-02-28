@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"time"
 
 	"scrabble/config"
@@ -101,7 +102,16 @@ func New(cfg *config.Config) (*API, error) {
 	}
 
 	api := &API{
-		App:    fiber.New(),
+		App: fiber.New(fiber.Config{
+			ErrorHandler: func(c *fiber.Ctx, err error) error {
+				code := fiber.StatusInternalServerError
+				var e *fiber.Error
+				if errors.As(err, &e) {
+					code = e.Code
+				}
+				return c.Status(code).JSON(err)
+			},
+		}),
 		logger: slog.Default(),
 		Ctrls:  controllers,
 		Svcs:   services,

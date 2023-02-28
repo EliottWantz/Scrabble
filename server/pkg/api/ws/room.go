@@ -120,6 +120,13 @@ func (r *Room) addClient(cID string) error {
 }
 
 func (r *Room) removeClient(cID string) error {
+	if r.ID == cID {
+		return ErrLeavingOwnRoom
+	}
+	if r.ID == r.Manager.GlobalRoom.ID {
+		return ErrLeavingGloabalRoom
+	}
+
 	c, err := r.getClient(cID)
 	if err != nil {
 		return err
