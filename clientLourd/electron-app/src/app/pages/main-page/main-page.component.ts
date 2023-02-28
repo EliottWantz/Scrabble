@@ -12,14 +12,14 @@ export class MainPageComponent {
   public username: string;
 
   constructor(
-    private authentificationService: AuthenticationService
+    private authenticationService: AuthenticationService
   ) {this.username = "";}
 
   isConnected(): Boolean {
-    return this.authentificationService.isLoggedIn;
+    return this.authenticationService.isLoggedIn;
   }
 
   logout(): void {
-    this.authentificationService.logout();
+    this.authenticationService.logout();
   }
 }

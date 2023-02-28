@@ -4,7 +4,7 @@
       *ngIf="!isConnected()"
       mat-raised-button
       color="primary"
-      routerLink="['login']" routerLinkActive="router-link-active" 
+      routerLink="/login" routerLinkActive="router-link-active" 
       id="login-button"
     >
       Se connecter
@@ -19,10 +19,10 @@
       Déconnexion
     </button>
 
-    <a *ngIf="isConnected()" routerLink="['profile']" routerLinkActive="router-link-active" id="login-button">
+    <a *ngIf="isConnected()" routerLink="/profile" routerLinkActive="router-link-active" id="login-button">
       HELLO
       <img src="">
     </a>
   </nav>
-  <app-chat-box-prototype *ngIf="isConnected()"></app-chat-box-prototype>
+  <!--<app-chat-box-prototype *ngIf="isConnected()"></app-chat-box-prototype>-->
 </div>
