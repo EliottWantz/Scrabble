@@ -114,7 +114,7 @@ export class ChatBoxPrototypeComponent implements OnInit, AfterViewInit {
     this.chatBoxForm.reset();
   }
   async send(msg: string): Promise<void> {
-    if (!msg) return;
+    if (!msg || !msg.replace(/\s/g, '')) return;
     // console.log("Sending message: " + msg);
     const payload: BroadcastPayload = {
       roomId: this.globalRoomId,
