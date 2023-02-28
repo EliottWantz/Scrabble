@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"scrabble/pkg/api/room"
 	"scrabble/pkg/api/user"
 
 	"github.com/alphadose/haxmap"
@@ -19,11 +20,11 @@ type Manager struct {
 	GlobalRoom  *Room
 	logger      *slog.Logger
 	MessageRepo *MessageRepository
-	RoomRepo    *RoomRepository
+	RoomRepo    *room.Repository
 	UserRepo    *user.Repository
 }
 
-func NewManager(messageRepo *MessageRepository, roomRepo *RoomRepository, userRepo *user.Repository) (*Manager, error) {
+func NewManager(messageRepo *MessageRepository, roomRepo *room.Repository, userRepo *user.Repository) (*Manager, error) {
 	m := &Manager{
 		Clients:     haxmap.New[string, *Client](),
 		Rooms:       haxmap.New[string, *Room](),
@@ -171,17 +172,17 @@ func (m *Manager) CreateRoomWithID(ID, name string) *Room {
 }
 
 func (m *Manager) AddRoom(r *Room) error {
-	roomDB, err := m.RoomRepo.Get(r.ID)
+	found, err := m.RoomRepo.Find(r.ID)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			// global room doesn't exist in db, insert it
-			if m.RoomRepo.Insert(r) != nil {
+			if m.RoomRepo.Insert(&room.Room{ID: r.ID, UserIDs: make([]string, 0)}) != nil {
 				return nil
 			}
 		}
 	} else {
 		// global room exists in db, use it
-		r.ClientIDs = roomDB.UsersIDs
+		r.ClientIDs = found.UserIDs
 	}
 	m.Rooms.Set(r.ID, r)
 	m.logger.Info(

@@ -3,6 +3,7 @@ package ws
 import (
 	"errors"
 
+	"scrabble/pkg/api/room"
 	"scrabble/pkg/api/user"
 
 	"github.com/alphadose/haxmap"
@@ -72,7 +73,10 @@ func (r *Room) AddClient(cID string) error {
 	c.Rooms.Set(r.ID, r)
 	r.logger.Info("client added in room", "client", c.ID)
 
-	err = r.Manager.RoomRepo.Update(r)
+	err = r.Manager.RoomRepo.Update(&room.Room{
+		ID:      r.ID,
+		UserIDs: r.ListClientIDs(),
+	})
 	if err != nil {
 		return err
 	}
@@ -141,7 +145,10 @@ func (r *Room) RemoveClient(cID string) error {
 		return r.Manager.RoomRepo.Delete(r.ID)
 	}
 
-	if err := r.Manager.RoomRepo.Update(r); err != nil {
+	if err := r.Manager.RoomRepo.Update(&room.Room{
+		ID:      r.ID,
+		UserIDs: r.ListClientIDs(),
+	}); err != nil {
 		return err
 	}
 

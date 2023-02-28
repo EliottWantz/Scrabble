@@ -7,6 +7,7 @@ import (
 	"scrabble/config"
 	"scrabble/pkg/api/auth"
 	"scrabble/pkg/api/game"
+	"scrabble/pkg/api/room"
 	"scrabble/pkg/api/storage"
 	"scrabble/pkg/api/user"
 	"scrabble/pkg/api/ws"
@@ -37,13 +38,14 @@ type Services struct {
 	GameSvc *game.Service
 	UserSvc *user.Service
 	AuthSvc *auth.Service
+	RoomSvc *room.Service
 }
 
 type Repositories struct {
 	GameRepo    *game.Repository
 	UserRepo    *user.Repository
 	MessageRepo *ws.MessageRepository
-	RoomRepo    *ws.RoomRepository
+	RoomRepo    *room.Repository
 }
 
 func New(cfg *config.Config) (*API, error) {
@@ -59,7 +61,7 @@ func New(cfg *config.Config) (*API, error) {
 		gameRepo := game.NewRepository(db)
 		userRepo := user.NewRepository(db)
 		messageRepo := ws.NewMessageRepository(db)
-		roomRepo := ws.NewRoomRepository(db)
+		roomRepo := room.NewRepository(db)
 
 		repositories = Repositories{
 			GameRepo:    gameRepo,
@@ -77,11 +79,13 @@ func New(cfg *config.Config) (*API, error) {
 		}
 		gameSvc := game.NewService(repositories.GameRepo)
 		authSvc := auth.NewService(cfg.JWT_SIGN_KEY)
+		roomSvc := room.NewService(repositories.RoomRepo)
 
 		services = Services{
 			GameSvc: gameSvc,
 			UserSvc: userSvc,
 			AuthSvc: authSvc,
+			RoomSvc: roomSvc,
 		}
 	}
 
