@@ -5,6 +5,7 @@ import { Observable } from "rxjs";
 import { CommunicationService } from "@app/services/communication/communication.service"
 import { StorageService } from "../storage/storage.service";
 import { environment } from "src/environments/environment";
+import { WebsocketService } from "../web-socket/web-socket.service";
 
 //TODO: Logout, Web-socket service, login component, register component https://www.bezkoder.com/angular-14-jwt-auth/#Login_Component
 
@@ -17,7 +18,7 @@ export class AuthenticationService {
     isLoggedIn = false;
     isLoginFailed = false;
     errorMessage = '';
-    constructor(private http: HttpClient, private commService: CommunicationService, private storageService: StorageService) {
+    constructor(private http: HttpClient, private commService: CommunicationService, private storageService: StorageService, private websocketService: WebsocketService) {
     }
     
     ngOnInit(): void {
@@ -44,6 +45,9 @@ export class AuthenticationService {
                 }
             })
         });
+        if (this.isLoggedIn) {
+            this.websocketService.connect();
+        }
         /*
         .subscribe({
             next: data => {
@@ -62,5 +66,11 @@ export class AuthenticationService {
                 this.isLoginFailed = true;
             }
         });*/
+    }
+
+    logout(): void {
+        this.isLoggedIn = false;
+        this.websocketService.disconnect();
+        this.storageService.deleteUser();
     }
 }
