@@ -49,7 +49,6 @@ func (api *API) setupRoutes(cfg *config.Config) {
 	})
 	r.Post("/signup", api.Ctrls.UserCtrl.SignUp)
 	r.Post("/login", api.Ctrls.UserCtrl.Login)
-	r.Post("/logout", api.Ctrls.WebSocketManager.Logout)
 
 	// Proctected routes
 	r.Use(
