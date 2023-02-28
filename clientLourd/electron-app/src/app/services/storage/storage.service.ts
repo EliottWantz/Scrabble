@@ -14,16 +14,21 @@ export class StorageService {
     }
 
     public saveUser(user: User): void {
-        window.sessionStorage.removeItem(USER_KEY);
+        sessionStorage.removeItem(USER_KEY);
         sessionStorage.setItem(USER_KEY, JSON.stringify(user));
     }
 
-    public getUser(): any {
+    public getUser(): User | null {
         const user = sessionStorage.getItem(USER_KEY);
         if (user)
             return JSON.parse(user);
-        
-        return {};
+        return null;
+    }
+
+    public deleteUser(): void {
+        const user = sessionStorage.getItem(USER_KEY);
+        if (user)
+            sessionStorage.removeItem(USER_KEY);
     }
 
     public isLoggedIn(): boolean {
