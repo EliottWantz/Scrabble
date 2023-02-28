@@ -39,7 +39,11 @@ func (api *API) setupRoutes(cfg *config.Config) {
 		if ID == "" {
 			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "Missing id"})
 		}
-		return api.Ctrls.WebSocketManager.Accept(ID)(c)
+		username := c.Query("username")
+		if username == "" {
+			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "Missing username"})
+		}
+		return api.Ctrls.WebSocketManager.Accept(ID, username)(c)
 	})
 
 	r := api.App.Group("/api")

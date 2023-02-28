@@ -23,14 +23,14 @@ type Room struct {
 	logger  *slog.Logger
 }
 
-func NewRoom(m *Manager) *Room {
-	return NewRoomWithID(m, uuid.NewString())
+func NewRoom(m *Manager, name string) *Room {
+	return NewRoomWithID(m, uuid.NewString(), name)
 }
 
-func NewRoomWithID(m *Manager, ID string) *Room {
+func NewRoomWithID(m *Manager, ID, name string) *Room {
 	r := &Room{
 		ID:      ID,
-		Name:    "room-" + ID,
+		Name:    name,
 		Manager: m,
 		Clients: haxmap.New[string, *Client](),
 	}

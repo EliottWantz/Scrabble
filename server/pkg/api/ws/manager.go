@@ -31,16 +31,16 @@ func NewManager(messageRepo *MessageRepository, roomRepo *RoomRepository, userRe
 		UserRepo:    userRepo,
 	}
 
-	m.GlobalRoom = NewRoomWithID(m, "global")
+	m.GlobalRoom = NewRoomWithID(m, "global", "Global")
 	m.AddRoom(m.GlobalRoom)
 
 	return m, nil
 }
 
-func (m *Manager) Accept(cID string) fiber.Handler {
+func (m *Manager) Accept(cID, name string) fiber.Handler {
 	return websocket.New(func(conn *websocket.Conn) {
 		c := NewClient(conn, cID, m)
-		err := m.AddClient(conn, c)
+		err := m.AddClient(c, name)
 		if err != nil {
 			m.logger.Error("add client", err)
 			return
@@ -91,8 +91,8 @@ func (m *Manager) ListUsers() ([]user.PublicUser, error) {
 	return pubUsers, nil
 }
 
-func (m *Manager) AddClient(conn *websocket.Conn, c *Client) error {
-	r := NewRoomWithID(m, c.ID)
+func (m *Manager) AddClient(c *Client, name string) error {
+	r := NewRoomWithID(m, c.ID, name)
 	m.AddRoom(r)
 	m.Clients.Set(c.ID, c)
 
@@ -155,6 +155,12 @@ func (m *Manager) DisconnectClient(cID string) error {
 		websocket.CloseMessage,
 		websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""),
 	)
+}
+
+func (m *Manager) CreateRoom(name string) *Room {
+	r := NewRoom(m, name)
+	m.AddRoom(r)
+	return r
 }
 
 func (m *Manager) AddRoom(r *Room) {
