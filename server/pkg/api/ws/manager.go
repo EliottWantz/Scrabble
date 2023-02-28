@@ -72,23 +72,6 @@ func (m *Manager) Broadcast(p *Packet) {
 	})
 }
 
-func (m *Manager) SendLatestMessages(rID string, c *Client) error {
-	msgs, err := m.MessageRepo.LatestMessage(rID, 0)
-	if err != nil {
-		return err
-	}
-
-	for _, msg := range msgs {
-		p, err := NewPacket(ClientEventBroadcast, msg)
-		if err != nil {
-			return err
-		}
-		c.send(p)
-	}
-
-	return nil
-}
-
 func (m *Manager) ListUsers() ([]user.PublicUser, error) {
 	var pubUsers []user.PublicUser
 	users, err := m.UserRepo.FindAll()
