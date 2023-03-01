@@ -14,6 +14,7 @@ export class RegisterComponent {
     email: string = "";
     avatar: string = "";
     isRegisterFailed = false;
+    selectedFile: any = null;
     
     constructor(private authService: AuthenticationService, private router: Router) { }
     
@@ -36,6 +37,7 @@ export class RegisterComponent {
         for(let i = 0; i < document.getElementsByClassName("avatar").length; i++) {
             if (i != num) {
                 document.getElementsByClassName("avatar")[i].setAttribute("style", "");
+                this.selectedFile = null;
             } else {
                 src = document.getElementsByClassName("avatar")[i].getAttribute("src");
                 document.getElementsByClassName("avatar")[i].setAttribute("style", "background: -webkit-linear-gradient(left top, crimson 0%, #f90 100%);");
@@ -46,10 +48,8 @@ export class RegisterComponent {
         console.log(this.avatar);
     }
 
-    selectedFile: any = null;
-
-onFileSelected(event: any): void {
-    this.selectedFile = event.target.files[0] ?? null;
-
-}
+    onFileSelected(event: any): void {
+        this.selectedFile = event.target.files[0] ?? null;
+        this.selectAvatar(-1);
+    }
 }
