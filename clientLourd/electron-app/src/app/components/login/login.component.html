@@ -1,4 +1,4 @@
-<form id="btn-submit">
+<form id="form">
     <div class="form-group">
         <mat-form-field class="fields" appearance="fill">
             <mat-label for="username">Nom d'utilisateur</mat-label>
@@ -11,12 +11,12 @@
             <input matInput placeholder="Entrez votre mot de passe" value="" name="password" type="password" [(ngModel)]= "password" required>
         </mat-form-field>
     </div>
-
-    <div *ngIf="isLoginFailed">
-        <strong style="color: red;"> Le mot de passe ou nom d'utilisateur est incorrect</strong>
-    </div>
     
     <button mat-raised-button color="primary" (click)="onSubmit()">Se connecter</button>
 </form>
+
+<div *ngIf="isLoginFailed" id="error">
+    <strong style="color: red;"> Le mot de passe ou nom d'utilisateur est incorrect</strong>
+</div>
 
     

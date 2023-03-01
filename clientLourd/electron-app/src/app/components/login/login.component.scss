@@ -9,3 +9,13 @@
       rgb(52, 75, 138) 100%
     );
   }
+
+#error {
+  margin-top: 2%;
+}
+
+#form {
+  display: flex;
+    flex-direction: column;
+    align-items: center;
+}
