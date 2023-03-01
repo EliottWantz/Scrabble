@@ -68,6 +68,29 @@ export class AuthenticationService {
         });*/
     }
 
+    async register(username: string, password: string, email: string, avatar: string): Promise<void> {
+        await this.commService.register(username, password, email, avatar).then(data => {
+            data.subscribe({
+                next: info => {
+                    if (info != null) {
+                        this.storageService.saveUser(info.user);
+                        this.isLoginFailed = false;
+                        this.isLoggedIn = true;
+                    } else {
+                        this.isLoginFailed = true;
+                    }
+                },
+                error: err => {
+                    this.errorMessage = err.error.message;
+                    this.isLoginFailed = true;
+                }
+            })
+        });
+        if (this.isLoggedIn) {
+            this.websocketService.connect();
+        }
+    }
+
     logout(): void {
         this.isLoggedIn = false;
         this.websocketService.disconnect();
