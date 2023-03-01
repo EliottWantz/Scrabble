@@ -14,6 +14,7 @@ import { ProfilePageComponent } from './pages/profile-page/profile-page.componen
 import { MatCardModule } from '@angular/material/card';
 import { AppMaterialModule } from "@app/modules/material.module";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
+import { RegisterComponent } from '@app/components/register/register.component';
 
 @NgModule({
   declarations: [
@@ -21,7 +22,8 @@ import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
     LoginComponent,
     MainPageComponent,
     LoginPageComponent,
-    ProfilePageComponent
+    ProfilePageComponent,
+    RegisterComponent
   ],
   imports: [
     BrowserModule,
