@@ -1,13 +1,11 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http"
 import { User } from "@app/utils/interfaces/user";
-import { Observable } from "rxjs";
+import { BehaviorSubject, Observable } from "rxjs";
 import { CommunicationService } from "@app/services/communication/communication.service"
 import { StorageService } from "../storage/storage.service";
 import { environment } from "src/environments/environment";
 import { WebsocketService } from "../web-socket/web-socket.service";
-
-//TODO: Logout, Web-socket service, login component, register component https://www.bezkoder.com/angular-14-jwt-auth/#Login_Component
 
 @Injectable({
     providedIn: 'root',
@@ -18,7 +16,9 @@ export class AuthenticationService {
     isLoggedIn = false;
     isLoginFailed = false;
     errorMessage = '';
+    //subjectUser: BehaviorSubject<User>;
     constructor(private http: HttpClient, private commService: CommunicationService, private storageService: StorageService, private websocketService: WebsocketService) {
+        //this.subjectUser = new BehaviorSubject();
     }
     
     ngOnInit(): void {
@@ -28,12 +28,10 @@ export class AuthenticationService {
     }
 
     async login(username: string, password: string): Promise<boolean> {
-        return await this.commService.login(username, password).then((user) => {
+        return await this.commService.login(username, password).then((res) => {
+            console.log(res);
             console.log("login");
-            this.storageService.saveUser(user);
-            this.isLoginFailed = false;
-            this.isLoggedIn = true;
-            this.websocketService.connect();
+            this.setSession(res);
             return true;
         })
         .catch((err) => {
@@ -41,30 +39,12 @@ export class AuthenticationService {
             this.isLoginFailed = true;
             return false;
         });
-        /*this.commService.login(username, password).subscribe({
-            next: data => {
-                console.log("login");
-                this.storageService.saveUser(data.user);
-                this.isLoginFailed = false;
-                this.isLoggedIn = true;
-            },
-            error: err => {
-                this.errorMessage = err.error.message;
-                this.isLoginFailed = true;
-            }
-        });
-        if (this.isLoggedIn) {
-            this.websocketService.connect();
-        }*/
     }
 
     async register(username: string, password: string, email: string, avatar: string): Promise<boolean> {
-        return await this.commService.register(username, password, email, avatar).then((user) => {
+        return await this.commService.register(username, password, email, avatar).then((res) => {
             console.log("register");
-            this.storageService.saveUser(user);
-            this.isLoginFailed = false;
-            this.isLoggedIn = true;
-            this.websocketService.connect();
+            this.setSession(res);
             return true;
         })
         .catch((err) => {
@@ -84,6 +64,14 @@ export class AuthenticationService {
                 this.isLoginFailed = true;
             }
         });*/
+    }
+
+    private setSession(res: {user: User, token: string}): void {
+        this.storageService
+        this.storageService.saveUser(res.user);
+        this.isLoginFailed = false;
+        this.isLoggedIn = true;
+        this.websocketService.connect();
     }
 
     logout(): void {

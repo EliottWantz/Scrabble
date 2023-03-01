@@ -12,14 +12,14 @@ export class CommunicationService {
 
     constructor(private readonly http: HttpClient) {}
 
-    async login(username: string, password: string): Promise<User> {
-        const user: User = (await lastValueFrom(this.requestLogin(username, password))).user;
-        return user;
+    async login(username: string, password: string): Promise<{user: User, token: string}> {
+        const res: any = (await lastValueFrom(this.requestLogin(username, password)));
+        return res;
     }
 
-    async register(username: string, password: string, email: string, avatar: string): Promise<User> {
-        const user: User = (await lastValueFrom(this.requestRegister(username, password, email, avatar))).user;
-        return user;
+    async register(username: string, password: string, email: string, avatar: string): Promise<{user: User, token: string}> {
+        const res: any = (await lastValueFrom(this.requestRegister(username, password, email, avatar)));
+        return res;
     }
 
     private requestLogin(username: string, password: string): Observable<{user: User}> {
