@@ -2,7 +2,7 @@ import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { environment } from 'src/environments/environment';
 import { User } from "@app/utils/interfaces/user";
-import { catchError, Observable, throwError } from "rxjs";
+import { catchError, lastValueFrom, Observable, throwError } from "rxjs";
 
 @Injectable({
     providedIn: 'root',
@@ -12,11 +12,21 @@ export class CommunicationService {
 
     constructor(private readonly http: HttpClient) {}
 
-    login(username: string, password: string): Observable<{user: User}> {
+    async login(username: string, password: string): Promise<User> {
+        const user: User = (await lastValueFrom(this.requestLogin(username, password))).user;
+        return user;
+    }
+
+    async register(username: string, password: string, email: string, avatar: string): Promise<User> {
+        const user: User = (await lastValueFrom(this.requestRegister(username, password, email, avatar))).user;
+        return user;
+    }
+
+    private requestLogin(username: string, password: string): Observable<{user: User}> {
         return this.http.post<{user: User}>(`${this.baseUrl}/login`, { username, password }).pipe(catchError(this.handleError));
     }
 
-    register(username: string, password: string, email: string, avatar: string): Observable<{user: User}> {
+    private requestRegister(username: string, password: string, email: string, avatar: string): Observable<{user: User}> {
         return this.http.post<{user: User}>(`${this.baseUrl}/signup`, { username, password, email, avatar }).pipe(catchError(this.handleError));
     }
 

@@ -11,23 +11,16 @@ import { Router } from "@angular/router"
 export class LoginComponent {
     username: string = "";
     password: string = "";
-    isLoggedIn = false;
     isLoginFailed = false;
     
     constructor(private authService: AuthenticationService, private router: Router) { }
     
-    ngOnInit(): void {
-        if (this.authService.isLoggedIn) {
-            this.isLoggedIn = true;
-        }
-    }
-    
-    onSubmit() {
+    async onSubmit() {
         if (this.username == "" || this.password == "")
             return;
-        this.authService.login(this.username, this.password);
+        const isLoggedIn = await this.authService.login(this.username, this.password);
 
-        if (this.authService.isLoggedIn) {
+        if (isLoggedIn) {
             this.router.navigate(['/home']);
         } else {
             this.isLoginFailed = true;

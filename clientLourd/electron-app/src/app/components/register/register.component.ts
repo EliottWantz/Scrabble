@@ -17,14 +17,16 @@ export class RegisterComponent {
     
     constructor(private authService: AuthenticationService, private router: Router) { }
     
-    onSubmit() {
+    async onSubmit() {
         if (this.username == "" || this.password == "" || this.email =="" || this.avatar == "")
             return;
-        this.authService.register(this.username, this.password, this.email, this.avatar);
+        const isLoggedIn = await this.authService.register(this.username, this.password, this.email, this.avatar);
 
-        if (this.authService.isLoggedIn) {
+        if (isLoggedIn) {
             console.log("allo2");
             this.router.navigate(['/home']);
+        } else {
+            this.isRegisterFailed = true;
         }
     }
 
@@ -43,4 +45,11 @@ export class RegisterComponent {
             this.avatar = src;
         console.log(this.avatar);
     }
+
+    selectedFile: any = null;
+
+onFileSelected(event: any): void {
+    this.selectedFile = event.target.files[0] ?? null;
+
+}
 }

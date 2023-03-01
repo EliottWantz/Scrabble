@@ -27,8 +27,21 @@ export class AuthenticationService {
         }
     }
 
-    login(username: string, password: string): void {
-        this.commService.login(username, password).subscribe({
+    async login(username: string, password: string): Promise<boolean> {
+        return await this.commService.login(username, password).then((user) => {
+            console.log("login");
+            this.storageService.saveUser(user);
+            this.isLoginFailed = false;
+            this.isLoggedIn = true;
+            this.websocketService.connect();
+            return true;
+        })
+        .catch((err) => {
+            this.errorMessage = err.message;
+            this.isLoginFailed = true;
+            return false;
+        });
+        /*this.commService.login(username, password).subscribe({
             next: data => {
                 console.log("login");
                 this.storageService.saveUser(data.user);
@@ -42,10 +55,23 @@ export class AuthenticationService {
         });
         if (this.isLoggedIn) {
             this.websocketService.connect();
-        }
+        }*/
     }
 
-    register(username: string, password: string, email: string, avatar: string): void {
+    async register(username: string, password: string, email: string, avatar: string): Promise<boolean> {
+        return await this.commService.register(username, password, email, avatar).then((user) => {
+            console.log("register");
+            this.storageService.saveUser(user);
+            this.isLoginFailed = false;
+            this.isLoggedIn = true;
+            this.websocketService.connect();
+            return true;
+        })
+        .catch((err) => {
+            this.errorMessage = err.message;
+            this.isLoginFailed = true;
+            return false;
+        });/*
         this.commService.register(username, password, email, avatar).subscribe({
             next: data => {
                 console.log("register");
@@ -57,10 +83,7 @@ export class AuthenticationService {
                 this.errorMessage = err.error.message;
                 this.isLoginFailed = true;
             }
-        });
-        if (this.isLoggedIn) {
-            this.websocketService.connect();
-        }
+        });*/
     }
 
     logout(): void {
