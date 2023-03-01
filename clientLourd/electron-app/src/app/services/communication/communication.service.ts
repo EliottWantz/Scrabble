@@ -15,4 +15,8 @@ export class CommunicationService {
     async login(username: string, password: string): Promise<Observable<{user: User} | null>> {
         return this.http.post<{user: User}>(`${this.baseUrl}/login`, { username, password });
     }
+
+    async register(username: string, password: string, email: string, avatar: string): Promise<Observable<{user: User} | null>> {
+        return this.http.post<{user: User}>(`${this.baseUrl}/signup`, { username, password, email, avatar });
+    }
 }
