@@ -27,64 +27,36 @@ export class AuthenticationService {
         }
     }
 
-    async login(username: string, password: string): Promise<void> {
-        await this.commService.login(username, password).then(data => {
-            data.subscribe({
-                next: info => {
-                    if (info != null) {
-                        this.storageService.saveUser(info.user);
-                        this.isLoginFailed = false;
-                        this.isLoggedIn = true;
-                    } else {
-                        this.isLoginFailed = true;
-                    }
-                },
-                error: err => {
-                    this.errorMessage = err.error.message;
-                    this.isLoginFailed = true;
-                }
-            })
-        });
-        if (this.isLoggedIn) {
-            this.websocketService.connect();
-        }
-        /*
-        .subscribe({
+    login(username: string, password: string): void {
+        this.commService.login(username, password).subscribe({
             next: data => {
-                if (data != null) {
-                    this.storageService.saveUser(data.user);
-                    this.isLoginFailed = false;
-                    this.isLoggedIn = true;
-                    return true;
-                } else {
-                    this.isLoginFailed = true;
-                }
-                
+                console.log("login");
+                this.storageService.saveUser(data.user);
+                this.isLoginFailed = false;
+                this.isLoggedIn = true;
             },
             error: err => {
                 this.errorMessage = err.error.message;
                 this.isLoginFailed = true;
             }
-        });*/
+        });
+        if (this.isLoggedIn) {
+            this.websocketService.connect();
+        }
     }
 
-    async register(username: string, password: string, email: string, avatar: string): Promise<void> {
-        await this.commService.register(username, password, email, avatar).then(data => {
-            data.subscribe({
-                next: info => {
-                    if (info != null) {
-                        this.storageService.saveUser(info.user);
-                        this.isLoginFailed = false;
-                        this.isLoggedIn = true;
-                    } else {
-                        this.isLoginFailed = true;
-                    }
-                },
-                error: err => {
-                    this.errorMessage = err.error.message;
-                    this.isLoginFailed = true;
-                }
-            })
+    register(username: string, password: string, email: string, avatar: string): void {
+        this.commService.register(username, password, email, avatar).subscribe({
+            next: data => {
+                console.log("register");
+                this.storageService.saveUser(data.user);
+                this.isLoginFailed = false;
+                this.isLoggedIn = true;
+            },
+            error: err => {
+                this.errorMessage = err.error.message;
+                this.isLoginFailed = true;
+            }
         });
         if (this.isLoggedIn) {
             this.websocketService.connect();

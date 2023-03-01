@@ -12,11 +12,11 @@ export class CommunicationService {
 
     constructor(private readonly http: HttpClient) {}
 
-    async login(username: string, password: string): Promise<Observable<{user: User} | null>> {
+    login(username: string, password: string): Observable<{user: User}> {
         return this.http.post<{user: User}>(`${this.baseUrl}/login`, { username, password });
     }
 
-    async register(username: string, password: string, email: string, avatar: string): Promise<Observable<{user: User} | null>> {
+    register(username: string, password: string, email: string, avatar: string): Observable<{user: User}> {
         return this.http.post<{user: User}>(`${this.baseUrl}/signup`, { username, password, email, avatar });
     }
 }
