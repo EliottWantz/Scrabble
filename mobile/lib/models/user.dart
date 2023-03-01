@@ -1,11 +1,11 @@
 import 'dart:convert';
 
-class UserPrefs {
-  String? theme;
+class Preferences {
+  String theme;
 
-  UserPrefs({this.theme});
+  Preferences({required this.theme});
 
-  factory UserPrefs.fromJson(Map<String, dynamic> json) => UserPrefs(
+  factory Preferences.fromJson(Map<String, dynamic> json) => Preferences(
         theme: json["theme"],
       );
 
@@ -17,18 +17,31 @@ class UserPrefs {
 class User {
   String id;
   String username;
+  String email;
+  Object avatar;
+  Preferences preferences;
 
-  User({required this.id, required this.username});
+  User(
+      {required this.id,
+      required this.username,
+      required this.email,
+      required this.avatar,
+      required this.preferences});
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json["id"],
-      username: json["username"],
-    );
+        id: json["id"],
+        username: json["username"],
+        email: json["email"],
+        avatar: json["avatar"],
+        preferences: Preferences.fromJson(json["Preferences"]));
   }
 
   Map<String, dynamic> toJson() => {
         "id": id,
         "username": username,
+        "email": email,
+        "avatar": avatar,
+        "preferences": preferences.toJson(),
       };
 }

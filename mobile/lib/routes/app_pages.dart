@@ -25,8 +25,10 @@ class AppPages {
         name: Routes.HOME,
         page: () => HomeScreen(),
         binding: ChatBoxBinding(),
-        // middlewares: [AuthGuard()]),
-    ),
-    GetPage(name: Routes.AVATAR_SELECTION, page: () => AvatarSelectionScreen(),binding: AvatarSelectionBinding()),
+        middlewares: [AuthGuard()]),
+    GetPage(
+        name: Routes.AVATAR_SELECTION,
+        page: () => AvatarSelectionScreen(),
+        binding: AvatarSelectionBinding()),
   ];
 }

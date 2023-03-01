@@ -23,16 +23,16 @@ class ApiRepository {
     }
   }
 
-  // Future<RegisterResponse?> signup(RegisterRequest data) async {
-  //   final res = await apiProvider.signup('/signup', data);
-  //   if (res.statusCode == 201) {
-  //     return RegisterResponse.fromJson(res.body);
-  //   }
-  // }
-
-  Future<LogoutResponse?> logout(LogoutRequest data) async {
-    await apiProvider.logout('/logout', data);
+  Future<RegisterResponse?> signup(RegisterRequest data) async {
+    final res = await apiProvider.signup('/signup', data);
+    if (res.statusCode == 201) {
+      return RegisterResponse.fromJson(res.body);
+    }
   }
+
+  // Future<LogoutResponse?> logout(LogoutRequest data) async {
+  //   await apiProvider.logout('/logout', data);
+  // }
 
   Future<void> upload (File imagePath) async {
     final FormData formData = FormData({

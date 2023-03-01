@@ -9,6 +9,7 @@ import 'package:client_leger/services/auth_service.dart';
 import 'package:client_leger/services/avatar_service.dart';
 import 'package:client_leger/services/settings_service.dart';
 import 'package:client_leger/services/storage_service.dart';
+import 'package:client_leger/services/user_service.dart';
 import 'package:client_leger/services/websocket_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -38,7 +39,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeConfig.lightTheme,
       defaultTransition: Transition.fade,
       debugShowCheckedModeBanner: false,
-      initialRoute: Routes.AVATAR_SELECTION,
+      initialRoute: Routes.AUTH,
       getPages: AppPages.routes,
       locale: TranslationService.locale,
       fallbackLocale: TranslationService.fallbackLocale,
@@ -53,6 +54,11 @@ Future<void> initGlobalServices() async {
   Get.put(WebsocketService(), permanent: false);
   Get.put(ApiRepository(apiProvider: Get.find()), permanent: true);
   Get.put(SettingsService(storageService: Get.find()));
-  Get.put(AuthService(storageService: Get.find(), apiRepository: Get.find(), websocketService: Get.find()));
+  Get.put(UserService());
+  Get.put(AuthService(
+      storageService: Get.find(),
+      apiRepository: Get.find(),
+      websocketService: Get.find(),
+      userService: Get.find()));
   Get.put(AvatarService());
 }

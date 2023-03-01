@@ -41,47 +41,19 @@ class AppSideBar extends StatelessWidget {
         headerDivider: const Divider(
           color: Colors.white,
         ),
-        // headerBuilder: (context, extended) {
-        //   if (ModalRoute.of(context)!.settings.name == '/auth' ||
-        //       ModalRoute.of(context)!.settings.name == '/auth/login' ||
-        //       ModalRoute.of(context)!.settings.name == '/auth/register') {
-        //     return _buildHeaderAuth(extended);
-        //   } else {
-        //     return _buildHeaderHome(extended);
-        //   }
-        // },
+        headerBuilder: (context, extended) {
+          if (ModalRoute.of(context)!.settings.name == '/auth' ||
+              ModalRoute.of(context)!.settings.name == '/auth/login' ||
+              ModalRoute.of(context)!.settings.name == '/auth/register') {
+            return _buildHeaderAuth(extended);
+          } else {
+            return _buildHeaderHome(extended);
+          }
+        },
         items: _buildListItems(context));
   }
 
   Widget _buildFooterAuth() {
-    return SizedBox(
-      // height: 150,
-      // child: Padding(
-      //   padding: const EdgeInsets.all(16.0),
-      //   child: Center(
-      //     child: Column(
-      //       children: [
-      //         const Divider(color: Colors.white),
-      //         const Gap(20),
-      //         InkWell(
-      //             onTap: () {
-      //               settingsService.switchTheme();
-      //             },
-      //             child: Obx(
-      //               () => Icon(
-      //                 settingsService.currentThemeIcon.value,
-      //                 size: 20,
-      //                 color: Colors.white,
-      //               ),
-      //             )),
-      //       ],
-      //     ),
-      //   ),
-      // ),
-    );
-  }
-
-  Widget _buildFooterHome() {
     return SizedBox(
       height: 150,
       child: Padding(
@@ -91,18 +63,56 @@ class AppSideBar extends StatelessWidget {
             children: [
               const Divider(color: Colors.white),
               const Gap(20),
-              // InkWell(
-              //     onTap: () {
-              //       settingsService.switchTheme();
-              //     },
-              //     child: Obx(
-              //       () => Icon(
-              //         settingsService.currentThemeIcon.value,
-              //         size: 20,
-              //         color: Colors.white,
-              //       ),
-              //     )),
-              // const Gap(40),
+              InkWell(
+                  onTap: () {
+                    settingsService.switchTheme();
+                  },
+                  child: Obx(
+                    () => Icon(
+                      settingsService.currentThemeIcon.value,
+                      size: 20,
+                      color: Colors.white,
+                    ),
+                  )),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFooterHome() {
+    return SizedBox(
+      height: 200,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Center(
+          child: Column(
+            children: [
+              const Divider(color: Colors.white),
+              const Gap(20),
+              InkWell(
+                onTap: () {
+                  showSettingsDialog();
+                },
+                child: const Icon(
+                  Icons.settings,
+                  color: Colors.white,
+                ),
+              ),
+              const Gap(20),
+              InkWell(
+                  onTap: () {
+                    settingsService.switchTheme();
+                  },
+                  child: Obx(
+                    () => Icon(
+                      settingsService.currentThemeIcon.value,
+                      size: 20,
+                      color: Colors.white,
+                    ),
+                  )),
+              const Gap(40),
               InkWell(
                 onTap: () async {
                   await DialogHelper.showLogoutDialog(authService.logout);
@@ -130,18 +140,18 @@ class AppSideBar extends StatelessWidget {
             children: [
               const Divider(color: Colors.white),
               const Gap(20),
-              // InkWell(
-              //     onTap: () {
-              //       settingsService.switchTheme();
-              //     },
-              //     child: Obx(
-              //       () => Icon(
-              //         settingsService.currentThemeIcon.value,
-              //         size: 20,
-              //         color: Colors.white,
-              //       ),
-              //     )),
-              // const Gap(40),
+              InkWell(
+                  onTap: () {
+                    settingsService.switchTheme();
+                  },
+                  child: Obx(
+                    () => Icon(
+                      settingsService.currentThemeIcon.value,
+                      size: 20,
+                      color: Colors.white,
+                    ),
+                  )),
+              const Gap(40),
               InkWell(
                 onTap: () {
                   Get.back();
@@ -185,7 +195,7 @@ class AppSideBar extends StatelessWidget {
       child: Column(
         children: [
           Padding(
-            padding: EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(16.0),
             child: CircleAvatar(
               radius: 40,
               child: Image.asset('assets/images/avatar(7).png'),
@@ -204,14 +214,10 @@ class AppSideBar extends StatelessWidget {
           label: 'PolyScrabble',
           onTap: () {},
         ),
-        // const SidebarXItem(
-        //   icon: Icons.person,
-        //   label: 'Profile',
-        // ),
-        // const SidebarXItem(
-        //   icon: Icons.settings,
-        //   label: 'Settings',
-        // ),
+        const SidebarXItem(
+          icon: Icons.person,
+          label: 'Profile',
+        ),
       ];
     } else if (ModalRoute.of(context)!.settings.name == '/auth/login') {
       return [
@@ -242,5 +248,31 @@ class AppSideBar extends StatelessWidget {
         ),
       ];
     }
+  }
+
+  void showSettingsDialog() {
+    Get.dialog(
+      Dialog(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Déconnexion',
+                style: Get.textTheme.headline4,
+              ),
+              const Gap(20),
+              Text(
+                'Êtes-vous sûr de vouloir partir',
+                style: Get.textTheme.headline6,
+              ),
+              const Gap(20),
+            ],
+          ),
+        ),
+      ),
+      barrierDismissible: true,
+    );
   }
 }

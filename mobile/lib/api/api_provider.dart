@@ -14,9 +14,9 @@ class ApiProvider extends BaseProvider {
     return post(path, data.toJson());
   }
 
-  Future<Response> logout(String path, LogoutRequest data) {
-    return post(path, data.toJson());
-  }
+  // Future<Response> logout(String path, LogoutRequest data) {
+  //   return post(path, data.toJson());
+  // }
 
   Future<Response> upload(String path, FormData data) {
     return post(path, data);

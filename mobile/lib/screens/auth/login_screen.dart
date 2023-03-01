@@ -57,22 +57,22 @@ class LoginScreen extends StatelessWidget {
                                   requiredMessage:
                                       'Le champ ne peut pas être vide')
                               .build()),
-                      // const Gap(20.0),
-                      // InputField(
-                      //   controller: controller.loginPasswordController,
-                      //   keyboardType: TextInputType.text,
-                      //   labelText: 'authPasswordLabel'.tr,
-                      //   placeholder: 'authPasswordPlaceholder'.tr,
-                      //   password: true,
-                      //   validator: ValidationBuilder(
-                      //           requiredMessage:
-                      //               'Le champ ne peut pas être vide')
-                      //       .regExp(
-                      //           RegExp(
-                      //               r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{3,}$'),
-                      //           'Veuillez entrez un mot de passe valide')
-                      //       .build(),
-                      // ),
+                      const Gap(20.0),
+                      InputField(
+                        controller: controller.loginPasswordController,
+                        keyboardType: TextInputType.text,
+                        labelText: 'authPasswordLabel'.tr,
+                        placeholder: 'authPasswordPlaceholder'.tr,
+                        password: true,
+                        validator: ValidationBuilder(
+                                requiredMessage:
+                                    'Le champ ne peut pas être vide')
+                            .regExp(
+                                RegExp(
+                                    r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{3,}$'),
+                                'Veuillez entrez un mot de passe valide')
+                            .build(),
+                      ),
                       const Gap(50.0),
                       CustomButton(
                         text: 'authLoginBtn'.tr,
