@@ -5,7 +5,6 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type Repository struct {
@@ -36,14 +35,21 @@ func (r *Repository) Find(ID string) (*Room, error) {
 	return &roomDB, nil
 }
 
-func (r *Repository) Update(room *Room) error {
-	_, err := r.coll.ReplaceOne(
+func (r *Repository) AddUser(roomID, userID string) error {
+	_, err := r.coll.UpdateByID(
 		context.Background(),
-		bson.M{"_id": room.ID},
-		room,
-		options.Replace().SetUpsert(true),
+		roomID,
+		bson.M{"$addToSet": bson.M{"userIds": userID}},
 	)
+	return err
+}
 
+func (r *Repository) RemoveUser(roomID, userID string) error {
+	_, err := r.coll.UpdateByID(
+		context.Background(),
+		roomID,
+		bson.M{"$pull": bson.M{"userIds": userID}},
+	)
 	return err
 }
 

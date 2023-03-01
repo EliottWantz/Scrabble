@@ -7,7 +7,6 @@ import (
 	"scrabble/pkg/api/user"
 
 	"github.com/alphadose/haxmap"
-	"github.com/google/uuid"
 	"golang.org/x/exp/slog"
 )
 
@@ -17,29 +16,25 @@ var (
 )
 
 type Room struct {
-	ID        string
-	Name      string
-	Manager   *Manager
-	Clients   *haxmap.Map[string, *Client]
-	ClientIDs []string
-	logger    *slog.Logger
+	ID      string
+	Name    string
+	Manager *Manager
+	Clients *haxmap.Map[string, *Client]
+	UserIDs []string
+	logger  *slog.Logger
+	DBRoom  *room.Room
 }
 
-func NewRoom(m *Manager, name string) *Room {
-	return NewRoomWithID(m, uuid.NewString(), name)
-}
-
-func NewRoomWithID(m *Manager, ID, name string) *Room {
-	r := &Room{
-		ID:        ID,
-		Name:      name,
-		Manager:   m,
-		Clients:   haxmap.New[string, *Client](),
-		ClientIDs: make([]string, 0),
-		logger:    slog.With("room", ID),
+func NewRoomWithID(m *Manager, r *room.Room) *Room {
+	return &Room{
+		ID:      r.ID,
+		Name:    r.Name,
+		Manager: m,
+		Clients: haxmap.New[string, *Client](),
+		UserIDs: r.UserIDs,
+		logger:  slog.With("room", r.ID),
+		DBRoom:  r,
 	}
-
-	return r
 }
 
 func (r *Room) Broadcast(p *Packet) {
@@ -73,10 +68,7 @@ func (r *Room) AddClient(cID string) error {
 	c.Rooms.Set(r.ID, r)
 	r.logger.Info("client added in room", "client", c.ID)
 
-	err = r.Manager.RoomRepo.Update(&room.Room{
-		ID:      r.ID,
-		UserIDs: r.ListClientIDs(),
-	})
+	err = r.Manager.RoomSvc.AddUserToRoom(r.ID, cID)
 	if err != nil {
 		return err
 	}
@@ -142,13 +134,10 @@ func (r *Room) RemoveClient(cID string) error {
 		if err := r.Manager.RemoveRoom(r.ID); err != nil {
 			return err
 		}
-		return r.Manager.RoomRepo.Delete(r.ID)
+		return r.Manager.RoomSvc.Delete(r.ID)
 	}
 
-	if err := r.Manager.RoomRepo.Update(&room.Room{
-		ID:      r.ID,
-		UserIDs: r.ListClientIDs(),
-	}); err != nil {
+	if err := r.Manager.RoomSvc.RemoveUserFromRoom(r.ID, cID); err != nil {
 		return err
 	}
 

@@ -4,6 +4,7 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 )
 
 type JoinRoomRequest struct {
@@ -26,7 +27,10 @@ func (m *Manager) JoinRoom(c *fiber.Ctx) error {
 			return fiber.NewError(fiber.StatusBadRequest, "Room ID is required")
 		}
 		// Create a new room with the given name and add the user to it
-		r := m.CreateRoom(req.RoomName)
+		r, err := m.AddRoom(uuid.NewString(), req.RoomName)
+		if err != nil {
+			fiber.NewError(fiber.StatusInternalServerError, "Failed to create new room"+err.Error())
+		}
 		if err := r.AddClient(req.UserID); err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, "Failed to add client in new room"+err.Error())
 		}

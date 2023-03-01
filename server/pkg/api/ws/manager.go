@@ -1,7 +1,6 @@
 package ws
 
 import (
-	"errors"
 	"fmt"
 
 	"scrabble/pkg/api/room"
@@ -10,7 +9,6 @@ import (
 	"github.com/alphadose/haxmap"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
-	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/exp/slog"
 )
 
@@ -20,21 +18,24 @@ type Manager struct {
 	GlobalRoom  *Room
 	logger      *slog.Logger
 	MessageRepo *MessageRepository
-	RoomRepo    *room.Repository
+	RoomSvc     *room.Service
 	UserRepo    *user.Repository
 }
 
-func NewManager(messageRepo *MessageRepository, roomRepo *room.Repository, userRepo *user.Repository) (*Manager, error) {
+func NewManager(messageRepo *MessageRepository, roomSvc *room.Service, userRepo *user.Repository) (*Manager, error) {
 	m := &Manager{
 		Clients:     haxmap.New[string, *Client](),
 		Rooms:       haxmap.New[string, *Room](),
 		logger:      slog.Default(),
 		MessageRepo: messageRepo,
-		RoomRepo:    roomRepo,
+		RoomSvc:     roomSvc,
 		UserRepo:    userRepo,
 	}
 
-	r := m.CreateRoomWithID("global", "Global")
+	r, err := m.AddRoom("global", "Global")
+	if err != nil {
+		return nil, err
+	}
 	m.GlobalRoom = r
 
 	return m, nil
@@ -93,13 +94,16 @@ func (m *Manager) ListUsers() ([]user.PublicUser, error) {
 }
 
 func (m *Manager) AddClient(c *Client, name string) error {
-	r := m.CreateRoomWithID(c.ID, name)
+	r, err := m.AddRoom(c.ID, name)
+	if err != nil {
+		return err
+	}
+
 	m.Clients.Set(c.ID, c)
 
 	if err := r.AddClient(c.ID); err != nil {
 		return err
 	}
-
 	if err := m.GlobalRoom.AddClient(c.ID); err != nil {
 		return err
 	}
@@ -107,8 +111,7 @@ func (m *Manager) AddClient(c *Client, name string) error {
 	m.logger.Info(
 		"client registered",
 		"client_id", c.ID,
-		"room_id", r.ID,
-		"room_number", m.Rooms.Len(),
+		"total_rooms", m.Rooms.Len(),
 	)
 
 	return nil
@@ -140,7 +143,7 @@ func (m *Manager) RemoveClient(c *Client) error {
 	m.logger.Info(
 		"client disconnected",
 		"client_id", c.ID,
-		"room_number", m.Rooms.Len(),
+		"total_rooms", m.Rooms.Len(),
 	)
 	return nil
 }
@@ -157,42 +160,30 @@ func (m *Manager) DisconnectClient(cID string) error {
 	)
 }
 
-func (m *Manager) CreateRoom(name string) *Room {
-	r := NewRoom(m, name)
+func (m *Manager) AddRoom(ID, name string) (*Room, error) {
+	var (
+		r   *Room
+		err error
+	)
 
-	m.AddRoom(r)
-	return r
-}
-
-func (m *Manager) CreateRoomWithID(ID, name string) *Room {
-	r := NewRoomWithID(m, ID, name)
-
-	m.AddRoom(r)
-	return r
-}
-
-func (m *Manager) AddRoom(r *Room) error {
-	found, err := m.RoomRepo.Find(r.ID)
-	if err != nil {
-		if errors.Is(err, mongo.ErrNoDocuments) {
-			// global room doesn't exist in db, insert it
-			if m.RoomRepo.Insert(&room.Room{ID: r.ID, UserIDs: make([]string, 0)}) != nil {
-				return nil
-			}
+	found, ok := m.RoomSvc.HasRoom(ID)
+	if !ok {
+		found, err = m.RoomSvc.CreateRoom(ID, name)
+		if err != nil {
+			return nil, err
 		}
-	} else {
-		// global room exists in db, use it
-		r.ClientIDs = found.UserIDs
 	}
+
+	r = NewRoomWithID(m, found)
 	m.Rooms.Set(r.ID, r)
 	m.logger.Info(
 		"room registered",
 		"room_id", r.ID,
-		"room_number", m.Rooms.Len(),
-		"room_users", r.ClientIDs,
+		"room_users", r.UserIDs,
+		"total_rooms", m.Rooms.Len(),
 	)
 
-	return nil
+	return r, nil
 }
 
 func (m *Manager) GetRoom(rID string) (*Room, error) {
@@ -217,7 +208,7 @@ func (m *Manager) RemoveRoom(rID string) error {
 	m.logger.Info(
 		"room removed",
 		"room_id", r.ID,
-		"room_number", m.Rooms.Len(),
+		"total_rooms", m.Rooms.Len(),
 	)
 
 	return nil

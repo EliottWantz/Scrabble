@@ -91,7 +91,7 @@ func New(cfg *config.Config) (*API, error) {
 
 	var controllers Controllers
 	{
-		wsManager, err := ws.NewManager(repositories.MessageRepo, repositories.RoomRepo, repositories.UserRepo)
+		wsManager, err := ws.NewManager(repositories.MessageRepo, services.RoomSvc, repositories.UserRepo)
 		if err != nil {
 			return nil, err
 		}
