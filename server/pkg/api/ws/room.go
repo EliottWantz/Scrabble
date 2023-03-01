@@ -2,7 +2,6 @@ package ws
 
 import (
 	"errors"
-	"fmt"
 
 	"scrabble/pkg/api/user"
 
@@ -18,9 +17,9 @@ var (
 
 type Room struct {
 	ID      string
+	Name    string
 	Manager *Manager
 	Clients *haxmap.Map[string, *Client]
-	SendCh  chan *Packet
 	logger  *slog.Logger
 }
 
@@ -31,26 +30,29 @@ func NewRoom(m *Manager) *Room {
 func NewRoomWithID(m *Manager, ID string) *Room {
 	r := &Room{
 		ID:      ID,
+		Name:    "room-" + ID,
 		Manager: m,
 		Clients: haxmap.New[string, *Client](),
-		SendCh:  make(chan *Packet, 10),
 	}
 	r.logger = slog.With("room", r.ID)
-
-	go func() {
-		for p := range r.SendCh {
-			r.Clients.ForEach(func(cID string, c *Client) bool {
-				c.send(p)
-				return true
-			})
-		}
-	}()
 
 	return r
 }
 
-func (r *Room) send(p *Packet) {
-	r.SendCh <- p
+func (r *Room) broadcast(p *Packet) {
+	r.Clients.ForEach(func(cID string, c *Client) bool {
+		c.send(p)
+		return true
+	})
+}
+
+func (r *Room) broadcastSkipSelf(p *Packet, selfID string) {
+	r.Clients.ForEach(func(cID string, c *Client) bool {
+		if c.ID != selfID {
+			c.send(p)
+		}
+		return true
+	})
 }
 
 func (r *Room) addClient(cID string) error {
@@ -59,7 +61,7 @@ func (r *Room) addClient(cID string) error {
 		return ErrAlreadyInRoom
 	}
 
-	c, err := r.Manager.getClient(cID)
+	c, err := r.Manager.GetClient(cID)
 	if err != nil {
 		return err
 	}
@@ -69,14 +71,49 @@ func (r *Room) addClient(cID string) error {
 	r.logger.Info("client added in room", "client", c.ID)
 
 	{
-		p, err := NewPacket(ServerEventJoinedRoom, JoinedRoomPayload{
+		payload := JoinedRoomPayload{
 			RoomID: r.ID,
+			Name:   r.Name,
 			Users:  r.ListUsers(),
-		})
-		if err != nil {
-			return fmt.Errorf("creating packet: %w", err)
 		}
-		r.send(p)
+		msgs, err := r.Manager.MessageRepo.LatestMessage(r.ID, 0)
+		if err != nil {
+			r.logger.Error("get latest messages", err)
+		}
+		if len(msgs) == 0 {
+			msgs = make([]ChatMessage, 0)
+		}
+		payload.Messages = msgs
+
+		slog.Info("packet", "name", payload.Name, "users", payload.Users, "msg", payload.Messages)
+		p, err := NewJoinedRoomPacket(payload)
+		if err != nil {
+			r.logger.Error("creating packet", err)
+			return nil
+		}
+		c.send(p)
+	}
+
+	{
+		res, err := r.Manager.UserRepo.Find(cID)
+		if err != nil {
+			r.logger.Error("find user that joined", err)
+		}
+
+		payload := UserJoinedPayload{
+			RoomID: r.ID,
+			User: user.PublicUser{
+				ID:       res.ID,
+				Username: res.Username,
+				Avatar:   res.Avatar,
+			},
+		}
+		p, err := NewUserJoinedPacket(payload)
+		if err != nil {
+			r.logger.Error("creating packet", err)
+			return nil
+		}
+		r.broadcastSkipSelf(p, c.ID)
 	}
 
 	return nil
@@ -92,7 +129,7 @@ func (r *Room) removeClient(cID string) error {
 	r.logger.Info("client removed from room", "client", c.ID)
 
 	if r.Clients.Len() == 0 && r.ID != r.Manager.GlobalRoom.ID {
-		if err := r.Manager.removeRoom(r.ID); err != nil {
+		if err := r.Manager.RemoveRoom(r.ID); err != nil {
 			return err
 		}
 	}
@@ -114,14 +151,14 @@ func (r *Room) has(cID string) bool {
 	return err == nil
 }
 
-func (r *Room) ListUsers() []*user.PublicUser {
-	users := make([]*user.PublicUser, 0, r.Clients.Len())
+func (r *Room) ListUsers() []user.PublicUser {
+	users := make([]user.PublicUser, 0, r.Clients.Len())
 	r.Clients.ForEach(func(cID string, c *Client) bool {
 		res, err := r.Manager.UserRepo.Find(cID)
 		if err != nil {
 			r.logger.Error("list users", err)
 		}
-		pubUser := &user.PublicUser{
+		pubUser := user.PublicUser{
 			ID:       res.ID,
 			Username: res.Username,
 			Avatar:   res.Avatar,

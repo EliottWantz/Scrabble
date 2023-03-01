@@ -12,19 +12,9 @@ type MessageRepository struct {
 	coll *mongo.Collection
 }
 
-type RoomRepository struct {
-	coll *mongo.Collection
-}
-
 func NewMessageRepository(db *mongo.Database) *MessageRepository {
 	return &MessageRepository{
 		coll: db.Collection("messages"),
-	}
-}
-
-func NewRoomRepository(db *mongo.Database) *RoomRepository {
-	return &RoomRepository{
-		coll: db.Collection("rooms"),
 	}
 }
 

@@ -51,6 +51,20 @@ func (r *Repository) FindByUsername(username string) (*User, error) {
 	return u, nil
 }
 
+func (r *Repository) FindAll() ([]User, error) {
+	users := make([]User, 0)
+	res, err := r.coll.Find(context.TODO(), bson.M{})
+	if err != nil {
+		return nil, err
+	}
+	err = res.All(context.Background(), &users)
+	if err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}
+
 func (r *Repository) Has(ID string) bool {
 	u := &User{}
 	res := r.coll.FindOne(
