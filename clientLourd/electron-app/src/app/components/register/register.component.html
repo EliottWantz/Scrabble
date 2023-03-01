@@ -1,3 +1,4 @@
+<mat-card-subtitle>Choisir une image de profil</mat-card-subtitle>
 <div class="imgs">
     <img tabindex="1" width="10%" class="avatar" src="https://cdn.discordapp.com/avatars/679451542339715116/d31a4faf00d717467635889bc0ff22a3.webp" (click)="selectAvatar(0)">
     <img tabindex="2" width="10%" class="avatar" src="https://cdn.discordapp.com/avatars/833059997695868928/75366689f7862f5f66a4a876bdaca44d.webp" (click)="selectAvatar(1)">
@@ -6,6 +7,13 @@
     <img tabindex="5" width="10%" class="avatar" src="https://cdn.discordapp.com/avatars/225986311981498371/6be19dedd850ca9e72b20e603acffcaf.webp" (click)="selectAvatar(4)">
     
 </div>
+<small>Enregistrer votre propre image de profil</small>
+<button id="upload-button" type="button" mat-raised-button (click)="fileInput.click()">Choose File</button>
+<input hidden (change)="onFileSelected($event)" #fileInput type="file">
+<span class="file-name">{{selectedFile?.name}}</span>
+
+<mat-divider></mat-divider>
+<mat-card-subtitle>Entrez vos informations</mat-card-subtitle>
 <div class="form-group">
     <mat-form-field class="fields" appearance="fill">
         <mat-label for="email">Email</mat-label>
@@ -24,4 +32,9 @@
         <input matInput placeholder="Entrez votre mot de passe" name="password" type="password" [(ngModel)]= "password" required>
     </mat-form-field>
 </div>
+<mat-divider></mat-divider>
 <button mat-raised-button color="primary" id="btn-submit" (click)="onSubmit()">Créer un compte</button>
+
+<div *ngIf="isRegisterFailed" id="error">
+    <strong style="color: red;">Le nom d'utilisateur n'est pas disponible</strong>
+</div>
