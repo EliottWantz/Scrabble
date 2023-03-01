@@ -15,6 +15,8 @@ import { MatCardModule } from '@angular/material/card';
 import { AppMaterialModule } from "@app/modules/material.module";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { RegisterComponent } from '@app/components/register/register.component';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDividerModule } from '@angular/material/divider'
 
 @NgModule({
   declarations: [
@@ -35,7 +37,9 @@ import { RegisterComponent } from '@app/components/register/register.component';
     MatInputModule,
     MatCardModule,
     AppMaterialModule,
-    BrowserAnimationsModule
+    BrowserAnimationsModule,
+    MatIconModule,
+    MatDividerModule
   ],
   providers: [],
   bootstrap: [AppComponent]
