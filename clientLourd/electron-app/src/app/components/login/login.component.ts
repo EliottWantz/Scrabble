@@ -2,7 +2,6 @@ import { Component } from "@angular/core";
 //import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { AuthenticationService } from "@app/services/authentication/authentication.service";
 import { Router } from "@angular/router"
-import { StorageService } from "@app/services/storage/storage.service";
 
 @Component({
     selector: "app-login",
@@ -14,9 +13,8 @@ export class LoginComponent {
     password: string = "";
     isLoggedIn = false;
     isLoginFailed = false;
-    errorMessage = '';
     
-    constructor(private authService: AuthenticationService, private storageService: StorageService, private router: Router) { }
+    constructor(private authService: AuthenticationService, private router: Router) { }
     
     ngOnInit(): void {
         if (this.authService.isLoggedIn) {
@@ -25,10 +23,14 @@ export class LoginComponent {
     }
     
     async onSubmit() {
+        if (this.username == "" || this.password == "")
+            return;
         await this.authService.login(this.username, this.password);
 
         if (this.authService.isLoggedIn) {
-            this.router.navigate(['home']);
+            this.router.navigate(['/home']);
+        } else {
+            this.isLoginFailed = true;
         }
     }
 }
