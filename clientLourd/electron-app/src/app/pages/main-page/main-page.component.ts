@@ -1,5 +1,6 @@
 import { Component } from "@angular/core";
 import { AuthenticationService } from "@app/services/authentication/authentication.service";
+import { StorageService } from "@app/services/storage/storage.service";
 
 @Component({
   selector: "app-main-page",
@@ -11,12 +12,19 @@ export class MainPageComponent {
   isJoining: boolean = false;
   public username: string;
 
-  constructor(
-    private authenticationService: AuthenticationService
-  ) {this.username = "";}
+  constructor(private authenticationService: AuthenticationService, private storageService: StorageService) {
+    this.username = "";
+  }
 
   isConnected(): Boolean {
-    return this.authenticationService.isLoggedIn;
+    if (this.authenticationService.isLoggedIn) {
+      const avatar = this.storageService.getUser()?.avatar;
+      console.log(avatar);
+      if (avatar)
+        document.getElementById("avatar")?.setAttribute("src", avatar);
+      return true;
+    }
+    return false;
   }
 
   logout(): void {
