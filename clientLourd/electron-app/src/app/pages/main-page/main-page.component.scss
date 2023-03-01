@@ -139,38 +139,6 @@ Style Footer
   transform: scale(1.3);
 } 
 
-
-
-
-
-.row {
-  height: inherit;
-}
-
-.column {
-  float: left;
-  width: 31.3%;
-  height: 98%;
-  margin-left: 1.5%;
-  margin-top: 1%;
-}
-
-/* Clear floats after the columns */
-.row:after {
-  content: "";
-  display: table;
-  clear: both;
-  height: 100%;
-}
-
-.center {
-  float: middle;
-}
-
-.card {
-  height:95%
-}
-
-.form {
-  margin-top: 1%;
+#login-button {
+  float: right;
 }

@@ -1,11 +1,9 @@
-img:focus {
-    outline-style: outset;
-    outline-color: blue;
-}
-
 img {
-    margin-left: 5%;
-    border-radius: 50%;
+  width: 75px;
+  height: 75px;
+  padding: 5px;
+  border-radius: 50%;
+  margin-left: 5%;
 }
 
 .container {
@@ -19,3 +17,9 @@ img {
       rgb(52, 75, 138) 100%
     );
   }
+
+.imgs {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 5%;
+}

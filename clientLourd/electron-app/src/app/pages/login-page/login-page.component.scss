@@ -12,4 +12,35 @@
       rgba(159, 205, 110, 0.3) 35%,
       rgb(52, 75, 138) 100%
     );
-  }
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.card {
+  width:50%;
+  //height: 75%;
+  display: flex;
+  align-items: center;
+}
+
+.center {
+  display: contents;
+  margin-top: 10%;
+}
+
+.home-button {
+  position: absolute;
+  top: 2%;
+  left: 2%;
+}
+
+mat-divider {
+  width: 100%;
+  margin-bottom: 5%;
+}
+
+.switch {
+  margin-top: 5%;
+  margin-bottom: 5%;
+}

@@ -1,7 +1,27 @@
-<div>
-    <app-login *ngIf="isLoginView"></app-login>
-    <button *ngIf="isLoginView" mat-raised-button (click)="switchView()" id="switch">Créer un compte utilisateur</button>
-    
-    <app-register *ngIf="!isLoginView"></app-register>
-    <button *ngIf="!isLoginView" mat-raised-button (click)="switchView()" class="switch">Se connecter</button>
+<div class="container">
+    <button mat-fab color="primary" class="home-button" routerLink="/home" routerLinkActive="router-link-active">
+        <mat-icon>home</mat-icon>
+    </button>
+    <mat-card class="card">
+        <mat-card-header>
+            <mat-card-title *ngIf="isLoginView">Connexion</mat-card-title>
+            <mat-card-title *ngIf="!isLoginView">Créer un compte</mat-card-title>
+        </mat-card-header>
+        <mat-divider></mat-divider>
+        <mat-card-content class="center">
+            <app-login *ngIf="isLoginView" class="center"></app-login>
+            <app-register *ngIf="!isLoginView" class="center"></app-register>
+
+            <div *ngIf="isLoginView" class="switch">
+                Vous n'avez pas de compte?
+                <button *ngIf="isLoginView" color="primary" mat-raised-button (click)="switchView()">Créer un compte utilisateur</button>
+            </div>
+
+            <div *ngIf="!isLoginView" class="switch">
+                Vous avez déjà un compte?
+                <button *ngIf="!isLoginView" color="primary" mat-raised-button (click)="switchView()">Se connecter</button>
+            </div>
+            <div></div>
+        </mat-card-content>
+    </mat-card>
 </div>

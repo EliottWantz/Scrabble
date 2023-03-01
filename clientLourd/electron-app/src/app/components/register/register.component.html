@@ -1,46 +1,27 @@
-<div class="container">
-    <h2>Connexion</h2>
-    <div>
-        <mat-card>
-            <mat-card-header>
-                <mat-card-title>Choisir une image de profil</mat-card-title>
-            </mat-card-header>
-            <mat-card-actions>
-                <img tabindex="1" width="10%" class="avatar" src="https://st3.depositphotos.com/15648834/17930/v/600/depositphotos_179308454-stock-illustration-unknown-person-silhouette-glasses-profile.jpg" (click)="selectAvatar(0)">
-                <img tabindex="2" width="10%" class="avatar" src="../../../assets/Bedge.png" (click)="selectAvatar(1)">
-                <img tabindex="3" width="10%" class="avatar" src="../../../assets/bruh.png" (click)="selectAvatar(2)">
-            </mat-card-actions>
-        </mat-card>
-    </div>
-    <div>
-        <mat-card>
-            <mat-card-header>
-                <mat-card-title>Choisir les informations du compte</mat-card-title>
-            </mat-card-header>
-            <mat-card-content>
-                <div class="form-group">
-                    <mat-form-field class="fields" appearance="fill">
-                        <mat-label for="email">Email</mat-label>
-                        <input matInput placeholder="Entrez votre email" name="email" type="email" [(ngModel)]= "email" required>
-                    </mat-form-field>
-                </div>
-                <div class="form-group">
-                    <mat-form-field class="fields" appearance="fill">
-                        <mat-label for="username">Nom d'utilisateur</mat-label>
-                        <input matInput placeholder="Entrez votre nom d'utilisateur" name="usename" [(ngModel)] ="username" required>
-                    </mat-form-field>
-                </div>
-                <div class="form-group">
-                    <mat-form-field class="fields" appearance="fill">
-                        <mat-label for="password">Mot de passe</mat-label>
-                        <input matInput placeholder="Entrez votre mot de passe" name="password" type="password" [(ngModel)]= "password" required>
-                    </mat-form-field>
-                </div>
-                <button mat-raised-button color="primary" id="btn-submit" (click)="onSubmit()">Créer un compte</button>
-            </mat-card-content>
-        </mat-card>
-    </div>
-<div>
-    <button mat-raised-button color="warn" id="btn-cancel" routerLink="/home" routerLinkActive="router-link-active">Quitter</button>
+<div class="imgs">
+    <img tabindex="1" width="10%" class="avatar" src="https://cdn.discordapp.com/avatars/679451542339715116/d31a4faf00d717467635889bc0ff22a3.webp" (click)="selectAvatar(0)">
+    <img tabindex="2" width="10%" class="avatar" src="https://cdn.discordapp.com/avatars/833059997695868928/75366689f7862f5f66a4a876bdaca44d.webp" (click)="selectAvatar(1)">
+    <img tabindex="3" width="10%" class="avatar" src="https://cdn.discordapp.com/avatars/751431754748919828/3701535bbcf91a9cfe7fbba0b549fb6b.webp" (click)="selectAvatar(2)">
+    <img tabindex="4" width="10%" class="avatar" src="https://cdn.discordapp.com/avatars/449957829122719750/0790f81c6ec731e3a0fb593fff876a10.webp" (click)="selectAvatar(3)">
+    <img tabindex="5" width="10%" class="avatar" src="https://cdn.discordapp.com/avatars/225986311981498371/6be19dedd850ca9e72b20e603acffcaf.webp" (click)="selectAvatar(4)">
+    
 </div>
+<div class="form-group">
+    <mat-form-field class="fields" appearance="fill">
+        <mat-label for="email">Email</mat-label>
+        <input matInput placeholder="Entrez votre email" name="email" type="email" [(ngModel)]= "email" required>
+    </mat-form-field>
 </div>
+<div class="form-group">
+    <mat-form-field class="fields" appearance="fill">
+        <mat-label for="username">Nom d'utilisateur</mat-label>
+        <input matInput placeholder="Entrez votre nom d'utilisateur" name="usename" [(ngModel)] ="username" required>
+    </mat-form-field>
+</div>
+<div class="form-group">
+    <mat-form-field class="fields" appearance="fill">
+        <mat-label for="password">Mot de passe</mat-label>
+        <input matInput placeholder="Entrez votre mot de passe" name="password" type="password" [(ngModel)]= "password" required>
+    </mat-form-field>
+</div>
+<button mat-raised-button color="primary" id="btn-submit" (click)="onSubmit()">Créer un compte</button>

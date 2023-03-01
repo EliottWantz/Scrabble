@@ -36,7 +36,7 @@ export class RegisterComponent {
                 document.getElementsByClassName("avatar")[i].setAttribute("style", "");
             } else {
                 src = document.getElementsByClassName("avatar")[i].getAttribute("src");
-                document.getElementsByClassName("avatar")[i].setAttribute("style", "outline-style: outset; outline-color: blue;");
+                document.getElementsByClassName("avatar")[i].setAttribute("style", "background: -webkit-linear-gradient(left top, crimson 0%, #f90 100%);");
             }
         }
         if (src)
