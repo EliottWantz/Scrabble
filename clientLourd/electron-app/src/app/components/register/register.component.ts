@@ -17,12 +17,13 @@ export class RegisterComponent {
     
     constructor(private authService: AuthenticationService, private router: Router) { }
     
-    async onSubmit() {
+    onSubmit() {
         if (this.username == "" || this.password == "" || this.email =="" || this.avatar == "")
             return;
-        await this.authService.register(this.username, this.password, this.email, this.avatar);
+        this.authService.register(this.username, this.password, this.email, this.avatar);
 
         if (this.authService.isLoggedIn) {
+            console.log("allo2");
             this.router.navigate(['/home']);
         }
     }

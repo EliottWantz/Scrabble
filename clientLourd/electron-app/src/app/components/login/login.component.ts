@@ -22,10 +22,10 @@ export class LoginComponent {
         }
     }
     
-    async onSubmit() {
+    onSubmit() {
         if (this.username == "" || this.password == "")
             return;
-        await this.authService.login(this.username, this.password);
+        this.authService.login(this.username, this.password);
 
         if (this.authService.isLoggedIn) {
             this.router.navigate(['/home']);
