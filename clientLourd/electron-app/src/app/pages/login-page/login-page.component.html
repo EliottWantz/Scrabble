@@ -1,3 +1,7 @@
 <div>
-    <app-login></app-login>
+    <app-login *ngIf="isLoginView"></app-login>
+    <button *ngIf="isLoginView" mat-raised-button (click)="switchView()" id="switch">Créer un compte utilisateur</button>
+    
+    <app-register *ngIf="!isLoginView"></app-register>
+    <button *ngIf="!isLoginView" mat-raised-button (click)="switchView()" class="switch">Se connecter</button>
 </div>
