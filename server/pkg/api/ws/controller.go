@@ -71,16 +71,3 @@ func (m *Manager) GetMessages(c *fiber.Ctx) error {
 		Messages: msgs,
 	})
 }
-
-type LogoutRequest struct {
-	ID string `json:"id,omitempty"`
-}
-
-func (m *Manager) Logout(c *fiber.Ctx) error {
-	req := LogoutRequest{}
-	if err := c.BodyParser(&req); err != nil {
-		return err
-	}
-
-	return m.DisconnectClient(req.ID)
-}
