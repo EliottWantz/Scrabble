@@ -58,12 +58,12 @@ func NewService(cfg *config.Config, repo *Repository, roomSvc *room.Service) (*S
 	}, nil
 }
 
-func (s *Service) SignUp(req SignupRequest, avatar io.ReadSeeker) (*User, error) {
-	if _, err := s.Repo.FindByUsername(req.Username); err == nil {
+func (s *Service) SignUp(username, password, email string, uploadAvatar UploadAvatarStrategy) (*User, error) {
+	if _, err := s.Repo.FindByUsername(username); err == nil {
 		return nil, fiber.NewError(fiber.StatusUnprocessableEntity, "username already exists")
 	}
 
-	hashedPassword, err := auth.HashPassword(req.Password)
+	hashedPassword, err := auth.HashPassword(password)
 	if err != nil {
 		return nil, fiber.NewError(fiber.StatusInternalServerError, "failed to hash password")
 	}
@@ -71,32 +71,15 @@ func (s *Service) SignUp(req SignupRequest, avatar io.ReadSeeker) (*User, error)
 	ID := uuid.NewString()
 	u := &User{
 		ID:              ID,
-		Username:        req.Username,
+		Username:        username,
 		HashedPassword:  hashedPassword,
-		Email:           req.Email,
-		Avatar:          Avatar{URL: req.AvatarURL, FileID: req.FileID},
+		Email:           email,
 		JoinedChatRooms: make([]string, 0),
 	}
 
-	// Upload avatar
-	if avatar != nil {
-		slog.Info("uploading avatar")
-		ctx, close := context.WithTimeout(context.Background(), 10*time.Second)
-		defer close()
-
-		params := upload.FileParams{
-			Data:        avatar,
-			Name:        ID,
-			ContentType: "image/png",
-		}
-
-		fID, err := s.uploadSvc.File(ctx, params)
-		if err != nil {
-			return nil, fiber.NewError(fiber.StatusInternalServerError, "failed to upload avatar")
-		}
-		slog.Info("avatar upload success", "fileID", fID)
-
-		u.Avatar = Avatar{URL: fmt.Sprintf("%s/%s/", s.uploadURL, fID), FileID: fID}
+	// Add avatar strategy
+	if err = uploadAvatar(u); err != nil {
+		return nil, fiber.NewError(fiber.StatusInternalServerError, "failed to upload avatar: "+err.Error())
 	}
 
 	if err := s.Repo.Insert(u); err != nil {
@@ -115,6 +98,74 @@ func (s *Service) SignUp(req SignupRequest, avatar io.ReadSeeker) (*User, error)
 	}
 
 	return u, nil
+}
+
+type UploadAvatarStrategy func(u *User) error
+
+func WithAvatarFile(s *Service, file io.ReadSeeker) UploadAvatarStrategy {
+	return func(u *User) error {
+		slog.Info("uploading avatar file")
+		ctx, close := context.WithTimeout(context.Background(), 10*time.Second)
+		defer close()
+
+		params := upload.FileParams{
+			Data:        file,
+			Name:        u.ID,
+			ContentType: "image/png",
+		}
+
+		fID, err := s.uploadSvc.File(ctx, params)
+		if err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, "failed to upload avatar")
+		}
+		slog.Info("avatar upload success", "fileID", fID)
+
+		u.Avatar = Avatar{URL: fmt.Sprintf("%s/%s/", s.uploadURL, fID), FileID: fID}
+
+		return nil
+	}
+}
+
+func WithUploadcareFile(fileURL, fileID string) UploadAvatarStrategy {
+	return func(u *User) error {
+		slog.Info("adding uploadcare avatar to user")
+		u.Avatar = Avatar{URL: fileURL, FileID: fileID}
+		return nil
+	}
+}
+
+func WithDicebearURL(s *Service, url string) UploadAvatarStrategy {
+	return func(u *User) error {
+		slog.Info("uploading dicebear avatar", "name", u.ID)
+
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		params := upload.FromURLParams{
+			URL: url,
+		}
+		res, err := s.uploadSvc.FromURL(ctx, params)
+		if err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+		}
+
+		info, ok := res.Info()
+		if !ok {
+			select {
+			case info = <-res.Done():
+			case err = <-res.Error():
+			}
+		}
+		if err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+		}
+
+		slog.Info("file uploaded", "fileName", info.FileName, "fileID", info.ID)
+
+		u.Avatar = Avatar{URL: fmt.Sprintf("%s/%s/", s.uploadURL, info.ID), FileID: info.ID}
+
+		return nil
+	}
 }
 
 func (s *Service) Login(username, password string) (*User, error) {

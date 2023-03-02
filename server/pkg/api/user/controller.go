@@ -1,8 +1,6 @@
 package user
 
 import (
-	"io"
-
 	"scrabble/pkg/api/auth"
 
 	"github.com/gofiber/fiber/v2"
@@ -47,8 +45,20 @@ func (ctrl *Controller) SignUp(c *fiber.Ctx) error {
 	if req.Email == "" {
 		return fiber.NewError(fiber.StatusBadRequest, "email can't be blank")
 	}
-	var avatarFile io.ReadSeeker
-	if req.AvatarURL == "" {
+
+	var strategy UploadAvatarStrategy
+
+	if req.FileID != "" {
+		// It's an uploadcare file with url and id
+		if req.AvatarURL == "" {
+			return fiber.NewError(fiber.StatusBadRequest, "avatar url can't be blank")
+		}
+		strategy = WithUploadcareFile(req.AvatarURL, req.FileID)
+	} else if req.AvatarURL != "" {
+		// dicebear api url
+		strategy = WithDicebearURL(ctrl.svc, req.AvatarURL)
+	} else {
+		// multipart form file
 		header, err := c.FormFile("avatar")
 		if err != nil {
 			return fiber.NewError(fiber.StatusBadRequest, "no avatar url or avatar file can be read: "+err.Error())
@@ -57,10 +67,10 @@ func (ctrl *Controller) SignUp(c *fiber.Ctx) error {
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, "error opening avatar file: "+err.Error())
 		}
-		avatarFile = file
+		strategy = WithAvatarFile(ctrl.svc, file)
 	}
 
-	user, err := ctrl.svc.SignUp(req, avatarFile)
+	user, err := ctrl.svc.SignUp(req.Username, req.Password, req.Email, strategy)
 	if err != nil {
 		return err
 	}
