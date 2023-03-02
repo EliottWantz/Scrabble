@@ -1,4 +1,4 @@
-import { HttpClient, HttpErrorResponse } from "@angular/common/http";
+import { HttpClient, HttpErrorResponse, HttpHeaders } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { environment } from 'src/environments/environment';
 import { User } from "@app/utils/interfaces/user";
@@ -28,6 +28,20 @@ export class CommunicationService {
 
     private requestRegister(username: string, password: string, email: string, avatar: string): Observable<{user: User}> {
         return this.http.post<{user: User}>(`${this.baseUrl}/signup`, { username, password, email, avatar }).pipe(catchError(this.handleError));
+    }
+
+    async uploadAvatar(file: File, user: User): Promise<{URL: string, fileId: string}> {
+        const res: any = (await lastValueFrom(this.requestUploadAvatar(file, user)));
+        return res;
+    }
+
+    private requestUploadAvatar(file: File, user: User): Observable<{URL: string, fileId: string}> {
+        /*return this.http.post<{URL: string, fileId: string}>(`${this.baseUrl}/avatar/${user.id}`, file, {
+            headers: {"Authorization": `Bearer ${this.storageService.getUserToken()!}`}
+        }).pipe(catchError(this.handleError));*/
+        const formData = new FormData();
+        formData.append("avatar", file);
+        return this.http.post<{URL: string, fileId: string}>(`${this.baseUrl}/avatar/${user.id}`, formData).pipe(catchError(this.handleError))
     }
 
     private handleError(error: HttpErrorResponse) {

@@ -69,6 +69,7 @@ export class AuthenticationService {
     private setSession(res: {user: User, token: string}): void {
         this.storageService
         this.storageService.saveUser(res.user);
+        this.storageService.saveUserToken(res.token);
         this.isLoginFailed = false;
         this.isLoggedIn = true;
         this.websocketService.connect();
