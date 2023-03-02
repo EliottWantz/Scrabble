@@ -1,4 +1,6 @@
 import { Component } from "@angular/core";
+import { CommunicationService } from "@app/services/communication/communication.service";
+import { StorageService } from "@app/services/storage/storage.service";
 
 @Component({
   selector: "app-profile-page",
@@ -7,5 +9,26 @@ import { Component } from "@angular/core";
 })
 export class ProfilePageComponent {
   username: string = "";
-  constructor() {}
+  email: string = "";
+  selectedFile: File = new File([], "");
+  hasError = false;
+  constructor(private communicationService: CommunicationService, private storageService: StorageService) {}
+
+  onFileSelected(event: any): void {
+    this.selectedFile = event.target.files[0] ?? null;
+  }
+
+  async submit(): Promise<void> {
+    console.log(this.selectedFile);
+    const user = this.storageService.getUser()!;
+    if (this.selectedFile.name != "") {
+      await this.communicationService.uploadAvatar(this.selectedFile, user).then((res) => {
+        user.avatar = res.URL;
+        this.storageService.saveUser(user);
+        document.getElementById("avatar")?.setAttribute("src", res.URL);
+        console.log(res);
+      });
+    }
+    
+  }
 }
