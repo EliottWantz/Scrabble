@@ -73,13 +73,16 @@ func New(cfg *config.Config) (*API, error) {
 
 	var services Services
 	{
-		userSvc, err := user.NewService(cfg, repositories.UserRepo)
+		gameSvc := game.NewService(repositories.GameRepo)
+		authSvc := auth.NewService(cfg.JWT_SIGN_KEY)
+		roomSvc, err := room.NewService(repositories.RoomRepo)
 		if err != nil {
 			return nil, err
 		}
-		gameSvc := game.NewService(repositories.GameRepo)
-		authSvc := auth.NewService(cfg.JWT_SIGN_KEY)
-		roomSvc := room.NewService(repositories.RoomRepo)
+		userSvc, err := user.NewService(cfg, repositories.UserRepo, roomSvc)
+		if err != nil {
+			return nil, err
+		}
 
 		services = Services{
 			GameSvc: gameSvc,
@@ -91,7 +94,7 @@ func New(cfg *config.Config) (*API, error) {
 
 	var controllers Controllers
 	{
-		wsManager, err := ws.NewManager(repositories.MessageRepo, services.RoomSvc, repositories.UserRepo)
+		wsManager, err := ws.NewManager(repositories.MessageRepo, services.RoomSvc, services.UserSvc)
 		if err != nil {
 			return nil, err
 		}

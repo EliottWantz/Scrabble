@@ -20,29 +20,41 @@ func (m *Manager) JoinRoom(c *fiber.Ctx) error {
 	}
 
 	if req.UserID == "" {
-		return fiber.NewError(fiber.StatusBadRequest, "User ID is required")
+		return fiber.NewError(fiber.StatusBadRequest, "user ID is required")
 	}
 	if req.RoomID == "" {
 		if req.RoomName == "" {
-			return fiber.NewError(fiber.StatusBadRequest, "Room ID is required")
+			return fiber.NewError(fiber.StatusBadRequest, "room ID is required")
 		}
 		// Create a new room with the given name and add the user to it
-		r, err := m.AddRoom(uuid.NewString(), req.RoomName)
+		room, err := m.RoomSvc.CreateRoom(uuid.NewString(), req.RoomName, req.UserID)
 		if err != nil {
-			fiber.NewError(fiber.StatusInternalServerError, "Failed to create new room"+err.Error())
+			return fiber.NewError(fiber.StatusInternalServerError, "failed to create new room"+err.Error())
 		}
+		err = m.UserSvc.Repo.AddJoinedRoom(room.ID, req.UserID)
+		if err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, "failed to add user to room"+err.Error())
+		}
+		r := m.AddRoom(room.ID)
 		if err := r.AddClient(req.UserID); err != nil {
-			return fiber.NewError(fiber.StatusInternalServerError, "Failed to add client in new room"+err.Error())
+			return fiber.NewError(fiber.StatusInternalServerError, "failed to add client in new room"+err.Error())
 		}
 	} else {
 		// Join an existing room
 		r, err := m.GetRoom(req.RoomID)
 		if err != nil {
-			return fiber.NewError(fiber.StatusBadRequest, "Room not found")
+			return fiber.NewError(fiber.StatusBadRequest, "room not found: "+err.Error())
 		}
 
+		if err = m.RoomSvc.JoinRoom(req.RoomID, req.UserID); err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, "failed to join room: "+err.Error())
+		}
 		if err = r.AddClient(req.UserID); err != nil {
-			return fiber.NewError(fiber.StatusInternalServerError, "Failed to join room: "+err.Error())
+			return fiber.NewError(fiber.StatusInternalServerError, "failed to join ws room: "+err.Error())
+		}
+		err = m.UserSvc.Repo.AddJoinedRoom(req.RoomID, req.UserID)
+		if err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, "failed to add user to room"+err.Error())
 		}
 	}
 
@@ -76,11 +88,13 @@ func (m *Manager) LeaveRoom(c *fiber.Ctx) error {
 
 	r, err := m.GetRoom(req.RoomID)
 	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, "Room not found")
+		return fiber.NewError(fiber.StatusBadRequest, "room not found: "+err.Error())
 	}
-
+	if err = m.RoomSvc.LeaveRoom(req.RoomID, req.UserID); err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, "failed to leave room: "+err.Error())
+	}
 	if err = r.RemoveClient(req.UserID); err != nil {
-		return fiber.NewError(fiber.StatusInternalServerError, "Failed to leave room: "+err.Error())
+		return fiber.NewError(fiber.StatusInternalServerError, "failed to leave ws room: "+err.Error())
 	}
 
 	return c.SendStatus(fiber.StatusOK)

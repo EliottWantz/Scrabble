@@ -19,23 +19,20 @@ type Manager struct {
 	logger      *slog.Logger
 	MessageRepo *MessageRepository
 	RoomSvc     *room.Service
-	UserRepo    *user.Repository
+	UserSvc     *user.Service
 }
 
-func NewManager(messageRepo *MessageRepository, roomSvc *room.Service, userRepo *user.Repository) (*Manager, error) {
+func NewManager(messageRepo *MessageRepository, roomSvc *room.Service, userSvc *user.Service) (*Manager, error) {
 	m := &Manager{
 		Clients:     haxmap.New[string, *Client](),
 		Rooms:       haxmap.New[string, *Room](),
 		logger:      slog.Default(),
 		MessageRepo: messageRepo,
 		RoomSvc:     roomSvc,
-		UserRepo:    userRepo,
+		UserSvc:     userSvc,
 	}
 
-	r, err := m.AddRoom("global", "Global")
-	if err != nil {
-		return nil, err
-	}
+	r := m.AddRoom("global")
 	m.GlobalRoom = r
 
 	return m, nil
@@ -76,7 +73,7 @@ func (m *Manager) Broadcast(p *Packet) {
 
 func (m *Manager) ListUsers() ([]user.PublicUser, error) {
 	var pubUsers []user.PublicUser
-	users, err := m.UserRepo.FindAll()
+	users, err := m.UserSvc.Repo.FindAll()
 	if err != nil {
 		return nil, err
 	}
@@ -94,24 +91,38 @@ func (m *Manager) ListUsers() ([]user.PublicUser, error) {
 }
 
 func (m *Manager) AddClient(c *Client, name string) error {
-	r, err := m.AddRoom(c.ID, name)
+	user, err := m.UserSvc.Repo.Find(c.ID)
 	if err != nil {
 		return err
 	}
 
 	m.Clients.Set(c.ID, c)
 
+	// Add the client to the global room
+	if err := m.GlobalRoom.AddClient(c.ID); err != nil {
+		return err
+	}
+
+	// Add the client to his own room
+	r := m.AddRoom(c.ID)
 	if err := r.AddClient(c.ID); err != nil {
 		return err
 	}
-	if err := m.GlobalRoom.AddClient(c.ID); err != nil {
-		return err
+
+	// Add the client to all his joined rooms
+	for _, roomID := range user.JoinedChatRooms {
+		r, err := m.GetRoom(roomID)
+		if err != nil {
+			r = m.AddRoom(roomID)
+		}
+		if err := r.AddClient(c.ID); err != nil {
+			return err
+		}
 	}
 
 	m.logger.Info(
 		"client registered",
 		"client_id", c.ID,
-		"total_rooms", m.Rooms.Len(),
 	)
 
 	return nil
@@ -160,36 +171,22 @@ func (m *Manager) DisconnectClient(cID string) error {
 	)
 }
 
-func (m *Manager) AddRoom(ID, name string) (*Room, error) {
-	var (
-		r   *Room
-		err error
-	)
-
-	found, ok := m.RoomSvc.HasRoom(ID)
-	if !ok {
-		found, err = m.RoomSvc.CreateRoom(ID, name)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	r = NewRoomWithID(m, found)
+func (m *Manager) AddRoom(ID string) *Room {
+	r := NewRoom(m, ID)
 	m.Rooms.Set(r.ID, r)
 	m.logger.Info(
 		"room registered",
 		"room_id", r.ID,
-		"room_users", r.UserIDs,
 		"total_rooms", m.Rooms.Len(),
 	)
 
-	return r, nil
+	return r
 }
 
 func (m *Manager) GetRoom(rID string) (*Room, error) {
 	r, ok := m.Rooms.Get(rID)
 	if !ok {
-		return nil, fmt.Errorf("room with id %s not registered", rID)
+		return nil, ErrRoomNotFound
 	}
 	return r, nil
 }

@@ -5,6 +5,7 @@ import (
 
 	"scrabble/config"
 	"scrabble/pkg/api/auth"
+	"scrabble/pkg/api/room"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
@@ -21,14 +22,14 @@ var (
 )
 
 type Service struct {
-	repo         *Repository
-	uploadClient ucare.Client
-	uploadSvc    upload.Service
-	fileSvc      file.Service
-	uploadURL    string
+	Repo      *Repository
+	uploadSvc upload.Service
+	fileSvc   file.Service
+	uploadURL string
+	RoomSvc   *room.Service
 }
 
-func NewService(cfg *config.Config, repo *Repository) (*Service, error) {
+func NewService(cfg *config.Config, repo *Repository, roomSvc *room.Service) (*Service, error) {
 	creds := ucare.APICreds{
 		SecretKey: cfg.UPLOAD_CARE_SECRET_KEY,
 		PublicKey: cfg.UPLOAD_CARE_PUBLIC_KEY,
@@ -45,16 +46,16 @@ func NewService(cfg *config.Config, repo *Repository) (*Service, error) {
 	}
 
 	return &Service{
-		repo:         repo,
-		uploadClient: client,
-		uploadSvc:    upload.NewService(client),
-		fileSvc:      file.NewService(client),
-		uploadURL:    cfg.UPLOAD_CARE_UPLOAD_URL,
+		Repo:      repo,
+		uploadSvc: upload.NewService(client),
+		fileSvc:   file.NewService(client),
+		uploadURL: cfg.UPLOAD_CARE_UPLOAD_URL,
+		RoomSvc:   roomSvc,
 	}, nil
 }
 
 func (s *Service) SignUp(username, password, email string) (*User, error) {
-	if _, err := s.repo.FindByUsername(username); err == nil {
+	if _, err := s.Repo.FindByUsername(username); err == nil {
 		return nil, fiber.NewError(fiber.StatusUnprocessableEntity, "username already exists")
 	}
 
@@ -63,22 +64,35 @@ func (s *Service) SignUp(username, password, email string) (*User, error) {
 		return nil, fiber.NewError(fiber.StatusInternalServerError, "failed to hash password")
 	}
 
+	ID := uuid.NewString()
 	u := &User{
-		ID:             uuid.NewString(),
-		Username:       username,
-		Email:          email,
-		HashedPassword: hashedPassword,
+		ID:              ID,
+		Username:        username,
+		Email:           email,
+		HashedPassword:  hashedPassword,
+		JoinedChatRooms: make([]string, 0),
 	}
 
-	if err := s.repo.Insert(u); err != nil {
-		return nil, fiber.NewError(fiber.StatusInternalServerError, "failed to insert user")
+	if err := s.Repo.Insert(u); err != nil {
+		return nil, fiber.NewError(fiber.StatusInternalServerError, "failed to insert user: "+err.Error())
+	}
+
+	// Create and join own room
+	_, err = s.RoomSvc.CreateRoom(u.ID, u.Username, u.ID)
+	if err != nil {
+		return nil, fiber.NewError(fiber.StatusInternalServerError, "failed to create and join own room: "+err.Error())
+	}
+	// Join global room
+	err = s.RoomSvc.JoinRoom("global", u.ID)
+	if err != nil {
+		return nil, fiber.NewError(fiber.StatusInternalServerError, "failed to join global room: "+err.Error())
 	}
 
 	return u, nil
 }
 
 func (s *Service) Login(username, password string) (*User, error) {
-	u, err := s.repo.FindByUsername(username)
+	u, err := s.Repo.FindByUsername(username)
 	if err != nil {
 		return nil, fiber.NewError(fiber.StatusNotFound, "user not found")
 	}
@@ -91,11 +105,11 @@ func (s *Service) Login(username, password string) (*User, error) {
 }
 
 func (s *Service) Logout(ID string) error {
-	if !s.repo.Has(ID) {
+	if !s.Repo.Has(ID) {
 		return fiber.NewError(fiber.StatusNotFound, "user not found")
 	}
 
-	if err := s.repo.Delete(ID); err != nil {
+	if err := s.Repo.Delete(ID); err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, "failed to delete user")
 	}
 
@@ -105,10 +119,18 @@ func (s *Service) Logout(ID string) error {
 }
 
 func (s *Service) GetUser(ID string) (*User, error) {
-	u, err := s.repo.Find(ID)
+	u, err := s.Repo.Find(ID)
 	if err != nil {
 		return nil, fiber.NewError(fiber.StatusNotFound, "user not found")
 	}
 
 	return u, nil
+}
+
+func (s *Service) JoinRoom(roomID, userID string) error {
+	return s.Repo.AddJoinedRoom(roomID, userID)
+}
+
+func (s *Service) LeaveRoom(roomID, userID string) error {
+	return s.Repo.RemoveJoinedRoom(roomID, userID)
 }

@@ -12,9 +12,7 @@ type Repository struct {
 }
 
 func NewRepository(db *mongo.Database) *Repository {
-	return &Repository{
-		coll: db.Collection("rooms"),
-	}
+	return &Repository{coll: db.Collection("rooms")}
 }
 
 func (r *Repository) Insert(room *Room) error {

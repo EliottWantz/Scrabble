@@ -46,7 +46,6 @@ type ChatMessage struct {
 // Server events payloads
 type JoinedRoomPayload struct {
 	RoomID   string            `json:"roomId"`
-	Name     string            `json:"name"`
 	Users    []user.PublicUser `json:"users"`
 	Messages []ChatMessage     `json:"messages"`
 }

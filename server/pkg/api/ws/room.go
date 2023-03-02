@@ -3,7 +3,6 @@ package ws
 import (
 	"errors"
 
-	"scrabble/pkg/api/room"
 	"scrabble/pkg/api/user"
 
 	"github.com/alphadose/haxmap"
@@ -13,27 +12,22 @@ import (
 var (
 	ErrAlreadyInRoom = errors.New("client already in room")
 	ErrNotInRoom     = errors.New("client not in room")
+	ErrRoomNotFound  = errors.New("room not found")
 )
 
 type Room struct {
 	ID      string
-	Name    string
 	Manager *Manager
 	Clients *haxmap.Map[string, *Client]
-	UserIDs []string
 	logger  *slog.Logger
-	DBRoom  *room.Room
 }
 
-func NewRoomWithID(m *Manager, r *room.Room) *Room {
+func NewRoom(m *Manager, ID string) *Room {
 	return &Room{
-		ID:      r.ID,
-		Name:    r.Name,
+		ID:      ID,
 		Manager: m,
 		Clients: haxmap.New[string, *Client](),
-		UserIDs: r.UserIDs,
-		logger:  slog.With("room", r.ID),
-		DBRoom:  r,
+		logger:  slog.With("room", ID),
 	}
 }
 
@@ -68,7 +62,7 @@ func (r *Room) AddClient(cID string) error {
 	c.Rooms.Set(r.ID, r)
 	r.logger.Info("client added in room", "client", c.ID)
 
-	err = r.Manager.RoomSvc.AddUserToRoom(r.ID, cID)
+	err = r.Manager.RoomSvc.JoinRoom(r.ID, cID)
 	if err != nil {
 		return err
 	}
@@ -76,7 +70,6 @@ func (r *Room) AddClient(cID string) error {
 	{
 		payload := JoinedRoomPayload{
 			RoomID: r.ID,
-			Name:   r.Name,
 			Users:  r.ListUsers(),
 		}
 		msgs, err := r.Manager.MessageRepo.LatestMessage(r.ID, 0)
@@ -97,7 +90,7 @@ func (r *Room) AddClient(cID string) error {
 	}
 
 	{
-		res, err := r.Manager.UserRepo.Find(cID)
+		res, err := r.Manager.UserSvc.Repo.Find(cID)
 		if err != nil {
 			r.logger.Error("find user that joined", err)
 		}
@@ -137,7 +130,7 @@ func (r *Room) RemoveClient(cID string) error {
 		return r.Manager.RoomSvc.Delete(r.ID)
 	}
 
-	if err := r.Manager.RoomSvc.RemoveUserFromRoom(r.ID, cID); err != nil {
+	if err := r.Manager.RoomSvc.LeaveRoom(r.ID, cID); err != nil {
 		return err
 	}
 
@@ -161,7 +154,7 @@ func (r *Room) has(cID string) bool {
 func (r *Room) ListUsers() []user.PublicUser {
 	users := make([]user.PublicUser, 0, r.Clients.Len())
 	r.Clients.ForEach(func(cID string, c *Client) bool {
-		res, err := r.Manager.UserRepo.Find(cID)
+		res, err := r.Manager.UserSvc.Repo.Find(cID)
 		if err != nil {
 			r.logger.Error("list users", err)
 		}

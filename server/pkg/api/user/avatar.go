@@ -17,7 +17,7 @@ type Avatar struct {
 }
 
 func (s *Service) UploadAvatar(ID string, avatar io.ReadSeeker) (*Avatar, error) {
-	user, err := s.repo.Find(ID)
+	user, err := s.Repo.Find(ID)
 	if err != nil {
 		return nil, fiber.NewError(fiber.StatusNotFound, "user not found")
 	}
@@ -45,7 +45,7 @@ func (s *Service) UploadAvatar(ID string, avatar io.ReadSeeker) (*Avatar, error)
 	slog.Info("upload success", "fileID", fID)
 
 	user.Avatar = Avatar{URL: fmt.Sprintf("%s/%s/", s.uploadURL, fID), FileID: fID}
-	err = s.repo.Update(user)
+	err = s.Repo.Update(user)
 	if err != nil {
 		return nil, fiber.NewError(fiber.StatusInternalServerError, "failed to update user")
 	}
@@ -54,7 +54,7 @@ func (s *Service) UploadAvatar(ID string, avatar io.ReadSeeker) (*Avatar, error)
 }
 
 func (s *Service) DeleteAvatar(ID string) error {
-	user, err := s.repo.Find(ID)
+	user, err := s.Repo.Find(ID)
 	if err != nil {
 		return fiber.NewError(fiber.StatusNotFound, "user not found")
 	}
@@ -68,7 +68,7 @@ func (s *Service) DeleteAvatar(ID string) error {
 	}
 
 	user.Avatar = Avatar{URL: "", FileID: ""}
-	err = s.repo.Update(user)
+	err = s.Repo.Update(user)
 	if err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, "failed to update user")
 	}
