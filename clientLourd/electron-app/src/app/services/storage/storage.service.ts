@@ -39,7 +39,7 @@ export class StorageService {
         return false;
     }
 
-    public addUserToken(token: string): void {
+    public saveUserToken(token: string): void {
         sessionStorage.setItem('id_token', token);
     }
 
