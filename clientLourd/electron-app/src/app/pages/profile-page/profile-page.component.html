@@ -39,7 +39,7 @@
           </mat-card-title>
         </mat-card-header>
         <mat-card-content>
-          <img width="50%" src="https://st3.depositphotos.com/15648834/17930/v/600/depositphotos_179308454-stock-illustration-unknown-person-silhouette-glasses-profile.jpg">
+          <img id="avatar" width="50%" src="https://st3.depositphotos.com/15648834/17930/v/600/depositphotos_179308454-stock-illustration-unknown-person-silhouette-glasses-profile.jpg">
           <div class="">Edogaru</div>
           <div class="form">
             <mat-form-field appearance="fill">
@@ -55,7 +55,14 @@
               <input matInput type="email" class="form-control" value="" placeholder="Email">
             </mat-form-field>
           </div>
-          <button mat-raised-button color="primary" type="button">Enregistrer</button>
+
+          <div class="form">
+            <button id="upload-button" type="button" mat-raised-button (click)="fileInput.click()">Choose File</button>
+            <input hidden (change)="onFileSelected($event)" #fileInput type="file">
+            <span class="file-name">{{selectedFile?.name}}</span>
+          </div>
+          <button mat-raised-button color="primary" type="button" (click)="submit()">Enregistrer</button>
+          
         </mat-card-content>
       </mat-card>
     </div>
