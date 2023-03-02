@@ -6,47 +6,39 @@ import (
 	"scrabble/pkg/api/user"
 
 	"github.com/alphadose/haxmap"
-	"github.com/google/uuid"
 	"golang.org/x/exp/slog"
 )
 
 var (
 	ErrAlreadyInRoom = errors.New("client already in room")
 	ErrNotInRoom     = errors.New("client not in room")
+	ErrRoomNotFound  = errors.New("room not found")
 )
 
 type Room struct {
 	ID      string
-	Name    string
 	Manager *Manager
 	Clients *haxmap.Map[string, *Client]
 	logger  *slog.Logger
 }
 
-func NewRoom(m *Manager) *Room {
-	return NewRoomWithID(m, uuid.NewString())
-}
-
-func NewRoomWithID(m *Manager, ID string) *Room {
-	r := &Room{
+func NewRoom(m *Manager, ID string) *Room {
+	return &Room{
 		ID:      ID,
-		Name:    "room-" + ID,
 		Manager: m,
 		Clients: haxmap.New[string, *Client](),
+		logger:  slog.With("room", ID),
 	}
-	r.logger = slog.With("room", r.ID)
-
-	return r
 }
 
-func (r *Room) broadcast(p *Packet) {
+func (r *Room) Broadcast(p *Packet) {
 	r.Clients.ForEach(func(cID string, c *Client) bool {
 		c.send(p)
 		return true
 	})
 }
 
-func (r *Room) broadcastSkipSelf(p *Packet, selfID string) {
+func (r *Room) BroadcastSkipSelf(p *Packet, selfID string) {
 	r.Clients.ForEach(func(cID string, c *Client) bool {
 		if c.ID != selfID {
 			c.send(p)
@@ -55,8 +47,8 @@ func (r *Room) broadcastSkipSelf(p *Packet, selfID string) {
 	})
 }
 
-func (r *Room) addClient(cID string) error {
-	_, err := r.getClient(cID)
+func (r *Room) AddClient(cID string) error {
+	_, err := r.GetClient(cID)
 	if err == nil {
 		return ErrAlreadyInRoom
 	}
@@ -70,10 +62,14 @@ func (r *Room) addClient(cID string) error {
 	c.Rooms.Set(r.ID, r)
 	r.logger.Info("client added in room", "client", c.ID)
 
+	err = r.Manager.RoomSvc.AddUser(r.ID, cID)
+	if err != nil {
+		return err
+	}
+
 	{
 		payload := JoinedRoomPayload{
 			RoomID: r.ID,
-			Name:   r.Name,
 			Users:  r.ListUsers(),
 		}
 		msgs, err := r.Manager.MessageRepo.LatestMessage(r.ID, 0)
@@ -85,7 +81,6 @@ func (r *Room) addClient(cID string) error {
 		}
 		payload.Messages = msgs
 
-		slog.Info("packet", "name", payload.Name, "users", payload.Users, "msg", payload.Messages)
 		p, err := NewJoinedRoomPacket(payload)
 		if err != nil {
 			r.logger.Error("creating packet", err)
@@ -95,7 +90,7 @@ func (r *Room) addClient(cID string) error {
 	}
 
 	{
-		res, err := r.Manager.UserRepo.Find(cID)
+		res, err := r.Manager.UserSvc.Repo.Find(cID)
 		if err != nil {
 			r.logger.Error("find user that joined", err)
 		}
@@ -113,14 +108,14 @@ func (r *Room) addClient(cID string) error {
 			r.logger.Error("creating packet", err)
 			return nil
 		}
-		r.broadcastSkipSelf(p, c.ID)
+		r.BroadcastSkipSelf(p, c.ID)
 	}
 
 	return nil
 }
 
-func (r *Room) removeClient(cID string) error {
-	c, err := r.getClient(cID)
+func (r *Room) RemoveClient(cID string) error {
+	c, err := r.GetClient(cID)
 	if err != nil {
 		return err
 	}
@@ -128,16 +123,21 @@ func (r *Room) removeClient(cID string) error {
 	r.Clients.Del(cID)
 	r.logger.Info("client removed from room", "client", c.ID)
 
-	if r.Clients.Len() == 0 && r.ID != r.Manager.GlobalRoom.ID {
+	if r.Clients.Len() == 0 && r.ID != r.Manager.GlobalRoom.ID && r.ID != c.ID {
 		if err := r.Manager.RemoveRoom(r.ID); err != nil {
 			return err
 		}
+		return r.Manager.RoomSvc.Delete(r.ID)
+	}
+
+	if err := r.Manager.RoomSvc.RemoveUser(r.ID, cID); err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func (r *Room) getClient(cID string) (*Client, error) {
+func (r *Room) GetClient(cID string) (*Client, error) {
 	c, ok := r.Clients.Get(cID)
 	if !ok {
 		return nil, ErrNotInRoom
@@ -147,14 +147,14 @@ func (r *Room) getClient(cID string) (*Client, error) {
 }
 
 func (r *Room) has(cID string) bool {
-	_, err := r.getClient(cID)
+	_, err := r.GetClient(cID)
 	return err == nil
 }
 
 func (r *Room) ListUsers() []user.PublicUser {
 	users := make([]user.PublicUser, 0, r.Clients.Len())
 	r.Clients.ForEach(func(cID string, c *Client) bool {
-		res, err := r.Manager.UserRepo.Find(cID)
+		res, err := r.Manager.UserSvc.Repo.Find(cID)
 		if err != nil {
 			r.logger.Error("list users", err)
 		}
@@ -168,4 +168,14 @@ func (r *Room) ListUsers() []user.PublicUser {
 	})
 
 	return users
+}
+
+func (r *Room) ListClientIDs() []string {
+	clientIDs := make([]string, 0, r.Clients.Len())
+	r.Clients.ForEach(func(cID string, c *Client) bool {
+		clientIDs = append(clientIDs, c.ID)
+		return true
+	})
+
+	return clientIDs
 }
