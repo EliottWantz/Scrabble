@@ -46,30 +46,10 @@ func (ctrl *Controller) SignUp(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, "email can't be blank")
 	}
 
-	var strategy UploadAvatarStrategy
-
-	if req.FileID != "" {
-		// It's an uploadcare file with url and id
-		if req.AvatarURL == "" {
-			return fiber.NewError(fiber.StatusBadRequest, "avatar url can't be blank")
-		}
-		strategy = WithUploadcareFile(req.AvatarURL, req.FileID)
-	} else if req.AvatarURL != "" {
-		// dicebear api url
-		strategy = WithDicebearURL(ctrl.svc, req.AvatarURL)
-	} else {
-		// multipart form file
-		header, err := c.FormFile("avatar")
-		if err != nil {
-			return fiber.NewError(fiber.StatusBadRequest, "no avatar url or avatar file can be read: "+err.Error())
-		}
-		file, err := header.Open()
-		if err != nil {
-			return fiber.NewError(fiber.StatusInternalServerError, "error opening avatar file: "+err.Error())
-		}
-		strategy = WithAvatarFile(ctrl.svc, file)
+	strategy, err := ctrl.svc.GetStrategy(req.FileID, req.AvatarURL, c)
+	if err != nil {
+		return err
 	}
-
 	user, err := ctrl.svc.SignUp(req.Username, req.Password, req.Email, strategy)
 	if err != nil {
 		return err
@@ -167,26 +147,30 @@ func (ctrl *Controller) GetUser(c *fiber.Ctx) error {
 	})
 }
 
+type UploadAvatarResquest struct {
+	ID        string `json:"id,omitempty"`
+	AvatarURL string `json:"avatarUrl,omitempty"`
+	FileID    string `json:"fileId,omitempty"`
+}
+
 type UploadAvatarResponse struct {
 	*Avatar
 }
 
 func (ctrl *Controller) UploadAvatar(c *fiber.Ctx) error {
-	ID := c.Params("id")
-	if ID == "" {
+	req := UploadAvatarResquest{}
+	if err := c.BodyParser(&req); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "decode req: "+err.Error())
+	}
+	if req.ID == "" {
 		return fiber.NewError(fiber.StatusBadRequest, "no user id given")
 	}
 
-	fileHeader, err := c.FormFile("avatar")
+	strategy, err := ctrl.svc.GetStrategy(req.FileID, req.AvatarURL, c)
 	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, "no avatar given")
+		return err
 	}
-	file, err := fileHeader.Open()
-	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, err.Error())
-	}
-
-	avatar, err := ctrl.svc.UploadAvatar(ID, file)
+	avatar, err := ctrl.svc.UploadAvatar(req, strategy)
 	if err != nil {
 		return err
 	}
@@ -198,16 +182,16 @@ func (ctrl *Controller) UploadAvatar(c *fiber.Ctx) error {
 	)
 }
 
-func (ctrl *Controller) DeleteAvatar(c *fiber.Ctx) error {
-	ID := c.Params("id")
-	if ID == "" {
-		return fiber.NewError(fiber.StatusBadRequest, "no user id given")
-	}
+// func (ctrl *Controller) DeleteAvatar(c *fiber.Ctx) error {
+// 	ID := c.Params("id")
+// 	if ID == "" {
+// 		return fiber.NewError(fiber.StatusBadRequest, "no user id given")
+// 	}
 
-	err := ctrl.svc.DeleteAvatar(ID)
-	if err != nil {
-		return err
-	}
+// 	err := ctrl.svc.DeleteAvatar(ID)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	return c.SendStatus(fiber.StatusNoContent)
-}
+// 	return c.SendStatus(fiber.StatusNoContent)
+// }

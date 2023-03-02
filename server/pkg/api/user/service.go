@@ -1,11 +1,7 @@
 package user
 
 import (
-	"context"
 	"errors"
-	"fmt"
-	"io"
-	"time"
 
 	"scrabble/config"
 	"scrabble/pkg/api/auth"
@@ -98,74 +94,6 @@ func (s *Service) SignUp(username, password, email string, uploadAvatar UploadAv
 	}
 
 	return u, nil
-}
-
-type UploadAvatarStrategy func(u *User) error
-
-func WithAvatarFile(s *Service, file io.ReadSeeker) UploadAvatarStrategy {
-	return func(u *User) error {
-		slog.Info("uploading avatar file")
-		ctx, close := context.WithTimeout(context.Background(), 10*time.Second)
-		defer close()
-
-		params := upload.FileParams{
-			Data:        file,
-			Name:        u.ID,
-			ContentType: "image/png",
-		}
-
-		fID, err := s.uploadSvc.File(ctx, params)
-		if err != nil {
-			return fiber.NewError(fiber.StatusInternalServerError, "failed to upload avatar")
-		}
-		slog.Info("avatar upload success", "fileID", fID)
-
-		u.Avatar = Avatar{URL: fmt.Sprintf("%s/%s/", s.uploadURL, fID), FileID: fID}
-
-		return nil
-	}
-}
-
-func WithUploadcareFile(fileURL, fileID string) UploadAvatarStrategy {
-	return func(u *User) error {
-		slog.Info("adding uploadcare avatar to user")
-		u.Avatar = Avatar{URL: fileURL, FileID: fileID}
-		return nil
-	}
-}
-
-func WithDicebearURL(s *Service, url string) UploadAvatarStrategy {
-	return func(u *User) error {
-		slog.Info("uploading dicebear avatar", "name", u.ID)
-
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
-
-		params := upload.FromURLParams{
-			URL: url,
-		}
-		res, err := s.uploadSvc.FromURL(ctx, params)
-		if err != nil {
-			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
-		}
-
-		info, ok := res.Info()
-		if !ok {
-			select {
-			case info = <-res.Done():
-			case err = <-res.Error():
-			}
-		}
-		if err != nil {
-			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
-		}
-
-		slog.Info("file uploaded", "fileName", info.FileName, "fileID", info.ID)
-
-		u.Avatar = Avatar{URL: fmt.Sprintf("%s/%s/", s.uploadURL, info.ID), FileID: info.ID}
-
-		return nil
-	}
 }
 
 func (s *Service) Login(username, password string) (*User, error) {
