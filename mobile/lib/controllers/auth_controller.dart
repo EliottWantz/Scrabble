@@ -69,7 +69,9 @@ class AuthController extends GetxController {
           password: registerPasswordController.text);
       await DialogHelper.showLoading('Connexion au serveur');
       await authService.register(request);
-      Get.offAllNamed(Routes.HOME);
+      if (authService.isUserLoggedIn()) {
+        Get.offAllNamed(Routes.AVATAR_SELECTION);
+      }
     }
   }
 }

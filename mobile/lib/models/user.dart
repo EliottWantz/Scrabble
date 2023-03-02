@@ -34,7 +34,7 @@ class User {
         username: json["username"],
         email: json["email"],
         avatar: json["avatar"],
-        preferences: Preferences.fromJson(json["Preferences"]));
+        preferences: Preferences.fromJson(json["preferences"]));
   }
 
   Map<String, dynamic> toJson() => {

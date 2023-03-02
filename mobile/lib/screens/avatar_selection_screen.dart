@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:client_leger/controllers/auth_controller.dart';
 import 'package:client_leger/controllers/avatar_controller.dart';
+import 'package:client_leger/routes/app_routes.dart';
 import 'package:client_leger/services/auth_service.dart';
 import 'package:client_leger/services/settings_service.dart';
 import 'package:client_leger/services/storage_service.dart';
@@ -16,7 +17,6 @@ import 'package:path_provider/path_provider.dart';
 class AvatarSelectionScreen extends GetView<AvatarController> {
   AvatarSelectionScreen({Key? key}) : super(key: key);
   final StorageService storageService = Get.find();
-
 
   @override
   Widget build(BuildContext context) {
@@ -54,18 +54,18 @@ class AvatarSelectionScreen extends GetView<AvatarController> {
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const Gap(50),
-              Obx(() => CircleAvatar(
-                  maxRadius: 150,
-                  backgroundColor: Colors.transparent,
-                  backgroundImage: controller.getAvatarToDisplay(),
-                  child: Center(
-                      child: controller.avatarIndex == null
-                          ? const Text(
-                              'Pas d\'avatar sélectionné',
-                              style: TextStyle(fontSize: 20),
-                            )
-                          : null))),
-              const Gap(40),
+              // Obx(() => CircleAvatar(
+              //     maxRadius: 150,
+              //     backgroundColor: Colors.transparent,
+              //     backgroundImage: controller.getAvatarToDisplay(),
+              //     child: Center(
+              //         child: controller.avatarIndex == null
+              //             ? const Text(
+              //                 'Pas d\'avatar sélectionné',
+              //                 style: TextStyle(fontSize: 20),
+              //               )
+              //             : null))),
+              // const Gap(40),
               CustomButton(
                 text: 'Choisir un avatar',
                 onPressed: () {
@@ -81,12 +81,25 @@ class AvatarSelectionScreen extends GetView<AvatarController> {
               CustomButton(
                 text: 'Prenez votre avatar en photo',
                 onPressed: () async {
-                  controller.onTakePicture();
-                  //   final directory = await getApplicationDocumentsDirectory();
-                  //   print(directory.path);
-                  //   print(File(dire))
+                  await controller.onTakePicture();
                 },
               ),
+              const Gap(20),
+              Text(
+                'Ou',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const Gap(20),
+              CustomButton(
+                text: 'Personnaliser votre avatar',
+                onPressed: () {},
+              ),
+              const Gap(100),
+              CustomButton(
+                  text: 'Continuer vers le menu principal',
+                  onPressed: () {
+                    Get.offAllNamed(Routes.HOME);
+                  })
             ],
           ),
         ),
@@ -152,7 +165,6 @@ class AvatarSelectionScreen extends GetView<AvatarController> {
               const Gap(10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-
                 children: [
                   TextButton(
                       style: TextButton.styleFrom(

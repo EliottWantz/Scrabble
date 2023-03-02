@@ -1,11 +1,13 @@
 import 'package:client_leger/routes/app_routes.dart';
 import 'package:client_leger/services/auth_service.dart';
+import 'package:client_leger/services/avatar_service.dart';
 import 'package:client_leger/services/settings_service.dart';
 import 'package:client_leger/utils/dialog_helper.dart';
 import 'package:client_leger/utils/sidebar_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:sidebarx/sidebarx.dart';
 
 class AppSideBar extends StatelessWidget {
@@ -17,6 +19,7 @@ class AppSideBar extends StatelessWidget {
 
   final SidebarXController _controller;
   final SettingsService settingsService = Get.find();
+  final AvatarService avatarService = Get.find();
   final AuthService authService = Get.find();
 
   @override
@@ -195,15 +198,25 @@ class AppSideBar extends StatelessWidget {
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: CircleAvatar(
-              radius: 40,
-              child: Image.asset('assets/images/avatar(7).png'),
-            ),
-          ),
+              padding: const EdgeInsets.all(16.0),
+              child: Obx(
+                () => CircleAvatar(
+                  backgroundColor: Colors.transparent,
+                  maxRadius: 40,
+                  backgroundImage: _getAvatarToDisplay(),
+                ),
+              )),
         ],
       ),
     );
+  }
+
+  ImageProvider _getAvatarToDisplay() {
+    if (avatarService.isAvatar.value) {
+      return AssetImage('assets/images/avatar(${avatarService.currentAvatarIndex.value}).png');
+    } else {
+      return NetworkImage(avatarService.imageUrl.value);
+    }
   }
 
   List<SidebarXItem> _buildListItems(BuildContext context) {

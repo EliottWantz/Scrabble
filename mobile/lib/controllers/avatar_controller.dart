@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:client_leger/api/api_provider.dart';
 import 'package:client_leger/api/api_repository.dart';
+import 'package:client_leger/models/response/avatar_upload_response.dart';
 import 'package:client_leger/services/avatar_service.dart';
 import 'package:client_leger/utils/dialog_helper.dart';
 import 'package:flutter/cupertino.dart';
@@ -15,7 +16,7 @@ import 'package:sidebarx/sidebarx.dart';
 class AvatarController extends GetxController {
   final AvatarService avatarService;
   final ApiRepository apiRepository = Get.find();
-  Rx<File> imagePath = File('').obs;
+
 
   AvatarController({required this.avatarService});
 
@@ -29,26 +30,25 @@ class AvatarController extends GetxController {
   Future<void> onTakePicture() async {
     final image = await avatarService.takePicture();
     if (image != null) {
-      imagePath.value = File(image.path);
-      avatarService.isAvatar.value = false;
+      DialogHelper.showLoading('Connexion au Serveur');
+      final avatar = await apiRepository.upload(File(image.path));
+      if (avatar != null) {
+        avatarService.isAvatar.value = false;
+        avatarService.imageUrl.value = avatar.url;
+      }
     }
   }
 
   Future<void> onAvatarConfirmation() async {
     DialogHelper.hideLoading();
     avatarService.isAvatar.value = true;
-    imagePath.value =  File('');
-    // Directory directory = await getApplicationDocumentsDirectory();
-    // final currentImagePath = join(directory.path, "assets/images/avatar($avatarIndex).png");
-    // imagePath = File(currentImagePath);
   }
 
   ImageProvider getAvatarToDisplay() {
     if (avatarService.isAvatar.value) {
       return AssetImage('assets/images/avatar($avatarIndex).png');
-    }
-    else {
-      return FileImage(imagePath.value);
+    } else {
+      return NetworkImage(avatarService.imageUrl.value);
     }
   }
 }
