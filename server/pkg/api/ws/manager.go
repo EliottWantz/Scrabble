@@ -3,6 +3,7 @@ package ws
 import (
 	"fmt"
 
+	"scrabble/pkg/api/room"
 	"scrabble/pkg/api/user"
 
 	"github.com/alphadose/haxmap"
@@ -17,46 +18,44 @@ type Manager struct {
 	GlobalRoom  *Room
 	logger      *slog.Logger
 	MessageRepo *MessageRepository
-	RoomRepo    *RoomRepository
-	UserRepo    *user.Repository
+	RoomSvc     *room.Service
+	UserSvc     *user.Service
 }
 
-func NewManager(messageRepo *MessageRepository, roomRepo *RoomRepository, userRepo *user.Repository) (*Manager, error) {
+func NewManager(messageRepo *MessageRepository, roomSvc *room.Service, userSvc *user.Service) (*Manager, error) {
 	m := &Manager{
 		Clients:     haxmap.New[string, *Client](),
 		Rooms:       haxmap.New[string, *Room](),
 		logger:      slog.Default(),
 		MessageRepo: messageRepo,
-		RoomRepo:    roomRepo,
-		UserRepo:    userRepo,
+		RoomSvc:     roomSvc,
+		UserSvc:     userSvc,
 	}
 
-	m.GlobalRoom = NewRoomWithID(m, "global")
-	m.AddRoom(m.GlobalRoom)
+	r := m.AddRoom("global")
+	m.GlobalRoom = r
 
 	return m, nil
 }
 
-func (m *Manager) Accept(cID string) fiber.Handler {
+func (m *Manager) Accept(cID, name string) fiber.Handler {
 	return websocket.New(func(conn *websocket.Conn) {
 		c := NewClient(conn, cID, m)
-		err := m.AddClient(conn, c)
+		err := m.AddClient(c, name)
 		if err != nil {
 			m.logger.Error("add client", err)
 			return
 		}
 
-		{
-			users, err := m.ListUsers()
-			if err != nil {
-				m.logger.Error("list users", err)
-			}
-			p, err := NewPacket(ServerEventListUsers, ListUsersPayload{Users: users})
-			if err != nil {
-				m.logger.Error("list users", err)
-			}
-			c.send(p)
+		users, err := m.ListUsers()
+		if err != nil {
+			m.logger.Error("list users", err)
 		}
+		p, err := NewPacket(ServerEventListUsers, ListUsersPayload{Users: users})
+		if err != nil {
+			m.logger.Error("list users", err)
+		}
+		c.send(p)
 
 		<-c.quitCh
 		if err := m.RemoveClient(c); err != nil {
@@ -72,26 +71,9 @@ func (m *Manager) Broadcast(p *Packet) {
 	})
 }
 
-func (m *Manager) SendLatestMessages(rID string, c *Client) error {
-	msgs, err := m.MessageRepo.LatestMessage(rID, 0)
-	if err != nil {
-		return err
-	}
-
-	for _, msg := range msgs {
-		p, err := NewPacket(ClientEventBroadcast, msg)
-		if err != nil {
-			return err
-		}
-		c.send(p)
-	}
-
-	return nil
-}
-
 func (m *Manager) ListUsers() ([]user.PublicUser, error) {
 	var pubUsers []user.PublicUser
-	users, err := m.UserRepo.FindAll()
+	users, err := m.UserSvc.Repo.FindAll()
 	if err != nil {
 		return nil, err
 	}
@@ -108,24 +90,39 @@ func (m *Manager) ListUsers() ([]user.PublicUser, error) {
 	return pubUsers, nil
 }
 
-func (m *Manager) AddClient(conn *websocket.Conn, c *Client) error {
-	r := NewRoomWithID(m, c.ID)
-	m.AddRoom(r)
-	m.Clients.Set(c.ID, c)
-
-	if err := r.addClient(c.ID); err != nil {
+func (m *Manager) AddClient(c *Client, name string) error {
+	user, err := m.UserSvc.Repo.Find(c.ID)
+	if err != nil {
 		return err
 	}
 
-	if err := m.GlobalRoom.addClient(c.ID); err != nil {
+	m.Clients.Set(c.ID, c)
+
+	// Add the client to the global room
+	if err := m.GlobalRoom.AddClient(c.ID); err != nil {
 		return err
+	}
+
+	// Add the client to his own room
+	r := m.AddRoom(c.ID)
+	if err := r.AddClient(c.ID); err != nil {
+		return err
+	}
+
+	// Add the client to all his joined rooms
+	for _, roomID := range user.JoinedChatRooms {
+		r, err := m.GetRoom(roomID)
+		if err != nil {
+			r = m.AddRoom(roomID)
+		}
+		if err := r.AddClient(c.ID); err != nil {
+			return err
+		}
 	}
 
 	m.logger.Info(
 		"client registered",
 		"client_id", c.ID,
-		"room_id", r.ID,
-		"room_number", m.Rooms.Len(),
 	)
 
 	return nil
@@ -141,7 +138,7 @@ func (m *Manager) GetClient(cID string) (*Client, error) {
 
 func (m *Manager) RemoveClient(c *Client) error {
 	c.Rooms.ForEach(func(rID string, r *Room) bool {
-		if err := r.removeClient(c.ID); err != nil {
+		if err := r.RemoveClient(c.ID); err != nil {
 			r.logger.Error("failed to remove client from room", err, "client_id", c.ID)
 		}
 
@@ -157,7 +154,7 @@ func (m *Manager) RemoveClient(c *Client) error {
 	m.logger.Info(
 		"client disconnected",
 		"client_id", c.ID,
-		"room_number", m.Rooms.Len(),
+		"total_rooms", m.Rooms.Len(),
 	)
 	return nil
 }
@@ -174,19 +171,22 @@ func (m *Manager) DisconnectClient(cID string) error {
 	)
 }
 
-func (m *Manager) AddRoom(r *Room) {
+func (m *Manager) AddRoom(ID string) *Room {
+	r := NewRoom(m, ID)
 	m.Rooms.Set(r.ID, r)
 	m.logger.Info(
 		"room registered",
 		"room_id", r.ID,
-		"room_number", m.Rooms.Len(),
+		"total_rooms", m.Rooms.Len(),
 	)
+
+	return r
 }
 
 func (m *Manager) GetRoom(rID string) (*Room, error) {
 	r, ok := m.Rooms.Get(rID)
 	if !ok {
-		return nil, fmt.Errorf("room with id %s not registered", rID)
+		return nil, ErrRoomNotFound
 	}
 	return r, nil
 }
@@ -205,7 +205,7 @@ func (m *Manager) RemoveRoom(rID string) error {
 	m.logger.Info(
 		"room removed",
 		"room_id", r.ID,
-		"room_number", m.Rooms.Len(),
+		"total_rooms", m.Rooms.Len(),
 	)
 
 	return nil
