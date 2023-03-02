@@ -16,7 +16,9 @@ import { AppMaterialModule } from "@app/modules/material.module";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { RegisterComponent } from '@app/components/register/register.component';
 import { MatIconModule } from '@angular/material/icon';
-import { MatDividerModule } from '@angular/material/divider'
+import { MatDividerModule } from '@angular/material/divider';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { AuthInterceptor } from '@app/services/auth-interceptor/auth-interceptor.service'
 
 @NgModule({
   declarations: [
@@ -41,7 +43,13 @@ import { MatDividerModule } from '@angular/material/divider'
     MatIconModule,
     MatDividerModule
   ],
-  providers: [],
+  providers: [
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true
+    }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
