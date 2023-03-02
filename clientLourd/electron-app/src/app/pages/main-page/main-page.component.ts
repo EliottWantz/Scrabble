@@ -19,9 +19,8 @@ export class MainPageComponent {
   isConnected(): Boolean {
     if (this.authenticationService.isLoggedIn) {
       const avatar = this.storageService.getUser()?.avatar;
-      console.log(avatar);
       if (avatar)
-        document.getElementById("avatar")?.setAttribute("src", avatar);
+        document.getElementById("avatar")?.setAttribute("src", avatar.url);
       return true;
     }
     return false;

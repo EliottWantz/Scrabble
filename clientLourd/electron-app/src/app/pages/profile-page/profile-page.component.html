@@ -59,7 +59,7 @@
           <div class="form">
             <button id="upload-button" type="button" mat-raised-button (click)="fileInput.click()">Choose File</button>
             <input hidden (change)="onFileSelected($event)" #fileInput type="file">
-            <span class="file-name">{{selectedFile?.name}}</span>
+            <span class="file-name">{{selectedFile.name}}</span>
           </div>
           <button mat-raised-button color="primary" type="button" (click)="submit()">Enregistrer</button>
           

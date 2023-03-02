@@ -19,14 +19,12 @@ export class ProfilePageComponent {
   }
 
   async submit(): Promise<void> {
-    console.log(this.selectedFile);
     const user = this.storageService.getUser()!;
     if (this.selectedFile.name != "") {
       await this.communicationService.uploadAvatar(this.selectedFile, user).then((res) => {
-        user.avatar = res.url;
+        user.avatar = res;
         this.storageService.saveUser(user);
         document.getElementById("avatar")?.setAttribute("src", res.url);
-        console.log(res);
       });
     }
     
