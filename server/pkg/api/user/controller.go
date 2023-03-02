@@ -1,6 +1,8 @@
 package user
 
 import (
+	"io"
+
 	"scrabble/pkg/api/auth"
 
 	"github.com/gofiber/fiber/v2"
@@ -21,6 +23,7 @@ type SignupRequest struct {
 	Password  string `json:"password,omitempty"`
 	Email     string `json:"email,omitempty"`
 	AvatarURL string `json:"avatarUrl,omitempty"`
+	FileID    string `json:"fileId,omitempty"`
 }
 
 type SignupResponse struct {
@@ -32,7 +35,7 @@ type SignupResponse struct {
 func (ctrl *Controller) SignUp(c *fiber.Ctx) error {
 	req := SignupRequest{}
 	if err := c.BodyParser(&req); err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+		return fiber.NewError(fiber.StatusBadRequest, "decode req: "+err.Error())
 	}
 
 	if req.Username == "" {
@@ -44,8 +47,20 @@ func (ctrl *Controller) SignUp(c *fiber.Ctx) error {
 	if req.Email == "" {
 		return fiber.NewError(fiber.StatusBadRequest, "email can't be blank")
 	}
+	var avatarFile io.ReadSeeker
+	if req.AvatarURL == "" {
+		header, err := c.FormFile("avatar")
+		if err != nil {
+			return fiber.NewError(fiber.StatusBadRequest, "no avatar url or avatar file can be read: "+err.Error())
+		}
+		file, err := header.Open()
+		if err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, "error opening avatar file: "+err.Error())
+		}
+		avatarFile = file
+	}
 
-	user, err := ctrl.svc.SignUp(req.Username, req.Password, req.Email)
+	user, err := ctrl.svc.SignUp(req, avatarFile)
 	if err != nil {
 		return err
 	}
