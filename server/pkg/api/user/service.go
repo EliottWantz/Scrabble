@@ -83,7 +83,7 @@ func (s *Service) SignUp(username, password, email string) (*User, error) {
 		return nil, fiber.NewError(fiber.StatusInternalServerError, "failed to create and join own room: "+err.Error())
 	}
 	// Join global room
-	err = s.RoomSvc.JoinRoom("global", u.ID)
+	err = s.RoomSvc.AddUser("global", u.ID)
 	if err != nil {
 		return nil, fiber.NewError(fiber.StatusInternalServerError, "failed to join global room: "+err.Error())
 	}

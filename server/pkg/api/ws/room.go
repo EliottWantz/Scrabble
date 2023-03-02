@@ -62,7 +62,7 @@ func (r *Room) AddClient(cID string) error {
 	c.Rooms.Set(r.ID, r)
 	r.logger.Info("client added in room", "client", c.ID)
 
-	err = r.Manager.RoomSvc.JoinRoom(r.ID, cID)
+	err = r.Manager.RoomSvc.AddUser(r.ID, cID)
 	if err != nil {
 		return err
 	}
@@ -130,7 +130,7 @@ func (r *Room) RemoveClient(cID string) error {
 		return r.Manager.RoomSvc.Delete(r.ID)
 	}
 
-	if err := r.Manager.RoomSvc.LeaveRoom(r.ID, cID); err != nil {
+	if err := r.Manager.RoomSvc.RemoveUser(r.ID, cID); err != nil {
 		return err
 	}
 

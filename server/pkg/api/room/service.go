@@ -33,11 +33,11 @@ func (s *Service) HasRoom(ID string) (*Room, bool) {
 	return r, err == nil
 }
 
-func (s *Service) JoinRoom(roomID, userID string) error {
+func (s *Service) AddUser(roomID, userID string) error {
 	return s.repo.AddUser(roomID, userID)
 }
 
-func (s *Service) LeaveRoom(roomID, userID string) error {
+func (s *Service) RemoveUser(roomID, userID string) error {
 	return s.repo.RemoveUser(roomID, userID)
 }
 

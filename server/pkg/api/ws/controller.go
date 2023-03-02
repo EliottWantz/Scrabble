@@ -46,7 +46,7 @@ func (m *Manager) JoinRoom(c *fiber.Ctx) error {
 			return fiber.NewError(fiber.StatusBadRequest, "room not found: "+err.Error())
 		}
 
-		if err = m.RoomSvc.JoinRoom(req.RoomID, req.UserID); err != nil {
+		if err = m.RoomSvc.AddUser(req.RoomID, req.UserID); err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, "failed to join room: "+err.Error())
 		}
 		if err = r.AddClient(req.UserID); err != nil {
@@ -90,7 +90,7 @@ func (m *Manager) LeaveRoom(c *fiber.Ctx) error {
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, "room not found: "+err.Error())
 	}
-	if err = m.RoomSvc.LeaveRoom(req.RoomID, req.UserID); err != nil {
+	if err = m.RoomSvc.RemoveUser(req.RoomID, req.UserID); err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, "failed to leave room: "+err.Error())
 	}
 	if err = r.RemoveClient(req.UserID); err != nil {
