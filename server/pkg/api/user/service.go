@@ -54,7 +54,7 @@ func NewService(cfg *config.Config, repo *Repository, roomSvc *room.Service) (*S
 	}, nil
 }
 
-func (s *Service) SignUp(username, password, email string) (*User, error) {
+func (s *Service) SignUp(username, password, email string, uploadAvatar UploadAvatarStrategy) (*User, error) {
 	if _, err := s.Repo.FindByUsername(username); err == nil {
 		return nil, fiber.NewError(fiber.StatusUnprocessableEntity, "username already exists")
 	}
@@ -68,9 +68,14 @@ func (s *Service) SignUp(username, password, email string) (*User, error) {
 	u := &User{
 		ID:              ID,
 		Username:        username,
-		Email:           email,
 		HashedPassword:  hashedPassword,
+		Email:           email,
 		JoinedChatRooms: make([]string, 0),
+	}
+
+	// Add avatar strategy
+	if err = uploadAvatar(u); err != nil {
+		return nil, fiber.NewError(fiber.StatusInternalServerError, "failed to upload avatar: "+err.Error())
 	}
 
 	if err := s.Repo.Insert(u); err != nil {
