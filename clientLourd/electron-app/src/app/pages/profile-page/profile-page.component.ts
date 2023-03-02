@@ -23,9 +23,9 @@ export class ProfilePageComponent {
     const user = this.storageService.getUser()!;
     if (this.selectedFile.name != "") {
       await this.communicationService.uploadAvatar(this.selectedFile, user).then((res) => {
-        user.avatar = res.URL;
+        user.avatar = res.url;
         this.storageService.saveUser(user);
-        document.getElementById("avatar")?.setAttribute("src", res.URL);
+        document.getElementById("avatar")?.setAttribute("src", res.url);
         console.log(res);
       });
     }

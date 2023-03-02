@@ -30,18 +30,18 @@ export class CommunicationService {
         return this.http.post<{user: User}>(`${this.baseUrl}/signup`, { username, password, email, avatar }).pipe(catchError(this.handleError));
     }
 
-    async uploadAvatar(file: File, user: User): Promise<{URL: string, fileId: string}> {
+    async uploadAvatar(file: File, user: User): Promise<{url: string, fileId: string}> {
         const res: any = (await lastValueFrom(this.requestUploadAvatar(file, user)));
         return res;
     }
 
-    private requestUploadAvatar(file: File, user: User): Observable<{URL: string, fileId: string}> {
+    private requestUploadAvatar(file: File, user: User): Observable<{url: string, fileId: string}> {
         /*return this.http.post<{URL: string, fileId: string}>(`${this.baseUrl}/avatar/${user.id}`, file, {
             headers: {"Authorization": `Bearer ${this.storageService.getUserToken()!}`}
         }).pipe(catchError(this.handleError));*/
         const formData = new FormData();
         formData.append("avatar", file);
-        return this.http.post<{URL: string, fileId: string}>(`${this.baseUrl}/avatar/${user.id}`, formData).pipe(catchError(this.handleError))
+        return this.http.post<{url: string, fileId: string}>(`${this.baseUrl}/avatar/${user.id}`, formData).pipe(catchError(this.handleError))
     }
 
     private handleError(error: HttpErrorResponse) {
