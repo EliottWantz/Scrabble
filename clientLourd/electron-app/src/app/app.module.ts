@@ -11,6 +11,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 import { LoginPageComponent } from '@app/pages/login-page/login-page.component';
 import { ProfilePageComponent } from './pages/profile-page/profile-page.component';
+import { ChatBoxPrototypeComponent } from './components/chat-box/chat-box-prototype.component';
 import { MatCardModule } from '@angular/material/card';
 import { AppMaterialModule } from "@app/modules/material.module";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
@@ -27,7 +28,8 @@ import { AuthInterceptor } from '@app/services/auth-interceptor/auth-interceptor
     MainPageComponent,
     LoginPageComponent,
     ProfilePageComponent,
-    RegisterComponent
+    RegisterComponent,
+    ChatBoxPrototypeComponent
   ],
   imports: [
     BrowserModule,
