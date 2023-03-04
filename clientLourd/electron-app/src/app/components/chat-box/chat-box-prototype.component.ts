@@ -167,4 +167,10 @@ export class ChatBoxPrototypeComponent implements OnInit, AfterViewInit {
       this.chatBoxMessagesContainer.nativeElement.scrollHeight;
     // }
   }
+
+
+
+  public popout(): void {
+    
+  }
 }

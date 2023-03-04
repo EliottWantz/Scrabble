@@ -1,27 +1,29 @@
 <div class="container">
-  <nav>
-    <button
-      *ngIf="!isConnected()"
-      mat-raised-button
-      color="primary"
-      routerLink="/login" routerLinkActive="router-link-active" 
-      id="login-button"
-    >
-      Se connecter
-    </button>
-    <button
-      *ngIf="isConnected()"
-      mat-raised-button
-      color="warn"
-      (click)="logout()"
-      id="login-button"
-    >
-      Déconnexion
-    </button>
-
-    <a *ngIf="isConnected()" routerLink="/profile" routerLinkActive="router-link-active" id="login-button">
-      <img id="avatar" src="">
-    </a>
-  </nav>
-  <app-chat-box-prototype *ngIf="isConnected()"></app-chat-box-prototype>
+  <div class="content">
+    <nav>
+      <button
+        *ngIf="!isConnected()"
+        mat-raised-button
+        color="primary"
+        routerLink="/login" routerLinkActive="router-link-active" 
+        id="login-button"
+      >
+        Se connecter
+      </button>
+      <button
+        *ngIf="isConnected()"
+        mat-raised-button
+        color="warn"
+        (click)="logout()"
+        id="login-button"
+      >
+        Déconnexion
+      </button>
+  
+      <a *ngIf="isConnected()" routerLink="/profile" routerLinkActive="router-link-active" id="login-button">
+        <img id="avatar" src="">
+      </a>
+    </nav>
+  </div>
+  <app-chat-box-prototype class="chat" *ngIf="isConnected()"></app-chat-box-prototype>
 </div>

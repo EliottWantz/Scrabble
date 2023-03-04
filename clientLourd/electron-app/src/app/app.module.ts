@@ -29,7 +29,7 @@ import { AuthInterceptor } from '@app/services/auth-interceptor/auth-interceptor
     LoginPageComponent,
     ProfilePageComponent,
     RegisterComponent,
-    ChatBoxPrototypeComponent
+    ChatBoxPrototypeComponent,
   ],
   imports: [
     BrowserModule,
@@ -43,7 +43,7 @@ import { AuthInterceptor } from '@app/services/auth-interceptor/auth-interceptor
     AppMaterialModule,
     BrowserAnimationsModule,
     MatIconModule,
-    MatDividerModule
+    MatDividerModule,
   ],
   providers: [
     {
