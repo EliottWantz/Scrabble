@@ -1,11 +1,13 @@
 package api
 
 import (
+	"errors"
 	"time"
 
 	"scrabble/config"
 	"scrabble/pkg/api/auth"
 	"scrabble/pkg/api/game"
+	"scrabble/pkg/api/room"
 	"scrabble/pkg/api/storage"
 	"scrabble/pkg/api/user"
 	"scrabble/pkg/api/ws"
@@ -36,13 +38,14 @@ type Services struct {
 	GameSvc *game.Service
 	UserSvc *user.Service
 	AuthSvc *auth.Service
+	RoomSvc *room.Service
 }
 
 type Repositories struct {
 	GameRepo    *game.Repository
 	UserRepo    *user.Repository
 	MessageRepo *ws.MessageRepository
-	RoomRepo    *ws.RoomRepository
+	RoomRepo    *room.Repository
 }
 
 func New(cfg *config.Config) (*API, error) {
@@ -58,7 +61,7 @@ func New(cfg *config.Config) (*API, error) {
 		gameRepo := game.NewRepository(db)
 		userRepo := user.NewRepository(db)
 		messageRepo := ws.NewMessageRepository(db)
-		roomRepo := ws.NewRoomRepository(db)
+		roomRepo := room.NewRepository(db)
 
 		repositories = Repositories{
 			GameRepo:    gameRepo,
@@ -70,23 +73,28 @@ func New(cfg *config.Config) (*API, error) {
 
 	var services Services
 	{
-		userSvc, err := user.NewService(cfg, repositories.UserRepo)
+		gameSvc := game.NewService(repositories.GameRepo)
+		authSvc := auth.NewService(cfg.JWT_SIGN_KEY)
+		roomSvc, err := room.NewService(repositories.RoomRepo)
 		if err != nil {
 			return nil, err
 		}
-		gameSvc := game.NewService(repositories.GameRepo)
-		authSvc := auth.NewService(cfg.JWT_SIGN_KEY)
+		userSvc, err := user.NewService(cfg, repositories.UserRepo, roomSvc)
+		if err != nil {
+			return nil, err
+		}
 
 		services = Services{
 			GameSvc: gameSvc,
 			UserSvc: userSvc,
 			AuthSvc: authSvc,
+			RoomSvc: roomSvc,
 		}
 	}
 
 	var controllers Controllers
 	{
-		wsManager, err := ws.NewManager(repositories.MessageRepo, repositories.RoomRepo, repositories.UserRepo)
+		wsManager, err := ws.NewManager(repositories.MessageRepo, services.RoomSvc, services.UserSvc)
 		if err != nil {
 			return nil, err
 		}
@@ -101,7 +109,16 @@ func New(cfg *config.Config) (*API, error) {
 	}
 
 	api := &API{
-		App:    fiber.New(),
+		App: fiber.New(fiber.Config{
+			ErrorHandler: func(c *fiber.Ctx, err error) error {
+				code := fiber.StatusInternalServerError
+				var e *fiber.Error
+				if errors.As(err, &e) {
+					code = e.Code
+				}
+				return c.Status(code).JSON(err)
+			},
+		}),
 		logger: slog.Default(),
 		Ctrls:  controllers,
 		Svcs:   services,

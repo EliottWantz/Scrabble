@@ -104,6 +104,24 @@ func (r *Repository) Update(u *User) error {
 	return nil
 }
 
+func (r *Repository) AddJoinedRoom(roomID, userID string) error {
+	_, err := r.coll.UpdateByID(
+		context.Background(),
+		userID,
+		bson.M{"$addToSet": bson.M{"joinedChatRooms": roomID}},
+	)
+	return err
+}
+
+func (r *Repository) RemoveJoinedRoom(roomID, userID string) error {
+	_, err := r.coll.UpdateByID(
+		context.Background(),
+		userID,
+		bson.M{"$pull": bson.M{"joinedChatRooms": roomID}},
+	)
+	return err
+}
+
 func (r *Repository) Delete(ID string) error {
 	_, err := r.coll.DeleteOne(context.TODO(), bson.M{"_id": ID})
 	if err != nil {

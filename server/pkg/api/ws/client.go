@@ -33,11 +33,11 @@ func NewClient(conn *websocket.Conn, cID string, m *Manager) *Client {
 		Manager:   m,
 		Conn:      conn,
 		Rooms:     haxmap.New[string, *Room](),
+		logger:    slog.With("client", cID),
 		sendCh:    make(chan *Packet, 10),
 		receiveCh: make(chan *Packet, 10),
 		quitCh:    make(chan struct{}),
 	}
-	c.logger = slog.With("client", c.ID)
 
 	go c.write()
 	go c.read()
@@ -90,55 +90,8 @@ func (c *Client) handlePacket(p *Packet) error {
 	switch p.Event {
 	case ClientEventNoEvent:
 		c.logger.Info("received packet with no action")
-	case ClientEventJoin:
-		return c.joinRoom(p)
-	case ClientEventLeave:
-		return c.leaveRoom(p)
 	case ClientEventBroadcast:
 		return c.broadcast(p)
-	}
-
-	return nil
-}
-
-func (c *Client) joinRoom(p *Packet) error {
-	payload := JoinPayload{}
-	if err := json.Unmarshal(p.Payload, &payload); err != nil {
-		return fmt.Errorf("failed to unmarshal JoinPayload: %w", err)
-	}
-
-	r, err := c.Manager.GetRoom(payload.RoomID)
-	if err != nil {
-		return err
-	}
-
-	if err := r.addClient(c.ID); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (c *Client) leaveRoom(p *Packet) error {
-	payload := LeavePayload{}
-	if err := json.Unmarshal(p.Payload, &payload); err != nil {
-		return fmt.Errorf("failed to unmarshal LeavePayload: %v", err)
-	}
-
-	if payload.RoomID == c.ID {
-		return ErrLeavingOwnRoom
-	}
-	if payload.RoomID == c.Manager.GlobalRoom.ID {
-		return ErrLeavingGloabalRoom
-	}
-
-	r, err := c.Manager.GetRoom(payload.RoomID)
-	if err != nil {
-		return err
-	}
-
-	if err = r.removeClient(c.ID); err != nil {
-		return err
 	}
 
 	return nil
@@ -170,7 +123,7 @@ func (c *Client) broadcast(p *Packet) error {
 	if err := p.setPayload(payload); err != nil {
 		return err
 	}
-	r.broadcast(p)
+	r.Broadcast(p)
 
 	return nil
 }

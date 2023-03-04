@@ -35,12 +35,6 @@ func (p *Packet) setPayload(payload any) error {
 	return nil
 }
 
-// Client events payloads
-type JoinPayload struct {
-	RoomID string `json:"roomId"`
-}
-type LeavePayload = JoinPayload
-
 type ChatMessage struct {
 	RoomID    string    `json:"roomId" bson:"roomId"`
 	Message   string    `json:"message" bson:"message"`
@@ -52,7 +46,6 @@ type ChatMessage struct {
 // Server events payloads
 type JoinedRoomPayload struct {
 	RoomID   string            `json:"roomId"`
-	Name     string            `json:"name"`
 	Users    []user.PublicUser `json:"users"`
 	Messages []ChatMessage     `json:"messages"`
 }
