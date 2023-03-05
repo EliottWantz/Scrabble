@@ -1,4 +1,5 @@
 import 'package:client_leger/controllers/home_controller.dart';
+import 'package:client_leger/screens/friends_screen.dart';
 import 'package:client_leger/screens/main_menu_screen.dart';
 import 'package:client_leger/screens/profile_screen.dart';
 import 'package:client_leger/screens/settings_screen.dart';
@@ -46,6 +47,8 @@ class HomeScreen extends GetView<HomeController> {
             case 1:
               return const ProfileScreen();
             case 2:
+              return const FriendsScreen();
+            case 3:
               return const SettingsScreen();
             default:
               return Text(
