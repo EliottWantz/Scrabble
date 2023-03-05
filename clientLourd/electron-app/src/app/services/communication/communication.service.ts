@@ -2,6 +2,7 @@ import { HttpClient, HttpErrorResponse, HttpHeaders } from "@angular/common/http
 import { Injectable } from "@angular/core";
 import { environment } from 'src/environments/environment';
 import { User } from "@app/utils/interfaces/user";
+import { Room } from "@app/utils/interfaces/room";
 import { catchError, lastValueFrom, Observable, throwError } from "rxjs";
 
 @Injectable({
@@ -42,6 +43,15 @@ export class CommunicationService {
         const formData = new FormData();
         formData.append("avatar", file);
         return this.http.post<{url: string, fileId: string}>(`${this.baseUrl}/avatar/${user.id}`, formData).pipe(catchError(this.handleError))
+    }
+
+    async joinRoom(username: string, roomId: string, roomName: string): Promise<{room: Room}> {
+        const res: any = (await lastValueFrom(this.requestJoinRoom(username, roomId, roomName)));
+        return res;
+    }
+
+    private requestJoinRoom(userId: string, roomId: string, roomName: string): Observable<{room: Room}> {
+        return this.http.post<{room: Room}>(`${this.baseUrl}/room/join`, { userId, roomId, roomName }).pipe(catchError(this.handleError));
     }
 
     private handleError(error: HttpErrorResponse) {
