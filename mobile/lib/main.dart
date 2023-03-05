@@ -52,7 +52,9 @@ Future<void> initGlobalServices() async {
   await Get.putAsync(() => StorageService().init());
   Get.put(UserService());
   Get.put(ApiProvider(), permanent: true);
-  Get.put(WebsocketService(), permanent: false);
+  Get.put(WebsocketService(
+      userService: Get.find()
+  ), permanent: false);
   Get.put(ApiRepository(apiProvider: Get.find()), permanent: true);
   Get.put(SettingsService(storageService: Get.find()));
   Get.put(AuthService(

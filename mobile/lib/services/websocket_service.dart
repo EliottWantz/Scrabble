@@ -9,9 +9,15 @@ import 'package:client_leger/api/api_constants.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:client_leger/services/user_service.dart';
 import 'package:web_socket_channel/status.dart' as status;
 
 class WebsocketService extends GetxService {
+  final UserService userService;
+
+  WebsocketService(
+      {required this.userService});
+
   late WebSocketChannel socket;
   late String roomId;
   late String username;
@@ -19,15 +25,15 @@ class WebsocketService extends GetxService {
   late RxString timestamp = ''.obs;
   late RxInt itemCount = 0.obs;
 
-  connect(String username) {
+  connect() {
     socket = WebSocketChannel.connect(Uri(
         scheme: ApiConstants.wsScheme,
         host: ApiConstants.wsHost,
-        // port: ApiConstants.wsPort,
+        port: ApiConstants.wsPort,
         path: ApiConstants.wsPath,
-        queryParameters: { 'id': username }
+        queryParameters: { 'id': userService.user.id, 'username': userService.user.username }
     ));
-    username = username;
+    // username = username;
     // final message = {'event': 'broadcast','payload': 'hello'};
     // print(jsonEncode(message));
     socket.stream.listen(

@@ -1,4 +1,5 @@
 import 'package:client_leger/models/chat_message_payload.dart';
+import 'package:client_leger/services/user_service.dart';
 import 'package:client_leger/services/websocket_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
@@ -9,6 +10,7 @@ import 'package:intl/intl.dart';
 class ChatBoxController extends GetxController {
   final WebsocketService websocketService = Get.find();
   final StorageService storageService = Get.find();
+  final UserService userService = Get.find();
   final ScrollController scrollController = ScrollController();
 
   late RxInt itemCount = 0.obs;
@@ -20,7 +22,7 @@ class ChatBoxController extends GetxController {
   TextEditingController messageTextEditingController = TextEditingController();
 
   bool isCurrentUserMessage(String username) {
-    return storageService.read('username') == username;
+    return userService.user.username == username;
   }
 
   String getLocalTime(int index) {
@@ -39,7 +41,7 @@ class ChatBoxController extends GetxController {
       final chatMessagePayload = ChatMessagePayload(
           roomId: 'global',
           message: messageTextEditingController.text,
-          from: storageService.read('username')
+          from: userService.user.username
       );
       print('send message');
       print(chatMessagePayload);

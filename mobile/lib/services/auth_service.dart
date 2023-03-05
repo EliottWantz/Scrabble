@@ -29,7 +29,7 @@ class AuthService extends GetxService {
     if (res.token != null && res.user != null) {
       userService.user = res.user as User;
       await _setSession(res.token as String);
-      // websocketService.connect(res.user!.id);
+      websocketService.connect();
     }
   }
 
@@ -39,6 +39,7 @@ class AuthService extends GetxService {
     if (res.token != null && res.user != null) {
       userService.user = res.user as User;
       await _setSession(res.token as String);
+      websocketService.connect();
     }
   }
 
