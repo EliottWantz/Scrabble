@@ -8,6 +8,7 @@ type User struct {
 	Avatar          Avatar      `bson:"avatar" json:"avatar,omitempty"`
 	Preferences     Preferences `bson:"preferences" json:"preferences,omitempty"`
 	JoinedChatRooms []string    `bson:"joinedChatRooms" json:"joinedChatRooms"`
+	Friends         []string    `bson:"friends" json:"friends"`
 	Summary         Summary     `bson:"summary" json:"summary,omitempty"`
 }
 
