@@ -1,6 +1,6 @@
 #chatBox {
   height: 100%;
-  width: 100%;
+  width: 30%;
   display: grid;
   grid-template-rows: 1fr auto;
 }
@@ -71,6 +71,14 @@ form > mat-form-field {
 
 form > button {
   margin-bottom: 1rem;
+}
+
+#popout {
+  height: 20px;
+  width: 20px;
+  border: none;
+  cursor: pointer;
+  background-color: transparent;
 }
 
 // form {

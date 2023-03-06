@@ -22,6 +22,9 @@
     <a *ngIf="isConnected()" routerLink="/profile" routerLinkActive="router-link-active" id="login-button">
       <img id="avatar" src="">
     </a>
+    <a *ngIf="isConnected()" routerLink="/rules-slider" routerLinkActive="router-link-active" id="rules-button">
+      <div> Help! </div>
+    </a>
   </nav>
-  <app-chat-box-prototype *ngIf="isConnected()"></app-chat-box-prototype>
+  <app-chat-box *ngIf="isConnected()"></app-chat-box>
 </div>

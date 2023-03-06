@@ -20,11 +20,11 @@ import { Room } from "@app/utils/interfaces/room";
 import { UserService } from "@app/services/user/user.service";
 
 @Component({
-  selector: "app-chat-box-prototype",
-  templateUrl: "./chat-box-prototype.component.html",
-  styleUrls: ["./chat-box-prototype.component.scss"],
+  selector: "app-chat-box",
+  templateUrl: "./chat-box.component.html",
+  styleUrls: ["./chat-box.component.scss"],
 })
-export class ChatBoxPrototypeComponent implements OnInit, AfterViewInit {
+export class ChatBoxComponent implements OnInit, AfterViewInit {
   @ViewChild("chatBoxMessages")
   chatBoxMessagesContainer!: ElementRef;
   // @ViewChild("chatBoxMessages")
@@ -103,5 +103,11 @@ export class ChatBoxPrototypeComponent implements OnInit, AfterViewInit {
     this.chatBoxMessagesContainer.nativeElement.scrollTop =
       this.chatBoxMessagesContainer.nativeElement.scrollHeight;
     // }
+  }
+
+
+
+  public popout(): void {
+    
   }
 }

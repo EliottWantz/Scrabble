@@ -1,0 +1,10 @@
+<div class="container">
+  <button mat-fab color="primary" class="home-button" routerLink="/home" routerLinkActive="router-link-active">
+    <mat-icon>home</mat-icon>
+  </button>
+  <button id="next-page-button" type="button" mat-raised-button (click)="previousPage()">Previous Page</button>
+  <div *ngIf="page==0">Texte 1</div>
+  <div *ngIf="page==1">Texte 2</div>
+  <div *ngIf="page==2">Texte 3</div>
+  <button id="next-page-button" type="button" mat-raised-button (click)="nextPage()">Next Page</button>
+</div>
