@@ -45,7 +45,7 @@ import { AuthInterceptor } from '@app/services/auth-interceptor/auth-interceptor
     AppMaterialModule,
     BrowserAnimationsModule,
     MatIconModule,
-    MatDividerModule
+    MatDividerModule,
   ],
   providers: [
     {
