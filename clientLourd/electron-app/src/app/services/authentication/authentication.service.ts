@@ -17,8 +17,6 @@ export class AuthenticationService {
 
     async login(username: string, password: string): Promise<boolean> {
         return await this.commService.login(username, password).then((res) => {
-            console.log(res);
-            console.log("login");
             this.setUser(res);
             this.socketService.connect();
             return true;
@@ -32,7 +30,6 @@ export class AuthenticationService {
 
     async register(username: string, password: string, email: string, avatar: string): Promise<boolean> {
         return await this.commService.register(username, password, email, avatar).then((res) => {
-            console.log("register");
             this.setUser(res);
             this.socketService.connect();
             return true;
