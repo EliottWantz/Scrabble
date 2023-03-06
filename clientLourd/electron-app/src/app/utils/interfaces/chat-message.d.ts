@@ -1,7 +1,7 @@
 export interface ChatMessage {
-    roomID: string;
+    roomId: string;
     message: string;
     from: string;
-    fromID: string;
+    fromId: string;
     timestamp?: string;
 }
