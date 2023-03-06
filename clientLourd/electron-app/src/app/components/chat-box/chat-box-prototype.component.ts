@@ -13,10 +13,11 @@ import {
 } from "@angular/forms";
 import { MessageErrorStateMatcher } from "@app/classes/form-error/error-state-form";
 import { ChatService } from "@app/services/chat/chat.service";
-import { BehaviorSubject, Subscription } from "rxjs";
-import { ChatMessage } from "@app/utils/interfaces/chat-message";
+import { BehaviorSubject } from "rxjs";
 import { User } from "@app/utils/interfaces/user";
 import { RoomService } from "@app/services/room/room.service";
+import { Room } from "@app/utils/interfaces/room";
+import { UserService } from "@app/services/user/user.service";
 
 @Component({
   selector: "app-chat-box-prototype",
@@ -30,28 +31,29 @@ export class ChatBoxPrototypeComponent implements OnInit, AfterViewInit {
   // chatBoxMessagesContainer: CdkVirtualScrollViewport;
   chatBoxForm: FormGroup;
   //   messages: ChatMessage[];
-  messages$!: BehaviorSubject<ChatMessage[]>;
+  //messages$!: BehaviorSubject<ChatMessage[]>;
+  room$!: BehaviorSubject<Room>;
   messageValidator: MessageErrorStateMatcher = new MessageErrorStateMatcher;
   ws!: WebSocket;
-  user!: User;
   @ViewChild("chatBoxInput")
   chatBoxInput!: ElementRef;
-  messagesSub: Subscription;
+  user!: User;
 
   constructor(
     private fb: FormBuilder,
     private chatService: ChatService,
-    private roomService: RoomService
+    private roomService: RoomService,
+    private userService: UserService
   ) {
     this.chatBoxForm = this.fb.group({
       input: ["", [Validators.required]],
     });
-    this.messagesSub = new Subscription();
   }
 
   ngOnInit(): void {
-    this.messages$ = this.chatService.messages$;
-    this.messagesSub = this.messages$.subscribe(() => {
+    this.room$ = this.roomService.currentRoom;
+    this.user = this.userService.currentUserValue;
+    this.room$.subscribe(() => {
       setTimeout(() => this.scrollBottom());
     });
   }
@@ -64,14 +66,8 @@ export class ChatBoxPrototypeComponent implements OnInit, AfterViewInit {
       // })
       this.chatBoxMessagesContainer.nativeElement.scrollTop =
         this.chatBoxMessagesContainer.nativeElement.scrollHeight;
-      console.log(
-        "scrollTop",
-        this.chatBoxMessagesContainer.nativeElement.scrollTop
-      );
-      console.log(
-        "scrollHeight",
-        this.chatBoxMessagesContainer.nativeElement.scrollHeight
-      );
+        this.chatBoxMessagesContainer.nativeElement.scrollTop;
+        this.chatBoxMessagesContainer.nativeElement.scrollHeight;
       // this.scrollBottom();
       // this.messages$.subscribe(() => {
       //   this.scrollBottom();
@@ -85,6 +81,7 @@ export class ChatBoxPrototypeComponent implements OnInit, AfterViewInit {
     await this.chatService.send(msg, this.roomService.currentRoom.value);
     this.chatBoxForm.reset();
     this.chatBoxInput.nativeElement.focus();
+    //console.log(this.messages$);
   }
 
   get input(): AbstractControl {
@@ -96,24 +93,12 @@ export class ChatBoxPrototypeComponent implements OnInit, AfterViewInit {
     //   this.chatBoxMessagesContainer.nativeElement.scrollTop +
     //     this.chatBoxMessagesContainer.nativeElement.clientHeight !==
     //   this.chatBoxMessagesContainer.nativeElement.scrollHeight;
+    
     // console.log(shouldScroll);
-    console.log(
-      "scrollTop",
-      this.chatBoxMessagesContainer.nativeElement.scrollTop
-    );
-    console.log(
-      "scrollHeight",
-      this.chatBoxMessagesContainer.nativeElement.scrollHeight
-    );
-    console.log(
-      "clientHeight",
-      this.chatBoxMessagesContainer.nativeElement.clientHeight
-    );
-    console.log(
-      "scrollTop + clientHeight",
-      this.chatBoxMessagesContainer.nativeElement.scrollTop +
-        this.chatBoxMessagesContainer.nativeElement.clientHeight
-    );
+    this.chatBoxMessagesContainer.nativeElement.scrollTop
+    this.chatBoxMessagesContainer.nativeElement.scrollHeight
+    this.chatBoxMessagesContainer.nativeElement.clientHeight
+    this.chatBoxMessagesContainer.nativeElement.scrollTop + this.chatBoxMessagesContainer.nativeElement.clientHeight
     // if (shouldScroll) {
     this.chatBoxMessagesContainer.nativeElement.scrollTop =
       this.chatBoxMessagesContainer.nativeElement.scrollHeight;
