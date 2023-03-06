@@ -6,6 +6,7 @@ import { environment } from 'src/environments/environment';
 import { Packet } from "@app/utils/interfaces/packet";
 import { RoomService } from "@app/services/room/room.service";
 import { Room } from "@app/utils/interfaces/room";
+import { ChatMessage } from "@app/utils/interfaces/chat-message";
 
 @Injectable({
     providedIn: "root",
@@ -20,14 +21,14 @@ export class WebSocketService {
 
     async connect(): Promise<void> {
         if (this.user) {
-            console.log("yo");
             this.socket = new WebSocket(
                 `${environment.wsUrl}/?id=${this.user.value.id}&username=${this.user.value.username}`
             );
-            this.socket.onmessage = (e) => {
-                console.log("yo2");
-                this.handleSocket(e);
-            }
+            this.socket.onopen = () => {
+                this.socket.onmessage = (e) => {
+                    this.handleSocket(e);
+                }
+            }  
         }
     }
 
@@ -35,21 +36,37 @@ export class WebSocketService {
         this.socket.close.bind(this.socket);
     }
 
-    private handleSocket(e: MessageEvent): void {
+    private async handleSocket(e: MessageEvent): Promise<void> {
         const packet: Packet = JSON.parse(e.data);
         switch (packet.event) {
             case "joinedRoom":
-                const payload = packet.payload as Room;
-                if (!this.roomService.rooms.value.includes(payload)) {
-                    this.roomService.addRoom(payload);
+                const payloadRoom = packet.payload as Room;
+                if (!this.roomService.findRoom(payloadRoom.roomId)) {
+                    this.roomService.addRoom(payloadRoom);
                 }
-                this.roomService.currentRoom.next(payload);
-                console.log(payload);
+                break;
+
+            case "broadcast":
+                const payloadMessage = packet.payload as ChatMessage;
+                const message: ChatMessage = {
+                    from: payloadMessage.from,
+                    fromId: payloadMessage.fromId,
+                    roomId: payloadMessage.roomId,
+                    message: payloadMessage.message,
+                    timestamp: new Date(payloadMessage.timestamp!).toLocaleTimeString(
+                      undefined,
+                      { hour12: false }
+                    ),
+                };
+                this.roomService.addMessage(message);
+                break;
+
+            case "listUsers":
                 break;
         }
     }
 
-    sendMessage(packet: Packet): void {
+    send(packet: Packet): void {
         this.socket.send(JSON.stringify(packet));
     }
 }
