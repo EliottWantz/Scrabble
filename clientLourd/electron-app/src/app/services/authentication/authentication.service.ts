@@ -1,8 +1,9 @@
 import { Injectable } from "@angular/core";
 import { User } from "@app/utils/interfaces/user";
-import { BehaviorSubject } from "rxjs";
 import { CommunicationService } from "@app/services/communication/communication.service"
 import { StorageService } from "../storage/storage.service";
+import { UserService } from "@app/services/user/user.service";
+import { WebSocketService } from "@app/services/web-socket/web-socket.service";
 
 @Injectable({
     providedIn: 'root',
@@ -10,25 +11,14 @@ import { StorageService } from "../storage/storage.service";
 export class AuthenticationService {
     username: string = "";
     password: string = "";
-    isLoggedIn = false;
     isLoginFailed = false;
     errorMessage = '';
-    subjectUser: BehaviorSubject<User>;
-    constructor(private commService: CommunicationService, private storageService: StorageService) {
-        this.subjectUser = new BehaviorSubject<User>({
-            id: "0",
-            username: "",
-            email:"0@0.0",
-            avatar:{url:"a",fileId:"a"},
-            preferences:{theme:"a"},
-          });
-    }
+    constructor(private commService: CommunicationService, private storageService: StorageService, private userService: UserService, private socketService: WebSocketService) {}
 
     async login(username: string, password: string): Promise<boolean> {
         return await this.commService.login(username, password).then((res) => {
-            console.log(res);
-            console.log("login");
             this.setUser(res);
+            this.socketService.connect();
             return true;
         })
         .catch((err) => {
@@ -40,8 +30,8 @@ export class AuthenticationService {
 
     async register(username: string, password: string, email: string, avatar: string): Promise<boolean> {
         return await this.commService.register(username, password, email, avatar).then((res) => {
-            console.log("register");
             this.setUser(res);
+            this.socketService.connect();
             return true;
         })
         .catch((err) => {
@@ -52,23 +42,20 @@ export class AuthenticationService {
     }
 
     private setUser(res: {user: User, token: string}): void {
-        this.subjectUser.value.username = res.user.username;
-        this.subjectUser.value.email = res.user.email;
-        this.subjectUser.value.avatar = res.user.avatar;
-        this.subjectUser.value.id = res.user.id;
-        this.subjectUser.value.preferences = res.user.preferences;
+        this.userService.setUser({
+            id: res.user.id,
+            username: res.user.username,
+            email: res.user.email,
+            avatar: res.user.avatar,
+            preferences: res.user.preferences
+        });
         this.storageService.saveUserToken(res.token);
         this.isLoginFailed = false;
-        this.isLoggedIn = true;
         //this.websocketService.connect();
     }
 
     logout(): void {
-        this.isLoggedIn = false;
-        //this.websocketService.disconnect();
+        this.userService.deleteUser();
+        this.socketService.disconnect();
     }
-
-    public get currentUserValue(): User {
-        return this.subjectUser.value;
-      }
 }

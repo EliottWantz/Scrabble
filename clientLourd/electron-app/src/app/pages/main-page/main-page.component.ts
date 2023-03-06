@@ -1,7 +1,8 @@
 import { Component } from "@angular/core";
-import { AuthenticationService } from "@app/services/authentication/authentication.service";
-import { WebsocketService } from "@app/services/web-socket/web-socket.service";
+import { UserService } from "@app/services/user/user.service";
+import { WebSocketService } from "@app/services/web-socket/web-socket.service";
 import { User } from "@app/utils/interfaces/user";
+import { BehaviorSubject } from "rxjs";
 
 @Component({
   selector: "app-main-page",
@@ -11,15 +12,15 @@ import { User } from "@app/utils/interfaces/user";
 export class MainPageComponent {
   readonly title: string = "Scrabble";
   isJoining: boolean = false;
-  public user: User;
+  public user: BehaviorSubject<User>;
 
-  constructor(private authenticationService: AuthenticationService, private socketService: WebsocketService) {
-    this.user= this.authenticationService.currentUserValue;
-    document.getElementById("avatar")?.setAttribute("src", this.user.avatar.url);
+  constructor(private userService: UserService, private socketService: WebSocketService) {
+    this.user = this.userService.subjectUser;
+    document.getElementById("avatar")?.setAttribute("src", this.user.value.avatar.url);
   }
 
   isConnected(): Boolean {
-    return this.authenticationService.isLoggedIn;
+    return this.userService.isLoggedIn;
   }
 
   logout(): void {

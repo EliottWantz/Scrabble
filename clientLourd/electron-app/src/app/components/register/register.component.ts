@@ -24,7 +24,6 @@ export class RegisterComponent {
         const isLoggedIn = await this.authService.register(this.username, this.password, this.email, this.avatar);
 
         if (isLoggedIn) {
-            console.log("allo2");
             this.router.navigate(['/home']);
         } else {
             this.isRegisterFailed = true;
@@ -32,7 +31,6 @@ export class RegisterComponent {
     }
 
     selectAvatar(num: number): void {
-        console.log("allo");
         let src;
         for(let i = 0; i < document.getElementsByClassName("avatar").length; i++) {
             if (i != num) {
@@ -45,7 +43,6 @@ export class RegisterComponent {
         }
         if (src)
             this.avatar = src;
-        console.log(this.avatar);
     }
 
     onFileSelected(event: any): void {

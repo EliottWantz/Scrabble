@@ -3,7 +3,7 @@
     <div id="chatBoxMessages" #chatBoxMessages>
       <div
         class="message"
-        *ngFor="let msg of messages$ | async"
+        *ngFor="let msg of room$.value.messages"
         [ngClass]="{
           sent: msg.from === user.id,
           received: msg.from !== user.id

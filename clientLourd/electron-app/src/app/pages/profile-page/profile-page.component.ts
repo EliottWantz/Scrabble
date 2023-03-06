@@ -1,6 +1,6 @@
 import { Component } from "@angular/core";
 import { CommunicationService } from "@app/services/communication/communication.service";
-import { AuthenticationService } from "@app/services/authentication/authentication.service";
+import { UserService } from "@app/services/user/user.service";
 import { User } from "@app/utils/interfaces/user";
 
 @Component({
@@ -14,8 +14,8 @@ export class ProfilePageComponent {
   selectedFile: File = new File([], "");
   hasError = false;
   user: User;
-  constructor(private communicationService: CommunicationService, private authService: AuthenticationService) {
-    this.user= this.authService.currentUserValue;
+  constructor(private communicationService: CommunicationService, private userService: UserService) {
+    this.user= this.userService.currentUserValue;
     document.getElementById("avatar")?.setAttribute("src", this.user.avatar.url);
   }
 
@@ -25,8 +25,8 @@ export class ProfilePageComponent {
 
   async submit(): Promise<void> {
     if (this.selectedFile.name != "") {
-      await this.communicationService.uploadAvatar(this.selectedFile, this.authService.currentUserValue).then((res) => {
-        this.authService.subjectUser.next({...this.authService.subjectUser.value, avatar: res})
+      await this.communicationService.uploadAvatar(this.selectedFile, this.userService.currentUserValue).then((res) => {
+        this.userService.subjectUser.next({...this.userService.subjectUser.value, avatar: res})
         document.getElementById("avatar")?.setAttribute("src", res.url);
       });
     }

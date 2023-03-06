@@ -1,1 +1,1 @@
-export type ServerEvent = "joinedGlobalRoom";
+export type ServerEvent = "listUsers" | "joinedRoom";

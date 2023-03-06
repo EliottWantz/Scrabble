@@ -12,15 +12,12 @@ import {
   Validators,
 } from "@angular/forms";
 import { MessageErrorStateMatcher } from "@app/classes/form-error/error-state-form";
-import { AuthenticationService } from "@app/services/authentication/authentication.service";
+import { ChatService } from "@app/services/chat/chat.service";
 import { BehaviorSubject } from "rxjs";
-import {
-  BroadcastPayload,
-  ChatMessage,
-  JoinedGlobalRoomPayload,
-  Packet,
-  User,
-} from "./Exports";
+import { User } from "@app/utils/interfaces/user";
+import { RoomService } from "@app/services/room/room.service";
+import { Room } from "@app/utils/interfaces/room";
+import { UserService } from "@app/services/user/user.service";
 
 @Component({
   selector: "app-chat-box",
@@ -34,17 +31,19 @@ export class ChatBoxComponent implements OnInit, AfterViewInit {
   // chatBoxMessagesContainer: CdkVirtualScrollViewport;
   chatBoxForm: FormGroup;
   //   messages: ChatMessage[];
-  messages$!: BehaviorSubject<ChatMessage[]>;
+  //messages$!: BehaviorSubject<ChatMessage[]>;
+  room$!: BehaviorSubject<Room>;
   messageValidator: MessageErrorStateMatcher = new MessageErrorStateMatcher;
-  globalRoomId!: string;
   ws!: WebSocket;
-  user!: User;
   @ViewChild("chatBoxInput")
   chatBoxInput!: ElementRef;
+  user!: User;
 
   constructor(
-    private authenticationService: AuthenticationService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private chatService: ChatService,
+    private roomService: RoomService,
+    private userService: UserService
   ) {
     this.chatBoxForm = this.fb.group({
       input: ["", [Validators.required]],
@@ -52,7 +51,11 @@ export class ChatBoxComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-    this.connect();
+    this.room$ = this.roomService.currentRoom;
+    this.user = this.userService.currentUserValue;
+    this.room$.subscribe(() => {
+      setTimeout(() => this.scrollBottom());
+    });
   }
 
   ngAfterViewInit(): void {
@@ -63,14 +66,8 @@ export class ChatBoxComponent implements OnInit, AfterViewInit {
       // })
       this.chatBoxMessagesContainer.nativeElement.scrollTop =
         this.chatBoxMessagesContainer.nativeElement.scrollHeight;
-      console.log(
-        "scrollTop",
-        this.chatBoxMessagesContainer.nativeElement.scrollTop
-      );
-      console.log(
-        "scrollHeight",
-        this.chatBoxMessagesContainer.nativeElement.scrollHeight
-      );
+        this.chatBoxMessagesContainer.nativeElement.scrollTop;
+        this.chatBoxMessagesContainer.nativeElement.scrollHeight;
       // this.scrollBottom();
       // this.messages$.subscribe(() => {
       //   this.scrollBottom();
@@ -78,61 +75,13 @@ export class ChatBoxComponent implements OnInit, AfterViewInit {
     });
   }
 
-  async connect(): Promise<void> {
-    // this.messages = [];
-    this.messages$ = new BehaviorSubject<ChatMessage[]>([]);
-    this.user = this.authenticationService.currentUserValue;
-    this.ws = new WebSocket(
-      "wss://scrabble-production.up.railway.app/ws?id=" + this.user.id
-    );
-    this.ws.onmessage = (e) => {
-      const packet: Packet = JSON.parse(e.data);
-      switch (packet.event) {
-        case "joinedGlobalRoom":
-          this.globalRoomId = (
-            packet.payload as JoinedGlobalRoomPayload
-          ).roomId;
-          break;
-        case "broadcast": {
-          const payload = packet.payload as BroadcastPayload;
-          console.log(payload);
-          const message: ChatMessage = {
-            from: payload.from,
-            message: payload.message,
-            timestamp: new Date(payload.timestamp!).toLocaleTimeString(
-              undefined,
-              { hour12: false }
-            ),
-          };
-          // console.log(this.messages$.value);
-          this.messages$.next([...this.messages$.value, message]);
-          this.scrollBottom();
-          setTimeout(() => {
-            this.scrollBottom();
-          });
-        }
-      }
-    };
-    this.chatBoxForm.reset();
-  }
   async send(msg: string): Promise<void> {
     if (!msg || !msg.replace(/\s/g, '')) return;
-    // console.log("Sending message: " + msg);
-    const payload: BroadcastPayload = {
-      roomId: this.globalRoomId,
-      from: this.user.username,
-      message: msg,
-    };
-    console.log(this.user);
-    const packet: Packet = {
-      event: "broadcast",
-      payload: payload,
-    };
-    this.ws.send(JSON.stringify(packet));
-    // msg = "";
-    // this.chatBoxForm.setValue({ input: "" });
+
+    await this.chatService.send(msg, this.roomService.currentRoom.value);
     this.chatBoxForm.reset();
     this.chatBoxInput.nativeElement.focus();
+    //console.log(this.messages$);
   }
 
   get input(): AbstractControl {
@@ -144,24 +93,12 @@ export class ChatBoxComponent implements OnInit, AfterViewInit {
     //   this.chatBoxMessagesContainer.nativeElement.scrollTop +
     //     this.chatBoxMessagesContainer.nativeElement.clientHeight !==
     //   this.chatBoxMessagesContainer.nativeElement.scrollHeight;
+    
     // console.log(shouldScroll);
-    console.log(
-      "scrollTop",
-      this.chatBoxMessagesContainer.nativeElement.scrollTop
-    );
-    console.log(
-      "scrollHeight",
-      this.chatBoxMessagesContainer.nativeElement.scrollHeight
-    );
-    console.log(
-      "clientHeight",
-      this.chatBoxMessagesContainer.nativeElement.clientHeight
-    );
-    console.log(
-      "scrollTop + clientHeight",
-      this.chatBoxMessagesContainer.nativeElement.scrollTop +
-        this.chatBoxMessagesContainer.nativeElement.clientHeight
-    );
+    this.chatBoxMessagesContainer.nativeElement.scrollTop
+    this.chatBoxMessagesContainer.nativeElement.scrollHeight
+    this.chatBoxMessagesContainer.nativeElement.clientHeight
+    this.chatBoxMessagesContainer.nativeElement.scrollTop + this.chatBoxMessagesContainer.nativeElement.clientHeight
     // if (shouldScroll) {
     this.chatBoxMessagesContainer.nativeElement.scrollTop =
       this.chatBoxMessagesContainer.nativeElement.scrollHeight;
