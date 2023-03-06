@@ -55,9 +55,13 @@ export class RoomService {
         const index = this.findRoom(msg.roomId);
         if (index) {
             if (this.rooms.value[index].value.roomId == this.currentRoom.value.roomId) {
-                this.currentRoom.next({...this.rooms.value[index].value, messages: [...this.rooms.value[index].value.messages, msg]});
+                const currentMessages = this.currentRoom.value.messages;
+                currentMessages.push(msg);
+                this.currentRoom.next({...this.rooms.value[index].value, messages: currentMessages});
             } else {
-                this.rooms.value[index].next({...this.rooms.value[index].value, messages: [...this.rooms.value[index].value.messages, msg]});
+                const currentMessages = this.rooms.value[index].value.messages;
+                currentMessages.push(msg);
+                this.rooms.value[index].next({...this.rooms.value[index].value, messages: currentMessages});
             }
         }
     }
