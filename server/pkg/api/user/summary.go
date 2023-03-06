@@ -8,7 +8,7 @@ type Summary struct {
 
 type NetworkLog struct {
 	EventType string `bson:"eventType" json:"eventType,omitempty"`
-	EvenTime  int    `bson:"evenTime" json:"evenTime,omitempty"`
+	EvenTime  int64  `bson:"evenTime" json:"evenTime,omitempty"`
 }
 type GameStats struct {
 	EventDate int  `bson:"eventDate" json:"eventDate,omitempty"`
@@ -22,7 +22,7 @@ type UserStats struct {
 	AverageTimePlayed    int `bson:"averageTimePlayed" json:"averageTimePlayed,omitempty"`
 }
 
-func (s *Service) addNetworkingLog(u *User, eventType string, eventTime int) {
+func (s *Service) addNetworkingLog(u *User, eventType string, eventTime int64) {
 	networkLogs := &u.Summary.NetworkLogs
 	*networkLogs = append(*networkLogs, NetworkLog{
 		EventType: eventType,
