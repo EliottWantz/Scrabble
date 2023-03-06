@@ -2,6 +2,7 @@ package user
 
 import (
 	"errors"
+	"time"
 
 	"scrabble/config"
 	"scrabble/pkg/api/auth"
@@ -105,7 +106,7 @@ func (s *Service) Login(username, password string) (*User, error) {
 	if !auth.PasswordsMatch(password, u.HashedPassword) {
 		return nil, fiber.NewError(fiber.StatusUnauthorized, "password mismatch")
 	}
-
+	s.AddNetworkingLog(u, "login", time.Now().UnixMilli())
 	return u, nil
 }
 
@@ -117,7 +118,6 @@ func (s *Service) Logout(ID string) error {
 	if err := s.Repo.Delete(ID); err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, "failed to delete user")
 	}
-
 	slog.Info("Logout user", "id", ID)
 
 	return nil
