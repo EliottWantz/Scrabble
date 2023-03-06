@@ -51,6 +51,7 @@ class AuthService extends GetxService {
     // final logoutRequest = LogoutRequest(id: id, username: username);
     // await apiRepository.logout(logoutRequest);
     // Get.delete<WebsocketService>();
+    // websocketService.socket.
     websocketService.messages.value = [];
     Get.offAllNamed(Routes.AUTH);
   }

@@ -47,7 +47,7 @@ class HomeScreen extends GetView<HomeController> {
             case 1:
               return const ProfileScreen();
             case 2:
-              return const FriendsScreen();
+              return FriendsScreen();
             case 3:
               return const SettingsScreen();
             default:

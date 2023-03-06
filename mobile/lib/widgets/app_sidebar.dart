@@ -233,7 +233,7 @@ class AppSideBar extends StatelessWidget {
         ),
         const SidebarXItem(
           icon: Icons.people_alt,
-          label: 'Friends',
+          label: 'Social',
         ),
       ];
     } else if (ModalRoute.of(context)!.settings.name == '/auth/login') {

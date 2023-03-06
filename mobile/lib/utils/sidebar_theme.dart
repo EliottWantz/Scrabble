@@ -3,6 +3,7 @@ import 'package:sidebarx/sidebarx.dart';
 
 const primaryColor = Color(0xFF685BFF);
 const canvasColor = Color(0xFF2E2E48);
+const friendsCanvasColor = Color(0xFF333349);
 const scaffoldBackgroundColor = Color(0xFF464667);
 const accentCanvasColor = Color(0xFF3E3E61);
 const white = Colors.white;
@@ -55,5 +56,12 @@ class sideBarUtils {
     decoration: BoxDecoration(
       color: canvasColor,
     ),
+  );
+
+  static const friendsSideBarThemeExt = SidebarXTheme(
+    width: 150,
+    decoration: BoxDecoration(
+      color: friendsCanvasColor,
+    )
   );
 }
