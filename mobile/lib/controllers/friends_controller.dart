@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 
-class FriendsController extends GetxController {
-  FriendsController();
+class SocialController extends GetxController {
+  SocialController();
 
 }

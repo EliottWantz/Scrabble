@@ -61,7 +61,7 @@ class sideBarUtils {
   static const friendsSideBarThemeExt = SidebarXTheme(
     width: 150,
     decoration: BoxDecoration(
-      color: friendsCanvasColor,
+      color: canvasColor,
     )
   );
 }

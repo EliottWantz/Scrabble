@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 
-class FriendsScreen extends GetView<ChatBoxController> {
-  FriendsScreen({Key? key}) : super(key: key);
+class SocialScreen extends GetView<ChatBoxController> {
+  SocialScreen({Key? key}) : super(key: key);
 
   final _key = GlobalKey<ScaffoldState>();
   final FocusNode messageInputFocusNode = FocusNode();
@@ -19,12 +19,12 @@ class FriendsScreen extends GetView<ChatBoxController> {
           key: _key,
           body: Row(
             children: [
-              FriendsSideBar(),
               Expanded(child: Center(
                   child: _buildItems(
                   context,
                 ),
-              ))
+              )),
+              FriendsSideBar(),
             ],
           ),
         )

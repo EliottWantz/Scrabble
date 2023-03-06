@@ -28,6 +28,24 @@ class FriendsSideBar extends StatelessWidget {
     );
   }
 
+  Widget _buildHeader() {
+    return SizedBox(
+      height: 150,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Center(
+          child: CustomButton(
+            text: 'Friends',
+            textColor: Colors.white,
+            onPressed: () {
+              print('clicked on friends button');
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
   List<SidebarXItem> _buildListItems(BuildContext context) {
     return [
       const SidebarXItem(
@@ -43,22 +61,5 @@ class FriendsSideBar extends StatelessWidget {
         label: 'Friend 3',
       ),
     ];
-  }
-
-  Widget _buildHeader() {
-    return SizedBox(
-      height: 150,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Center(
-          child: CustomButton(
-            text: 'Friends',
-            onPressed: () {
-              print('clicked on friends button');
-            },
-          ),
-        ),
-      ),
-    );
   }
 }

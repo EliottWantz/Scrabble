@@ -5,6 +5,7 @@ class CustomButton extends StatelessWidget {
   final Widget? child;
   final double width;
   final double height;
+  final Color? textColor;
   final Function? onPressed;
 
   const CustomButton({
@@ -13,6 +14,7 @@ class CustomButton extends StatelessWidget {
     this.child,
     this.width = double.infinity,
     this.height = 50.0,
+    this.textColor = Colors.black,
     this.onPressed,
   }) : super(key: key);
 
@@ -29,6 +31,9 @@ class CustomButton extends StatelessWidget {
           child: text != ""
               ? Text(
                   text,
+                  style: TextStyle(
+                    color: textColor,
+                  ),
                 )
               : child,
         ),
