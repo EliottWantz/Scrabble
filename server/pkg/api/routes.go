@@ -69,6 +69,7 @@ func (api *API) setupRoutes(cfg *config.Config) {
 			return c.Next()
 		},
 	)
+	r.Patch("/user/:id/config", api.Ctrls.UserCtrl.UpdatePreferences)
 	r.Post("/avatar", api.Ctrls.UserCtrl.UploadAvatar)
 	// r.Delete("/avatar/:id", api.Ctrls.UserCtrl.DeleteAvatar)
 	r.Get("/user/:id", api.Ctrls.UserCtrl.GetUser)
