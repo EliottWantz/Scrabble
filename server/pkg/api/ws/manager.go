@@ -38,10 +38,10 @@ func NewManager(messageRepo *MessageRepository, roomSvc *room.Service, userSvc *
 	return m, nil
 }
 
-func (m *Manager) Accept(cID, name string) fiber.Handler {
+func (m *Manager) Accept(cID string) fiber.Handler {
 	return websocket.New(func(conn *websocket.Conn) {
 		c := NewClient(conn, cID, m)
-		err := m.AddClient(c, name)
+		err := m.AddClient(c)
 		if err != nil {
 			m.logger.Error("add client", err)
 			return
@@ -90,7 +90,7 @@ func (m *Manager) ListUsers() ([]user.PublicUser, error) {
 	return pubUsers, nil
 }
 
-func (m *Manager) AddClient(c *Client, name string) error {
+func (m *Manager) AddClient(c *Client) error {
 	user, err := m.UserSvc.Repo.Find(c.ID)
 	if err != nil {
 		return err
@@ -100,12 +100,6 @@ func (m *Manager) AddClient(c *Client, name string) error {
 
 	// Add the client to the global room
 	if err := m.GlobalRoom.AddClient(c.ID); err != nil {
-		return err
-	}
-
-	// Add the client to his own room
-	r := m.AddRoom(c.ID)
-	if err := r.AddClient(c.ID); err != nil {
 		return err
 	}
 

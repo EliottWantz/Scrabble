@@ -1,6 +1,7 @@
 package ws
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
@@ -59,6 +60,53 @@ func (m *Manager) JoinRoom(c *fiber.Ctx) error {
 	}
 
 	return c.SendStatus(fiber.StatusOK)
+}
+
+type JoinDMRequest struct {
+	UserID     string `json:"userId,omitempty"`
+	Username   string `json:"username,omitempty"`
+	ToID       string `json:"toId,omitempty"`
+	ToUsername string `json:"toUsername,omitempty"`
+}
+type JoinDMResponse struct {
+	RoomID   string `json:"roomId,omitempty"`
+	RoomName string `json:"roomName,omitempty"`
+}
+
+func (m *Manager) JoinDMRoom(c *fiber.Ctx) error {
+	req := JoinDMRequest{}
+	if err := c.BodyParser(&req); err != nil {
+		return err
+	}
+
+	// Create room with both users in it
+	roomName := fmt.Sprintf("%s/%s", req.Username, req.ToUsername)
+	dbRoom, err := m.RoomSvc.CreateRoom(
+		uuid.NewString(),
+		roomName,
+		req.UserID,
+		req.ToID,
+	)
+	if err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, "failed to create new room: "+err.Error())
+	}
+
+	// Add room to joinedRoom for both users
+	err = m.UserSvc.Repo.AddJoinedRoom(dbRoom.ID, req.UserID)
+	if err != nil {
+		return fmt.Errorf("add user to room: %w", err)
+	}
+	err = m.UserSvc.Repo.AddJoinedRoom(dbRoom.ID, req.ToID)
+	if err != nil {
+		return fmt.Errorf("add user to room: %w", err)
+	}
+
+	r := m.AddRoom(dbRoom.ID)
+
+	return c.Status(fiber.StatusCreated).JSON(JoinDMResponse{
+		RoomID:   r.ID,
+		RoomName: roomName,
+	})
 }
 
 type LeaveRoomRequest struct {

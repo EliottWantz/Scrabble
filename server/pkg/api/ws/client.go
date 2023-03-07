@@ -90,23 +90,23 @@ func (c *Client) handlePacket(p *Packet) error {
 	switch p.Event {
 	case ClientEventNoEvent:
 		c.logger.Info("received packet with no action")
-	case ClientEventBroadcast:
-		return c.broadcast(p)
+	case ClientEventChatMessage:
+		return c.ChatMessage(p)
 	}
 
 	return nil
 }
 
-func (c *Client) broadcast(p *Packet) error {
+func (c *Client) ChatMessage(p *Packet) error {
 	payload := ChatMessage{}
 	if err := json.Unmarshal(p.Payload, &payload); err != nil {
-		return fmt.Errorf("failed to unmarshal BroadcastPayload: %w", err)
+		return fmt.Errorf("failed to unmarshal ChatMessage: %w", err)
 	}
-	slog.Info("broadcast", "payload", payload)
+	slog.Info("room-message", "payload", payload)
 
 	r, err := c.Manager.GetRoom(payload.RoomID)
 	if err != nil {
-		return fmt.Errorf("broadcast: %w", err)
+		return fmt.Errorf("ChatMessage: %w", err)
 	}
 
 	if !r.has(c.ID) {
@@ -116,7 +116,6 @@ func (c *Client) broadcast(p *Packet) error {
 	payload.Timestamp = time.Now().UTC()
 
 	if err := r.Manager.MessageRepo.InsertOne(r.ID, &payload); err != nil {
-		// return fmt.Errorf("failed to insert message in db: %w", err)
 		slog.Error("failed to insert message in db", err)
 	}
 
