@@ -5,4 +5,5 @@ abstract class Routes {
   static const REGISTER = '/register';
   static const HOME = '/home';
   static const AVATAR_SELECTION = '/avatar-selection';
+  static const FRIENDS = '/friends';
 }

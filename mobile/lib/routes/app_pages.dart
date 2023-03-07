@@ -1,10 +1,12 @@
 import 'package:client_leger/bindings/auth_binding.dart';
 import 'package:client_leger/bindings/avatar_selection_binding.dart';
+import 'package:client_leger/bindings/friends_binding.dart';
 import 'package:client_leger/screens/auth/auth_screen.dart';
 import 'package:client_leger/screens/avatar_selection_screen.dart';
 import 'package:client_leger/screens/home_screen.dart';
 import 'package:client_leger/screens/auth/login_screen.dart';
 import 'package:client_leger/screens/auth/register_screen.dart';
+import 'package:client_leger/screens/friends_screen.dart';
 import 'package:get/get.dart';
 import '../bindings/chatbox_binding.dart';
 import 'app_routes.dart';
@@ -26,5 +28,6 @@ class AppPages {
         name: Routes.AVATAR_SELECTION,
         page: () => AvatarSelectionScreen(),
         binding: AvatarSelectionBinding()),
+    // GetPage(name: Routes.FRIENDS, page: () => FriendsScreen(), binding: FriendsBinding()),
   ];
 }
