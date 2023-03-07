@@ -2,6 +2,7 @@ package ws
 
 import (
 	"fmt"
+	"time"
 
 	"scrabble/pkg/api/room"
 	"scrabble/pkg/api/user"
@@ -145,11 +146,17 @@ func (m *Manager) RemoveClient(c *Client) error {
 		return fmt.Errorf("removeClient: %w", err)
 	}
 
+	user, err := m.UserSvc.GetUser(c.ID)
+	if err != nil {
+		return fmt.Errorf("removeClient: %w", err)
+	}
+	m.UserSvc.AddNetworkingLog(user, "Logout", time.Now().UnixMilli())
 	m.logger.Info(
 		"client disconnected",
 		"client_id", c.ID,
 		"total_rooms", m.Rooms.Len(),
 	)
+
 	return nil
 }
 

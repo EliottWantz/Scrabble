@@ -6,8 +6,9 @@ type User struct {
 	HashedPassword  string      `bson:"password" json:"-"`
 	Email           string      `bson:"email" json:"email,omitempty"`
 	Avatar          Avatar      `bson:"avatar" json:"avatar,omitempty"`
-	Preferences     Preferences `bson:"preferences" json:"preferences,omitempty"`
+	Preferences     Preferences `bson:"preferences" json:"preferences"`
 	JoinedChatRooms []string    `bson:"joinedChatRooms" json:"joinedChatRooms"`
+	Summary         Summary     `bson:"summary" json:"summary,omitempty"`
 }
 
 type PublicUser struct {

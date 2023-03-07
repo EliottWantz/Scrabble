@@ -5,17 +5,19 @@ import (
 	"fmt"
 	"time"
 
+	"scrabble/pkg/api/user"
 	"scrabble/pkg/scrabble"
 )
 
 var numGames = flag.Int("n", 1, "Number of games to simulate")
 
 type Service struct {
-	repo *Repository
+	repo    *Repository
+	userSvc *user.Service
 }
 
-func NewService(repo *Repository) *Service {
-	return &Service{repo: repo}
+func NewService(repo *Repository, userSvc *user.Service) *Service {
+	return &Service{repo: repo, userSvc: userSvc}
 }
 
 func (gs *Service) StartGame() {
@@ -67,6 +69,13 @@ func (gs *Service) simulateGame(tileSet *scrabble.TileSet, dawg *scrabble.DAWG) 
 		fmt.Println(move)
 		fmt.Println(g.Board)
 		if g.IsOver() {
+
+			// TODO:  update user Gamestats
+			// gs.userSvc.UpdateUserStats()
+
+			// TODO : add new game stats
+			// gs.userSvc.addGameStats()
+
 			fmt.Printf("Game over!\n\n")
 			break
 		}

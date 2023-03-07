@@ -65,6 +65,7 @@ func (api *API) setupRoutes(cfg *config.Config) {
 			return c.Next()
 		},
 	)
+	r.Patch("/user/:id/config", api.Ctrls.UserCtrl.UpdatePreferences)
 	r.Post("/avatar", api.Ctrls.UserCtrl.UploadAvatar)
 	r.Get("/user/:id", api.Ctrls.UserCtrl.GetUser)
 

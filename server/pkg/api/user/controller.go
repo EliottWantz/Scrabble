@@ -182,6 +182,52 @@ func (ctrl *Controller) UploadAvatar(c *fiber.Ctx) error {
 	)
 }
 
+type PreferencesRequest struct {
+	Theme    string `json:"theme,omitempty"`
+	Language string `json:"language,omitempty"`
+}
+
+func (ctrl *Controller) UpdatePreferences(c *fiber.Ctx) error {
+	ID := c.Params("id")
+	req := PreferencesRequest{}
+	if err := c.BodyParser(&req); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "decode req: "+err.Error())
+	}
+	if ID == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "no user id given")
+	}
+	user, err := ctrl.svc.GetUser(ID)
+
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "no user found")
+	}
+
+	var preference Preferences
+	{
+		var theme string
+		var language string
+		if req.Theme != user.Preferences.Theme && req.Theme != "" {
+			theme = req.Theme
+		} else {
+			theme = user.Preferences.Theme
+		}
+
+		if req.Language != user.Preferences.Language && req.Language != "" {
+			language = req.Language
+		} else {
+			language = user.Preferences.Language
+		}
+
+		preference = Preferences{
+			Theme:    theme,
+			Language: language,
+		}
+	}
+
+	ctrl.svc.UpdatePreferences(user, preference)
+	return c.SendStatus(fiber.StatusOK)
+}
+
 // func (ctrl *Controller) DeleteAvatar(c *fiber.Ctx) error {
 // 	ID := c.Params("id")
 // 	if ID == "" {
