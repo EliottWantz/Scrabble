@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:client_leger/api/api_repository.dart';
 import 'package:client_leger/models/requests/login_request.dart';
 import 'package:client_leger/models/requests/logout_request.dart';
@@ -26,33 +28,24 @@ class AuthService extends GetxService {
   Future<void> login(LoginRequest loginRequest) async {
     var res = await apiRepository.login(loginRequest);
     if (res == null) return;
-    if (res.token != null && res.user != null) {
-      userService.user = res.user as User;
-      await _setSession(res.token as String);
-      websocketService.connect();
-    }
+    userService.user = res.user;
+    await _setSession(res.token);
+    websocketService.connect();
   }
 
-  Future<void> register(RegisterRequest registerRequest) async {
-    var res = await apiRepository.signup(registerRequest);
+  Future<void> register(RegisterRequest registerRequest, File imagePath) async {
+    var res = await apiRepository.signup(registerRequest, imagePath);
     if (res == null) return;
-    if (res.token != null && res.user != null) {
-      userService.user = res.user as User;
-      await _setSession(res.token as String);
-      websocketService.connect();
-    }
+    userService.user = res.user;
+    await _setSession(res.token);
+    websocketService.connect();
   }
 
   Future<void> logout() async {
-    // final String username = storageService.read('username');
-    // final String id = storageService.read('id');
-    // await storageService.remove('username');
-    // await storageService.remove('id');
-    // final logoutRequest = LogoutRequest(id: id, username: username);
-    // await apiRepository.logout(logoutRequest);
     // Get.delete<WebsocketService>();
     websocketService.socket.sink.close();
-    websocketService.messages.value = [];
+    // websocketService.messages.value = [];
+    await storageService.remove('token');
     Get.offAllNamed(Routes.AUTH);
   }
 

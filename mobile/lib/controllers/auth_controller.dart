@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:client_leger/api/api_repository.dart';
 import 'package:client_leger/models/requests/login_request.dart';
 import 'package:client_leger/models/requests/register_request.dart';
@@ -9,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:client_leger/services/settings_service.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:sidebarx/sidebarx.dart';
 
 class AuthController extends GetxController {
@@ -60,18 +63,23 @@ class AuthController extends GetxController {
     }
   }
 
-  Future<void> onRegister(BuildContext context) async {
+  void onAvatarClick(BuildContext context) {
     AppFocus.unfocus(context);
     if (registerFormKey.currentState!.validate()) {
-      final request = RegisterRequest(
-          email: registerEmailController.text,
-          username: registerUsernameController.text,
-          password: registerPasswordController.text);
-      await DialogHelper.showLoading('Connexion au serveur');
-      await authService.register(request);
-      if (authService.isUserLoggedIn()) {
-        Get.offAllNamed(Routes.AVATAR_SELECTION);
-      }
+      Get.toNamed(Routes.AUTH + Routes.REGISTER + Routes.AVATAR_SELECTION,
+          arguments: this);
+    }
+  }
+
+  Future<void> onRegister(XFile image) async {
+    final request = RegisterRequest(
+        email: registerEmailController.text,
+        username: registerUsernameController.text,
+        password: registerPasswordController.text);
+    await DialogHelper.showLoading('Connexion au serveur');
+    await authService.register(request, File(image.path));
+    if (authService.isUserLoggedIn()) {
+      Get.offAllNamed(Routes.HOME);
     }
   }
 }

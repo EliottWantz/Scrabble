@@ -3,10 +3,8 @@ import 'dart:convert';
 class LogoutRequest {
   LogoutRequest({
     required this.id,
-    required this.username,
   });
 
-  String username;
   String id;
 
   factory LogoutRequest.fromRawJson(String str) =>
@@ -15,12 +13,10 @@ class LogoutRequest {
   String toRawJson() => json.encode(toJson());
 
   factory LogoutRequest.fromJson(Map<String, dynamic> json) => LogoutRequest(
-    username: json["username"],
-    id: json["id"],
-  );
+        id: json["id"],
+      );
 
   Map<String, dynamic> toJson() => {
-    "username": username,
-    "id": id,
-  };
+        "id": id,
+      };
 }

@@ -20,7 +20,8 @@ class RegisterScreen extends StatelessWidget {
               body: Row(
                 children: [
                   AppSideBar(
-                      controller: controller.sideBarController,),
+                    controller: controller.sideBarController,
+                  ),
                   Expanded(
                     child: _buildItems(
                       context,
@@ -89,9 +90,9 @@ class RegisterScreen extends StatelessWidget {
                       ),
                       const Gap(50.0),
                       CustomButton(
-                        text: 'authRegisterBtn'.tr,
-                        onPressed: () async {
-                          await controller.onRegister(context);
+                        text: 'Choisir son Avatar',
+                        onPressed: () {
+                          controller.onAvatarClick(context);
                         },
                       ),
                       const Gap(50.0),

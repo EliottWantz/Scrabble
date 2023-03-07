@@ -1,24 +1,24 @@
 import 'dart:convert';
 
+import 'package:client_leger/models/avatar.dart';
+
 class Preferences {
   String theme;
+  String language;
 
-  Preferences({required this.theme});
+  Preferences({required this.theme, required this.language});
 
-  factory Preferences.fromJson(Map<String, dynamic> json) => Preferences(
-        theme: json["theme"],
-      );
+  factory Preferences.fromJson(Map<String, dynamic> json) =>
+      Preferences(theme: json["theme"], language: json["language"]);
 
-  Map<String, dynamic> toJson() => {
-        "theme": theme,
-      };
+  Map<String, dynamic> toJson() => {"theme": theme, "language": language};
 }
 
 class User {
   String id;
   String username;
   String email;
-  Object avatar;
+  Avatar avatar;
   Preferences preferences;
 
   User(
@@ -33,7 +33,7 @@ class User {
         id: json["id"],
         username: json["username"],
         email: json["email"],
-        avatar: json["avatar"],
+        avatar: Avatar.fromJson(json["avatar"]),
         preferences: Preferences.fromJson(json["preferences"]));
   }
 
@@ -41,7 +41,7 @@ class User {
         "id": id,
         "username": username,
         "email": email,
-        "avatar": avatar,
+        "avatar": avatar.toJson(),
         "preferences": preferences.toJson(),
       };
 }

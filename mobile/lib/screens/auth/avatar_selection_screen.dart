@@ -17,6 +17,7 @@ import 'package:path_provider/path_provider.dart';
 class AvatarSelectionScreen extends GetView<AvatarController> {
   AvatarSelectionScreen({Key? key}) : super(key: key);
   final StorageService storageService = Get.find();
+  final AuthController authController = Get.arguments;
 
   @override
   Widget build(BuildContext context) {
@@ -54,18 +55,6 @@ class AvatarSelectionScreen extends GetView<AvatarController> {
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const Gap(50),
-              // Obx(() => CircleAvatar(
-              //     maxRadius: 150,
-              //     backgroundColor: Colors.transparent,
-              //     backgroundImage: controller.getAvatarToDisplay(),
-              //     child: Center(
-              //         child: controller.avatarIndex == null
-              //             ? const Text(
-              //                 'Pas d\'avatar sélectionné',
-              //                 style: TextStyle(fontSize: 20),
-              //               )
-              //             : null))),
-              // const Gap(40),
               CustomButton(
                 text: 'Choisir un avatar',
                 onPressed: () {
@@ -96,9 +85,9 @@ class AvatarSelectionScreen extends GetView<AvatarController> {
               ),
               const Gap(100),
               CustomButton(
-                  text: 'Continuer vers le menu principal',
+                  text: 'S\'inscrire',
                   onPressed: () {
-                    Get.offAllNamed(Routes.HOME);
+                    authController.onRegister(controller.image);
                   })
             ],
           ),

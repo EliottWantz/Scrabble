@@ -3,10 +3,10 @@ import 'dart:convert';
 import 'package:client_leger/models/user.dart';
 
 class LoginResponse {
-  LoginResponse({this.user, this.token});
+  LoginResponse({required this.user, required this.token});
 
-  User? user;
-  String? token;
+  User user;
+  String token;
 
   factory LoginResponse.fromRawJson(String str) =>
       LoginResponse.fromJson(json.decode(str));
@@ -19,7 +19,7 @@ class LoginResponse {
       );
 
   Map<String, dynamic> toJson() => {
-        "user": user?.toJson(),
+        "user": user.toJson(),
         "token": token,
       };
 }

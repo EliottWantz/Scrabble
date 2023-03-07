@@ -1,21 +1,19 @@
 import 'dart:io';
-
-import 'package:client_leger/api/api_provider.dart';
 import 'package:client_leger/api/api_repository.dart';
-import 'package:client_leger/models/response/avatar_upload_response.dart';
 import 'package:client_leger/services/avatar_service.dart';
+import 'package:client_leger/services/user_service.dart';
 import 'package:client_leger/utils/dialog_helper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
-import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:sidebarx/sidebarx.dart';
 
 class AvatarController extends GetxController {
   final AvatarService avatarService;
   final ApiRepository apiRepository = Get.find();
+  final UserService userService = Get.find();
+  late XFile image;
 
 
   AvatarController({required this.avatarService});
@@ -28,15 +26,7 @@ class AvatarController extends GetxController {
       SidebarXController(selectedIndex: 0, extended: true);
 
   Future<void> onTakePicture() async {
-    final image = await avatarService.takePicture();
-    if (image != null) {
-      DialogHelper.showLoading('Connexion au Serveur');
-      final avatar = await apiRepository.upload(File(image.path));
-      if (avatar != null) {
-        avatarService.isAvatar.value = false;
-        avatarService.imageUrl.value = avatar.url;
-      }
-    }
+    image = (await avatarService.takePicture())!;
   }
 
   Future<void> onAvatarConfirmation() async {

@@ -35,7 +35,10 @@ class AppSideBar extends StatelessWidget {
           if (ModalRoute.of(context)!.settings.name == '/auth') {
             return _buildFooterAuth();
           } else if (ModalRoute.of(context)!.settings.name == '/auth/login' ||
-              ModalRoute.of(context)!.settings.name == '/auth/register') {
+              ModalRoute.of(context)!.settings.name == '/auth/register' ||
+              ModalRoute.of(context)!.settings.name == '/home/game-start' ||
+              ModalRoute.of(context)!.settings.name ==
+                  '/auth/register/avatar-selection') {
             return _buildFooterLoginRegister();
           } else {
             return _buildFooterHome();
@@ -213,7 +216,8 @@ class AppSideBar extends StatelessWidget {
 
   ImageProvider _getAvatarToDisplay() {
     if (avatarService.isAvatar.value) {
-      return AssetImage('assets/images/avatar(${avatarService.currentAvatarIndex.value}).png');
+      return AssetImage(
+          'assets/images/avatar(${avatarService.currentAvatarIndex.value}).png');
     } else {
       return NetworkImage(avatarService.imageUrl.value);
     }
@@ -250,7 +254,15 @@ class AppSideBar extends StatelessWidget {
           label: 'Inscription',
         ),
       ];
-    } else if (ModalRoute.of(context)!.settings.name == '/avatar-selection') {
+    } else if (ModalRoute.of(context)!.settings.name == '/home/game-start') {
+      return [
+        const SidebarXItem(
+          icon: Icons.play_arrow,
+          label: 'Options de Jeu',
+        ),
+      ];
+    } else if (ModalRoute.of(context)!.settings.name ==
+        'auth/register/avatar-selection') {
       return [
         const SidebarXItem(
           icon: Icons.home,

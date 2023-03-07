@@ -1,8 +1,7 @@
 import 'package:client_leger/controllers/home_controller.dart';
-import 'package:client_leger/screens/social_screen.dart';
-import 'package:client_leger/screens/main_menu_screen.dart';
-import 'package:client_leger/screens/profile_screen.dart';
-import 'package:client_leger/screens/settings_screen.dart';
+import 'package:client_leger/screens/home/social_screen.dart';
+import 'package:client_leger/screens/home/main_menu_screen.dart';
+import 'package:client_leger/screens/home/profile_screen.dart';
 import 'package:client_leger/utils/dialog_helper.dart';
 import 'package:client_leger/widgets/app_sidebar.dart';
 import 'package:flutter/material.dart';
@@ -48,8 +47,6 @@ class HomeScreen extends GetView<HomeController> {
               return const ProfileScreen();
             case 2:
               return SocialScreen();
-            case 3:
-              return const SettingsScreen();
             default:
               return Text(
                 pageTitle,

@@ -64,3 +64,4 @@ Future<void> initGlobalServices() async {
       userService: Get.find()));
   Get.put(AvatarService());
 }
+
