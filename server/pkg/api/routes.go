@@ -39,11 +39,7 @@ func (api *API) setupRoutes(cfg *config.Config) {
 		if ID == "" {
 			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "Missing id"})
 		}
-		username := c.Query("username")
-		if username == "" {
-			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "Missing username"})
-		}
-		return api.Ctrls.WebSocketManager.Accept(ID, username)(c)
+		return api.Ctrls.WebSocketManager.Accept(ID)(c)
 	})
 
 	r := api.App.Group("/api")
@@ -69,11 +65,12 @@ func (api *API) setupRoutes(cfg *config.Config) {
 			return c.Next()
 		},
 	)
-	r.Post("/avatar/:id", api.Ctrls.UserCtrl.UploadAvatar)
-	r.Delete("/avatar/:id", api.Ctrls.UserCtrl.DeleteAvatar)
+	r.Patch("/user/:id/config", api.Ctrls.UserCtrl.UpdatePreferences)
+	r.Post("/avatar", api.Ctrls.UserCtrl.UploadAvatar)
 	r.Get("/user/:id", api.Ctrls.UserCtrl.GetUser)
 
-	r.Post("/chat/room/join", api.Ctrls.WebSocketManager.JoinRoom)
-	r.Post("/chat/room/leave", api.Ctrls.WebSocketManager.LeaveRoom)
-	r.Get("/chat/room/:id/messages", api.Ctrls.WebSocketManager.GetMessages)
+	r.Post("/chat/join", api.Ctrls.WebSocketManager.JoinRoom)
+	r.Post("/chat/joindm", api.Ctrls.WebSocketManager.JoinDMRoom)
+	r.Post("/chat/leave", api.Ctrls.WebSocketManager.LeaveRoom)
+	r.Get("/chat/:id/messages", api.Ctrls.WebSocketManager.GetMessages)
 }
