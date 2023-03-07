@@ -66,8 +66,10 @@ func (api *API) setupRoutes(cfg *config.Config) {
 		},
 	)
 	r.Patch("/user/:id/config", api.Ctrls.UserCtrl.UpdatePreferences)
-	r.Post("/avatar", api.Ctrls.UserCtrl.UploadAvatar)
 	r.Get("/user/:id", api.Ctrls.UserCtrl.GetUser)
+
+	r.Post("/avatar", api.Ctrls.UserCtrl.UploadAvatar)
+	r.Get("/avatar/defaults", api.Ctrls.UserCtrl.GetDefaultAvatars)
 
 	r.Post("/chat/join", api.Ctrls.WebSocketManager.JoinRoom)
 	r.Post("/chat/joindm", api.Ctrls.WebSocketManager.JoinDMRoom)
