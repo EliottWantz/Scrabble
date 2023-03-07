@@ -60,7 +60,7 @@ func New(cfg *config.Config) (*API, error) {
 	{
 		gameRepo := game.NewRepository(db)
 		userRepo := user.NewRepository(db)
-		messageRepo := ws.NewMessageRepository(db)
+		messageRepo := ws.NewRepository(db)
 		roomRepo := room.NewRepository(db)
 
 		repositories = Repositories{
@@ -73,13 +73,13 @@ func New(cfg *config.Config) (*API, error) {
 
 	var services Services
 	{
-		gameSvc := game.NewService(repositories.GameRepo)
 		authSvc := auth.NewService(cfg.JWT_SIGN_KEY)
 		roomSvc, err := room.NewService(repositories.RoomRepo)
 		if err != nil {
 			return nil, err
 		}
 		userSvc, err := user.NewService(cfg, repositories.UserRepo, roomSvc)
+		gameSvc := game.NewService(repositories.GameRepo, userSvc)
 		if err != nil {
 			return nil, err
 		}
