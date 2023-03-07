@@ -66,11 +66,16 @@ func (s *Service) SignUp(username, password, email string, uploadAvatar UploadAv
 	}
 
 	ID := uuid.NewString()
+	Preferences := Preferences{
+		Theme:    "light",
+		Language: "en",
+	}
 	u := &User{
 		ID:              ID,
 		Username:        username,
 		HashedPassword:  hashedPassword,
 		Email:           email,
+		Preferences:     Preferences,
 		JoinedChatRooms: make([]string, 0),
 	}
 
