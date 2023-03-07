@@ -21,6 +21,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AuthInterceptor } from '@app/services/auth-interceptor/auth-interceptor.service'
+import { GamePageComponent } from '@app/pages/game-page/game-page.component';
+import { BoardComponent } from '@app/components/board/board.component';
+import { PieceComponent } from '@app/components/piece/piece.component';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 
 @NgModule({
   declarations: [
@@ -31,7 +35,10 @@ import { AuthInterceptor } from '@app/services/auth-interceptor/auth-interceptor
     ProfilePageComponent,
     RulesSliderPageComponent,
     RegisterComponent,
-    ChatBoxComponent
+    ChatBoxComponent,
+    GamePageComponent,
+    BoardComponent,
+    PieceComponent
   ],
   imports: [
     BrowserModule,
@@ -46,6 +53,7 @@ import { AuthInterceptor } from '@app/services/auth-interceptor/auth-interceptor
     BrowserAnimationsModule,
     MatIconModule,
     MatDividerModule,
+    DragDropModule
   ],
   providers: [
     {
