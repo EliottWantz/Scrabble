@@ -2,6 +2,7 @@ package user
 
 import (
 	"errors"
+	"time"
 
 	"scrabble/config"
 	"scrabble/pkg/api/auth"
@@ -54,7 +55,7 @@ func NewService(cfg *config.Config, repo *Repository, roomSvc *room.Service) (*S
 	}, nil
 }
 
-func (s *Service) SignUp(username, password, email string) (*User, error) {
+func (s *Service) SignUp(username, password, email string, uploadAvatar UploadAvatarStrategy) (*User, error) {
 	if _, err := s.Repo.FindByUsername(username); err == nil {
 		return nil, fiber.NewError(fiber.StatusUnprocessableEntity, "username already exists")
 	}
@@ -65,23 +66,28 @@ func (s *Service) SignUp(username, password, email string) (*User, error) {
 	}
 
 	ID := uuid.NewString()
+	Preferences := Preferences{
+		Theme:    "light",
+		Language: "en",
+	}
 	u := &User{
 		ID:              ID,
 		Username:        username,
-		Email:           email,
 		HashedPassword:  hashedPassword,
+		Email:           email,
+		Preferences:     Preferences,
 		JoinedChatRooms: make([]string, 0),
+	}
+
+	// Add avatar strategy
+	if err = uploadAvatar(u); err != nil {
+		return nil, fiber.NewError(fiber.StatusInternalServerError, "failed to upload avatar: "+err.Error())
 	}
 
 	if err := s.Repo.Insert(u); err != nil {
 		return nil, fiber.NewError(fiber.StatusInternalServerError, "failed to insert user: "+err.Error())
 	}
 
-	// Create and join own room
-	_, err = s.RoomSvc.CreateRoom(u.ID, u.Username, u.ID)
-	if err != nil {
-		return nil, fiber.NewError(fiber.StatusInternalServerError, "failed to create and join own room: "+err.Error())
-	}
 	// Join global room
 	err = s.RoomSvc.AddUser("global", u.ID)
 	if err != nil {
@@ -100,7 +106,7 @@ func (s *Service) Login(username, password string) (*User, error) {
 	if !auth.PasswordsMatch(password, u.HashedPassword) {
 		return nil, fiber.NewError(fiber.StatusUnauthorized, "password mismatch")
 	}
-
+	s.AddNetworkingLog(u, "login", time.Now().UnixMilli())
 	return u, nil
 }
 
@@ -112,7 +118,6 @@ func (s *Service) Logout(ID string) error {
 	if err := s.Repo.Delete(ID); err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, "failed to delete user")
 	}
-
 	slog.Info("Logout user", "id", ID)
 
 	return nil

@@ -21,6 +21,7 @@ type SignupRequest struct {
 	Password  string `json:"password,omitempty"`
 	Email     string `json:"email,omitempty"`
 	AvatarURL string `json:"avatarUrl,omitempty"`
+	FileID    string `json:"fileId,omitempty"`
 }
 
 type SignupResponse struct {
@@ -32,7 +33,7 @@ type SignupResponse struct {
 func (ctrl *Controller) SignUp(c *fiber.Ctx) error {
 	req := SignupRequest{}
 	if err := c.BodyParser(&req); err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+		return fiber.NewError(fiber.StatusBadRequest, "decode req: "+err.Error())
 	}
 
 	if req.Username == "" {
@@ -45,7 +46,11 @@ func (ctrl *Controller) SignUp(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, "email can't be blank")
 	}
 
-	user, err := ctrl.svc.SignUp(req.Username, req.Password, req.Email)
+	strategy, err := ctrl.svc.GetStrategy(req.FileID, req.AvatarURL, c)
+	if err != nil {
+		return err
+	}
+	user, err := ctrl.svc.SignUp(req.Username, req.Password, req.Email, strategy)
 	if err != nil {
 		return err
 	}
@@ -142,26 +147,30 @@ func (ctrl *Controller) GetUser(c *fiber.Ctx) error {
 	})
 }
 
+type UploadAvatarResquest struct {
+	ID        string `json:"id,omitempty"`
+	AvatarURL string `json:"avatarUrl,omitempty"`
+	FileID    string `json:"fileId,omitempty"`
+}
+
 type UploadAvatarResponse struct {
 	*Avatar
 }
 
 func (ctrl *Controller) UploadAvatar(c *fiber.Ctx) error {
-	ID := c.Params("id")
-	if ID == "" {
+	req := UploadAvatarResquest{}
+	if err := c.BodyParser(&req); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "decode req: "+err.Error())
+	}
+	if req.ID == "" {
 		return fiber.NewError(fiber.StatusBadRequest, "no user id given")
 	}
 
-	fileHeader, err := c.FormFile("avatar")
+	strategy, err := ctrl.svc.GetStrategy(req.FileID, req.AvatarURL, c)
 	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, "no avatar given")
+		return err
 	}
-	file, err := fileHeader.Open()
-	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, err.Error())
-	}
-
-	avatar, err := ctrl.svc.UploadAvatar(ID, file)
+	avatar, err := ctrl.svc.UploadAvatar(req, strategy)
 	if err != nil {
 		return err
 	}
@@ -173,16 +182,62 @@ func (ctrl *Controller) UploadAvatar(c *fiber.Ctx) error {
 	)
 }
 
-func (ctrl *Controller) DeleteAvatar(c *fiber.Ctx) error {
+type PreferencesRequest struct {
+	Theme    string `json:"theme,omitempty"`
+	Language string `json:"language,omitempty"`
+}
+
+func (ctrl *Controller) UpdatePreferences(c *fiber.Ctx) error {
 	ID := c.Params("id")
+	req := PreferencesRequest{}
+	if err := c.BodyParser(&req); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "decode req: "+err.Error())
+	}
 	if ID == "" {
 		return fiber.NewError(fiber.StatusBadRequest, "no user id given")
 	}
+	user, err := ctrl.svc.GetUser(ID)
 
-	err := ctrl.svc.DeleteAvatar(ID)
 	if err != nil {
-		return err
+		return fiber.NewError(fiber.StatusBadRequest, "no user found")
 	}
 
-	return c.SendStatus(fiber.StatusNoContent)
+	var preference Preferences
+	{
+		var theme string
+		var language string
+		if req.Theme != user.Preferences.Theme && req.Theme != "" {
+			theme = req.Theme
+		} else {
+			theme = user.Preferences.Theme
+		}
+
+		if req.Language != user.Preferences.Language && req.Language != "" {
+			language = req.Language
+		} else {
+			language = user.Preferences.Language
+		}
+
+		preference = Preferences{
+			Theme:    theme,
+			Language: language,
+		}
+	}
+
+	ctrl.svc.UpdatePreferences(user, preference)
+	return c.SendStatus(fiber.StatusOK)
 }
+
+// func (ctrl *Controller) DeleteAvatar(c *fiber.Ctx) error {
+// 	ID := c.Params("id")
+// 	if ID == "" {
+// 		return fiber.NewError(fiber.StatusBadRequest, "no user id given")
+// 	}
+
+// 	err := ctrl.svc.DeleteAvatar(ID)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	return c.SendStatus(fiber.StatusNoContent)
+// }
