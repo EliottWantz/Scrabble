@@ -2,8 +2,8 @@ package ws
 
 // Client events
 var (
-	ClientEventNoEvent   = ""
-	ClientEventBroadcast = "broadcast"
+	ClientEventNoEvent     = ""
+	ClientEventChatMessage = "chat-message"
 )
 
 // Server events

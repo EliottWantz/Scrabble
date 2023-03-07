@@ -88,11 +88,6 @@ func (s *Service) SignUp(username, password, email string, uploadAvatar UploadAv
 		return nil, fiber.NewError(fiber.StatusInternalServerError, "failed to insert user: "+err.Error())
 	}
 
-	// Create and join own room
-	_, err = s.RoomSvc.CreateRoom(u.ID, u.Username, u.ID)
-	if err != nil {
-		return nil, fiber.NewError(fiber.StatusInternalServerError, "failed to create and join own room: "+err.Error())
-	}
 	// Join global room
 	err = s.RoomSvc.AddUser("global", u.ID)
 	if err != nil {
