@@ -16,7 +16,7 @@ export class MainPageComponent {
 
   constructor(private userService: UserService, private socketService: WebSocketService) {
     this.user = this.userService.subjectUser;
-    document.getElementById("avatar")?.setAttribute("src", this.user.value.avatar.url);
+    document.getElementById("avatar")?.setAttribute("src", this.user.value.avatar.URL);
   }
 
   isConnected(): Boolean {
