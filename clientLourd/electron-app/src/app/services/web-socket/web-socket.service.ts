@@ -33,7 +33,7 @@ export class WebSocketService {
     }
 
     disconnect(): void {
-        this.socket.close.bind(this.socket);
+        this.socket.close();
         this.userService.deleteUser();
     }
 
@@ -43,7 +43,6 @@ export class WebSocketService {
             case "joinedRoom":
                 const payloadRoom = packet.payload as Room;
                 if (this.roomService.findRoom(payloadRoom.roomId) === undefined) {
-                    console.log("socket room");
                     this.roomService.addRoom(payloadRoom);
                 }
                 break;
