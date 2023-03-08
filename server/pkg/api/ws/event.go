@@ -4,6 +4,10 @@ package ws
 var (
 	ClientEventNoEvent     = ""
 	ClientEventChatMessage = "chat-message"
+	ClientEventJoinRoom    = "join-room"
+	ClientEventJoinDMRoom  = "join-dm-room"
+	ClientEventCreateRoom  = "create-room"
+	ClientEventLeaveRoom   = "leave-room"
 )
 
 // Server events
@@ -12,4 +16,6 @@ var (
 	ServerEventUserJoined  = "userJoined"
 	ServerEventListUsers   = "listUsers"
 	ServerEventUsersInRoom = "usersInRoom"
+
+	ServerEventError = "error"
 )

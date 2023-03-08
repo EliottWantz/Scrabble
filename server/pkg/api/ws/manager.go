@@ -33,7 +33,7 @@ func NewManager(messageRepo *MessageRepository, roomSvc *room.Service, userSvc *
 		UserSvc:     userSvc,
 	}
 
-	r := m.AddRoom("global")
+	r := m.AddRoom("global", "Global Room")
 	m.GlobalRoom = r
 
 	return m, nil
@@ -108,7 +108,11 @@ func (m *Manager) AddClient(c *Client) error {
 	for _, roomID := range user.JoinedChatRooms {
 		r, err := m.GetRoom(roomID)
 		if err != nil {
-			r = m.AddRoom(roomID)
+			dbRoom, ok := m.RoomSvc.HasRoom(roomID)
+			if !ok {
+				return err
+			}
+			r = m.AddRoom(roomID, dbRoom.Name)
 		}
 		if err := r.AddClient(c.ID); err != nil {
 			return err
@@ -172,8 +176,8 @@ func (m *Manager) DisconnectClient(cID string) error {
 	)
 }
 
-func (m *Manager) AddRoom(ID string) *Room {
-	r := NewRoom(m, ID)
+func (m *Manager) AddRoom(ID, Name string) *Room {
+	r := NewRoom(m, ID, Name)
 	m.Rooms.Set(r.ID, r)
 	m.logger.Info(
 		"room registered",

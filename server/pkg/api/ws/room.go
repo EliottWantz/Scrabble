@@ -17,14 +17,16 @@ var (
 
 type Room struct {
 	ID      string
+	Name    string
 	Manager *Manager
 	Clients *haxmap.Map[string, *Client]
 	logger  *slog.Logger
 }
 
-func NewRoom(m *Manager, ID string) *Room {
+func NewRoom(m *Manager, ID, Name string) *Room {
 	return &Room{
 		ID:      ID,
+		Name:    Name,
 		Manager: m,
 		Clients: haxmap.New[string, *Client](),
 		logger:  slog.With("room", ID),
@@ -69,8 +71,9 @@ func (r *Room) AddClient(cID string) error {
 
 	{
 		payload := JoinedRoomPayload{
-			RoomID: r.ID,
-			Users:  r.ListUsers(),
+			RoomID:   r.ID,
+			RoomName: r.Name,
+			Users:    r.ListUsers(),
 		}
 		msgs, err := r.Manager.MessageRepo.LatestMessage(r.ID, 0)
 		if err != nil {
