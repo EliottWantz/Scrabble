@@ -1,5 +1,6 @@
 import 'package:client_leger/controllers/chatbox_controller.dart';
 import 'package:client_leger/controllers/friends_controller.dart';
+import 'package:client_leger/screens/chat_screen.dart';
 import 'package:client_leger/screens/home/profile_screen.dart';
 import 'package:client_leger/widgets/chatbox.dart';
 import 'package:client_leger/widgets/friends_sidebar.dart';
@@ -30,7 +31,8 @@ class SocialScreen extends GetView<FriendsController> {
                 ),
               )),
               FriendsSideBar(
-                  items: controller.userService.user.value!.joinedChatRooms,
+                  // items: controller.userService.user.value!.joinedChatRooms,
+                  items: controller.items2,
                   controller: friendSidebarController
               ),
             ],
@@ -47,7 +49,7 @@ class SocialScreen extends GetView<FriendsController> {
             case 0:
               return const FriendsScreen();
             default:
-              return const ProfileScreen();
+              return const ChatScreen();
           }
         }
     );

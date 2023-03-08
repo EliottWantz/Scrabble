@@ -17,7 +17,6 @@ class WebsocketService extends GetxService {
 
   late WebSocketChannel socket;
   late String roomId;
-  late String username;
   late RxList<ChatMessageResponse> messages = <ChatMessageResponse>[].obs;
   late RxString timestamp = ''.obs;
   late RxInt itemCount = 0.obs;
@@ -30,23 +29,17 @@ class WebsocketService extends GetxService {
         path: ApiConstants.wsPath,
         queryParameters: { 'id': userService.user.value!.id, 'username': userService.user.value!.username }
     ));
-    // username = username;
-    // final message = {'event': 'broadcast','payload': 'hello'};
-    // print(jsonEncode(message));
-    socket.stream.listen(
-          (data) {
-        print(data);
-        if (jsonDecode(data)['event'] == 'broadcast') {
-          handleData(ChatMessageResponse.fromRawJson(data));
-        }
-        // handleData(data);
-          },
+    socket.stream.listen((data) {
+          print(data);
+          if (jsonDecode(data)['event'] == 'broadcast') {
+            handleData(ChatMessageResponse.fromRawJson(data));
+          }
+        },
       onError: (error) => print(error),
     );
   }
 
   handleData(ChatMessageResponse data) {
-    // final decodedData = jsonDecode(data);
     print(data.payload!.message);
 
     switch(data.event) {
@@ -58,14 +51,9 @@ class WebsocketService extends GetxService {
       case 'broadcast': {
         roomId = data.payload!.roomId;
         messages.obs.value.add(data);
-        // final DateTime timestamp = decodedData['payload']['timestamp'];
-        // final parsedTimestamp = DateTime.parse(data.payload!.timestamp!);
-        // timestamp.value = DateFormat.Hms().format(parsedTimestamp);
         print(messages.value.length);
         itemCount.value = messages.value.length;
         print(itemCount.value);
-        // print(decodedData['payload']['timestamp']);
-        // print(decodedData['payload']['message'].runtimeType);
         print(messages.value);
         print('event broadcast');
       }
@@ -83,19 +71,10 @@ class WebsocketService extends GetxService {
   }
 
   sendMessage(String event, ChatMessagePayload payload) {
-    // final timestamp = DateFormat('y-M-d H:m:s').format(DateTime.now());
     final chatMessageRequest = ChatMessageRequest(
       event: 'broadcast',
       payload: payload,
     );
-    // final message = {
-    //   'event': 'broadcast',
-    //   'payload': {
-    //     'RoomId': 'global',
-    //     'Message': 'hello 2',
-    //     'From': 'test123'
-    //   }
-    // };
     socket.sink.add(chatMessageRequest.toRawJson());
   }
 }
