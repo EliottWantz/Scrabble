@@ -20,7 +20,7 @@ export class ChatService {
     }
 
     send(msg: string, room: Room): void {
-        if (this.userService.isLoggedIn && this.roomService.findRoom(room.roomId)) {
+        if (this.userService.isLoggedIn && this.roomService.findRoom(room.roomId) !== undefined) {
             const payload: ChatMessage = {
                 roomId: room.roomId,
                 from: this.user.value.username,
@@ -28,7 +28,7 @@ export class ChatService {
                 message: msg
             };
             const packet: Packet = {
-                event: "broadcast",
+                event: "chat-message",
                 payload: payload,
             };
             this.socketService.send(packet);
