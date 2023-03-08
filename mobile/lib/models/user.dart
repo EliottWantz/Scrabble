@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:client_leger/models/avatar.dart';
+
 class Preferences {
   String theme;
 
@@ -37,7 +39,7 @@ class User {
         email: json["email"],
         avatar: Avatar.fromJson(json["avatar"]),
         preferences: Preferences.fromJson(json["preferences"]),
-        joinedChatRooms: json["joinedChatRooms"]));
+        joinedChatRooms: json["joinedChatRooms"]);
   }
 
   Map<String, dynamic> toJson() => {
