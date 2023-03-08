@@ -107,9 +107,26 @@ func (c *Client) handlePacket(p *Packet) error {
 		return c.HandleCreateRoomRequest(p)
 	case ClientEventLeaveRoom:
 		return c.HandleLeaveRoomRequest(p)
+	case ClientEventPlayMove:
+		return c.PlayMove(p)
 	}
 
 	return nil
+}
+
+func (c *Client) BroadcastToRoom(rID string, p *Packet) (*Room, error) {
+	r, err := c.Manager.GetRoom(rID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get room: %w", err)
+	}
+
+	if !r.has(c.ID) {
+		return nil, fmt.Errorf("%w %s", ErrNotInRoom, rID)
+	}
+
+	r.Broadcast(p)
+
+	return r, nil
 }
 
 func (c *Client) HandleChatMessage(p *Packet) error {
@@ -117,27 +134,20 @@ func (c *Client) HandleChatMessage(p *Packet) error {
 	if err := json.Unmarshal(p.Payload, &payload); err != nil {
 		return fmt.Errorf("failed to unmarshal ChatMessage: %w", err)
 	}
-	slog.Info("room-message", "payload", payload)
-
-	r, err := c.Manager.GetRoom(payload.RoomID)
-	if err != nil {
-		return fmt.Errorf("ChatMessage: %w", err)
-	}
-
-	if !r.has(c.ID) {
-		return fmt.Errorf("%w %s", ErrNotInRoom, payload.RoomID)
-	}
-
 	payload.Timestamp = time.Now().UTC()
+	slog.Info("room-message", "payload", payload)
+	if err := p.setPayload(payload); err != nil {
+		return err
+	}
+
+	r, err := c.BroadcastToRoom(payload.RoomID, p)
+	if err != nil {
+		return err
+	}
 
 	if err := r.Manager.MessageRepo.InsertOne(r.ID, &payload); err != nil {
 		slog.Error("failed to insert message in db", err)
 	}
-
-	if err := p.setPayload(payload); err != nil {
-		return err
-	}
-	r.Broadcast(p)
 
 	return nil
 }
@@ -258,6 +268,56 @@ func (c *Client) HandleLeaveRoomRequest(p *Packet) error {
 	if err = r.RemoveClient(c.ID); err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, "failed to leave ws room: "+err.Error())
 	}
+
+	return nil
+}
+
+func (c *Client) PlayMove(p *Packet) error {
+	payload := PlayMovePayload{}
+	if err := json.Unmarshal(p.Payload, &payload); err != nil {
+		return fmt.Errorf("failed to unmarshal PlayMovePayload: %w", err)
+	}
+	slog.Info("playMove", "payload", payload)
+
+	g, err := c.Manager.GameSvc.ApplyPlayerMove(payload.GameID, c.ID, payload.MoveInfo)
+	if err != nil {
+		return err
+	}
+
+	gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
+		Game: g,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = c.BroadcastToRoom(payload.GameID, gamePacket)
+	if err != nil {
+		return err
+	}
+
+	// Make bots move if applicable
+	go func() {
+		for {
+			g, err := c.Manager.GameSvc.ApplyBotMove(payload.GameID)
+			if err != nil {
+				break
+			}
+			gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
+				Game: g,
+			})
+			if err != nil {
+				slog.Error("failed to create update game packet", err)
+				break
+			}
+
+			_, err = c.BroadcastToRoom(payload.GameID, gamePacket)
+			if err != nil {
+				slog.Error("failed to broadcast game update", err)
+				break
+			}
+		}
+	}()
 
 	return nil
 }

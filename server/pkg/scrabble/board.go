@@ -71,7 +71,8 @@ type Square struct {
 }
 
 type Position struct {
-	Row, Col int
+	Row int `json:"row"`
+	Col int `json:"col"`
 }
 
 type Direction = int
