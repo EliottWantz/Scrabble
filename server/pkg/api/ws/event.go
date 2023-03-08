@@ -16,4 +16,6 @@ var (
 	ServerEventUserJoined  = "userJoined"
 	ServerEventListUsers   = "listUsers"
 	ServerEventUsersInRoom = "usersInRoom"
+
+	ServerEventError = "error"
 )

@@ -102,3 +102,11 @@ func NewListUsersPacket(payload ListUsersPayload) (*Packet, error) {
 	}
 	return p, nil
 }
+
+func NewErrorPacket(err error) (*Packet, error) {
+	p, err := NewPacket(ServerEventError, err)
+	if err != nil {
+		return nil, err
+	}
+	return p, nil
+}

@@ -84,6 +84,11 @@ func (c *Client) receive() {
 		c.logger.Info("received packet", "event", p.Event)
 		if err := c.handlePacket(p); err != nil {
 			c.logger.Error("handlePacket", err)
+			errPacket, err := NewErrorPacket(err)
+			if err != nil {
+				c.logger.Error("new error packet", err)
+			}
+			c.send(errPacket)
 		}
 	}
 }
