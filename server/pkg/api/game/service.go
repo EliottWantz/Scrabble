@@ -86,53 +86,65 @@ func (s *Service) StartGame(room *room.Room) (*Game, error) {
 	}, nil
 }
 
-func (s *Service) ApplyPlayerMove(gID string, req PlayMoveRequest) error {
+type MoveInfo struct {
+	Type    string                    `json:"type,omitempty"`
+	Letters string                    `json:"letters,omitempty"`
+	Covers  map[string]scrabble.Cover `json:"covers"`
+}
+
+const (
+	MoveTypePlayTile = "playTile"
+	MoveTypeExchange = "exchange"
+	MoveTypePass     = "pass"
+)
+
+func (s *Service) ApplyPlayerMove(gID, pID string, req MoveInfo) (*Game, error) {
 	g, err := s.repo.GetGame(gID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	player := g.PlayerToMove()
-	if player.ID != req.PlayerID {
-		return ErrNotPlayerTurn
+	if player.ID != pID {
+		return nil, ErrNotPlayerTurn
 	}
 
 	var move scrabble.Move
 	switch req.Type {
-	case "tileMove":
+	case MoveTypePlayTile:
 		for _, letter := range req.Letters {
 			if !player.Rack.Contains(letter) {
-				return ErrInvalidMove
+				return nil, ErrInvalidMove
 			}
 		}
 		covers := make(scrabble.Covers)
 		for pos, c := range req.Covers {
 			row, err := strconv.Atoi(string(pos[0]))
 			if err != nil {
-				return fmt.Errorf("invalid row: %w", err)
+				return nil, fmt.Errorf("invalid row: %w", err)
 			}
 			col, err := strconv.Atoi(string(pos[1]))
 			if err != nil {
-				return fmt.Errorf("invalid col: %w", err)
+				return nil, fmt.Errorf("invalid col: %w", err)
 			}
 			covers[scrabble.Position{Row: row, Col: col}] = c
 		}
 		move = scrabble.NewTileMove(g.Board, covers)
-	case "pass":
-		move = scrabble.NewPassMove()
-	case "exchange":
+	case MoveTypeExchange:
 		move = scrabble.NewExchangeMove(req.Letters)
+	case MoveTypePass:
+		move = scrabble.NewPassMove()
 	default:
-		return fmt.Errorf("invalid move type: %s", req.Type)
+		return nil, fmt.Errorf("invalid move type: %s", req.Type)
 	}
 
 	if !move.IsValid(g) {
-		return ErrInvalidMove
+		return nil, ErrInvalidMove
 	}
 
 	err = g.ApplyValid(move)
 	if err != nil {
 		// Should not happen because move is valid
-		return fmt.Errorf("should not have ended up here. cannot apply move that was validated: %v", err)
+		return nil, fmt.Errorf("should not have ended up here. cannot apply move that was validated: %v", err)
 	}
 
 	// if g.IsOver() {
@@ -145,7 +157,14 @@ func (s *Service) ApplyPlayerMove(gID string, req PlayMoveRequest) error {
 	// s.UserSvc.addGameStats()
 	// }
 
-	return nil
+	return &Game{
+		ID:           g.ID,
+		Players:      g.Players,
+		Board:        g.Board,
+		Bag:          g.Bag,
+		Finished:     g.Finished,
+		NumPassMoves: g.NumPassMoves,
+	}, nil
 }
 
 // Not used, just for testing

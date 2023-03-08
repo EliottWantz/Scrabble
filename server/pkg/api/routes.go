@@ -77,5 +77,4 @@ func (api *API) setupRoutes(cfg *config.Config) {
 	r.Get("/room/:id/messages", api.Ctrls.WebSocketManager.GetMessages)
 
 	r.Post("/game", api.Ctrls.GameCtrl.StartGame)
-	r.Post("/game/:id", api.Ctrls.GameCtrl.PlayMove)
 }

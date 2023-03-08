@@ -4,6 +4,7 @@ package ws
 var (
 	ClientEventNoEvent     = ""
 	ClientEventChatMessage = "chat-message"
+	ClientEventPlayMove    = "playMove"
 )
 
 // Server events
@@ -12,4 +13,5 @@ var (
 	ServerEventUserJoined  = "userJoined"
 	ServerEventListUsers   = "listUsers"
 	ServerEventUsersInRoom = "usersInRoom"
+	ServerEventGameUpdate  = "gameUpdate"
 )

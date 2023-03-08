@@ -2,7 +2,6 @@ package game
 
 import (
 	"scrabble/pkg/api/room"
-	"scrabble/pkg/scrabble"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -40,25 +39,4 @@ func (ctrl *Controller) StartGame(c *fiber.Ctx) error {
 		return err
 	}
 	return c.Status(fiber.StatusCreated).JSON(StartGameResponse{Game: g})
-}
-
-type PlayMoveRequest struct {
-	PlayerID string                    `json:"playerId"`
-	Type     string                    `json:"type,omitempty"`
-	Letters  string                    `json:"letters,omitempty"`
-	Covers   map[string]scrabble.Cover `json:"covers"`
-}
-
-func (ctrl *Controller) PlayMove(c *fiber.Ctx) error {
-	req := PlayMoveRequest{}
-	if err := c.BodyParser(&req); err != nil {
-		return fiber.NewError(fiber.StatusUnprocessableEntity, "parse request: "+err.Error())
-	}
-	gID := c.Params("id")
-	err := ctrl.svc.ApplyPlayerMove(gID, req)
-	if err != nil {
-		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
-	}
-
-	return c.SendString("move applied")
 }
