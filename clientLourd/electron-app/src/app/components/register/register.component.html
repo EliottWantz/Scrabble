@@ -1,6 +1,6 @@
 <mat-card-subtitle>Choisir une image de profil</mat-card-subtitle>
 <div class="imgs">
-    <img *ngFor="let defaultAvatar of defaultAvatars; let i = index" width="10%" class="avatar" src="" (click)="selectAvatar(i)">
+    <img *ngFor="let defaultAvatar of defaultAvatars; let i = index" width="10%" class="avatar" src="{{defaultAvatar.url}}" (click)="selectAvatar(i)">
     
 </div>
 <small>Enregistrer votre propre image de profil</small>

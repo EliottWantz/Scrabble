@@ -14,7 +14,7 @@ export class UserService {
             id: "0",
             username: "",
             email:"0@0.0",
-            avatar:{URL:"a", FileId:"a"},
+            avatar:{url:"a", fileId:"a"},
             preferences:{theme:"a"},
           });
     }
@@ -29,7 +29,7 @@ export class UserService {
             id: "0",
             username: "",
             email:"0@0.0",
-            avatar:{URL:"a", FileId:"a"},
+            avatar:{url:"a", fileId:"a"},
             preferences:{theme:"a"},
         });
         this.storageService.deleteUserToken();

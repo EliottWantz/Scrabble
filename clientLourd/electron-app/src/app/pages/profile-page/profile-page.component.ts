@@ -16,7 +16,7 @@ export class ProfilePageComponent {
   user: User;
   constructor(private communicationService: CommunicationService, private userService: UserService) {
     this.user= this.userService.currentUserValue;
-    document.getElementById("avatar")?.setAttribute("src", this.user.avatar.URL);
+    document.getElementById("avatar")?.setAttribute("src", this.user.avatar.url);
   }
 
   onFileSelected(event: any): void {
@@ -27,7 +27,7 @@ export class ProfilePageComponent {
     if (this.selectedFile.name != "") {
       await this.communicationService.uploadAvatar(this.selectedFile, this.userService.currentUserValue).then((res) => {
         this.userService.subjectUser.next({...this.userService.subjectUser.value, avatar: res})
-        document.getElementById("avatar")?.setAttribute("src", res.URL);
+        document.getElementById("avatar")?.setAttribute("src", res.url);
       });
     }
     

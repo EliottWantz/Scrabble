@@ -16,7 +16,7 @@ export class RegisterComponent implements OnInit {
     avatar: string = "";
     isRegisterFailed = false;
     selectedFile: any = null;
-    defaultAvatars: {URL: string, FileId: string}[];
+    defaultAvatars: {url: string, fileId: string}[];
     
     constructor(private authService: AuthenticationService, private router: Router, private commService: CommunicationService) { 
         this.defaultAvatars = [];
@@ -24,7 +24,7 @@ export class RegisterComponent implements OnInit {
     
     ngOnInit(): void {
         this.commService.getDefaultAvatars().then((res) => {
-            this.defaultAvatars = res;
+            this.defaultAvatars = res.avatars;
         });
     }
     
