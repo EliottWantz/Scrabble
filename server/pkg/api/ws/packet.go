@@ -43,9 +43,33 @@ type ChatMessage struct {
 	Timestamp time.Time `json:"timestamp" bson:"timestamp"`
 }
 
+type JoinRoomPayload struct {
+	UserID   string `json:"userId"`
+	RoomID   string `json:"roomId"`
+	RoomName string `json:"roomName"`
+}
+
+type JoinDMPayload struct {
+	UserID     string `json:"userId"`
+	Username   string `json:"username"`
+	ToID       string `json:"toId"`
+	ToUsername string `json:"toUsername"`
+}
+
+type JoinDMResponse struct {
+	RoomID   string `json:"roomId"`
+	RoomName string `json:"roomName"`
+}
+
+type LeaveRoomPayload struct {
+	UserID string `json:"userId"`
+	RoomID string `json:"roomId"`
+}
+
 // Server events payloads
 type JoinedRoomPayload struct {
 	RoomID   string            `json:"roomId"`
+	RoomName string            `json:"roomName"`
 	Users    []user.PublicUser `json:"users"`
 	Messages []ChatMessage     `json:"messages"`
 }

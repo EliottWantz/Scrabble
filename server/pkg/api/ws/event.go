@@ -4,6 +4,9 @@ package ws
 var (
 	ClientEventNoEvent     = ""
 	ClientEventChatMessage = "chat-message"
+	ClientEventJoinRoom    = "join-room"
+	ClientEventJoinDMRoom  = "join-dm-room"
+	ClientEventLeaveRoom   = "leave-room"
 )
 
 // Server events
