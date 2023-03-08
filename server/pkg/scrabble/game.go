@@ -1,5 +1,7 @@
 package scrabble
 
+import "fmt"
+
 const (
 	MaxPassMoves                 int = 6
 	MaxHumanConsecutivePassMoves int = 2
@@ -98,8 +100,8 @@ func (g *Game) ApplyValid(move Move) error {
 	g.Turn = g.PlayerToMove().ID
 
 	// DEBUG PRINTS
-	// fmt.Println("Player:", playerToMove.Username, "Move:", move)
-	// fmt.Println(g.Board)
+	fmt.Println("Player:", playerToMove.Username, "Move:", move)
+	fmt.Println(g.Board)
 
 	// TODO: What to do with a game of 4 players?
 	// if g.IsOver() {

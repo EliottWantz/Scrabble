@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"time"
 
 	"scrabble/pkg/api/room"
 	"scrabble/pkg/api/user"
@@ -165,6 +166,9 @@ func (s *Service) ApplyBotMove(gID string) (*Game, error) {
 	if !g.PlayerToMove().IsBot {
 		return nil, ErrNotBotTurn
 	}
+
+	// Make the bot think
+	time.Sleep(time.Second * 1)
 
 	state := g.State()
 	move := g.Engine.GenerateMove(state)
