@@ -6,6 +6,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
+	"golang.org/x/exp/slog"
 )
 
 type JoinRoomRequest struct {
@@ -102,6 +103,14 @@ func (m *Manager) JoinDMRoom(c *fiber.Ctx) error {
 	}
 
 	r := m.AddRoom(dbRoom.ID)
+	err = r.AddClient(req.UserID)
+	if err != nil {
+		slog.Error("error:", err)
+	}
+	err = r.AddClient(req.ToID)
+	if err != nil {
+		slog.Error("error:", err)
+	}
 
 	return c.Status(fiber.StatusCreated).JSON(JoinDMResponse{
 		RoomID:   r.ID,
