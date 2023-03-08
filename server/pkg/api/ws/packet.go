@@ -44,25 +44,21 @@ type ChatMessage struct {
 }
 
 type JoinRoomPayload struct {
-	UserID   string `json:"userId"`
-	RoomID   string `json:"roomId"`
-	RoomName string `json:"roomName"`
+	RoomID string `json:"roomId"`
 }
 
 type JoinDMPayload struct {
-	UserID     string `json:"userId"`
 	Username   string `json:"username"`
 	ToID       string `json:"toId"`
 	ToUsername string `json:"toUsername"`
 }
 
-type JoinDMResponse struct {
-	RoomID   string `json:"roomId"`
-	RoomName string `json:"roomName"`
+type CreateRoomPayload struct {
+	RoomName string   `json:"roomName"`
+	UserIDs  []string `json:"userIds"`
 }
 
 type LeaveRoomPayload struct {
-	UserID string `json:"userId"`
 	RoomID string `json:"roomId"`
 }
 

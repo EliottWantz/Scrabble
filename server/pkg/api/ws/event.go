@@ -6,6 +6,7 @@ var (
 	ClientEventChatMessage = "chat-message"
 	ClientEventJoinRoom    = "join-room"
 	ClientEventJoinDMRoom  = "join-dm-room"
+	ClientEventCreateRoom  = "create-room"
 	ClientEventLeaveRoom   = "leave-room"
 )
 
