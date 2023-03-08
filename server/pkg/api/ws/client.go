@@ -142,9 +142,9 @@ func (c *Client) PlayMove(p *Packet) error {
 	if err := json.Unmarshal(p.Payload, &payload); err != nil {
 		return fmt.Errorf("failed to unmarshal PlayMovePayload: %w", err)
 	}
-	slog.Info("play-move", "payload", payload)
+	slog.Info("playMove", "payload", payload)
 
-	g, err := c.Manager.GameSvc.ApplyPlayerMove(payload.GameID, payload.PlayerID, payload.MoveInfo)
+	g, err := c.Manager.GameSvc.ApplyPlayerMove(payload.GameID, c.ID, payload.MoveInfo)
 	if err != nil {
 		return err
 	}

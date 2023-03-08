@@ -46,7 +46,6 @@ type ChatMessage struct {
 
 type PlayMovePayload struct {
 	GameID   string        `json:"gameId"`
-	PlayerID string        `json:"playerId"`
 	MoveInfo game.MoveInfo `json:"moveInfo"`
 }
 
