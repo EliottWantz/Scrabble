@@ -27,12 +27,13 @@ type Service struct {
 }
 
 type Game struct {
-	ID           string
-	Players      []*scrabble.Player
-	Board        *scrabble.Board
-	Bag          *scrabble.Bag
-	Finished     bool
-	NumPassMoves int
+	ID           string             `json:"id"`
+	Players      []*scrabble.Player `json:"players"`
+	Board        *scrabble.Board    `json:"board"`
+	Bag          *scrabble.Bag      `json:"bag"`
+	Finished     bool               `json:"finished"`
+	NumPassMoves int                `json:"numPassMoves"`
+	Turn         string             `json:"turn"`
 }
 
 func NewService(repo *Repository, userSvc *user.Service) *Service {
@@ -70,6 +71,7 @@ func (s *Service) StartGame(room *room.Room) (*Game, error) {
 	for i := 0; i < botPlayers; i++ {
 		g.AddPlayer(scrabble.NewPlayer(uuid.NewString(), botNames[i], g.Bag))
 	}
+	g.Turn = g.PlayerToMove().ID
 
 	err := s.repo.Insert(g)
 	if err != nil {

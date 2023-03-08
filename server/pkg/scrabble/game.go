@@ -16,6 +16,7 @@ type Game struct {
 	Engine       *Engine
 	Finished     bool
 	NumPassMoves int
+	Turn         string
 }
 
 // GameState contains the bare minimum of information
@@ -94,7 +95,7 @@ func (g *Game) ApplyValid(move Move) error {
 
 	// Update the scores and append to the move list
 	g.scoreMove(rackBefore, move)
-
+	g.Turn = g.PlayerToMove().ID
 	// TODO: What to do with a game of 4 players?
 	// if g.IsOver() {
 	// 	// The game is now over: add the FinalMoves
