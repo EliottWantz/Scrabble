@@ -29,7 +29,10 @@ class SocialScreen extends GetView<FriendsController> {
                   context,
                 ),
               )),
-              FriendsSideBar(controller: friendSidebarController),
+              FriendsSideBar(
+                  items: controller.userService.user.joinedChatRooms,
+                  controller: friendSidebarController
+              ),
             ],
           ),
         )

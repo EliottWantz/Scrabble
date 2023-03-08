@@ -9,13 +9,21 @@ import 'package:client_leger/utils/sidebar_theme.dart';
 
 
 class FriendsSideBar extends StatelessWidget {
-  const FriendsSideBar({
+  FriendsSideBar({
     Key? key,
     required SidebarXController controller,
-  }) : _controller = controller,
+    required List<dynamic> items,
+  }) : _items = items,
+        _controller = controller,
         super(key: key);
 
   final SidebarXController _controller;
+  final List<dynamic> _items; //= [
+  //   'Friend1',
+  //   'Friend2',
+  //   'Friend3',
+  //   'Friend4'
+  // ];
 
   @override
   Widget build(BuildContext context) {
@@ -59,23 +67,37 @@ class FriendsSideBar extends StatelessWidget {
   // }
 
   List<SidebarXItem> _buildListItems(BuildContext context) {
-    return [
-      const SidebarXItem(
-        icon: Icons.people_alt,
-        label: 'Friends',
-      ),
-      const SidebarXItem(
-        icon: Icons.home,
-        label: 'Friend 1',
-      ),
-      const SidebarXItem(
-        icon: Icons.home,
-        label: 'Friend 2',
-      ),
-      const SidebarXItem(
-        icon: Icons.home,
-        label: 'Friend 3',
-      ),
+    List<SidebarXItem> items = [
+        const SidebarXItem(
+          icon: Icons.people_alt,
+          label: 'Friends',
+        ),
     ];
+    for (int i = 0; i < this._items.length; i++) {
+      SidebarXItem item = SidebarXItem(
+          icon: Icons.people_alt,
+          label: this._items[i],
+      );
+      items.add(item);
+    }
+    return items;
+    // return [
+    //   const SidebarXItem(
+    //     icon: Icons.people_alt,
+    //     label: 'Friends',
+    //   ),
+    //   const SidebarXItem(
+    //     icon: Icons.home,
+    //     label: 'Friend 1',
+    //   ),
+    //   const SidebarXItem(
+    //     icon: Icons.home,
+    //     label: 'Friend 2',
+    //   ),
+    //   const SidebarXItem(
+    //     icon: Icons.home,
+    //     label: 'Friend 3',
+    //   ),
+    // ];
   }
 }
