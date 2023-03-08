@@ -49,7 +49,7 @@ class SocialScreen extends GetView<FriendsController> {
             case 0:
               return const FriendsScreen();
             default:
-              return const ChatScreen();
+              return ChatScreen();
           }
         }
     );
