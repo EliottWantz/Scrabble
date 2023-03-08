@@ -7,21 +7,26 @@ import 'package:flutter/material.dart';
 // }
 
 class UserList extends StatelessWidget {
+  UserList({
+    Key? key,
+    required List<dynamic> items,
+  }) : _items = items,
+        super(key: key);
 
-  final List<dynamic> items = [
-    'Friend1',
-    'Friend2',
-    'Friend3',
-    'Friend4',
-    'Friend1',
-    'Friend2',
-    'Friend3',
-    'Friend4',
-    'Friend1',
-    'Friend2',
-    'Friend3',
-    'Friend4',
-  ];
+  final List<dynamic> _items; // = [
+  //   'Friend1',
+  //   'Friend2',
+  //   'Friend3',
+  //   'Friend4',
+  //   'Friend1',
+  //   'Friend2',
+  //   'Friend3',
+  //   'Friend4',
+  //   'Friend1',
+  //   'Friend2',
+  //   'Friend3',
+  //   'Friend4',
+  // ];
 
   Widget build(BuildContext context) {
     return Scrollbar(
@@ -32,7 +37,7 @@ class UserList extends StatelessWidget {
   Widget _buildList() {
     return ListView.builder(
       padding: const EdgeInsets.all(16.0),
-      itemCount: items.length,
+      itemCount: _items.length,
       itemBuilder: (context, item) {
         // if (item.isEven) return Divider();
 
@@ -43,7 +48,7 @@ class UserList extends StatelessWidget {
         // }
 
         // return _buildRow(_randomWordPairs[index]);
-        return _buildRow(items[index]);
+        return _buildRow(_items[index]);
       },
     );
   }

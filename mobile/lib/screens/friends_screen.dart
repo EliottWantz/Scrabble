@@ -26,6 +26,13 @@ class FriendsScreen extends GetView<FriendsController> {
             ),
             BottomNavigationBarItem(
               icon: Icon(
+                  Icons.people_alt,
+                  color: Colors.green
+              ),
+              label: 'All',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(
                   Icons.check,
                   color: Colors.green
               ),
