@@ -1,16 +1,21 @@
 import 'package:client_leger/controllers/chatbox_controller.dart';
+import 'package:client_leger/controllers/friends_controller.dart';
+import 'package:client_leger/screens/profile_screen.dart';
 import 'package:client_leger/widgets/chatbox.dart';
 import 'package:client_leger/widgets/friends_sidebar.dart';
+import 'package:client_leger/screens/friends_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
+import 'package:sidebarx/sidebarx.dart';
 
-class SocialScreen extends GetView<ChatBoxController> {
+class SocialScreen extends GetView<FriendsController> {
   SocialScreen({Key? key}) : super(key: key);
 
   final _key = GlobalKey<ScaffoldState>();
-  final FocusNode messageInputFocusNode = FocusNode();
+  // final FocusNode messageInputFocusNode = FocusNode();
+  final friendSidebarController = SidebarXController(selectedIndex: 0, extended: true);
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +29,10 @@ class SocialScreen extends GetView<ChatBoxController> {
                   context,
                 ),
               )),
-              FriendsSideBar(),
+              FriendsSideBar(
+                  items: controller.userService.user.joinedChatRooms,
+                  controller: friendSidebarController
+              ),
             ],
           ),
         )
@@ -32,60 +40,16 @@ class SocialScreen extends GetView<ChatBoxController> {
   }
 
   Widget _buildItems(BuildContext context) {
-    return SafeArea(
-      minimum: const EdgeInsets.symmetric(horizontal: 40.0),
-      child: Center(
-        child: SizedBox(
-            height: 600,
-            width: 600,
-            child: Column(
-              children: [
-                ChatBox(),
-                Gap(50),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        focusNode: messageInputFocusNode,
-                        onSubmitted: (_) {
-                          controller.sendMessage();
-                          messageInputFocusNode.requestFocus();
-                        },
-                        controller: controller.messageTextEditingController,
-                        decoration: const InputDecoration(
-                            hintText: "entrez un message",
-                            labelText: "entrez un message",
-                            border: OutlineInputBorder(
-                                borderRadius:
-                                BorderRadius.all(Radius.circular(8)))),
-                      ),
-                    ),
-                    Gap(10),
-                    TextButton(
-                        onPressed: () {
-                          controller.sendMessage();
-                        },
-                        child: Text('Envoyer')),
-                  ],
-                )
-              ],
-            )),
-      ),
+    return AnimatedBuilder(
+        animation: friendSidebarController,
+        builder: (context, child) {
+          switch (friendSidebarController.selectedIndex) {
+            case 0:
+              return const FriendsScreen();
+            default:
+              return const ProfileScreen();
+          }
+        }
     );
-
-    // return SafeArea(
-    //     minimum: const EdgeInsets.symmetric(horizontal: 40.0),
-    //     child: Center(
-    //       child: SizedBox(
-    //         width: 300,
-    //         child: Column(
-    //           mainAxisAlignment: MainAxisAlignment.center,
-    //           children: const [
-    //             Text('Friends List', style: TextStyle(fontSize: 30),)
-    //           ],
-    //         ),
-    //       )
-    //     )
-    // );
   }
 }

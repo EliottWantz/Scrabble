@@ -1,17 +1,17 @@
 import 'dart:convert';
 
-import 'package:client_leger/models/avatar.dart';
-
 class Preferences {
   String theme;
-  String language;
 
-  Preferences({required this.theme, required this.language});
+  Preferences({required this.theme});
 
-  factory Preferences.fromJson(Map<String, dynamic> json) =>
-      Preferences(theme: json["theme"], language: json["language"]);
+  factory Preferences.fromJson(Map<String, dynamic> json) => Preferences(
+        theme: json["theme"],
+      );
 
-  Map<String, dynamic> toJson() => {"theme": theme, "language": language};
+  Map<String, dynamic> toJson() => {
+        "theme": theme,
+      };
 }
 
 class User {
@@ -20,13 +20,15 @@ class User {
   String email;
   Avatar avatar;
   Preferences preferences;
+  List<dynamic> joinedChatRooms;
 
   User(
       {required this.id,
       required this.username,
       required this.email,
       required this.avatar,
-      required this.preferences});
+      required this.preferences,
+      required this.joinedChatRooms});
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
@@ -34,7 +36,8 @@ class User {
         username: json["username"],
         email: json["email"],
         avatar: Avatar.fromJson(json["avatar"]),
-        preferences: Preferences.fromJson(json["preferences"]));
+        preferences: Preferences.fromJson(json["preferences"]),
+        joinedChatRooms: json["joinedChatRooms"]));
   }
 
   Map<String, dynamic> toJson() => {
@@ -43,5 +46,6 @@ class User {
         "email": email,
         "avatar": avatar.toJson(),
         "preferences": preferences.toJson(),
+        "joinedChatRooms": joinedChatRooms,
       };
 }
