@@ -39,7 +39,7 @@ export class RoomService {
     removeRoom(roomID: string): void {
         const currentRooms = this.rooms.getValue();
         const index = this.findRoom(roomID);
-        if (index)
+        if (index !== undefined)
             currentRooms.splice(index, 1);
 
         this.rooms.next(currentRooms);
@@ -47,13 +47,13 @@ export class RoomService {
 
     changeRoom(roomId: string): void {
         const index = this.findRoom(roomId);
-        if (index)
+        if (index !== undefined)
             this.currentRoom.next(this.rooms.value[index].value);
     }
 
     addMessage(msg: ChatMessage): void {
         const index = this.findRoom(msg.roomId);
-        if (index) {
+        if (index !== undefined) {
             if (this.rooms.value[index].value.roomId == this.currentRoom.value.roomId) {
                 const currentMessages = this.currentRoom.value.messages;
                 currentMessages.push(msg);
@@ -69,7 +69,7 @@ export class RoomService {
     findRoom(roomIdTocHeck: string): number | undefined {
         for (let i = 0; i < this.rooms.value.length; i++) {
             if (this.rooms.value[i].value.roomId == roomIdTocHeck)
-                return i;
+                return i;         
         }
         return undefined;
     }

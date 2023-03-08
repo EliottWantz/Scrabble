@@ -1,1 +1,1 @@
-export type ClientEvent = "join" | "leave" | "broadcast";
+export type ClientEvent = "join" | "leave" | "chat-message";

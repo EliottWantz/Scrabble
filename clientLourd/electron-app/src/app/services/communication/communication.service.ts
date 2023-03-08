@@ -54,6 +54,15 @@ export class CommunicationService {
         return this.http.post<{room: Room}>(`${this.baseUrl}/room/join`, { userId, roomId, roomName }).pipe(catchError(this.handleError));
     }
 
+    async getDefaultAvatars(): Promise<{avatars: [{url: string, fileId: string}]}> {
+        const res: any = (await lastValueFrom(this.requestGetDefaultAvatars()));
+        return res;
+    }
+
+    private requestGetDefaultAvatars(): Observable<{avatars: [{url: string, fileId: string}]}> {
+        return this.http.get<{avatars: [{url: string, fileId: string}]}>(`${this.baseUrl}/avatar/defaults`).pipe(catchError(this.handleError));
+    }
+
     private handleError(error: HttpErrorResponse) {
         if (error.status === 0) {
           // A client-side or network error occurred. Handle it accordingly.

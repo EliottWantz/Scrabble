@@ -1,10 +1,6 @@
 <mat-card-subtitle>Choisir une image de profil</mat-card-subtitle>
 <div class="imgs">
-    <img tabindex="1" width="10%" class="avatar" src="https://cdn.discordapp.com/avatars/679451542339715116/d31a4faf00d717467635889bc0ff22a3.webp" (click)="selectAvatar(0)">
-    <img tabindex="2" width="10%" class="avatar" src="https://cdn.discordapp.com/avatars/833059997695868928/75366689f7862f5f66a4a876bdaca44d.webp" (click)="selectAvatar(1)">
-    <img tabindex="3" width="10%" class="avatar" src="https://cdn.discordapp.com/avatars/751431754748919828/3701535bbcf91a9cfe7fbba0b549fb6b.webp" (click)="selectAvatar(2)">
-    <img tabindex="4" width="10%" class="avatar" src="https://cdn.discordapp.com/avatars/449957829122719750/0790f81c6ec731e3a0fb593fff876a10.webp" (click)="selectAvatar(3)">
-    <img tabindex="5" width="10%" class="avatar" src="https://cdn.discordapp.com/avatars/225986311981498371/6be19dedd850ca9e72b20e603acffcaf.webp" (click)="selectAvatar(4)">
+    <img *ngFor="let defaultAvatar of defaultAvatars; let i = index" width="10%" class="avatar" src="{{defaultAvatar.url}}" (click)="selectAvatar(i)">
     
 </div>
 <small>Enregistrer votre propre image de profil</small>

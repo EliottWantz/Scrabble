@@ -33,7 +33,8 @@ export class WebSocketService {
     }
 
     disconnect(): void {
-        this.socket.close.bind(this.socket);
+        this.socket.close();
+        this.userService.deleteUser();
     }
 
     private async handleSocket(e: MessageEvent): Promise<void> {
@@ -41,12 +42,12 @@ export class WebSocketService {
         switch (packet.event) {
             case "joinedRoom":
                 const payloadRoom = packet.payload as Room;
-                if (!this.roomService.findRoom(payloadRoom.roomId)) {
+                if (this.roomService.findRoom(payloadRoom.roomId) === undefined) {
                     this.roomService.addRoom(payloadRoom);
                 }
                 break;
 
-            case "broadcast":
+            case "chat-message":
                 const payloadMessage = packet.payload as ChatMessage;
                 const message: ChatMessage = {
                     from: payloadMessage.from,

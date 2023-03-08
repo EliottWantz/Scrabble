@@ -1,22 +1,32 @@
-import { Component, ElementRef } from "@angular/core";
+import { Component, ElementRef, OnInit } from "@angular/core";
 //import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { AuthenticationService } from "@app/services/authentication/authentication.service";
 import { Router } from "@angular/router"
+import { CommunicationService } from "@app/services/communication/communication.service";
 
 @Component({
     selector: "app-register",
     templateUrl: "./register.component.html",
     styleUrls: ["./register.component.scss"],
 })
-export class RegisterComponent {
+export class RegisterComponent implements OnInit {
     username: string = "";
     password: string = "";
     email: string = "";
     avatar: string = "";
     isRegisterFailed = false;
     selectedFile: any = null;
+    defaultAvatars: {url: string, fileId: string}[];
     
-    constructor(private authService: AuthenticationService, private router: Router) { }
+    constructor(private authService: AuthenticationService, private router: Router, private commService: CommunicationService) { 
+        this.defaultAvatars = [];
+    }
+    
+    ngOnInit(): void {
+        this.commService.getDefaultAvatars().then((res) => {
+            this.defaultAvatars = res.avatars;
+        });
+    }
     
     async onSubmit() {
         if (this.username == "" || this.password == "" || this.email =="" || this.avatar == "")

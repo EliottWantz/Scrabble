@@ -9,12 +9,12 @@ import { StorageService } from "../storage/storage.service";
 })
 export class UserService {
     subjectUser: BehaviorSubject<User>;
-    constructor() {
+    constructor(private storageService: StorageService) {
         this.subjectUser = new BehaviorSubject<User>({
             id: "0",
             username: "",
             email:"0@0.0",
-            avatar:{url:"a",fileId:"a"},
+            avatar:{url:"a", fileId:"a"},
             preferences:{theme:"a"},
           });
     }
@@ -29,9 +29,10 @@ export class UserService {
             id: "0",
             username: "",
             email:"0@0.0",
-            avatar:{url:"a",fileId:"a"},
+            avatar:{url:"a", fileId:"a"},
             preferences:{theme:"a"},
         });
+        this.storageService.deleteUserToken();
     }
 
     public get isLoggedIn(): boolean {
