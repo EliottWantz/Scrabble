@@ -137,6 +137,12 @@ func (s *Service) ApplyPlayerMove(gID string, req PlayMoveRequest) error {
 
 	// if g.IsOver() {
 	// 	// Send end game results by ws
+
+	// TODO:  update user Gamestats
+	// s.UserSvc.UpdateUserStats()
+
+	// TODO : add new game stats
+	// s.UserSvc.addGameStats()
 	// }
 
 	return nil
@@ -147,16 +153,16 @@ func (s *Service) ApplyPlayerMove(gID string, req PlayMoveRequest) error {
 // 	numGames := 10
 // 	start := time.Now()
 
-// 	var winsA, winsB int
+// 	botNames := []string{"Bot1", "Bot2", "Bot3", "Bot4"}
 
 // 	wg := &sync.WaitGroup{}
 // 	for i := 0; i < numGames; i++ {
 // 		wg.Add(1)
 // 		go func() {
-// 			g := scrabble.NewGame(s.DAWG, &scrabble.HighScore{})
-// 			p1 := scrabble.NewPlayer(uuid.NewString(), "Alphonse", g.Bag)
-// 			p2 := scrabble.NewPlayer(uuid.NewString(), "Sylvestre", g.Bag)
-// 			g.Players[0], g.Players[1] = p1, p2
+// 			g := scrabble.NewGame(uuid.NewString(), s.DAWG, &scrabble.HighScore{})
+// 			for i := 0; i < 4; i++ {
+// 				g.AddPlayer(scrabble.NewPlayer(uuid.NewString(), botNames[i], g.Bag))
+// 			}
 
 // 			for i := 0; ; i++ {
 // 				state := g.State()
@@ -169,27 +175,13 @@ func (s *Service) ApplyPlayerMove(gID string, req PlayMoveRequest) error {
 // 					break
 // 				}
 // 			}
-// 			scoreA, scoreB := g.Players[0].Score, g.Players[1].Score
-// 			if scoreA > scoreB {
-// 				fmt.Println("Robot A won")
-// 				winsA++
-// 			} else if scoreB > scoreA {
-// 				fmt.Println("Robot B won")
-// 				winsB++
-// 			} else {
-// 				fmt.Println("Draw")
-// 			}
+// 			scoreA, scoreB, scoreC, scoreD := g.Players[0].Score, g.Players[1].Score, g.Players[2].Score, g.Players[3].Score
+// 			fmt.Println("Bot1:", scoreA, "Bot2:", scoreB, "Bot3:", scoreC, "Bot4:", scoreD)
 // 			wg.Done()
 // 		}()
 // 	}
 // 	wg.Wait()
 
 // 	elapsed := time.Since(start)
-// 	fmt.Printf("%v games were played\nRobot A won %v games, and Robot B won %v games; %v games were draws.\n",
-// 		numGames,
-// 		winsA,
-// 		winsB,
-// 		numGames-winsA-winsB,
-// 	)
 // 	fmt.Println("Took", elapsed)
 // }

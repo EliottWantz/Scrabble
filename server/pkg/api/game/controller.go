@@ -62,9 +62,3 @@ func (ctrl *Controller) PlayMove(c *fiber.Ctx) error {
 
 	return c.SendString("move applied")
 }
-
-func (ctrl *Controller) JoinGame() fiber.Handler {
-	return func(c *fiber.Ctx) error {
-		return c.SendString("you have join the game")
-	}
-}
