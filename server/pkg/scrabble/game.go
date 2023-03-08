@@ -96,6 +96,11 @@ func (g *Game) ApplyValid(move Move) error {
 	// Update the scores and append to the move list
 	g.scoreMove(rackBefore, move)
 	g.Turn = g.PlayerToMove().ID
+
+	// DEBUG PRINTS
+	// fmt.Println("Player:", playerToMove.Username, "Move:", move)
+	// fmt.Println(g.Board)
+
 	// TODO: What to do with a game of 4 players?
 	// if g.IsOver() {
 	// 	// The game is now over: add the FinalMoves

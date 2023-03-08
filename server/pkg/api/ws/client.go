@@ -161,5 +161,28 @@ func (c *Client) PlayMove(p *Packet) error {
 		return err
 	}
 
+	// Make bots move if applicable
+	go func() {
+		for {
+			g, err := c.Manager.GameSvc.ApplyBotMove(payload.GameID)
+			if err != nil {
+				break
+			}
+			gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
+				Game: g,
+			})
+			if err != nil {
+				slog.Error("failed to create update game packet", err)
+				break
+			}
+
+			_, err = c.BroadcastToRoom(payload.GameID, gamePacket)
+			if err != nil {
+				slog.Error("failed to broadcast game update", err)
+				break
+			}
+		}
+	}()
+
 	return nil
 }

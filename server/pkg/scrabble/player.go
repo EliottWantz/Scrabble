@@ -16,3 +16,12 @@ func NewPlayer(ID, username string, b *Bag) *Player {
 		Rack:     NewRack(b),
 	}
 }
+
+func NewBot(ID, username string, b *Bag) *Player {
+	return &Player{
+		ID:       ID,
+		Username: username,
+		Rack:     NewRack(b),
+		IsBot:    true,
+	}
+}

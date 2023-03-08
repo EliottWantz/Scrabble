@@ -15,6 +15,7 @@ import (
 
 var (
 	ErrNotPlayerTurn   = errors.New("not player's turn")
+	ErrNotBotTurn      = errors.New("not bot's turn")
 	ErrInvalidMove     = errors.New("invalid move")
 	ErrInvalidPosition = errors.New("invalid position")
 )
@@ -69,7 +70,7 @@ func (s *Service) StartGame(room *room.Room) (*Game, error) {
 		g.AddPlayer(scrabble.NewPlayer(u.ID, u.Username, g.Bag))
 	}
 	for i := 0; i < botPlayers; i++ {
-		g.AddPlayer(scrabble.NewPlayer(uuid.NewString(), botNames[i], g.Bag))
+		g.AddPlayer(scrabble.NewBot(uuid.NewString(), botNames[i], g.Bag))
 	}
 	g.Turn = g.PlayerToMove().ID
 
@@ -78,14 +79,7 @@ func (s *Service) StartGame(room *room.Room) (*Game, error) {
 		return nil, err
 	}
 
-	return &Game{
-		ID:           g.ID,
-		Players:      g.Players,
-		Board:        g.Board,
-		Bag:          g.Bag,
-		Finished:     g.Finished,
-		NumPassMoves: g.NumPassMoves,
-	}, nil
+	return makeGamePacket(g), nil
 }
 
 type MoveInfo struct {
@@ -159,6 +153,30 @@ func (s *Service) ApplyPlayerMove(gID, pID string, req MoveInfo) (*Game, error) 
 	// s.UserSvc.addGameStats()
 	// }
 
+	return makeGamePacket(g), nil
+}
+
+func (s *Service) ApplyBotMove(gID string) (*Game, error) {
+	g, err := s.repo.GetGame(gID)
+	if err != nil {
+		return nil, err
+	}
+
+	if !g.PlayerToMove().IsBot {
+		return nil, ErrNotBotTurn
+	}
+
+	state := g.State()
+	move := g.Engine.GenerateMove(state)
+	err = g.ApplyValid(move)
+	if err != nil {
+		slog.Error("apply bot move", err)
+	}
+
+	return makeGamePacket(g), nil
+}
+
+func makeGamePacket(g *scrabble.Game) *Game {
 	return &Game{
 		ID:           g.ID,
 		Players:      g.Players,
@@ -166,7 +184,8 @@ func (s *Service) ApplyPlayerMove(gID, pID string, req MoveInfo) (*Game, error) 
 		Bag:          g.Bag,
 		Finished:     g.Finished,
 		NumPassMoves: g.NumPassMoves,
-	}, nil
+		Turn:         g.Turn,
+	}
 }
 
 // Not used, just for testing
