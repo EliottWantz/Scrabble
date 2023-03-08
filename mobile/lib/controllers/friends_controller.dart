@@ -1,3 +1,4 @@
+import 'package:client_leger/widgets/user_list.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:client_leger/services/user_service.dart';
 import 'package:get/get.dart';
@@ -16,15 +17,9 @@ class FriendsController extends GetxController {
 
   late RxInt selectedIndex = 0.obs;
   final List<Widget> widgetOptions = <Widget>[
-    const Text(
-      'Index 0: Home',
-    ),
-    const Text(
-      'Index 1: Business',
-    ),
-    const Text(
-      'Index 2: School',
-    ),
+    UserList(),
+    UserList(),
+    UserList(),
   ];
 
   void onItemTapped(int index) {
