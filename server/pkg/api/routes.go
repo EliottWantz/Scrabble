@@ -49,6 +49,7 @@ func (api *API) setupRoutes(cfg *config.Config) {
 	})
 	r.Post("/signup", api.Ctrls.UserCtrl.SignUp)
 	r.Post("/login", api.Ctrls.UserCtrl.Login)
+	r.Get("/avatar/defaults", api.Ctrls.UserCtrl.GetDefaultAvatars)
 
 	// Proctected routes
 	r.Use(
@@ -69,7 +70,6 @@ func (api *API) setupRoutes(cfg *config.Config) {
 	r.Get("/user/:id", api.Ctrls.UserCtrl.GetUser)
 
 	r.Post("/avatar", api.Ctrls.UserCtrl.UploadAvatar)
-	r.Get("/avatar/defaults", api.Ctrls.UserCtrl.GetDefaultAvatars)
 
 	r.Post("/room/join", api.Ctrls.WebSocketManager.JoinRoom)
 	r.Post("/room/joindm", api.Ctrls.WebSocketManager.JoinDMRoom)
