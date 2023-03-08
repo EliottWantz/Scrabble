@@ -7,6 +7,7 @@ import 'package:client_leger/models/requests/register_request.dart';
 import 'package:client_leger/models/response/login_response.dart';
 import 'package:client_leger/models/user.dart';
 import 'package:client_leger/routes/app_routes.dart';
+import 'package:client_leger/services/avatar_service.dart';
 import 'package:client_leger/services/storage_service.dart';
 import 'package:client_leger/services/user_service.dart';
 import 'package:client_leger/services/websocket_service.dart';
@@ -18,25 +19,27 @@ class AuthService extends GetxService {
   final ApiRepository apiRepository;
   final WebsocketService websocketService;
   final UserService userService;
+  final AvatarService avatarService;
 
   AuthService(
       {required this.storageService,
       required this.apiRepository,
       required this.websocketService,
-      required this.userService});
+      required this.userService,
+      required this.avatarService});
 
   Future<void> login(LoginRequest loginRequest) async {
     var res = await apiRepository.login(loginRequest);
     if (res == null) return;
-    userService.user = res.user;
+    userService.user.value = res.user;
     await _setSession(res.token);
     websocketService.connect();
   }
 
-  Future<void> register(RegisterRequest registerRequest, File imagePath) async {
-    var res = await apiRepository.signup(registerRequest, imagePath);
+  Future<void> register(RegisterRequest registerRequest, {File? imagePath}) async {
+    var res = await apiRepository.signup(registerRequest, imagePath: imagePath);
     if (res == null) return;
-    userService.user = res.user;
+    userService.user.value = res.user;
     await _setSession(res.token);
     websocketService.connect();
   }

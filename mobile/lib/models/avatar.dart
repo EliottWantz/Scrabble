@@ -1,10 +1,10 @@
 import 'dart:convert';
 
 class Avatar {
-  Avatar({this.url, this.fileId});
+  Avatar({required this.url, required this.fileId});
 
-  String? url;
-  String? fileId;
+  String url;
+  String fileId;
 
   factory Avatar.fromRawJson(String str) => Avatar.fromJson(json.decode(str));
 

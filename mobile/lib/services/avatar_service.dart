@@ -1,20 +1,34 @@
+import 'package:client_leger/api/api_repository.dart';
+import 'package:client_leger/models/avatar.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
 class AvatarService extends GetxService {
-  RxBool isAvatar = true.obs;
-  RxString imageUrl = ''.obs;
+  final ApiRepository apiRepository = Get.find();
+  late List<Avatar> avatars;
+  late XFile image;
   RxInt currentAvatarIndex = 0.obs;
+  RxBool isAvatar = true.obs;
 
   final ImagePicker _picker = ImagePicker();
 
-  Future<XFile?> takePicture() async {
+  @override
+  Future<void> onReady() async {
+    avatars = (await apiRepository.avatars())!;
+    super.onReady();
+  }
+
+  Future<void> takePicture() async {
     try {
-      return await _picker.pickImage(
+      XFile? imageFile = await _picker.pickImage(
           source: ImageSource.camera,
           preferredCameraDevice: CameraDevice.front);
+      if (imageFile != null) {
+        image = imageFile;
+        isAvatar.value = false;
+      }
     } catch (e) {
-      return null;
+      return;
     }
   }
 }

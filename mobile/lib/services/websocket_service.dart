@@ -6,11 +6,8 @@ import 'package:client_leger/models/response/chat_message_response.dart';
 import 'package:get/get.dart';
 // import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:client_leger/api/api_constants.dart';
-import 'package:get_storage/get_storage.dart';
-import 'package:intl/intl.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:client_leger/services/user_service.dart';
-import 'package:web_socket_channel/status.dart' as status;
 
 class WebsocketService extends GetxService {
   final UserService userService;
@@ -31,7 +28,7 @@ class WebsocketService extends GetxService {
         host: ApiConstants.wsHost,
         port: ApiConstants.wsPort,
         path: ApiConstants.wsPath,
-        queryParameters: { 'id': userService.user.id, 'username': userService.user.username }
+        queryParameters: { 'id': userService.user.value!.id, 'username': userService.user.value!.username }
     ));
     // username = username;
     // final message = {'event': 'broadcast','payload': 'hello'};

@@ -1,24 +1,27 @@
 import 'dart:io';
 
-import 'package:client_leger/api/api_repository.dart';
 import 'package:client_leger/models/requests/login_request.dart';
 import 'package:client_leger/models/requests/register_request.dart';
 import 'package:client_leger/routes/app_routes.dart';
 import 'package:client_leger/services/auth_service.dart';
+import 'package:client_leger/services/avatar_service.dart';
 import 'package:client_leger/utils/app_focus.dart';
 import 'package:client_leger/utils/dialog_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:client_leger/services/settings_service.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:sidebarx/sidebarx.dart';
 
 class AuthController extends GetxController {
   final SettingsService settingsService;
   final AuthService authService;
+  final AvatarService avatarService;
 
-  AuthController({required this.settingsService, required this.authService});
+  AuthController(
+      {required this.settingsService,
+      required this.authService,
+      required this.avatarService});
 
   @override
   void onInit() {
@@ -71,13 +74,19 @@ class AuthController extends GetxController {
     }
   }
 
-  Future<void> onRegister(XFile image) async {
+  Future<void> onRegister() async {
     final request = RegisterRequest(
         email: registerEmailController.text,
         username: registerUsernameController.text,
-        password: registerPasswordController.text);
+        password: registerPasswordController.text,
+        avatar: avatarService.isAvatar.value
+            ? avatarService.avatars[avatarService.currentAvatarIndex.value]
+            : null);
     await DialogHelper.showLoading('Connexion au serveur');
-    await authService.register(request, File(image.path));
+    await authService.register(request,
+        imagePath: avatarService.isAvatar.value == false
+            ? File(avatarService.image.path)
+            : null);
     if (authService.isUserLoggedIn()) {
       Get.offAllNamed(Routes.HOME);
     }

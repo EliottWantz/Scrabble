@@ -22,7 +22,7 @@ class ChatBoxController extends GetxController {
   TextEditingController messageTextEditingController = TextEditingController();
 
   bool isCurrentUserMessage(String username) {
-    return userService.user.username == username;
+    return userService.user.value!.username == username;
   }
 
   String getLocalTime(int index) {
@@ -41,7 +41,7 @@ class ChatBoxController extends GetxController {
       final chatMessagePayload = ChatMessagePayload(
           roomId: 'global',
           message: messageTextEditingController.text,
-          from: userService.user.username
+          from: userService.user.value!.username
       );
       print('send message');
       print(chatMessagePayload);

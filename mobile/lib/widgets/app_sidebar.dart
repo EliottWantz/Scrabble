@@ -2,6 +2,7 @@ import 'package:client_leger/routes/app_routes.dart';
 import 'package:client_leger/services/auth_service.dart';
 import 'package:client_leger/services/avatar_service.dart';
 import 'package:client_leger/services/settings_service.dart';
+import 'package:client_leger/services/user_service.dart';
 import 'package:client_leger/utils/dialog_helper.dart';
 import 'package:client_leger/utils/sidebar_theme.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +22,7 @@ class AppSideBar extends StatelessWidget {
   final SettingsService settingsService = Get.find();
   final AvatarService avatarService = Get.find();
   final AuthService authService = Get.find();
+  final UserService userService = Get.find();
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +52,8 @@ class AppSideBar extends StatelessWidget {
         headerBuilder: (context, extended) {
           if (ModalRoute.of(context)!.settings.name == '/auth' ||
               ModalRoute.of(context)!.settings.name == '/auth/login' ||
-              ModalRoute.of(context)!.settings.name == '/auth/register') {
+              ModalRoute.of(context)!.settings.name == '/auth/register'||
+              ModalRoute.of(context)!.settings.name == '/auth/register/avatar-selection') {
             return _buildHeaderAuth(extended);
           } else {
             return _buildHeaderHome(extended);
@@ -206,21 +209,13 @@ class AppSideBar extends StatelessWidget {
                 () => CircleAvatar(
                   backgroundColor: Colors.transparent,
                   maxRadius: 40,
-                  backgroundImage: _getAvatarToDisplay(),
+                  backgroundImage:
+                      NetworkImage(userService.user.value!.avatar.url),
                 ),
               )),
         ],
       ),
     );
-  }
-
-  ImageProvider _getAvatarToDisplay() {
-    if (avatarService.isAvatar.value) {
-      return AssetImage(
-          'assets/images/avatar(${avatarService.currentAvatarIndex.value}).png');
-    } else {
-      return NetworkImage(avatarService.imageUrl.value);
-    }
   }
 
   List<SidebarXItem> _buildListItems(BuildContext context) {

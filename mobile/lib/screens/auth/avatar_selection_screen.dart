@@ -86,8 +86,8 @@ class AvatarSelectionScreen extends GetView<AvatarController> {
               const Gap(100),
               CustomButton(
                   text: 'S\'inscrire',
-                  onPressed: () {
-                    authController.onRegister(controller.image);
+                  onPressed: () async {
+                    await authController.onRegister();
                   })
             ],
           ),
@@ -119,16 +119,20 @@ class AvatarSelectionScreen extends GetView<AvatarController> {
                       childAspectRatio: 1,
                     ),
                     shrinkWrap: false,
-                    itemCount: 9,
+                    itemCount: controller.avatarService.avatars.length,
                     scrollDirection: Axis.vertical,
                     itemBuilder: (BuildContext context, int index) {
                       return Obx(() => Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(12),
-                              border: controller.avatarIndex == index
+                              border: controller.avatarService
+                                          .currentAvatarIndex.value ==
+                                      index
                                   ? null
                                   : Border.all(color: Colors.grey.shade600),
-                              boxShadow: controller.avatarIndex == index
+                              boxShadow: controller.avatarService
+                                          .currentAvatarIndex.value ==
+                                      index
                                   ? const [
                                       BoxShadow(
                                         color: Colors.green,
@@ -138,14 +142,18 @@ class AvatarSelectionScreen extends GetView<AvatarController> {
                                   : null,
                             ),
                             child: Card(
-                              elevation:
-                                  controller.avatarIndex == index ? 5 : 0,
+                              elevation: controller.avatarService
+                                          .currentAvatarIndex.value ==
+                                      index
+                                  ? 5
+                                  : 0,
                               child: InkWell(
                                 onTap: () {
-                                  controller.avatarIndex = index;
+                                  controller.avatarService.currentAvatarIndex
+                                      .value = index;
                                 },
-                                child: Image.asset(
-                                    'assets/images/avatar($index).png'),
+                                child: Image.network(controller
+                                    .avatarService.avatars[index].url),
                               ),
                             ),
                           ));
@@ -161,7 +169,8 @@ class AvatarSelectionScreen extends GetView<AvatarController> {
                               borderRadius: BorderRadius.circular(12),
                               side: const BorderSide(color: Colors.black))),
                       onPressed: () {
-                        controller.onAvatarConfirmation();
+                        DialogHelper.hideLoading();
+                        controller.avatarService.isAvatar.value = true;
                       },
                       child: const Text('Confirmer')),
                   const Gap(10),
@@ -171,7 +180,7 @@ class AvatarSelectionScreen extends GetView<AvatarController> {
                               borderRadius: BorderRadius.circular(12),
                               side: const BorderSide(color: Colors.black))),
                       onPressed: () {
-                        controller.onAvatarConfirmation();
+                        DialogHelper.hideLoading();
                       },
                       child: const Text('Annuler')),
                 ],
