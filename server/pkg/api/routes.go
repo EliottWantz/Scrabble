@@ -75,4 +75,7 @@ func (api *API) setupRoutes(cfg *config.Config) {
 	r.Post("/chat/joindm", api.Ctrls.WebSocketManager.JoinDMRoom)
 	r.Post("/chat/leave", api.Ctrls.WebSocketManager.LeaveRoom)
 	r.Get("/chat/:id/messages", api.Ctrls.WebSocketManager.GetMessages)
+
+	r.Post("/game", api.Ctrls.GameCtrl.StartGame)
+	r.Post("/game/:id", api.Ctrls.GameCtrl.PlayMove)
 }

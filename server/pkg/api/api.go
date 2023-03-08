@@ -98,7 +98,7 @@ func New(cfg *config.Config) (*API, error) {
 		if err != nil {
 			return nil, err
 		}
-		gameCtrl := game.NewController(services.GameSvc)
+		gameCtrl := game.NewController(services.GameSvc, services.RoomSvc)
 		userCtrl := user.NewController(services.UserSvc, services.AuthSvc)
 
 		controllers = Controllers{

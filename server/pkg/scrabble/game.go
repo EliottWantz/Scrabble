@@ -1,14 +1,19 @@
 package scrabble
 
-const MaxPassMoves int = 6
+const (
+	MaxPassMoves                 int = 6
+	MaxHumanConsecutivePassMoves int = 2
+)
 
 type Game struct {
-	Players      [2]*Player
+	ID           string
+	Players      []*Player
 	Board        *Board
 	Bag          *Bag
 	DAWG         *DAWG
 	TileSet      *TileSet
 	MoveList     []*MoveItem
+	Engine       *Engine
 	Finished     bool
 	NumPassMoves int
 }
@@ -32,29 +37,31 @@ type MoveItem struct {
 	Move       Move
 }
 
-func NewGame(tileSet *TileSet, dawg *DAWG) *Game {
+func NewGame(ID string, dawg *DAWG, botStrategy Strategy) *Game {
 	g := &Game{
+		ID:      ID,
 		Board:   NewBoard(),
 		DAWG:    dawg,
-		Bag:     NewBag(tileSet),
-		TileSet: tileSet,
+		Bag:     NewBag(DefaultTileSet),
+		TileSet: DefaultTileSet,
+		Engine:  NewEngine(botStrategy),
 	}
 
 	return g
 }
 
 func (g *Game) AddPlayer(p *Player) {
-	g.Players[0] = p
-}
-
-// PlayerToMoveIndex returns 0 or 1 depending on which player's move it is
-func (g *Game) PlayerToMoveIndex() int {
-	return len(g.MoveList) % 2
+	g.Players = append(g.Players, p)
 }
 
 // PlayerToMove returns the player which player's move it is
 func (g *Game) PlayerToMove() *Player {
-	return g.Players[g.PlayerToMoveIndex()]
+	return g.Players[len(g.MoveList)%4]
+}
+
+// Returns the player that just played his move. Must be called after the move has been applied.
+func (g *Game) PlayerThatPlayed() *Player {
+	return g.Players[(len(g.MoveList)-1)%4]
 }
 
 // PlayTile moves a tile from the player's rack to the board
@@ -87,23 +94,25 @@ func (g *Game) ApplyValid(move Move) error {
 
 	// Update the scores and append to the move list
 	g.scoreMove(rackBefore, move)
-	if g.IsOver() {
-		// The game is now over: add the FinalMoves
-		rackPlayer := playerToMove.Rack.AsString()
-		rackOpp := g.Players[1-g.PlayerToMoveIndex()].Rack.AsString()
 
-		multiplyFactor := 2
-		if len(rackPlayer) > 0 {
-			// The game is not finishing by the final player
-			// completing his rack: both players then get the
-			// opponent's remaining tile scores
-			multiplyFactor = 1
-		}
-		// Add a final move for the finishing player
-		g.scoreMove(rackPlayer, NewFinalMove(rackOpp, multiplyFactor))
-		// Add a final move for the opponent
-		g.scoreMove(rackOpp, NewFinalMove(rackPlayer, multiplyFactor))
-	}
+	// TODO: What to do with a game of 4 players?
+	// if g.IsOver() {
+	// 	// The game is now over: add the FinalMoves
+	// 	rackPlayer := playerToMove.Rack.AsString()
+	// 	rackOpp := g.Players[1-g.PlayerToMoveIndex()].Rack.AsString()
+
+	// 	multiplyFactor := 2
+	// 	if len(rackPlayer) > 0 {
+	// 		// The game is not finishing by the final player
+	// 		// completing his rack: both players then get the
+	// 		// opponent's remaining tile scores
+	// 		multiplyFactor = 1
+	// 	}
+	// 	// Add a final move for the finishing player
+	// 	g.scoreMove(rackPlayer, NewFinalMove(rackOpp, multiplyFactor))
+	// 	// Add a final move for the opponent
+	// 	g.scoreMove(rackOpp, NewFinalMove(rackPlayer, multiplyFactor))
+	// }
 	return nil
 }
 
@@ -131,9 +140,16 @@ func (g *Game) IsOver() bool {
 	if g.NumPassMoves == MaxPassMoves {
 		return true
 	}
-	lastPlayer := 1 - (i % 2)
 
-	return g.Players[lastPlayer].Rack.IsEmpty()
+	lastPlayer := g.PlayerThatPlayed()
+	if lastPlayer.ConsecutiveExchanges >= MaxHumanConsecutivePassMoves {
+		return true
+	}
+	if lastPlayer.Rack.IsEmpty() {
+		return true
+	}
+
+	return false
 }
 
 // State returns a new GameState instance describing the state of the

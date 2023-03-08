@@ -53,8 +53,8 @@ type Covers map[Position]Cover
 
 // If Letter is a blank "*", then actual is the real letter
 type Cover struct {
-	Letter rune
-	Actual rune
+	Letter rune `json:"letter"`
+	Actual rune `json:"actual"`
 }
 
 const BingoBonus = 50
@@ -235,10 +235,10 @@ func (move *TileMove) IsValid(game *Game) bool {
 	}
 	// Check if the cross words are valid
 	for pos, coverLetter := range move.Covers {
-		left, right := game.Board.CrossWordFragments(pos, !move.Horizontal)
-		if len(left) > 0 || len(right) > 0 {
+		before, after := game.Board.CrossWordFragments(pos, !move.Horizontal)
+		if len(before) > 0 || len(after) > 0 {
 			// There is a cross word here: check it
-			if !game.DAWG.IsWord(left + string(coverLetter.Actual) + right) {
+			if !game.DAWG.IsWord(before + string(coverLetter.Actual) + after) {
 				return false
 			}
 		}
@@ -249,7 +249,8 @@ func (move *TileMove) IsValid(game *Game) bool {
 // Apply moves the tiles in the Covers from the player's Rack
 // to the board Squares. Move should be valid here
 func (move *TileMove) Apply(game *Game) error {
-	rack := game.PlayerToMove().Rack
+	player := game.PlayerToMove()
+	rack := player.Rack
 	for pos, cover := range move.Covers {
 		var (
 			tile *Tile
@@ -277,6 +278,7 @@ func (move *TileMove) Apply(game *Game) error {
 	rack.Fill(game.Bag)
 	// Reset the counter of consecutive pass moves
 	game.NumPassMoves = 0
+	player.ConsecutiveExchanges = 0
 	return nil
 }
 
@@ -374,6 +376,11 @@ func (move *PassMove) IsValid(game *Game) bool {
 }
 
 func (move *PassMove) Apply(game *Game) error {
+	// Reset the counter of consecutive exchanges moves
+	player := game.PlayerToMove()
+	if !player.IsBot {
+		player.ConsecutiveExchanges = 0
+	}
 	// Increment the number of consecutive pass moves
 	game.NumPassMoves++
 	return nil
@@ -423,7 +430,8 @@ func (move *ExchangeMove) IsValid(game *Game) bool {
 // Apply replenishes the exchanged tiles in the Rack
 // from the Bag
 func (move *ExchangeMove) Apply(game *Game) error {
-	rack := game.PlayerToMove().Rack
+	player := game.PlayerToMove()
+	rack := player.Rack
 	tiles := make([]*Tile, 0, RackSize)
 	// First, remove the exchanged tiles from the player's Rack
 	for _, letter := range move.Letters {
@@ -446,8 +454,10 @@ func (move *ExchangeMove) Apply(game *Game) error {
 	for _, tile := range tiles {
 		game.Bag.ReturnTile(tile)
 	}
-	// Increment the number of consecutive pass moves
-	game.NumPassMoves++
+	// Increment the number of consecutive exchange moves
+	if !player.IsBot {
+		player.ConsecutiveExchanges++
+	}
 	return nil
 }
 
