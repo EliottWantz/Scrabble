@@ -50,6 +50,15 @@ func (m *Manager) Accept(cID string) fiber.Handler {
 			m.logger.Error("add client", err)
 			return
 		}
+		user, err := m.UserSvc.GetUser(c.ID)
+		if err != nil {
+			m.logger.Error("get user", err)
+			return
+		}
+
+		m.watchUserChanges(&user, func(index int, newValue string) {
+			fmt.Printf("PendingRequests[%d] has been changed to %s\n", index, newValue)
+		})
 
 		users, err := m.ListUsers()
 		if err != nil {
@@ -225,4 +234,27 @@ func (m *Manager) Shutdown() {
 		_ = m.RemoveClient(c)
 		return true
 	})
+}
+
+func watchUserChanges(user *user.User, onChange func(index int, newValue string)) {
+	oldPendingRequests := user.PendingRequests
+
+	go func() {
+		for {
+			for i, newRequest := range user.PendingRequests {
+				if i < len(oldPendingRequests) && newRequest != oldPendingRequests[i] {
+					onChange(i, newRequest)
+					oldPendingRequests[i] = newRequest
+				}
+			}
+			if len(user.PendingRequests) < len(oldPendingRequests) {
+
+				oldPendingRequests = oldPendingRequests[:len(user.PendingRequests)]
+
+			} else if len(user.PendingRequests) > len(oldPendingRequests) {
+
+				oldPendingRequests = append(oldPendingRequests, user.PendingRequests[len(oldPendingRequests):]...)
+			}
+		}
+	}()
 }

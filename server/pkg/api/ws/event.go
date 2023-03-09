@@ -13,11 +13,11 @@ var (
 
 // Server events
 var (
-	ServerEventJoinedRoom  = "joinedRoom"
-	ServerEventUserJoined  = "userJoined"
-	ServerEventListUsers   = "listUsers"
-	ServerEventUsersInRoom = "usersInRoom"
-	ServerEventGameUpdate  = "gameUpdate"
-
-	ServerEventError = "error"
+	ServerEventJoinedRoom    = "joinedRoom"
+	ServerEventUserJoined    = "userJoined"
+	ServerEventListUsers     = "listUsers"
+	ServerEventUsersInRoom   = "usersInRoom"
+	ServerEventGameUpdate    = "gameUpdate"
+	ServerEventError         = "error"
+	ServerEventFriendRequest = "friendRequest"
 )
