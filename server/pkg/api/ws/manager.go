@@ -2,6 +2,7 @@ package ws
 
 import (
 	"fmt"
+	"reflect"
 	"time"
 
 	"scrabble/pkg/api/game"
@@ -50,15 +51,8 @@ func (m *Manager) Accept(cID string) fiber.Handler {
 			m.logger.Error("add client", err)
 			return
 		}
-		user, err := m.UserSvc.GetUser(c.ID)
-		if err != nil {
-			m.logger.Error("get user", err)
-			return
-		}
 
-		m.watchUserChanges(&user, func(index int, newValue string) {
-			fmt.Printf("PendingRequests[%d] has been changed to %s\n", index, newValue)
-		})
+		m.watchFriendRequests(cID)
 
 		users, err := m.ListUsers()
 		if err != nil {
@@ -236,25 +230,52 @@ func (m *Manager) Shutdown() {
 	})
 }
 
-func watchUserChanges(user *user.User, onChange func(index int, newValue string)) {
-	oldPendingRequests := user.PendingRequests
+func (m *Manager) watchFriendRequests(id string) {
+	oldUser, _ := m.UserSvc.GetUser(id)
+	oldPendingRequests := oldUser.PendingRequests
 
 	go func() {
 		for {
-			for i, newRequest := range user.PendingRequests {
-				if i < len(oldPendingRequests) && newRequest != oldPendingRequests[i] {
-					onChange(i, newRequest)
-					oldPendingRequests[i] = newRequest
+
+			newUser, _ := m.UserSvc.GetUser(id)
+			newRequests := newUser.PendingRequests
+			time.Sleep(1 * time.Second)
+			if !reflect.DeepEqual(newRequests, oldPendingRequests) && len(newRequests) > len(oldPendingRequests) {
+
+				incomingFriendsRequests := getArrayDifference(newRequests, oldPendingRequests)
+				for _, friend := range incomingFriendsRequests {
+					friendUser, _ := m.UserSvc.GetUser(friend)
+					friendRequestPayload := FriendRequestPayload{
+						FromID:       friendUser.ID,
+						FromUsername: friendUser.Username,
+					}
+					p, err := NewFriendRequestPacket(friendRequestPayload)
+					if err != nil {
+						m.logger.Error("failed to create friend request packet", err)
+					}
+					client, _ := m.GetClient(id)
+					client.send(p)
+
 				}
-			}
-			if len(user.PendingRequests) < len(oldPendingRequests) {
-
-				oldPendingRequests = oldPendingRequests[:len(user.PendingRequests)]
-
-			} else if len(user.PendingRequests) > len(oldPendingRequests) {
-
-				oldPendingRequests = append(oldPendingRequests, user.PendingRequests[len(oldPendingRequests):]...)
+				oldPendingRequests = newRequests
 			}
 		}
 	}()
+}
+
+func getArrayDifference(a, b []string) []string {
+	diff := []string{}
+	for _, value := range a {
+		found := false
+		for _, otherValue := range b {
+			if value == otherValue {
+				found = true
+				break
+			}
+		}
+		if !found {
+			diff = append(diff, value)
+		}
+	}
+	return diff
 }

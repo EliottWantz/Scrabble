@@ -2,36 +2,40 @@ package user
 
 import "fmt"
 
-func (s *Service) sendFriendRequest(req friendRequest) error {
-	user, err := s.GetUser(req.ID)
+func (s *Service) sendFriendRequest(id string, friendId string) error {
+	friend, err := s.GetUser(friendId)
 	if err != nil {
-		return fmt.Errorf("get user: %w", err)
+		return fmt.Errorf("get friend: %w", err)
 	}
-	user.PendingRequests = append(user.PendingRequests, req.FriendId)
+	friend.PendingRequests = append(friend.PendingRequests, id)
+	err = s.Repo.Update(friend)
 	return nil
 }
 
-func (s *Service) acceptFriendRequest(req friendRequest) error {
-	user, err := s.GetUser(req.ID)
+func (s *Service) acceptFriendRequest(id string, friendId string) error {
+	user, err := s.GetUser(id)
 	if err != nil {
 		return fmt.Errorf("get user: %w", err)
 	}
-	user.Friends = append(user.Friends, req.FriendId)
+	user.Friends = append(user.Friends, friendId)
 	return nil
 }
 
-func (s *Service) rejectFriendRequest(req friendRequest) (bool, error) {
-	user, err := s.GetUser(req.ID)
+func (s *Service) rejectFriendRequest(id string, friendId string) error {
+	user, err := s.GetUser(id)
 	if err != nil {
-		return false, fmt.Errorf("get user: %w", err)
+		return fmt.Errorf("get user: %w", err)
 	}
+	fmt.Println("ici1", user.PendingRequests)
+
 	for i, id := range user.PendingRequests {
-		if id == req.FriendId {
+		if id == friendId {
 			user.PendingRequests = append(user.PendingRequests[:i], user.PendingRequests[i+1:]...)
-			return true, nil
+			err = s.Repo.Update(user)
+			return nil
 		}
 	}
-	return false, nil
+	return fmt.Errorf("friend request not found")
 }
 
 func (s *Service) GetFriends(id string) ([]User, error) {

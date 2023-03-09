@@ -134,7 +134,7 @@ type FriendRequestPayload struct {
 	FromUsername string `json:"fromUsername"`
 }
 
-func newFriendRequestPacket(payload FriendRequestPayload) (*Packet, error) {
+func NewFriendRequestPacket(payload FriendRequestPayload) (*Packet, error) {
 	p, err := NewPacket(ServerEventFriendRequest, payload)
 	if err != nil {
 		return nil, err

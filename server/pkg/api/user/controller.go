@@ -182,24 +182,11 @@ func (ctrl *Controller) UploadAvatar(c *fiber.Ctx) error {
 	)
 }
 
-type friendRequest struct {
-	ID       string `json:"id,omitempty"`
-	FriendId string `json:"friendId,omitempty"`
-}
+func (ctrl *Controller) SendFriendRequest(c *fiber.Ctx) error {
+	id := c.Params("id")
+	friendId := c.Params("friendId")
 
-func (ctrl *Controller) sendFriendRequest(c *fiber.Ctx) error {
-	req := friendRequest{}
-	if err := c.BodyParser(&req); err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, "decode req: "+err.Error())
-	}
-	if req.ID == "" {
-		return fiber.NewError(fiber.StatusBadRequest, "no user id given")
-	}
-	if req.FriendId == "" {
-		return fiber.NewError(fiber.StatusBadRequest, "no friend id given")
-	}
-
-	err := ctrl.svc.sendFriendRequest(req)
+	err := ctrl.svc.sendFriendRequest(id, friendId)
 	if err != nil {
 		return err
 	}
@@ -208,18 +195,21 @@ func (ctrl *Controller) sendFriendRequest(c *fiber.Ctx) error {
 }
 
 func (ctrl *Controller) acceptFriendRequest(c *fiber.Ctx) error {
-	req := friendRequest{}
-	if err := c.BodyParser(&req); err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, "decode req: "+err.Error())
-	}
-	if req.ID == "" {
-		return fiber.NewError(fiber.StatusBadRequest, "no user id given")
-	}
-	if req.FriendId == "" {
-		return fiber.NewError(fiber.StatusBadRequest, "no friend id given")
-	}
+	id := c.Params("id")
+	friendId := c.Params("friendId")
 
-	err := ctrl.svc.acceptFriendRequest(req)
+	err := ctrl.svc.acceptFriendRequest(id, friendId)
+	if err != nil {
+		return err
+	}
+	return c.SendStatus(fiber.StatusOK)
+}
+
+func (ctrl *Controller) RejectFriendRequest(c *fiber.Ctx) error {
+	id := c.Params("id")
+	friendId := c.Params("friendId")
+
+	err := ctrl.svc.rejectFriendRequest(id, friendId)
 	if err != nil {
 		return err
 	}
