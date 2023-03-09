@@ -85,9 +85,9 @@ func (s *Service) StartGame(room *room.Room) (*Game, error) {
 }
 
 type MoveInfo struct {
-	Type    string                    `json:"type,omitempty"`
-	Letters string                    `json:"letters,omitempty"`
-	Covers  map[string]scrabble.Cover `json:"covers"`
+	Type    string            `json:"type,omitempty"`
+	Letters string            `json:"letters,omitempty"`
+	Covers  map[string]string `json:"covers"`
 }
 
 const (
@@ -109,18 +109,19 @@ func (s *Service) ApplyPlayerMove(gID, pID string, req MoveInfo) (*Game, *scrabb
 	var move scrabble.Move
 	switch req.Type {
 	case MoveTypePlayTile:
-		for _, letter := range req.Letters {
-			if !player.Rack.Contains(letter) {
-				return nil, nil, ErrInvalidMove
-			}
-		}
 		covers := make(scrabble.Covers)
-		for pos, c := range req.Covers {
+		for pos, letter := range req.Covers {
+			if !player.Rack.ContainsAsString(letter) {
+				if letter == strings.ToUpper(letter) && !player.Rack.Contains('*') {
+					return nil, nil, ErrInvalidMove
+				}
+			}
+
 			p, err := parsePoint(pos)
 			if err != nil {
 				return nil, nil, fmt.Errorf("invalid coordinate: %w", err)
 			}
-			covers[p] = c
+			covers[p] = []rune(letter)[0]
 		}
 		move = scrabble.NewTileMove(g.Board, covers)
 	case MoveTypeExchange:
