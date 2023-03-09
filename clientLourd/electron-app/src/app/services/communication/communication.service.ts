@@ -45,15 +45,6 @@ export class CommunicationService {
         return this.http.post<{url: string, fileId: string}>(`${this.baseUrl}/avatar/${user.id}`, formData).pipe(catchError(this.handleError))
     }
 
-    async joinRoom(username: string, roomId: string, roomName: string): Promise<{room: Room}> {
-        const res: any = (await lastValueFrom(this.requestJoinRoom(username, roomId, roomName)));
-        return res;
-    }
-
-    private requestJoinRoom(userId: string, roomId: string, roomName: string): Observable<{room: Room}> {
-        return this.http.post<{room: Room}>(`${this.baseUrl}/room/join`, { userId, roomId, roomName }).pipe(catchError(this.handleError));
-    }
-
     async getDefaultAvatars(): Promise<{avatars: [{url: string, fileId: string}]}> {
         const res: any = (await lastValueFrom(this.requestGetDefaultAvatars()));
         return res;
