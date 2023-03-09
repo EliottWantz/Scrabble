@@ -55,8 +55,8 @@ export class CommunicationService {
         return this.http.get<{avatars: [{url: string, fileId: string}]}>(`${this.baseUrl}/avatar/defaults`).pipe(catchError(this.handleError));
     }
 
-    async createGame(): Promise<{game: Game}> {
-        const res: any = (await lastValueFrom(this.requestGetDefaultAvatars()));
+    async createGame(roomId: string): Promise<{game: Game}> {
+        const res: any = (await lastValueFrom(this.requestCreateGame(roomId)));
         return res;
     }
 
