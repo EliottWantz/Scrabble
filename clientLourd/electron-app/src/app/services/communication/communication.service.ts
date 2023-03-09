@@ -4,6 +4,7 @@ import { environment } from 'src/environments/environment';
 import { User } from "@app/utils/interfaces/user";
 import { Room } from "@app/utils/interfaces/room";
 import { catchError, lastValueFrom, Observable, throwError } from "rxjs";
+import { Game } from "@app/utils/interfaces/game/game";
 
 @Injectable({
     providedIn: 'root',
@@ -52,6 +53,15 @@ export class CommunicationService {
 
     private requestGetDefaultAvatars(): Observable<{avatars: [{url: string, fileId: string}]}> {
         return this.http.get<{avatars: [{url: string, fileId: string}]}>(`${this.baseUrl}/avatar/defaults`).pipe(catchError(this.handleError));
+    }
+
+    async createGame(): Promise<{game: Game}> {
+        const res: any = (await lastValueFrom(this.requestGetDefaultAvatars()));
+        return res;
+    }
+
+    private requestCreateGame(roomId: string): Observable<{game: Game}> {
+        return this.http.post<{game: Game}>(`${this.baseUrl}/game`, roomId).pipe(catchError(this.handleError));
     }
 
     private handleError(error: HttpErrorResponse) {
