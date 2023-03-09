@@ -9,6 +9,7 @@ import 'package:client_leger/models/requests/chat_message_request.dart';
 import 'package:client_leger/models/requests/join_dm_request.dart';
 import 'package:client_leger/models/requests/join_room_request.dart';
 import 'package:client_leger/models/response/chat_message_response.dart';
+import 'package:client_leger/models/response/joined_room_response.dart';
 import 'package:get/get.dart';
 // import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:client_leger/api/api_constants.dart';
@@ -29,7 +30,7 @@ class WebsocketService extends GetxService {
   late RxString timestamp = ''.obs;
   late RxInt itemCount = 0.obs;
 
-  connect() {
+  void connect() {
     socket = WebSocketChannel.connect(Uri(
         scheme: ApiConstants.wsScheme,
         host: ApiConstants.wsHost,
@@ -49,15 +50,21 @@ class WebsocketService extends GetxService {
   }
 
   // handleData(ChatMessageResponse data) {
-    handleData(dynamic data) {
+    void handleData(dynamic data) {
     // print(data.payload!.message);
       print(jsonDecode(data)['event']);
     switch(jsonDecode(data)['event']) {
       case ServerEventJoinedRoom: {
         print('event joinedRoom');
+        JoinedRoomResponse joinedRoomResponse = JoinedRoomResponse.fromRawJson(data);
+        joinedRoomResponse.payload.users.forEach(
+                (user) => print(user.username)
+        );
+        print(joinedRoomResponse.payload.users);
+        print('joined room response above');
         print(jsonDecode(data)['payload']['roomId']);
-        roomId = jsonDecode(data)['payload']['roomId'];
-        print(roomId);
+        // roomId = jsonDecode(data)['payload']['roomId'];
+        // print(roomId);
       }
       break;
       case ServerEventChatMessage: {
@@ -78,7 +85,7 @@ class WebsocketService extends GetxService {
     }
   }
 
-  createRoom(String roomName, { List<String> userIds = const [] }) {
+  void createRoom(String roomName, { List<String> userIds = const [] }) {
     final createRoomPayload = CreateRoomPayload(
         roomName: roomName,
         userIds: userIds
@@ -90,7 +97,7 @@ class WebsocketService extends GetxService {
     socket.sink.add(createRoomRequest.toRawJson());
   }
 
-  joinRoom(String roomId) {
+  void joinRoom(String roomId) {
     final joinRoomPayload = JoinRoomPayload(roomId: roomId);
     final joinRoomRequest = JoinRoomRequest(
         event: ClientEventJoinRoom,
@@ -99,7 +106,7 @@ class WebsocketService extends GetxService {
     socket.sink.add(joinRoomRequest.toRawJson());
   }
 
-  joinDMRoom(String toId, String toUsername) {
+  void joinDMRoom(String toId, String toUsername) {
     final joinDMPayload = JoinDMPayload(
         username: userService.user.value!.username,
         toId: toId,
@@ -112,7 +119,7 @@ class WebsocketService extends GetxService {
     socket.sink.add(joinDMRequest.toRawJson());
   }
 
-  sendMessage(String roomId, String message) {
+  void sendMessage(String roomId, String message) {
     final chatMessagePayload = ChatMessagePayload(
         roomId: roomId,
         message: message,
