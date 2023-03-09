@@ -30,13 +30,13 @@ type Service struct {
 }
 
 type Game struct {
-	ID           string             `json:"id"`
-	Players      []*scrabble.Player `json:"players"`
-	Board        *scrabble.Board    `json:"board"`
-	Bag          *scrabble.Bag      `json:"bag"`
-	Finished     bool               `json:"finished"`
-	NumPassMoves int                `json:"numPassMoves"`
-	Turn         string             `json:"turn"`
+	ID           string                  `json:"id"`
+	Players      []*scrabble.Player      `json:"players"`
+	Board        [15][15]scrabble.Square `json:"board"`
+	Bag          []scrabble.Tile         `json:"bag"`
+	Finished     bool                    `json:"finished"`
+	NumPassMoves int                     `json:"numPassMoves"`
+	Turn         string                  `json:"turn"`
 }
 
 func NewService(repo *Repository, userSvc *user.Service) *Service {
@@ -181,8 +181,7 @@ func makeGamePacket(g *scrabble.Game) *Game {
 	return &Game{
 		ID:           g.ID,
 		Players:      g.Players,
-		Board:        g.Board,
-		Bag:          g.Bag,
+		Board:        g.Board.Squares,
 		Finished:     g.Finished,
 		NumPassMoves: g.NumPassMoves,
 		Turn:         g.Turn,
