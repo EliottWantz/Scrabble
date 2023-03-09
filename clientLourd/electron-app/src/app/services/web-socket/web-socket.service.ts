@@ -3,7 +3,7 @@ import { UserService } from "@app/services/user/user.service";
 import { User } from "@app/utils/interfaces/user";
 import { BehaviorSubject } from "rxjs";
 import { environment } from 'src/environments/environment';
-import { Packet } from "@app/utils/interfaces/packet";
+import { CreateRoomPayload, JoinDMPayload, JoinRoomPayload, LeaveRoomPayload, Packet, PlayMovePayload } from "@app/utils/interfaces/packet";
 import { RoomService } from "@app/services/room/room.service";
 import { Room } from "@app/utils/interfaces/room";
 import { ChatMessage } from "@app/utils/interfaces/chat-message";
