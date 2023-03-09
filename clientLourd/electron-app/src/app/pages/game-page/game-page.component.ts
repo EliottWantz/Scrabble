@@ -6,5 +6,5 @@ import { Component } from "@angular/core";
     styleUrls: ["./game-page.component.scss"],
 })
 export class GamePageComponent {
-    constructor() {}
+    constructor() { }
 }

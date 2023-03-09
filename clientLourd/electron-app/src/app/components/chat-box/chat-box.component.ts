@@ -11,7 +11,7 @@ import {
   FormGroup,
   Validators,
 } from "@angular/forms";
-import { MessageErrorStateMatcher } from "@app/classes/form-error/error-state-form";
+//import { MessageErrorStateMatcher } from "@app/classes/form-error/error-state-form";
 import { ChatService } from "@app/services/chat/chat.service";
 import { BehaviorSubject } from "rxjs";
 import { User } from "@app/utils/interfaces/user";
@@ -33,7 +33,7 @@ export class ChatBoxComponent implements OnInit, AfterViewInit {
   //   messages: ChatMessage[];
   //messages$!: BehaviorSubject<ChatMessage[]>;
   room$!: BehaviorSubject<Room>;
-  messageValidator: MessageErrorStateMatcher = new MessageErrorStateMatcher;
+  //messageValidator: MessageErrorStateMatcher = new MessageErrorStateMatcher;
   ws!: WebSocket;
   @ViewChild("chatBoxInput")
   chatBoxInput!: ElementRef;
