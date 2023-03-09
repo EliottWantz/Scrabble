@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"scrabble/pkg/api/game"
 	"scrabble/pkg/api/user"
 )
 
@@ -62,6 +63,11 @@ type LeaveRoomPayload struct {
 	RoomID string `json:"roomId"`
 }
 
+type PlayMovePayload struct {
+	GameID   string        `json:"gameId"`
+	MoveInfo game.MoveInfo `json:"moveInfo"`
+}
+
 // Server events payloads
 type JoinedRoomPayload struct {
 	RoomID   string            `json:"roomId"`
@@ -97,6 +103,18 @@ type ListUsersPayload struct {
 
 func NewListUsersPacket(payload ListUsersPayload) (*Packet, error) {
 	p, err := NewPacket(ServerEventListUsers, payload)
+	if err != nil {
+		return nil, err
+	}
+	return p, nil
+}
+
+type GameUpdatePayload struct {
+	Game *game.Game `json:"game"`
+}
+
+func NewGameUpdatePacket(payload GameUpdatePayload) (*Packet, error) {
+	p, err := NewPacket(ServerEventGameUpdate, payload)
 	if err != nil {
 		return nil, err
 	}

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"scrabble/pkg/api/game"
 	"scrabble/pkg/api/room"
 	"scrabble/pkg/api/user"
 
@@ -21,9 +22,10 @@ type Manager struct {
 	MessageRepo *MessageRepository
 	RoomSvc     *room.Service
 	UserSvc     *user.Service
+	GameSvc     *game.Service
 }
 
-func NewManager(messageRepo *MessageRepository, roomSvc *room.Service, userSvc *user.Service) (*Manager, error) {
+func NewManager(messageRepo *MessageRepository, roomSvc *room.Service, userSvc *user.Service, gameSvc *game.Service) (*Manager, error) {
 	m := &Manager{
 		Clients:     haxmap.New[string, *Client](),
 		Rooms:       haxmap.New[string, *Room](),
@@ -31,6 +33,7 @@ func NewManager(messageRepo *MessageRepository, roomSvc *room.Service, userSvc *
 		MessageRepo: messageRepo,
 		RoomSvc:     roomSvc,
 		UserSvc:     userSvc,
+		GameSvc:     gameSvc,
 	}
 
 	r := m.AddRoom("global", "Global Room")
