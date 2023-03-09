@@ -53,3 +53,17 @@ func (r *Repository) Insert(g *scrabble.Game) error {
 
 	return nil
 }
+
+func (r *Repository) Delete(ID string) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	_, ok := r.games[ID]
+	if !ok {
+		return ErrGameNotFound
+	}
+
+	delete(r.games, ID)
+
+	return nil
+}

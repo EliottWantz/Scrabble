@@ -178,6 +178,15 @@ func (s *Service) ApplyBotMove(gID string) (*Game, *scrabble.Game, error) {
 	return makeGamePacket(g), g, nil
 }
 
+func (s *Service) DeleteGame(gID string) error {
+	err := s.repo.Delete(gID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func makeGamePacket(g *scrabble.Game) *Game {
 	return &Game{
 		ID:           g.ID,

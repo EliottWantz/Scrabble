@@ -307,6 +307,11 @@ func (c *Client) PlayMove(p *Packet) error {
 		if err != nil {
 			return err
 		}
+		err = c.Manager.GameSvc.DeleteGame(g.ID)
+		if err != nil {
+			slog.Error("failed to delete game", err)
+		}
+		return nil
 	}
 
 	// Make bots move if applicable
