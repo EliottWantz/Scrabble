@@ -232,6 +232,22 @@ func (m *Manager) Shutdown() {
 	})
 }
 
+func (m *Manager) UpdateJoinableGames() error {
+	joinableGames, err := m.RoomSvc.GetAllJoinableGameRooms()
+	if err != nil {
+		return err
+	}
+	joinableGamesPacket, err := NewJoinableGamesPacket(ListJoinableGamesPayload{
+		Games: joinableGames,
+	})
+	if err != nil {
+		return err
+	}
+	m.Broadcast(joinableGamesPacket)
+
+	return nil
+}
+
 func (m *Manager) watchFriendRequests(id string) {
 	oldUser, _ := m.UserSvc.GetUser(id)
 	oldPendingRequests := oldUser.PendingRequests
