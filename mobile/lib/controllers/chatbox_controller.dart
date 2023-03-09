@@ -38,14 +38,14 @@ class ChatBoxController extends GetxController {
 
   void sendMessage() {
   if (messageTextEditingController.text.isNotEmpty) {
-      final chatMessagePayload = ChatMessagePayload(
-          roomId: 'global',
-          message: messageTextEditingController.text,
-          from: userService.user.value!.username
-      );
-      print('send message');
-      print(chatMessagePayload);
-      websocketService.sendMessage('broadcast', chatMessagePayload);
+      // final chatMessagePayload = ChatMessagePayload(
+      //     roomId: 'global',
+      //     message: messageTextEditingController.text,
+      //     from: userService.user.value!.username
+      // );
+      // print('send message');
+      // print(chatMessagePayload);
+      // websocketService.sendMessage('broadcast', chatMessagePayload);
       messageTextEditingController.text = '';
     }
   }

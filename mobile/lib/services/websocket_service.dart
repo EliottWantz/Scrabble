@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:client_leger/models/chat_message_payload.dart';
+import 'package:client_leger/models/events.dart';
 import 'package:client_leger/models/requests/chat_message_request.dart';
 import 'package:client_leger/models/response/chat_message_response.dart';
 import 'package:get/get.dart';
@@ -30,24 +31,26 @@ class WebsocketService extends GetxService {
         queryParameters: { 'id': userService.user.value!.id, 'username': userService.user.value!.username }
     ));
     socket.stream.listen((data) {
-          print(data);
-          if (jsonDecode(data)['event'] == 'broadcast') {
-            handleData(ChatMessageResponse.fromRawJson(data));
-          }
+      handleData(data);
+          // print(data);
+          // if (jsonDecode(data)['event'] == 'broadcast') {
+          //   handleData(ChatMessageResponse.fromRawJson(data));
+          // }
         },
       onError: (error) => print(error),
     );
   }
 
-  handleData(ChatMessageResponse data) {
-    print(data.payload!.message);
-
-    switch(data.event) {
-      // case 'joinedGlobalRoom': {
-      //   roomId = data.payload!.roomId;
-      //   print('event joinedGlobalRoom');
-      // }
-      // break;
+  // handleData(ChatMessageResponse data) {
+    handleData(dynamic data) {
+    // print(data.payload!.message);
+      print(jsonDecode(data)['event']);
+    switch(jsonDecode(data)['event']) {
+      case ServerEventJoinedRoom: {
+        // roomId = data.payload!.roomId;
+        print('event joinedRoom');
+      }
+      break;
       case 'broadcast': {
         roomId = data.payload!.roomId;
         messages.obs.value.add(data);
@@ -58,11 +61,6 @@ class WebsocketService extends GetxService {
         print('event broadcast');
       }
       break;
-      // case '': {
-      //   roomId = decodedData['payload']['roomId'];
-      //   print('event empty');
-      // }
-      // break;
       default: {
         print('no event in package received');
       }

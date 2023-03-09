@@ -56,23 +56,6 @@ class ChatScreen extends StatelessWidget {
                   child: Center(child: Text(messages[index])),
                 );
               }
-                // [
-                //   Container(
-                //     height: 50,
-                //     color: Colors.amber[600],
-                //     child: const Center(child: Text('Entry A')),
-                //   ),
-                //   Container(
-                //     height: 50,
-                //     color: Colors.amber[500],
-                //     child: const Center(child: Text('Entry B')),
-                //   ),
-                //   Container(
-                //     height: 50,
-                //     color: Colors.amber[100],
-                //     child: const Center(child: Text('Entry C')),
-                //   ),
-                // ],
             )
           )
         ),
@@ -84,41 +67,5 @@ class ChatScreen extends StatelessWidget {
         )
       ]
     );
-
-    // return Column(
-    //   children: [
-    //     // Expanded(
-    //       SingleChildScrollView(
-    //         child: Column(
-    //           children: [
-    //             Text('Message 1'),
-    //             Text('Message 2'),
-    //             Text('Message 3'),
-    //           ],
-    //         ),
-    //       ),
-    //     // ),
-    //     Container(
-    //       child: Text('Your super cool Footer'),
-    //       color: Colors.amber,
-    //     )
-    //   ],
-    // );
-
-
-    // return SafeArea(
-    //   minimum: const EdgeInsets.symmetric(horizontal: 40.0),
-    //   child: Center(
-    //     child: SizedBox(
-    //       width: 300,
-    //       child: Column(
-    //         mainAxisAlignment: MainAxisAlignment.center,
-    //         children: const [
-    //           Text('Chat',style: TextStyle(fontSize: 30),),
-    //         ],
-    //       ),
-    //     ),
-    //   ),
-    // );
   }
 }
