@@ -31,7 +31,7 @@ export class ChatService {
                 event: "chat-message",
                 payload: payload,
             };
-            this.socketService.send(packet);
+            this.socketService.send("chat-message", payload);
         } else {
             console.log("Not logged in");
         }
