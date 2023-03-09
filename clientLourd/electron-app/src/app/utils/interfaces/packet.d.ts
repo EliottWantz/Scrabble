@@ -5,7 +5,7 @@ import { MoveInfo } from "@app/utils/interfaces/game/move"
 
 export interface Packet {
     event: Event;
-    payload: any;
+    payload: JoinRoomPayload | JoinDMPayload | CreateRoomPayload | LeaveRoomPayload | PlayMovePayload;
 }
 
 export interface JoinRoomPayload {
