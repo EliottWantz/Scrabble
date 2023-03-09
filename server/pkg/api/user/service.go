@@ -23,11 +23,12 @@ var (
 )
 
 type Service struct {
-	Repo      *Repository
-	uploadSvc upload.Service
-	fileSvc   file.Service
-	uploadURL string
-	RoomSvc   *room.Service
+	Repo           *Repository
+	uploadSvc      upload.Service
+	fileSvc        file.Service
+	uploadURL      string
+	RoomSvc        *room.Service
+	DefaultAvatars []*Avatar
 }
 
 func NewService(cfg *config.Config, repo *Repository, roomSvc *room.Service) (*Service, error) {
@@ -52,6 +53,32 @@ func NewService(cfg *config.Config, repo *Repository, roomSvc *room.Service) (*S
 		fileSvc:   file.NewService(client),
 		uploadURL: cfg.UPLOAD_CARE_UPLOAD_URL,
 		RoomSvc:   roomSvc,
+		DefaultAvatars: []*Avatar{
+			{
+				URL:    "https://ucarecdn.com/3dfe6a52-849b-4a64-85c6-1274731595ac/",
+				FileID: "3dfe6a52-849b-4a64-85c6-1274731595ac",
+			},
+			{
+				URL:    "https://ucarecdn.com/add70d69-c5c0-46b3-9a36-10c62fb0bf61/",
+				FileID: "add70d69-c5c0-46b3-9a36-10c62fb0bf61",
+			},
+			{
+				URL:    "https://ucarecdn.com/a706a6af-c90b-4e81-99d6-e990386952a4/",
+				FileID: "a706a6af-c90b-4e81-99d6-e990386952a4",
+			},
+			{
+				URL:    "https://ucarecdn.com/ed62dd60-3d8c-4d3d-8e55-54005ecbdf20/",
+				FileID: "ed62dd60-3d8c-4d3d-8e55-54005ecbdf20",
+			},
+			{
+				URL:    "https://ucarecdn.com/9e66c3af-eb22-4402-96e6-0c4590382222/",
+				FileID: "9e66c3af-eb22-4402-96e6-0c4590382222",
+			},
+			{
+				URL:    "https://ucarecdn.com/a349a000-1ae5-4504-af91-c59674387663/",
+				FileID: "a349a000-1ae5-4504-af91-c59674387663",
+			},
+		},
 	}, nil
 }
 
@@ -88,11 +115,6 @@ func (s *Service) SignUp(username, password, email string, uploadAvatar UploadAv
 		return nil, fiber.NewError(fiber.StatusInternalServerError, "failed to insert user: "+err.Error())
 	}
 
-	// Create and join own room
-	_, err = s.RoomSvc.CreateRoom(u.ID, u.Username, u.ID)
-	if err != nil {
-		return nil, fiber.NewError(fiber.StatusInternalServerError, "failed to create and join own room: "+err.Error())
-	}
 	// Join global room
 	err = s.RoomSvc.AddUser("global", u.ID)
 	if err != nil {

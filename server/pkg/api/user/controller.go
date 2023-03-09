@@ -241,7 +241,6 @@ func (ctrl *Controller) UpdatePreferences(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, "no user id given")
 	}
 	user, err := ctrl.svc.GetUser(ID)
-
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, "no user found")
 	}
@@ -272,16 +271,11 @@ func (ctrl *Controller) UpdatePreferences(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusOK)
 }
 
-// func (ctrl *Controller) DeleteAvatar(c *fiber.Ctx) error {
-// 	ID := c.Params("id")
-// 	if ID == "" {
-// 		return fiber.NewError(fiber.StatusBadRequest, "no user id given")
-// 	}
-
-// 	err := ctrl.svc.DeleteAvatar(ID)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	return c.SendStatus(fiber.StatusNoContent)
-// }
+func (ctrl *Controller) GetDefaultAvatars(c *fiber.Ctx) error {
+	type GetDefaultAvatarsResponse struct {
+		Avatars []*Avatar `json:"avatars,omitempty"`
+	}
+	return c.JSON(GetDefaultAvatarsResponse{
+		Avatars: ctrl.svc.DefaultAvatars,
+	})
+}
