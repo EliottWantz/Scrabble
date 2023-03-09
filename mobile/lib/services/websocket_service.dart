@@ -18,6 +18,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:client_leger/services/user_service.dart';
 
 import '../models/requests/create_room_request.dart';
+import '../models/requests/list_joinable_games_request.dart';
 
 class WebsocketService extends GetxService {
   final UserService userService;
@@ -150,5 +151,12 @@ class WebsocketService extends GetxService {
       payload: chatMessagePayload,
     );
     socket.sink.add(chatMessageRequest.toRawJson());
+  }
+
+  void listJoinableGames() {
+    final listJoinableGamesRequest = ListJoinableGamesRequest(
+      event: ClientEventListJoinableGames
+    );
+    socket.sink.add(listJoinableGamesRequest);
   }
 }
