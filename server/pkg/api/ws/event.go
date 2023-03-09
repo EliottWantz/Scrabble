@@ -18,6 +18,7 @@ var (
 	ServerEventListUsers   = "listUsers"
 	ServerEventUsersInRoom = "usersInRoom"
 	ServerEventGameUpdate  = "gameUpdate"
+	ServerEventGameOver    = "gameOver"
 
 	ServerEventError = "error"
 )

@@ -95,14 +95,14 @@ const (
 	MoveTypePass     = "pass"
 )
 
-func (s *Service) ApplyPlayerMove(gID, pID string, req MoveInfo) (*Game, error) {
+func (s *Service) ApplyPlayerMove(gID, pID string, req MoveInfo) (*Game, *scrabble.Game, error) {
 	g, err := s.repo.GetGame(gID)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	player := g.PlayerToMove()
 	if player.ID != pID {
-		return nil, ErrNotPlayerTurn
+		return nil, nil, ErrNotPlayerTurn
 	}
 
 	var move scrabble.Move
@@ -110,18 +110,18 @@ func (s *Service) ApplyPlayerMove(gID, pID string, req MoveInfo) (*Game, error) 
 	case MoveTypePlayTile:
 		for _, letter := range req.Letters {
 			if !player.Rack.Contains(letter) {
-				return nil, ErrInvalidMove
+				return nil, nil, ErrInvalidMove
 			}
 		}
 		covers := make(scrabble.Covers)
 		for pos, c := range req.Covers {
 			row, err := strconv.Atoi(string(pos[0]))
 			if err != nil {
-				return nil, fmt.Errorf("invalid row: %w", err)
+				return nil, nil, fmt.Errorf("invalid row: %w", err)
 			}
 			col, err := strconv.Atoi(string(pos[1]))
 			if err != nil {
-				return nil, fmt.Errorf("invalid col: %w", err)
+				return nil, nil, fmt.Errorf("invalid col: %w", err)
 			}
 			covers[scrabble.Position{Row: row, Col: col}] = c
 		}
@@ -131,17 +131,17 @@ func (s *Service) ApplyPlayerMove(gID, pID string, req MoveInfo) (*Game, error) 
 	case MoveTypePass:
 		move = scrabble.NewPassMove()
 	default:
-		return nil, fmt.Errorf("invalid move type: %s", req.Type)
+		return nil, nil, fmt.Errorf("invalid move type: %s", req.Type)
 	}
 
 	if !move.IsValid(g) {
-		return nil, ErrInvalidMove
+		return nil, nil, ErrInvalidMove
 	}
 
 	err = g.ApplyValid(move)
 	if err != nil {
 		// Should not happen because move is valid
-		return nil, fmt.Errorf("should not have ended up here. cannot apply move that was validated: %v", err)
+		return nil, nil, fmt.Errorf("should not have ended up here. cannot apply move that was validated: %v", err)
 	}
 
 	// if g.IsOver() {
@@ -154,17 +154,17 @@ func (s *Service) ApplyPlayerMove(gID, pID string, req MoveInfo) (*Game, error) 
 	// s.UserSvc.addGameStats()
 	// }
 
-	return makeGamePacket(g), nil
+	return makeGamePacket(g), g, nil
 }
 
-func (s *Service) ApplyBotMove(gID string) (*Game, error) {
+func (s *Service) ApplyBotMove(gID string) (*Game, *scrabble.Game, error) {
 	g, err := s.repo.GetGame(gID)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	if !g.PlayerToMove().IsBot {
-		return nil, ErrNotBotTurn
+		return nil, nil, ErrNotBotTurn
 	}
 
 	// Make the bot think
@@ -177,7 +177,7 @@ func (s *Service) ApplyBotMove(gID string) (*Game, error) {
 		slog.Error("apply bot move", err)
 	}
 
-	return makeGamePacket(g), nil
+	return makeGamePacket(g), g, nil
 }
 
 func makeGamePacket(g *scrabble.Game) *Game {

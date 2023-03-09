@@ -279,7 +279,7 @@ func (c *Client) PlayMove(p *Packet) error {
 	}
 	slog.Info("playMove", "payload", payload)
 
-	g, err := c.Manager.GameSvc.ApplyPlayerMove(payload.GameID, c.ID, payload.MoveInfo)
+	g, gam, err := c.Manager.GameSvc.ApplyPlayerMove(payload.GameID, c.ID, payload.MoveInfo)
 	if err != nil {
 		return err
 	}
@@ -296,10 +296,23 @@ func (c *Client) PlayMove(p *Packet) error {
 		return err
 	}
 
+	if gam.IsOver() {
+		gameOverPacket, err := NewGameOverPacket(GameOverPayload{
+			WinnerID: gam.Winner().ID,
+		})
+		if err != nil {
+			return err
+		}
+		_, err = c.BroadcastToRoom(payload.GameID, gameOverPacket)
+		if err != nil {
+			return err
+		}
+	}
+
 	// Make bots move if applicable
 	go func() {
 		for {
-			g, err := c.Manager.GameSvc.ApplyBotMove(payload.GameID)
+			g, gam, err := c.Manager.GameSvc.ApplyBotMove(payload.GameID)
 			if err != nil {
 				break
 			}
@@ -315,6 +328,19 @@ func (c *Client) PlayMove(p *Packet) error {
 			if err != nil {
 				slog.Error("failed to broadcast game update", err)
 				break
+			}
+
+			if gam.IsOver() {
+				gameOverPacket, err := NewGameOverPacket(GameOverPayload{
+					WinnerID: gam.Winner().ID,
+				})
+				if err != nil {
+					slog.Error("failed to create game over packet", err)
+				}
+				_, err = c.BroadcastToRoom(payload.GameID, gameOverPacket)
+				if err != nil {
+					slog.Error("failed to broadcast game over packet", err)
+				}
 			}
 		}
 	}()
