@@ -305,9 +305,9 @@ func (c *Client) PlayMove(p *Packet) error {
 		return err
 	}
 
-	// if gam.IsOver() {
-	return c.Manager.HandleGameOver(gam)
-	// }
+	if gam.IsOver() {
+		return c.Manager.HandleGameOver(gam)
+	}
 
 	// Make bots move if applicable
 	go func() {
