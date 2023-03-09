@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"scrabble/pkg/api/game"
+	"scrabble/pkg/api/room"
 	"scrabble/pkg/api/user"
 )
 
@@ -59,6 +60,10 @@ type CreateRoomPayload struct {
 	UserIDs  []string `json:"userIds"`
 }
 
+type CreateGameRoomPayload struct {
+	UserIDs []string `json:"userIds"`
+}
+
 type LeaveRoomPayload struct {
 	RoomID string `json:"roomId"`
 }
@@ -77,11 +82,15 @@ type JoinedRoomPayload struct {
 }
 
 func NewJoinedRoomPacket(payload JoinedRoomPayload) (*Packet, error) {
-	p, err := NewPacket(ServerEventJoinedRoom, payload)
-	if err != nil {
-		return nil, err
-	}
-	return p, nil
+	return NewPacket(ServerEventJoinedRoom, payload)
+}
+
+type LeftRoomPayload struct {
+	RoomID string `json:"roomId"`
+}
+
+func NewLeftRoomPacket(payload LeftRoomPayload) (*Packet, error) {
+	return NewPacket(ServerEventLeftRoom, payload)
 }
 
 type UserJoinedPayload struct {
@@ -90,11 +99,7 @@ type UserJoinedPayload struct {
 }
 
 func NewUserJoinedPacket(payload UserJoinedPayload) (*Packet, error) {
-	p, err := NewPacket(ServerEventUserJoined, payload)
-	if err != nil {
-		return nil, err
-	}
-	return p, nil
+	return NewPacket(ServerEventUserJoined, payload)
 }
 
 type ListUsersPayload struct {
@@ -102,11 +107,23 @@ type ListUsersPayload struct {
 }
 
 func NewListUsersPacket(payload ListUsersPayload) (*Packet, error) {
-	p, err := NewPacket(ServerEventListUsers, payload)
-	if err != nil {
-		return nil, err
-	}
-	return p, nil
+	return NewPacket(ServerEventListUsers, payload)
+}
+
+type ListRoomsPayload struct {
+	Rooms []room.Room `json:"rooms"`
+}
+
+func NewListRoomsPacket(payload ListRoomsPayload) (*Packet, error) {
+	return NewPacket(ServerEventListRooms, payload)
+}
+
+type ListJoinableGamesPayload struct {
+	Games []room.Room `json:"games"`
+}
+
+func NewJoinableGamesPacket(payload ListJoinableGamesPayload) (*Packet, error) {
+	return NewPacket(ServerEventJoinableGames, payload)
 }
 
 type GameUpdatePayload struct {
@@ -114,17 +131,37 @@ type GameUpdatePayload struct {
 }
 
 func NewGameUpdatePacket(payload GameUpdatePayload) (*Packet, error) {
-	p, err := NewPacket(ServerEventGameUpdate, payload)
-	if err != nil {
-		return nil, err
-	}
-	return p, nil
+	return NewPacket(ServerEventGameUpdate, payload)
+}
+
+type GameOverPayload struct {
+	WinnerID string `json:"winnerId"`
+}
+
+func NewGameOverPacket(payload GameOverPayload) (*Packet, error) {
+	return NewPacket(ServerEventGameOver, payload)
 }
 
 func NewErrorPacket(err error) (*Packet, error) {
-	p, err := NewPacket(ServerEventError, err)
-	if err != nil {
-		return nil, err
+	type ErrorPayload struct {
+		Error string `json:"error"`
 	}
-	return p, nil
+	return NewPacket(ServerEventError, ErrorPayload{err.Error()})
+}
+
+type FriendRequestPayload struct {
+	FromID       string `json:"fromId"`
+	FromUsername string `json:"fromUsername"`
+}
+
+func NewFriendRequestPacket(payload FriendRequestPayload) (*Packet, error) {
+	return NewPacket(ServerEventFriendRequest, payload)
+}
+
+func AcceptFRiendRequestPacket(payload FriendRequestPayload) (*Packet, error) {
+	return NewPacket(ServerEventAcceptFriendRequest, payload)
+}
+
+func DeclineFriendRequestPacket(payload FriendRequestPayload) (*Packet, error) {
+	return NewPacket(ServerEventDeclineFriendRequest, payload)
 }
