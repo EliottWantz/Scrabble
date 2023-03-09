@@ -99,11 +99,9 @@ class WebsocketService extends GetxService {
 
   void handleServerEventChatMessage(ChatMessageResponse chatMessageResponse) {
     roomService.addMessagePayloadToRoom(chatMessageResponse.payload!.roomId, chatMessageResponse.payload!);
-    // print(roomService.currentRoomMessages.value!);
     if (chatMessageResponse.payload!.roomId == roomService.currentRoomId) {
       roomService.currentRoomMessages!.add(chatMessageResponse.payload!);
     }
-    // print(roomService.currentRoomMessages.value!);
   }
 
   void createRoom(String roomName, { List<String> userIds = const [] }) {
