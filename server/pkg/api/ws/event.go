@@ -18,8 +18,10 @@ var (
 	ServerEventListUsers            = "listUsers"
 	ServerEventUsersInRoom          = "usersInRoom"
 	ServerEventGameUpdate           = "gameUpdate"
-	ServerEventError                = "error"
 	ServerEventFriendRequest        = "friendRequest"
 	ServerEventAcceptFriendRequest  = "acceptFriendRequest"
 	ServerEventDeclineFriendRequest = "declineFriendRequest"
+	ServerEventGameOver             = "gameOver"
+
+	ServerEventError = "error"
 )

@@ -1,6 +1,9 @@
 package scrabble
 
-import "fmt"
+import (
+	"fmt"
+	"sort"
+)
 
 const (
 	MaxPassMoves                 int = 6
@@ -158,6 +161,18 @@ func (g *Game) IsOver() bool {
 	}
 
 	return false
+}
+
+func (g *Game) Winner() *Player {
+	// Return the player with the highest score
+	// sortedPlayer := g.Players
+	var sortedPlayer []*Player = make([]*Player, len(g.Players))
+	copy(sortedPlayer, g.Players)
+	sort.Slice(sortedPlayer, func(i, j int) bool {
+		return sortedPlayer[i].Score > sortedPlayer[j].Score
+	})
+
+	return sortedPlayer[0]
 }
 
 // State returns a new GameState instance describing the state of the

@@ -121,8 +121,23 @@ func NewGameUpdatePacket(payload GameUpdatePayload) (*Packet, error) {
 	return p, nil
 }
 
+type GameOverPayload struct {
+	WinnerID string `json:"winnerId"`
+}
+
+func NewGameOverPacket(payload GameOverPayload) (*Packet, error) {
+	p, err := NewPacket(ServerEventGameOver, payload)
+	if err != nil {
+		return nil, err
+	}
+	return p, nil
+}
+
 func NewErrorPacket(err error) (*Packet, error) {
-	p, err := NewPacket(ServerEventError, err)
+	type ErrorPayload struct {
+		Error string `json:"error"`
+	}
+	p, err := NewPacket(ServerEventError, ErrorPayload{err.Error()})
 	if err != nil {
 		return nil, err
 	}
