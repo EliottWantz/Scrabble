@@ -8,6 +8,7 @@ var (
 	ClientEventJoinDMRoom  = "join-dm-room"
 	ClientEventCreateRoom  = "create-room"
 	ClientEventLeaveRoom   = "leave-room"
+	ClientEventPlayMove    = "playMove"
 )
 
 // Server events
@@ -16,6 +17,7 @@ var (
 	ServerEventUserJoined  = "userJoined"
 	ServerEventListUsers   = "listUsers"
 	ServerEventUsersInRoom = "usersInRoom"
+	ServerEventGameUpdate  = "gameUpdate"
 
 	ServerEventError = "error"
 )
