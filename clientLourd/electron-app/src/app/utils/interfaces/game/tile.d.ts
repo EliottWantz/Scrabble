@@ -1,4 +1,4 @@
-export interface Piece {
+export interface Tile {
     letter: string;
     value: number;
 }
