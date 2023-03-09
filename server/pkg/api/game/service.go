@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"scrabble/pkg/api/room"
@@ -115,15 +116,11 @@ func (s *Service) ApplyPlayerMove(gID, pID string, req MoveInfo) (*Game, *scrabb
 		}
 		covers := make(scrabble.Covers)
 		for pos, c := range req.Covers {
-			row, err := strconv.Atoi(string(pos[0]))
+			p, err := parsePoint(pos)
 			if err != nil {
-				return nil, nil, fmt.Errorf("invalid row: %w", err)
+				return nil, nil, fmt.Errorf("invalid coordinate: %w", err)
 			}
-			col, err := strconv.Atoi(string(pos[1]))
-			if err != nil {
-				return nil, nil, fmt.Errorf("invalid col: %w", err)
-			}
-			covers[scrabble.Position{Row: row, Col: col}] = c
+			covers[p] = c
 		}
 		move = scrabble.NewTileMove(g.Board, covers)
 	case MoveTypeExchange:
@@ -190,6 +187,25 @@ func makeGamePacket(g *scrabble.Game) *Game {
 		NumPassMoves: g.NumPassMoves,
 		Turn:         g.Turn,
 	}
+}
+
+func parsePoint(str string) (scrabble.Position, error) {
+	var p scrabble.Position
+	parts := strings.Split(str, "/")
+	if len(parts) != 2 {
+		return p, fmt.Errorf("invalid position format: %s", str)
+	}
+	row, err := strconv.Atoi(parts[0])
+	if err != nil {
+		return p, fmt.Errorf("invalid row value: %s", parts[0])
+	}
+	col, err := strconv.Atoi(parts[1])
+	if err != nil {
+		return p, fmt.Errorf("invalid col value: %s", parts[1])
+	}
+	p.Row = row
+	p.Col = col
+	return p, nil
 }
 
 // Not used, just for testing
