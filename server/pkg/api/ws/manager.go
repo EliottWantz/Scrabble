@@ -9,6 +9,7 @@ import (
 	"scrabble/pkg/api/game"
 	"scrabble/pkg/api/room"
 	"scrabble/pkg/api/user"
+	"scrabble/pkg/scrabble"
 
 	"github.com/alphadose/haxmap"
 	"github.com/gofiber/fiber/v2"
@@ -301,6 +302,55 @@ func (m *Manager) watchFriendRequests(id string) {
 			}
 		}
 	}()
+}
+
+func (m *Manager) HandleGameOver(g *scrabble.Game) error {
+	r, err := m.GetRoom(g.ID)
+	if err != nil {
+		return err
+	}
+
+	winnerID := g.Winner().ID
+	gameOverPacket, err := NewGameOverPacket(GameOverPayload{
+		WinnerID: winnerID,
+	})
+	if err != nil {
+		return err
+	}
+
+	r.Broadcast(gameOverPacket)
+
+	for _, p := range g.Players {
+		u, err := m.UserSvc.GetUser(p.ID)
+		if err != nil {
+			continue
+		}
+		m.UserSvc.AddGameStats(u, time.Now().UnixMilli(), winnerID == p.ID)
+		m.UserSvc.LeaveRoom(r.ID, u.ID)
+	}
+
+	leftRoomPacket, err := NewLeftRoomPacket(LeftRoomPayload{
+		RoomID: r.ID,
+	})
+	if err != nil {
+		return err
+	}
+	r.Broadcast(leftRoomPacket)
+
+	err = m.RoomSvc.Delete(r.ID)
+	if err != nil {
+		return err
+	}
+	err = m.RemoveRoom(r.ID)
+	if err != nil {
+		return err
+	}
+	err = m.GameSvc.DeleteGame(g.ID)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func getArrayDifference(a, b []string) []string {

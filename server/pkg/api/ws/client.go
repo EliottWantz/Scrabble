@@ -255,19 +255,28 @@ func (c *Client) HandleLeaveRoomRequest(p *Packet) error {
 		return fiber.NewError(fiber.StatusBadRequest, "You cannot leave the global room")
 	}
 
+	if err := c.Manager.RoomSvc.RemoveUser(payload.RoomID, c.ID); err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, "failed to remove user from room: "+err.Error())
+	}
+	if err := c.Manager.UserSvc.LeaveRoom(payload.RoomID, c.ID); err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, "failed to remove room from user joined rooms: "+err.Error())
+	}
 	r, err := c.Manager.GetRoom(payload.RoomID)
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, "room not found: "+err.Error())
 	}
-	if err = c.Manager.RoomSvc.RemoveUser(payload.RoomID, c.ID); err != nil {
-		return fiber.NewError(fiber.StatusInternalServerError, "failed to remove user from room: "+err.Error())
-	}
-	if err = c.Manager.UserSvc.LeaveRoom(payload.RoomID, c.ID); err != nil {
-		return fiber.NewError(fiber.StatusInternalServerError, "failed to remove room from user joined rooms: "+err.Error())
-	}
-	if err = r.RemoveClient(c.ID); err != nil {
+	if err := r.RemoveClient(c.ID); err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, "failed to leave ws room: "+err.Error())
 	}
+
+	leftRoomPacket, err := NewLeftRoomPacket(LeftRoomPayload{
+		RoomID: r.ID,
+	})
+	if err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, "failed to create packet: "+err.Error())
+	}
+
+	c.send(leftRoomPacket)
 
 	return nil
 }
@@ -296,23 +305,9 @@ func (c *Client) PlayMove(p *Packet) error {
 		return err
 	}
 
-	if gam.IsOver() {
-		gameOverPacket, err := NewGameOverPacket(GameOverPayload{
-			WinnerID: gam.Winner().ID,
-		})
-		if err != nil {
-			return err
-		}
-		_, err = c.BroadcastToRoom(payload.GameID, gameOverPacket)
-		if err != nil {
-			return err
-		}
-		err = c.Manager.GameSvc.DeleteGame(g.ID)
-		if err != nil {
-			slog.Error("failed to delete game", err)
-		}
-		return nil
-	}
+	// if gam.IsOver() {
+	return c.Manager.HandleGameOver(gam)
+	// }
 
 	// Make bots move if applicable
 	go func() {
