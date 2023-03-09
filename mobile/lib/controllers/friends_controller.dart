@@ -38,15 +38,34 @@ class FriendsController extends GetxController {
       UserList(items: items),
       UserList(items: items2),
       UserList(items: items2),
+      Column(
+        children: [
+          TextButton(
+            onPressed: () {
+              // websocketService.createRoom('new room');
+              websocketService.createRoom('new room');
+            },
+            child: Text('TextButton'),
+          ),
+          TextButton(
+            onPressed: () {
+              // websocketService.createRoom('new room');
+              websocketService.sendMessage('global', 'hello global');
+            },
+            child: Text('TextButton'),
+          )
+        ],
+      )
       // const Text(
       //   'Index 3: Work',
       // ),
-      TextButton(
-        onPressed: () {
-          websocketService.createRoom('new room');
-        },
-        child: Text('TextButton'),
-      )
+      // TextButton(
+      //   onPressed: () {
+      //     // websocketService.createRoom('new room');
+      //     websocketService.sendMessage('global', 'hello global');
+      //   },
+      //   child: Text('TextButton'),
+      // )
     ];
   }
 

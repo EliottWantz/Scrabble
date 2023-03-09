@@ -3,7 +3,11 @@ import 'dart:convert';
 import 'package:client_leger/models/chat_message_payload.dart';
 import 'package:client_leger/models/create_room_payload.dart';
 import 'package:client_leger/models/events.dart';
+import 'package:client_leger/models/join_dm_payload.dart';
+import 'package:client_leger/models/join_room_payload.dart';
 import 'package:client_leger/models/requests/chat_message_request.dart';
+import 'package:client_leger/models/requests/join_dm_request.dart';
+import 'package:client_leger/models/requests/join_room_request.dart';
 import 'package:client_leger/models/response/chat_message_response.dart';
 import 'package:get/get.dart';
 // import 'package:socket_io_client/socket_io_client.dart' as IO;
@@ -50,18 +54,21 @@ class WebsocketService extends GetxService {
       print(jsonDecode(data)['event']);
     switch(jsonDecode(data)['event']) {
       case ServerEventJoinedRoom: {
-        // roomId = data.payload!.roomId;
         print('event joinedRoom');
+        print(jsonDecode(data)['payload']['roomId']);
+        roomId = jsonDecode(data)['payload']['roomId'];
+        print(roomId);
       }
       break;
-      case 'broadcast': {
-        roomId = data.payload!.roomId;
-        messages.obs.value.add(data);
-        print(messages.value.length);
-        itemCount.value = messages.value.length;
-        print(itemCount.value);
-        print(messages.value);
-        print('event broadcast');
+      case ServerEventChatMessage: {
+        // roomId = data.payload!.roomId;
+        // messages.obs.value.add(data);
+        // print(messages.value.length);
+        // itemCount.value = messages.value.length;
+        // print(itemCount.value);
+        // print(messages.value);
+        print(jsonDecode(data)['payload']['message']);
+        print('event chat message');
       }
       break;
       default: {
@@ -83,10 +90,38 @@ class WebsocketService extends GetxService {
     socket.sink.add(createRoomRequest.toRawJson());
   }
 
-  sendMessage(String event, ChatMessagePayload payload) {
+  joinRoom(String roomId) {
+    final joinRoomPayload = JoinRoomPayload(roomId: roomId);
+    final joinRoomRequest = JoinRoomRequest(
+        event: ClientEventJoinRoom,
+        payload: joinRoomPayload
+    );
+    socket.sink.add(joinRoomRequest.toRawJson());
+  }
+
+  joinDMRoom(String toId, String toUsername) {
+    final joinDMPayload = JoinDMPayload(
+        username: userService.user.value!.username,
+        toId: toId,
+        toUsername: toUsername
+    );
+    final joinDMRequest = JoinDMRequest(
+        event: ClientEventJoinDMRoom,
+        payload: joinDMPayload
+    );
+    socket.sink.add(joinDMRequest.toRawJson());
+  }
+
+  sendMessage(String roomId, String message) {
+    final chatMessagePayload = ChatMessagePayload(
+        roomId: roomId,
+        message: message,
+        from: userService.user.value!.username,
+        fromId: userService.user.value!.id
+    );
     final chatMessageRequest = ChatMessageRequest(
-      event: 'broadcast',
-      payload: payload,
+      event: ClientEventChatMessage,
+      payload: chatMessagePayload,
     );
     socket.sink.add(chatMessageRequest.toRawJson());
   }

@@ -4,6 +4,7 @@ const String ServerEventUserJoined = "userJoined";
 const String ServerEventListUsers    = "listUsers";
 const String ServerEventUsersInRoom  = "usersInRoom";
 const String ServerEventError   = "error";
+const String ServerEventChatMessage = "chat-message";
 
 
 // Client events
