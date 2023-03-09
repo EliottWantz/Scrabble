@@ -1,7 +1,7 @@
 import { Tile } from "@app/utils/interfaces/game/tile";
 
 export interface Square {
-    piece: Tile;
+    tile: Tile;
     wordMultiplier: number;
     letterMultiplier: number;
     x: number;

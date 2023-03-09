@@ -5,8 +5,11 @@ import { Room } from "@app/utils/interfaces/room";
 
 export interface Packet {
     event: Event;
-    payload: JoinRoomPayload | JoinDMPayload | CreateRoomPayload | LeaveRoomPayload | PlayMovePayload | Room | ChatMessage;
+    payload: ClientPayload | ServerPayload;
 }
+
+export type ClientPayload = JoinRoomPayload | JoinDMPayload | CreateRoomPayload | LeaveRoomPayload | PlayMovePayload | ChatMessage;
+export type ServerPayload = Room | ChatMessage;
 
 export interface JoinRoomPayload {
     roomID: string;
