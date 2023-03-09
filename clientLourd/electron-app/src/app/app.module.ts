@@ -23,7 +23,7 @@ import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AuthInterceptor } from '@app/services/auth-interceptor/auth-interceptor.service'
 import { GamePageComponent } from '@app/pages/game-page/game-page.component';
 import { BoardComponent } from '@app/components/board/board.component';
-import { PieceComponent } from '@app/components/piece/piece.component';
+import { TileComponent } from '@app/components/tile/tile.component';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 
 @NgModule({
@@ -38,7 +38,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
     ChatBoxComponent,
     GamePageComponent,
     BoardComponent,
-    PieceComponent
+    TileComponent
   ],
   imports: [
     BrowserModule,
