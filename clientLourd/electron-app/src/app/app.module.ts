@@ -25,6 +25,7 @@ import { GamePageComponent } from '@app/pages/game-page/game-page.component';
 import { BoardComponent } from '@app/components/board/board.component';
 import { TileComponent } from '@app/components/tile/tile.component';
 import { DragDropModule } from '@angular/cdk/drag-drop';
+import { RackComponent } from '@app/components/rack/rack.component';
 
 @NgModule({
   declarations: [
@@ -38,7 +39,8 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
     ChatBoxComponent,
     GamePageComponent,
     BoardComponent,
-    TileComponent
+    TileComponent,
+    RackComponent
   ],
   imports: [
     BrowserModule,
