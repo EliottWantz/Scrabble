@@ -1,1 +1,1 @@
-export type ServerEvent = "listUsers" | "joinedRoom";
+export type ServerEvent = "listUsers" | "joinedRoom" | "gameUpdate" | "chat-message";

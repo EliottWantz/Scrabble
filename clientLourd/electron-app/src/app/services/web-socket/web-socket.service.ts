@@ -9,6 +9,8 @@ import { Room } from "@app/utils/interfaces/room";
 import { ChatMessage } from "@app/utils/interfaces/chat-message";
 import { ClientEvent } from "@app/utils/events/client-events";
 import { ServerEvent } from "@app/utils/events/server-events";
+import { GameService } from "@app/services/game/game.service";
+import { Game } from "@app/utils/interfaces/game/game";
 
 @Injectable({
     providedIn: "root",
@@ -17,7 +19,7 @@ export class WebSocketService {
     socket!: WebSocket;
     user: BehaviorSubject<User>;
 
-    constructor(private userService: UserService, private roomService: RoomService) {
+    constructor(private userService: UserService, private roomService: RoomService, private gameService: GameService) {
         this.user = this.userService.subjectUser;
     }
 
@@ -41,33 +43,38 @@ export class WebSocketService {
 
     private async handleSocket(e: MessageEvent): Promise<void> {
         const packet: Packet = JSON.parse(e.data);
-        if (packet.event as ServerEvent) {
-            switch (packet.event) {
-                case "joinedRoom":
-                    const payloadRoom = packet.payload as Room;
-                    if (this.roomService.findRoom(payloadRoom.roomId) === undefined) {
-                        this.roomService.addRoom(payloadRoom);
-                    }
-                    break;
+        const event: ServerEvent = packet.event as ServerEvent;
+
+        switch (event) {
+            case "joinedRoom":
+                const payloadRoom = packet.payload as Room;
+                if (this.roomService.findRoom(payloadRoom.roomId) === undefined) {
+                    this.roomService.addRoom(payloadRoom);
+                }
+                break;
     
-                case "chat-message":
-                    const payloadMessage = packet.payload as ChatMessage;
-                    const message: ChatMessage = {
-                        from: payloadMessage.from,
-                        fromId: payloadMessage.fromId,
-                        roomId: payloadMessage.roomId,
-                        message: payloadMessage.message,
-                        timestamp: new Date(payloadMessage.timestamp!).toLocaleTimeString(
-                          undefined,
-                          { hour12: false }
-                        ),
-                    };
-                    this.roomService.addMessage(message);
-                    break;
+            case "chat-message":
+                const payloadMessage = packet.payload as ChatMessage;
+                const message: ChatMessage = {
+                    from: payloadMessage.from,
+                    fromId: payloadMessage.fromId,
+                    roomId: payloadMessage.roomId,
+                    message: payloadMessage.message,
+                    timestamp: new Date(payloadMessage.timestamp!).toLocaleTimeString(
+                        undefined,
+                        { hour12: false }
+                    ),
+                };
+                this.roomService.addMessage(message);
+                break;
     
-                case "listUsers":
-                    break;
-            }
+            case "listUsers":
+                break;
+
+            case "gameUpdate":
+                const payloadGame = packet.payload as Game;
+                this.gameService.updateGame(payloadGame);
+                break;
         }
     }
 
