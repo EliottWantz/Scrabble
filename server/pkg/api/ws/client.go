@@ -105,8 +105,14 @@ func (c *Client) handlePacket(p *Packet) error {
 		return c.HandleJoinDMRoomRequest(p)
 	case ClientEventCreateRoom:
 		return c.HandleCreateRoomRequest(p)
+	case ClientEventCreateGameRoom:
+		return c.HandleCreateGameRoomRequest(p)
 	case ClientEventLeaveRoom:
 		return c.HandleLeaveRoomRequest(p)
+	case ClientEventListRooms:
+		return c.HandleListRoomsRequest(p)
+	case ClientEventListJoinableGames:
+		return c.HandleListJoinableGamesRequest(p)
 	case ClientEventPlayMove:
 		return c.PlayMove(p)
 	}
@@ -239,6 +245,70 @@ func (c *Client) HandleCreateRoomRequest(p *Packet) error {
 		}
 	}
 
+	return nil
+}
+
+func (c *Client) HandleCreateGameRoomRequest(p *Packet) error {
+	payload := CreateGameRoomPayload{}
+	if err := json.Unmarshal(p.Payload, &payload); err != nil {
+		return err
+	}
+
+	payload.UserIDs = append(payload.UserIDs, c.ID)
+	dbRoom, err := c.Manager.RoomSvc.CreateRoom(uuid.NewString(), "", payload.UserIDs...)
+	if err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, "failed to create new room: "+err.Error())
+	}
+	slog.Info("game room created", "room", dbRoom)
+	r := c.Manager.AddRoom(dbRoom.ID, dbRoom.Name)
+	for _, uID := range payload.UserIDs {
+		// DONT NEED TO ADD ROOM TO USER CUZ TEMPORARY FOR THE GAME
+		// if err := c.Manager.UserSvc.Repo.AddJoinedRoom(dbRoom.ID, uID); err != nil {
+		// 	slog.Error("failed to add user to room", err)
+		// }
+		if err = r.AddClient(uID); err != nil {
+			slog.Error("error:", err)
+		}
+	}
+
+	err = c.Manager.UpdateJoinableGames()
+	if err != nil {
+		slog.Error("send joinable games update:", err)
+	}
+
+	return nil
+}
+
+func (c *Client) HandleListRoomsRequest(p *Packet) error {
+	rooms, err := c.Manager.RoomSvc.GetAllRooms()
+	if err != nil {
+		return fmt.Errorf("failed to get rooms: %w", err)
+	}
+
+	roomsPacket, err := NewListRoomsPacket(ListRoomsPayload{
+		Rooms: rooms,
+	})
+	if err != nil {
+		return err
+	}
+
+	c.send(roomsPacket)
+	return nil
+}
+
+func (c *Client) HandleListJoinableGamesRequest(p *Packet) error {
+	joinableGames, err := c.Manager.RoomSvc.GetAllJoinableGameRooms()
+	if err != nil {
+		return err
+	}
+	joinableGamesPacket, err := NewJoinableGamesPacket(ListJoinableGamesPayload{
+		Games: joinableGames,
+	})
+	if err != nil {
+		return err
+	}
+
+	c.send(joinableGamesPacket)
 	return nil
 }
 

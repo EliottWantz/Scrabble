@@ -23,7 +23,7 @@ var (
 )
 
 type Service struct {
-	repo    *Repository
+	Repo    *Repository
 	UserSvc *user.Service
 	Dict    *scrabble.Dictionary
 	DAWG    *scrabble.DAWG
@@ -33,7 +33,6 @@ type Game struct {
 	ID           string                  `json:"id"`
 	Players      []*scrabble.Player      `json:"players"`
 	Board        [15][15]scrabble.Square `json:"board"`
-	Bag          []scrabble.Tile         `json:"bag"`
 	Finished     bool                    `json:"finished"`
 	NumPassMoves int                     `json:"numPassMoves"`
 	Turn         string                  `json:"turn"`
@@ -44,7 +43,7 @@ func NewService(repo *Repository, userSvc *user.Service) *Service {
 	dawg := scrabble.NewDawg(dict)
 
 	s := &Service{
-		repo:    repo,
+		Repo:    repo,
 		UserSvc: userSvc,
 		Dict:    dict,
 		DAWG:    dawg,
@@ -76,7 +75,7 @@ func (s *Service) StartGame(room *room.Room) (*Game, error) {
 	}
 	g.Turn = g.PlayerToMove().ID
 
-	err := s.repo.Insert(g)
+	err := s.Repo.Insert(g)
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +96,7 @@ const (
 )
 
 func (s *Service) ApplyPlayerMove(gID, pID string, req MoveInfo) (*Game, *scrabble.Game, error) {
-	g, err := s.repo.GetGame(gID)
+	g, err := s.Repo.GetGame(gID)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -156,7 +155,7 @@ func (s *Service) ApplyPlayerMove(gID, pID string, req MoveInfo) (*Game, *scrabb
 }
 
 func (s *Service) ApplyBotMove(gID string) (*Game, *scrabble.Game, error) {
-	g, err := s.repo.GetGame(gID)
+	g, err := s.Repo.GetGame(gID)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -179,7 +178,7 @@ func (s *Service) ApplyBotMove(gID string) (*Game, *scrabble.Game, error) {
 }
 
 func (s *Service) DeleteGame(gID string) error {
-	err := s.repo.Delete(gID)
+	err := s.Repo.Delete(gID)
 	if err != nil {
 		return err
 	}
