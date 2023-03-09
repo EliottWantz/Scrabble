@@ -194,7 +194,7 @@ func (ctrl *Controller) SendFriendRequest(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusOK)
 }
 
-func (ctrl *Controller) acceptFriendRequest(c *fiber.Ctx) error {
+func (ctrl *Controller) AcceptFriendRequest(c *fiber.Ctx) error {
 	id := c.Params("id")
 	friendId := c.Params("friendId")
 

@@ -68,8 +68,10 @@ func (api *API) setupRoutes(cfg *config.Config) {
 	)
 	r.Patch("/user/:id/config", api.Ctrls.UserCtrl.UpdatePreferences)
 	r.Get("/user/:id", api.Ctrls.UserCtrl.GetUser)
-	r.Put("/user/friends/:id/:friendId", api.Ctrls.UserCtrl.SendFriendRequest)
-	r.Delete("/user/friends/:id/:friendId", api.Ctrls.UserCtrl.RejectFriendRequest)
+	r.Post("/user/friends/request/:id/:friendId", api.Ctrls.UserCtrl.SendFriendRequest)
+	r.Patch("/user/friends/accept/:id/:friendId", api.Ctrls.UserCtrl.AcceptFriendRequest)
+	r.Delete("/user/friends/accept/:id/:friendId", api.Ctrls.UserCtrl.RejectFriendRequest)
+
 	r.Post("/avatar", api.Ctrls.UserCtrl.UploadAvatar)
 
 	// r.Post("/room/join", api.Ctrls.WebSocketManager.JoinRoom)

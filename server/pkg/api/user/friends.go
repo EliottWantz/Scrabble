@@ -1,12 +1,25 @@
 package user
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+
+	"github.com/gofiber/fiber/v2"
+)
 
 func (s *Service) sendFriendRequest(id string, friendId string) error {
 	friend, err := s.GetUser(friendId)
 	if err != nil {
-		return fmt.Errorf("get friend: %w", err)
+		return fiber.NewError(fiber.StatusBadRequest, "no user found")
 	}
+	if strings.Contains(strings.Join(friend.PendingRequests, ""), id) {
+		return fiber.NewError(fiber.StatusBadRequest, "already sent a friend request")
+	}
+
+	if strings.Contains(strings.Join(friend.Friends, ""), id) {
+		return fiber.NewError(fiber.StatusBadRequest, "already friends")
+	}
+
 	friend.PendingRequests = append(friend.PendingRequests, id)
 	err = s.Repo.Update(friend)
 	return nil
@@ -15,9 +28,18 @@ func (s *Service) sendFriendRequest(id string, friendId string) error {
 func (s *Service) acceptFriendRequest(id string, friendId string) error {
 	user, err := s.GetUser(id)
 	if err != nil {
-		return fmt.Errorf("get user: %w", err)
+		return fiber.NewError(fiber.StatusBadRequest, "no user found")
+	}
+	if strings.Contains(strings.Join(user.Friends, ""), friendId) {
+		return fiber.NewError(fiber.StatusBadRequest, "already friends")
+	}
+	for i, id := range user.PendingRequests {
+		if id == friendId {
+			user.PendingRequests = append(user.PendingRequests[:i], user.PendingRequests[i+1:]...)
+		}
 	}
 	user.Friends = append(user.Friends, friendId)
+	err = s.Repo.Update(user)
 	return nil
 }
 
@@ -35,7 +57,7 @@ func (s *Service) rejectFriendRequest(id string, friendId string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("friend request not found")
+	return fiber.NewError(fiber.StatusBadRequest, "no friend request found")
 }
 
 func (s *Service) GetFriends(id string) ([]User, error) {

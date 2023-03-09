@@ -3,6 +3,7 @@ package ws
 import (
 	"fmt"
 	"reflect"
+	"strings"
 	"time"
 
 	"scrabble/pkg/api/game"
@@ -240,24 +241,63 @@ func (m *Manager) watchFriendRequests(id string) {
 			newUser, _ := m.UserSvc.GetUser(id)
 			newRequests := newUser.PendingRequests
 			time.Sleep(1 * time.Second)
-			if !reflect.DeepEqual(newRequests, oldPendingRequests) && len(newRequests) > len(oldPendingRequests) {
+			if !reflect.DeepEqual(newRequests, oldPendingRequests) {
 
 				incomingFriendsRequests := getArrayDifference(newRequests, oldPendingRequests)
-				for _, friend := range incomingFriendsRequests {
-					friendUser, _ := m.UserSvc.GetUser(friend)
-					friendRequestPayload := FriendRequestPayload{
-						FromID:       friendUser.ID,
-						FromUsername: friendUser.Username,
+				fmt.Println("incomingFriendsRequests: ", incomingFriendsRequests)
+				fmt.Println("newRequests: ", newRequests, "len: ", len(newRequests))
+				fmt.Println("oldPendingRequests: ", oldPendingRequests, "len: ", len(oldPendingRequests))
+				if len(incomingFriendsRequests) > 0 {
+					m.logger.Info("new friend request", "user_id", id, "friend_requests", incomingFriendsRequests)
+					for _, friend := range incomingFriendsRequests {
+						isJustFriendRequest := !strings.Contains(strings.Join(newUser.Friends, ""), friend) && strings.Contains(strings.Join(newUser.PendingRequests, ""), friend)
+						isAcceptFriendRequest := strings.Contains(strings.Join(newUser.Friends, ""), friend)
+						isDeleteFriendRequest := !strings.Contains(strings.Join(newUser.PendingRequests, ""), friend)
+
+						if isJustFriendRequest {
+							friendUser, _ := m.UserSvc.GetUser(friend)
+							friendRequestPayload := FriendRequestPayload{
+								FromID:       friendUser.ID,
+								FromUsername: friendUser.Username,
+							}
+							p, err := NewFriendRequestPacket(friendRequestPayload)
+							if err != nil {
+								m.logger.Error("failed to create friend request packet", err)
+							}
+							client, _ := m.GetClient(id)
+							client.send(p)
+						} else if isAcceptFriendRequest {
+							friendUser, _ := m.UserSvc.GetUser(friend)
+							friendRequestPayload := FriendRequestPayload{
+								FromID:       friendUser.ID,
+								FromUsername: friendUser.Username,
+							}
+							p, err := AcceptFRiendRequestPacket(friendRequestPayload)
+							if err != nil {
+								m.logger.Error("failed to create friend request packet", err)
+							}
+							client, _ := m.GetClient(id)
+							client.send(p)
+						} else if isDeleteFriendRequest {
+							friendUser, _ := m.UserSvc.GetUser(friend)
+							friendRequestPayload := FriendRequestPayload{
+								FromID:       friendUser.ID,
+								FromUsername: friendUser.Username,
+							}
+							p, err := DeclineFriendRequestPacket(friendRequestPayload)
+							if err != nil {
+								m.logger.Error("failed to create friend request packet", err)
+							}
+							client, _ := m.GetClient(id)
+							client.send(p)
+						}
+
 					}
-					p, err := NewFriendRequestPacket(friendRequestPayload)
-					if err != nil {
-						m.logger.Error("failed to create friend request packet", err)
-					}
-					client, _ := m.GetClient(id)
-					client.send(p)
+
+					oldPendingRequests = newRequests
 
 				}
-				oldPendingRequests = newRequests
+
 			}
 		}
 	}()
@@ -268,6 +308,18 @@ func getArrayDifference(a, b []string) []string {
 	for _, value := range a {
 		found := false
 		for _, otherValue := range b {
+			if value == otherValue {
+				found = true
+				break
+			}
+		}
+		if !found {
+			diff = append(diff, value)
+		}
+	}
+	for _, value := range b {
+		found := false
+		for _, otherValue := range a {
 			if value == otherValue {
 				found = true
 				break

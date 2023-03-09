@@ -141,3 +141,18 @@ func NewFriendRequestPacket(payload FriendRequestPayload) (*Packet, error) {
 	}
 	return p, nil
 }
+func AcceptFRiendRequestPacket(payload FriendRequestPayload) (*Packet, error) {
+	p, err := NewPacket(ServerEventAcceptFriendRequest, payload)
+	if err != nil {
+		return nil, err
+	}
+	return p, nil
+}
+
+func DeclineFriendRequestPacket(payload FriendRequestPayload) (*Packet, error) {
+	p, err := NewPacket(ServerEventDeclineFriendRequest, payload)
+	if err != nil {
+		return nil, err
+	}
+	return p, nil
+}
