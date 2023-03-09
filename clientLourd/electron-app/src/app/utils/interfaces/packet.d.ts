@@ -1,11 +1,11 @@
 import { Event } from "@app/utils/events/events";
 import { MoveInfo } from "@app/utils/interfaces/game/move"
-//import { ChatMessage } from "@app/utils/interfaces/chat-message";
-//import { Room } from "@app/utils/interfaces/room";
+import { ChatMessage } from "@app/utils/interfaces/chat-message";
+import { Room } from "@app/utils/interfaces/room";
 
 export interface Packet {
     event: Event;
-    payload: JoinRoomPayload | JoinDMPayload | CreateRoomPayload | LeaveRoomPayload | PlayMovePayload;
+    payload: JoinRoomPayload | JoinDMPayload | CreateRoomPayload | LeaveRoomPayload | PlayMovePayload | Room | ChatMessage;
 }
 
 export interface JoinRoomPayload {
