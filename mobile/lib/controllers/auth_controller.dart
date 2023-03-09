@@ -85,7 +85,7 @@ class AuthController extends GetxController {
     await DialogHelper.showLoading('Connexion au serveur');
     await authService.register(request,
         imagePath: avatarService.isAvatar.value == false
-            ? File(avatarService.image.path)
+            ? File(avatarService.image.value!.path)
             : null);
     if (authService.isUserLoggedIn()) {
       Get.offAllNamed(Routes.HOME);

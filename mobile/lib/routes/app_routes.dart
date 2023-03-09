@@ -6,4 +6,5 @@ abstract class Routes {
   static const HOME = '/home';
   static const AVATAR_SELECTION = '/avatar-selection';
   static const GAME_START = '/game-start';
+  static const LOBBY = '/lobby';
 }

@@ -1,6 +1,7 @@
 import 'package:client_leger/bindings/auth_binding.dart';
 import 'package:client_leger/bindings/avatar_selection_binding.dart';
 import 'package:client_leger/screens/auth/auth_screen.dart';
+import 'package:client_leger/screens/home/game_lobby_screen.dart';
 import 'package:client_leger/screens/home/game_start_screen.dart';
 import 'package:client_leger/screens/auth/avatar_selection_screen.dart';
 import 'package:client_leger/screens/home/home_screen.dart';
@@ -36,7 +37,16 @@ class AppPages {
       page: () => HomeScreen(),
       binding: ChatBoxBinding(),
       children: [
-        GetPage(name: Routes.GAME_START, page: () => GameStartScreen())
+        GetPage(
+          name: Routes.GAME_START,
+          page: () => GameStartScreen(),
+          children: [
+            GetPage(
+              name: Routes.LOBBY,
+              page: () => GameLobbyScreen(),
+            ),
+          ],
+        )
       ],
     ),
   ];

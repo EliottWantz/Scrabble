@@ -42,6 +42,9 @@ class AppSideBar extends StatelessWidget {
               ModalRoute.of(context)!.settings.name ==
                   '/auth/register/avatar-selection') {
             return _buildFooterLoginRegister();
+          } else if (ModalRoute.of(context)!.settings.name ==
+              '/home/game-start/lobby') {
+            return _buildFooterLobby();
           } else {
             return _buildFooterHome();
           }
@@ -52,8 +55,9 @@ class AppSideBar extends StatelessWidget {
         headerBuilder: (context, extended) {
           if (ModalRoute.of(context)!.settings.name == '/auth' ||
               ModalRoute.of(context)!.settings.name == '/auth/login' ||
-              ModalRoute.of(context)!.settings.name == '/auth/register'||
-              ModalRoute.of(context)!.settings.name == '/auth/register/avatar-selection') {
+              ModalRoute.of(context)!.settings.name == '/auth/register' ||
+              ModalRoute.of(context)!.settings.name ==
+                  '/auth/register/avatar-selection') {
             return _buildHeaderAuth(extended);
           } else {
             return _buildHeaderHome(extended);
@@ -90,9 +94,9 @@ class AppSideBar extends StatelessWidget {
     );
   }
 
-  Widget _buildFooterHome() {
+  Widget _buildFooterLobby() {
     return SizedBox(
-      height: 200,
+      height: 150,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Center(
@@ -101,14 +105,43 @@ class AppSideBar extends StatelessWidget {
               const Divider(color: Colors.white),
               const Gap(20),
               InkWell(
-                onTap: () {
-                  showSettingsDialog();
+                  onTap: () {
+                    settingsService.switchTheme();
+                  },
+                  child: Obx(
+                        () => Icon(
+                      settingsService.currentThemeIcon.value,
+                      size: 20,
+                      color: Colors.white,
+                    ),
+                  )),
+              const Gap(40),
+              InkWell(
+                onTap: () async {
+                  await DialogHelper.showLobbyQuitDialog();
                 },
                 child: const Icon(
-                  Icons.settings,
+                  Icons.arrow_back,
+                  size: 20,
                   color: Colors.white,
                 ),
               ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFooterHome() {
+    return SizedBox(
+      height: 150,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Center(
+          child: Column(
+            children: [
+              const Divider(color: Colors.white),
               const Gap(20),
               InkWell(
                   onTap: () {
@@ -257,7 +290,7 @@ class AppSideBar extends StatelessWidget {
         ),
       ];
     } else if (ModalRoute.of(context)!.settings.name ==
-        'auth/register/avatar-selection') {
+        '/auth/register/avatar-selection') {
       return [
         const SidebarXItem(
           icon: Icons.home,
@@ -272,31 +305,5 @@ class AppSideBar extends StatelessWidget {
         ),
       ];
     }
-  }
-
-  void showSettingsDialog() {
-    Get.dialog(
-      Dialog(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Déconnexion',
-                style: Get.textTheme.headline4,
-              ),
-              const Gap(20),
-              Text(
-                'Êtes-vous sûr de vouloir partir',
-                style: Get.textTheme.headline6,
-              ),
-              const Gap(20),
-            ],
-          ),
-        ),
-      ),
-      barrierDismissible: true,
-    );
   }
 }

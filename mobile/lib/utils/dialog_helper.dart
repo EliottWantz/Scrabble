@@ -84,6 +84,57 @@ class DialogHelper {
     );
   }
 
+  static Future<void> showLobbyQuitDialog() async {
+    Get.dialog(
+      Dialog(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Annuler la création de la partie',
+                style: Get.textTheme.headline4,
+              ),
+              const Gap(20),
+              Text(
+                'Êtes-vous sûr de vouloir annuler la création de cette partie',
+                style: Get.textTheme.headline6,
+              ),
+              const Gap(20),
+              SizedBox(
+                width: 200,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        if (Get.isDialogOpen!) {
+                          Get.back();
+                          Get.back();
+                        }
+                      },
+                      child: const Text('Oui'),
+                    ),
+                    const Gap(20),
+                    ElevatedButton(
+                      onPressed: () {
+                        if (Get.isDialogOpen!) Get.back();
+                      },
+                      child: const Text('Non'),
+                    ),
+                  ],
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
+      barrierDismissible: false,
+    );
+  }
+
   static Future<void> showLoading([String? message]) async {
     Get.dialog(
       Dialog(

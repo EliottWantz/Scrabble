@@ -55,6 +55,12 @@ class AvatarSelectionScreen extends GetView<AvatarController> {
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const Gap(50),
+              Obx(() => CircleAvatar(
+                  maxRadius: 60,
+                  backgroundColor: Colors.transparent,
+                  backgroundImage: controller.getAvatarToDisplay(),
+                 )),
+              const Gap(50),
               CustomButton(
                 text: 'Choisir un avatar',
                 onPressed: () {
@@ -83,7 +89,7 @@ class AvatarSelectionScreen extends GetView<AvatarController> {
                 text: 'Personnaliser votre avatar',
                 onPressed: () {},
               ),
-              const Gap(100),
+              const Gap(60),
               CustomButton(
                   text: 'S\'inscrire',
                   onPressed: () async {
@@ -122,9 +128,16 @@ class AvatarSelectionScreen extends GetView<AvatarController> {
                     itemCount: controller.avatarService.avatars.length,
                     scrollDirection: Axis.vertical,
                     itemBuilder: (BuildContext context, int index) {
-                      return Obx(() => Container(
+                      return Obx(
+                        () => InkWell(
+                          onTap: () {
+                            controller.avatarService.currentAvatarIndex.value =
+                                index;
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(20),
                               border: controller.avatarService
                                           .currentAvatarIndex.value ==
                                       index
@@ -141,22 +154,37 @@ class AvatarSelectionScreen extends GetView<AvatarController> {
                                     ]
                                   : null,
                             ),
-                            child: Card(
-                              elevation: controller.avatarService
-                                          .currentAvatarIndex.value ==
-                                      index
-                                  ? 5
-                                  : 0,
-                              child: InkWell(
-                                onTap: () {
-                                  controller.avatarService.currentAvatarIndex
-                                      .value = index;
-                                },
-                                child: Image.network(controller
-                                    .avatarService.avatars[index].url),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(20),
+                              child: SizedBox.fromSize(
+                                size: const Size.fromRadius(48),
+                                // Image radius
+                                child: Image.network(
+                                  controller.avatarService.avatars[index].url,
+                                  fit: BoxFit.fill,
+                                  loadingBuilder: (BuildContext context,
+                                      Widget child,
+                                      ImageChunkEvent? loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return Center(
+                                      child: CircularProgressIndicator(
+                                        value: loadingProgress
+                                                    .expectedTotalBytes !=
+                                                null
+                                            ? loadingProgress
+                                                    .cumulativeBytesLoaded /
+                                                loadingProgress
+                                                    .expectedTotalBytes!
+                                            : null,
+                                      ),
+                                    );
+                                  },
+                                ),
                               ),
                             ),
-                          ));
+                          ),
+                        ),
+                      );
                     }),
               ),
               const Gap(10),
@@ -179,8 +207,10 @@ class AvatarSelectionScreen extends GetView<AvatarController> {
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                               side: const BorderSide(color: Colors.black))),
-                      onPressed: () {
+                      onPressed: () async {
                         DialogHelper.hideLoading();
+                        await Future.delayed(const Duration(seconds: 1));
+                        controller.avatarService.currentAvatarIndex.value = 0;
                       },
                       child: const Text('Annuler')),
                 ],
