@@ -143,3 +143,31 @@ func NewErrorPacket(err error) (*Packet, error) {
 	}
 	return p, nil
 }
+
+type FriendRequestPayload struct {
+	FromID       string `json:"fromId"`
+	FromUsername string `json:"fromUsername"`
+}
+
+func NewFriendRequestPacket(payload FriendRequestPayload) (*Packet, error) {
+	p, err := NewPacket(ServerEventFriendRequest, payload)
+	if err != nil {
+		return nil, err
+	}
+	return p, nil
+}
+func AcceptFRiendRequestPacket(payload FriendRequestPayload) (*Packet, error) {
+	p, err := NewPacket(ServerEventAcceptFriendRequest, payload)
+	if err != nil {
+		return nil, err
+	}
+	return p, nil
+}
+
+func DeclineFriendRequestPacket(payload FriendRequestPayload) (*Packet, error) {
+	p, err := NewPacket(ServerEventDeclineFriendRequest, payload)
+	if err != nil {
+		return nil, err
+	}
+	return p, nil
+}

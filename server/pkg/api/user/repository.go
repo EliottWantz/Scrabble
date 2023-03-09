@@ -130,3 +130,19 @@ func (r *Repository) Delete(ID string) error {
 
 	return nil
 }
+
+func (r *Repository) FindFriendById(ID string) (User, error) {
+	panic("not implemented")
+}
+
+func (r *Repository) FindAllFriends() ([]User, error) {
+	panic("not implemented")
+}
+
+func (r *Repository) insertFriendToList(friendID, userID string) error {
+	panic("not implemented")
+}
+
+func (r *Repository) removeFriendFromList(friendID, userID string) error {
+	panic("not implemented")
+}
