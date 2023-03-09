@@ -30,11 +30,12 @@ class SocialScreen extends GetView<FriendsController> {
                   context,
                 ),
               )),
-              FriendsSideBar(
+              Obx(() => FriendsSideBar(
                   // items: controller.userService.user.value!.joinedChatRooms,
-                  items: controller.items2,
+                  // items: controller.items2,
+                  items: controller.roomService.getRooms(),
                   controller: friendSidebarController
-              ),
+              )),
             ],
           ),
         )
@@ -49,6 +50,7 @@ class SocialScreen extends GetView<FriendsController> {
             case 0:
               return const FriendsScreen();
             default:
+              // return ChatScreen(controller.roomService.currentRoomId);
               return ChatScreen();
           }
         }

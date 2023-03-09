@@ -10,6 +10,7 @@ import 'package:client_leger/models/requests/join_dm_request.dart';
 import 'package:client_leger/models/requests/join_room_request.dart';
 import 'package:client_leger/models/response/chat_message_response.dart';
 import 'package:client_leger/models/response/joined_room_response.dart';
+import 'package:client_leger/services/room_service.dart';
 import 'package:get/get.dart';
 // import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:client_leger/api/api_constants.dart';
@@ -20,9 +21,11 @@ import '../models/requests/create_room_request.dart';
 
 class WebsocketService extends GetxService {
   final UserService userService;
+  final RoomService roomService;
 
   WebsocketService(
-      {required this.userService});
+      {required this.userService,
+      required this.roomService});
 
   late WebSocketChannel socket;
   late String roomId;
@@ -63,6 +66,7 @@ class WebsocketService extends GetxService {
         print(joinedRoomResponse.payload.users);
         print('joined room response above');
         print(jsonDecode(data)['payload']['roomId']);
+        handleJoinRoomResponse(joinedRoomResponse);
         // roomId = jsonDecode(data)['payload']['roomId'];
         // print(roomId);
       }
@@ -83,6 +87,10 @@ class WebsocketService extends GetxService {
       }
       break;
     }
+  }
+
+  void handleJoinRoomResponse(JoinedRoomResponse joinedRoomResponse) {
+    roomService.addRoom(joinedRoomResponse.payload.roomId, joinedRoomResponse.payload);
   }
 
   void createRoom(String roomName, { List<String> userIds = const [] }) {

@@ -1,3 +1,5 @@
+import 'package:client_leger/controllers/friends_sidebar_controller.dart';
+import 'package:client_leger/models/room.dart';
 import 'package:client_leger/widgets/custom_button.dart';
 import 'package:client_leger/widgets/input_field.dart';
 import 'package:flutter/cupertino.dart';
@@ -8,17 +10,17 @@ import 'package:sidebarx/sidebarx.dart';
 import 'package:client_leger/utils/sidebar_theme.dart';
 
 
-class FriendsSideBar extends StatelessWidget {
+class FriendsSideBar extends GetView<FriendsSideBarController> {
   FriendsSideBar({
     Key? key,
     required SidebarXController controller,
-    required List<dynamic> items,
+    required List<Room> items,
   }) : _items = items,
         _controller = controller,
         super(key: key);
 
   final SidebarXController _controller;
-  final List<dynamic> _items; //= [
+  final List<Room> _items; //= [
   //   'Friend1',
   //   'Friend2',
   //   'Friend3',
@@ -44,7 +46,7 @@ class FriendsSideBar extends StatelessWidget {
 
   SidebarXItem _buildHeader() {
     return SidebarXItem(
-      label: 'Friends'
+      label: 'Friends',
     );
   }
 
@@ -76,7 +78,10 @@ class FriendsSideBar extends StatelessWidget {
     for (int i = 0; i < this._items.length; i++) {
       SidebarXItem item = SidebarXItem(
           icon: Icons.people_alt,
-          label: this._items[i],
+          label: this._items[i].roomName,
+          onTap: () {
+            controller.roomService.updateCurrentRoomId(this._items[i].roomId);
+          }
       );
       items.add(item);
     }

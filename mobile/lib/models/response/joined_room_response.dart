@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import '../joined_room_payload.dart';
+import '../room.dart';
 
 class JoinedRoomResponse {
   JoinedRoomResponse({
@@ -9,7 +10,7 @@ class JoinedRoomResponse {
   });
 
   String event;
-  JoinedRoomPayload payload;
+  Room payload;
 
   factory JoinedRoomResponse.fromRawJson(String str) =>
       JoinedRoomResponse.fromJson(json.decode(str));
@@ -18,7 +19,7 @@ class JoinedRoomResponse {
 
   factory JoinedRoomResponse.fromJson(Map<String, dynamic> json) => JoinedRoomResponse(
       event: json["event"],
-      payload: JoinedRoomPayload.fromJson(json["payload"])
+      payload: Room.fromJson(json["payload"])
   );
 
   Map<String, dynamic> toJson() => {

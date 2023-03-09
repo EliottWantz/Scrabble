@@ -7,6 +7,7 @@ import 'package:client_leger/routes/app_pages.dart';
 import 'package:client_leger/routes/app_routes.dart';
 import 'package:client_leger/services/auth_service.dart';
 import 'package:client_leger/services/avatar_service.dart';
+import 'package:client_leger/services/room_service.dart';
 import 'package:client_leger/services/settings_service.dart';
 import 'package:client_leger/services/storage_service.dart';
 import 'package:client_leger/services/user_service.dart';
@@ -51,8 +52,12 @@ class MyApp extends StatelessWidget {
 Future<void> initGlobalServices() async {
   await Get.putAsync(() => StorageService().init());
   Get.put(UserService());
+  Get.put(RoomService());
   Get.put(ApiProvider(), permanent: true);
-  Get.put(WebsocketService(userService: Get.find()), permanent: false);
+  Get.put(WebsocketService(
+      userService: Get.find(),
+      roomService: Get.find()
+  ), permanent: false);
   Get.put(ApiRepository(apiProvider: Get.find()), permanent: true);
   Get.put(SettingsService(storageService: Get.find()));
   Get.put(AvatarService());

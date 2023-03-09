@@ -1,3 +1,4 @@
+import 'package:client_leger/services/room_service.dart';
 import 'package:client_leger/services/websocket_service.dart';
 import 'package:client_leger/widgets/user_list.dart';
 import 'package:flutter/cupertino.dart';
@@ -7,6 +8,7 @@ import 'package:get/get.dart';
 
 class FriendsController extends GetxController {
   final UserService userService = Get.find();
+  final RoomService roomService = Get.find();
   final WebsocketService websocketService = Get.find();
   List<Widget> widgetOptions = [];
 
