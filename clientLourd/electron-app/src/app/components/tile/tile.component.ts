@@ -1,4 +1,4 @@
-import { Component, HostListener } from "@angular/core";
+import { Component, HostListener, Input, Output } from "@angular/core";
 import { Tile } from "@app/utils/interfaces/game/tile";
 
 @Component({
@@ -7,8 +7,5 @@ import { Tile } from "@app/utils/interfaces/game/tile";
     styleUrls: ["./tile.component.scss"],
 })
 export class TileComponent{
-    tile!: Tile;
-
-    constructor() { 
-    }
+    @Input() tile!: Tile;
 }
