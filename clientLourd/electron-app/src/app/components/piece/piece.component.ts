@@ -1,6 +1,5 @@
 import { Component, HostListener } from "@angular/core";
 import { Piece } from "@app/utils/interfaces/piece";
-import { MousePlacementService } from "@app/services/mouse-placement/mouse-placement.service";
 
 @Component({
     selector: "app-piece",
@@ -10,8 +9,6 @@ import { MousePlacementService } from "@app/services/mouse-placement/mouse-place
 export class PieceComponent{
     piece!: Piece;
 
-    constructor(private mousePlacementService: MousePlacementService) { 
-        const characters = 'abcdefghijklmnopqrstuvwxyz';
-        this.piece = {letter: characters.charAt(Math.floor(Math.random() * characters.length)), value: 0};
+    constructor() { 
     }
 }
