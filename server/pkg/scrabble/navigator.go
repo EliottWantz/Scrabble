@@ -294,14 +294,14 @@ func (ean *ExtendAfterNavigator) Accept(matched string, isWord bool, ns *navStat
 		sq := ean.axis.squares[start+i]
 		if sq.Tile == nil {
 			letter := actualLetter
-			if strings.ContainsRune(rack, actualLetter) {
-				rack = strings.Replace(rack, string(actualLetter), "", 1)
+			if strings.ContainsRune(rack, letter) {
+				rack = strings.Replace(rack, string(letter), "", 1)
 			} else {
 				// Must be using a blank tile
-				letter = '*'
+				letter = []rune(strings.ToUpper(string(letter)))[0]
 				rack = strings.Replace(rack, "*", "", 1)
 			}
-			covers[sq.Position] = Cover{Letter: letter, Actual: actualLetter}
+			covers[sq.Position] = letter
 		}
 	}
 	// No need to validate robot-generated tile moves

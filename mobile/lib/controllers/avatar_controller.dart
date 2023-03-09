@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:client_leger/api/api_repository.dart';
 import 'package:client_leger/services/avatar_service.dart';
 import 'package:client_leger/services/user_service.dart';
@@ -19,5 +21,14 @@ class AvatarController extends GetxController {
 
   Future<void> onTakePicture() async {
     await avatarService.takePicture();
+  }
+
+  ImageProvider getAvatarToDisplay() {
+    if (avatarService.isAvatar.value) {
+      return NetworkImage(
+          avatarService.avatars[avatarService.currentAvatarIndex.value].url);
+    } else {
+      return FileImage(File(avatarService.image.value!.path));
+    }
   }
 }

@@ -3,7 +3,6 @@ package scrabble
 import (
 	"fmt"
 	"strings"
-	"unicode"
 )
 
 const (
@@ -15,7 +14,7 @@ var (
 	_ Move = (*TileMove)(nil)
 	_ Move = (*PassMove)(nil)
 	_ Move = (*ExchangeMove)(nil)
-	_ Move = (*FinalMove)(nil)
+	// _ Move = (*FinalMove)(nil)
 )
 
 type Move interface {
@@ -43,19 +42,19 @@ type ExchangeMove struct {
 
 // FinalMove represents the final adjustments that are made to
 // player scores at the end of a Game
-type FinalMove struct {
-	OpponentRack   string
-	MultiplyFactor int
-}
+// type FinalMove struct {
+// 	OpponentRack   string
+// 	MultiplyFactor int
+// }
 
 // Covers is a map of board coordinates to the letter covering the square
-type Covers map[Position]Cover
+type Covers map[Position]rune
 
-// If Letter is a blank "*", then actual is the real letter
-type Cover struct {
-	Letter rune `json:"letter"`
-	Actual rune `json:"actual"`
-}
+// // If Letter is a blank "*", then actual is the real letter
+// type Cover struct {
+// 	Letter rune `json:"letter"`
+// 	Actual rune `json:"actual"`
+// }
 
 const BingoBonus = 50
 
@@ -133,14 +132,16 @@ func (move *TileMove) Init(b *Board, covers Covers, validateWords bool) {
 	for {
 		if cover, ok := covers[sq.Position]; ok {
 			// This square is being covered by the tile move
-			word += string(cover.Actual)
+			// word += string(cover.Actual)
+			word += strings.ToLower(string(cover))
 		} else {
 			// This square must be covered by a previously laid tile
 			if sq.Tile == nil {
 				move.Word = IllegalMoveWord
 				return
 			}
-			word += string(sq.Tile.Letter)
+			word += strings.ToLower(string(sq.Tile.Letter))
+			// word += string(sq.Tile.Letter)
 		}
 		if sq.Position.Row == bottom && sq.Position.Col == right {
 			// This was the last tile laid down in the move:
@@ -238,7 +239,7 @@ func (move *TileMove) IsValid(game *Game) bool {
 		before, after := game.Board.CrossWordFragments(pos, !move.Horizontal)
 		if len(before) > 0 || len(after) > 0 {
 			// There is a cross word here: check it
-			if !game.DAWG.IsWord(before + string(coverLetter.Actual) + after) {
+			if !game.DAWG.IsWord(before + strings.ToLower(string(coverLetter)) + after) {
 				return false
 			}
 		}
@@ -251,17 +252,24 @@ func (move *TileMove) IsValid(game *Game) bool {
 func (move *TileMove) Apply(game *Game) error {
 	player := game.PlayerToMove()
 	rack := player.Rack
-	for pos, cover := range move.Covers {
+	for pos, letter := range move.Covers {
 		var (
 			tile *Tile
 			err  error
 		)
 
-		tile, err = rack.GetTile(cover.Letter)
-		if cover.Letter == '*' {
-			// It is a blank tile, put the letter to uppercase on the tile
-			tile.Letter = unicode.ToUpper(cover.Actual)
+		if strings.ToUpper(string(letter)) == string(letter) {
+			// This is a blank tile '*'
+			tile, err = rack.GetTile('*')
+			tile.Letter = letter
+		} else {
+			tile, err = rack.GetTile(letter)
 		}
+
+		// if cover == '*' {
+		// 	// It is a blank tile, put the letter to uppercase on the tile
+		// 	tile.Letter = unicode.ToUpper(cover.Actual)
+		// }
 
 		if err != nil {
 			// Should not happen
@@ -314,7 +322,14 @@ func (move *TileMove) Score(state *GameState) int {
 	for {
 		s := state.Board.GetSquare(pos)
 		if cover, covered := move.Covers[pos]; covered {
-			sc := state.TileSet.Values[cover.Letter] * s.LetterMultiplier
+			var sc int
+			if strings.ToUpper(string(cover)) == string(cover) {
+				// This is a blank tile
+				sc = state.TileSet.Values['*'] * s.LetterMultiplier
+			} else {
+				sc = state.TileSet.Values[cover] * s.LetterMultiplier
+			}
+			// sc := state.TileSet.Values[cover.Letter] * s.LetterMultiplier
 			score += sc
 			multiplier *= s.WordMultiplier
 			// Add cross score, if any
@@ -471,29 +486,29 @@ func (move *ExchangeMove) String() string {
 	return "Exchanged letters: " + move.Letters
 }
 
-func NewFinalMove(rackOpp string, multiplyFactor int) *FinalMove {
-	return &FinalMove{OpponentRack: rackOpp, MultiplyFactor: multiplyFactor}
-}
+// func NewFinalMove(rackOpp string, multiplyFactor int) *FinalMove {
+// 	return &FinalMove{OpponentRack: rackOpp, MultiplyFactor: multiplyFactor}
+// }
 
-func (move *FinalMove) IsValid(game *Game) bool {
-	return true
-}
+// func (move *FinalMove) IsValid(game *Game) bool {
+// 	return true
+// }
 
-func (move *FinalMove) Apply(game *Game) error {
-	return nil
-}
+// func (move *FinalMove) Apply(game *Game) error {
+// 	return nil
+// }
 
-// Score returns the opponent's rack leave, multiplied
-// by a multiplication factor that can be 1 or 2
-func (move *FinalMove) Score(state *GameState) int {
-	adj := 0
-	for _, letter := range move.OpponentRack {
-		adj += state.TileSet.Values[letter]
-	}
-	return adj * move.MultiplyFactor
-}
+// // Score returns the opponent's rack leave, multiplied
+// // by a multiplication factor that can be 1 or 2
+// func (move *FinalMove) Score(state *GameState) int {
+// 	adj := 0
+// 	for _, letter := range move.OpponentRack {
+// 		adj += state.TileSet.Values[letter]
+// 	}
+// 	return adj * move.MultiplyFactor
+// }
 
-// String return a string description of the FinalMove
-func (move *FinalMove) String() string {
-	return "Rack " + move.OpponentRack
-}
+// // String return a string description of the FinalMove
+// func (move *FinalMove) String() string {
+// 	return "Rack " + move.OpponentRack
+// }
