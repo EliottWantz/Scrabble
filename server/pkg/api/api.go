@@ -94,11 +94,11 @@ func New(cfg *config.Config) (*API, error) {
 
 	var controllers Controllers
 	{
-		wsManager, err := ws.NewManager(repositories.MessageRepo, services.RoomSvc, services.UserSvc)
+		wsManager, err := ws.NewManager(repositories.MessageRepo, services.RoomSvc, services.UserSvc, services.GameSvc)
 		if err != nil {
 			return nil, err
 		}
-		gameCtrl := game.NewController(services.GameSvc)
+		gameCtrl := game.NewController(services.GameSvc, services.RoomSvc)
 		userCtrl := user.NewController(services.UserSvc, services.AuthSvc)
 
 		controllers = Controllers{

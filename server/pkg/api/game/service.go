@@ -1,85 +1,231 @@
 package game
 
 import (
-	"flag"
+	"errors"
 	"fmt"
+	"strconv"
 	"time"
 
+	"scrabble/pkg/api/room"
 	"scrabble/pkg/api/user"
 	"scrabble/pkg/scrabble"
+
+	"github.com/google/uuid"
+	"golang.org/x/exp/slog"
 )
 
-var numGames = flag.Int("n", 1, "Number of games to simulate")
+var (
+	ErrNotPlayerTurn   = errors.New("not player's turn")
+	ErrNotBotTurn      = errors.New("not bot's turn")
+	ErrInvalidMove     = errors.New("invalid move")
+	ErrInvalidPosition = errors.New("invalid position")
+)
 
 type Service struct {
 	repo    *Repository
-	userSvc *user.Service
+	UserSvc *user.Service
+	Dict    *scrabble.Dictionary
+	DAWG    *scrabble.DAWG
+}
+
+type Game struct {
+	ID           string             `json:"id"`
+	Players      []*scrabble.Player `json:"players"`
+	Board        *scrabble.Board    `json:"board"`
+	Bag          *scrabble.Bag      `json:"bag"`
+	Finished     bool               `json:"finished"`
+	NumPassMoves int                `json:"numPassMoves"`
+	Turn         string             `json:"turn"`
 }
 
 func NewService(repo *Repository, userSvc *user.Service) *Service {
-	return &Service{repo: repo, userSvc: userSvc}
-}
-
-func (gs *Service) StartGame() {
-	start := time.Now()
-	flag.Parse()
-
 	dict := scrabble.NewDictionary()
-	tileSet := scrabble.DefaultTileSet
 	dawg := scrabble.NewDawg(dict)
 
-	var winsA, winsB int
-
-	for i := 0; i < *numGames; i++ {
-		scoreA, scoreB := gs.simulateGame(tileSet, dawg)
-		if scoreA > scoreB {
-			winsA++
-		}
-		if scoreB > scoreA {
-			winsB++
-		}
+	s := &Service{
+		repo:    repo,
+		UserSvc: userSvc,
+		Dict:    dict,
+		DAWG:    dawg,
 	}
 
-	elapsed := time.Since(start)
-	fmt.Printf("%v games were played\nRobot A won %v games, and Robot B won %v games; %v games were draws.\n",
-		*numGames,
-		winsA,
-		winsB,
-		*numGames-winsA-winsB,
-	)
-	fmt.Println("Took", elapsed)
+	return s
 }
 
-func (gs *Service) simulateGame(tileSet *scrabble.TileSet, dawg *scrabble.DAWG) (scoreA, scoreB int) {
-	g := scrabble.NewGame(tileSet, dawg)
+func (s *Service) StartGame(room *room.Room) (*Game, error) {
+	humanPlayers := len(room.UserIDs)
+	if humanPlayers < 2 {
+		return nil, errors.New("must have at least 2 players")
+	}
+	botPlayers := 4 - humanPlayers
+	slog.Info("Starting game", "room", room.ID, "human", humanPlayers, "ai", botPlayers)
 
-	highScoreEngine := scrabble.NewEngine(&scrabble.HighScore{})
-	p1 := scrabble.NewPlayer("Alphonse", g.Bag)
-	p2 := scrabble.NewPlayer("Sylvestre", g.Bag)
-	g.Players[0], g.Players[1] = p1, p2
+	botNames := []string{"Bot1", "Bot2"}
 
-	for i := 0; ; i++ {
-		state := g.State()
-		// Ask robotA or robotB to generate a move
-		move := highScoreEngine.GenerateMove(state)
-		err := g.ApplyValid(move)
+	g := scrabble.NewGame(room.ID, s.DAWG, &scrabble.HighScore{})
+	for _, uID := range room.UserIDs {
+		u, err := s.UserSvc.GetUser(uID)
 		if err != nil {
-			fmt.Println(err)
+			return nil, err
 		}
-		fmt.Println(move)
-		fmt.Println(g.Board)
-		if g.IsOver() {
-
-			// TODO:  update user Gamestats
-			// gs.userSvc.UpdateUserStats()
-
-			// TODO : add new game stats
-			// gs.userSvc.addGameStats()
-
-			fmt.Printf("Game over!\n\n")
-			break
-		}
+		g.AddPlayer(scrabble.NewPlayer(u.ID, u.Username, g.Bag))
 	}
-	scoreA, scoreB = g.Players[0].Score, g.Players[1].Score
-	return scoreA, scoreB
+	for i := 0; i < botPlayers; i++ {
+		g.AddPlayer(scrabble.NewBot(uuid.NewString(), botNames[i], g.Bag))
+	}
+	g.Turn = g.PlayerToMove().ID
+
+	err := s.repo.Insert(g)
+	if err != nil {
+		return nil, err
+	}
+
+	return makeGamePacket(g), nil
 }
+
+type MoveInfo struct {
+	Type    string                    `json:"type,omitempty"`
+	Letters string                    `json:"letters,omitempty"`
+	Covers  map[string]scrabble.Cover `json:"covers"`
+}
+
+const (
+	MoveTypePlayTile = "playTile"
+	MoveTypeExchange = "exchange"
+	MoveTypePass     = "pass"
+)
+
+func (s *Service) ApplyPlayerMove(gID, pID string, req MoveInfo) (*Game, error) {
+	g, err := s.repo.GetGame(gID)
+	if err != nil {
+		return nil, err
+	}
+	player := g.PlayerToMove()
+	if player.ID != pID {
+		return nil, ErrNotPlayerTurn
+	}
+
+	var move scrabble.Move
+	switch req.Type {
+	case MoveTypePlayTile:
+		for _, letter := range req.Letters {
+			if !player.Rack.Contains(letter) {
+				return nil, ErrInvalidMove
+			}
+		}
+		covers := make(scrabble.Covers)
+		for pos, c := range req.Covers {
+			row, err := strconv.Atoi(string(pos[0]))
+			if err != nil {
+				return nil, fmt.Errorf("invalid row: %w", err)
+			}
+			col, err := strconv.Atoi(string(pos[1]))
+			if err != nil {
+				return nil, fmt.Errorf("invalid col: %w", err)
+			}
+			covers[scrabble.Position{Row: row, Col: col}] = c
+		}
+		move = scrabble.NewTileMove(g.Board, covers)
+	case MoveTypeExchange:
+		move = scrabble.NewExchangeMove(req.Letters)
+	case MoveTypePass:
+		move = scrabble.NewPassMove()
+	default:
+		return nil, fmt.Errorf("invalid move type: %s", req.Type)
+	}
+
+	if !move.IsValid(g) {
+		return nil, ErrInvalidMove
+	}
+
+	err = g.ApplyValid(move)
+	if err != nil {
+		// Should not happen because move is valid
+		return nil, fmt.Errorf("should not have ended up here. cannot apply move that was validated: %v", err)
+	}
+
+	// if g.IsOver() {
+	// 	// Send end game results by ws
+
+	// TODO:  update user Gamestats
+	// s.UserSvc.UpdateUserStats()
+
+	// TODO : add new game stats
+	// s.UserSvc.addGameStats()
+	// }
+
+	return makeGamePacket(g), nil
+}
+
+func (s *Service) ApplyBotMove(gID string) (*Game, error) {
+	g, err := s.repo.GetGame(gID)
+	if err != nil {
+		return nil, err
+	}
+
+	if !g.PlayerToMove().IsBot {
+		return nil, ErrNotBotTurn
+	}
+
+	// Make the bot think
+	time.Sleep(time.Second * 1)
+
+	state := g.State()
+	move := g.Engine.GenerateMove(state)
+	err = g.ApplyValid(move)
+	if err != nil {
+		slog.Error("apply bot move", err)
+	}
+
+	return makeGamePacket(g), nil
+}
+
+func makeGamePacket(g *scrabble.Game) *Game {
+	return &Game{
+		ID:           g.ID,
+		Players:      g.Players,
+		Board:        g.Board,
+		Bag:          g.Bag,
+		Finished:     g.Finished,
+		NumPassMoves: g.NumPassMoves,
+		Turn:         g.Turn,
+	}
+}
+
+// Not used, just for testing
+// func (s *Service) simulateGame() {
+// 	numGames := 10
+// 	start := time.Now()
+
+// 	botNames := []string{"Bot1", "Bot2", "Bot3", "Bot4"}
+
+// 	wg := &sync.WaitGroup{}
+// 	for i := 0; i < numGames; i++ {
+// 		wg.Add(1)
+// 		go func() {
+// 			g := scrabble.NewGame(uuid.NewString(), s.DAWG, &scrabble.HighScore{})
+// 			for i := 0; i < 4; i++ {
+// 				g.AddPlayer(scrabble.NewPlayer(uuid.NewString(), botNames[i], g.Bag))
+// 			}
+
+// 			for i := 0; ; i++ {
+// 				state := g.State()
+// 				move := g.Engine.GenerateMove(state)
+// 				err := g.ApplyValid(move)
+// 				if err != nil {
+// 					fmt.Println(err)
+// 				}
+// 				if g.IsOver() {
+// 					break
+// 				}
+// 			}
+// 			scoreA, scoreB, scoreC, scoreD := g.Players[0].Score, g.Players[1].Score, g.Players[2].Score, g.Players[3].Score
+// 			fmt.Println("Bot1:", scoreA, "Bot2:", scoreB, "Bot3:", scoreC, "Bot4:", scoreD)
+// 			wg.Done()
+// 		}()
+// 	}
+// 	wg.Wait()
+
+// 	elapsed := time.Since(start)
+// 	fmt.Println("Took", elapsed)
+// }

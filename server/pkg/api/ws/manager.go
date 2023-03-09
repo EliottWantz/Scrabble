@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"scrabble/pkg/api/game"
 	"scrabble/pkg/api/room"
 	"scrabble/pkg/api/user"
 
@@ -21,9 +22,10 @@ type Manager struct {
 	MessageRepo *MessageRepository
 	RoomSvc     *room.Service
 	UserSvc     *user.Service
+	GameSvc     *game.Service
 }
 
-func NewManager(messageRepo *MessageRepository, roomSvc *room.Service, userSvc *user.Service) (*Manager, error) {
+func NewManager(messageRepo *MessageRepository, roomSvc *room.Service, userSvc *user.Service, gameSvc *game.Service) (*Manager, error) {
 	m := &Manager{
 		Clients:     haxmap.New[string, *Client](),
 		Rooms:       haxmap.New[string, *Room](),
@@ -31,9 +33,10 @@ func NewManager(messageRepo *MessageRepository, roomSvc *room.Service, userSvc *
 		MessageRepo: messageRepo,
 		RoomSvc:     roomSvc,
 		UserSvc:     userSvc,
+		GameSvc:     gameSvc,
 	}
 
-	r := m.AddRoom("global")
+	r := m.AddRoom("global", "Global Room")
 	m.GlobalRoom = r
 
 	return m, nil
@@ -108,7 +111,11 @@ func (m *Manager) AddClient(c *Client) error {
 	for _, roomID := range user.JoinedChatRooms {
 		r, err := m.GetRoom(roomID)
 		if err != nil {
-			r = m.AddRoom(roomID)
+			dbRoom, ok := m.RoomSvc.HasRoom(roomID)
+			if !ok {
+				return err
+			}
+			r = m.AddRoom(roomID, dbRoom.Name)
 		}
 		if err := r.AddClient(c.ID); err != nil {
 			return err
@@ -172,8 +179,8 @@ func (m *Manager) DisconnectClient(cID string) error {
 	)
 }
 
-func (m *Manager) AddRoom(ID string) *Room {
-	r := NewRoom(m, ID)
+func (m *Manager) AddRoom(ID, Name string) *Room {
+	r := NewRoom(m, ID, Name)
 	m.Rooms.Set(r.ID, r)
 	m.logger.Info(
 		"room registered",
