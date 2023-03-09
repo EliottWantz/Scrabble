@@ -66,7 +66,7 @@ class WebsocketService extends GetxService {
         print(joinedRoomResponse.payload.users);
         print('joined room response above');
         print(jsonDecode(data)['payload']['roomId']);
-        handleJoinRoomResponse(joinedRoomResponse);
+        handleEventJoinedRoom(joinedRoomResponse);
         // roomId = jsonDecode(data)['payload']['roomId'];
         // print(roomId);
       }
@@ -78,8 +78,12 @@ class WebsocketService extends GetxService {
         // itemCount.value = messages.value.length;
         // print(itemCount.value);
         // print(messages.value);
+        ChatMessageResponse chatMessageResponse = ChatMessageResponse.fromRawJson(data);
+        print(chatMessageResponse);
+        print('chat message response above');
         print(jsonDecode(data)['payload']['message']);
         print('event chat message');
+        handleServerEventChatMessage(chatMessageResponse);
       }
       break;
       default: {
@@ -89,8 +93,17 @@ class WebsocketService extends GetxService {
     }
   }
 
-  void handleJoinRoomResponse(JoinedRoomResponse joinedRoomResponse) {
+  void handleEventJoinedRoom(JoinedRoomResponse joinedRoomResponse) {
     roomService.addRoom(joinedRoomResponse.payload.roomId, joinedRoomResponse.payload);
+  }
+
+  void handleServerEventChatMessage(ChatMessageResponse chatMessageResponse) {
+    roomService.addMessagePayloadToRoom(chatMessageResponse.payload!.roomId, chatMessageResponse.payload!);
+    // print(roomService.currentRoomMessages.value!);
+    if (chatMessageResponse.payload!.roomId == roomService.currentRoomId) {
+      roomService.currentRoomMessages!.add(chatMessageResponse.payload!);
+    }
+    // print(roomService.currentRoomMessages.value!);
   }
 
   void createRoom(String roomName, { List<String> userIds = const [] }) {

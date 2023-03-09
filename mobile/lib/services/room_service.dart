@@ -1,4 +1,5 @@
 import 'dart:core';
+import 'dart:math';
 
 import 'package:client_leger/models/public_user.dart';
 import 'package:get/get.dart';
@@ -7,13 +8,24 @@ import '../models/chat_message_payload.dart';
 import '../models/room.dart';
 
 class RoomService extends GetxService {
-  Map<String, Room> roomsMap = RxMap<String, Room>();
+  RxMap<String, Room> roomsMap = RxMap<String, Room>();
+  final currentRoomMessages = <ChatMessagePayload>[].obs;
+  // final currentRoomMessages = List<ChatMessagePayload>().obs;
 
   var currentRoomId = 'global';
 
   void updateCurrentRoomId(String newCurrentRoomId) {
     currentRoomId = newCurrentRoomId;
     print('Current room id is $currentRoomId');
+  }
+
+  void updateCurrentRoomMessages() {
+    currentRoomMessages.clear();
+    currentRoomMessages.addAll(getCurrentRoomChatMessagePayloads());
+  }
+
+  List<ChatMessagePayload> getCurrentRoomChatMessagePayloads() {
+    return getCurrentRoom().messages;
   }
 
   Map<String, Room> getMapOfRoomsByIds() {
@@ -44,6 +56,10 @@ class RoomService extends GetxService {
     return roomIds;
   }
 
+  Room getCurrentRoom() {
+    return roomsMap[currentRoomId]!;
+  }
+
   Room getRoom(String roomId) {
     Room room = roomsMap[roomId]!;
     return room;
@@ -60,7 +76,7 @@ class RoomService extends GetxService {
   }
 
   void addMessagePayloadToRoom(String roomId, ChatMessagePayload chatMessagePayload) {
-    roomsMap[roomId]!.messages.add(chatMessagePayload);
+    roomsMap.value[roomId]!.messages.add(chatMessagePayload);
   }
 
   void addRoom(String roomId, Room room) {

@@ -81,6 +81,7 @@ class FriendsSideBar extends GetView<FriendsSideBarController> {
           label: this._items[i].roomName,
           onTap: () {
             controller.roomService.updateCurrentRoomId(this._items[i].roomId);
+            controller.roomService.updateCurrentRoomMessages();
           }
       );
       items.add(item);
