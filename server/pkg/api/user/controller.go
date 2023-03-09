@@ -182,6 +182,40 @@ func (ctrl *Controller) UploadAvatar(c *fiber.Ctx) error {
 	)
 }
 
+func (ctrl *Controller) SendFriendRequest(c *fiber.Ctx) error {
+	id := c.Params("id")
+	friendId := c.Params("friendId")
+
+	err := ctrl.svc.sendFriendRequest(id, friendId)
+	if err != nil {
+		return err
+	}
+
+	return c.SendStatus(fiber.StatusOK)
+}
+
+func (ctrl *Controller) AcceptFriendRequest(c *fiber.Ctx) error {
+	id := c.Params("id")
+	friendId := c.Params("friendId")
+
+	err := ctrl.svc.acceptFriendRequest(id, friendId)
+	if err != nil {
+		return err
+	}
+	return c.SendStatus(fiber.StatusOK)
+}
+
+func (ctrl *Controller) RejectFriendRequest(c *fiber.Ctx) error {
+	id := c.Params("id")
+	friendId := c.Params("friendId")
+
+	err := ctrl.svc.rejectFriendRequest(id, friendId)
+	if err != nil {
+		return err
+	}
+	return c.SendStatus(fiber.StatusOK)
+}
+
 type PreferencesRequest struct {
 	Theme    string `json:"theme,omitempty"`
 	Language string `json:"language,omitempty"`

@@ -121,8 +121,51 @@ func NewGameUpdatePacket(payload GameUpdatePayload) (*Packet, error) {
 	return p, nil
 }
 
+type GameOverPayload struct {
+	WinnerID string `json:"winnerId"`
+}
+
+func NewGameOverPacket(payload GameOverPayload) (*Packet, error) {
+	p, err := NewPacket(ServerEventGameOver, payload)
+	if err != nil {
+		return nil, err
+	}
+	return p, nil
+}
+
 func NewErrorPacket(err error) (*Packet, error) {
-	p, err := NewPacket(ServerEventError, err)
+	type ErrorPayload struct {
+		Error string `json:"error"`
+	}
+	p, err := NewPacket(ServerEventError, ErrorPayload{err.Error()})
+	if err != nil {
+		return nil, err
+	}
+	return p, nil
+}
+
+type FriendRequestPayload struct {
+	FromID       string `json:"fromId"`
+	FromUsername string `json:"fromUsername"`
+}
+
+func NewFriendRequestPacket(payload FriendRequestPayload) (*Packet, error) {
+	p, err := NewPacket(ServerEventFriendRequest, payload)
+	if err != nil {
+		return nil, err
+	}
+	return p, nil
+}
+func AcceptFRiendRequestPacket(payload FriendRequestPayload) (*Packet, error) {
+	p, err := NewPacket(ServerEventAcceptFriendRequest, payload)
+	if err != nil {
+		return nil, err
+	}
+	return p, nil
+}
+
+func DeclineFriendRequestPacket(payload FriendRequestPayload) (*Packet, error) {
+	p, err := NewPacket(ServerEventDeclineFriendRequest, payload)
 	if err != nil {
 		return nil, err
 	}

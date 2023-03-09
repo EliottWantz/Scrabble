@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"scrabble/pkg/api/room"
@@ -29,13 +30,13 @@ type Service struct {
 }
 
 type Game struct {
-	ID           string             `json:"id"`
-	Players      []*scrabble.Player `json:"players"`
-	Board        *scrabble.Board    `json:"board"`
-	Bag          *scrabble.Bag      `json:"bag"`
-	Finished     bool               `json:"finished"`
-	NumPassMoves int                `json:"numPassMoves"`
-	Turn         string             `json:"turn"`
+	ID           string                  `json:"id"`
+	Players      []*scrabble.Player      `json:"players"`
+	Board        [15][15]scrabble.Square `json:"board"`
+	Bag          []scrabble.Tile         `json:"bag"`
+	Finished     bool                    `json:"finished"`
+	NumPassMoves int                     `json:"numPassMoves"`
+	Turn         string                  `json:"turn"`
 }
 
 func NewService(repo *Repository, userSvc *user.Service) *Service {
@@ -84,9 +85,9 @@ func (s *Service) StartGame(room *room.Room) (*Game, error) {
 }
 
 type MoveInfo struct {
-	Type    string                    `json:"type,omitempty"`
-	Letters string                    `json:"letters,omitempty"`
-	Covers  map[string]scrabble.Cover `json:"covers"`
+	Type    string            `json:"type,omitempty"`
+	Letters string            `json:"letters,omitempty"`
+	Covers  map[string]string `json:"covers"`
 }
 
 const (
@@ -95,35 +96,32 @@ const (
 	MoveTypePass     = "pass"
 )
 
-func (s *Service) ApplyPlayerMove(gID, pID string, req MoveInfo) (*Game, error) {
+func (s *Service) ApplyPlayerMove(gID, pID string, req MoveInfo) (*Game, *scrabble.Game, error) {
 	g, err := s.repo.GetGame(gID)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	player := g.PlayerToMove()
 	if player.ID != pID {
-		return nil, ErrNotPlayerTurn
+		return nil, nil, ErrNotPlayerTurn
 	}
 
 	var move scrabble.Move
 	switch req.Type {
 	case MoveTypePlayTile:
-		for _, letter := range req.Letters {
-			if !player.Rack.Contains(letter) {
-				return nil, ErrInvalidMove
-			}
-		}
 		covers := make(scrabble.Covers)
-		for pos, c := range req.Covers {
-			row, err := strconv.Atoi(string(pos[0]))
-			if err != nil {
-				return nil, fmt.Errorf("invalid row: %w", err)
+		for pos, letter := range req.Covers {
+			if !player.Rack.ContainsAsString(letter) {
+				if letter == strings.ToUpper(letter) && !player.Rack.Contains('*') {
+					return nil, nil, ErrInvalidMove
+				}
 			}
-			col, err := strconv.Atoi(string(pos[1]))
+
+			p, err := parsePoint(pos)
 			if err != nil {
-				return nil, fmt.Errorf("invalid col: %w", err)
+				return nil, nil, fmt.Errorf("invalid coordinate: %w", err)
 			}
-			covers[scrabble.Position{Row: row, Col: col}] = c
+			covers[p] = []rune(letter)[0]
 		}
 		move = scrabble.NewTileMove(g.Board, covers)
 	case MoveTypeExchange:
@@ -131,17 +129,17 @@ func (s *Service) ApplyPlayerMove(gID, pID string, req MoveInfo) (*Game, error) 
 	case MoveTypePass:
 		move = scrabble.NewPassMove()
 	default:
-		return nil, fmt.Errorf("invalid move type: %s", req.Type)
+		return nil, nil, fmt.Errorf("invalid move type: %s", req.Type)
 	}
 
 	if !move.IsValid(g) {
-		return nil, ErrInvalidMove
+		return nil, nil, ErrInvalidMove
 	}
 
 	err = g.ApplyValid(move)
 	if err != nil {
 		// Should not happen because move is valid
-		return nil, fmt.Errorf("should not have ended up here. cannot apply move that was validated: %v", err)
+		return nil, nil, fmt.Errorf("should not have ended up here. cannot apply move that was validated: %v", err)
 	}
 
 	// if g.IsOver() {
@@ -154,17 +152,17 @@ func (s *Service) ApplyPlayerMove(gID, pID string, req MoveInfo) (*Game, error) 
 	// s.UserSvc.addGameStats()
 	// }
 
-	return makeGamePacket(g), nil
+	return makeGamePacket(g), g, nil
 }
 
-func (s *Service) ApplyBotMove(gID string) (*Game, error) {
+func (s *Service) ApplyBotMove(gID string) (*Game, *scrabble.Game, error) {
 	g, err := s.repo.GetGame(gID)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	if !g.PlayerToMove().IsBot {
-		return nil, ErrNotBotTurn
+		return nil, nil, ErrNotBotTurn
 	}
 
 	// Make the bot think
@@ -177,19 +175,37 @@ func (s *Service) ApplyBotMove(gID string) (*Game, error) {
 		slog.Error("apply bot move", err)
 	}
 
-	return makeGamePacket(g), nil
+	return makeGamePacket(g), g, nil
 }
 
 func makeGamePacket(g *scrabble.Game) *Game {
 	return &Game{
 		ID:           g.ID,
 		Players:      g.Players,
-		Board:        g.Board,
-		Bag:          g.Bag,
+		Board:        g.Board.Squares,
 		Finished:     g.Finished,
 		NumPassMoves: g.NumPassMoves,
 		Turn:         g.Turn,
 	}
+}
+
+func parsePoint(str string) (scrabble.Position, error) {
+	var p scrabble.Position
+	parts := strings.Split(str, "/")
+	if len(parts) != 2 {
+		return p, fmt.Errorf("invalid position format: %s", str)
+	}
+	row, err := strconv.Atoi(parts[0])
+	if err != nil {
+		return p, fmt.Errorf("invalid row value: %s", parts[0])
+	}
+	col, err := strconv.Atoi(parts[1])
+	if err != nil {
+		return p, fmt.Errorf("invalid col value: %s", parts[1])
+	}
+	p.Row = row
+	p.Col = col
+	return p, nil
 }
 
 // Not used, just for testing
