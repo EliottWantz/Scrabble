@@ -30,7 +30,7 @@ class Room {
     "id": id,
     "name": name,
     "users": users.map((user) => user.toJson()).toList(),
-    "messages": messages.map((message) => message.toString()).toList()
+    "messages": messages.map((message) => message.toJson()).toList()
   };
 
 }

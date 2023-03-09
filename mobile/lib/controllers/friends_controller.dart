@@ -1,10 +1,13 @@
+import 'package:client_leger/services/websocket_service.dart';
 import 'package:client_leger/widgets/user_list.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:client_leger/services/user_service.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class FriendsController extends GetxController {
   final UserService userService = Get.find();
+  final WebsocketService websocketService = Get.find();
   List<Widget> widgetOptions = [];
 
   final List<dynamic> items = [
@@ -35,9 +38,15 @@ class FriendsController extends GetxController {
       UserList(items: items),
       UserList(items: items2),
       UserList(items: items2),
-      const Text(
-        'Index 3: Work',
-      ),
+      // const Text(
+      //   'Index 3: Work',
+      // ),
+      TextButton(
+        onPressed: () {
+          websocketService.createRoom('new room');
+        },
+        child: Text('TextButton'),
+      )
     ];
   }
 

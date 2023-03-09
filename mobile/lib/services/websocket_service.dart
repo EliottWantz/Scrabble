@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:client_leger/models/chat_message_payload.dart';
+import 'package:client_leger/models/create_room_payload.dart';
 import 'package:client_leger/models/events.dart';
 import 'package:client_leger/models/requests/chat_message_request.dart';
 import 'package:client_leger/models/response/chat_message_response.dart';
@@ -9,6 +10,8 @@ import 'package:get/get.dart';
 import 'package:client_leger/api/api_constants.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:client_leger/services/user_service.dart';
+
+import '../models/requests/create_room_request.dart';
 
 class WebsocketService extends GetxService {
   final UserService userService;
@@ -66,6 +69,18 @@ class WebsocketService extends GetxService {
       }
       break;
     }
+  }
+
+  createRoom(String roomName, { List<String> userIds = const [] }) {
+    final createRoomPayload = CreateRoomPayload(
+        roomName: roomName,
+        userIds: userIds
+    );
+    final createRoomRequest = CreateRoomRequest(
+      event: ClientEventCreateRoom,
+      payload: createRoomPayload
+    );
+    socket.sink.add(createRoomRequest.toRawJson());
   }
 
   sendMessage(String event, ChatMessagePayload payload) {
