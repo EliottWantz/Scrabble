@@ -112,6 +112,7 @@ class WebsocketService extends GetxService {
   }
 
   void handleServerEventJoinableGames(ListJoinableGamesResponse listJoinableGamesResponse) {
+    print(listJoinableGamesResponse.payload.games.toString());
 
   }
 
@@ -167,6 +168,6 @@ class WebsocketService extends GetxService {
     final listJoinableGamesRequest = ListJoinableGamesRequest(
       event: ClientEventListJoinableGames
     );
-    socket.sink.add(listJoinableGamesRequest);
+    socket.sink.add(listJoinableGamesRequest.toRawJson());
   }
 }
