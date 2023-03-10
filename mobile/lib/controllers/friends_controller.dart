@@ -1,3 +1,4 @@
+import 'package:client_leger/screens/friend_request_screen.dart';
 import 'package:client_leger/services/room_service.dart';
 import 'package:client_leger/services/websocket_service.dart';
 import 'package:client_leger/widgets/user_list.dart';
@@ -40,24 +41,25 @@ class FriendsController extends GetxController {
       UserList(items: items),
       UserList(items: items2),
       UserList(items: items2),
-      Column(
-        children: [
-          TextButton(
-            onPressed: () {
-              // websocketService.createRoom('new room');
-              websocketService.createRoom('new room');
-            },
-            child: Text('TextButton'),
-          ),
-          TextButton(
-            onPressed: () {
-              // websocketService.createRoom('new room');
-              websocketService.sendMessage('global', 'hello global');
-            },
-            child: Text('TextButton'),
-          )
-        ],
-      )
+      FriendRequestScreen()
+      // Column(
+      //   children: [
+      //     TextButton(
+      //       onPressed: () {
+      //         // websocketService.createRoom('new room');
+      //         websocketService.createRoom('new room');
+      //       },
+      //       child: Text('TextButton'),
+      //     ),
+      //     TextButton(
+      //       onPressed: () {
+      //         // websocketService.createRoom('new room');
+      //         websocketService.sendMessage('global', 'hello global');
+      //       },
+      //       child: Text('TextButton'),
+      //     )
+      //   ],
+      // )
       // const Text(
       //   'Index 3: Work',
       // ),

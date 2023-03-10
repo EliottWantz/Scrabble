@@ -118,7 +118,6 @@ class ChatScreen extends GetView<ChatController> {
             },
             decoration: const InputDecoration(
                 hintText: "Entrez un message...",
-                labelText: "Entrez un message...",
                 border: OutlineInputBorder(
                     borderRadius:
                     BorderRadius.all(Radius.circular(8)))),
