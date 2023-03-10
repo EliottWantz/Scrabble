@@ -1,0 +1,27 @@
+.square-multiplier {
+    width: 50px;
+    height: 50px;
+    outline-style: solid;
+    outline-color: black;
+    outline-width: 1px;
+    background-color: white;
+    justify-items: center;
+    align-items: center;
+    vertical-align: middle;
+}
+
+.square-multiplier.word3 {
+    background: red;
+}
+
+.square-multiplier.word2 {
+    background: pink;
+}
+
+.square-multiplier.letter2 {
+    background: lightblue;
+}
+
+.square-multiplier.letter3 {
+    background: blue;
+}

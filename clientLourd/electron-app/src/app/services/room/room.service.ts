@@ -22,12 +22,6 @@ export class RoomService {
     }
 
     async joinRoom(roomId: string, roomName: string): Promise<void> {
-        await this.commService.joinRoom(this.userService.currentUserValue.id, roomId, roomName).then((res) => {
-            this.addRoom(res.room);
-        })
-        .catch((err) => {
-            console.log(err);
-        });
     }
 
     addRoom(room: Room): void {

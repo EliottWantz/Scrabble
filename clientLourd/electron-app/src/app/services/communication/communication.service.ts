@@ -4,6 +4,7 @@ import { environment } from 'src/environments/environment';
 import { User } from "@app/utils/interfaces/user";
 import { Room } from "@app/utils/interfaces/room";
 import { catchError, lastValueFrom, Observable, throwError } from "rxjs";
+import { Game } from "@app/utils/interfaces/game/game";
 
 @Injectable({
     providedIn: 'root',
@@ -45,15 +46,6 @@ export class CommunicationService {
         return this.http.post<{url: string, fileId: string}>(`${this.baseUrl}/avatar/${user.id}`, formData).pipe(catchError(this.handleError))
     }
 
-    async joinRoom(username: string, roomId: string, roomName: string): Promise<{room: Room}> {
-        const res: any = (await lastValueFrom(this.requestJoinRoom(username, roomId, roomName)));
-        return res;
-    }
-
-    private requestJoinRoom(userId: string, roomId: string, roomName: string): Observable<{room: Room}> {
-        return this.http.post<{room: Room}>(`${this.baseUrl}/room/join`, { userId, roomId, roomName }).pipe(catchError(this.handleError));
-    }
-
     async getDefaultAvatars(): Promise<{avatars: [{url: string, fileId: string}]}> {
         const res: any = (await lastValueFrom(this.requestGetDefaultAvatars()));
         return res;
@@ -61,6 +53,15 @@ export class CommunicationService {
 
     private requestGetDefaultAvatars(): Observable<{avatars: [{url: string, fileId: string}]}> {
         return this.http.get<{avatars: [{url: string, fileId: string}]}>(`${this.baseUrl}/avatar/defaults`).pipe(catchError(this.handleError));
+    }
+
+    async createGame(roomId: string): Promise<{game: Game}> {
+        const res: any = (await lastValueFrom(this.requestCreateGame(roomId)));
+        return res;
+    }
+
+    private requestCreateGame(roomId: string): Observable<{game: Game}> {
+        return this.http.post<{game: Game}>(`${this.baseUrl}/game`, roomId).pipe(catchError(this.handleError));
     }
 
     private handleError(error: HttpErrorResponse) {
