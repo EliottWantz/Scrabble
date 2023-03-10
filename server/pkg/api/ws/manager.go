@@ -261,9 +261,7 @@ func (m *Manager) watchFriendRequests(id string) {
 			if !reflect.DeepEqual(newRequests, oldPendingRequests) {
 
 				incomingFriendsRequests := getArrayDifference(newRequests, oldPendingRequests)
-				fmt.Println("incomingFriendsRequests: ", incomingFriendsRequests)
-				fmt.Println("newRequests: ", newRequests, "len: ", len(newRequests))
-				fmt.Println("oldPendingRequests: ", oldPendingRequests, "len: ", len(oldPendingRequests))
+
 				if len(incomingFriendsRequests) > 0 {
 					m.logger.Info("new friend request", "user_id", id, "friend_requests", incomingFriendsRequests)
 					for _, friend := range incomingFriendsRequests {
