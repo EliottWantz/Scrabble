@@ -11,6 +11,7 @@ var (
 	ClientEventLeaveRoom         = "leave-room"
 	ClientEventListRooms         = "list-rooms"
 	ClientEventListJoinableGames = "list-joinable-games"
+	ClientEventStartGame         = "start-game"
 	ClientEventPlayMove          = "playMove"
 )
 

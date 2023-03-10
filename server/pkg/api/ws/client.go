@@ -113,6 +113,8 @@ func (c *Client) handlePacket(p *Packet) error {
 		return c.HandleListRoomsRequest(p)
 	case ClientEventListJoinableGames:
 		return c.HandleListJoinableGamesRequest(p)
+	case ClientEventStartGame:
+		return c.HandleStartGameRequest(p)
 	case ClientEventPlayMove:
 		return c.PlayMove(p)
 	}
@@ -347,6 +349,35 @@ func (c *Client) HandleLeaveRoomRequest(p *Packet) error {
 	}
 
 	c.send(leftRoomPacket)
+
+	return nil
+}
+
+func (c *Client) HandleStartGameRequest(p *Packet) error {
+	payload := StartGamePayload{}
+	if err := json.Unmarshal(p.Payload, &payload); err != nil {
+		return fiber.NewError(fiber.StatusUnprocessableEntity, "parse request: "+err.Error())
+	}
+	r, ok := c.Manager.RoomSvc.HasRoom(payload.RoomID)
+	if !ok {
+		return fiber.NewError(fiber.StatusNotFound, "Room not found")
+	}
+	g, err := c.Manager.GameSvc.StartGame(r)
+	if err != nil {
+		return err
+	}
+
+	gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
+		Game: g,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = c.BroadcastToRoom(g.ID, gamePacket)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

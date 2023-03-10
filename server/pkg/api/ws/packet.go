@@ -73,6 +73,10 @@ type PlayMovePayload struct {
 	MoveInfo game.MoveInfo `json:"moveInfo"`
 }
 
+type StartGamePayload struct {
+	RoomID string `json:"roomId"`
+}
+
 // Server events payloads
 type JoinedRoomPayload struct {
 	RoomID   string            `json:"roomId"`
