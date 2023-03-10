@@ -19,6 +19,7 @@ import 'package:client_leger/services/user_service.dart';
 
 import '../models/requests/create_room_request.dart';
 import '../models/requests/list_joinable_games_request.dart';
+import '../models/response/list_joinable_games_response.dart';
 
 class WebsocketService extends GetxService {
   final UserService userService;
@@ -88,8 +89,8 @@ class WebsocketService extends GetxService {
       }
       break;
       case ServerEventJoinableGames: {
-        ListJoinableGamesRequest listJoinableGamesRequest = ListJoinableGamesRequest.fromRawJson(data);
-        handleServerEventJoinableGames(listJoinableGamesRequest);
+        ListJoinableGamesResponse listJoinableGamesResponse = ListJoinableGamesResponse.fromRawJson(data);
+        handleServerEventJoinableGames(listJoinableGamesResponse);
       }
       break;
       default: {
@@ -110,7 +111,7 @@ class WebsocketService extends GetxService {
     }
   }
 
-  void handleServerEventJoinableGames(ListJoinableGamesRequest listJoinableGamesRequest) {
+  void handleServerEventJoinableGames(ListJoinableGamesResponse listJoinableGamesResponse) {
 
   }
 
