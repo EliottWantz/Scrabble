@@ -25,7 +25,7 @@ class RoomService extends GetxService {
   }
 
   List<ChatMessagePayload> getCurrentRoomChatMessagePayloads() {
-    return getCurrentRoom().messages;
+    return getCurrentRoom().messages!;
   }
 
   Map<String, Room> getMapOfRoomsByIds() {
@@ -66,7 +66,7 @@ class RoomService extends GetxService {
   }
 
   List<ChatMessagePayload> getRoomMessagesPayloads(String roomId) {
-    List<ChatMessagePayload> messages = roomsMap[roomId]!.messages;
+    List<ChatMessagePayload> messages = roomsMap[roomId]!.messages!;
     return messages;
   }
 
@@ -76,7 +76,7 @@ class RoomService extends GetxService {
   }
 
   void addMessagePayloadToRoom(String roomId, ChatMessagePayload chatMessagePayload) {
-    roomsMap.value[roomId]!.messages.add(chatMessagePayload);
+    roomsMap.value[roomId]!.messages!.add(chatMessagePayload);
   }
 
   void addRoom(String roomId, Room room) {

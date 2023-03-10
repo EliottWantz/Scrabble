@@ -57,7 +57,7 @@ class GameStartScreen extends StatelessWidget {
                   Gap(Get.height / 6),
                   ElevatedButton.icon(
                     onPressed: () {
-                      _websocketService.createRoom('test');
+                      _websocketService.createGameRoom();
                       Get.toNamed(Routes.HOME+Routes.GAME_START+Routes.LOBBY);
                     },
                     icon: const Icon(
@@ -70,7 +70,7 @@ class GameStartScreen extends StatelessWidget {
                   const Gap(60),
                   ElevatedButton.icon(
                     onPressed: () {
-                      _websocketService.listJoinableGames();
+                    //   _websocketService.listJoinableGames();
                     },
                     icon: const Icon(
                       // <-- Icon

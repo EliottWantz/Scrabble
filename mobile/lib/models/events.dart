@@ -20,6 +20,7 @@ const String ClientEventChatMessage = "chat-message";
 const String ClientEventJoinRoom    = "join-room";
 const String ClientEventJoinDMRoom  = "join-dm-room";
 const String ClientEventCreateRoom  = "create-room";
+const String ClientEventCreateGameRoom = "create-game-room";
 const String ClientEventLeaveRoom   = "leave-room";
 const String ClientEventListRooms = "list-rooms";
 const String ClientEventListJoinableGames = "list-joinable-games";

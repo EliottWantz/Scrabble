@@ -5,13 +5,13 @@ class Room {
   String roomId;
   String roomName;
   List<PublicUser> users;
-  List<ChatMessagePayload> messages;
+  List<ChatMessagePayload>? messages;
 
   Room(
     {required this.roomId,
     required this.roomName,
     required this.users,
-    required this.messages});
+    this.messages});
 
   factory Room.fromJson(Map<String, dynamic> json) {
     return Room(
@@ -30,7 +30,7 @@ class Room {
     "id": roomId,
     "name": roomName,
     "users": users.map((user) => user.toJson()).toList(),
-    "messages": messages.map((message) => message.toJson()).toList()
+    "messages": messages?.map((message) => message.toJson()).toList()
   };
 
 }
