@@ -68,6 +68,10 @@ func (api *API) setupRoutes(cfg *config.Config) {
 	)
 	r.Patch("/user/:id/config", api.Ctrls.UserCtrl.UpdatePreferences)
 	r.Get("/user/:id", api.Ctrls.UserCtrl.GetUser)
+
+	r.Get("/user/friends/:id", api.Ctrls.UserCtrl.GetFriends)
+	r.Get("/user/friends/requests/:id", api.Ctrls.UserCtrl.GetPendingFriendRequests)
+
 	r.Post("/user/friends/request/:id/:friendId", api.Ctrls.UserCtrl.SendFriendRequest)
 	r.Patch("/user/friends/accept/:id/:friendId", api.Ctrls.UserCtrl.AcceptFriendRequest)
 	r.Delete("/user/friends/accept/:id/:friendId", api.Ctrls.UserCtrl.RejectFriendRequest)
