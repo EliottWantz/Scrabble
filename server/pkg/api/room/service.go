@@ -1,5 +1,7 @@
 package room
 
+import "fmt"
+
 type Service struct {
 	repo *Repository
 }
@@ -7,7 +9,7 @@ type Service struct {
 func NewService(repo *Repository) (*Service, error) {
 	svc := &Service{repo: repo}
 	if _, ok := svc.HasRoom("global"); !ok {
-		_, err := svc.CreateRoom("global", "Global")
+		_, err := svc.CreateRoom("global", "Global Room", "system")
 		if err != nil {
 			return nil, err
 		}
@@ -16,11 +18,12 @@ func NewService(repo *Repository) (*Service, error) {
 	return svc, nil
 }
 
-func (s *Service) CreateRoom(ID, name string, withUserIDs ...string) (*Room, error) {
+func (s *Service) CreateRoom(ID, name, creatorID string, withUserIDs ...string) (*Room, error) {
 	r := &Room{
-		ID:      ID,
-		Name:    name,
-		UserIDs: make([]string, 0, 1),
+		ID:        ID,
+		Name:      name,
+		CreatorID: creatorID,
+		UserIDs:   []string{creatorID},
 	}
 
 	r.UserIDs = append(r.UserIDs, withUserIDs...)
@@ -58,7 +61,12 @@ func (s *Service) AddUser(roomID, userID string) error {
 }
 
 func (s *Service) RemoveUser(roomID, userID string) error {
-	return s.repo.RemoveUser(roomID, userID)
+	err := s.repo.RemoveUser(roomID, userID)
+	if err != nil {
+		return fmt.Errorf("failed to remove user from room %s: %w", roomID, err)
+	}
+
+	return nil
 }
 
 func (s *Service) Delete(ID string) error {
