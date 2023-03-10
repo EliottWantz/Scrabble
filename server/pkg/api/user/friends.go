@@ -92,20 +92,19 @@ func (s *Service) GetFriendById(id string, friendId string) (*User, error) {
 	return nil, fiber.NewError(fiber.StatusBadRequest, "no friend found")
 }
 
-func (s *Service) getAllFriends(id string) ([]*User, error) {
+func (s *Service) RemoveFriend(id string, friendId string) error {
 	user, err := s.GetUser(id)
 	if err != nil {
-		return nil, fiber.NewError(fiber.StatusBadRequest, "no user found")
+		return fiber.NewError(fiber.StatusBadRequest, "no user found")
 	}
-	friends := make([]*User, 0, len(user.Friends))
-	for _, id := range user.Friends {
-		f, err := s.GetUser(id)
-		if err != nil {
-			return nil, fiber.NewError(fiber.StatusBadRequest, "no user found")
+	for i, id := range user.Friends {
+		if id == friendId {
+			user.Friends = append(user.Friends[:i], user.Friends[i+1:]...)
+			err = s.Repo.Update(user)
+			return nil
 		}
-		friends = append(friends, f)
 	}
-	return friends, nil
+	return fiber.NewError(fiber.StatusBadRequest, "no friend found")
 }
 
 func (s *Service) GetPendingFriendRequests(id string) ([]*User, error) {
