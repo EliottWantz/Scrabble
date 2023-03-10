@@ -21,6 +21,7 @@ var (
 	ServerEventLeftRoom             = "leftRoom"
 	ServerEventUserJoined           = "userJoined"
 	ServerEventListUsers            = "listUsers"
+	ServerEventNewUser              = "newUser"
 	ServerEventListRooms            = "listRooms"
 	ServerEventUsersInRoom          = "usersInRoom"
 	ServerEventJoinableGames        = "joinableGames"
