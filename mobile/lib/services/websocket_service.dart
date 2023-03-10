@@ -127,6 +127,12 @@ class WebsocketService extends GetxService {
     socket.sink.add(createRoomRequest.toRawJson());
   }
 
+  void createGameRoom({ List<String> userIds = const [] }) {
+    // final createGameRoomPayload = CreateGameRoomPayload(
+
+    // )
+  }
+
   void joinRoom(String roomId) {
     final joinRoomPayload = JoinRoomPayload(roomId: roomId);
     final joinRoomRequest = JoinRoomRequest(
@@ -167,6 +173,6 @@ class WebsocketService extends GetxService {
     final listJoinableGamesRequest = ListJoinableGamesRequest(
       event: ClientEventListJoinableGames
     );
-    socket.sink.add(listJoinableGamesRequest);
+    socket.sink.add(listJoinableGamesRequest.toRawJson());
   }
 }
