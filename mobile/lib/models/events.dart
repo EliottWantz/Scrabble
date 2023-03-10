@@ -3,8 +3,15 @@ const String ServerEventJoinedRoom = "joinedRoom";
 const String ServerEventUserJoined = "userJoined";
 const String ServerEventListUsers    = "listUsers";
 const String ServerEventUsersInRoom  = "usersInRoom";
-const String ServerEventError   = "error";
 const String ServerEventChatMessage = "chat-message";
+const String ServerEventJoinableGames = "joinableGames";
+const String ServerEventGameUpdate = "gameUpdate";
+const String ServerEventGameOver = "gameOver";
+const String ServerEventFriendRequest = "friendRequest";
+const String ServerEventAcceptFriendRequest = "acceptFriendRequest";
+const String ServerEventDeclineFriendRequest = "declineFriendRequest";
+
+const String ServerEventError   = "error";
 
 
 // Client events

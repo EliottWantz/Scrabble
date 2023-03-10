@@ -87,6 +87,11 @@ class WebsocketService extends GetxService {
         handleServerEventChatMessage(chatMessageResponse);
       }
       break;
+      case ServerEventJoinableGames: {
+        ListJoinableGamesRequest listJoinableGamesRequest = ListJoinableGamesRequest.fromRawJson(data);
+        handleServerEventJoinableGames(listJoinableGamesRequest);
+      }
+      break;
       default: {
         print('no event in package received');
       }
@@ -103,6 +108,10 @@ class WebsocketService extends GetxService {
     if (chatMessageResponse.payload!.roomId == roomService.currentRoomId) {
       roomService.currentRoomMessages!.add(chatMessageResponse.payload!);
     }
+  }
+
+  void handleServerEventJoinableGames(ListJoinableGamesRequest listJoinableGamesRequest) {
+
   }
 
   void createRoom(String roomName, { List<String> userIds = const [] }) {
