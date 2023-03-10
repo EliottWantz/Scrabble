@@ -29,6 +29,7 @@ type Service struct {
 	uploadURL      string
 	RoomSvc        *room.Service
 	DefaultAvatars []*Avatar
+	NewUserChan    chan *User
 }
 
 func NewService(cfg *config.Config, repo *Repository, roomSvc *room.Service) (*Service, error) {
@@ -48,11 +49,12 @@ func NewService(cfg *config.Config, repo *Repository, roomSvc *room.Service) (*S
 	}
 
 	return &Service{
-		Repo:      repo,
-		uploadSvc: upload.NewService(client),
-		fileSvc:   file.NewService(client),
-		uploadURL: cfg.UPLOAD_CARE_UPLOAD_URL,
-		RoomSvc:   roomSvc,
+		Repo:        repo,
+		uploadSvc:   upload.NewService(client),
+		fileSvc:     file.NewService(client),
+		uploadURL:   cfg.UPLOAD_CARE_UPLOAD_URL,
+		RoomSvc:     roomSvc,
+		NewUserChan: make(chan *User, 10),
 		DefaultAvatars: []*Avatar{
 			{
 				URL:    "https://ucarecdn.com/3dfe6a52-849b-4a64-85c6-1274731595ac/",
@@ -114,6 +116,8 @@ func (s *Service) SignUp(username, password, email string, uploadAvatar UploadAv
 	if err := s.Repo.Insert(u); err != nil {
 		return nil, fiber.NewError(fiber.StatusInternalServerError, "failed to insert user: "+err.Error())
 	}
+
+	s.NewUserChan <- u
 
 	// Join global room
 	err = s.RoomSvc.AddUser("global", u.ID)

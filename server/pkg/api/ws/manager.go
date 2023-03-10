@@ -42,6 +42,8 @@ func NewManager(messageRepo *MessageRepository, roomSvc *room.Service, userSvc *
 	r := m.AddRoom("global", "Global Room")
 	m.GlobalRoom = r
 
+	go m.ListNewUser()
+
 	return m, nil
 }
 
@@ -367,6 +369,23 @@ func (m *Manager) HandleGameOver(g *scrabble.Game) error {
 	}
 
 	return nil
+}
+
+func (m *Manager) ListNewUser() {
+	for u := range m.UserSvc.NewUserChan {
+		p, err := NewNewUserPacket(NewUserPayload{
+			User: user.PublicUser{
+				ID:       u.ID,
+				Username: u.Username,
+				Avatar:   u.Avatar,
+			},
+		})
+		if err != nil {
+			continue
+		}
+
+		m.Broadcast(p)
+	}
 }
 
 func getArrayDifference(a, b []string) []string {

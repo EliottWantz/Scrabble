@@ -73,6 +73,10 @@ type PlayMovePayload struct {
 	MoveInfo game.MoveInfo `json:"moveInfo"`
 }
 
+type StartGamePayload struct {
+	RoomID string `json:"roomId"`
+}
+
 // Server events payloads
 type JoinedRoomPayload struct {
 	RoomID   string            `json:"roomId"`
@@ -110,6 +114,14 @@ func NewListUsersPacket(payload ListUsersPayload) (*Packet, error) {
 	return NewPacket(ServerEventListUsers, payload)
 }
 
+type NewUserPayload struct {
+	User user.PublicUser `json:"user"`
+}
+
+func NewNewUserPacket(payload NewUserPayload) (*Packet, error) {
+	return NewPacket(ServerEventNewUser, payload)
+}
+
 type ListRoomsPayload struct {
 	Rooms []room.Room `json:"rooms"`
 }
@@ -142,13 +154,6 @@ func NewGameOverPacket(payload GameOverPayload) (*Packet, error) {
 	return NewPacket(ServerEventGameOver, payload)
 }
 
-func NewErrorPacket(err error) (*Packet, error) {
-	type ErrorPayload struct {
-		Error string `json:"error"`
-	}
-	return NewPacket(ServerEventError, ErrorPayload{err.Error()})
-}
-
 type FriendRequestPayload struct {
 	FromID       string `json:"fromId"`
 	FromUsername string `json:"fromUsername"`
@@ -164,4 +169,11 @@ func AcceptFRiendRequestPacket(payload FriendRequestPayload) (*Packet, error) {
 
 func DeclineFriendRequestPacket(payload FriendRequestPayload) (*Packet, error) {
 	return NewPacket(ServerEventDeclineFriendRequest, payload)
+}
+
+func NewErrorPacket(err error) (*Packet, error) {
+	type ErrorPayload struct {
+		Error string `json:"error"`
+	}
+	return NewPacket(ServerEventError, ErrorPayload{err.Error()})
 }
