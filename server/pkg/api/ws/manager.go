@@ -2,10 +2,14 @@ package ws
 
 import (
 	"fmt"
+	"reflect"
+	"strings"
 	"time"
 
+	"scrabble/pkg/api/game"
 	"scrabble/pkg/api/room"
 	"scrabble/pkg/api/user"
+	"scrabble/pkg/scrabble"
 
 	"github.com/alphadose/haxmap"
 	"github.com/gofiber/fiber/v2"
@@ -21,9 +25,10 @@ type Manager struct {
 	MessageRepo *MessageRepository
 	RoomSvc     *room.Service
 	UserSvc     *user.Service
+	GameSvc     *game.Service
 }
 
-func NewManager(messageRepo *MessageRepository, roomSvc *room.Service, userSvc *user.Service) (*Manager, error) {
+func NewManager(messageRepo *MessageRepository, roomSvc *room.Service, userSvc *user.Service, gameSvc *game.Service) (*Manager, error) {
 	m := &Manager{
 		Clients:     haxmap.New[string, *Client](),
 		Rooms:       haxmap.New[string, *Room](),
@@ -31,10 +36,13 @@ func NewManager(messageRepo *MessageRepository, roomSvc *room.Service, userSvc *
 		MessageRepo: messageRepo,
 		RoomSvc:     roomSvc,
 		UserSvc:     userSvc,
+		GameSvc:     gameSvc,
 	}
 
-	r := m.AddRoom("global")
+	r := m.AddRoom("global", "Global Room")
 	m.GlobalRoom = r
+
+	go m.ListNewUser()
 
 	return m, nil
 }
@@ -47,6 +55,8 @@ func (m *Manager) Accept(cID string) fiber.Handler {
 			m.logger.Error("add client", err)
 			return
 		}
+
+		m.watchFriendRequests(cID)
 
 		users, err := m.ListUsers()
 		if err != nil {
@@ -108,7 +118,11 @@ func (m *Manager) AddClient(c *Client) error {
 	for _, roomID := range user.JoinedChatRooms {
 		r, err := m.GetRoom(roomID)
 		if err != nil {
-			r = m.AddRoom(roomID)
+			dbRoom, ok := m.RoomSvc.HasRoom(roomID)
+			if !ok {
+				return err
+			}
+			r = m.AddRoom(roomID, dbRoom.Name)
 		}
 		if err := r.AddClient(c.ID); err != nil {
 			return err
@@ -172,8 +186,8 @@ func (m *Manager) DisconnectClient(cID string) error {
 	)
 }
 
-func (m *Manager) AddRoom(ID string) *Room {
-	r := NewRoom(m, ID)
+func (m *Manager) AddRoom(ID, Name string) *Room {
+	r := NewRoom(m, ID, Name)
 	m.Rooms.Set(r.ID, r)
 	m.logger.Info(
 		"room registered",
@@ -218,4 +232,185 @@ func (m *Manager) Shutdown() {
 		_ = m.RemoveClient(c)
 		return true
 	})
+}
+
+func (m *Manager) UpdateJoinableGames() error {
+	joinableGames, err := m.RoomSvc.GetAllJoinableGameRooms()
+	if err != nil {
+		return err
+	}
+	joinableGamesPacket, err := NewJoinableGamesPacket(ListJoinableGamesPayload{
+		Games: joinableGames,
+	})
+	if err != nil {
+		return err
+	}
+	m.Broadcast(joinableGamesPacket)
+
+	return nil
+}
+
+func (m *Manager) watchFriendRequests(id string) {
+	oldUser, _ := m.UserSvc.GetUser(id)
+	oldPendingRequests := oldUser.PendingRequests
+
+	go func() {
+		for {
+
+			newUser, _ := m.UserSvc.GetUser(id)
+			newRequests := newUser.PendingRequests
+			time.Sleep(1 * time.Second)
+			if !reflect.DeepEqual(newRequests, oldPendingRequests) {
+
+				incomingFriendsRequests := getArrayDifference(newRequests, oldPendingRequests)
+
+				if len(incomingFriendsRequests) > 0 {
+					m.logger.Info("new friend request", "user_id", id, "friend_requests", incomingFriendsRequests)
+					for _, friend := range incomingFriendsRequests {
+						isJustFriendRequest := !strings.Contains(strings.Join(newUser.Friends, ""), friend) && strings.Contains(strings.Join(newUser.PendingRequests, ""), friend)
+						isAcceptFriendRequest := strings.Contains(strings.Join(newUser.Friends, ""), friend)
+						isDeleteFriendRequest := !strings.Contains(strings.Join(newUser.PendingRequests, ""), friend)
+
+						if isJustFriendRequest {
+							friendUser, _ := m.UserSvc.GetUser(friend)
+							friendRequestPayload := FriendRequestPayload{
+								FromID:       friendUser.ID,
+								FromUsername: friendUser.Username,
+							}
+							p, err := NewFriendRequestPacket(friendRequestPayload)
+							if err != nil {
+								m.logger.Error("failed to create friend request packet", err)
+							}
+							client, _ := m.GetClient(id)
+							client.send(p)
+						} else if isAcceptFriendRequest {
+							friendUser, _ := m.UserSvc.GetUser(friend)
+							friendRequestPayload := FriendRequestPayload{
+								FromID:       friendUser.ID,
+								FromUsername: friendUser.Username,
+							}
+							p, err := AcceptFRiendRequestPacket(friendRequestPayload)
+							if err != nil {
+								m.logger.Error("failed to create friend request packet", err)
+							}
+							client, _ := m.GetClient(id)
+							client.send(p)
+						} else if isDeleteFriendRequest {
+							friendUser, _ := m.UserSvc.GetUser(friend)
+							friendRequestPayload := FriendRequestPayload{
+								FromID:       friendUser.ID,
+								FromUsername: friendUser.Username,
+							}
+							p, err := DeclineFriendRequestPacket(friendRequestPayload)
+							if err != nil {
+								m.logger.Error("failed to create friend request packet", err)
+							}
+							client, _ := m.GetClient(id)
+							client.send(p)
+						}
+
+					}
+
+					oldPendingRequests = newRequests
+
+				}
+
+			}
+		}
+	}()
+}
+
+func (m *Manager) HandleGameOver(g *scrabble.Game) error {
+	r, err := m.GetRoom(g.ID)
+	if err != nil {
+		return err
+	}
+
+	winnerID := g.Winner().ID
+	gameOverPacket, err := NewGameOverPacket(GameOverPayload{
+		WinnerID: winnerID,
+	})
+	if err != nil {
+		return err
+	}
+
+	r.Broadcast(gameOverPacket)
+
+	for _, p := range g.Players {
+		u, err := m.UserSvc.GetUser(p.ID)
+		if err != nil {
+			continue
+		}
+		m.UserSvc.AddGameStats(u, time.Now().UnixMilli(), winnerID == p.ID)
+		m.UserSvc.LeaveRoom(r.ID, u.ID)
+	}
+
+	leftRoomPacket, err := NewLeftRoomPacket(LeftRoomPayload{
+		RoomID: r.ID,
+	})
+	if err != nil {
+		return err
+	}
+	r.Broadcast(leftRoomPacket)
+
+	err = m.RoomSvc.Delete(r.ID)
+	if err != nil {
+		return err
+	}
+	err = m.RemoveRoom(r.ID)
+	if err != nil {
+		return err
+	}
+	err = m.GameSvc.DeleteGame(g.ID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *Manager) ListNewUser() {
+	for u := range m.UserSvc.NewUserChan {
+		p, err := NewNewUserPacket(NewUserPayload{
+			User: user.PublicUser{
+				ID:       u.ID,
+				Username: u.Username,
+				Avatar:   u.Avatar,
+			},
+		})
+		if err != nil {
+			continue
+		}
+
+		m.Broadcast(p)
+	}
+}
+
+func getArrayDifference(a, b []string) []string {
+	diff := []string{}
+	for _, value := range a {
+		found := false
+		for _, otherValue := range b {
+			if value == otherValue {
+				found = true
+				break
+			}
+		}
+		if !found {
+			diff = append(diff, value)
+		}
+	}
+	for _, value := range b {
+		found := false
+		for _, otherValue := range a {
+			if value == otherValue {
+				found = true
+				break
+			}
+		}
+		if !found {
+			diff = append(diff, value)
+		}
+	}
+	return diff
 }

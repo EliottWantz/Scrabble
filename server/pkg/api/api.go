@@ -29,7 +29,6 @@ type API struct {
 }
 
 type Controllers struct {
-	GameCtrl         *game.Controller
 	UserCtrl         *user.Controller
 	WebSocketManager *ws.Manager
 }
@@ -94,15 +93,13 @@ func New(cfg *config.Config) (*API, error) {
 
 	var controllers Controllers
 	{
-		wsManager, err := ws.NewManager(repositories.MessageRepo, services.RoomSvc, services.UserSvc)
+		wsManager, err := ws.NewManager(repositories.MessageRepo, services.RoomSvc, services.UserSvc, services.GameSvc)
 		if err != nil {
 			return nil, err
 		}
-		gameCtrl := game.NewController(services.GameSvc)
 		userCtrl := user.NewController(services.UserSvc, services.AuthSvc)
 
 		controllers = Controllers{
-			GameCtrl:         gameCtrl,
 			UserCtrl:         userCtrl,
 			WebSocketManager: wsManager,
 		}

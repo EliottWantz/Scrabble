@@ -33,6 +33,29 @@ func (r *Repository) Find(ID string) (*Room, error) {
 	return &roomDB, nil
 }
 
+func (r *Repository) FindAll() ([]Room, error) {
+	rooms := make([]Room, 0)
+	cursor, err := r.coll.Find(context.Background(), bson.M{})
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(context.Background())
+
+	for cursor.Next(context.Background()) {
+		var roomDB Room
+		err := cursor.Decode(&roomDB)
+		if err != nil {
+			return nil, err
+		}
+		if roomDB.ID == "global" {
+			continue
+		}
+		rooms = append(rooms, roomDB)
+	}
+
+	return rooms, nil
+}
+
 func (r *Repository) AddUser(roomID, userID string) error {
 	_, err := r.coll.UpdateByID(
 		context.Background(),
