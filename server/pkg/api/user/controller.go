@@ -216,6 +216,37 @@ func (ctrl *Controller) RejectFriendRequest(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusOK)
 }
 
+type GetFriendsResponse struct {
+	Friends []*User `json:"friends,omitempty"`
+}
+
+func (ctrl *Controller) GetFriends(c *fiber.Ctx) error {
+	id := c.Params("id")
+	friends, err := ctrl.svc.GetFriends(id)
+	if err != nil {
+		return err
+	}
+	return c.JSON(GetFriendsResponse{
+		Friends: friends,
+	})
+}
+
+type GetFriendRequestsResponse struct {
+	FriendRequests []*User `json:"friendRequests,omitempty"`
+}
+
+func (ctrl *Controller) GetPendingFriendRequests(c *fiber.Ctx) error {
+
+	id := c.Params("id")
+	friendRequests, err := ctrl.svc.GetPendingFriendRequests(id)
+	if err != nil {
+		return err
+	}
+	return c.JSON(GetFriendRequestsResponse{
+		FriendRequests: friendRequests,
+	})
+}
+
 type PreferencesRequest struct {
 	Theme    string `json:"theme,omitempty"`
 	Language string `json:"language,omitempty"`

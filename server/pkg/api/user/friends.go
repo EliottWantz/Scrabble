@@ -60,34 +60,34 @@ func (s *Service) rejectFriendRequest(id string, friendId string) error {
 	return fiber.NewError(fiber.StatusBadRequest, "no friend request found")
 }
 
-func (s *Service) GetFriends(id string) ([]User, error) {
+func (s *Service) GetFriends(id string) ([]*User, error) {
 	user, err := s.GetUser(id)
 	if err != nil {
-		return nil, fmt.Errorf("get user: %w", err)
+		return nil, fiber.NewError(fiber.StatusBadRequest, "no user found")
 	}
-	friends := make([]User, 0, len(user.Friends))
+	friends := make([]*User, 0, len(user.Friends))
 	for _, id := range user.Friends {
 		f, err := s.GetUser(id)
 		if err != nil {
-			return nil, fmt.Errorf("get friend: %w", err)
+			return nil, fiber.NewError(fiber.StatusBadRequest, "no user found")
 		}
-		friends = append(friends, *f)
+		friends = append(friends, f)
 	}
 	return friends, nil
 }
 
-func (s *Service) GetPendingFriendRequests(id string) ([]User, error) {
+func (s *Service) GetPendingFriendRequests(id string) ([]*User, error) {
 	user, err := s.GetUser(id)
 	if err != nil {
-		return nil, fmt.Errorf("get user: %w", err)
+		return nil, fiber.NewError(fiber.StatusBadRequest, "no user found")
 	}
-	requests := make([]User, 0, len(user.PendingRequests))
+	friends := make([]*User, 0, len(user.PendingRequests))
 	for _, id := range user.PendingRequests {
 		f, err := s.GetUser(id)
 		if err != nil {
-			return nil, fmt.Errorf("get friend: %w", err)
+			return nil, fiber.NewError(fiber.StatusBadRequest, "no user found")
 		}
-		requests = append(requests, *f)
+		friends = append(friends, f)
 	}
-	return requests, nil
+	return friends, nil
 }
