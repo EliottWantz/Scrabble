@@ -432,16 +432,7 @@ func (c *Client) PlayMove(p *Packet) error {
 			}
 
 			if gam.IsOver() {
-				gameOverPacket, err := NewGameOverPacket(GameOverPayload{
-					WinnerID: gam.Winner().ID,
-				})
-				if err != nil {
-					slog.Error("failed to create game over packet", err)
-				}
-				_, err = c.BroadcastToRoom(payload.GameID, gameOverPacket)
-				if err != nil {
-					slog.Error("failed to broadcast game over packet", err)
-				}
+				c.Manager.HandleGameOver(gam)
 			}
 		}
 	}()
