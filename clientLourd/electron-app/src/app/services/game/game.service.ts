@@ -11,7 +11,25 @@ export class GameService {
     constructor() {
         this.game = new BehaviorSubject<Game>({
             id: "",
-            players: [],
+            players: [
+                {
+                    id: "0",
+                    username: "Olivier",
+                    rack: [
+                        {
+                            letter: "a",
+                            value: 1
+                        },
+                        {
+                            letter: "e",
+                            value: 1
+                        } 
+                    ],
+                    score: 0,
+                    consecutiveExchanges: 0,
+                    isBot: false
+                }
+            ],
             board: BoardHelper.createBoard(),
             bag: [],
             finished: false,

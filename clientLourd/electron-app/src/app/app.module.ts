@@ -26,6 +26,7 @@ import { BoardComponent } from '@app/components/board/board.component';
 import { TileComponent } from '@app/components/tile/tile.component';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { RackComponent } from '@app/components/rack/rack.component';
+import { FreeDraggingDirective } from "@app/directives/dragging.directive"
 
 @NgModule({
   declarations: [
@@ -40,7 +41,8 @@ import { RackComponent } from '@app/components/rack/rack.component';
     GamePageComponent,
     BoardComponent,
     TileComponent,
-    RackComponent
+    RackComponent,
+    FreeDraggingDirective
   ],
   imports: [
     BrowserModule,
