@@ -26,6 +26,7 @@ var (
 	ServerEventUsersInRoom          = "usersInRoom"
 	ServerEventJoinableGames        = "joinableGames"
 	ServerEventGameUpdate           = "gameUpdate"
+	ServerEventTimerUpdate          = "timerUpdate"
 	ServerEventGameOver             = "gameOver"
 	ServerEventFriendRequest        = "friendRequest"
 	ServerEventAcceptFriendRequest  = "acceptFriendRequest"

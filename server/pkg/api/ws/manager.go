@@ -86,6 +86,17 @@ func (m *Manager) Broadcast(p *Packet) {
 	})
 }
 
+func (m *Manager) BroadcastToRoom(rID string, p *Packet) (*Room, error) {
+	r, err := m.GetRoom(rID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get room: %w", err)
+	}
+
+	r.Broadcast(p)
+
+	return r, nil
+}
+
 func (m *Manager) ListUsers() ([]user.PublicUser, error) {
 	var pubUsers []user.PublicUser
 	users, err := m.UserSvc.Repo.FindAll()
@@ -324,6 +335,33 @@ func (m *Manager) watchFriendRequests(id string) {
 	}()
 }
 
+func (m *Manager) MakeBotMoves(gID string) {
+	// Make bots move if applicable
+	for {
+		g, err := m.GameSvc.ApplyBotMove(gID)
+		if err != nil {
+			break
+		}
+		gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
+			Game: makeGamePayload(g),
+		})
+		if err != nil {
+			slog.Error("failed to create update game packet", err)
+			break
+		}
+
+		_, err = m.BroadcastToRoom(gID, gamePacket)
+		if err != nil {
+			slog.Error("failed to broadcast game update", err)
+			break
+		}
+
+		if g.IsOver() {
+			m.HandleGameOver(g)
+		}
+	}
+}
+
 func (m *Manager) HandleGameOver(g *scrabble.Game) error {
 	r, err := m.GetRoom(g.ID)
 	if err != nil {
@@ -346,6 +384,7 @@ func (m *Manager) HandleGameOver(g *scrabble.Game) error {
 			continue
 		}
 		m.UserSvc.AddGameStats(u, time.Now().UnixMilli(), winnerID == p.ID)
+		m.UserSvc.UpdateUserStats(u, winnerID == p.ID, p.Score, time.Now().UnixMilli())
 		m.UserSvc.LeaveRoom(r.ID, u.ID)
 	}
 
