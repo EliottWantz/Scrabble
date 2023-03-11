@@ -8,6 +8,8 @@
         id="square"
         (click)="clicked(i, j)"
         #elem
+        squareHost
     >
+        <app-tile *ngIf="col.tile" [tile]="col.tile" [disabled]="true"></app-tile>
     </th>
 </tr>
