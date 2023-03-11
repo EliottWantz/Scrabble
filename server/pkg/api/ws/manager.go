@@ -39,7 +39,11 @@ func NewManager(messageRepo *MessageRepository, roomSvc *room.Service, userSvc *
 		GameSvc:     gameSvc,
 	}
 
-	r := m.AddRoom("global", "Global Room")
+	dbRoom, ok := m.RoomSvc.HasRoom("global")
+	if !ok {
+		return nil, fmt.Errorf("global room not found")
+	}
+	r := m.AddRoom(dbRoom)
 	m.GlobalRoom = r
 
 	go m.ListNewUser()
@@ -122,7 +126,7 @@ func (m *Manager) AddClient(c *Client) error {
 			if !ok {
 				return err
 			}
-			r = m.AddRoom(roomID, dbRoom.Name)
+			r = m.AddRoom(dbRoom)
 		}
 		if err := r.AddClient(c.ID); err != nil {
 			return err
@@ -186,8 +190,8 @@ func (m *Manager) DisconnectClient(cID string) error {
 	)
 }
 
-func (m *Manager) AddRoom(ID, Name string) *Room {
-	r := NewRoom(m, ID, Name)
+func (m *Manager) AddRoom(dbRoom *room.Room) *Room {
+	r := NewRoom(m, dbRoom)
 	m.Rooms.Set(r.ID, r)
 	m.logger.Info(
 		"room registered",
