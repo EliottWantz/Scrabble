@@ -254,11 +254,11 @@ func (t *GameTimer) TimeRemaining() time.Duration {
 }
 
 func (t *GameTimer) OnTick(tickFn func()) {
-	tickFn()
+	t.tickFn = tickFn
 }
 
 func (t *GameTimer) OnDone(doneFn func()) {
-	doneFn()
+	t.doneFn = doneFn
 }
 
 func (t *GameTimer) Start() {
