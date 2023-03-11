@@ -216,6 +216,60 @@ func (ctrl *Controller) RejectFriendRequest(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusOK)
 }
 
+type GetFriendsResponse struct {
+	Friends []*User `json:"friends,omitempty"`
+}
+
+func (ctrl *Controller) GetFriends(c *fiber.Ctx) error {
+	id := c.Params("id")
+	friends, err := ctrl.svc.GetFriends(id)
+	if err != nil {
+		return err
+	}
+	return c.JSON(GetFriendsResponse{
+		Friends: friends,
+	})
+}
+
+func (ctrl *Controller) GetFriendById(c *fiber.Ctx) error {
+	id := c.Params("id")
+	friendId := c.Params("friendId")
+	friend, err := ctrl.svc.GetFriendById(id, friendId)
+	if err != nil {
+		return err
+	}
+	return c.JSON(GetUserResponse{
+		User: friend,
+	})
+}
+
+func (ctrl *Controller) RemoveFriend(c *fiber.Ctx) error {
+	id := c.Params("id")
+	friendId := c.Params("friendId")
+
+	err := ctrl.svc.RemoveFriend(id, friendId)
+	if err != nil {
+		return err
+	}
+	return c.SendStatus(fiber.StatusOK)
+}
+
+type GetFriendRequestsResponse struct {
+	FriendRequests []*User `json:"friendRequests,omitempty"`
+}
+
+func (ctrl *Controller) GetPendingFriendRequests(c *fiber.Ctx) error {
+
+	id := c.Params("id")
+	friendRequests, err := ctrl.svc.GetPendingFriendRequests(id)
+	if err != nil {
+		return err
+	}
+	return c.JSON(GetFriendRequestsResponse{
+		FriendRequests: friendRequests,
+	})
+}
+
 type PreferencesRequest struct {
 	Theme    string `json:"theme,omitempty"`
 	Language string `json:"language,omitempty"`

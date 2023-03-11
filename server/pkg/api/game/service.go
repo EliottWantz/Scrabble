@@ -23,20 +23,10 @@ var (
 )
 
 type Service struct {
-	repo    *Repository
+	Repo    *Repository
 	UserSvc *user.Service
 	Dict    *scrabble.Dictionary
 	DAWG    *scrabble.DAWG
-}
-
-type Game struct {
-	ID           string                  `json:"id"`
-	Players      []*scrabble.Player      `json:"players"`
-	Board        [15][15]scrabble.Square `json:"board"`
-	Bag          []scrabble.Tile         `json:"bag"`
-	Finished     bool                    `json:"finished"`
-	NumPassMoves int                     `json:"numPassMoves"`
-	Turn         string                  `json:"turn"`
 }
 
 func NewService(repo *Repository, userSvc *user.Service) *Service {
@@ -44,7 +34,7 @@ func NewService(repo *Repository, userSvc *user.Service) *Service {
 	dawg := scrabble.NewDawg(dict)
 
 	s := &Service{
-		repo:    repo,
+		Repo:    repo,
 		UserSvc: userSvc,
 		Dict:    dict,
 		DAWG:    dawg,
@@ -53,7 +43,7 @@ func NewService(repo *Repository, userSvc *user.Service) *Service {
 	return s
 }
 
-func (s *Service) StartGame(room *room.Room) (*Game, error) {
+func (s *Service) StartGame(room *room.Room) (*scrabble.Game, error) {
 	humanPlayers := len(room.UserIDs)
 	if humanPlayers < 2 {
 		return nil, errors.New("must have at least 2 players")
@@ -76,12 +66,12 @@ func (s *Service) StartGame(room *room.Room) (*Game, error) {
 	}
 	g.Turn = g.PlayerToMove().ID
 
-	err := s.repo.Insert(g)
+	err := s.Repo.Insert(g)
 	if err != nil {
 		return nil, err
 	}
 
-	return makeGamePacket(g), nil
+	return g, nil
 }
 
 type MoveInfo struct {
@@ -96,14 +86,14 @@ const (
 	MoveTypePass     = "pass"
 )
 
-func (s *Service) ApplyPlayerMove(gID, pID string, req MoveInfo) (*Game, *scrabble.Game, error) {
-	g, err := s.repo.GetGame(gID)
+func (s *Service) ApplyPlayerMove(gID, pID string, req MoveInfo) (*scrabble.Game, error) {
+	g, err := s.Repo.GetGame(gID)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	player := g.PlayerToMove()
 	if player.ID != pID {
-		return nil, nil, ErrNotPlayerTurn
+		return nil, ErrNotPlayerTurn
 	}
 
 	var move scrabble.Move
@@ -113,13 +103,13 @@ func (s *Service) ApplyPlayerMove(gID, pID string, req MoveInfo) (*Game, *scrabb
 		for pos, letter := range req.Covers {
 			if !player.Rack.ContainsAsString(letter) {
 				if letter == strings.ToUpper(letter) && !player.Rack.Contains('*') {
-					return nil, nil, ErrInvalidMove
+					return nil, ErrInvalidMove
 				}
 			}
 
 			p, err := parsePoint(pos)
 			if err != nil {
-				return nil, nil, fmt.Errorf("invalid coordinate: %w", err)
+				return nil, fmt.Errorf("invalid coordinate: %w", err)
 			}
 			covers[p] = []rune(letter)[0]
 		}
@@ -129,40 +119,30 @@ func (s *Service) ApplyPlayerMove(gID, pID string, req MoveInfo) (*Game, *scrabb
 	case MoveTypePass:
 		move = scrabble.NewPassMove()
 	default:
-		return nil, nil, fmt.Errorf("invalid move type: %s", req.Type)
+		return nil, fmt.Errorf("invalid move type: %s", req.Type)
 	}
 
 	if !move.IsValid(g) {
-		return nil, nil, ErrInvalidMove
+		return nil, ErrInvalidMove
 	}
 
 	err = g.ApplyValid(move)
 	if err != nil {
 		// Should not happen because move is valid
-		return nil, nil, fmt.Errorf("should not have ended up here. cannot apply move that was validated: %v", err)
+		return nil, fmt.Errorf("should not have ended up here. cannot apply move that was validated: %v", err)
 	}
 
-	// if g.IsOver() {
-	// 	// Send end game results by ws
-
-	// TODO:  update user Gamestats
-	// s.UserSvc.UpdateUserStats()
-
-	// TODO : add new game stats
-	// s.UserSvc.addGameStats()
-	// }
-
-	return makeGamePacket(g), g, nil
+	return g, nil
 }
 
-func (s *Service) ApplyBotMove(gID string) (*Game, *scrabble.Game, error) {
-	g, err := s.repo.GetGame(gID)
+func (s *Service) ApplyBotMove(gID string) (*scrabble.Game, error) {
+	g, err := s.Repo.GetGame(gID)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	if !g.PlayerToMove().IsBot {
-		return nil, nil, ErrNotBotTurn
+		return nil, ErrNotBotTurn
 	}
 
 	// Make the bot think
@@ -175,18 +155,16 @@ func (s *Service) ApplyBotMove(gID string) (*Game, *scrabble.Game, error) {
 		slog.Error("apply bot move", err)
 	}
 
-	return makeGamePacket(g), g, nil
+	return g, nil
 }
 
-func makeGamePacket(g *scrabble.Game) *Game {
-	return &Game{
-		ID:           g.ID,
-		Players:      g.Players,
-		Board:        g.Board.Squares,
-		Finished:     g.Finished,
-		NumPassMoves: g.NumPassMoves,
-		Turn:         g.Turn,
+func (s *Service) DeleteGame(gID string) error {
+	err := s.Repo.Delete(gID)
+	if err != nil {
+		return err
 	}
+
+	return nil
 }
 
 func parsePoint(str string) (scrabble.Position, error) {

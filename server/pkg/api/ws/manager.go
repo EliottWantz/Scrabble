@@ -9,6 +9,7 @@ import (
 	"scrabble/pkg/api/game"
 	"scrabble/pkg/api/room"
 	"scrabble/pkg/api/user"
+	"scrabble/pkg/scrabble"
 
 	"github.com/alphadose/haxmap"
 	"github.com/gofiber/fiber/v2"
@@ -38,8 +39,14 @@ func NewManager(messageRepo *MessageRepository, roomSvc *room.Service, userSvc *
 		GameSvc:     gameSvc,
 	}
 
-	r := m.AddRoom("global", "Global Room")
+	dbRoom, ok := m.RoomSvc.HasRoom("global")
+	if !ok {
+		return nil, fmt.Errorf("global room not found")
+	}
+	r := m.AddRoom(dbRoom)
 	m.GlobalRoom = r
+
+	go m.ListNewUser()
 
 	return m, nil
 }
@@ -77,6 +84,17 @@ func (m *Manager) Broadcast(p *Packet) {
 		c.send(p)
 		return true
 	})
+}
+
+func (m *Manager) BroadcastToRoom(rID string, p *Packet) (*Room, error) {
+	r, err := m.GetRoom(rID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get room: %w", err)
+	}
+
+	r.Broadcast(p)
+
+	return r, nil
 }
 
 func (m *Manager) ListUsers() ([]user.PublicUser, error) {
@@ -119,7 +137,7 @@ func (m *Manager) AddClient(c *Client) error {
 			if !ok {
 				return err
 			}
-			r = m.AddRoom(roomID, dbRoom.Name)
+			r = m.AddRoom(dbRoom)
 		}
 		if err := r.AddClient(c.ID); err != nil {
 			return err
@@ -183,8 +201,8 @@ func (m *Manager) DisconnectClient(cID string) error {
 	)
 }
 
-func (m *Manager) AddRoom(ID, Name string) *Room {
-	r := NewRoom(m, ID, Name)
+func (m *Manager) AddRoom(dbRoom *room.Room) *Room {
+	r := NewRoom(m, dbRoom)
 	m.Rooms.Set(r.ID, r)
 	m.logger.Info(
 		"room registered",
@@ -231,6 +249,22 @@ func (m *Manager) Shutdown() {
 	})
 }
 
+func (m *Manager) UpdateJoinableGames() error {
+	joinableGames, err := m.RoomSvc.GetAllJoinableGameRooms()
+	if err != nil {
+		return err
+	}
+	joinableGamesPacket, err := NewJoinableGamesPacket(ListJoinableGamesPayload{
+		Games: joinableGames,
+	})
+	if err != nil {
+		return err
+	}
+	m.Broadcast(joinableGamesPacket)
+
+	return nil
+}
+
 func (m *Manager) watchFriendRequests(id string) {
 	oldUser, _ := m.UserSvc.GetUser(id)
 	oldPendingRequests := oldUser.PendingRequests
@@ -244,9 +278,7 @@ func (m *Manager) watchFriendRequests(id string) {
 			if !reflect.DeepEqual(newRequests, oldPendingRequests) {
 
 				incomingFriendsRequests := getArrayDifference(newRequests, oldPendingRequests)
-				fmt.Println("incomingFriendsRequests: ", incomingFriendsRequests)
-				fmt.Println("newRequests: ", newRequests, "len: ", len(newRequests))
-				fmt.Println("oldPendingRequests: ", oldPendingRequests, "len: ", len(oldPendingRequests))
+
 				if len(incomingFriendsRequests) > 0 {
 					m.logger.Info("new friend request", "user_id", id, "friend_requests", incomingFriendsRequests)
 					for _, friend := range incomingFriendsRequests {
@@ -301,6 +333,100 @@ func (m *Manager) watchFriendRequests(id string) {
 			}
 		}
 	}()
+}
+
+func (m *Manager) MakeBotMoves(gID string) {
+	// Make bots move if applicable
+	for {
+		g, err := m.GameSvc.ApplyBotMove(gID)
+		if err != nil {
+			break
+		}
+		gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
+			Game: makeGamePayload(g),
+		})
+		if err != nil {
+			slog.Error("failed to create update game packet", err)
+			break
+		}
+
+		_, err = m.BroadcastToRoom(gID, gamePacket)
+		if err != nil {
+			slog.Error("failed to broadcast game update", err)
+			break
+		}
+
+		if g.IsOver() {
+			m.HandleGameOver(g)
+		}
+	}
+}
+
+func (m *Manager) HandleGameOver(g *scrabble.Game) error {
+	r, err := m.GetRoom(g.ID)
+	if err != nil {
+		return err
+	}
+
+	winnerID := g.Winner().ID
+	gameOverPacket, err := NewGameOverPacket(GameOverPayload{
+		WinnerID: winnerID,
+	})
+	if err != nil {
+		return err
+	}
+
+	r.Broadcast(gameOverPacket)
+
+	for _, p := range g.Players {
+		u, err := m.UserSvc.GetUser(p.ID)
+		if err != nil {
+			continue
+		}
+		m.UserSvc.AddGameStats(u, time.Now().UnixMilli(), winnerID == p.ID)
+		m.UserSvc.UpdateUserStats(u, winnerID == p.ID, p.Score, time.Now().UnixMilli())
+		m.UserSvc.LeaveRoom(r.ID, u.ID)
+	}
+
+	leftRoomPacket, err := NewLeftRoomPacket(LeftRoomPayload{
+		RoomID: r.ID,
+	})
+	if err != nil {
+		return err
+	}
+	r.Broadcast(leftRoomPacket)
+
+	err = m.RoomSvc.Delete(r.ID)
+	if err != nil {
+		return err
+	}
+	err = m.RemoveRoom(r.ID)
+	if err != nil {
+		return err
+	}
+	err = m.GameSvc.DeleteGame(g.ID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *Manager) ListNewUser() {
+	for u := range m.UserSvc.NewUserChan {
+		p, err := NewNewUserPacket(NewUserPayload{
+			User: user.PublicUser{
+				ID:       u.ID,
+				Username: u.Username,
+				Avatar:   u.Avatar,
+			},
+		})
+		if err != nil {
+			continue
+		}
+
+		m.Broadcast(p)
+	}
 }
 
 func getArrayDifference(a, b []string) []string {
