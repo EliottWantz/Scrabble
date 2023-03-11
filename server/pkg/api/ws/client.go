@@ -109,10 +109,10 @@ func (c *Client) handlePacket(p *Packet) error {
 		return c.HandleCreateGameRoomRequest(p)
 	case ClientEventLeaveRoom:
 		return c.HandleLeaveRoomRequest(p)
-	case ClientEventListRooms:
-		return c.HandleListRoomsRequest(p)
-	case ClientEventListJoinableGames:
-		return c.HandleListJoinableGamesRequest(p)
+	// case ClientEventListRooms:
+	// return c.HandleListRoomsRequest(p)
+	// case ClientEventListJoinableGames:
+	// return c.HandleListJoinableGamesRequest(p)
 	case ClientEventStartGame:
 		return c.HandleStartGameRequest(p)
 	case ClientEventPlayMove:
@@ -201,7 +201,16 @@ func (c *Client) HandleCreateRoomRequest(p *Packet) error {
 		return err
 	}
 
-	return createRoomWithUsers(c, payload.RoomName, payload.UserIDs...)
+	err := createRoomWithUsers(c, payload.RoomName, payload.UserIDs...)
+	if err != nil {
+		return err
+	}
+
+	if err := c.Manager.UpdateChatRooms(); err != nil {
+		slog.Error("send joinable games update:", err)
+	}
+
+	return nil
 }
 
 func (c *Client) HandleCreateGameRoomRequest(p *Packet) error {
@@ -219,39 +228,6 @@ func (c *Client) HandleCreateGameRoomRequest(p *Packet) error {
 		slog.Error("send joinable games update:", err)
 	}
 
-	return nil
-}
-
-func (c *Client) HandleListRoomsRequest(p *Packet) error {
-	rooms, err := c.Manager.RoomSvc.GetAllRooms()
-	if err != nil {
-		return fmt.Errorf("failed to get rooms: %w", err)
-	}
-
-	roomsPacket, err := NewListRoomsPacket(ListRoomsPayload{
-		Rooms: rooms,
-	})
-	if err != nil {
-		return err
-	}
-
-	c.send(roomsPacket)
-	return nil
-}
-
-func (c *Client) HandleListJoinableGamesRequest(p *Packet) error {
-	joinableGames, err := c.Manager.RoomSvc.GetAllJoinableGameRooms()
-	if err != nil {
-		return err
-	}
-	joinableGamesPacket, err := NewJoinableGamesPacket(ListJoinableGamesPayload{
-		Games: joinableGames,
-	})
-	if err != nil {
-		return err
-	}
-
-	c.send(joinableGamesPacket)
 	return nil
 }
 

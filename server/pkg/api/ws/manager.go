@@ -62,15 +62,46 @@ func (m *Manager) Accept(cID string) fiber.Handler {
 
 		m.watchFriendRequests(cID)
 
-		users, err := m.ListUsers()
-		if err != nil {
-			m.logger.Error("list users", err)
+		{
+			// List all users registered in the application
+			p, err := NewListUsersPacket(
+				ListUsersPayload{
+					Users: m.ListUsers(),
+				},
+			)
+			if err != nil {
+				m.logger.Error("list users", err)
+			}
+			c.send(p)
 		}
-		p, err := NewPacket(ServerEventListUsers, ListUsersPayload{Users: users})
-		if err != nil {
-			m.logger.Error("list users", err)
+		{
+			// List available chat rooms
+			rooms, err := m.RoomSvc.GetAllChatRooms()
+			if err != nil {
+				m.logger.Error("list chat rooms", err)
+			}
+			p, err := NewListChatRoomsPacket(ListChatRoomsPayload{
+				Rooms: rooms,
+			})
+			if err != nil {
+				m.logger.Error("list chat rooms", err)
+			}
+			c.send(p)
 		}
-		c.send(p)
+		{
+			// List available games
+			games, err := m.RoomSvc.GetAllGameRooms()
+			if err != nil {
+				m.logger.Error("list joinable games", err)
+			}
+			p, err := NewJoinableGamesPacket(ListJoinableGamesPayload{
+				Games: games,
+			})
+			if err != nil {
+				m.logger.Error("list joinable games", err)
+			}
+			c.send(p)
+		}
 
 		<-c.quitCh
 		if err := m.RemoveClient(c); err != nil {
@@ -97,23 +128,13 @@ func (m *Manager) BroadcastToRoom(rID string, p *Packet) (*Room, error) {
 	return r, nil
 }
 
-func (m *Manager) ListUsers() ([]user.PublicUser, error) {
-	var pubUsers []user.PublicUser
+func (m *Manager) ListUsers() []user.User {
 	users, err := m.UserSvc.Repo.FindAll()
 	if err != nil {
-		return nil, err
+		users = make([]user.User, 0)
 	}
 
-	for _, u := range users {
-		pubUser := user.PublicUser{
-			ID:       u.ID,
-			Username: u.Username,
-			Avatar:   u.Avatar,
-		}
-		pubUsers = append(pubUsers, pubUser)
-	}
-
-	return pubUsers, nil
+	return users
 }
 
 func (m *Manager) AddClient(c *Client) error {
@@ -249,8 +270,24 @@ func (m *Manager) Shutdown() {
 	})
 }
 
+func (m *Manager) UpdateChatRooms() error {
+	rooms, err := m.RoomSvc.GetAllChatRooms()
+	if err != nil {
+		return err
+	}
+	p, err := NewListChatRoomsPacket(ListChatRoomsPayload{
+		Rooms: rooms,
+	})
+	if err != nil {
+		return err
+	}
+	m.Broadcast(p)
+
+	return nil
+}
+
 func (m *Manager) UpdateJoinableGames() error {
-	joinableGames, err := m.RoomSvc.GetAllJoinableGameRooms()
+	joinableGames, err := m.RoomSvc.GetAllGameRooms()
 	if err != nil {
 		return err
 	}
@@ -415,11 +452,7 @@ func (m *Manager) HandleGameOver(g *scrabble.Game) error {
 func (m *Manager) ListNewUser() {
 	for u := range m.UserSvc.NewUserChan {
 		p, err := NewNewUserPacket(NewUserPayload{
-			User: user.PublicUser{
-				ID:       u.ID,
-				Username: u.Username,
-				Avatar:   u.Avatar,
-			},
+			User: u,
 		})
 		if err != nil {
 			continue

@@ -69,11 +69,6 @@ func (r *Room) AddClient(cID string) error {
 	c.Rooms.Set(r.ID, r)
 	r.logger.Info("client added in room", "client", c.ID)
 
-	// err = r.Manager.RoomSvc.AddUser(r.ID, cID)
-	// if err != nil {
-	// 	return err
-	// }
-
 	{
 		payload := JoinedRoomPayload{
 			RoomID:    r.ID,
@@ -96,18 +91,14 @@ func (r *Room) AddClient(cID string) error {
 	}
 
 	{
-		res, err := r.Manager.UserSvc.Repo.Find(cID)
+		u, err := r.Manager.UserSvc.Repo.Find(cID)
 		if err != nil {
 			r.logger.Error("find user that joined", err)
 		}
 
 		payload := UserJoinedPayload{
 			RoomID: r.ID,
-			User: user.PublicUser{
-				ID:       res.ID,
-				Username: res.Username,
-				Avatar:   res.Avatar,
-			},
+			User:   u,
 		}
 		p, err := NewUserJoinedPacket(payload)
 		if err != nil {
@@ -153,8 +144,8 @@ func (r *Room) has(cID string) bool {
 	return err == nil
 }
 
-func (r *Room) ListUsers() []user.PublicUser {
-	users := make([]user.PublicUser, 0, r.Clients.Len())
+func (r *Room) ListUsers() []*user.User {
+	users := make([]*user.User, 0, r.Clients.Len())
 	dbRoom, ok := r.Manager.RoomSvc.HasRoom(r.ID)
 	if !ok {
 		return users
@@ -166,12 +157,7 @@ func (r *Room) ListUsers() []user.PublicUser {
 			r.logger.Error("list users", err)
 			continue
 		}
-		pubUser := user.PublicUser{
-			ID:       u.ID,
-			Username: u.Username,
-			Avatar:   u.Avatar,
-		}
-		users = append(users, pubUser)
+		users = append(users, u)
 	}
 
 	return users
