@@ -1,7 +1,5 @@
-import { Component, ElementRef, HostListener, Input, OnInit, ViewChild, ViewChildren, QueryList } from "@angular/core";
-import {CdkDragDrop, moveItemInArray, transferArrayItem, CdkDragEnter} from '@angular/cdk/drag-drop';
-import { Square } from "@app/utils/interfaces/square";
-import { BehaviorSubject, Observable, Subject } from "rxjs";
+import { Component, ElementRef, OnInit, ViewChildren, QueryList } from "@angular/core";
+import { BehaviorSubject } from "rxjs";
 import { Game } from "@app/utils/interfaces/game/game";
 import { GameService } from "@app/services/game/game.service";
 import { MouseService } from "@app/services/mouse/mouse.service";
