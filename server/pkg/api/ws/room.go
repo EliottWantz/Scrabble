@@ -210,3 +210,24 @@ func createRoomWithUsers(c *Client, roomName string, userIDs ...string) error {
 
 	return nil
 }
+
+func createGameRoomWithUsers(c *Client, roomName string, userIDs ...string) error {
+	dbRoom, err := c.Manager.RoomSvc.CreateGameRoom(
+		uuid.NewString(),
+		roomName,
+		c.ID,
+		userIDs...,
+	)
+	if err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, "failed to create new room: "+err.Error())
+	}
+
+	r := c.Manager.AddRoom(dbRoom)
+	for _, uID := range dbRoom.UserIDs {
+		if err := r.AddClient(uID); err != nil {
+			slog.Error("add client to ws room", err)
+		}
+	}
+
+	return nil
+}

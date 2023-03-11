@@ -89,6 +89,7 @@ func (c *Client) receive() {
 			}
 			c.send(errPacket)
 		}
+		c.Manager.logger.Info("rooms remaining", "rooms", c.Manager.Rooms.Len())
 	}
 }
 
@@ -209,7 +210,7 @@ func (c *Client) HandleCreateGameRoomRequest(p *Packet) error {
 		return err
 	}
 
-	err := createRoomWithUsers(c, "", payload.UserIDs...)
+	err := createGameRoomWithUsers(c, "", payload.UserIDs...)
 	if err != nil {
 		return err
 	}
@@ -290,6 +291,20 @@ func (c *Client) HandleLeaveRoomRequest(p *Packet) error {
 		return fiber.NewError(fiber.StatusInternalServerError, "failed to create packet: "+err.Error())
 	}
 
+	dbRoom, ok := c.Manager.RoomSvc.HasRoom(payload.RoomID)
+	if !ok {
+		return nil
+	}
+
+	if c.ID == dbRoom.CreatorID && dbRoom.IsGameRoom {
+		r.Broadcast(leftRoomPacket)
+		if err := r.Manager.RemoveRoom(r.ID); err != nil {
+			return err
+		}
+		if err := c.Manager.RoomSvc.Delete(r.ID); err != nil {
+			return err
+		}
+	}
 	c.send(leftRoomPacket)
 
 	return nil

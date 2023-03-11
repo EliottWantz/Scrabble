@@ -31,6 +31,20 @@ func (s *Service) CreateRoom(ID, name, creatorID string, withUserIDs ...string) 
 	return r, s.repo.Insert(r)
 }
 
+func (s *Service) CreateGameRoom(ID, name, creatorID string, withUserIDs ...string) (*Room, error) {
+	r := &Room{
+		ID:         ID,
+		Name:       name,
+		CreatorID:  creatorID,
+		UserIDs:    []string{creatorID},
+		IsGameRoom: true,
+	}
+
+	r.UserIDs = append(r.UserIDs, withUserIDs...)
+
+	return r, s.repo.Insert(r)
+}
+
 func (s *Service) HasRoom(ID string) (*Room, bool) {
 	r, err := s.repo.Find(ID)
 	return r, err == nil
