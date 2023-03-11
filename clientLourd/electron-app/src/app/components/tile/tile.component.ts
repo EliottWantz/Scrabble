@@ -7,14 +7,16 @@ import { Tile } from "@app/utils/interfaces/game/tile";
     templateUrl: "./tile.component.html",
     styleUrls: ["./tile.component.scss"],
 })
-export class TileComponent{
+export class TileComponent {
     constructor(private mouseService: MouseService) {}
     @Input() tile!: Tile;
+    @Input() disabled: boolean = false;
     @ViewChild('elem') element!: ElementRef;
 
     clicked(): void {
-        if (this.element.nativeElement.getAttribute('id') != "disabled") {
+        if (!this.disabled) {
             this.mouseService.tileElem = this.element.nativeElement;
+            this.mouseService.tile = this.tile;
         }
     }
 }
