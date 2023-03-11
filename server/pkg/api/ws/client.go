@@ -319,6 +319,13 @@ func (c *Client) HandleStartGameRequest(p *Packet) error {
 	if !ok {
 		return fiber.NewError(fiber.StatusNotFound, "Room not found")
 	}
+	if !dbRoom.IsGameRoom {
+		return fiber.NewError(fiber.StatusBadRequest, "Room is not a game room")
+	}
+	if c.ID != dbRoom.CreatorID {
+		return fiber.NewError(fiber.StatusForbidden, "You are not the room creator")
+	}
+
 	g, err := c.Manager.GameSvc.StartGame(dbRoom)
 	if err != nil {
 		return err
@@ -349,6 +356,9 @@ func (c *Client) HandleStartGameRequest(p *Packet) error {
 			return
 		}
 		r.Broadcast(gamePacket)
+
+		// Make bots move if applicable
+		go c.Manager.MakeBotMoves(g.ID)
 	})
 	g.Timer.Start()
 
@@ -396,31 +406,7 @@ func (c *Client) PlayMove(p *Packet) error {
 	}
 
 	// Make bots move if applicable
-	go func() {
-		for {
-			g, err := c.Manager.GameSvc.ApplyBotMove(payload.GameID)
-			if err != nil {
-				break
-			}
-			gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
-				Game: makeGamePayload(g),
-			})
-			if err != nil {
-				slog.Error("failed to create update game packet", err)
-				break
-			}
-
-			_, err = c.BroadcastToRoom(payload.GameID, gamePacket)
-			if err != nil {
-				slog.Error("failed to broadcast game update", err)
-				break
-			}
-
-			if g.IsOver() {
-				c.Manager.HandleGameOver(g)
-			}
-		}
-	}()
+	go c.Manager.MakeBotMoves(payload.GameID)
 
 	return nil
 }

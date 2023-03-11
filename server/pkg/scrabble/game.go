@@ -55,13 +55,15 @@ type MoveItem struct {
 
 func NewGame(ID string, dawg *DAWG, botStrategy Strategy) *Game {
 	g := &Game{
-		ID:      ID,
-		Board:   NewBoard(),
-		DAWG:    dawg,
-		Bag:     NewBag(DefaultTileSet),
-		TileSet: DefaultTileSet,
-		Engine:  NewEngine(botStrategy),
-		Timer:   NewGameTimer(),
+		ID:       ID,
+		Players:  []*Player{},
+		Board:    NewBoard(),
+		Bag:      NewBag(DefaultTileSet),
+		DAWG:     dawg,
+		TileSet:  DefaultTileSet,
+		MoveList: []*MoveItem{},
+		Engine:   NewEngine(botStrategy),
+		Timer:    NewGameTimer(),
 	}
 
 	return g
@@ -117,6 +119,7 @@ func (g *Game) ApplyValid(move Move) error {
 	// Update the scores and append to the move list
 	g.scoreMove(rackBefore, move)
 	g.Turn = g.PlayerToMove().ID
+	g.Timer.Reset()
 
 	// DEBUG PRINTS
 	fmt.Println("Player:", playerToMove.Username, "Move:", move)
@@ -263,15 +266,17 @@ func (t *GameTimer) OnDone(doneFn func()) {
 
 func (t *GameTimer) Start() {
 	t.Reset()
-	for {
-		select {
-		case <-t.Timer.C:
-			t.doneFn()
-			time.Sleep(time.Second)
-			t.Reset()
-		case <-t.Ticker.C:
-			t.tickFn()
-			// fmt.Printf("\r%v", t.TimeRemaining())
+	go func() {
+		for {
+			select {
+			case <-t.Timer.C:
+				t.doneFn()
+				time.Sleep(time.Second)
+				t.Reset()
+			case <-t.Ticker.C:
+				t.tickFn()
+				// fmt.Printf("\r%v", t.TimeRemaining())
+			}
 		}
-	}
+	}()
 }
