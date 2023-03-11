@@ -1,4 +1,17 @@
 <div class="container">
+    <button mat-fab color="primary" class="home-button" routerLink="/home" routerLinkActive="router-link-active">
+        <mat-icon>home</mat-icon>
+      </button>
     <app-board></app-board>
     <app-rack></app-rack>
+    <button
+      *ngIf="isTurn()"
+      mat-raised-button
+      color="warn"
+      (click)="submit()"
+      id="login-button"
+      [disabled]="!hasPlacedLetters()"
+    >
+      Envoyer
+    </button>
 </div>
