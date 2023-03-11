@@ -342,6 +342,7 @@ func (m *Manager) HandleGameOver(g *scrabble.Game) error {
 			continue
 		}
 		m.UserSvc.AddGameStats(u, time.Now().UnixMilli(), winnerID == p.ID)
+		m.UserSvc.UpdateUserStats(u, winnerID == p.ID, p.Score, time.Now().UnixMilli())
 		m.UserSvc.LeaveRoom(r.ID, u.ID)
 	}
 
@@ -365,6 +366,12 @@ func (m *Manager) HandleGameOver(g *scrabble.Game) error {
 	if err != nil {
 		return err
 	}
+
+	// TODO:  update user Gamestats
+	// m.UserSvc.UpdateUserStats()
+
+	// TODO : add new game stats
+	// s.UserSvc.addGameStats()
 
 	return nil
 }

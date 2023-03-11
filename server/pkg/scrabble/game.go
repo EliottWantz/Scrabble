@@ -3,6 +3,7 @@ package scrabble
 import (
 	"fmt"
 	"sort"
+	"time"
 )
 
 const (
@@ -22,6 +23,15 @@ type Game struct {
 	Finished     bool
 	NumPassMoves int
 	Turn         string
+	Timer        *GameTimer
+}
+
+type GameTimer struct {
+	Timer  *time.Timer
+	Ticker *time.Ticker
+	tickFn func()
+	doneFn func()
+	end    time.Time
 }
 
 // GameState contains the bare minimum of information
@@ -51,6 +61,7 @@ func NewGame(ID string, dawg *DAWG, botStrategy Strategy) *Game {
 		Bag:     NewBag(DefaultTileSet),
 		TileSet: DefaultTileSet,
 		Engine:  NewEngine(botStrategy),
+		Timer:   NewGameTimer(),
 	}
 
 	return g
@@ -68,6 +79,11 @@ func (g *Game) PlayerToMove() *Player {
 // Returns the player that just played his move. Must be called after the move has been applied.
 func (g *Game) PlayerThatPlayed() *Player {
 	return g.Players[(len(g.MoveList)-1)%4]
+}
+
+func (g *Game) SkipTurn() {
+	move := NewPassMove()
+	g.ApplyValid(move)
 }
 
 // PlayTile moves a tile from the player's rack to the board
@@ -213,4 +229,49 @@ func (gs *GameState) GenerateMovesOnAxis(index int, horizontal bool, leftParts [
 	var axis Axis
 	axis.Init(gs, index, horizontal)
 	moveCh <- axis.GenerateMoves(leftParts)
+}
+
+func NewGameTimer() *GameTimer {
+	return &GameTimer{
+		Ticker: time.NewTicker(time.Second), // Fires every second
+		Timer:  time.NewTimer(time.Minute),  // Fires every minute
+		end:    time.Now().Add(time.Minute),
+	}
+}
+
+func (t *GameTimer) Reset() {
+	t.Timer.Reset(time.Minute)
+	t.end = time.Now().Add(time.Minute)
+}
+
+func (t *GameTimer) Stop() {
+	t.Timer.Stop()
+	t.Ticker.Stop()
+}
+
+func (t *GameTimer) TimeRemaining() time.Duration {
+	return time.Until(t.end).Abs().Round(time.Second)
+}
+
+func (t *GameTimer) OnTick(tickFn func()) {
+	tickFn()
+}
+
+func (t *GameTimer) OnDone(doneFn func()) {
+	doneFn()
+}
+
+func (t *GameTimer) Start() {
+	t.Reset()
+	for {
+		select {
+		case <-t.Timer.C:
+			t.doneFn()
+			time.Sleep(time.Second)
+			t.Reset()
+		case <-t.Ticker.C:
+			t.tickFn()
+			// fmt.Printf("\r%v", t.TimeRemaining())
+		}
+	}
 }

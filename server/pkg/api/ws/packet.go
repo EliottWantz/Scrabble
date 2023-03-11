@@ -8,6 +8,7 @@ import (
 	"scrabble/pkg/api/game"
 	"scrabble/pkg/api/room"
 	"scrabble/pkg/api/user"
+	"scrabble/pkg/scrabble"
 )
 
 type Packet struct {
@@ -138,12 +139,42 @@ func NewJoinableGamesPacket(payload ListJoinableGamesPayload) (*Packet, error) {
 	return NewPacket(ServerEventJoinableGames, payload)
 }
 
+type Game struct {
+	ID           string                  `json:"id"`
+	Players      []*scrabble.Player      `json:"players"`
+	Board        [15][15]scrabble.Square `json:"board"`
+	Finished     bool                    `json:"finished"`
+	NumPassMoves int                     `json:"numPassMoves"`
+	Turn         string                  `json:"turn"`
+	Timer        time.Duration           `json:"timer"`
+}
+
+func makeGamePayload(g *scrabble.Game) *Game {
+	return &Game{
+		ID:           g.ID,
+		Players:      g.Players,
+		Board:        g.Board.Squares,
+		Finished:     g.Finished,
+		NumPassMoves: g.NumPassMoves,
+		Turn:         g.Turn,
+		Timer:        g.Timer.TimeRemaining(),
+	}
+}
+
 type GameUpdatePayload struct {
-	Game *game.Game `json:"game"`
+	Game *Game `json:"game"`
 }
 
 func NewGameUpdatePacket(payload GameUpdatePayload) (*Packet, error) {
 	return NewPacket(ServerEventGameUpdate, payload)
+}
+
+type TimerUpdatePayload struct {
+	Timer time.Duration `json:"timer"`
+}
+
+func NewTimerUpdatePacket(payload TimerUpdatePayload) (*Packet, error) {
+	return NewPacket(ServerEventTimerUpdate, payload)
 }
 
 type GameOverPayload struct {

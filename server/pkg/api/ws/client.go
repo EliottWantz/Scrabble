@@ -358,17 +358,45 @@ func (c *Client) HandleStartGameRequest(p *Packet) error {
 	if err := json.Unmarshal(p.Payload, &payload); err != nil {
 		return fiber.NewError(fiber.StatusUnprocessableEntity, "parse request: "+err.Error())
 	}
-	r, ok := c.Manager.RoomSvc.HasRoom(payload.RoomID)
+	dbRoom, ok := c.Manager.RoomSvc.HasRoom(payload.RoomID)
 	if !ok {
 		return fiber.NewError(fiber.StatusNotFound, "Room not found")
 	}
-	g, err := c.Manager.GameSvc.StartGame(r)
+	g, err := c.Manager.GameSvc.StartGame(dbRoom)
 	if err != nil {
 		return err
 	}
 
+	r, err := c.Manager.GetRoom(payload.RoomID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "ws room not found: "+err.Error())
+	}
+	// Start game timer
+	g.Timer.OnTick(func() {
+		timerPacket, err := NewTimerUpdatePacket(TimerUpdatePayload{
+			Timer: g.Timer.TimeRemaining(),
+		})
+		if err != nil {
+			slog.Error("failed to create timer update packet:", err)
+			return
+		}
+		r.Broadcast(timerPacket)
+	})
+	g.Timer.OnDone(func() {
+		g.SkipTurn()
+		gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
+			Game: makeGamePayload(g),
+		})
+		if err != nil {
+			slog.Error("failed to create timer update packet:", err)
+			return
+		}
+		r.Broadcast(gamePacket)
+	})
+	g.Timer.Start()
+
 	gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
-		Game: g,
+		Game: makeGamePayload(g),
 	})
 	if err != nil {
 		return err
@@ -389,13 +417,13 @@ func (c *Client) PlayMove(p *Packet) error {
 	}
 	slog.Info("playMove", "payload", payload)
 
-	g, gam, err := c.Manager.GameSvc.ApplyPlayerMove(payload.GameID, c.ID, payload.MoveInfo)
+	g, err := c.Manager.GameSvc.ApplyPlayerMove(payload.GameID, c.ID, payload.MoveInfo)
 	if err != nil {
 		return err
 	}
 
 	gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
-		Game: g,
+		Game: makeGamePayload(g),
 	})
 	if err != nil {
 		return err
@@ -406,19 +434,19 @@ func (c *Client) PlayMove(p *Packet) error {
 		return err
 	}
 
-	if gam.IsOver() {
-		return c.Manager.HandleGameOver(gam)
+	if g.IsOver() {
+		return c.Manager.HandleGameOver(g)
 	}
 
 	// Make bots move if applicable
 	go func() {
 		for {
-			g, gam, err := c.Manager.GameSvc.ApplyBotMove(payload.GameID)
+			g, err := c.Manager.GameSvc.ApplyBotMove(payload.GameID)
 			if err != nil {
 				break
 			}
 			gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
-				Game: g,
+				Game: makeGamePayload(g),
 			})
 			if err != nil {
 				slog.Error("failed to create update game packet", err)
@@ -431,8 +459,8 @@ func (c *Client) PlayMove(p *Packet) error {
 				break
 			}
 
-			if gam.IsOver() {
-				c.Manager.HandleGameOver(gam)
+			if g.IsOver() {
+				c.Manager.HandleGameOver(g)
 			}
 		}
 	}()
