@@ -13,12 +13,13 @@ import { MoveInfo } from "@app/utils/interfaces/game/move";
 })
 export class MoveService {
     gameId: string = "";
+    placedTiles: Tile[] = [];
     constructor(private webSocketService: WebSocketService) {}
 
-    playTiles(tiles: Tile[]): void {
+    async playTiles(): Promise<void> {
         let letters: string = "";
         const covers = new Map();
-        tiles.forEach(tile => {
+        this.placedTiles.forEach(tile => {
             letters += tile.letter;
             covers.set(tile.x?.toString() + "/" + tile.y?.toString(), tile.letter);
         });
