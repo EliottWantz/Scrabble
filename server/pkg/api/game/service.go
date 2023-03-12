@@ -179,6 +179,31 @@ func (s *Service) ReplacePlayerWithBot(gID, pID string) (*scrabble.Game, error) 
 	return g, nil
 }
 
+func (s *Service) GetIndices(gID string) ([]MoveInfo, error) {
+	g, err := s.Repo.GetGame(gID)
+	if err != nil {
+		return nil, err
+	}
+
+	moves := g.Engine.GenerateBestTileMoves(g.State())
+	var indices []MoveInfo
+	for _, move := range moves {
+		tileMove := move.(*scrabble.TileMove)
+		covers := make(map[string]string)
+		for pos, letter := range tileMove.Covers {
+			covers[stringifyPoint(pos)] = string(letter)
+		}
+		info := MoveInfo{
+			Type:    MoveTypePlayTile,
+			Letters: tileMove.Word,
+			Covers:  covers,
+		}
+		indices = append(indices, info)
+	}
+
+	return indices, nil
+}
+
 func (s *Service) DeleteGame(gID string) error {
 	err := s.Repo.Delete(gID)
 	if err != nil {
@@ -205,6 +230,10 @@ func parsePoint(str string) (scrabble.Position, error) {
 	p.Row = row
 	p.Col = col
 	return p, nil
+}
+
+func stringifyPoint(point scrabble.Position) string {
+	return fmt.Sprintf("%d/%d", point.Row, point.Col)
 }
 
 // Not used, just for testing

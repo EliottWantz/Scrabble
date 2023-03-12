@@ -111,14 +111,12 @@ func (c *Client) handlePacket(p *Packet) error {
 		return c.HandleCreateGameRoomRequest(p)
 	case ClientEventLeaveRoom:
 		return c.HandleLeaveRoomRequest(p)
-	// case ClientEventListRooms:
-	// return c.HandleListRoomsRequest(p)
-	// case ClientEventListJoinableGames:
-	// return c.HandleListJoinableGamesRequest(p)
 	case ClientEventStartGame:
 		return c.HandleStartGameRequest(p)
 	case ClientEventPlayMove:
 		return c.PlayMove(p)
+	case ClientEventIndice:
+		return c.HandleIndiceRequest(p)
 	}
 
 	return nil
@@ -378,6 +376,29 @@ func (c *Client) PlayMove(p *Packet) error {
 
 	// Make bots move if applicable
 	go c.Manager.MakeBotMoves(payload.GameID)
+
+	return nil
+}
+
+func (c *Client) HandleIndiceRequest(p *Packet) error {
+	payload := IndicePayload{}
+	if err := json.Unmarshal(p.Payload, &payload); err != nil {
+		return err
+	}
+
+	moves, err := c.Manager.GameSvc.GetIndices(payload.GameID)
+	if err != nil {
+		return err
+	}
+
+	response, err := NewServerIndicePacket(ServerIndicePayload{
+		Moves: moves,
+	})
+	if err != nil {
+		return err
+	}
+
+	c.send(response)
 
 	return nil
 }

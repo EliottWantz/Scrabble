@@ -82,6 +82,10 @@ type StartGamePayload struct {
 	RoomID string `json:"roomId"`
 }
 
+type IndicePayload struct {
+	GameID string `json:"gameId"`
+}
+
 // Server events payloads
 type JoinedRoomPayload struct {
 	RoomID     string        `json:"roomId"`
@@ -206,6 +210,14 @@ func AcceptFRiendRequestPacket(payload FriendRequestPayload) (*Packet, error) {
 
 func DeclineFriendRequestPacket(payload FriendRequestPayload) (*Packet, error) {
 	return NewPacket(ServerEventDeclineFriendRequest, payload)
+}
+
+type ServerIndicePayload struct {
+	Moves []game.MoveInfo `json:"moves"`
+}
+
+func NewServerIndicePacket(payload ServerIndicePayload) (*Packet, error) {
+	return NewPacket(ServerEventIndice, payload)
 }
 
 func NewErrorPacket(err error) (*Packet, error) {
