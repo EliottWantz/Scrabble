@@ -11,6 +11,7 @@ import 'package:client_leger/models/requests/join_dm_request.dart';
 import 'package:client_leger/models/requests/join_room_request.dart';
 import 'package:client_leger/models/response/chat_message_response.dart';
 import 'package:client_leger/models/response/joined_room_response.dart';
+import 'package:client_leger/models/start_game_payload.dart';
 import 'package:client_leger/services/room_service.dart';
 import 'package:get/get.dart';
 // import 'package:socket_io_client/socket_io_client.dart' as IO;
@@ -21,11 +22,14 @@ import 'package:client_leger/services/user_service.dart';
 import '../models/create_game_room_payload.dart';
 import '../models/requests/create_room_request.dart';
 import '../models/requests/list_joinable_games_request.dart';
+import '../models/requests/start_game_request.dart';
 import '../models/response/list_joinable_games_response.dart';
+import 'game_service.dart';
 
 class WebsocketService extends GetxService {
   final UserService userService;
   final RoomService roomService;
+  final GameService gameService = Get.find();
 
   WebsocketService(
       {required this.userService,
@@ -118,6 +122,7 @@ class WebsocketService extends GetxService {
 
   void handleServerEventJoinableGames(ListJoinableGamesResponse listJoinableGamesResponse) {
     print('before first joinable game userids');
+    gameService.joinableGames.value = listJoinableGamesResponse.payload.games;
     // print(listJoinableGamesResponse.payload.games[0].usersIds.toString());
 
   }
@@ -188,7 +193,12 @@ class WebsocketService extends GetxService {
     socket.sink.add(listJoinableGamesRequest.toRawJson());
   }
 
-  void startGameRequest() {
-    // final startGameRequest =
+  void startGameRequest(String roomId) {
+    final startGamePayload = StartGamePayload(roomId: roomId);
+    final startGameRequest = StartGameRequest(
+      event: ClientEventStartGame,
+      payload: startGamePayload
+    );
+    socket.sink.add(startGameRequest.toRawJson());
   }
 }
