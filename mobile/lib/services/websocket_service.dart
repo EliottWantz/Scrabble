@@ -187,4 +187,8 @@ class WebsocketService extends GetxService {
     );
     socket.sink.add(listJoinableGamesRequest.toRawJson());
   }
+
+  void startGameRequest() {
+    // final startGameRequest =
+  }
 }
