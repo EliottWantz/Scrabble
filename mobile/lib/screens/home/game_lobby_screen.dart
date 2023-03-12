@@ -10,6 +10,7 @@ class GameLobbyScreen extends StatelessWidget {
   final sideBarController =
       SidebarXController(selectedIndex: 0, extended: true);
 
+
   @override
   Widget build(BuildContext context) {
     return Builder(

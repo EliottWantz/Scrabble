@@ -1,6 +1,8 @@
 import 'package:client_leger/controllers/auth_controller.dart';
 import 'package:client_leger/controllers/home_controller.dart';
+import 'package:client_leger/models/game_room.dart';
 import 'package:client_leger/routes/app_routes.dart';
+import 'package:client_leger/services/game_service.dart';
 import 'package:client_leger/services/user_service.dart';
 import 'package:client_leger/services/websocket_service.dart';
 import 'package:client_leger/utils/constants/game.dart';
@@ -18,6 +20,7 @@ class GameStartScreen extends StatelessWidget {
   final sideBarController =
       SidebarXController(selectedIndex: 0, extended: true);
   final WebsocketService _websocketService = Get.find();
+  final GameService _gameService = Get.find();
   final UserService _userService = Get.find();
 
   @override
@@ -58,7 +61,8 @@ class GameStartScreen extends StatelessWidget {
                   ElevatedButton.icon(
                     onPressed: () {
                       _websocketService.createGameRoom();
-                      Get.toNamed(Routes.HOME+Routes.GAME_START+Routes.LOBBY);
+                      Get.toNamed(
+                          Routes.HOME + Routes.GAME_START + Routes.LOBBY);
                     },
                     icon: const Icon(
                       // <-- Icon
@@ -70,7 +74,7 @@ class GameStartScreen extends StatelessWidget {
                   const Gap(60),
                   ElevatedButton.icon(
                     onPressed: () {
-                    //   _websocketService.listJoinableGames();
+                      _showJoinableGamesDialog(context);
                     },
                     icon: const Icon(
                       // <-- Icon
@@ -84,6 +88,99 @@ class GameStartScreen extends StatelessWidget {
             )),
           );
         });
+  }
+
+  void _showJoinableGamesDialog(BuildContext context) {
+    Get.dialog(
+      Dialog(
+        child: SizedBox(
+          height: 500,
+          width: 600,
+          child: Column(
+            children: [
+              const Gap(10),
+              Text('Liste des parties',
+                  style: Theme.of(context).textTheme.headline6),
+              const Gap(10),
+              Obx(
+                () => Expanded(
+                    child: SingleChildScrollView(
+                  child: DataTable(
+                    columns: const <DataColumn>[
+                      DataColumn(
+                        label: Expanded(
+                          child: Text(
+                            'Room Name',
+                          ),
+                        ),
+                      ),
+                      DataColumn(
+                        label: Expanded(
+                          child: Text(
+                            'Users',
+                          ),
+                        ),
+                      ),
+                    ],
+                    rows: _createJoinableGameRows(),
+                  ),
+                )),
+              ),
+              const Gap(10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  TextButton(
+                      style: TextButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              side: const BorderSide(color: Colors.black))),
+                      onPressed: () {},
+                      child: const Text('Confirmer')),
+                  const Gap(10),
+                  TextButton(
+                      style: TextButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              side: const BorderSide(color: Colors.black))),
+                      onPressed: () {
+                        DialogHelper.hideLoading();
+                      },
+                      child: const Text('Annuler')),
+                ],
+              ),
+              const Gap(10),
+            ],
+          ),
+        ),
+      ),
+      barrierDismissible: false,
+    );
+  }
+
+  List<DataRow> _createJoinableGameRows() {
+    if (_gameService.joinableGames.value != null) {
+      return _gameService.joinableGames.value!
+          .map((game) => DataRow(cells: [
+                DataCell(Text(game.id)),
+                DataCell(
+                  ElevatedButton.icon(
+                    onPressed: () {
+                    },
+                    icon: const Icon(
+                      // <-- Icon
+                      Icons.play_arrow,
+                      size: 20,
+                    ),
+                    label: const Text('Rejoindre'), // <-- Text
+                  ),
+                ),
+              ]))
+          .toList();
+    }
+    return [
+      DataRow(cells: [DataCell(Text('')), DataCell(Text(''))])
+    ];
   }
 
 // void _showCreateGameDialog(BuildContext context) {
