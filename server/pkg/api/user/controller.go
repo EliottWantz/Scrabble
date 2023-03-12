@@ -231,6 +231,29 @@ func (ctrl *Controller) GetFriends(c *fiber.Ctx) error {
 	})
 }
 
+func (ctrl *Controller) GetFriendById(c *fiber.Ctx) error {
+	id := c.Params("id")
+	friendId := c.Params("friendId")
+	friend, err := ctrl.svc.GetFriendById(id, friendId)
+	if err != nil {
+		return err
+	}
+	return c.JSON(GetUserResponse{
+		User: friend,
+	})
+}
+
+func (ctrl *Controller) RemoveFriend(c *fiber.Ctx) error {
+	id := c.Params("id")
+	friendId := c.Params("friendId")
+
+	err := ctrl.svc.RemoveFriend(id, friendId)
+	if err != nil {
+		return err
+	}
+	return c.SendStatus(fiber.StatusOK)
+}
+
 type GetFriendRequestsResponse struct {
 	FriendRequests []*User `json:"friendRequests,omitempty"`
 }
