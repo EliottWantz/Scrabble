@@ -1,16 +1,40 @@
 package scrabble
 
-const MaxPassMoves int = 6
+import (
+	"errors"
+	"fmt"
+	"sort"
+	"time"
+)
+
+const (
+	MaxPassMoves                 int = 6
+	MaxHumanConsecutivePassMoves int = 2
+)
+
+var ErrPlayerNotFound = errors.New("player not found")
 
 type Game struct {
-	Players      [2]*Player
+	ID           string
+	Players      []*Player
 	Board        *Board
 	Bag          *Bag
 	DAWG         *DAWG
 	TileSet      *TileSet
 	MoveList     []*MoveItem
+	Engine       *Engine
 	Finished     bool
 	NumPassMoves int
+	Turn         string
+	Timer        *GameTimer
+}
+
+type GameTimer struct {
+	Timer  *time.Timer
+	Ticker *time.Ticker
+	tickFn func()
+	doneFn func()
+	end    time.Time
 }
 
 // GameState contains the bare minimum of information
@@ -32,29 +56,48 @@ type MoveItem struct {
 	Move       Move
 }
 
-func NewGame(tileSet *TileSet, dawg *DAWG) *Game {
+func NewGame(ID string, dawg *DAWG, botStrategy Strategy) *Game {
 	g := &Game{
-		Board:   NewBoard(),
-		DAWG:    dawg,
-		Bag:     NewBag(tileSet),
-		TileSet: tileSet,
+		ID:       ID,
+		Players:  []*Player{},
+		Board:    NewBoard(),
+		Bag:      NewBag(DefaultTileSet),
+		DAWG:     dawg,
+		TileSet:  DefaultTileSet,
+		MoveList: []*MoveItem{},
+		Engine:   NewEngine(botStrategy),
+		Timer:    NewGameTimer(),
 	}
 
 	return g
 }
 
 func (g *Game) AddPlayer(p *Player) {
-	g.Players[0] = p
-}
-
-// PlayerToMoveIndex returns 0 or 1 depending on which player's move it is
-func (g *Game) PlayerToMoveIndex() int {
-	return len(g.MoveList) % 2
+	g.Players = append(g.Players, p)
 }
 
 // PlayerToMove returns the player which player's move it is
 func (g *Game) PlayerToMove() *Player {
-	return g.Players[g.PlayerToMoveIndex()]
+	return g.Players[len(g.MoveList)%4]
+}
+
+// Returns the player that just played his move. Must be called after the move has been applied.
+func (g *Game) PlayerThatPlayed() *Player {
+	return g.Players[(len(g.MoveList)-1)%4]
+}
+
+func (g *Game) SkipTurn() {
+	move := NewPassMove()
+	g.ApplyValid(move)
+}
+
+func (g *Game) GetPlayer(pID string) (*Player, error) {
+	for _, p := range g.Players {
+		if p.ID == pID {
+			return p, nil
+		}
+	}
+	return nil, ErrPlayerNotFound
 }
 
 // PlayTile moves a tile from the player's rack to the board
@@ -87,23 +130,31 @@ func (g *Game) ApplyValid(move Move) error {
 
 	// Update the scores and append to the move list
 	g.scoreMove(rackBefore, move)
-	if g.IsOver() {
-		// The game is now over: add the FinalMoves
-		rackPlayer := playerToMove.Rack.AsString()
-		rackOpp := g.Players[1-g.PlayerToMoveIndex()].Rack.AsString()
+	g.Turn = g.PlayerToMove().ID
+	g.Timer.Reset()
 
-		multiplyFactor := 2
-		if len(rackPlayer) > 0 {
-			// The game is not finishing by the final player
-			// completing his rack: both players then get the
-			// opponent's remaining tile scores
-			multiplyFactor = 1
-		}
-		// Add a final move for the finishing player
-		g.scoreMove(rackPlayer, NewFinalMove(rackOpp, multiplyFactor))
-		// Add a final move for the opponent
-		g.scoreMove(rackOpp, NewFinalMove(rackPlayer, multiplyFactor))
-	}
+	// DEBUG PRINTS
+	fmt.Println("Player:", playerToMove.Username, "Move:", move)
+	fmt.Println(g.Board)
+
+	// TODO: What to do with a game of 4 players?
+	// if g.IsOver() {
+	// 	// The game is now over: add the FinalMoves
+	// 	rackPlayer := playerToMove.Rack.AsString()
+	// 	rackOpp := g.Players[1-g.PlayerToMoveIndex()].Rack.AsString()
+
+	// 	multiplyFactor := 2
+	// 	if len(rackPlayer) > 0 {
+	// 		// The game is not finishing by the final player
+	// 		// completing his rack: both players then get the
+	// 		// opponent's remaining tile scores
+	// 		multiplyFactor = 1
+	// 	}
+	// 	// Add a final move for the finishing player
+	// 	g.scoreMove(rackPlayer, NewFinalMove(rackOpp, multiplyFactor))
+	// 	// Add a final move for the opponent
+	// 	g.scoreMove(rackOpp, NewFinalMove(rackPlayer, multiplyFactor))
+	// }
 	return nil
 }
 
@@ -131,9 +182,28 @@ func (g *Game) IsOver() bool {
 	if g.NumPassMoves == MaxPassMoves {
 		return true
 	}
-	lastPlayer := 1 - (i % 2)
 
-	return g.Players[lastPlayer].Rack.IsEmpty()
+	lastPlayer := g.PlayerThatPlayed()
+	if lastPlayer.ConsecutiveExchanges >= MaxHumanConsecutivePassMoves {
+		return true
+	}
+	if lastPlayer.Rack.IsEmpty() {
+		return true
+	}
+
+	return false
+}
+
+func (g *Game) Winner() *Player {
+	// Return the player with the highest score
+	// sortedPlayer := g.Players
+	var sortedPlayer []*Player = make([]*Player, len(g.Players))
+	copy(sortedPlayer, g.Players)
+	sort.Slice(sortedPlayer, func(i, j int) bool {
+		return sortedPlayer[i].Score > sortedPlayer[j].Score
+	})
+
+	return sortedPlayer[0]
 }
 
 // State returns a new GameState instance describing the state of the
@@ -174,4 +244,51 @@ func (gs *GameState) GenerateMovesOnAxis(index int, horizontal bool, leftParts [
 	var axis Axis
 	axis.Init(gs, index, horizontal)
 	moveCh <- axis.GenerateMoves(leftParts)
+}
+
+func NewGameTimer() *GameTimer {
+	return &GameTimer{
+		Ticker: time.NewTicker(time.Second), // Fires every second
+		Timer:  time.NewTimer(time.Minute),  // Fires every minute
+		end:    time.Now().Add(time.Minute),
+	}
+}
+
+func (t *GameTimer) Reset() {
+	t.Timer.Reset(time.Minute)
+	t.end = time.Now().Add(time.Minute)
+}
+
+func (t *GameTimer) Stop() {
+	t.Timer.Stop()
+	t.Ticker.Stop()
+}
+
+func (t *GameTimer) TimeRemaining() time.Duration {
+	return time.Until(t.end).Abs().Round(time.Second)
+}
+
+func (t *GameTimer) OnTick(tickFn func()) {
+	t.tickFn = tickFn
+}
+
+func (t *GameTimer) OnDone(doneFn func()) {
+	t.doneFn = doneFn
+}
+
+func (t *GameTimer) Start() {
+	t.Reset()
+	go func() {
+		for {
+			select {
+			case <-t.Timer.C:
+				t.doneFn()
+				time.Sleep(time.Second)
+				t.Reset()
+			case <-t.Ticker.C:
+				t.tickFn()
+				// fmt.Printf("\r%v", t.TimeRemaining())
+			}
+		}
+	}()
 }

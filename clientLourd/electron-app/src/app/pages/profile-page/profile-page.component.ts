@@ -1,22 +1,26 @@
-import { Component } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { CommunicationService } from "@app/services/communication/communication.service";
 import { UserService } from "@app/services/user/user.service";
 import { User } from "@app/utils/interfaces/user";
+import { BehaviorSubject } from "rxjs";
 
 @Component({
   selector: "app-profile-page",
   templateUrl: "./profile-page.component.html",
   styleUrls: ["./profile-page.component.scss"],
 })
-export class ProfilePageComponent {
+export class ProfilePageComponent implements OnInit {
   username: string = "";
   email: string = "";
   selectedFile: File = new File([], "");
   hasError = false;
-  user: User;
+  user!: BehaviorSubject<User>;
   constructor(private communicationService: CommunicationService, private userService: UserService) {
-    this.user= this.userService.currentUserValue;
-    document.getElementById("avatar")?.setAttribute("src", this.user.avatar.url);
+    this.user = this.userService.subjectUser;
+  }
+
+  ngOnInit() {
+    this.user.subscribe();
   }
 
   onFileSelected(event: any): void {
@@ -31,5 +35,9 @@ export class ProfilePageComponent {
       });
     }
     
+  }
+
+  getDate(time: number) {
+    return new Date(time).toLocaleString()
   }
 }

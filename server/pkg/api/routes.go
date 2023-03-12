@@ -69,10 +69,20 @@ func (api *API) setupRoutes(cfg *config.Config) {
 	r.Patch("/user/:id/config", api.Ctrls.UserCtrl.UpdatePreferences)
 	r.Get("/user/:id", api.Ctrls.UserCtrl.GetUser)
 
+	r.Get("/user/friends/:id", api.Ctrls.UserCtrl.GetFriends)
+	r.Get("/user/friends/:id/:friendId", api.Ctrls.UserCtrl.GetFriendById)
+	r.Delete("/user/friends/:id/:friendId", api.Ctrls.UserCtrl.RemoveFriend)
+
+	r.Get("/user/friends/requests/:id", api.Ctrls.UserCtrl.GetPendingFriendRequests)
+
+	r.Post("/user/friends/request/:id/:friendId", api.Ctrls.UserCtrl.SendFriendRequest)
+	r.Patch("/user/friends/accept/:id/:friendId", api.Ctrls.UserCtrl.AcceptFriendRequest)
+	r.Delete("/user/friends/accept/:id/:friendId", api.Ctrls.UserCtrl.RejectFriendRequest)
+
 	r.Post("/avatar", api.Ctrls.UserCtrl.UploadAvatar)
 
-	r.Post("/room/join", api.Ctrls.WebSocketManager.JoinRoom)
-	r.Post("/room/joindm", api.Ctrls.WebSocketManager.JoinDMRoom)
-	r.Post("/room/leave", api.Ctrls.WebSocketManager.LeaveRoom)
+	// r.Post("/room/join", api.Ctrls.WebSocketManager.JoinRoom)
+	// r.Post("/room/joindm", api.Ctrls.WebSocketManager.JoinDMRoom)
+	// r.Post("/room/leave", api.Ctrls.WebSocketManager.LeaveRoom)
 	r.Get("/room/:id/messages", api.Ctrls.WebSocketManager.GetMessages)
 }

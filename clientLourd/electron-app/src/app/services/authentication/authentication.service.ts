@@ -47,7 +47,11 @@ export class AuthenticationService {
             username: res.user.username,
             email: res.user.email,
             avatar: res.user.avatar,
-            preferences: res.user.preferences
+            preferences: res.user.preferences,
+            joinedChatRooms: res.user.joinedChatRooms,
+	        friends: res.user.friends,
+	        pendingRequests: res.user.pendingRequests,
+	        summary: res.user.summary
         });
         this.storageService.saveUserToken(res.token);
         this.isLoginFailed = false;

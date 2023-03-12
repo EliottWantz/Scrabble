@@ -44,6 +44,10 @@ func (r *Rack) Contains(letter rune) bool {
 	return r.Index(letter) >= 0
 }
 
+func (r *Rack) ContainsAsString(letter string) bool {
+	return r.Index([]rune(letter)[0]) >= 0
+}
+
 func (r *Rack) Remove(letter rune) error {
 	i := r.Index(letter)
 
