@@ -92,9 +92,9 @@ class WebsocketService extends GetxService {
       break;
       case ServerEventJoinableGames: {
         print('joinable games event object from server');
-        print(jsonDecode(data)['payload']['games'][0]['UserIDs'][0].runtimeType);
+        // print(jsonDecode(data)['payload']['games'][0]['UserIDs'][0].runtimeType);
         ListJoinableGamesResponse listJoinableGamesResponse = ListJoinableGamesResponse.fromRawJson(data);
-        print(listJoinableGamesResponse.payload.games[0].usersIds.toString());
+        // print(listJoinableGamesResponse.payload.games[0].usersIds.toString());
         handleServerEventJoinableGames(listJoinableGamesResponse);
       }
       break;
@@ -118,7 +118,7 @@ class WebsocketService extends GetxService {
 
   void handleServerEventJoinableGames(ListJoinableGamesResponse listJoinableGamesResponse) {
     print('before first joinable game userids');
-    print(listJoinableGamesResponse.payload.games[0].usersIds.toString());
+    // print(listJoinableGamesResponse.payload.games[0].usersIds.toString());
 
   }
 
