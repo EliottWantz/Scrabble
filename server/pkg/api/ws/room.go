@@ -124,7 +124,10 @@ func (r *Room) RemoveClient(cID string) error {
 		if err := r.Manager.RemoveRoom(r.ID); err != nil {
 			return err
 		}
-		return r.Manager.RoomSvc.Delete(r.ID)
+		if err := r.Manager.RoomSvc.Delete(r.ID); err != nil {
+			return err
+		}
+		return r.Manager.GameSvc.DeleteGame(r.ID)
 	}
 
 	return nil
@@ -146,8 +149,8 @@ func (r *Room) has(cID string) bool {
 
 func (r *Room) ListUsers() []*user.User {
 	users := make([]*user.User, 0, r.Clients.Len())
-	dbRoom, ok := r.Manager.RoomSvc.HasRoom(r.ID)
-	if !ok {
+	dbRoom, err := r.Manager.RoomSvc.Find(r.ID)
+	if err != nil {
 		return users
 	}
 

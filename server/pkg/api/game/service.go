@@ -20,6 +20,9 @@ var (
 	ErrNotBotTurn      = errors.New("not bot's turn")
 	ErrInvalidMove     = errors.New("invalid move")
 	ErrInvalidPosition = errors.New("invalid position")
+	ErrGameNotStarted  = errors.New("game not started")
+
+	botNames = []string{"Bot1", "Bot2", "Bot3", "Bot4"}
 )
 
 type Service struct {
@@ -50,8 +53,6 @@ func (s *Service) StartGame(room *room.Room) (*scrabble.Game, error) {
 	}
 	botPlayers := 4 - humanPlayers
 	slog.Info("Starting game", "room", room.ID, "human", humanPlayers, "ai", botPlayers)
-
-	botNames := []string{"Bot1", "Bot2"}
 
 	g := scrabble.NewGame(room.ID, s.DAWG, &scrabble.HighScore{})
 	for _, uID := range room.UserIDs {
@@ -154,6 +155,26 @@ func (s *Service) ApplyBotMove(gID string) (*scrabble.Game, error) {
 	if err != nil {
 		slog.Error("apply bot move", err)
 	}
+
+	return g, nil
+}
+
+func (s *Service) ReplacePlayerWithBot(gID, pID string) (*scrabble.Game, error) {
+	g, err := s.Repo.GetGame(gID)
+	if err != nil {
+		return nil, err
+	}
+
+	p, err := g.GetPlayer(pID)
+	if err != nil {
+		return nil, err
+	}
+	if p.IsBot {
+		return nil, fmt.Errorf("player %s is a bot", pID)
+	}
+
+	p.IsBot = true
+	p.Username = "Bot " + p.Username
 
 	return g, nil
 }

@@ -8,7 +8,7 @@ type Service struct {
 
 func NewService(repo *Repository) (*Service, error) {
 	svc := &Service{repo: repo}
-	if _, ok := svc.HasRoom("global"); !ok {
+	if _, err := svc.Find("global"); err != nil {
 		_, err := svc.CreateRoom("global", "Global Room", "system")
 		if err != nil {
 			return nil, err
@@ -45,9 +45,8 @@ func (s *Service) CreateGameRoom(ID, name, creatorID string, withUserIDs ...stri
 	return r, s.repo.Insert(r)
 }
 
-func (s *Service) HasRoom(ID string) (*Room, bool) {
-	r, err := s.repo.Find(ID)
-	return r, err == nil
+func (s *Service) Find(ID string) (*Room, error) {
+	return s.repo.Find(ID)
 }
 
 func (s *Service) GetAllChatRooms() ([]Room, error) {
