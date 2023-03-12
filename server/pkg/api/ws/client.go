@@ -267,8 +267,8 @@ func (c *Client) HandleLeaveRoomRequest(p *Packet) error {
 		return fiber.NewError(fiber.StatusInternalServerError, "failed to create packet: "+err.Error())
 	}
 
-	dbRoom, ok := c.Manager.RoomSvc.HasRoom(payload.RoomID)
-	if !ok {
+	dbRoom, err := c.Manager.RoomSvc.Find(payload.RoomID)
+	if err != nil {
 		return nil
 	}
 
@@ -283,6 +283,13 @@ func (c *Client) HandleLeaveRoomRequest(p *Packet) error {
 	}
 	c.send(leftRoomPacket)
 
+	// Replace player with bot
+	if dbRoom.IsGameRoom {
+		if _, err := c.Manager.GameSvc.ReplacePlayerWithBot(dbRoom.ID, c.ID); err != nil {
+			r.logger.Error("failed to replace player fwith a bot", err, "playerID", c.ID)
+		}
+	}
+
 	return nil
 }
 
@@ -291,8 +298,8 @@ func (c *Client) HandleStartGameRequest(p *Packet) error {
 	if err := json.Unmarshal(p.Payload, &payload); err != nil {
 		return fiber.NewError(fiber.StatusUnprocessableEntity, "parse request: "+err.Error())
 	}
-	dbRoom, ok := c.Manager.RoomSvc.HasRoom(payload.RoomID)
-	if !ok {
+	dbRoom, err := c.Manager.RoomSvc.Find(payload.RoomID)
+	if err != nil {
 		return fiber.NewError(fiber.StatusNotFound, "Room not found")
 	}
 	if !dbRoom.IsGameRoom {

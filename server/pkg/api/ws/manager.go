@@ -39,8 +39,8 @@ func NewManager(messageRepo *MessageRepository, roomSvc *room.Service, userSvc *
 		GameSvc:     gameSvc,
 	}
 
-	dbRoom, ok := m.RoomSvc.HasRoom("global")
-	if !ok {
+	dbRoom, err := m.RoomSvc.Find("global")
+	if err != nil {
 		return nil, fmt.Errorf("global room not found")
 	}
 	r := m.AddRoom(dbRoom)
@@ -154,8 +154,8 @@ func (m *Manager) AddClient(c *Client) error {
 	for _, roomID := range user.JoinedChatRooms {
 		r, err := m.GetRoom(roomID)
 		if err != nil {
-			dbRoom, ok := m.RoomSvc.HasRoom(roomID)
-			if !ok {
+			dbRoom, err := m.RoomSvc.Find(roomID)
+			if err != nil {
 				return err
 			}
 			r = m.AddRoom(dbRoom)
@@ -185,6 +185,17 @@ func (m *Manager) RemoveClient(c *Client) error {
 	c.Rooms.ForEach(func(rID string, r *Room) bool {
 		if err := r.RemoveClient(c.ID); err != nil {
 			r.logger.Error("failed to remove client from room", err, "client_id", c.ID)
+		}
+
+		dbRoom, err := m.RoomSvc.Find(rID)
+		if err != nil {
+			r.logger.Error("db room not found", err)
+			return true
+		}
+		if dbRoom.IsGameRoom {
+			if _, err := m.GameSvc.ReplacePlayerWithBot(dbRoom.ID, c.ID); err != nil {
+				r.logger.Error("failed to replace player fwith a bot", err, "playerID", c.ID)
+			}
 		}
 
 		return true

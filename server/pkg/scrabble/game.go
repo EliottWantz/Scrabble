@@ -1,6 +1,7 @@
 package scrabble
 
 import (
+	"errors"
 	"fmt"
 	"sort"
 	"time"
@@ -10,6 +11,8 @@ const (
 	MaxPassMoves                 int = 6
 	MaxHumanConsecutivePassMoves int = 2
 )
+
+var ErrPlayerNotFound = errors.New("player not found")
 
 type Game struct {
 	ID           string
@@ -86,6 +89,15 @@ func (g *Game) PlayerThatPlayed() *Player {
 func (g *Game) SkipTurn() {
 	move := NewPassMove()
 	g.ApplyValid(move)
+}
+
+func (g *Game) GetPlayer(pID string) (*Player, error) {
+	for _, p := range g.Players {
+		if p.ID == pID {
+			return p, nil
+		}
+	}
+	return nil, ErrPlayerNotFound
 }
 
 // PlayTile moves a tile from the player's rack to the board
