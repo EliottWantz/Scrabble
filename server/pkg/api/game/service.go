@@ -20,6 +20,7 @@ var (
 	ErrNotBotTurn      = errors.New("not bot's turn")
 	ErrInvalidMove     = errors.New("invalid move")
 	ErrInvalidPosition = errors.New("invalid position")
+	ErrGameNotStarted  = errors.New("game not started")
 
 	botNames = []string{"Bot1", "Bot2", "Bot3", "Bot4"}
 )
@@ -168,8 +169,8 @@ func (s *Service) ReplacePlayerWithBot(gID, pID string) (*scrabble.Game, error) 
 	if err != nil {
 		return nil, err
 	}
-	if !p.IsBot {
-		return nil, fmt.Errorf("player %s is not a bot", pID)
+	if p.IsBot {
+		return nil, fmt.Errorf("player %s is a bot", pID)
 	}
 
 	p.IsBot = true

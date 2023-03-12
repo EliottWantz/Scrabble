@@ -183,30 +183,15 @@ func (m *Manager) GetClient(cID string) (*Client, error) {
 
 func (m *Manager) RemoveClient(c *Client) error {
 	c.Rooms.ForEach(func(rID string, r *Room) bool {
-		if err := r.RemoveClient(c.ID); err != nil {
-			r.logger.Error("failed to remove client from room", err, "client_id", c.ID)
-		}
-
-		dbRoom, err := m.RoomSvc.Find(rID)
+		err := m.RemoveClientFromRoom(c, r)
 		if err != nil {
-			r.logger.Error("db room not found", err)
-			return true
-		}
-		if dbRoom.IsGameRoom {
-			if _, err := m.GameSvc.ReplacePlayerWithBot(dbRoom.ID, c.ID); err != nil {
-				r.logger.Error("failed to replace player fwith a bot", err, "playerID", c.ID)
-			}
+			m.logger.Error("remove client from room", err)
 		}
 
 		return true
 	})
 
 	m.Clients.Del(c.ID)
-	err := c.Conn.Close()
-	if err != nil {
-		return fmt.Errorf("removeClient: %w", err)
-	}
-
 	user, err := m.UserSvc.GetUser(c.ID)
 	if err != nil {
 		return fmt.Errorf("removeClient: %w", err)
@@ -217,6 +202,51 @@ func (m *Manager) RemoveClient(c *Client) error {
 		"client_id", c.ID,
 		"total_rooms", m.Rooms.Len(),
 	)
+
+	err = c.Conn.Close()
+	if err != nil {
+		return fmt.Errorf("removeClient: %w", err)
+	}
+
+	return nil
+}
+
+func (m *Manager) RemoveClientFromRoom(c *Client, r *Room) error {
+	if err := r.RemoveClient(c.ID); err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, "failed to leave ws room: "+err.Error())
+	}
+
+	leftRoomPacket, err := NewLeftRoomPacket(LeftRoomPayload{
+		RoomID: r.ID,
+	})
+	if err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, "failed to create packet: "+err.Error())
+	}
+
+	dbRoom, err := c.Manager.RoomSvc.Find(r.ID)
+	if err != nil {
+		return nil
+	}
+
+	if c.ID == dbRoom.CreatorID && dbRoom.IsGameRoom {
+		_, err := c.Manager.GameSvc.Repo.GetGame(dbRoom.ID)
+		if err != nil {
+			// Game has not started yet
+			r.Broadcast(leftRoomPacket)
+			if err := r.Manager.RemoveRoom(r.ID); err != nil {
+				return err
+			}
+			if err := c.Manager.RoomSvc.Delete(r.ID); err != nil {
+				return err
+			}
+		}
+	}
+	c.send(leftRoomPacket)
+
+	// Replace player with bot if game room
+	if dbRoom.IsGameRoom {
+		m.ReplacePlayerWithBot(c.ID, r, dbRoom)
+	}
 
 	return nil
 }
@@ -408,6 +438,25 @@ func (m *Manager) MakeBotMoves(gID string) {
 			m.HandleGameOver(g)
 		}
 	}
+}
+
+func (m *Manager) ReplacePlayerWithBot(pID string, r *Room, dbRoom *room.Room) error {
+	g, err := m.GameSvc.ReplacePlayerWithBot(dbRoom.ID, pID)
+	if err != nil {
+		return err
+	}
+	gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
+		Game: makeGamePayload(g),
+	})
+	if err != nil {
+		slog.Error("failed to create game update packet:", err)
+	}
+	r.Broadcast(gamePacket)
+
+	// Make bots move if applicable
+	go m.MakeBotMoves(dbRoom.ID)
+
+	return nil
 }
 
 func (m *Manager) HandleGameOver(g *scrabble.Game) error {

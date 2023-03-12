@@ -124,7 +124,10 @@ func (r *Room) RemoveClient(cID string) error {
 		if err := r.Manager.RemoveRoom(r.ID); err != nil {
 			return err
 		}
-		return r.Manager.RoomSvc.Delete(r.ID)
+		if err := r.Manager.RoomSvc.Delete(r.ID); err != nil {
+			return err
+		}
+		return r.Manager.GameSvc.DeleteGame(r.ID)
 	}
 
 	return nil

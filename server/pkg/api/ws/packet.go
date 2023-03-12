@@ -56,6 +56,10 @@ type JoinDMPayload struct {
 	ToUsername string `json:"toUsername"`
 }
 
+type JoinGameRoomPayload struct {
+	RoomID string `json:"roomId"`
+}
+
 type CreateRoomPayload struct {
 	RoomName string   `json:"roomName"`
 	UserIDs  []string `json:"userIds"`

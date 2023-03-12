@@ -103,6 +103,8 @@ func (c *Client) handlePacket(p *Packet) error {
 		return c.HandleJoinRoomRequest(p)
 	case ClientEventJoinDMRoom:
 		return c.HandleJoinDMRoomRequest(p)
+	case ClientEventJoinGameRoom:
+		return c.HandleJoinGameRoomRequest(p)
 	case ClientEventCreateRoom:
 		return c.HandleCreateRoomRequest(p)
 	case ClientEventCreateGameRoom:
@@ -195,6 +197,26 @@ func (c *Client) HandleJoinDMRoomRequest(p *Packet) error {
 	return createRoomWithUsers(c, roomName, payload.ToID)
 }
 
+func (c *Client) HandleJoinGameRoomRequest(p *Packet) error {
+	payload := JoinRoomPayload{}
+	if err := json.Unmarshal(p.Payload, &payload); err != nil {
+		return err
+	}
+
+	r, err := c.Manager.GetRoom(payload.RoomID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	if err := c.Manager.RoomSvc.AddUser(payload.RoomID, c.ID); err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, "failed to join room: "+err.Error())
+	}
+	if err := r.AddClient(c.ID); err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+
+	return nil
+}
+
 func (c *Client) HandleCreateRoomRequest(p *Packet) error {
 	payload := CreateRoomPayload{}
 	if err := json.Unmarshal(p.Payload, &payload); err != nil {
@@ -256,41 +278,7 @@ func (c *Client) HandleLeaveRoomRequest(p *Packet) error {
 		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
 
-	if err := r.RemoveClient(c.ID); err != nil {
-		return fiber.NewError(fiber.StatusInternalServerError, "failed to leave ws room: "+err.Error())
-	}
-
-	leftRoomPacket, err := NewLeftRoomPacket(LeftRoomPayload{
-		RoomID: r.ID,
-	})
-	if err != nil {
-		return fiber.NewError(fiber.StatusInternalServerError, "failed to create packet: "+err.Error())
-	}
-
-	dbRoom, err := c.Manager.RoomSvc.Find(payload.RoomID)
-	if err != nil {
-		return nil
-	}
-
-	if c.ID == dbRoom.CreatorID && dbRoom.IsGameRoom {
-		r.Broadcast(leftRoomPacket)
-		if err := r.Manager.RemoveRoom(r.ID); err != nil {
-			return err
-		}
-		if err := c.Manager.RoomSvc.Delete(r.ID); err != nil {
-			return err
-		}
-	}
-	c.send(leftRoomPacket)
-
-	// Replace player with bot
-	if dbRoom.IsGameRoom {
-		if _, err := c.Manager.GameSvc.ReplacePlayerWithBot(dbRoom.ID, c.ID); err != nil {
-			r.logger.Error("failed to replace player fwith a bot", err, "playerID", c.ID)
-		}
-	}
-
-	return nil
+	return c.Manager.RemoveClientFromRoom(c, r)
 }
 
 func (c *Client) HandleStartGameRequest(p *Packet) error {
@@ -335,7 +323,7 @@ func (c *Client) HandleStartGameRequest(p *Packet) error {
 			Game: makeGamePayload(g),
 		})
 		if err != nil {
-			slog.Error("failed to create timer update packet:", err)
+			slog.Error("failed to create game update packet:", err)
 			return
 		}
 		r.Broadcast(gamePacket)
