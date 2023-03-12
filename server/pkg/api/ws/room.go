@@ -3,9 +3,12 @@ package ws
 import (
 	"errors"
 
+	"scrabble/pkg/api/room"
 	"scrabble/pkg/api/user"
 
 	"github.com/alphadose/haxmap"
+	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"golang.org/x/exp/slog"
 )
 
@@ -16,18 +19,22 @@ var (
 )
 
 type Room struct {
-	ID      string
-	Manager *Manager
-	Clients *haxmap.Map[string, *Client]
-	logger  *slog.Logger
+	ID        string
+	Name      string
+	CreatorID string
+	Manager   *Manager
+	Clients   *haxmap.Map[string, *Client]
+	logger    *slog.Logger
 }
 
-func NewRoom(m *Manager, ID string) *Room {
+func NewRoom(m *Manager, dbRoom *room.Room) *Room {
 	return &Room{
-		ID:      ID,
-		Manager: m,
-		Clients: haxmap.New[string, *Client](),
-		logger:  slog.With("room", ID),
+		ID:        dbRoom.ID,
+		Name:      dbRoom.Name,
+		CreatorID: dbRoom.CreatorID,
+		Manager:   m,
+		Clients:   haxmap.New[string, *Client](),
+		logger:    slog.With("room", dbRoom.ID),
 	}
 }
 
@@ -61,22 +68,18 @@ func (r *Room) AddClient(cID string) error {
 	r.Clients.Set(cID, c)
 	c.Rooms.Set(r.ID, r)
 	r.logger.Info("client added in room", "client", c.ID)
-
-	err = r.Manager.RoomSvc.AddUser(r.ID, cID)
-	if err != nil {
-		return err
-	}
+	dbRoom, _ := r.Manager.RoomSvc.Find(r.ID)
 
 	{
 		payload := JoinedRoomPayload{
-			RoomID: r.ID,
-			Users:  r.ListUsers(),
+			RoomID:     r.ID,
+			RoomName:   r.Name,
+			CreatorID:  r.CreatorID,
+			Users:      r.ListUsers(),
+			IsGameRoom: dbRoom.IsGameRoom,
 		}
 		msgs, err := r.Manager.MessageRepo.LatestMessage(r.ID, 0)
-		if err != nil {
-			r.logger.Error("get latest messages", err)
-		}
-		if len(msgs) == 0 {
+		if err != nil || len(msgs) == 0 {
 			msgs = make([]ChatMessage, 0)
 		}
 		payload.Messages = msgs
@@ -90,18 +93,14 @@ func (r *Room) AddClient(cID string) error {
 	}
 
 	{
-		res, err := r.Manager.UserSvc.Repo.Find(cID)
+		u, err := r.Manager.UserSvc.Repo.Find(cID)
 		if err != nil {
 			r.logger.Error("find user that joined", err)
 		}
 
 		payload := UserJoinedPayload{
 			RoomID: r.ID,
-			User: user.PublicUser{
-				ID:       res.ID,
-				Username: res.Username,
-				Avatar:   res.Avatar,
-			},
+			User:   u,
 		}
 		p, err := NewUserJoinedPacket(payload)
 		if err != nil {
@@ -123,15 +122,14 @@ func (r *Room) RemoveClient(cID string) error {
 	r.Clients.Del(cID)
 	r.logger.Info("client removed from room", "client", c.ID)
 
-	if r.Clients.Len() == 0 && r.ID != r.Manager.GlobalRoom.ID && r.ID != c.ID {
+	if r.Clients.Len() == 0 && r.ID != r.Manager.GlobalRoom.ID {
 		if err := r.Manager.RemoveRoom(r.ID); err != nil {
 			return err
 		}
-		return r.Manager.RoomSvc.Delete(r.ID)
-	}
-
-	if err := r.Manager.RoomSvc.RemoveUser(r.ID, cID); err != nil {
-		return err
+		if err := r.Manager.RoomSvc.Delete(r.ID); err != nil {
+			return err
+		}
+		return r.Manager.GameSvc.DeleteGame(r.ID)
 	}
 
 	return nil
@@ -151,21 +149,21 @@ func (r *Room) has(cID string) bool {
 	return err == nil
 }
 
-func (r *Room) ListUsers() []user.PublicUser {
-	users := make([]user.PublicUser, 0, r.Clients.Len())
-	r.Clients.ForEach(func(cID string, c *Client) bool {
-		res, err := r.Manager.UserSvc.Repo.Find(cID)
+func (r *Room) ListUsers() []*user.User {
+	users := make([]*user.User, 0, r.Clients.Len())
+	dbRoom, err := r.Manager.RoomSvc.Find(r.ID)
+	if err != nil {
+		return users
+	}
+
+	for _, uID := range dbRoom.UserIDs {
+		u, err := r.Manager.UserSvc.Repo.Find(uID)
 		if err != nil {
 			r.logger.Error("list users", err)
+			continue
 		}
-		pubUser := user.PublicUser{
-			ID:       res.ID,
-			Username: res.Username,
-			Avatar:   res.Avatar,
-		}
-		users = append(users, pubUser)
-		return true
-	})
+		users = append(users, u)
+	}
 
 	return users
 }
@@ -178,4 +176,49 @@ func (r *Room) ListClientIDs() []string {
 	})
 
 	return clientIDs
+}
+
+func createRoomWithUsers(c *Client, roomName string, userIDs ...string) error {
+	dbRoom, err := c.Manager.RoomSvc.CreateRoom(
+		uuid.NewString(),
+		roomName,
+		c.ID,
+		userIDs...,
+	)
+	if err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, "failed to create new room: "+err.Error())
+	}
+
+	r := c.Manager.AddRoom(dbRoom)
+	for _, uID := range dbRoom.UserIDs {
+		if err := c.Manager.UserSvc.Repo.AddJoinedRoom(dbRoom.ID, uID); err != nil {
+			slog.Error("add user to room", err)
+		}
+		if err := r.AddClient(uID); err != nil {
+			slog.Error("add client to ws room", err)
+		}
+	}
+
+	return nil
+}
+
+func createGameRoomWithUsers(c *Client, roomName string, userIDs ...string) error {
+	dbRoom, err := c.Manager.RoomSvc.CreateGameRoom(
+		uuid.NewString(),
+		roomName,
+		c.ID,
+		userIDs...,
+	)
+	if err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, "failed to create new room: "+err.Error())
+	}
+
+	r := c.Manager.AddRoom(dbRoom)
+	for _, uID := range dbRoom.UserIDs {
+		if err := r.AddClient(uID); err != nil {
+			slog.Error("add client to ws room", err)
+		}
+	}
+
+	return nil
 }
