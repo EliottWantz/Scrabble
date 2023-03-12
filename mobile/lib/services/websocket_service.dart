@@ -102,6 +102,8 @@ class WebsocketService extends GetxService {
         handleServerEventJoinableGames(listJoinableGamesResponse);
       }
       break;
+      // case game update
+      // case game timer
       default: {
         print('no event in package received');
       }
@@ -170,6 +172,14 @@ class WebsocketService extends GetxService {
         payload: joinDMPayload
     );
     socket.sink.add(joinDMRequest.toRawJson());
+  }
+
+  void joinGameRoom(String roomId) {
+    final joinGameRoomPayload = JoinRoomPayload(roomId: roomId);
+    final joinGameRoomRequest = JoinRoomRequest(
+        event: ClientEventJoinGameRoom,
+        payload: joinGameRoomPayload
+    );
   }
 
   void sendMessage(String roomId, String message) {
