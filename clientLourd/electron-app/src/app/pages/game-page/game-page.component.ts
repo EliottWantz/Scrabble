@@ -27,7 +27,19 @@ export class GamePageComponent implements OnInit {
         return this.moveService.placedTiles.length != 0;
     }
 
+    hasSelectedLetters(): boolean {
+        return this.moveService.selectedTiles.length != 0;
+    }
+
     submit(): void {
         this.moveService.playTiles();
+    }
+
+    pass(): void {
+        this.moveService.pass();
+    }
+
+    exchange(): void {
+        this.moveService.exchange();
     }
 }

@@ -9,9 +9,30 @@
       mat-raised-button
       color="warn"
       (click)="submit()"
-      id="login-button"
+      id="play-button"
       [disabled]="!hasPlacedLetters()"
     >
       Envoyer
+    </button>
+
+    <button
+      *ngIf="isTurn()"
+      mat-raised-button
+      color="warn"
+      (click)="pass()"
+      id="pass-button"
+    >
+      Passer
+    </button>
+
+    <button
+      *ngIf="isTurn()"
+      mat-raised-button
+      color="warn"
+      (click)="exchange()"
+      id="exchange-button"
+      [disabled]="!hasSelectedLetters()"
+    >
+      Échanger
     </button>
 </div>
