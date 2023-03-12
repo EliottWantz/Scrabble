@@ -474,6 +474,7 @@ func (m *Manager) HandleGameOver(g *scrabble.Game) error {
 	}
 
 	r.Broadcast(gameOverPacket)
+	g.Timer.Stop()
 
 	for _, p := range g.Players {
 		u, err := m.UserSvc.GetUser(p.ID)
