@@ -75,6 +75,11 @@ export class WebSocketService {
                 const payloadGame = packet.payload as Game;
                 this.gameService.updateGame(payloadGame);
                 break;
+
+            case "timerUpdate":
+                const payloadTimer = packet.payload as number;
+                this.gameService.updateTimer(payloadTimer);
+                break;
         }
     }
 
