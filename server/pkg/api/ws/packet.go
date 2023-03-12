@@ -80,11 +80,11 @@ type StartGamePayload struct {
 
 // Server events payloads
 type JoinedRoomPayload struct {
-	RoomID    string            `json:"roomId"`
-	RoomName  string            `json:"roomName"`
-	CreatorID string            `json:"creatorId"`
-	Users     []user.PublicUser `json:"users"`
-	Messages  []ChatMessage     `json:"messages"`
+	RoomID    string        `json:"roomId"`
+	RoomName  string        `json:"roomName"`
+	CreatorID string        `json:"creatorId"`
+	Users     []*user.User  `json:"users"`
+	Messages  []ChatMessage `json:"messages"`
 }
 
 func NewJoinedRoomPacket(payload JoinedRoomPayload) (*Packet, error) {
@@ -100,8 +100,8 @@ func NewLeftRoomPacket(payload LeftRoomPayload) (*Packet, error) {
 }
 
 type UserJoinedPayload struct {
-	RoomID string          `json:"roomId"`
-	User   user.PublicUser `json:"user"`
+	RoomID string     `json:"roomId"`
+	User   *user.User `json:"user"`
 }
 
 func NewUserJoinedPacket(payload UserJoinedPayload) (*Packet, error) {
@@ -109,7 +109,7 @@ func NewUserJoinedPacket(payload UserJoinedPayload) (*Packet, error) {
 }
 
 type ListUsersPayload struct {
-	Users []user.PublicUser `json:"users"`
+	Users []user.User `json:"users"`
 }
 
 func NewListUsersPacket(payload ListUsersPayload) (*Packet, error) {
@@ -117,19 +117,19 @@ func NewListUsersPacket(payload ListUsersPayload) (*Packet, error) {
 }
 
 type NewUserPayload struct {
-	User user.PublicUser `json:"user"`
+	User *user.User `json:"user"`
 }
 
 func NewNewUserPacket(payload NewUserPayload) (*Packet, error) {
 	return NewPacket(ServerEventNewUser, payload)
 }
 
-type ListRoomsPayload struct {
+type ListChatRoomsPayload struct {
 	Rooms []room.Room `json:"rooms"`
 }
 
-func NewListRoomsPacket(payload ListRoomsPayload) (*Packet, error) {
-	return NewPacket(ServerEventListRooms, payload)
+func NewListChatRoomsPacket(payload ListChatRoomsPayload) (*Packet, error) {
+	return NewPacket(ServerEventListChatRooms, payload)
 }
 
 type ListJoinableGamesPayload struct {

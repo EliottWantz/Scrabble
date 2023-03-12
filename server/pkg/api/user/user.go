@@ -13,8 +13,8 @@ type User struct {
 	Summary         Summary     `bson:"summary" json:"summary,omitempty"`
 }
 
-type PublicUser struct {
-	ID       string `bson:"_id,omitempty" json:"id,omitempty"`
-	Username string `bson:"username" json:"username,omitempty"`
-	Avatar   Avatar `bson:"avatar" json:"avatar,omitempty"`
-}
+// type PublicUser struct {
+// 	ID       string `bson:"_id,omitempty" json:"id,omitempty"`
+// 	Username string `bson:"username" json:"username,omitempty"`
+// 	Avatar   Avatar `bson:"avatar" json:"avatar,omitempty"`
+// }
