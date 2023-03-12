@@ -68,13 +68,15 @@ func (r *Room) AddClient(cID string) error {
 	r.Clients.Set(cID, c)
 	c.Rooms.Set(r.ID, r)
 	r.logger.Info("client added in room", "client", c.ID)
+	dbRoom, _ := r.Manager.RoomSvc.Find(r.ID)
 
 	{
 		payload := JoinedRoomPayload{
-			RoomID:    r.ID,
-			RoomName:  r.Name,
-			CreatorID: r.CreatorID,
-			Users:     r.ListUsers(),
+			RoomID:     r.ID,
+			RoomName:   r.Name,
+			CreatorID:  r.CreatorID,
+			Users:      r.ListUsers(),
+			IsGameRoom: dbRoom.IsGameRoom,
 		}
 		msgs, err := r.Manager.MessageRepo.LatestMessage(r.ID, 0)
 		if err != nil || len(msgs) == 0 {
@@ -124,7 +126,10 @@ func (r *Room) RemoveClient(cID string) error {
 		if err := r.Manager.RemoveRoom(r.ID); err != nil {
 			return err
 		}
-		return r.Manager.RoomSvc.Delete(r.ID)
+		if err := r.Manager.RoomSvc.Delete(r.ID); err != nil {
+			return err
+		}
+		return r.Manager.GameSvc.DeleteGame(r.ID)
 	}
 
 	return nil
@@ -146,8 +151,8 @@ func (r *Room) has(cID string) bool {
 
 func (r *Room) ListUsers() []*user.User {
 	users := make([]*user.User, 0, r.Clients.Len())
-	dbRoom, ok := r.Manager.RoomSvc.HasRoom(r.ID)
-	if !ok {
+	dbRoom, err := r.Manager.RoomSvc.Find(r.ID)
+	if err != nil {
 		return users
 	}
 
