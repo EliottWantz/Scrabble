@@ -84,11 +84,12 @@ type StartGamePayload struct {
 
 // Server events payloads
 type JoinedRoomPayload struct {
-	RoomID    string        `json:"roomId"`
-	RoomName  string        `json:"roomName"`
-	CreatorID string        `json:"creatorId"`
-	Users     []*user.User  `json:"users"`
-	Messages  []ChatMessage `json:"messages"`
+	RoomID     string        `json:"roomId"`
+	RoomName   string        `json:"roomName"`
+	CreatorID  string        `json:"creatorId"`
+	Users      []*user.User  `json:"users"`
+	Messages   []ChatMessage `json:"messages"`
+	IsGameRoom bool          `json:"isGameRoom"`
 }
 
 func NewJoinedRoomPacket(payload JoinedRoomPayload) (*Packet, error) {
