@@ -28,8 +28,8 @@ export class AuthenticationService {
         });
     }
 
-    async register(username: string, password: string, email: string, avatar: string): Promise<boolean> {
-        return await this.commService.register(username, password, email, avatar).then((res) => {
+    async register(username: string, password: string, email: string, avatarURL: string, fileID: string): Promise<boolean> {
+        return await this.commService.register(username, password, email, avatarURL, fileID).then((res) => {
             this.setUser(res);
             this.socketService.connect();
             return true;
