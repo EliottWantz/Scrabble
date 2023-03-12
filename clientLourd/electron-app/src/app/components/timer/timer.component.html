@@ -1,0 +1,8 @@
+<div id="timer">
+    <div id="timer-num">
+        {{ (timer | async)! }}
+    </div>
+    <svg *ngIf="(timer | async)! / 1000 < 60">
+        <circle r="40" cx="50" cy="50"></circle>
+    </svg>
+</div>
