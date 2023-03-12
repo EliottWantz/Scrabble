@@ -13,6 +13,7 @@ import { MoveInfo } from "@app/utils/interfaces/game/move";
 })
 export class MoveService {
     gameId: string = "";
+    selectedTiles: Tile[] = [];
     placedTiles: Tile[] = [];
     constructor(private webSocketService: WebSocketService) {}
 
@@ -35,12 +36,15 @@ export class MoveService {
             moveInfo: move
         };
 
-        this.webSocketService.send("playMove", payload)
+        this.webSocketService.send("playMove", payload);
+        console.log("Played ");
+        console.log(this.placedTiles);
+        this.placedTiles = [];
     }
 
-    exchange(tiles: Tile[]): void {
+    exchange(): void {
         let letters: string = "";
-        tiles.forEach(tile => {
+        this.selectedTiles.forEach(tile => {
             letters += tile.letter;
         });
 
@@ -54,7 +58,10 @@ export class MoveService {
             moveInfo: move
         };
 
-        this.webSocketService.send("playMove", payload)
+        this.webSocketService.send("playMove", payload);
+        console.log("Exchanged ");
+        console.log(this.selectedTiles);
+        this.selectedTiles = [];
     }
 
     pass(): void {

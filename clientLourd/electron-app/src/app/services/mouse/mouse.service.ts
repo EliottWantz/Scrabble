@@ -6,17 +6,38 @@ import { MoveService } from "@app/services/game/move.service";
     providedIn: 'root',
 })
 export class MouseService {
-    tileElem: HTMLElement | undefined;
-    tile: Tile | undefined;
-
+    tileElems: HTMLElement[] = [];
     constructor(private moveService: MoveService) {}
 
-    place(element: HTMLElement): void {
-        if (this.tileElem && this.tile) {
-            element.appendChild(this.tileElem);
-            this.tileElem = undefined;
-            this.moveService.placedTiles.push(this.tile);
-            this.tile = undefined;
+    place(element: HTMLElement, row: number, col: number): void {
+        if (this.tileElems.length == 1 && this.moveService.selectedTiles.length == 1) {
+            console.log("hello");
+            element.appendChild(this.tileElems[0]);
+            this.tileElems[0].style.outlineColor = "black";
+            this.tileElems = [];
+            
+            const indexMove = this.moveService.placedTiles.indexOf(this.moveService.selectedTiles[0], 0);
+            if (indexMove > -1) {
+                this.moveService.selectedTiles[0] = {...this.moveService.selectedTiles[0], x: col, y: row};
+                this.moveService.placedTiles[indexMove] = {...this.moveService.selectedTiles[0], x: col, y: row};
+            } else {
+                this.moveService.placedTiles.push({...this.moveService.selectedTiles[0], x: col, y: row});
+            }
+
+            this.moveService.selectedTiles.splice(0, 1);
+            console.log(this.moveService.placedTiles);
+            console.log(this.moveService.selectedTiles);
         }
+    }
+
+    select(tile: Tile): void {
+        this.moveService.selectedTiles.push(tile);
+        console.log(this.moveService.selectedTiles);
+    }
+
+    remove(tile: Tile): void {
+        const index = this.moveService.selectedTiles.indexOf(tile, 0);
+        if (index > -1)
+            this.moveService.selectedTiles.splice(index, 1);
     }
 }

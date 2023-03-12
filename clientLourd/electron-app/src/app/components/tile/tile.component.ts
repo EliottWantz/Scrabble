@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, Input, Output, ViewChild } from "@angular/core";
+import { Component, ElementRef, HostListener, Input, Output, Renderer2, ViewChild } from "@angular/core";
 import { MouseService } from "@app/services/mouse/mouse.service";
 import { Tile } from "@app/utils/interfaces/game/tile";
 
@@ -8,15 +8,30 @@ import { Tile } from "@app/utils/interfaces/game/tile";
     styleUrls: ["./tile.component.scss"],
 })
 export class TileComponent {
-    constructor(private mouseService: MouseService) {}
+    alreadyClicked: boolean = false;
+    constructor(private mouseService: MouseService, private renderer: Renderer2) {}
     @Input() tile!: Tile;
     @Input() disabled: boolean = false;
     @ViewChild('elem') element!: ElementRef;
 
     clicked(): void {
         if (!this.disabled) {
-            this.mouseService.tileElem = this.element.nativeElement;
-            this.mouseService.tile = this.tile;
+            console.log("clicked");
+            if (this.alreadyClicked) {
+                this.renderer.setStyle(this.element.nativeElement, "outline-color", "black");
+                this.alreadyClicked = false;
+                this.mouseService.remove(this.tile);
+                const index = this.mouseService.tileElems.indexOf(this.element.nativeElement, 0);
+                if (index > -1) {
+                    this.mouseService.tileElems.splice(index, 1);
+                }
+            }
+            else {
+                this.renderer.setStyle(this.element.nativeElement, "outline-color", "red");
+                this.alreadyClicked = true;
+                this.mouseService.select(this.tile);
+                this.mouseService.tileElems.push(this.element.nativeElement);
+            }
         }
     }
 }

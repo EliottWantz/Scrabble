@@ -13,7 +13,7 @@ export class GameService {
             id: "",
             players: [
                 {
-                    id: "0",
+                    id: "ba9f559f-e42b-45df-88bd-a7b3cc3c8cc3",
                     username: "Olivier",
                     rack: [
                         {
@@ -34,7 +34,7 @@ export class GameService {
             bag: [],
             finished: false,
             numPassMoves: 0,
-            turn: ""
+            turn: "ba9f559f-e42b-45df-88bd-a7b3cc3c8cc3"
         });
     }
 
