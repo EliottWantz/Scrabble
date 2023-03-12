@@ -10,4 +10,5 @@ export interface Game {
     finished: boolean;
     numPassMoves: number;
     turn: string;
+    timer: number;
 }

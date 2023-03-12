@@ -10,7 +10,7 @@ export interface Packet {
 }
 
 export type ClientPayload = JoinRoomPayload | JoinDMPayload | CreateRoomPayload | LeaveRoomPayload | PlayMovePayload | ChatMessage;
-export type ServerPayload = Room | ChatMessage | Game;
+export type ServerPayload = Room | ChatMessage | Game | number;
 
 export interface JoinRoomPayload {
     roomID: string;
