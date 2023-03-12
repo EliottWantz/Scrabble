@@ -1,7 +1,6 @@
 package scrabble
 
 import (
-	"math/rand"
 	"sort"
 )
 
@@ -15,6 +14,12 @@ type Engine struct {
 	Strategy
 }
 
+func NewEngine(s Strategy) *Engine {
+	return &Engine{
+		Strategy: s,
+	}
+}
+
 // GenerateMove generates a list of legal tile moves, then picks a move from
 // with the current bot's strategy
 func (e *Engine) GenerateMove(state *GameState) Move {
@@ -22,15 +27,17 @@ func (e *Engine) GenerateMove(state *GameState) Move {
 	return e.PickMove(state, moves)
 }
 
+// GenerateMove generates a list of legal tile moves, then picks the 3 best
+// moves from with the current bot's strategy
+func (e *Engine) GenerateBestTileMoves(state *GameState) []Move {
+	moves := state.GenerateMoves()
+	return e.PickBestTileMoves(state, moves)
+}
+
 // HighScore strategy always picks the highest-scoring move available, or
 // exchanges all tiles if there is no valid tile move, or passes if exchange is
 // not allowed.
 type HighScore struct{}
-
-// OneOfNBest picks one of the N highest-scoring moves at random.
-type OneOfNBest struct {
-	N int
-}
 
 // Sort the moves by score
 type byScore struct {
@@ -68,31 +75,16 @@ func (hs *HighScore) PickMove(state *GameState, moves []Move) Move {
 	return NewPassMove()
 }
 
-// PickMove for OneOfNBestRobot selects one of the N highest-scoring
-// moves at random, or an exchange move, or a pass move as a last resort
-func (ofb *OneOfNBest) PickMove(state *GameState, moves []Move) Move {
+// PickBestTileMoves picks the best 3 moves from the current game state
+func (e *Engine) PickBestTileMoves(state *GameState, moves []Move) []Move {
 	if len(moves) > 0 {
 		// Sort by score
 		sort.Sort(byScore{state, moves})
-		// Cut the list down to N, if it is longer than that
-		if len(moves) > ofb.N {
-			moves = moves[:ofb.N]
+		// Cut the list down to 3, if it is longer than that
+		if len(moves) > 3 {
+			moves = moves[:3]
 		}
-		pick := rand.Intn(len(moves))
-		// Pick a move by random from the remaining list
-		return moves[pick]
+		return moves
 	}
-	// No valid tile moves
-	if state.ExchangeAllowed {
-		// Exchange all tiles, since that is allowed
-		return NewExchangeMove(state.Rack.AsString())
-	}
-	// Exchange forbidden: Return a pass move
-	return NewPassMove()
-}
-
-func NewEngine(s Strategy) *Engine {
-	return &Engine{
-		Strategy: s,
-	}
+	return []Move{}
 }
