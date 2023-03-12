@@ -8,6 +8,7 @@ import (
 	"scrabble/pkg/api/game"
 	"scrabble/pkg/api/room"
 	"scrabble/pkg/api/user"
+	"scrabble/pkg/scrabble"
 )
 
 type Packet struct {
@@ -55,6 +56,10 @@ type JoinDMPayload struct {
 	ToUsername string `json:"toUsername"`
 }
 
+type JoinGameRoomPayload struct {
+	RoomID string `json:"roomId"`
+}
+
 type CreateRoomPayload struct {
 	RoomName string   `json:"roomName"`
 	UserIDs  []string `json:"userIds"`
@@ -79,10 +84,11 @@ type StartGamePayload struct {
 
 // Server events payloads
 type JoinedRoomPayload struct {
-	RoomID   string            `json:"roomId"`
-	RoomName string            `json:"roomName"`
-	Users    []user.PublicUser `json:"users"`
-	Messages []ChatMessage     `json:"messages"`
+	RoomID    string        `json:"roomId"`
+	RoomName  string        `json:"roomName"`
+	CreatorID string        `json:"creatorId"`
+	Users     []*user.User  `json:"users"`
+	Messages  []ChatMessage `json:"messages"`
 }
 
 func NewJoinedRoomPacket(payload JoinedRoomPayload) (*Packet, error) {
@@ -98,8 +104,8 @@ func NewLeftRoomPacket(payload LeftRoomPayload) (*Packet, error) {
 }
 
 type UserJoinedPayload struct {
-	RoomID string          `json:"roomId"`
-	User   user.PublicUser `json:"user"`
+	RoomID string     `json:"roomId"`
+	User   *user.User `json:"user"`
 }
 
 func NewUserJoinedPacket(payload UserJoinedPayload) (*Packet, error) {
@@ -107,7 +113,7 @@ func NewUserJoinedPacket(payload UserJoinedPayload) (*Packet, error) {
 }
 
 type ListUsersPayload struct {
-	Users []user.PublicUser `json:"users"`
+	Users []user.User `json:"users"`
 }
 
 func NewListUsersPacket(payload ListUsersPayload) (*Packet, error) {
@@ -115,19 +121,19 @@ func NewListUsersPacket(payload ListUsersPayload) (*Packet, error) {
 }
 
 type NewUserPayload struct {
-	User user.PublicUser `json:"user"`
+	User *user.User `json:"user"`
 }
 
 func NewNewUserPacket(payload NewUserPayload) (*Packet, error) {
 	return NewPacket(ServerEventNewUser, payload)
 }
 
-type ListRoomsPayload struct {
+type ListChatRoomsPayload struct {
 	Rooms []room.Room `json:"rooms"`
 }
 
-func NewListRoomsPacket(payload ListRoomsPayload) (*Packet, error) {
-	return NewPacket(ServerEventListRooms, payload)
+func NewListChatRoomsPacket(payload ListChatRoomsPayload) (*Packet, error) {
+	return NewPacket(ServerEventListChatRooms, payload)
 }
 
 type ListJoinableGamesPayload struct {
@@ -138,12 +144,42 @@ func NewJoinableGamesPacket(payload ListJoinableGamesPayload) (*Packet, error) {
 	return NewPacket(ServerEventJoinableGames, payload)
 }
 
+type Game struct {
+	ID           string                  `json:"id"`
+	Players      []*scrabble.Player      `json:"players"`
+	Board        [15][15]scrabble.Square `json:"board"`
+	Finished     bool                    `json:"finished"`
+	NumPassMoves int                     `json:"numPassMoves"`
+	Turn         string                  `json:"turn"`
+	Timer        time.Duration           `json:"timer"`
+}
+
+func makeGamePayload(g *scrabble.Game) *Game {
+	return &Game{
+		ID:           g.ID,
+		Players:      g.Players,
+		Board:        g.Board.Squares,
+		Finished:     g.Finished,
+		NumPassMoves: g.NumPassMoves,
+		Turn:         g.Turn,
+		Timer:        g.Timer.TimeRemaining(),
+	}
+}
+
 type GameUpdatePayload struct {
-	Game *game.Game `json:"game"`
+	Game *Game `json:"game"`
 }
 
 func NewGameUpdatePacket(payload GameUpdatePayload) (*Packet, error) {
 	return NewPacket(ServerEventGameUpdate, payload)
+}
+
+type TimerUpdatePayload struct {
+	Timer time.Duration `json:"timer"`
+}
+
+func NewTimerUpdatePacket(payload TimerUpdatePayload) (*Packet, error) {
+	return NewPacket(ServerEventTimerUpdate, payload)
 }
 
 type GameOverPayload struct {

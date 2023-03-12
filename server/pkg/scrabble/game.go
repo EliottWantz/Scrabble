@@ -1,14 +1,18 @@
 package scrabble
 
 import (
+	"errors"
 	"fmt"
 	"sort"
+	"time"
 )
 
 const (
 	MaxPassMoves                 int = 6
 	MaxHumanConsecutivePassMoves int = 2
 )
+
+var ErrPlayerNotFound = errors.New("player not found")
 
 type Game struct {
 	ID           string
@@ -22,6 +26,15 @@ type Game struct {
 	Finished     bool
 	NumPassMoves int
 	Turn         string
+	Timer        *GameTimer
+}
+
+type GameTimer struct {
+	Timer  *time.Timer
+	Ticker *time.Ticker
+	tickFn func()
+	doneFn func()
+	end    time.Time
 }
 
 // GameState contains the bare minimum of information
@@ -45,12 +58,15 @@ type MoveItem struct {
 
 func NewGame(ID string, dawg *DAWG, botStrategy Strategy) *Game {
 	g := &Game{
-		ID:      ID,
-		Board:   NewBoard(),
-		DAWG:    dawg,
-		Bag:     NewBag(DefaultTileSet),
-		TileSet: DefaultTileSet,
-		Engine:  NewEngine(botStrategy),
+		ID:       ID,
+		Players:  []*Player{},
+		Board:    NewBoard(),
+		Bag:      NewBag(DefaultTileSet),
+		DAWG:     dawg,
+		TileSet:  DefaultTileSet,
+		MoveList: []*MoveItem{},
+		Engine:   NewEngine(botStrategy),
+		Timer:    NewGameTimer(),
 	}
 
 	return g
@@ -68,6 +84,20 @@ func (g *Game) PlayerToMove() *Player {
 // Returns the player that just played his move. Must be called after the move has been applied.
 func (g *Game) PlayerThatPlayed() *Player {
 	return g.Players[(len(g.MoveList)-1)%4]
+}
+
+func (g *Game) SkipTurn() {
+	move := NewPassMove()
+	g.ApplyValid(move)
+}
+
+func (g *Game) GetPlayer(pID string) (*Player, error) {
+	for _, p := range g.Players {
+		if p.ID == pID {
+			return p, nil
+		}
+	}
+	return nil, ErrPlayerNotFound
 }
 
 // PlayTile moves a tile from the player's rack to the board
@@ -101,6 +131,7 @@ func (g *Game) ApplyValid(move Move) error {
 	// Update the scores and append to the move list
 	g.scoreMove(rackBefore, move)
 	g.Turn = g.PlayerToMove().ID
+	g.Timer.Reset()
 
 	// DEBUG PRINTS
 	fmt.Println("Player:", playerToMove.Username, "Move:", move)
@@ -213,4 +244,51 @@ func (gs *GameState) GenerateMovesOnAxis(index int, horizontal bool, leftParts [
 	var axis Axis
 	axis.Init(gs, index, horizontal)
 	moveCh <- axis.GenerateMoves(leftParts)
+}
+
+func NewGameTimer() *GameTimer {
+	return &GameTimer{
+		Ticker: time.NewTicker(time.Second), // Fires every second
+		Timer:  time.NewTimer(time.Minute),  // Fires every minute
+		end:    time.Now().Add(time.Minute),
+	}
+}
+
+func (t *GameTimer) Reset() {
+	t.Timer.Reset(time.Minute)
+	t.end = time.Now().Add(time.Minute)
+}
+
+func (t *GameTimer) Stop() {
+	t.Timer.Stop()
+	t.Ticker.Stop()
+}
+
+func (t *GameTimer) TimeRemaining() time.Duration {
+	return time.Until(t.end).Abs().Round(time.Second)
+}
+
+func (t *GameTimer) OnTick(tickFn func()) {
+	t.tickFn = tickFn
+}
+
+func (t *GameTimer) OnDone(doneFn func()) {
+	t.doneFn = doneFn
+}
+
+func (t *GameTimer) Start() {
+	t.Reset()
+	go func() {
+		for {
+			select {
+			case <-t.Timer.C:
+				t.doneFn()
+				time.Sleep(time.Second)
+				t.Reset()
+			case <-t.Ticker.C:
+				t.tickFn()
+				// fmt.Printf("\r%v", t.TimeRemaining())
+			}
+		}
+	}()
 }

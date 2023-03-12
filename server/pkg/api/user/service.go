@@ -168,5 +168,9 @@ func (s *Service) JoinRoom(roomID, userID string) error {
 }
 
 func (s *Service) LeaveRoom(roomID, userID string) error {
-	return s.Repo.RemoveJoinedRoom(roomID, userID)
+	err := s.Repo.RemoveJoinedRoom(roomID, userID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, "failed to remove joined room: "+err.Error())
+	}
+	return nil
 }
