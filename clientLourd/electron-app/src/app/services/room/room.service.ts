@@ -4,6 +4,7 @@ import { BehaviorSubject } from "rxjs";
 import { CommunicationService } from "@app/services/communication/communication.service"
 import { UserService } from "@app/services/user/user.service";
 import { ChatMessage } from "@app/utils/interfaces/chat-message";
+import { User } from "@app/utils/interfaces/user";
 
 @Injectable({
     providedIn: 'root',
@@ -32,8 +33,8 @@ export class RoomService {
 
     addRoom(room: Room): void {
         //console.log(room);
-        //console.log("room");
-        //console.log(room);
+        console.log("room");
+        console.log(room);
         this.rooms.next([...this.rooms.value, room]);
         this.currentRoom.next(room);
     }
@@ -92,5 +93,22 @@ export class RoomService {
                 return i;         
         }
         return undefined;
+    }
+
+    addUser(roomId: string, user: User): void {
+        const rooms = this.rooms.value;
+        /*for (let i = 0; i < this.rooms.value.length; i++) {
+            if (rooms[i].id == roomId) {
+                rooms[i].userIds = [...rooms[i].userIds, user.id];
+                this.rooms.next(rooms);
+            }
+        }*/
+        if (this.currentRoom.value.id == roomId) {
+            
+            const currentRoom = this.currentRoom.value;
+            currentRoom.userIds = [...currentRoom.userIds, user.id]
+            this.currentRoom.next(currentRoom);
+            console.log(this.currentRoom.value);
+        }
     }
 }

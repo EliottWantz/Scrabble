@@ -35,6 +35,7 @@ export class RackComponent implements OnInit {
     }
 
     private getPlayerRack(): Tile[] | undefined {
+        console.log(this.game.value);
         for (let i = 0; i < this.game.value.players.length; i++) {
             if (this.game.value.players[i].id == this.userService.subjectUser.value.id) {
                 console.log(this.game.value.players[i].rack);

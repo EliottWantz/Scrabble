@@ -1,5 +1,5 @@
 export interface Tile {
-    letter: string;
+    letter: number;
     value: number;
     x?: number;
     y?: number;

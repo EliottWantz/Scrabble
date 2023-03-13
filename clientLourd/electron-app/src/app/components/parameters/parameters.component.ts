@@ -55,6 +55,10 @@ export class ParametersComponent implements OnInit {
 
     ngOnInit() {
         this.games$.subscribe(() => {
+            //console.log("hello");
+            //console.log(this.games$.value);
+        });
+        this.currentRoom.subscribe(() => {
             console.log("hello");
             console.log(this.games$.value);
         });
@@ -127,6 +131,7 @@ export class ParametersComponent implements OnInit {
                 gameId = game.id;
             }
         }*/
+        console.log(this.currentRoom.value);
         if(this.currentRoom.value.userIds.length < 2){
             return;
         }

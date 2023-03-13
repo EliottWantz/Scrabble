@@ -32,7 +32,7 @@ export class MoveService {
         };
 
         const payload: PlayMovePayload = {
-            gameID: this.gameId,
+            gameId: this.gameId,
             moveInfo: move
         };
 
@@ -54,7 +54,7 @@ export class MoveService {
         };
 
         const payload: PlayMovePayload = {
-            gameID: this.gameId,
+            gameId: this.gameId,
             moveInfo: move
         };
 
@@ -70,7 +70,7 @@ export class MoveService {
         };
 
         const payload: PlayMovePayload = {
-            gameID: this.gameId,
+            gameId: this.gameId,
             moveInfo: move
         };
 

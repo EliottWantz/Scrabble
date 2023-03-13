@@ -3,6 +3,7 @@ import { MoveInfo } from "@app/utils/interfaces/game/move"
 import { ChatMessage } from "@app/utils/interfaces/chat-message";
 import { Room } from "@app/utils/interfaces/room";
 import { Game } from "@app/utils/interfaces/game/game";
+import { User } from "@app/utils/interfaces/user";
 
 export interface Packet {
     event: Event;
@@ -10,7 +11,7 @@ export interface Packet {
 }
 
 export type ClientPayload = JoinRoomPayload | JoinDMPayload | CreateRoomPayload | LeaveRoomPayload | PlayMovePayload | ChatMessage | CreateGameRoomPayload | JoinGameRoomPayload;
-export type ServerPayload = Room | ChatMessage | Game | JoinableGamesPayload | JoinedRoomPayload | number;
+export type ServerPayload = Room | ChatMessage | Game | JoinableGamesPayload | JoinedRoomPayload | number | UserJoinedPayload;
 
 export interface JoinRoomPayload {
     roomId: string;
@@ -54,8 +55,13 @@ export interface JoinableGamesPayload {
 
 export interface JoinedRoomPayload {
     roomId: string;
-    users: string[];
+    users: User[];
     messages: ChatMessage[];
-    creatorID: string;
+    creatorId: string;
     isGameRoom: boolean;
+}
+
+export interface UserJoinedPayload {
+    roomId: string;
+    user: User;
 }

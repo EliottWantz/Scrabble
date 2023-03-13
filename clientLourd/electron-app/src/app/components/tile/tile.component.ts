@@ -34,4 +34,8 @@ export class TileComponent {
             }
         }
     }
+
+    getASCII(): string {
+        return String.fromCharCode(this.tile.letter);
+    }
 }

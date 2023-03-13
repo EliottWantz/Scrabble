@@ -3,7 +3,7 @@ import { UserService } from "@app/services/user/user.service";
 import { User } from "@app/utils/interfaces/user";
 import { BehaviorSubject } from "rxjs";
 import { environment } from 'src/environments/environment';
-import { ClientPayload, CreateRoomPayload, JoinableGamesPayload, JoinDMPayload, JoinedRoomPayload, JoinRoomPayload, LeaveRoomPayload, Packet, PlayMovePayload } from "@app/utils/interfaces/packet";
+import { ClientPayload, CreateRoomPayload, JoinableGamesPayload, JoinDMPayload, JoinedRoomPayload, JoinRoomPayload, LeaveRoomPayload, Packet, PlayMovePayload, UserJoinedPayload } from "@app/utils/interfaces/packet";
 import { RoomService } from "@app/services/room/room.service";
 import { Room } from "@app/utils/interfaces/room";
 import { ChatMessage } from "@app/utils/interfaces/chat-message";
@@ -48,11 +48,15 @@ export class WebSocketService {
         switch (event) {
             case "joinedRoom":
                 const payloadRoom = packet.payload as JoinedRoomPayload;
+                const userIds = [];
+                for (let user of payloadRoom.users) {
+                    userIds.push(user.id);
+                }
                 const room = {
                     id: payloadRoom.roomId,
-                    userIds: payloadRoom.users,
+                    userIds: userIds,
                     messages: payloadRoom.messages,
-                    creatorId: payloadRoom.creatorID,
+                    creatorId: payloadRoom.creatorId,
                     isGameRoom: payloadRoom.isGameRoom
                 }
                 //this.roomService.addRoom(room);
@@ -86,6 +90,7 @@ export class WebSocketService {
                 const payloadGame = packet.payload as Game;
                 this.gameService.updateGame(payloadGame);
                 break;
+
             case "joinableGames":
                 //console.log(packet.payload)
                 const joinableGames = packet.payload as JoinableGamesPayload;
@@ -93,11 +98,16 @@ export class WebSocketService {
                 //console.log(joinableGames);
                 this.roomService.joinableGames.next(joinableGames.games);
                 //console.log(this.roomService.rooms);
+                break;
 
             case "timerUpdate":
                 const payloadTimer = packet.payload as number;
                 this.gameService.updateTimer(payloadTimer);
                 break;
+
+            case "userJoined":
+                const payloadUserJoined = packet.payload as UserJoinedPayload;
+                this.roomService.addUser(payloadUserJoined.roomId, payloadUserJoined.user);
         }
     }
 
