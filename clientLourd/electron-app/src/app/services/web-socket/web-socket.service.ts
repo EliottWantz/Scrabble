@@ -3,7 +3,7 @@ import { UserService } from "@app/services/user/user.service";
 import { User } from "@app/utils/interfaces/user";
 import { BehaviorSubject } from "rxjs";
 import { environment } from 'src/environments/environment';
-import { ClientPayload, CreateRoomPayload, ErrorPayload, GameUpdatePayload, JoinableGamesPayload, JoinDMPayload, JoinedRoomPayload, JoinRoomPayload, LeaveRoomPayload, Packet, PlayMovePayload, TimerUpdatePayload, UserJoinedPayload } from "@app/utils/interfaces/packet";
+import { ClientPayload, CreateRoomPayload, ErrorPayload, GameUpdatePayload, IndiceServerPayload, JoinableGamesPayload, JoinDMPayload, JoinedRoomPayload, JoinRoomPayload, LeaveRoomPayload, Packet, PlayMovePayload, TimerUpdatePayload, UserJoinedPayload } from "@app/utils/interfaces/packet";
 import { RoomService } from "@app/services/room/room.service";
 import { Room } from "@app/utils/interfaces/room";
 import { ChatMessage } from "@app/utils/interfaces/chat-message";
@@ -120,6 +120,12 @@ export class WebSocketService {
                     this.rackService.replaceTilesInRack();
                     //this.gameService.game.next(this.gameService.game.value);
                 }
+                break;
+
+            case "indice":
+                const indicePayload = packet.payload as IndiceServerPayload;
+                this.gameService.moves.next(indicePayload.moves);
+                break;
         }
     }
 

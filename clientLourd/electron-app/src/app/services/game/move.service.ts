@@ -19,6 +19,10 @@ export class MoveService {
     game!: BehaviorSubject<Game>;
     constructor(private webSocketService: WebSocketService, private gameService: GameService) {
         this.game = this.gameService.game;
+        this.game.subscribe(() => {
+            this.selectedTiles = [];
+            this.placedTiles = [];
+        })
     }
 
     async playTiles(): Promise<void> {
@@ -44,6 +48,7 @@ export class MoveService {
         console.log("Played ");
         console.log(this.placedTiles);
         this.placedTiles = [];
+        this.selectedTiles = [];
     }
 
     exchange(): void {
@@ -66,6 +71,7 @@ export class MoveService {
         console.log("Exchanged ");
         console.log(this.selectedTiles);
         this.selectedTiles = [];
+        this.placedTiles = [];
     }
 
     pass(): void {
@@ -79,5 +85,11 @@ export class MoveService {
         };
 
         this.webSocketService.send("playMove", payload)
+        this.selectedTiles = [];
+        this.placedTiles = [];
+    }
+
+    indice(): void {
+        this.webSocketService.send("indice", {gameId: this.game.value.id});
     }
 }
