@@ -5,6 +5,7 @@ const String ServerEventListUsers    = "listUsers";
 const String ServerEventUsersInRoom  = "usersInRoom";
 const String ServerEventChatMessage = "chat-message";
 const String ServerEventJoinableGames = "joinableGames";
+const String ServerEventTimerUpdate = "timerUpdate";
 const String ServerEventGameUpdate = "gameUpdate";
 const String ServerEventGameOver = "gameOver";
 const String ServerEventFriendRequest = "friendRequest";

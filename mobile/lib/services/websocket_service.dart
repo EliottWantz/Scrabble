@@ -10,8 +10,11 @@ import 'package:client_leger/models/requests/create_game_room_request.dart';
 import 'package:client_leger/models/requests/join_dm_request.dart';
 import 'package:client_leger/models/requests/join_room_request.dart';
 import 'package:client_leger/models/response/chat_message_response.dart';
+import 'package:client_leger/models/response/game_update_response.dart';
 import 'package:client_leger/models/response/joined_room_response.dart';
+import 'package:client_leger/models/response/user_joined_response.dart';
 import 'package:client_leger/models/start_game_payload.dart';
+import 'package:client_leger/models/user.dart';
 import 'package:client_leger/services/room_service.dart';
 import 'package:get/get.dart';
 // import 'package:socket_io_client/socket_io_client.dart' as IO;
@@ -79,6 +82,11 @@ class WebsocketService extends GetxService {
         // print(roomId);
       }
       break;
+      case ServerEventUserJoined: {
+        UserJoinedResponse userJoinedResponse = UserJoinedResponse.fromRawJson(data);
+        handleEventUserJoined(userJoinedResponse);
+      }
+      break;
       case ServerEventChatMessage: {
         // roomId = data.payload!.roomId;
         // messages.obs.value.add(data);
@@ -103,6 +111,12 @@ class WebsocketService extends GetxService {
       }
       break;
       // case game update
+      case ServerEventGameUpdate: {
+        print('received game update');
+        GameUpdateResponse gameUpdateResponse = GameUpdateResponse.fromRawJson(data);
+        print(gameUpdateResponse.toString());
+      }
+      break;
       // case game timer
       default: {
         print('no event in package received');
@@ -112,7 +126,15 @@ class WebsocketService extends GetxService {
   }
 
   void handleEventJoinedRoom(JoinedRoomResponse joinedRoomResponse) {
-    roomService.addRoom(joinedRoomResponse.payload.roomId, joinedRoomResponse.payload);
+    if (!joinedRoomResponse.payload.isGameRoom!) {
+      roomService.addRoom(joinedRoomResponse.payload.roomId, joinedRoomResponse.payload);
+    }
+    print('joined game room');
+    gameService.currentGameRoom.value = joinedRoomResponse.payload;
+  }
+
+  void handleEventUserJoined(UserJoinedResponse userJoinedResponse) {
+    // gameService.currentGameRoom.value.users.add(userJoinedResponse.payload.user) userJoinedResponse.payload;
   }
 
   void handleServerEventChatMessage(ChatMessageResponse chatMessageResponse) {
@@ -180,6 +202,7 @@ class WebsocketService extends GetxService {
         event: ClientEventJoinGameRoom,
         payload: joinGameRoomPayload
     );
+    socket.sink.add(joinGameRoomRequest.toRawJson());
   }
 
   void sendMessage(String roomId, String message) {
@@ -203,7 +226,7 @@ class WebsocketService extends GetxService {
     socket.sink.add(listJoinableGamesRequest.toRawJson());
   }
 
-  void startGameRequest(String roomId) {
+  void startGame(String roomId) {
     final startGamePayload = StartGamePayload(roomId: roomId);
     final startGameRequest = StartGameRequest(
       event: ClientEventStartGame,

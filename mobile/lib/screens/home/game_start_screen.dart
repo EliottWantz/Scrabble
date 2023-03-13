@@ -166,6 +166,7 @@ class GameStartScreen extends StatelessWidget {
                 DataCell(
                   ElevatedButton.icon(
                     onPressed: () {
+                      _websocketService.joinGameRoom(game.id);
                     },
                     icon: const Icon(
                       // <-- Icon

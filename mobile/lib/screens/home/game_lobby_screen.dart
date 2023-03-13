@@ -1,8 +1,11 @@
+  import 'package:client_leger/services/websocket_service.dart';
 import 'package:client_leger/widgets/app_sidebar.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:sidebarx/sidebarx.dart';
+
+import '../../services/game_service.dart';
 
 class GameLobbyScreen extends StatelessWidget {
   GameLobbyScreen({Key? key}) : super(key: key);
@@ -10,6 +13,8 @@ class GameLobbyScreen extends StatelessWidget {
   final sideBarController =
       SidebarXController(selectedIndex: 0, extended: true);
 
+  final GameService _gameService = Get.find();
+  final WebsocketService _websocketService = Get.find();
 
   @override
   Widget build(BuildContext context) {
@@ -43,8 +48,7 @@ class GameLobbyScreen extends StatelessWidget {
                     image: AssetImage('assets/images/scrabble.png'),
                   ),
                   const Gap(20),
-                  Text('En attente d\'autre joueurs... Veuillez patientez',
-                      style: Theme.of(context).textTheme.headline6),
+                  Obx(() => _buildStartButton(context)),
                   Gap(Get.height / 5),
                   const CircularProgressIndicator(),
                   Gap(200),
@@ -55,5 +59,24 @@ class GameLobbyScreen extends StatelessWidget {
             )),
           );
         });
+  }
+
+  Widget _buildStartButton(BuildContext context) {
+    if (_gameService.currentGameRoom.value!.users.length < 2) {
+      return Text('En attente d\'autre joueurs... Veuillez patientez',
+          style: Theme.of(context).textTheme.headline6);
+    } else {
+      return ElevatedButton.icon(
+        onPressed: () {
+          _websocketService.startGame(_gameService.currentGameRoom!.value!.roomId);
+        },
+        icon: const Icon(
+          // <-- Icon
+          Icons.play_arrow,
+          size: 20,
+        ),
+        label: const Text('Démarrer la partie'), // <-- Text
+      );
+    }
   }
 }
