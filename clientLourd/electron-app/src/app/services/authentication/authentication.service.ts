@@ -28,8 +28,8 @@ export class AuthenticationService {
         });
     }
 
-    async register(username: string, password: string, email: string, avatar: string): Promise<boolean> {
-        return await this.commService.register(username, password, email, avatar).then((res) => {
+    async register(username: string, password: string, email: string, avatarURL: string, fileID: string): Promise<boolean> {
+        return await this.commService.register(username, password, email, avatarURL, fileID).then((res) => {
             this.setUser(res);
             this.socketService.connect();
             return true;
@@ -47,7 +47,11 @@ export class AuthenticationService {
             username: res.user.username,
             email: res.user.email,
             avatar: res.user.avatar,
-            preferences: res.user.preferences
+            preferences: res.user.preferences,
+            joinedChatRooms: res.user.joinedChatRooms,
+	        friends: res.user.friends,
+	        pendingRequests: res.user.pendingRequests,
+	        summary: res.user.summary
         });
         this.storageService.saveUserToken(res.token);
         this.isLoginFailed = false;

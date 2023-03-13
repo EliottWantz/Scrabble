@@ -19,8 +19,8 @@ export class CommunicationService {
         return res;
     }
 
-    async register(username: string, password: string, email: string, avatar: string): Promise<{user: User, token: string}> {
-        const res: any = (await lastValueFrom(this.requestRegister(username, password, email, avatar)));
+    async register(username: string, password: string, email: string, avatarURL: string, fileID: string): Promise<{user: User, token: string}> {
+        const res: any = (await lastValueFrom(this.requestRegister(username, password, email, avatarURL, fileID)));
         return res;
     }
 
@@ -28,8 +28,8 @@ export class CommunicationService {
         return this.http.post<{user: User}>(`${this.baseUrl}/login`, { username, password }).pipe(catchError(this.handleError));
     }
 
-    private requestRegister(username: string, password: string, email: string, avatar: string): Observable<{user: User}> {
-        return this.http.post<{user: User}>(`${this.baseUrl}/signup`, { username, password, email, avatar }).pipe(catchError(this.handleError));
+    private requestRegister(username: string, password: string, email: string, avatarURL: string, fileID: string): Observable<{user: User}> {
+        return this.http.post<{user: User}>(`${this.baseUrl}/signup`, { username, password, email, avatarURL, fileID }).pipe(catchError(this.handleError));
     }
 
     async uploadAvatar(file: File, user: User): Promise<{url: string, fileId: string}> {

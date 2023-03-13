@@ -13,7 +13,7 @@ export class RegisterComponent implements OnInit {
     username: string = "";
     password: string = "";
     email: string = "";
-    avatar: string = "";
+    avatar: {url: string, fileId: string} = {url: "", fileId: ""};
     isRegisterFailed = false;
     selectedFile: any = null;
     defaultAvatars: {url: string, fileId: string}[];
@@ -29,9 +29,9 @@ export class RegisterComponent implements OnInit {
     }
     
     async onSubmit() {
-        if (this.username == "" || this.password == "" || this.email =="" || this.avatar == "")
+        if (this.username == "" || this.password == "" || this.email =="" || this.avatar.url == "")
             return;
-        const isLoggedIn = await this.authService.register(this.username, this.password, this.email, this.avatar);
+        const isLoggedIn = await this.authService.register(this.username, this.password, this.email, this.avatar.url, this.avatar.fileId);
 
         if (isLoggedIn) {
             this.router.navigate(['/home']);
@@ -47,7 +47,7 @@ export class RegisterComponent implements OnInit {
                 document.getElementsByClassName("avatar")[i].setAttribute("style", "");
                 this.selectedFile = null;
             } else {
-                src = document.getElementsByClassName("avatar")[i].getAttribute("src");
+                src = this.defaultAvatars[num];
                 document.getElementsByClassName("avatar")[i].setAttribute("style", "background: -webkit-linear-gradient(left top, crimson 0%, #f90 100%);");
             }
         }

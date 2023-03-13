@@ -1,46 +1,49 @@
 <div id="chatBox" #chatBox>
-  <div id="chatBoxBody" #chatBoxBody>
-    <div id="chatBoxMessages" #chatBoxMessages>
-      <div
-        class="message"
-        *ngFor="let msg of room$.value.messages"
-        [ngClass]="{
-          sent: msg.from === user.id,
-          received: msg.from !== user.id
-        }"
-      >
-        <p>{{ msg.from }}: {{ msg.message }}</p>
-        <p class="timestamp">{{ msg.timestamp }}</p>
+  <mat-card>
+    <div id="chatBoxBody" #chatBoxBody>
+      <div id="chatBoxMessages" #chatBoxMessages>
+        <div
+          class="message"
+          *ngFor="let msg of room$.value.messages"
+          [ngClass]="{
+            sent: msg.from === user.id,
+            received: msg.from !== user.id
+          }"
+        >
+          <p>{{ msg.from }}: {{ msg.message }}</p>
+          <p class="timestamp">{{ msg.timestamp }}</p>
+        </div>
       </div>
     </div>
-  </div>
-
-  <form (ngSubmit)="send(chatBoxInput.value)" [formGroup]="chatBoxForm">
-    <mat-form-field appearance="fill">
-      <mat-label>Entrez votre message</mat-label>
-      <input
-        #chatBoxInput
-        type="text"
-        id="chatBoxInput"
-        formControlName="input"
-        autocomplete="off"
-        (keypress.enter)="submitBtn._elementRef.nativeElement.click()"
-        matInput
-      />
-      <!-- <mat-error *ngIf="input.hasError('maxlength')">Votre message <strong>excède</strong> la limite de charactères</mat-error> -->
-    </mat-form-field>
-    <button
-      #submitBtn
-      mat-mini-fab
-      color="primary"
-      [disabled]="false"
-      id="submitBtn"
-      type="submit"
-    >
-      <mat-icon>send</mat-icon>
-    </button>
-    <button id="popout" type="submit" (click)="popout()">
-      <img id="popout" src="../../../assets/popout.png">
-    </button>
-  </form>
+  
+    <form (ngSubmit)="send(chatBoxInput.value)" [formGroup]="chatBoxForm">
+      <mat-form-field appearance="fill">
+        <mat-label>Entrez votre message</mat-label>
+        <input
+          #chatBoxInput
+          type="text"
+          id="chatBoxInput"
+          formControlName="input"
+          autocomplete="off"
+          (keypress.enter)="submitBtn._elementRef.nativeElement.click()"
+          matInput
+          [errorStateMatcher]="messageValidator"
+        />
+        <!-- <mat-error *ngIf="input.hasError('maxlength')">Votre message <strong>excède</strong> la limite de charactères</mat-error> -->
+      </mat-form-field>
+      <button
+        #submitBtn
+        mat-mini-fab
+        color="primary"
+        [disabled]="false"
+        id="submitBtn"
+        type="submit"
+      >
+        <mat-icon>send</mat-icon>
+      </button>
+      <button id="popout" type="submit" (click)="popout()">
+        <img id="popout" src="../../../assets/popout.png">
+      </button>
+    </form>
+  </mat-card>
 </div>
