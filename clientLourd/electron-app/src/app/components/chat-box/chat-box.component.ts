@@ -51,7 +51,7 @@ export class ChatBoxComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-    this.room$ = this.roomService.currentRoom;
+    this.room$ = this.roomService.currentRoomChat;
     this.user = this.userService.currentUserValue;
     this.room$.subscribe(() => {
       setTimeout(() => this.scrollBottom());
@@ -78,7 +78,7 @@ export class ChatBoxComponent implements OnInit, AfterViewInit {
   async send(msg: string): Promise<void> {
     if (!msg || !msg.replace(/\s/g, '')) return;
 
-    await this.chatService.send(msg, this.roomService.currentRoom.value);
+    await this.chatService.send(msg, this.roomService.currentRoomChat.value);
     this.chatBoxForm.reset();
     this.chatBoxInput.nativeElement.focus();
     //console.log(this.messages$);
