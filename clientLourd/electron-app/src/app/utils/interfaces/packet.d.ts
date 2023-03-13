@@ -11,7 +11,7 @@ export interface Packet {
 }
 
 export type ClientPayload = JoinRoomPayload | JoinDMPayload | CreateRoomPayload | LeaveRoomPayload | PlayMovePayload | ChatMessage | CreateGameRoomPayload | JoinGameRoomPayload;
-export type ServerPayload = Room | ChatMessage | GameUpdatePayload | JoinableGamesPayload | JoinedRoomPayload | TimerUpdatePayload | UserJoinedPayload;
+export type ServerPayload = Room | ChatMessage | GameUpdatePayload | JoinableGamesPayload | JoinedRoomPayload | TimerUpdatePayload | UserJoinedPayload | ErrorPayload;
 
 export interface JoinRoomPayload {
     roomId: string;
@@ -72,4 +72,8 @@ export interface GameUpdatePayload {
 
 export interface TimerUpdatePayload {
     timer: number;
+}
+
+export interface ErrorPayload {
+    error: string;
 }

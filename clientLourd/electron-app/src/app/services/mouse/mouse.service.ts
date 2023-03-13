@@ -1,18 +1,20 @@
 import { Injectable } from "@angular/core";
 import { Tile } from "@app/utils/interfaces/game/tile";
 import { MoveService } from "@app/services/game/move.service";
+import { RackService } from "@app/services/game/rack.service";
 
 @Injectable({
     providedIn: 'root',
 })
 export class MouseService {
     tileElems: HTMLElement[] = [];
-    constructor(private moveService: MoveService) {}
+    constructor(private moveService: MoveService, private rackService: RackService) {}
 
     place(element: HTMLElement, row: number, col: number): void {
         if (this.tileElems.length == 1 && this.moveService.selectedTiles.length == 1) {
             console.log("hello");
             element.appendChild(this.tileElems[0]);
+            this.rackService.placedTiles.push(element);
             this.tileElems[0].style.outlineColor = "black";
             this.tileElems = [];
             
