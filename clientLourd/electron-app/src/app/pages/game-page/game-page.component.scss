@@ -60,11 +60,23 @@ mat-divider {
 #exchange-button {
   position:absolute;
   left: 85%;
-  top: 85%;
+  top: 80%;
 }
 
 app-timer {
   position:absolute;
   left: 85%;
   top:25%;
+}
+
+#indice-button {
+  position: absolute;
+  left: 85%;
+  top: 90%;
+}
+
+#indice {
+  position: absolute;
+  left: 8%;
+  top: 0%
 }

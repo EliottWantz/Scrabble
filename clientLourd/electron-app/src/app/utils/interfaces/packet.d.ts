@@ -10,8 +10,8 @@ export interface Packet {
     payload: ClientPayload | ServerPayload;
 }
 
-export type ClientPayload = JoinRoomPayload | JoinDMPayload | CreateRoomPayload | LeaveRoomPayload | PlayMovePayload | ChatMessage | CreateGameRoomPayload | JoinGameRoomPayload;
-export type ServerPayload = Room | ChatMessage | GameUpdatePayload | JoinableGamesPayload | JoinedRoomPayload | TimerUpdatePayload | UserJoinedPayload | ErrorPayload;
+export type ClientPayload = JoinRoomPayload | JoinDMPayload | CreateRoomPayload | LeaveRoomPayload | PlayMovePayload | ChatMessage | CreateGameRoomPayload | JoinGameRoomPayload | IndiceClientPayload;
+export type ServerPayload = Room | ChatMessage | GameUpdatePayload | JoinableGamesPayload | JoinedRoomPayload | TimerUpdatePayload | UserJoinedPayload | ErrorPayload | IndiceServerPayload;
 
 export interface JoinRoomPayload {
     roomId: string;
@@ -76,4 +76,12 @@ export interface TimerUpdatePayload {
 
 export interface ErrorPayload {
     error: string;
+}
+
+export interface IndiceClientPayload {
+    gameId: string;
+}
+
+export interface IndiceServerPayload {
+    moves: MoveInfo[];
 }

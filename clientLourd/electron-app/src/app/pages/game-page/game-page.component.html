@@ -36,4 +36,19 @@
     >
       Échanger
     </button>
+
+    <button
+      *ngIf="isTurn()"
+      mat-raised-button
+      color="warn"
+      (click)="indice()"
+      id="indice-button"
+    >
+      Indice
+    </button>
+    <mat-card id="indice" *ngIf="moves.value.length > 0">
+      <mat-card-content>
+        <p *ngFor="let move of getIndice()">{{move}}</p>
+      </mat-card-content>
+    </mat-card>
 </div>

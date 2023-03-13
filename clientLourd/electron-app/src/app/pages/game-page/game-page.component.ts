@@ -4,6 +4,7 @@ import { Game } from "@app/utils/interfaces/game/game";
 import { BehaviorSubject } from "rxjs";
 import { UserService } from "@app/services/user/user.service";
 import { MoveService } from "@app/services/game/move.service";
+import { MoveInfo } from "@app/utils/interfaces/game/move";
 
 @Component({
     selector: "app-game-page",
@@ -12,11 +13,13 @@ import { MoveService } from "@app/services/game/move.service";
 })
 export class GamePageComponent implements OnInit {
     game!: BehaviorSubject<Game>;
+    moves!: BehaviorSubject<MoveInfo[]>
     constructor(private gameService: GameService, private userService: UserService, private moveService: MoveService) { }
 
     ngOnInit(): void {
         this.game = this.gameService.game;
         this.game.subscribe();
+        this.moves = this.gameService.moves;
     }
 
     isTurn(): boolean {
@@ -41,5 +44,17 @@ export class GamePageComponent implements OnInit {
 
     exchange(): void {
         this.moveService.exchange();
+    }
+
+    indice(): void {
+        this.moveService.indice();
+    }
+
+    getIndice(): string[] {
+        const strings = [];
+        for (let move of this.moves.value) {
+            strings.push(JSON.stringify(move));
+        }
+        return strings;
     }
 }
