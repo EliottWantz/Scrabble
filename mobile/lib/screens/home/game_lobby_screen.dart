@@ -1,4 +1,4 @@
-  import 'package:client_leger/services/websocket_service.dart';
+import 'package:client_leger/services/websocket_service.dart';
 import 'package:client_leger/widgets/app_sidebar.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -52,17 +52,17 @@ class GameLobbyScreen extends StatelessWidget {
                   Gap(Get.height / 5),
                   const CircularProgressIndicator(),
                   Gap(200),
-                  Text('1/4 joueurs présents',
-                      style: Theme.of(context).textTheme.headline6),
+                  Obx(() => Text('${_gameService.currentGameRoomUsers.value!.length}/4 joueurs présents',
+                      style: Theme.of(context).textTheme.headline6)),
                 ],
-              ),
-            )),
+              )),
+            ),
           );
         });
   }
 
   Widget _buildStartButton(BuildContext context) {
-    if (_gameService.currentGameRoom.value!.users.length < 2) {
+    if (_gameService.currentGameRoomUsers.value!.length < 2) {
       return Text('En attente d\'autre joueurs... Veuillez patientez',
           style: Theme.of(context).textTheme.headline6);
     } else {

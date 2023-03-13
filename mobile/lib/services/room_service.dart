@@ -1,11 +1,11 @@
 import 'dart:core';
 import 'dart:math';
 
-import 'package:client_leger/models/public_user.dart';
 import 'package:get/get.dart';
 
 import '../models/chat_message_payload.dart';
 import '../models/room.dart';
+import '../models/user.dart';
 
 class RoomService extends GetxService {
   RxMap<String, Room> roomsMap = RxMap<String, Room>();
@@ -70,8 +70,8 @@ class RoomService extends GetxService {
     return messages;
   }
 
-  List<PublicUser> getRoomUsers(String roomId) {
-    List<PublicUser> users = roomsMap[roomId]!.users;
+  List<User> getRoomUsers(String roomId) {
+    List<User> users = roomsMap[roomId]!.users;
     return users;
   }
 

@@ -19,6 +19,7 @@ import 'package:client_leger/services/room_service.dart';
 import 'package:get/get.dart';
 // import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:client_leger/api/api_constants.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:client_leger/services/user_service.dart';
 
@@ -27,6 +28,7 @@ import '../models/requests/create_room_request.dart';
 import '../models/requests/list_joinable_games_request.dart';
 import '../models/requests/start_game_request.dart';
 import '../models/response/list_joinable_games_response.dart';
+import '../models/room.dart';
 import 'game_service.dart';
 
 class WebsocketService extends GetxService {
@@ -128,14 +130,32 @@ class WebsocketService extends GetxService {
   void handleEventJoinedRoom(JoinedRoomResponse joinedRoomResponse) {
     if (!joinedRoomResponse.payload.isGameRoom!) {
       roomService.addRoom(joinedRoomResponse.payload.roomId, joinedRoomResponse.payload);
+      return;
     }
     print('joined game room');
+    if (gameService.currentGameRoom.value == null) {
+      gameService.currentGameRoom.value = joinedRoomResponse.payload;
+      gameService.currentGameRoomUsers.value =
+          joinedRoomResponse.payload.users;
+      return;
+    }
+    // if (joinedRoomResponse.payload.roomId ==
+    //     gameService.currentGameRoom.value!.roomId) {
     gameService.currentGameRoom.value = joinedRoomResponse.payload;
+    gameService.currentGameRoomUsers.value = joinedRoomResponse.payload.users;
+    // }
   }
 
   void handleEventUserJoined(UserJoinedResponse userJoinedResponse) {
-
-    // gameService.currentGameRoom.value.users.add(userJoinedResponse.payload.user) userJoinedResponse.payload;
+    // Room currentGameRoom = gameService.currentGameRoom.value!;
+    // currentGameRoom.users.add(userJoinedResponse.payload.user);
+    // gameService.currentGameRoom.value = currentGameRoom;
+    // print('new current game room state');
+    // print(gameService.currentGameRoom.value!.users.toString());
+    if (gameService.currentGameRoom.value == null) return;
+    if (userJoinedResponse.payload.roomId == gameService.currentGameRoom.value!.roomId) {
+      gameService.currentGameRoomUsers!.add(userJoinedResponse.payload.user);
+    }
   }
 
   void handleServerEventChatMessage(ChatMessageResponse chatMessageResponse) {
