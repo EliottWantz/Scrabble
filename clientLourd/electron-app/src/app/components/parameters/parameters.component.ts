@@ -46,8 +46,8 @@ export class ParametersComponent implements OnInit {
         this.waiting = false;
         this.formPageButtonActive = true;
         // this.gameService.init();
-        this.games$ = this.roomService.rooms;
-        console.log(this.games$.value);
+        this.games$ = this.roomService.joinableGames;
+        //console.log(this.games$.value);
         this.created = false;
     }
 
@@ -56,7 +56,7 @@ export class ParametersComponent implements OnInit {
             console.log("hello");
             console.log(this.games$.value);
         });
-        console.log(this.games$.value);
+        //console.log(this.games$.value);
     }
 
     closeModal(): void {

@@ -11,6 +11,8 @@ import { ChatMessage } from "@app/utils/interfaces/chat-message";
 export class RoomService {
     rooms!: BehaviorSubject<Room[]>;
     currentRoom!: BehaviorSubject<Room>;
+    joinableGames!: BehaviorSubject<Room[]>;
+    listChatRooms!: BehaviorSubject<Room[]>;
 
     constructor(private commService: CommunicationService, private userService: UserService) {
         this.rooms = new BehaviorSubject<Room[]>([]);
@@ -21,15 +23,26 @@ export class RoomService {
             creatorID : "",
             isGameRoom: false
         });
+        this.joinableGames = new BehaviorSubject<Room[]>([]);
+        this.listChatRooms = new BehaviorSubject<Room[]>([]);
     }
 
     async joinRoom(roomId: string, roomName: string): Promise<void> {
     }
 
     addRoom(room: Room): void {
-        console.log(room);
+        //console.log(room);
+        //console.log("room");
+        //console.log(room);
         this.rooms.next([...this.rooms.value, room]);
         this.currentRoom.next(room);
+    }
+
+    addJoinableGame(room: Room): void {
+        console.log(room);
+        if (room.isGameRoom)
+            this.joinableGames.next([...this.rooms.value, room]);
+        console.log(this.joinableGames.value);
     }
 
     removeRoom(roomID: string): void {
@@ -68,6 +81,14 @@ export class RoomService {
     findRoom(roomIdTocHeck: string): number | undefined {
         for (let i = 0; i < this.rooms.value.length; i++) {
             if (this.rooms.value[i].ID == roomIdTocHeck)
+                return i;         
+        }
+        return undefined;
+    }
+
+    findGame(roomIdTocHeck: string): number | undefined {
+        for (let i = 0; i < this.joinableGames.value.length; i++) {
+            if (this.joinableGames.value[i].ID == roomIdTocHeck)
                 return i;         
         }
         return undefined;

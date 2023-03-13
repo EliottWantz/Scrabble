@@ -55,10 +55,10 @@ export class WebSocketService {
                     creatorID: payloadRoom.creatorID,
                     isGameRoom: payloadRoom.isGameRoom
                 }
-                this.roomService.addRoom(room);
-                /*if (this.roomService.findRoom(room.ID) === undefined) {
+                //this.roomService.addRoom(room);
+                if (this.roomService.findRoom(room.ID) === undefined) {
                     this.roomService.addRoom(room);
-                }*/
+                }
                 break;
     
             case "chat-message":
@@ -79,19 +79,20 @@ export class WebSocketService {
             case "listUsers":
                 break;
 
+            case "listChatRooms":
+                break;
+
             case "gameUpdate":
                 const payloadGame = packet.payload as Game;
                 this.gameService.updateGame(payloadGame);
                 break;
             case "joinableGames":
-                console.log(packet.payload)
+                //console.log(packet.payload)
                 const joinableGames = packet.payload as JoinableGamesPayload;
                 //if(joinableGames[0] == undefined) return;
-                console.log(joinableGames);
-                for (const game of joinableGames.games){
-                    this.roomService.addRoom(game);
-                }
-                console.log(this.roomService.rooms);
+                //console.log(joinableGames);
+                this.roomService.joinableGames.next(joinableGames.games);
+                //console.log(this.roomService.rooms);
         }
     }
 
