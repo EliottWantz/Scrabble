@@ -134,6 +134,7 @@ class WebsocketService extends GetxService {
   }
 
   void handleEventUserJoined(UserJoinedResponse userJoinedResponse) {
+
     // gameService.currentGameRoom.value.users.add(userJoinedResponse.payload.user) userJoinedResponse.payload;
   }
 
