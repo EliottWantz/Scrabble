@@ -1,4 +1,5 @@
 import { Injectable } from "@angular/core";
+import { Router } from "@angular/router";
 import { BoardHelper } from "@app/classes/board-helper";
 import { Game } from "@app/utils/interfaces/game/game";
 import { Player } from "@app/utils/interfaces/game/player";
@@ -11,7 +12,7 @@ import { BehaviorSubject } from "rxjs";
 export class GameService {
     game!: BehaviorSubject<Game>;
     timer!: BehaviorSubject<number>;
-    constructor() {
+    constructor(private router: Router) {
         this.game = new BehaviorSubject<Game>({
             id: "",
             players: [],
@@ -27,6 +28,7 @@ export class GameService {
     updateGame(game: GameUpdatePayload): void {
         this.game.next(game.game);
         this.timer.next(game.game.timer / 1000000000);
+        this.router.navigate(['/', 'game']);
     }
 
     updateTimer(timer: number): void {
