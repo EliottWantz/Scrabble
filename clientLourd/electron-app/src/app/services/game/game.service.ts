@@ -1,6 +1,8 @@
 import { Injectable } from "@angular/core";
 import { BoardHelper } from "@app/classes/board-helper";
 import { Game } from "@app/utils/interfaces/game/game";
+import { Player } from "@app/utils/interfaces/game/player";
+import { GameUpdatePayload } from "@app/utils/interfaces/packet";
 import { BehaviorSubject } from "rxjs";
 
 @Injectable({
@@ -16,19 +18,18 @@ export class GameService {
             board: BoardHelper.createBoard(),
             finished: false,
             numPassMoves: 0,
-            turn: "ba9f559f-e42b-45df-88bd-a7b3cc3c8cc3",
-            timer: 120,
+            turn: "",
+            timer: 0,
         });
-        
-        this.timer = new BehaviorSubject<number>(120);
+        this.timer = new BehaviorSubject<number>(0);
     }
 
-    updateGame(game: Game): void {
-        this.game.next(game);
-        this.timer.next(game.timer);
+    updateGame(game: GameUpdatePayload): void {
+        this.game.next(game.game);
+        this.timer.next(game.game.timer / 1000000000);
     }
 
     updateTimer(timer: number): void {
-        this.timer.next(timer);
+        this.timer.next(timer  / 1000000000);
     }
 }

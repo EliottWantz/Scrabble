@@ -3,7 +3,7 @@ import { UserService } from "@app/services/user/user.service";
 import { User } from "@app/utils/interfaces/user";
 import { BehaviorSubject } from "rxjs";
 import { environment } from 'src/environments/environment';
-import { ClientPayload, CreateRoomPayload, JoinableGamesPayload, JoinDMPayload, JoinedRoomPayload, JoinRoomPayload, LeaveRoomPayload, Packet, PlayMovePayload, UserJoinedPayload } from "@app/utils/interfaces/packet";
+import { ClientPayload, CreateRoomPayload, GameUpdatePayload, JoinableGamesPayload, JoinDMPayload, JoinedRoomPayload, JoinRoomPayload, LeaveRoomPayload, Packet, PlayMovePayload, TimerUpdatePayload, UserJoinedPayload } from "@app/utils/interfaces/packet";
 import { RoomService } from "@app/services/room/room.service";
 import { Room } from "@app/utils/interfaces/room";
 import { ChatMessage } from "@app/utils/interfaces/chat-message";
@@ -87,7 +87,7 @@ export class WebSocketService {
                 break;
 
             case "gameUpdate":
-                const payloadGame = packet.payload as Game;
+                const payloadGame = packet.payload as GameUpdatePayload;
                 this.gameService.updateGame(payloadGame);
                 break;
 
@@ -101,8 +101,8 @@ export class WebSocketService {
                 break;
 
             case "timerUpdate":
-                const payloadTimer = packet.payload as number;
-                this.gameService.updateTimer(payloadTimer);
+                const payloadTimer = packet.payload as TimerUpdatePayload;
+                this.gameService.updateTimer(payloadTimer.timer);
                 break;
 
             case "userJoined":

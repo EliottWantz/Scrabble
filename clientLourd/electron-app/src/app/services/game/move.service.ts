@@ -7,15 +7,19 @@ import { WebSocketService } from "@app/services/web-socket/web-socket.service";
 import { ClientPayload, Packet, PlayMovePayload } from "@app/utils/interfaces/packet";
 import { Tile } from "@app/utils/interfaces/game/tile";
 import { MoveInfo } from "@app/utils/interfaces/game/move";
+import { RoomService } from "@app/services/room/room.service";
+import { GameService } from "@app/services/game/game.service";
 
 @Injectable({
     providedIn: 'root',
 })
 export class MoveService {
-    gameId: string = "";
     selectedTiles: Tile[] = [];
     placedTiles: Tile[] = [];
-    constructor(private webSocketService: WebSocketService) {}
+    game!: BehaviorSubject<Game>;
+    constructor(private webSocketService: WebSocketService, private gameService: GameService) {
+        this.game = this.gameService.game;
+    }
 
     async playTiles(): Promise<void> {
         let letters: string = "";
@@ -32,7 +36,7 @@ export class MoveService {
         };
 
         const payload: PlayMovePayload = {
-            gameId: this.gameId,
+            gameId: this.game.value.id,
             moveInfo: move
         };
 
@@ -54,7 +58,7 @@ export class MoveService {
         };
 
         const payload: PlayMovePayload = {
-            gameId: this.gameId,
+            gameId: this.game.value.id,
             moveInfo: move
         };
 
@@ -70,7 +74,7 @@ export class MoveService {
         };
 
         const payload: PlayMovePayload = {
-            gameId: this.gameId,
+            gameId: this.game.value.id,
             moveInfo: move
         };
 
