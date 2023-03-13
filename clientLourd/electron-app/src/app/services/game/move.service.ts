@@ -6,7 +6,7 @@ import { BehaviorSubject } from "rxjs";
 import { WebSocketService } from "@app/services/web-socket/web-socket.service";
 import { ClientPayload, Packet, PlayMovePayload } from "@app/utils/interfaces/packet";
 import { Tile } from "@app/utils/interfaces/game/tile";
-import { MoveInfo } from "@app/utils/interfaces/game/move";
+import { Cover, MoveInfo } from "@app/utils/interfaces/game/move";
 import { RoomService } from "@app/services/room/room.service";
 import { GameService } from "@app/services/game/game.service";
 
@@ -23,10 +23,10 @@ export class MoveService {
 
     async playTiles(): Promise<void> {
         let letters: string = "";
-        const covers = new Map();
+        const covers: Cover = {};
         this.placedTiles.forEach(tile => {
-            letters += tile.letter;
-            covers.set(tile.x?.toString() + "/" + tile.y?.toString(), tile.letter);
+            letters += String.fromCharCode(tile.letter);
+            covers[tile.y?.toString() + "/" + tile.x?.toString()] = String.fromCharCode(tile.letter);
         });
 
         const move: MoveInfo = {
