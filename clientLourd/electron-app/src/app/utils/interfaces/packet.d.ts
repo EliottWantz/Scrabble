@@ -13,38 +13,38 @@ export type ClientPayload = JoinRoomPayload | JoinDMPayload | CreateRoomPayload 
 export type ServerPayload = Room | ChatMessage | Game | JoinableGamesPayload | JoinedRoomPayload;
 
 export interface JoinRoomPayload {
-    roomID: string;
+    roomId: string;
 }
 
 export interface JoinDMPayload {
     username: string;
-    toID: string;
+    toId: string;
     toUsername: string;
 }
 
 export interface CreateRoomPayload {
     roomName: string;
-    userIDs: string[];
+    userIds: string[];
 }
 
 export interface CreateGameRoomPayload {
-    userIDs: string[];
+    userIds: string[];
 }
 
 export interface JoinGameRoomPayload {
-    gameID: string;
+    roomId: string;
 }
 
 export interface StartGame {
-    gameID: string;
+    roomId: string;
 }
 
 export interface LeaveRoomPayload {
-    roomID: string;
+    roomId: string;
 }
 
 export interface PlayMovePayload {
-    gameID: string;
+    gameId: string;
     moveInfo: MoveInfo;
 }
 

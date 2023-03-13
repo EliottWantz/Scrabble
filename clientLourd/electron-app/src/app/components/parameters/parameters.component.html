@@ -12,8 +12,8 @@
     <h1 class="header-comp">En attente d'autres joueur</h1>
 </div>
 <div *ngFor="let game of games$.value" class="parameter">
-    <div class="parameter" *ngIf="game.isGameRoom">
-        <h1>{{ game.ID }}</h1>
+    <div class="parameter" *ngIf="game.isGameRoom && !created">
+        <button (click)="joinGame(game.id)">{{ game.id }}</button>
     </div>
     <!-- <ng-template #noData></ng-template> -->
 </div>

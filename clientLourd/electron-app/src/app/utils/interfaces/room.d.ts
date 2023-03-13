@@ -1,9 +1,9 @@
 import { ChatMessage } from "@app/utils/interfaces/chat-message";
 
 export interface Room {
-    ID: string;
-    users: string[];
+    id: string;
+    userIds: string[];
     messages: ChatMessage[];
-    creatorID: string;
+    creatorId: string;
     isGameRoom: boolean;
 }

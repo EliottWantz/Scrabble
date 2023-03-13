@@ -17,10 +17,10 @@ export class RoomService {
     constructor(private commService: CommunicationService, private userService: UserService) {
         this.rooms = new BehaviorSubject<Room[]>([]);
         this.currentRoom = new BehaviorSubject<Room>({
-            ID: "",
-            users: [],
+            id: "",
+            userIds: [],
             messages: [],
-            creatorID : "",
+            creatorId : "",
             isGameRoom: false
         });
         this.joinableGames = new BehaviorSubject<Room[]>([]);
@@ -63,7 +63,7 @@ export class RoomService {
     addMessage(msg: ChatMessage): void {
         const index = this.findRoom(msg.roomId);
         if (index !== undefined) {
-            if (this.rooms.value[index].ID == this.currentRoom.value.ID) {
+            if (this.rooms.value[index].id == this.currentRoom.value.id) {
                 const currentMessages = this.currentRoom.value.messages;
                 currentMessages.push(msg);
                 this.currentRoom.next({...this.rooms.value[index], messages: currentMessages});
@@ -80,7 +80,7 @@ export class RoomService {
 
     findRoom(roomIdTocHeck: string): number | undefined {
         for (let i = 0; i < this.rooms.value.length; i++) {
-            if (this.rooms.value[i].ID == roomIdTocHeck)
+            if (this.rooms.value[i].id == roomIdTocHeck)
                 return i;         
         }
         return undefined;
@@ -88,7 +88,7 @@ export class RoomService {
 
     findGame(roomIdTocHeck: string): number | undefined {
         for (let i = 0; i < this.joinableGames.value.length; i++) {
-            if (this.joinableGames.value[i].ID == roomIdTocHeck)
+            if (this.joinableGames.value[i].id == roomIdTocHeck)
                 return i;         
         }
         return undefined;

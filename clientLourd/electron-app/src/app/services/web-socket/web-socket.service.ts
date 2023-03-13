@@ -49,14 +49,14 @@ export class WebSocketService {
             case "joinedRoom":
                 const payloadRoom = packet.payload as JoinedRoomPayload;
                 const room = {
-                    ID: payloadRoom.roomId,
-                    users: payloadRoom.users,
+                    id: payloadRoom.roomId,
+                    userIds: payloadRoom.users,
                     messages: payloadRoom.messages,
-                    creatorID: payloadRoom.creatorID,
+                    creatorId: payloadRoom.creatorID,
                     isGameRoom: payloadRoom.isGameRoom
                 }
                 //this.roomService.addRoom(room);
-                if (this.roomService.findRoom(room.ID) === undefined) {
+                if (this.roomService.findRoom(room.id) === undefined) {
                     this.roomService.addRoom(room);
                 }
                 break;

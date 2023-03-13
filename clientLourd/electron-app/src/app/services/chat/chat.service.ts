@@ -20,9 +20,9 @@ export class ChatService {
     }
 
     send(msg: string, room: Room): void {
-        if (this.userService.isLoggedIn && this.roomService.findRoom(room.ID) !== undefined) {
+        if (this.userService.isLoggedIn && this.roomService.findRoom(room.id) !== undefined) {
             const payload: ChatMessage = {
-                roomId: room.ID,
+                roomId: room.id,
                 from: this.user.value.username,
                 fromId: this.user.value.id,
                 message: msg

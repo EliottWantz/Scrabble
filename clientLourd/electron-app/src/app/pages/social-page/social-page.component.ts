@@ -56,7 +56,7 @@ export class SocialPageComponent {
     const friend = await this.communicationService.getFriendByID(this.user.value.id, friendId)
     const payload: JoinDMPayload = {
       username:this.user.value.username,
-      toID: friend.friend.id,
+      toId: friend.friend.id,
       toUsername:friend.friend.username
     }
     const event : ClientEvent = "join-dm-room";

@@ -30,6 +30,7 @@ export class ParametersComponent implements OnInit {
     games$: BehaviorSubject<Room[]>;
     waiting: boolean;
     created: boolean;
+    currentRoom: BehaviorSubject<Room>;
 
     constructor(
         private matDialog: MatDialog,
@@ -47,6 +48,7 @@ export class ParametersComponent implements OnInit {
         this.formPageButtonActive = true;
         // this.gameService.init();
         this.games$ = this.roomService.joinableGames;
+        this.currentRoom = this.roomService.currentRoom;
         //console.log(this.games$.value);
         this.created = false;
     }
@@ -89,7 +91,7 @@ export class ParametersComponent implements OnInit {
 
     async createGame(): Promise<void> {
         const payload: CreateGameRoomPayload = {
-            userIDs: []
+            userIds: []
           }
           const event : ClientEvent = "create-game-room";
           this.webSocketService.send(event, payload);
@@ -109,7 +111,7 @@ export class ParametersComponent implements OnInit {
     joinGame(gameId: string): void {
         //this.stepper.selectedIndex = STEPPER_PAGE_IDX.confirmationPage;
         const payload: JoinGameRoomPayload = {
-            gameID: gameId,
+            roomId: gameId,
           }
           const event : ClientEvent = "join-game-room";
           this.webSocketService.send(event, payload);
@@ -117,16 +119,19 @@ export class ParametersComponent implements OnInit {
 
     startGame(): void {
         let gameId :string = "";
-        for(const game of this.roomService.rooms.value){
-            if(game.isGameRoom && game.creatorID === this.userService.currentUserValue.id){
-                if(game.users.length != 4){
+        /*for(const game of this.roomService.rooms.value){
+            if(game.isGameRoom && game.creatorId === this.userService.currentUserValue.id){
+                if(game.userIds.length < 2){
                     return;
                 }
-                gameId = game.ID;
+                gameId = game.id;
             }
+        }*/
+        if(this.currentRoom.value.userIds.length < 2){
+            return;
         }
         const payload: StartGame = {
-            gameID: gameId
+            roomId: this.currentRoom.value.id
           }
           const event : ClientEvent = "start-game";
           this.webSocketService.send(event, payload);
