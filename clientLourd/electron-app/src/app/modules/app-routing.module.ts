@@ -5,6 +5,7 @@ import { ProfilePageComponent } from '@app/pages/profile-page/profile-page.compo
 import { RulesSliderPageComponent } from '@app/pages/rules-slider-page/rules-slider-page.component';
 import { LoginPageComponent } from '@app/pages/login-page/login-page.component';
 import { GamePageComponent } from '@app/pages/game-page/game-page.component';
+import { SocialPageComponent } from '@app/pages/social-page/social-page.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' },
@@ -12,7 +13,8 @@ const routes: Routes = [
   { path: 'profile', component: ProfilePageComponent },
   { path: 'rules-slider', component: RulesSliderPageComponent },
   { path: 'login', component: LoginPageComponent },
-  { path: 'game', component: GamePageComponent }
+  { path: 'game', component: GamePageComponent },
+  { path: 'social', component: SocialPageComponent }
 ];
 
 @NgModule({

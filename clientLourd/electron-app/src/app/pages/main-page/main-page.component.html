@@ -28,6 +28,10 @@
     <a *ngIf="isConnected()" routerLink="/rules-slider" routerLinkActive="router-link-active" id="rules-button">
       <div> Help! </div>
     </a>
+    <a *ngIf="isConnected()" routerLink="/social" routerLinkActive="router-link-active" id="social-button">
+      <div> Social </div>
+    </a>
   </nav>
-  <app-chat-box *ngIf="isConnected()"></app-chat-box>
+  <!-- <app-chat-box *ngIf="isConnected()"></app-chat-box> -->
+  <parameters *ngIf="isConnected()"></parameters>
 </div>

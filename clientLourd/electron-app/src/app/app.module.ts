@@ -11,8 +11,10 @@ import { MatInputModule } from '@angular/material/input';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 import { LoginPageComponent } from '@app/pages/login-page/login-page.component';
 import { ProfilePageComponent } from './pages/profile-page/profile-page.component';
+import { SocialPageComponent } from './pages/social-page/social-page.component';
 import { RulesSliderPageComponent } from './pages/rules-slider-page/rules-slider-page.component';
 import { ChatBoxComponent } from './components/chat-box/chat-box.component';
+import { ParametersComponent } from './components/parameters/parameters.component';
 import { MatCardModule } from '@angular/material/card';
 import { AppMaterialModule } from "@app/modules/material.module";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
@@ -38,11 +40,13 @@ import { FreeDraggingDirective } from "@app/directives/dragging.directive"
     RulesSliderPageComponent,
     RegisterComponent,
     ChatBoxComponent,
+    ParametersComponent,
     GamePageComponent,
     BoardComponent,
     TileComponent,
     RackComponent,
-    FreeDraggingDirective
+    FreeDraggingDirective,
+    SocialPageComponent
   ],
   imports: [
     BrowserModule,

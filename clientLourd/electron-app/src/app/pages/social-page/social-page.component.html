@@ -1,0 +1,49 @@
+<div class="container">
+    <button mat-fab color="primary" class="home-button" routerLink="/home" routerLinkActive="router-link-active">
+        <mat-icon>home</mat-icon>
+      </button>
+    <div *ngIf="user.value.friends.length === 0">No friends ?</div>
+    <div *ngFor="let friend of user.value.friends">
+        <a (click)="friendChat(friend)">{{friend}}</a>
+    </div>
+
+    <app-chat-box *ngIf="inDM"></app-chat-box>
+    <!-- <form (ngSubmit)="addFriend(friendInput.value)" [formGroup]="friendForm">
+        <mat-form-field appearance="fill">
+          <mat-label>Entrez le nom de l'ami que vous souhaitez ajouter</mat-label>
+          <input
+            #friendInput
+            type="text"
+            id="chatBoxInput"
+            formControlName="input"
+            autocomplete="off"
+            (keypress.enter)="submitBtn._elementRef.nativeElement.click()"
+            matInput
+            [errorStateMatcher]="messageValidator"
+          /> -->
+          <!-- <mat-error *ngIf="input.hasError('maxlength')">Votre message <strong>excède</strong> la limite de charactères</mat-error> -->
+        <!-- </mat-form-field>
+        <button
+          #submitBtn
+          mat-mini-fab
+          color="primary"
+          [disabled]="false"
+          id="submitBtn"
+          type="submit"
+        >
+          <mat-icon>Add</mat-icon>
+        </button>
+      </form> -->
+
+      <button (click)="console()">
+        Bruh
+      </button>
+
+      <button (click)="initFriend()">
+        Bruh2
+      </button>
+
+      <button (click)="addFriendTemp()">
+        Bruh3
+      </button>
+</div>

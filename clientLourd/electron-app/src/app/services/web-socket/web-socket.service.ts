@@ -75,6 +75,15 @@ export class WebSocketService {
                 const payloadGame = packet.payload as Game;
                 this.gameService.updateGame(payloadGame);
                 break;
+            case "joinableGames":
+                console.log(packet.payload)
+                const joinableGames = packet.payload as Room[];
+                if(joinableGames[0] == undefined) return;
+                console.log(joinableGames);
+                for (const game of joinableGames){
+                    this.roomService.addRoom(game);
+                }
+                console.log(this.roomService.rooms);
         }
     }
 

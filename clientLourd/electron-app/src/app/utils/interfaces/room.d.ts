@@ -4,4 +4,6 @@ export interface Room {
     roomId: string;
     users: string[];
     messages: ChatMessage[];
+    creatorID: string;
+    isGameRoom: boolean;
 }

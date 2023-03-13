@@ -64,6 +64,24 @@ export class CommunicationService {
         return this.http.post<{game: Game}>(`${this.baseUrl}/game`, roomId).pipe(catchError(this.handleError));
     }
 
+    private requestGetFriendsList(userId: string): Observable<{friends: [{friendId: string}]}>{
+        return this.http.get<{friends: [{friendId: string}]}>(`${this.baseUrl}/user/friends/${userId}`).pipe(catchError(this.handleError));
+    }
+
+    private requestGetFriendByID(userId:string, friendId:string): Observable<{friend: User}> {
+        return this.http.get<{friend: User}>(`${this.baseUrl}/user/friends/${userId}/${friendId}`).pipe(catchError(this.handleError));
+    }
+
+    async getFriendsList(userId: string): Promise<{friends: [{friendId: string}]}>{
+        const res:any = (await lastValueFrom(this.requestGetFriendsList(userId)));
+        return res;
+    }
+
+    async getFriendByID(userId:string, friendId:string): Promise<{friend: User}> {
+        const res:any = (await lastValueFrom(this.requestGetFriendByID(userId, friendId)));
+        return res;
+    }
+
     private handleError(error: HttpErrorResponse) {
         if (error.status === 0) {
           // A client-side or network error occurred. Handle it accordingly.
@@ -77,4 +95,5 @@ export class CommunicationService {
         // Return an observable with a user-facing error message.
         return throwError(() => new Error('Something bad happened; please try again later.'));
       }
+
 }

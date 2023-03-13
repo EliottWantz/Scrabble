@@ -9,8 +9,8 @@ export interface Packet {
     payload: ClientPayload | ServerPayload;
 }
 
-export type ClientPayload = JoinRoomPayload | JoinDMPayload | CreateRoomPayload | LeaveRoomPayload | PlayMovePayload | ChatMessage;
-export type ServerPayload = Room | ChatMessage | Game;
+export type ClientPayload = JoinRoomPayload | JoinDMPayload | CreateRoomPayload | LeaveRoomPayload | PlayMovePayload | ChatMessage | CreateGameRoomPayload | JoinGameRoomPayload;
+export type ServerPayload = Room | ChatMessage | Game | Room[];
 
 export interface JoinRoomPayload {
     roomID: string;
@@ -25,6 +25,18 @@ export interface JoinDMPayload {
 export interface CreateRoomPayload {
     roomName: string;
     userIDs: string[];
+}
+
+export interface CreateGameRoomPayload {
+    userIDs: string[];
+}
+
+export interface JoinGameRoomPayload {
+    gameID: string;
+}
+
+export interface StartGame {
+    gameID: string;
 }
 
 export interface LeaveRoomPayload {

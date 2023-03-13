@@ -1,0 +1,23 @@
+<div id="btn" *ngIf="!waiting">
+    <button id="btn-Cancel" class="btn-close" (click)="closeModal()">Cancel</button>
+    <button *ngIf="createMultiplayer && formPageButtonActive" id="btn-Done" class="btn-next" (click)="createGame()">
+        Créer une partie
+    </button>
+    <!-- <button *ngIf="!createMultiplayer && formPageButtonActive" id="btn-Done" class="btn-next" (click)="listOfGame()">
+        Voir la liste de jeux
+    </button> -->
+</div>
+<div *ngIf="waiting" class="spinner-box">
+    <button (click)="startGame()">Start Game</button>
+    <h1 class="header-comp">En attente d'autres joueur</h1>
+</div>
+<div *ngFor="let game of games$" class="parameter">
+    <div class="parameter" *ngIf="game.value.isGameRoom">
+        <h1>{{ game.value.roomId }}</h1>
+    </div>
+    <!-- <ng-template #noData></ng-template> -->
+</div>
+
+<button (click)="console()">
+    Bruh
+  </button>

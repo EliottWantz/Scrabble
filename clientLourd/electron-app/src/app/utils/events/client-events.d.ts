@@ -1,1 +1,1 @@
-export type ClientEvent = "join-room" | "join-dm-room" | "create-room" | "leave-room" | "chat-message" | "playMove";
+export type ClientEvent = "join-room" | "join-game-room" | "join-dm-room" | "create-room" | "leave-room" | "chat-message" | "playMove"| "create-game-room" | "start-game";

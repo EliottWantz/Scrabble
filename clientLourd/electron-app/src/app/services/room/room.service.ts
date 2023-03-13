@@ -9,15 +9,17 @@ import { ChatMessage } from "@app/utils/interfaces/chat-message";
     providedIn: 'root',
 })
 export class RoomService {
-    rooms!: BehaviorSubject<BehaviorSubject<Room>[]>;
+    rooms!: BehaviorSubject<Room[]>;
     currentRoom!: BehaviorSubject<Room>;
 
     constructor(private commService: CommunicationService, private userService: UserService) {
-        this.rooms = new BehaviorSubject<BehaviorSubject<Room>[]>([]);
+        this.rooms = new BehaviorSubject<Room[]>([]);
         this.currentRoom = new BehaviorSubject<Room>({
             roomId: "",
             users: [],
-            messages: []
+            messages: [],
+            creatorID : "",
+            isGameRoom: false
         });
     }
 
