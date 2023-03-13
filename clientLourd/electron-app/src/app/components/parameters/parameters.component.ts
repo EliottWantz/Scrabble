@@ -4,10 +4,8 @@ import { MatCard } from '@angular/material/card';
 import { MatDialog, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatStepper, MatStep } from '@angular/material/stepper';
 import { GameService } from '@app/services/game/game.service';
-import { UserService } from '@app/services/user/user.service';
 import { Game } from '@app/utils/interfaces/game/game';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { User } from "@app/utils/interfaces/user";
 import { WebSocketService } from '@app/services/web-socket/web-socket.service';
 import { Room } from '@app/utils/interfaces/room';
 import { RoomService } from '@app/services/room/room.service';
@@ -30,14 +28,13 @@ export class ParametersComponent implements OnInit {
     games$: BehaviorSubject<Room[]>;
     waiting: boolean;
     created: boolean;
-    currentRoom: BehaviorSubject<Room>;
+    currentGameRoom: BehaviorSubject<Room>;
 
     constructor(
         private matDialog: MatDialog,
         public gameService: GameService,
         public roomService: RoomService,
         public webSocketService: WebSocketService,
-        public userService : UserService
     ) {
 
         this.name = new FormControl('', [Validators.required, Validators.minLength(3)]);
@@ -48,7 +45,7 @@ export class ParametersComponent implements OnInit {
         this.formPageButtonActive = true;
         // this.gameService.init();
         this.games$ = this.roomService.joinableGames;
-        this.currentRoom = this.roomService.currentRoom;
+        this.currentGameRoom = this.roomService.currentGameRoom;
         //console.log(this.games$.value);
         this.created = false;
     }
@@ -58,10 +55,10 @@ export class ParametersComponent implements OnInit {
             //console.log("hello");
             //console.log(this.games$.value);
         });
-        this.currentRoom.subscribe(() => {
+        /*this.currentRoom.subscribe(() => {
             console.log("hello");
             console.log(this.games$.value);
-        });
+        });*/
         //console.log(this.games$.value);
     }
 
@@ -131,12 +128,12 @@ export class ParametersComponent implements OnInit {
                 gameId = game.id;
             }
         }*/
-        console.log(this.currentRoom.value);
-        if(this.currentRoom.value.userIds.length < 2){
+        console.log(this.currentGameRoom.value);
+        if(this.currentGameRoom.value.userIds.length < 2){
             return;
         }
         const payload: StartGame = {
-            roomId: this.currentRoom.value.id
+            roomId: this.currentGameRoom.value.id
           }
           const event : ClientEvent = "start-game";
           this.webSocketService.send(event, payload);
