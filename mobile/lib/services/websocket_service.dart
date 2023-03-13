@@ -5,10 +5,12 @@ import 'package:client_leger/models/create_room_payload.dart';
 import 'package:client_leger/models/events.dart';
 import 'package:client_leger/models/join_dm_payload.dart';
 import 'package:client_leger/models/join_room_payload.dart';
+import 'package:client_leger/models/play_move_payload.dart';
 import 'package:client_leger/models/requests/chat_message_request.dart';
 import 'package:client_leger/models/requests/create_game_room_request.dart';
 import 'package:client_leger/models/requests/join_dm_request.dart';
 import 'package:client_leger/models/requests/join_room_request.dart';
+import 'package:client_leger/models/requests/play_move_request.dart';
 import 'package:client_leger/models/response/chat_message_response.dart';
 import 'package:client_leger/models/response/game_update_response.dart';
 import 'package:client_leger/models/response/joined_room_response.dart';
@@ -25,6 +27,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:client_leger/services/user_service.dart';
 
 import '../models/create_game_room_payload.dart';
+import '../models/move_info.dart';
 import '../models/requests/create_room_request.dart';
 import '../models/requests/list_joinable_games_request.dart';
 import '../models/requests/start_game_request.dart';
@@ -267,5 +270,17 @@ class WebsocketService extends GetxService {
       payload: startGamePayload
     );
     socket.sink.add(startGameRequest.toRawJson());
+  }
+
+  void playMove(String type, MoveInfo moveInfo) {
+    final playMovePayload = PlayMovePayload(
+        gameId: gameService.currentGameRoom.value!.roomId,
+        moveInfo: moveInfo
+    );
+    final playMoveRequest = PlayMoveRequest(
+      event: ClientEventPlayMove,
+      payload: playMovePayload
+    );
+    socket.sink.add(playMoveRequest.toRawJson());
   }
 }
