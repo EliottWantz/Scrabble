@@ -47,6 +47,7 @@ dependencies:
   web_socket_channel: ^2.1.0
   intl: ^0.18.0
   image_picker: ^0.8.6+1
+  flutter_layout_grid: ^2.0.1
 
 
 dev_dependencies:

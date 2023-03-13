@@ -55,11 +55,14 @@ Future<void> initGlobalServices() async {
   Get.put(GameService());
   Get.put(UserService());
   Get.put(RoomService());
+  Get.put(GameService());
   Get.put(ApiProvider(), permanent: true);
-  Get.put(WebsocketService(
-      userService: Get.find(),
-      roomService: Get.find()
-  ), permanent: false);
+  Get.put(
+      WebsocketService(
+        userService: Get.find(),
+        roomService: Get.find(),
+      ),
+      permanent: false);
   Get.put(ApiRepository(apiProvider: Get.find()), permanent: true);
   Get.put(SettingsService(storageService: Get.find()));
   Get.put(AvatarService());

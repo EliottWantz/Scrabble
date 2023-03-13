@@ -15,6 +15,7 @@ import 'package:client_leger/models/response/joined_room_response.dart';
 import 'package:client_leger/models/response/user_joined_response.dart';
 import 'package:client_leger/models/start_game_payload.dart';
 import 'package:client_leger/models/user.dart';
+import 'package:client_leger/routes/app_routes.dart';
 import 'package:client_leger/services/room_service.dart';
 import 'package:get/get.dart';
 // import 'package:socket_io_client/socket_io_client.dart' as IO;
@@ -38,7 +39,8 @@ class WebsocketService extends GetxService {
 
   WebsocketService(
       {required this.userService,
-      required this.roomService});
+      required this.roomService
+      });
 
   late WebSocketChannel socket;
   late String roomId;
@@ -174,7 +176,13 @@ class WebsocketService extends GetxService {
   }
 
   void handleServerEventGameUpdate(GameUpdateResponse gameUpdateResponse) {
-    gameService.currentGame.value = gameUpdateResponse.payload;
+    if(gameService.currentGame.value == null) {
+      gameService.currentGame.value = gameUpdateResponse.payload;
+      Get.offAllNamed(Routes.GAME);
+    }
+    else {
+      gameService.currentGame.value = gameUpdateResponse.payload;
+    }
   }
 
   void createRoom(String roomName, { List<String> userIds = const [] }) {
