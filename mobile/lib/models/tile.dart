@@ -1,7 +1,7 @@
 import 'dart:ffi';
 
 class Tile {
-  Int32 letter;
+  int letter;
   int value;
 
   Tile({
@@ -10,8 +10,8 @@ class Tile {
 
   factory Tile.fromJson(Map<String, dynamic> json) {
     return Tile(
-      letter: json["letter"],
-      value: json["value"]
+      letter: json["Letter"],
+      value: json["Value"]
     );
   }
 

@@ -2,7 +2,7 @@ import 'package:client_leger/models/position.dart';
 import 'package:client_leger/models/tile.dart';
 
 class Square {
-  Tile tile;
+  Tile? tile;
   int letterMultiplier;
   int wordMutiplier;
   Position position;
@@ -15,14 +15,14 @@ class Square {
 
   factory Square.fromJson(Map<String, dynamic> json) {
     return Square(
-      tile: Tile.fromJson(json["tile"]),
-      letterMultiplier: json["letterMultiplier"],
-      wordMutiplier: json["wordMultiplier"],
-      position: Position.fromJson(json["position"]));
+      tile: json["Tile"] != null ? Tile.fromJson(json["Tile"]) : null,
+      letterMultiplier: json["LetterMultiplier"],
+      wordMutiplier: json["WordMultiplier"],
+      position: Position.fromJson(json["Position"]));
   }
 
   Map<String, dynamic> toJson() => {
-    "tile": tile.toJson(),
+    "tile": tile?.toJson(),
     "letterMultiplier": letterMultiplier,
     "wordMultiplier": wordMutiplier,
     "position": position.toJson()

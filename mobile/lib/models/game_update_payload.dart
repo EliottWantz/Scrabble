@@ -20,14 +20,17 @@ class GameUpdatePayload {
 
   factory GameUpdatePayload.fromJson(Map<String, dynamic> json) {
     return GameUpdatePayload(
-        id: json["id"],
-        players: List<Player>.from((json["players"] as List).map(
+        id: json["game"]["id"],
+        players: List<Player>.from((json["game"]["players"] as List).map(
             (player) => Player.fromJson(player))
         ),
-        board: json["board"],
-        finished: json["finished"],
-        numPassMoves: json["numPassMoves"],
-        turn: json["turn"]
+        board: List<List<Square>>.from((json["game"]["board"] as List).map(
+                (row) => List<Square>.from((row as List).map((square) => Square.fromJson(square))))
+        ),
+        // board: json["game"]["board"],
+        finished: json["game"]["finished"],
+        numPassMoves: json["game"]["numPassMoves"],
+        turn: json["game"]["turn"]
     );
   }
 
