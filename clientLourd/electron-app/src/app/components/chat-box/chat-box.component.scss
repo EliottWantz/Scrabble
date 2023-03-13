@@ -1,8 +1,10 @@
 #chatBox {
-  height: 100%;
+  height: 50%;
   width: 30%;
   display: grid;
   grid-template-rows: 1fr auto;
+  position: absolute;
+  top: 50%;
 }
 
 #chatBoxBody {
