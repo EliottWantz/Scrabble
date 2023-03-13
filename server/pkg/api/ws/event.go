@@ -10,10 +10,9 @@ var (
 	ClientEventCreateRoom     = "create-room"
 	ClientEventCreateGameRoom = "create-game-room"
 	ClientEventLeaveRoom      = "leave-room"
-	// ClientEventListRooms         = "list-rooms"
-	// ClientEventListJoinableGames = "list-joinable-games"
-	ClientEventStartGame = "start-game"
-	ClientEventPlayMove  = "playMove"
+	ClientEventStartGame      = "start-game"
+	ClientEventPlayMove       = "playMove"
+	ClientEventIndice         = "indice"
 )
 
 // Server events
@@ -31,6 +30,7 @@ var (
 	ServerEventFriendRequest        = "friendRequest"
 	ServerEventAcceptFriendRequest  = "acceptFriendRequest"
 	ServerEventDeclineFriendRequest = "declineFriendRequest"
+	ServerEventIndice               = "indice"
 
 	ServerEventError = "error"
 )

@@ -68,13 +68,15 @@ func (r *Room) AddClient(cID string) error {
 	r.Clients.Set(cID, c)
 	c.Rooms.Set(r.ID, r)
 	r.logger.Info("client added in room", "client", c.ID)
+	dbRoom, _ := r.Manager.RoomSvc.Find(r.ID)
 
 	{
 		payload := JoinedRoomPayload{
-			RoomID:    r.ID,
-			RoomName:  r.Name,
-			CreatorID: r.CreatorID,
-			Users:     r.ListUsers(),
+			RoomID:     r.ID,
+			RoomName:   r.Name,
+			CreatorID:  r.CreatorID,
+			Users:      r.ListUsers(),
+			IsGameRoom: dbRoom.IsGameRoom,
 		}
 		msgs, err := r.Manager.MessageRepo.LatestMessage(r.ID, 0)
 		if err != nil || len(msgs) == 0 {
