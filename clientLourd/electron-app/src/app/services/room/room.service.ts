@@ -15,7 +15,7 @@ export class RoomService {
     constructor(private commService: CommunicationService, private userService: UserService) {
         this.rooms = new BehaviorSubject<Room[]>([]);
         this.currentRoom = new BehaviorSubject<Room>({
-            roomId: "",
+            ID: "",
             users: [],
             messages: [],
             creatorID : "",
@@ -27,9 +27,9 @@ export class RoomService {
     }
 
     addRoom(room: Room): void {
-        const newRoom = new BehaviorSubject<Room>(room);
-        this.rooms.next([...this.rooms.value, newRoom]);
-        this.currentRoom.next(newRoom.value);
+        console.log(room);
+        this.rooms.next([...this.rooms.value, room]);
+        this.currentRoom.next(room);
     }
 
     removeRoom(roomID: string): void {
@@ -44,27 +44,30 @@ export class RoomService {
     changeRoom(roomId: string): void {
         const index = this.findRoom(roomId);
         if (index !== undefined)
-            this.currentRoom.next(this.rooms.value[index].value);
+            this.currentRoom.next(this.rooms.value[index]);
     }
 
     addMessage(msg: ChatMessage): void {
         const index = this.findRoom(msg.roomId);
         if (index !== undefined) {
-            if (this.rooms.value[index].value.roomId == this.currentRoom.value.roomId) {
+            if (this.rooms.value[index].ID == this.currentRoom.value.ID) {
                 const currentMessages = this.currentRoom.value.messages;
                 currentMessages.push(msg);
-                this.currentRoom.next({...this.rooms.value[index].value, messages: currentMessages});
+                this.currentRoom.next({...this.rooms.value[index], messages: currentMessages});
             } else {
-                const currentMessages = this.rooms.value[index].value.messages;
+                const currentMessages = this.rooms.value[index].messages;
                 currentMessages.push(msg);
-                this.rooms.value[index].next({...this.rooms.value[index].value, messages: currentMessages});
+                const newRooms = this.rooms.value;
+                newRooms[index] = {...newRooms[index], messages: currentMessages};
+                this.rooms.next(newRooms);
+                //this.rooms.value[index].next({...this.rooms.value[index], messages: currentMessages});
             }
         }
     }
 
     findRoom(roomIdTocHeck: string): number | undefined {
         for (let i = 0; i < this.rooms.value.length; i++) {
-            if (this.rooms.value[i].value.roomId == roomIdTocHeck)
+            if (this.rooms.value[i].ID == roomIdTocHeck)
                 return i;         
         }
         return undefined;

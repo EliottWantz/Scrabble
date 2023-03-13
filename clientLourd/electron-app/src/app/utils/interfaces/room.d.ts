@@ -1,7 +1,7 @@
 import { ChatMessage } from "@app/utils/interfaces/chat-message";
 
 export interface Room {
-    roomId: string;
+    ID: string;
     users: string[];
     messages: ChatMessage[];
     creatorID: string;

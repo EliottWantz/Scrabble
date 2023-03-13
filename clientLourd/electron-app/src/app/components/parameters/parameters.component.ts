@@ -19,7 +19,7 @@ import { ClientEvent } from '@app/utils/events/client-events';
     templateUrl: './parameters.component.html',
     styleUrls: ['./parameters.component.scss'],
 })
-export class ParametersComponent {
+export class ParametersComponent implements OnInit {
     // @ViewChild('stepper') stepper: MatStepper;
 
     createMultiplayer: boolean;
@@ -27,7 +27,7 @@ export class ParametersComponent {
     minValue: boolean;
     formPageButtonActive: boolean;
     name: FormControl;
-    games$: BehaviorSubject<Room>[];
+    games$: BehaviorSubject<Room[]>;
     waiting: boolean;
     created: boolean;
 
@@ -46,8 +46,17 @@ export class ParametersComponent {
         this.waiting = false;
         this.formPageButtonActive = true;
         // this.gameService.init();
-        this.games$ = this.roomService.rooms.value;
+        this.games$ = this.roomService.rooms;
+        console.log(this.games$.value);
         this.created = false;
+    }
+
+    ngOnInit() {
+        this.games$.subscribe(() => {
+            console.log("hello");
+            console.log(this.games$.value);
+        });
+        console.log(this.games$.value);
     }
 
     closeModal(): void {
@@ -109,11 +118,11 @@ export class ParametersComponent {
     startGame(): void {
         let gameId :string = "";
         for(const game of this.roomService.rooms.value){
-            if(game.value.isGameRoom && game.value.creatorID === this.userService.currentUserValue.id){
-                if(game.value.users.length != 4){
+            if(game.isGameRoom && game.creatorID === this.userService.currentUserValue.id){
+                if(game.users.length != 4){
                     return;
                 }
-                gameId = game.value.roomId;
+                gameId = game.ID;
             }
         }
         const payload: StartGame = {
@@ -126,6 +135,6 @@ export class ParametersComponent {
 
     async console():Promise<void>{
         console.log(this.games$);
-        this.games$ = this.roomService.rooms.value;
+        this.games$ = this.roomService.rooms;
       }
 }

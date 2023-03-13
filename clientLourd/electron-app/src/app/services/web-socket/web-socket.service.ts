@@ -3,7 +3,7 @@ import { UserService } from "@app/services/user/user.service";
 import { User } from "@app/utils/interfaces/user";
 import { BehaviorSubject } from "rxjs";
 import { environment } from 'src/environments/environment';
-import { ClientPayload, CreateRoomPayload, JoinDMPayload, JoinRoomPayload, LeaveRoomPayload, Packet, PlayMovePayload } from "@app/utils/interfaces/packet";
+import { ClientPayload, CreateRoomPayload, JoinableGamesPayload, JoinDMPayload, JoinedRoomPayload, JoinRoomPayload, LeaveRoomPayload, Packet, PlayMovePayload } from "@app/utils/interfaces/packet";
 import { RoomService } from "@app/services/room/room.service";
 import { Room } from "@app/utils/interfaces/room";
 import { ChatMessage } from "@app/utils/interfaces/chat-message";
@@ -47,10 +47,18 @@ export class WebSocketService {
 
         switch (event) {
             case "joinedRoom":
-                const payloadRoom = packet.payload as Room;
-                if (this.roomService.findRoom(payloadRoom.roomId) === undefined) {
-                    this.roomService.addRoom(payloadRoom);
+                const payloadRoom = packet.payload as JoinedRoomPayload;
+                const room = {
+                    ID: payloadRoom.roomId,
+                    users: payloadRoom.users,
+                    messages: payloadRoom.messages,
+                    creatorID: payloadRoom.creatorID,
+                    isGameRoom: payloadRoom.isGameRoom
                 }
+                this.roomService.addRoom(room);
+                /*if (this.roomService.findRoom(room.ID) === undefined) {
+                    this.roomService.addRoom(room);
+                }*/
                 break;
     
             case "chat-message":
@@ -77,10 +85,10 @@ export class WebSocketService {
                 break;
             case "joinableGames":
                 console.log(packet.payload)
-                const joinableGames = packet.payload as Room[];
-                if(joinableGames[0] == undefined) return;
+                const joinableGames = packet.payload as JoinableGamesPayload;
+                //if(joinableGames[0] == undefined) return;
                 console.log(joinableGames);
-                for (const game of joinableGames){
+                for (const game of joinableGames.games){
                     this.roomService.addRoom(game);
                 }
                 console.log(this.roomService.rooms);

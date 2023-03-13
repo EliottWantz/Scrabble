@@ -27,7 +27,6 @@
           autocomplete="off"
           (keypress.enter)="submitBtn._elementRef.nativeElement.click()"
           matInput
-          [errorStateMatcher]="messageValidator"
         />
         <!-- <mat-error *ngIf="input.hasError('maxlength')">Votre message <strong>excède</strong> la limite de charactères</mat-error> -->
       </mat-form-field>
