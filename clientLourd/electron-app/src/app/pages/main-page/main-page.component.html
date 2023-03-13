@@ -20,9 +20,9 @@
     </button>
 
     <a *ngIf="isConnected()" routerLink="/profile" routerLinkActive="router-link-active" id="login-button">
-      <img id="avatar" src="">
+      <img id="avatar" src="{{user.value.avatar.url}}">
     </a>
-    <a routerLink="/game" routerLinkActive="router-link-active" id="rules-button">
+    <a *ngIf="isInGame() && isConnected()" routerLink="/game" routerLinkActive="router-link-active" id="rules-button">
       <div> Game </div>
     </a>
     <a *ngIf="isConnected()" routerLink="/rules-slider" routerLinkActive="router-link-active" id="rules-button">
@@ -32,6 +32,6 @@
       <div> Social </div>
     </a>
   </nav>
-  <!-- <app-chat-box *ngIf="isConnected()"></app-chat-box> -->
   <parameters *ngIf="isConnected()"></parameters>
+  <app-chat-box *ngIf="isConnected()"></app-chat-box>
 </div>
