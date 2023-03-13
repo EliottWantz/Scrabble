@@ -49,7 +49,7 @@ export class MoveService {
     exchange(): void {
         let letters: string = "";
         this.selectedTiles.forEach(tile => {
-            letters += tile.letter;
+            letters += String.fromCharCode(tile.letter);
         });
 
         const move: MoveInfo = {
