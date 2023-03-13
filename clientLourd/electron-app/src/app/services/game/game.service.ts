@@ -8,12 +8,13 @@ import { BehaviorSubject } from "rxjs";
 })
 export class GameService {
     game!: BehaviorSubject<Game>;
+    timer!: BehaviorSubject<number>;
     constructor() {
         this.game = new BehaviorSubject<Game>({
             id: "",
             players: [
                 {
-                    id: "0",
+                    id: "ba9f559f-e42b-45df-88bd-a7b3cc3c8cc3",
                     username: "Olivier",
                     rack: [
                         {
@@ -34,11 +35,19 @@ export class GameService {
             bag: [],
             finished: false,
             numPassMoves: 0,
-            turn: ""
+            turn: "ba9f559f-e42b-45df-88bd-a7b3cc3c8cc3",
+            timer: 120,
         });
+        
+        this.timer = new BehaviorSubject<number>(120);
     }
 
     updateGame(game: Game): void {
         this.game.next(game);
+        this.timer.next(game.timer);
+    }
+
+    updateTimer(timer: number): void {
+        this.timer.next(timer);
     }
 }

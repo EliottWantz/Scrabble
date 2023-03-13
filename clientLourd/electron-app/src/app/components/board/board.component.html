@@ -1,13 +1,17 @@
-<tr *ngFor="let row of game.value.board; let i = index">
-    <th *ngFor="let col of row, let j = index"
-        class="square-multiplier"
-        [class.word3]="col.wordMultiplier === 3"
-        [class.word2]="col.wordMultiplier === 2"
-        [class.letter2]="col.letterMultiplier === 2"
-        [class.letter3]="col.letterMultiplier === 3"
-        id="square"
-        (click)="clicked(i, j)"
-        #elem
-    >
-    </th>
-</tr>
+<div class="board">
+    <tr *ngFor="let row of game.value.board; let i = index">
+        <th *ngFor="let col of row, let j = index"
+            class="square-multiplier"
+            [class.word3]="col.wordMultiplier === 3"
+            [class.word2]="col.wordMultiplier === 2"
+            [class.letter2]="col.letterMultiplier === 2"
+            [class.letter3]="col.letterMultiplier === 3"
+            id="square"
+            (click)="clicked(i, j)"
+            #elem
+            squareHost
+        >
+            <app-tile *ngIf="col.tile" [tile]="col.tile" [disabled]="true"></app-tile>
+        </th>
+    </tr>
+</div>

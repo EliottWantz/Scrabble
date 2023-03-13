@@ -93,6 +93,11 @@ export class WebSocketService {
                 //console.log(joinableGames);
                 this.roomService.joinableGames.next(joinableGames.games);
                 //console.log(this.roomService.rooms);
+
+            case "timerUpdate":
+                const payloadTimer = packet.payload as number;
+                this.gameService.updateTimer(payloadTimer);
+                break;
         }
     }
 
