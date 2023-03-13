@@ -117,6 +117,7 @@ class WebsocketService extends GetxService {
         print('received game update');
         GameUpdateResponse gameUpdateResponse = GameUpdateResponse.fromRawJson(data);
         print(gameUpdateResponse.toString());
+        handleServerEventGameUpdate(gameUpdateResponse);
       }
       break;
       // case game timer
@@ -170,6 +171,10 @@ class WebsocketService extends GetxService {
     gameService.joinableGames.value = listJoinableGamesResponse.payload.games;
     // print(listJoinableGamesResponse.payload.games[0].usersIds.toString());
 
+  }
+
+  void handleServerEventGameUpdate(GameUpdateResponse gameUpdateResponse) {
+    gameService.currentGame.value = gameUpdateResponse.payload;
   }
 
   void createRoom(String roomName, { List<String> userIds = const [] }) {
