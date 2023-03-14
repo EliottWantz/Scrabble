@@ -23,5 +23,8 @@ class GameService extends GetxService {
       if (player.id == userService.user.value!.id) return player;
     }
   }
+  bool isCurrentPlayer(String playerId) {
+    return currentGame.value!.turn == playerId;
+  }
   // final currentGameTimer = Rxn<
 }
