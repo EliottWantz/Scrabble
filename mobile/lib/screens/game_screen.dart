@@ -39,7 +39,7 @@ class GameScreen extends GetView<GameController> {
                       children: [
                         const Gap(20),
                         ScrabbleBoard(),
-                        Row(
+                        Obx(() => Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: _gameService
                               .getPlayer()!
@@ -47,8 +47,8 @@ class GameScreen extends GetView<GameController> {
                               .tiles
                               .map((e) => _buildEasel(e))
                               .toList()
-                          ),
-                        Obx(() => Row(
+                          )),
+                        Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             ElevatedButton.icon(
@@ -103,7 +103,7 @@ class GameScreen extends GetView<GameController> {
                               label: const Text('Échanger'), // <-- Text
                             ),
                       ],
-                    )),
+                    ),
                   ])
               ),
               )
