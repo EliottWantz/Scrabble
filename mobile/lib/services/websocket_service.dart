@@ -171,9 +171,12 @@ class WebsocketService extends GetxService {
   }
 
   void handleServerEventChatMessage(ChatMessageResponse chatMessageResponse) {
-    if (chatMessageResponse.payload!.roomId == gameService.currentGameRoom.value!.roomId) {
-      gameService.currentRoomMessages.add(chatMessageResponse.payload!);
-      return;
+    if (gameService.currentGameRoom.value != null) {
+      if (chatMessageResponse.payload!.roomId ==
+          gameService.currentGameRoom.value!.roomId) {
+        gameService.currentRoomMessages.add(chatMessageResponse.payload!);
+        return;
+      }
     }
     roomService.addMessagePayloadToRoom(chatMessageResponse.payload!.roomId, chatMessageResponse.payload!);
     if (chatMessageResponse.payload!.roomId == roomService.currentRoomId) {

@@ -15,10 +15,10 @@ class Square {
 
   factory Square.fromJson(Map<String, dynamic> json) {
     return Square(
-      tile: json["Tile"] != null ? Tile.fromJson(json["Tile"]) : null,
-      letterMultiplier: json["LetterMultiplier"],
-      wordMutiplier: json["WordMultiplier"],
-      position: Position.fromJson(json["Position"]));
+      tile: json["tile"] != null ? Tile.fromJson(json["tile"]) : null,
+      letterMultiplier: json["letterMultiplier"],
+      wordMutiplier: json["wordMultiplier"],
+      position: Position.fromJson(json["position"]));
   }
 
   Map<String, dynamic> toJson() => {

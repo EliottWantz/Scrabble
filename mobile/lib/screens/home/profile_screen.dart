@@ -1,7 +1,13 @@
+import 'package:client_leger/models/avatar.dart';
+import 'package:client_leger/services/user_service.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 
 class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({Key? key}) : super(key: key);
+  ProfileScreen({Key? key}) : super(key: key);
+
+  final UserService userService = Get.find();
 
   @override
   Widget build(BuildContext context) {
@@ -12,8 +18,15 @@ class ProfileScreen extends StatelessWidget {
           width: 300,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
-              Text('Profile',style: TextStyle(fontSize: 30),),
+            children: [
+              Text('${userService.user.value!.username}', style: TextStyle(fontSize: 30),),
+              Text('${userService.user.value!.email}', style: TextStyle(fontSize: 30),),
+              CircleAvatar(
+                backgroundColor: Colors.transparent,
+                maxRadius: 40,
+                backgroundImage:
+                NetworkImage(userService.user.value!.avatar.url),
+              )
             ],
           ),
         ),

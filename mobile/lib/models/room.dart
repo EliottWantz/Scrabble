@@ -20,10 +20,10 @@ class Room {
 
   factory Room.fromJson(Map<String, dynamic> json) {
     return Room(
-      roomId: json["id"],
-      roomName: json["name"],
+      roomId: json["roomId"],
+      roomName: json["roomName"],
       creatorId: json["creatorId"],
-      users: List<User>.from((json["userIds"] as List).map(
+      users: List<User>.from((json["users"] as List).map(
               (user) => User.fromJson(user))
       ),
       messages: List<ChatMessagePayload>.from((json["messages"] as List).map(
