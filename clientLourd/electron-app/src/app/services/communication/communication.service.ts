@@ -1,8 +1,7 @@
-import { HttpClient, HttpErrorResponse, HttpHeaders } from "@angular/common/http";
+import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { environment } from 'src/environments/environment';
 import { User } from "@app/utils/interfaces/user";
-import { Room } from "@app/utils/interfaces/room";
 import { catchError, lastValueFrom, Observable, throwError } from "rxjs";
 import { Game } from "@app/utils/interfaces/game/game";
 

@@ -12,7 +12,7 @@ import { BehaviorSubject } from "rxjs";
 })
 export class MainPageComponent {
   readonly title: string = "Scrabble";
-  isJoining: boolean = false;
+  isJoining = false;
   public user: BehaviorSubject<User>;
 
   constructor(private userService: UserService, private socketService: WebSocketService, private roomService: RoomService) {
@@ -20,7 +20,7 @@ export class MainPageComponent {
     document.getElementById("avatar")?.setAttribute("src", this.user.value.avatar.url);
   }
 
-  isConnected(): Boolean {
+  isConnected(): boolean {
     return this.userService.isLoggedIn;
   }
 

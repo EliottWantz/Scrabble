@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 //import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { AuthenticationService } from "@app/services/authentication/authentication.service";
 import { Router } from "@angular/router"
@@ -10,9 +10,9 @@ import { CommunicationService } from "@app/services/communication/communication.
     styleUrls: ["./register.component.scss"],
 })
 export class RegisterComponent implements OnInit {
-    username: string = "";
-    password: string = "";
-    email: string = "";
+    username = "";
+    password = "";
+    email = "";
     avatar: {url: string, fileId: string} = {url: "", fileId: ""};
     isRegisterFailed = false;
     selectedFile: any = null;

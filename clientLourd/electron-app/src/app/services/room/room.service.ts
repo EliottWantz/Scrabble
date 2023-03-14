@@ -36,9 +36,6 @@ export class RoomService {
         this.listChatRooms = new BehaviorSubject<Room[]>([]);
     }
 
-    async joinRoom(roomId: string, roomName: string): Promise<void> {
-    }
-
     addRoom(room: Room): void {
         //console.log(room);
         console.log("room");

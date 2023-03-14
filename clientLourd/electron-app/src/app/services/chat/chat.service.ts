@@ -27,10 +27,6 @@ export class ChatService {
                 fromId: this.user.value.id,
                 message: msg
             };
-            const packet: Packet = {
-                event: "chat-message",
-                payload: payload,
-            };
             this.socketService.send("chat-message", payload);
         } else {
             console.log("Not logged in");

@@ -9,8 +9,8 @@ import { WebSocketService } from "@app/services/web-socket/web-socket.service";
     providedIn: 'root',
 })
 export class AuthenticationService {
-    username: string = "";
-    password: string = "";
+    username = "";
+    password = "";
     isLoginFailed = false;
     errorMessage = '';
     constructor(private commService: CommunicationService, private storageService: StorageService, private userService: UserService, private socketService: WebSocketService) {}
@@ -49,9 +49,9 @@ export class AuthenticationService {
             avatar: res.user.avatar,
             preferences: res.user.preferences,
             joinedChatRooms: res.user.joinedChatRooms,
-	        friends: res.user.friends,
-	        pendingRequests: res.user.pendingRequests,
-	        summary: res.user.summary
+            friends: res.user.friends,
+            pendingRequests: res.user.pendingRequests,
+            summary: res.user.summary
         });
         this.storageService.saveUserToken(res.token);
         this.isLoginFailed = false;

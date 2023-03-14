@@ -23,7 +23,7 @@ export class BoardComponent implements OnInit {
     }
 
     @ViewChildren('elem') elements!: QueryList<ElementRef>;
-    clicked(row: number, col: number): void {;
+    clicked(row: number, col: number): void {
         const currentElem = this.elements.toArray()[row * 15 + col];
         if (currentElem.nativeElement.children.length == 0 && this.moveService.selectedTiles.length == 1) {
             this.mouseService.place(currentElem.nativeElement, row, col);

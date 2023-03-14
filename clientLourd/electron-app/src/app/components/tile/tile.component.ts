@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, Input, Output, Renderer2, ViewChild } from "@angular/core";
+import { Component, ElementRef, Input, Renderer2, ViewChild } from "@angular/core";
 import { MouseService } from "@app/services/mouse/mouse.service";
 import { Tile } from "@app/utils/interfaces/game/tile";
 
@@ -8,10 +8,10 @@ import { Tile } from "@app/utils/interfaces/game/tile";
     styleUrls: ["./tile.component.scss"],
 })
 export class TileComponent {
-    alreadyClicked: boolean = false;
+    alreadyClicked = false;
     constructor(private mouseService: MouseService, private renderer: Renderer2) {}
     @Input() tile!: Tile;
-    @Input() disabled: boolean = false;
+    @Input() disabled = false;
     @ViewChild('elem') element!: ElementRef;
 
     clicked(): void {

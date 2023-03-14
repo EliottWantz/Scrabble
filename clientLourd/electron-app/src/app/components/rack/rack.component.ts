@@ -1,12 +1,9 @@
-import { Component, HostListener, OnInit } from "@angular/core";
-import {CdkDragDrop, moveItemInArray, transferArrayItem, CdkDragEnter} from '@angular/cdk/drag-drop';
-import { Square } from "@app/utils/interfaces/square";
-import { BehaviorSubject, Observable, Subject } from "rxjs";
+import { Component, OnInit } from "@angular/core";
+import { BehaviorSubject } from "rxjs";
 import { Game } from "@app/utils/interfaces/game/game";
 import { GameService } from "@app/services/game/game.service";
 import { UserService } from "@app/services/user/user.service";
 import { Tile } from "@app/utils/interfaces/game/tile";
-import { Player } from "@app/utils/interfaces/game/player";
 
 @Component({
     selector: "app-rack",

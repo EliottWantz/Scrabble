@@ -1,6 +1,5 @@
 import { Player } from "@app/utils/interfaces/game/player";
 import { Square } from "@app/utils/interfaces/square";
-import { Tile } from "@app/utils/interfaces/game/tile";
  
 export interface Game {
     id: string;

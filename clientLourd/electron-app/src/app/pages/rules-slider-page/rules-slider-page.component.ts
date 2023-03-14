@@ -2,12 +2,12 @@ import { Component } from "@angular/core";
 
 
 @Component({
-  selector: "rules-slider-page",
+  selector: "app-rules-slider-page",
   templateUrl: "./rules-slider-page.component.html",
   styleUrls: ["./rules-slider-page.component.scss"],
 })
 export class RulesSliderPageComponent {
-  page: number = 0;
+  page = 0;
   nextPage(): void {
     this.page++;
     this.page = this.mod(this.page,3);

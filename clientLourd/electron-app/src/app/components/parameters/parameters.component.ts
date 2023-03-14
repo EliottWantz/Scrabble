@@ -1,19 +1,16 @@
-import { Component, Inject, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
-import { MatCard } from '@angular/material/card';
-import { MatDialog, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { MatStepper, MatStep } from '@angular/material/stepper';
+import { MatDialog } from '@angular/material/dialog';
 import { GameService } from '@app/services/game/game.service';
-import { Game } from '@app/utils/interfaces/game/game';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { WebSocketService } from '@app/services/web-socket/web-socket.service';
 import { Room } from '@app/utils/interfaces/room';
 import { RoomService } from '@app/services/room/room.service';
-import { CreateGameRoomPayload, JoinDMPayload, JoinGameRoomPayload, StartGame } from '@app/utils/interfaces/packet';
+import { CreateGameRoomPayload, JoinGameRoomPayload, StartGame } from '@app/utils/interfaces/packet';
 import { ClientEvent } from '@app/utils/events/client-events';
 
 @Component({    
-    selector: 'parameters',
+    selector: 'app-parameters',
     templateUrl: './parameters.component.html',
     styleUrls: ['./parameters.component.scss'],
 })
@@ -73,7 +70,7 @@ export class ParametersComponent implements OnInit {
         return;
     }
 
-    async goToPageForm(page: string, mode: string = 'Multi'): Promise<void> {
+    async goToPageForm(page: string): Promise<void> {
         if (page === 'create') {
             this.createMultiplayer = true;
         } else if (page === 'join') {
@@ -119,7 +116,6 @@ export class ParametersComponent implements OnInit {
     }
 
     startGame(): void {
-        let gameId :string = "";
         /*for(const game of this.roomService.rooms.value){
             if(game.isGameRoom && game.creatorId === this.userService.currentUserValue.id){
                 if(game.userIds.length < 2){

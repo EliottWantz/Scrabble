@@ -5,8 +5,6 @@ import { Injectable } from "@angular/core";
 })
 export class RackService {
     placedTiles: HTMLElement[] = []
-    constructor() {}
-
     
     replaceTilesInRack(): void {
         const rack = document.getElementById("rack");

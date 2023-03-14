@@ -1,7 +1,6 @@
 import { Injectable } from "@angular/core";
 import { User } from "@app/utils/interfaces/user";
 import { BehaviorSubject } from "rxjs";
-import { CommunicationService } from "@app/services/communication/communication.service"
 import { StorageService } from "../storage/storage.service";
 import { Summary, UserStats } from "@app/utils/interfaces/summary";
 
@@ -29,9 +28,9 @@ export class UserService {
             avatar:{url:"a", fileId:"a"},
             preferences:{theme:"a"},
             joinedChatRooms: [],
-	        friends: [],
-	        pendingRequests: [],
-	        summary: summary
+            friends: [],
+            pendingRequests: [],
+            summary: summary
           });
     }
 
@@ -59,9 +58,9 @@ export class UserService {
             avatar:{url:"a", fileId:"a"},
             preferences:{theme:"a"},
             joinedChatRooms: [],
-	        friends: [],
-	        pendingRequests: [],
-	        summary: summary
+            friends: [],
+            pendingRequests: [],
+            summary: summary
         });
         this.storageService.deleteUserToken();
     }

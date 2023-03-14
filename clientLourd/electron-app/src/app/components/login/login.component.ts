@@ -8,8 +8,8 @@ import { Router } from "@angular/router"
     styleUrls: ["./login.component.scss"],
 })
 export class LoginComponent implements AfterViewInit {
-    username: string = "";
-    password: string = "";
+    username = "";
+    password = "";
     isLoginFailed = false;
     @ViewChild("usernameInput")
     private usernameInput!: ElementRef;

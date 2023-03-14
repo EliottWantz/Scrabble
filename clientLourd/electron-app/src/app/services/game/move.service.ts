@@ -1,13 +1,10 @@
 import { Injectable } from "@angular/core";
-import { BoardHelper } from "@app/classes/board-helper";
 import { Game } from "@app/utils/interfaces/game/game";
-import { Square } from "@app/utils/interfaces/square";
 import { BehaviorSubject } from "rxjs";
 import { WebSocketService } from "@app/services/web-socket/web-socket.service";
-import { ClientPayload, Packet, PlayMovePayload } from "@app/utils/interfaces/packet";
+import { PlayMovePayload } from "@app/utils/interfaces/packet";
 import { Tile } from "@app/utils/interfaces/game/tile";
 import { Cover, MoveInfo } from "@app/utils/interfaces/game/move";
-import { RoomService } from "@app/services/room/room.service";
 import { GameService } from "@app/services/game/game.service";
 
 @Injectable({
@@ -26,7 +23,7 @@ export class MoveService {
     }
 
     async playTiles(): Promise<void> {
-        let letters: string = "";
+        let letters = "";
         const covers: Cover = {};
         this.placedTiles.forEach(tile => {
             letters += String.fromCharCode(tile.letter);
@@ -52,7 +49,7 @@ export class MoveService {
     }
 
     exchange(): void {
-        let letters: string = "";
+        let letters = "";
         this.selectedTiles.forEach(tile => {
             letters += String.fromCharCode(tile.letter);
         });

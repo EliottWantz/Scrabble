@@ -10,8 +10,8 @@ import { BehaviorSubject } from "rxjs";
   styleUrls: ["./profile-page.component.scss"],
 })
 export class ProfilePageComponent implements OnInit {
-  username: string = "";
-  email: string = "";
+  username = "";
+  email = "";
   selectedFile: File = new File([], "");
   hasError = false;
   user!: BehaviorSubject<User>;

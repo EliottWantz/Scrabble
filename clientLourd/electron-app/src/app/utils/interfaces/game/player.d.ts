@@ -1,4 +1,3 @@
-import { Tile } from "@app/utils/interfaces/game/tile";
 import { Rack } from "@app/utils/interfaces/game/rack";
 
 export interface Player {

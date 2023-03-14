@@ -3,7 +3,6 @@ import { Router } from "@angular/router";
 import { BoardHelper } from "@app/classes/board-helper";
 import { Game } from "@app/utils/interfaces/game/game";
 import { MoveInfo } from "@app/utils/interfaces/game/move";
-import { Player } from "@app/utils/interfaces/game/player";
 import { GameUpdatePayload } from "@app/utils/interfaces/packet";
 import { BehaviorSubject } from "rxjs";
 

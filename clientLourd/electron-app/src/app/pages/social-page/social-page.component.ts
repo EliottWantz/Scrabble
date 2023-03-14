@@ -1,5 +1,5 @@
-import { Component, ElementRef } from "@angular/core";
-import { FormBuilder, FormGroup, Validators } from "@angular/forms";
+import { Component } from "@angular/core";
+import { FormBuilder } from "@angular/forms";
 import { CommunicationService } from "@app/services/communication/communication.service";
 // import { MessageErrorStateMatcher } from "@app/classes/form-error/error-state-form";
 import { UserService } from "@app/services/user/user.service";
