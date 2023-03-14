@@ -9,7 +9,7 @@ const (
 var ErrTileNotInRack = errors.New("tile not in rack")
 
 type Rack struct {
-	Tiles []*Tile
+	Tiles []*Tile `json:"tiles"`
 }
 
 func NewRack(b *Bag) *Rack {

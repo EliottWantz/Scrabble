@@ -47,7 +47,8 @@ type ChatMessage struct {
 }
 
 type JoinRoomPayload struct {
-	RoomID string `json:"roomId"`
+	RoomID   string `json:"roomId"`
+	Password string `json:"password,omitempty"`
 }
 
 type JoinDMPayload struct {
@@ -66,7 +67,8 @@ type CreateRoomPayload struct {
 }
 
 type CreateGameRoomPayload struct {
-	UserIDs []string `json:"userIds"`
+	Password string   `json:"password,omitempty"`
+	UserIDs  []string `json:"userIds"`
 }
 
 type LeaveRoomPayload struct {
@@ -80,6 +82,10 @@ type PlayMovePayload struct {
 
 type StartGamePayload struct {
 	RoomID string `json:"roomId"`
+}
+
+type IndicePayload struct {
+	GameID string `json:"gameId"`
 }
 
 // Server events payloads
@@ -206,6 +212,14 @@ func AcceptFRiendRequestPacket(payload FriendRequestPayload) (*Packet, error) {
 
 func DeclineFriendRequestPacket(payload FriendRequestPayload) (*Packet, error) {
 	return NewPacket(ServerEventDeclineFriendRequest, payload)
+}
+
+type ServerIndicePayload struct {
+	Moves []game.MoveInfo `json:"moves"`
+}
+
+func NewServerIndicePacket(payload ServerIndicePayload) (*Packet, error) {
+	return NewPacket(ServerEventIndice, payload)
 }
 
 func NewErrorPacket(err error) (*Packet, error) {

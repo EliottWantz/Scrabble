@@ -1,12 +1,12 @@
 package scrabble
 
 type Player struct {
-	ID                   string
-	Username             string
-	Rack                 *Rack
-	Score                int
-	ConsecutiveExchanges int
-	IsBot                bool
+	ID                   string `json:"id"`
+	Username             string `json:"username"`
+	Rack                 *Rack  `json:"rack"`
+	Score                int    `json:"score"`
+	ConsecutiveExchanges int    `json:"consecutiveExchanges"`
+	IsBot                bool   `json:"isBot"`
 }
 
 func NewPlayer(ID, username string, b *Bag) *Player {

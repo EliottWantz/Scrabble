@@ -2,6 +2,7 @@ package ws
 
 import (
 	"errors"
+	"fmt"
 
 	"scrabble/pkg/api/room"
 	"scrabble/pkg/api/user"
@@ -202,7 +203,7 @@ func createRoomWithUsers(c *Client, roomName string, userIDs ...string) error {
 	return nil
 }
 
-func createGameRoomWithUsers(c *Client, roomName string, userIDs ...string) error {
+func createGameRoomWithUsers(c *Client, roomName string, password string, userIDs ...string) error {
 	dbRoom, err := c.Manager.RoomSvc.CreateGameRoom(
 		uuid.NewString(),
 		roomName,
@@ -212,7 +213,13 @@ func createGameRoomWithUsers(c *Client, roomName string, userIDs ...string) erro
 	if err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, "failed to create new room: "+err.Error())
 	}
-
+	if password != "" {
+		dbRoom, err = c.Manager.RoomSvc.ProtectGameRoom(dbRoom.ID, password)
+		if err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, "failed to create new room with password: "+err.Error())
+		}
+	}
+	fmt.Print("room", dbRoom)
 	r := c.Manager.AddRoom(dbRoom)
 	for _, uID := range dbRoom.UserIDs {
 		if err := r.AddClient(uID); err != nil {

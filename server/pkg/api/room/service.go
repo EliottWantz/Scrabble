@@ -1,6 +1,9 @@
 package room
 
-import "fmt"
+import (
+	"fmt"
+	"scrabble/pkg/api/auth"
+)
 
 type Service struct {
 	repo *Repository
@@ -44,7 +47,38 @@ func (s *Service) CreateGameRoom(ID, name, creatorID string, withUserIDs ...stri
 
 	return r, s.repo.Insert(r)
 }
+func (s *Service) ProtectGameRoom(Id, password string) (*Room, error) {
+	hashPassword, err := auth.HashPassword(password)
+	if err != nil {
+		return nil, fmt.Errorf("hash password: %w", err)
+	}
 
+	room, err := s.Find(Id)
+	if err != nil {
+		return nil, fmt.Errorf("room not found err: %w", err)
+	}
+	if !room.IsGameRoom {
+		return nil, fmt.Errorf("room is not a game room")
+	}
+	room.IsProtected = true
+	room.HashPassword = hashPassword
+	s.repo.Update(room)
+	return room, nil
+}
+
+func (s *Service) UnprotectGameRoom(Id string) error {
+	room, err := s.Find(Id)
+	if err != nil {
+		return err
+	}
+	if !room.IsGameRoom {
+		return fmt.Errorf("room is not a game room")
+	}
+	room.IsProtected = false
+	room.HashPassword = ""
+	s.repo.Update(room)
+	return nil
+}
 func (s *Service) Find(ID string) (*Room, error) {
 	return s.repo.Find(ID)
 }
