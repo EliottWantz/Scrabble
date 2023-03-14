@@ -1,5 +1,6 @@
 import 'package:client_leger/bindings/auth_binding.dart';
 import 'package:client_leger/bindings/avatar_selection_binding.dart';
+import 'package:client_leger/bindings/game_binding.dart';
 import 'package:client_leger/screens/auth/auth_screen.dart';
 import 'package:client_leger/screens/game_screen.dart';
 import 'package:client_leger/screens/home/game_lobby_screen.dart';
@@ -50,6 +51,6 @@ class AppPages {
         )
       ],
     ),
-    GetPage(name: Routes.GAME, page: () => GameScreen())
+    GetPage(name: Routes.GAME, page: () => GameScreen(), binding: GameBinding())
   ];
 }

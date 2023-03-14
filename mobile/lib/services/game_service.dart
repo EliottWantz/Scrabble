@@ -22,6 +22,7 @@ class GameService extends GetxService {
     for (final player in currentGame.value!.players) {
       if (player.id == userService.user.value!.id) return player;
     }
+    return null;
   }
   bool isCurrentPlayer(String playerId) {
     return currentGame.value!.turn == playerId;
