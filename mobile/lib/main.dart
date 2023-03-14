@@ -52,8 +52,8 @@ class MyApp extends StatelessWidget {
 
 Future<void> initGlobalServices() async {
   await Get.putAsync(() => StorageService().init());
-  Get.put(GameService());
   Get.put(UserService());
+  Get.put(GameService());
   Get.put(RoomService());
   Get.put(GameService());
   Get.put(ApiProvider(), permanent: true);

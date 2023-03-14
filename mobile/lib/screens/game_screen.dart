@@ -1,3 +1,4 @@
+import 'package:client_leger/models/tile.dart';
 import 'package:client_leger/services/game_service.dart';
 import 'package:client_leger/widgets/board.dart';
 import 'package:client_leger/widgets/board_tile.dart';
@@ -5,11 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 
-final easel = List<String>.generate(7, (index) => 'A', growable: false);
-
-
 class GameScreen extends StatelessWidget {
   GameScreen({Key? key}) : super(key: key);
+  final GameService _gameService = Get.find();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -24,7 +24,12 @@ class GameScreen extends StatelessWidget {
               ScrabbleBoard(),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: easel.map((e) => _buildEasel(e)).toList(),
+                children: _gameService
+                    .getPlayer()!
+                    .rack
+                    .tiles
+                    .map((e) => _buildEasel(e))
+                    .toList(),
               ),
             ],
           ),
@@ -33,11 +38,16 @@ class GameScreen extends StatelessWidget {
     ));
   }
 
-  Widget _buildEasel(String tile) {
-    return Draggable<String>(
+  Widget _buildEasel(Tile tile) {
+    return Draggable<Tile>(
         data: tile,
-        feedback:
-            SizedBox(height: 70, width: 70, child: LetterTile(letter: 'A')),
-        child: SizedBox(height: 70, width: 70, child: LetterTile(letter: 'A')));
+        feedback: SizedBox(
+            height: 70,
+            width: 70,
+            child: LetterTile(letter: String.fromCharCode(tile.letter))),
+        child: SizedBox(
+            height: 70,
+            width: 70,
+            child: LetterTile(letter: String.fromCharCode(tile.letter))));
   }
 }

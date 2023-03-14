@@ -1,3 +1,4 @@
+import 'package:client_leger/models/position.dart';
 import 'package:client_leger/services/game_service.dart';
 import 'package:client_leger/utils/constants/board.dart';
 import 'package:client_leger/widgets/board_tile.dart';
@@ -29,8 +30,9 @@ class ScrabbleBoard extends StatelessWidget {
             // First, square bases
             for (int i = 0; i < trackCount; i++)
               for (int j = 0; j < trackCount; j++)
-                const StandardSquare()
-                    .withGridPlacement(columnStart: i, rowStart: j),
+                if (gameService.currentGame.value!.board[i][j].tile == null)
+                  StandardSquare(position: Position(row: i, col: j))
+                      .withGridPlacement(columnStart: i, rowStart: j),
             // Then put bonuses on top
             const StartingSquare().inGridArea('★'),
             for (int i = 0; i < doubleLetterCount; i++)
@@ -45,12 +47,12 @@ class ScrabbleBoard extends StatelessWidget {
             // Then place tiles on top of those
             for (final row in gameService.currentGame.value!.board)
               for (final square in row)
-                if(square.tile != null)
-                LetterTile(letter: String.fromCharCode(square.tile!.letter))
-                    .withGridPlacement(
-                  columnStart: square.position.col,
-                  rowStart: square.position.row,
-                )
+                if (square.tile != null)
+                  LetterTile(letter: String.fromCharCode(square.tile!.letter))
+                      .withGridPlacement(
+                    columnStart: square.position.col,
+                    rowStart: square.position.row,
+                  )
           ],
         ));
   }
