@@ -12,10 +12,10 @@ class GameRoom {
   factory GameRoom.fromJson(Map<String, dynamic> json) {
     int index = 0;
     return GameRoom(
-        id: json["ID"],
-        name: json["Name"],
-        usersIds: List<String>.from((json["UserIDs"] as List).map(
-                (userId) => json["UserIDs"][index++]
+        id: json["id"],
+        name: json["name"],
+        usersIds: List<String>.from((json["userIds"] as List).map(
+                (userId) => json["userIds"][index++]
                 )
         )
     );

@@ -7,7 +7,7 @@ class Rack {
 
   factory Rack.fromJson(Map<String, dynamic> json) {
     return Rack(
-      tiles: List<Tile>.from((json["Tiles"] as List).map(
+      tiles: List<Tile>.from((json["tiles"] as List).map(
               (tile) => Tile.fromJson(tile))
       )
     );

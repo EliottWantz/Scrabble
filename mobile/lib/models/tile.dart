@@ -8,8 +8,8 @@ class Tile {
 
   factory Tile.fromJson(Map<String, dynamic> json) {
     return Tile(
-      letter: json["Letter"],
-      value: json["Value"]
+      letter: json["letter"],
+      value: json["value"]
     );
   }
 

@@ -18,12 +18,12 @@ class Player {
 
   factory Player.fromJson(Map<String, dynamic> json) {
     return Player(
-      id: json["ID"],
-      username: json["Username"],
-      rack: Rack.fromJson(json["Rack"]),
-      score: json["Score"],
-      consecutiveExchanges: json["ConsecutiveExchanges"],
-      isBot: json["IsBot"]);
+      id: json["id"],
+      username: json["username"],
+      rack: Rack.fromJson(json["rack"]),
+      score: json["score"],
+      consecutiveExchanges: json["consecutiveExchanges"],
+      isBot: json["isBot"]);
   }
 
   Map<String, dynamic> toJson() => {
