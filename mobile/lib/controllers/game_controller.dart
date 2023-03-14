@@ -12,4 +12,5 @@ class GameController extends GetxController {
 
   List<String> letters = [];
   Map<String, String> covers = {};
+  late RxList<String> lettersToExchange = <String>[].obs;
 }

@@ -105,6 +105,21 @@ class GameScreen extends GetView<GameController> {
                             const Gap(20),
                             ElevatedButton.icon(
                               onPressed: () {
+                                if (_gameService.currentGame.value!.turn != _userService.user.value!.id) {
+                                  return;
+                                }
+                                if (controller.lettersToExchange.isEmpty) {
+                                  return;
+                                }
+                                final moveInfo = MoveInfo(
+                                    type: MoveTypeExchange,
+                                    letters: controller.lettersToExchange.join(),
+                                    covers: controller.covers
+                                );
+                                controller.websocketService.playMove(moveInfo);
+                                controller.letters = [];
+                                controller.lettersToExchange.value = [];
+                                controller.covers = {};
                               },
                               icon: const Icon(
                                 // <-- Icon
@@ -131,10 +146,28 @@ class GameScreen extends GetView<GameController> {
             height: 70,
             width: 70,
             child: LetterTile(letter: String.fromCharCode(tile.letter))),
-        child: SizedBox(
-            height: 70,
-            width: 70,
-            child: LetterTile(letter: String.fromCharCode(tile.letter)))
+        child: GestureDetector(
+          onTap: () {
+            if (!controller.lettersToExchange.contains(String.fromCharCode(tile.letter))) {
+              controller.lettersToExchange.add(String.fromCharCode(tile.letter));
+            } else {
+              controller.lettersToExchange.remove(String.fromCharCode(tile.letter));
+            }
+            print(controller.lettersToExchange.toString());
+          },
+          child: Container(
+            decoration: controller.lettersToExchange.contains(String.fromCharCode(tile.letter))
+              ? BoxDecoration(
+                  border: Border.all(color: Colors.blueAccent)
+                )
+            : null,
+            child: SizedBox(
+                height: 70,
+                width: 70,
+                child: LetterTile(letter: String.fromCharCode(tile.letter))
+            ),
+          )
+        )
     );
   }
 
