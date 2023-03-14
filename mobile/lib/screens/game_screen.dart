@@ -4,6 +4,7 @@ import 'package:client_leger/services/game_service.dart';
 import 'package:client_leger/services/user_service.dart';
 import 'package:client_leger/widgets/board.dart';
 import 'package:client_leger/widgets/board_tile.dart';
+import 'package:client_leger/widgets/timer.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
@@ -183,6 +184,7 @@ class GameScreen extends GetView<GameController> {
       ));
       playerInfoPanels.add(Gap(20));
     }
+    playerInfoPanels.add(Timer(time: _gameService.currentGameTimer.value));
     return playerInfoPanels;
   }
 }

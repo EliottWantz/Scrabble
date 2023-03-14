@@ -17,6 +17,7 @@ class GameService extends GetxService {
   final currentGameRoomUsers = <User>[].obs;
 
   final currentGame = Rxn<GameUpdatePayload>();
+  final currentGameTimer = Rxn<int>();
 
   Player? getPlayer() {
     for (final player in currentGame.value!.players) {

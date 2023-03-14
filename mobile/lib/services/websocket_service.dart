@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:client_leger/models/chat_message_payload.dart';
@@ -14,6 +15,7 @@ import 'package:client_leger/models/requests/play_move_request.dart';
 import 'package:client_leger/models/response/chat_message_response.dart';
 import 'package:client_leger/models/response/game_update_response.dart';
 import 'package:client_leger/models/response/joined_room_response.dart';
+import 'package:client_leger/models/response/timer_response.dart';
 import 'package:client_leger/models/response/user_joined_response.dart';
 import 'package:client_leger/models/start_game_payload.dart';
 import 'package:client_leger/models/user.dart';
@@ -117,12 +119,16 @@ class WebsocketService extends GetxService {
         handleServerEventJoinableGames(listJoinableGamesResponse);
       }
       break;
-      // case game update
       case ServerEventGameUpdate: {
         print('received game update');
         GameUpdateResponse gameUpdateResponse = GameUpdateResponse.fromRawJson(data);
         print(gameUpdateResponse.toString());
         handleServerEventGameUpdate(gameUpdateResponse);
+      }
+      break;
+      case ServerEventTimerUpdate: {
+        TimerResponse timerResponse = TimerResponse.fromRawJson(data);
+        handleServerEventTimerUpdate(timerResponse);
       }
       break;
       // case game timer
@@ -186,6 +192,10 @@ class WebsocketService extends GetxService {
     else {
       gameService.currentGame.value = gameUpdateResponse.payload;
     }
+  }
+
+  void handleServerEventTimerUpdate(TimerResponse timerResponse) {
+    gameService.currentGameTimer.value = timerResponse.payload.timer;
   }
 
   void createRoom(String roomName, { List<String> userIds = const [] }) {
