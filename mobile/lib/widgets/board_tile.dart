@@ -136,7 +136,7 @@ class LetterTile extends StatelessWidget {
 }
 
 class StartingSquare extends Square {
-  const StartingSquare({Key? key})
+  StartingSquare({Key? key, required this.position})
       : super(
           key: key,
           label: '★',
@@ -144,42 +144,373 @@ class StartingSquare extends Square {
           edgeInsetsOverride: const EdgeInsets.only(left: 0.2, bottom: 0.5),
           labelFontSizeOverride: 14,
         );
+
+  final GameService _gameService = Get.find();
+
+  final Position position;
+
+  Tile currentData = Tile(letter: 0, value: 0);
+
+  @override
+  Widget build(BuildContext context) {
+    return DragTarget<Tile>(onWillAccept: (data) {
+      List<List<String>> positions = [];
+      controller.covers.forEach((key, value) => {
+        positions.add(key.split('/'))
+      });
+      for (final coverPosition in positions) {
+        if (coverPosition[0] == position.row.toString()
+            && coverPosition[1] == position.col.toString()) {
+          print('cannot place here');
+          return false;
+        }
+      }
+      return _gameService.currentGame.value!.board[position.row][position.col].tile == null;
+    }, onAccept: (data) {
+      currentData = data;
+      _isDropped.value = true;
+    }, builder: (
+      BuildContext context,
+      List<dynamic> accepted,
+      List<dynamic> rejected,
+    ) {
+      if (_isDropped.value) {
+        _isDropped.value = false;
+        print('has been dropped');
+        controller.letters.add(String.fromCharCode(currentData.letter));
+        controller.covers['${position.row}/${position.col}'] = String.fromCharCode(currentData.letter);
+        return LetterTile(letter: String.fromCharCode(currentData.letter));
+        // return LetterTile(letter: 'a');
+      } else {
+        String currentPosition = '${position.row}/${position.col}';
+        if (controller.covers[currentPosition] != null) {
+          return LetterTile(letter: controller.covers[currentPosition]!);
+        }
+        return Padding(
+          padding: const EdgeInsets.all(3.0),
+            child: InnerShadow(
+            offset: const Offset(0, 0.5),
+            blurX: 0.8,
+            blurY: 0.7,
+            color: Colors.black.withOpacity(.25),
+            child: SizedBox.expand(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: const BorderRadius.all(Radius.elliptical(6, 4)),
+                ),
+                child: _buildLabel(context),
+              ),
+            ),
+            ),
+        );
+      }
+    });
+  }
 }
 
 class DoubleLetterSquare extends Square {
-  const DoubleLetterSquare({Key? key})
+  DoubleLetterSquare({Key? key, required this.position})
       : super(
           key: key,
           label: 'DL',
           color: lightBlueSquareBackground,
         );
+
+  final GameService _gameService = Get.find();
+
+  final Position position;
+
+  // List<String> letters = [];
+  // Map<String, String> covers = {};
+
+  Tile currentData = Tile(letter: 0, value: 0);
+
+  @override
+  Widget build(BuildContext context) {
+    return DragTarget<Tile>(onWillAccept: (data) {
+      List<List<String>> positions = [];
+      controller.covers.forEach((key, value) =>
+      {
+        positions.add(key.split('/'))
+      });
+      for (final coverPosition in positions) {
+        if (coverPosition[0] == position.row.toString()
+            && coverPosition[1] == position.col.toString()) {
+          print('cannot place here');
+          return false;
+        }
+      }
+      return _gameService.currentGame.value!.board[position.row][position.col]
+          .tile == null;
+    }, onAccept: (data) {
+      currentData = data;
+      _isDropped.value = true;
+    }, builder: (BuildContext context,
+        List<dynamic> accepted,
+        List<dynamic> rejected,) {
+      if (_isDropped.value) {
+        _isDropped.value = false;
+        print('has been dropped');
+        controller.letters.add(String.fromCharCode(currentData.letter));
+        controller.covers['${position.row}/${position.col}'] =
+            String.fromCharCode(currentData.letter);
+        return LetterTile(letter: String.fromCharCode(currentData.letter));
+        // return LetterTile(letter: 'a');
+      } else {
+        String currentPosition = '${position.row}/${position.col}';
+        if (controller.covers[currentPosition] != null) {
+          return LetterTile(letter: controller.covers[currentPosition]!);
+        }
+        return Padding(
+          padding: const EdgeInsets.all(3.0),
+          child: InnerShadow(
+            offset: const Offset(0, 0.5),
+            blurX: 0.8,
+            blurY: 0.7,
+            color: Colors.black.withOpacity(.25),
+            child: SizedBox.expand(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: const BorderRadius.all(Radius.elliptical(6, 4)),
+                ),
+                child: _buildLabel(context),
+              ),
+            ),
+          ),
+        );
+      }
+    });
+  }
 }
 
 class DoubleWordSquare extends Square {
-  const DoubleWordSquare({Key? key})
+  DoubleWordSquare({Key? key, required this.position})
       : super(
           key: key,
           label: 'DW',
           color: orangeSquareBackground,
         );
+
+  final GameService _gameService = Get.find();
+
+  final Position position;
+
+  // List<String> letters = [];
+  // Map<String, String> covers = {};
+
+  Tile currentData = Tile(letter: 0, value: 0);
+
+  @override
+  Widget build(BuildContext context) {
+    return DragTarget<Tile>(onWillAccept: (data) {
+      List<List<String>> positions = [];
+      controller.covers.forEach((key, value) =>
+      {
+        positions.add(key.split('/'))
+      });
+      for (final coverPosition in positions) {
+        if (coverPosition[0] == position.row.toString()
+            && coverPosition[1] == position.col.toString()) {
+          print('cannot place here');
+          return false;
+        }
+      }
+      return _gameService.currentGame.value!.board[position.row][position.col]
+          .tile == null;
+    }, onAccept: (data) {
+      currentData = data;
+      _isDropped.value = true;
+    }, builder: (BuildContext context,
+        List<dynamic> accepted,
+        List<dynamic> rejected,) {
+      if (_isDropped.value) {
+        _isDropped.value = false;
+        print('has been dropped');
+        controller.letters.add(String.fromCharCode(currentData.letter));
+        controller.covers['${position.row}/${position.col}'] =
+            String.fromCharCode(currentData.letter);
+        return LetterTile(letter: String.fromCharCode(currentData.letter));
+        // return LetterTile(letter: 'a');
+      } else {
+        String currentPosition = '${position.row}/${position.col}';
+        if (controller.covers[currentPosition] != null) {
+          return LetterTile(letter: controller.covers[currentPosition]!);
+        }
+        return Padding(
+          padding: const EdgeInsets.all(3.0),
+          child: InnerShadow(
+            offset: const Offset(0, 0.5),
+            blurX: 0.8,
+            blurY: 0.7,
+            color: Colors.black.withOpacity(.25),
+            child: SizedBox.expand(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: const BorderRadius.all(Radius.elliptical(6, 4)),
+                ),
+                child: _buildLabel(context),
+              ),
+            ),
+          ),
+        );
+      }
+    });
+  }
 }
 
 class TripleLetterSquare extends Square {
-  const TripleLetterSquare({Key? key})
+  TripleLetterSquare({Key? key, required this.position})
       : super(
           key: key,
           label: 'TL',
           color: darkBlueSquareBackground,
         );
+
+  final GameService _gameService = Get.find();
+
+  final Position position;
+
+  // List<String> letters = [];
+  // Map<String, String> covers = {};
+
+  Tile currentData = Tile(letter: 0, value: 0);
+
+  @override
+  Widget build(BuildContext context) {
+    return DragTarget<Tile>(onWillAccept: (data) {
+      List<List<String>> positions = [];
+      controller.covers.forEach((key, value) =>
+      {
+        positions.add(key.split('/'))
+      });
+      for (final coverPosition in positions) {
+        if (coverPosition[0] == position.row.toString()
+            && coverPosition[1] == position.col.toString()) {
+          print('cannot place here');
+          return false;
+        }
+      }
+      return _gameService.currentGame.value!.board[position.row][position.col]
+          .tile == null;
+    }, onAccept: (data) {
+      currentData = data;
+      _isDropped.value = true;
+    }, builder: (BuildContext context,
+        List<dynamic> accepted,
+        List<dynamic> rejected,) {
+      if (_isDropped.value) {
+        _isDropped.value = false;
+        print('has been dropped');
+        controller.letters.add(String.fromCharCode(currentData.letter));
+        controller.covers['${position.row}/${position.col}'] =
+            String.fromCharCode(currentData.letter);
+        return LetterTile(letter: String.fromCharCode(currentData.letter));
+        // return LetterTile(letter: 'a');
+      } else {
+        String currentPosition = '${position.row}/${position.col}';
+        if (controller.covers[currentPosition] != null) {
+          return LetterTile(letter: controller.covers[currentPosition]!);
+        }
+        return Padding(
+          padding: const EdgeInsets.all(3.0),
+          child: InnerShadow(
+            offset: const Offset(0, 0.5),
+            blurX: 0.8,
+            blurY: 0.7,
+            color: Colors.black.withOpacity(.25),
+            child: SizedBox.expand(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: const BorderRadius.all(Radius.elliptical(6, 4)),
+                ),
+                child: _buildLabel(context),
+              ),
+            ),
+          ),
+        );
+      }
+    });
+  }
 }
 
 class TripleWordSquare extends Square {
-  const TripleWordSquare({Key? key})
+  TripleWordSquare({Key? key, required this.position})
       : super(
           key: key,
           label: 'TW',
           color: magentaSquareBackground,
         );
+
+  final GameService _gameService = Get.find();
+
+  final Position position;
+
+  // List<String> letters = [];
+  // Map<String, String> covers = {};
+
+  Tile currentData = Tile(letter: 0, value: 0);
+
+  @override
+  Widget build(BuildContext context) {
+    return DragTarget<Tile>(onWillAccept: (data) {
+      List<List<String>> positions = [];
+      controller.covers.forEach((key, value) =>
+      {
+        positions.add(key.split('/'))
+      });
+      for (final coverPosition in positions) {
+        if (coverPosition[0] == position.row.toString()
+            && coverPosition[1] == position.col.toString()) {
+          print('cannot place here');
+          return false;
+        }
+      }
+      return _gameService.currentGame.value!.board[position.row][position.col]
+          .tile == null;
+    }, onAccept: (data) {
+      currentData = data;
+      _isDropped.value = true;
+    }, builder: (BuildContext context,
+        List<dynamic> accepted,
+        List<dynamic> rejected,) {
+      if (_isDropped.value) {
+        _isDropped.value = false;
+        print('has been dropped');
+        controller.letters.add(String.fromCharCode(currentData.letter));
+        controller.covers['${position.row}/${position.col}'] =
+            String.fromCharCode(currentData.letter);
+        return LetterTile(letter: String.fromCharCode(currentData.letter));
+        // return LetterTile(letter: 'a');
+      } else {
+        String currentPosition = '${position.row}/${position.col}';
+        if (controller.covers[currentPosition] != null) {
+          return LetterTile(letter: controller.covers[currentPosition]!);
+        }
+        return Padding(
+          padding: const EdgeInsets.all(3.0),
+          child: InnerShadow(
+            offset: const Offset(0, 0.5),
+            blurX: 0.8,
+            blurY: 0.7,
+            color: Colors.black.withOpacity(.25),
+            child: SizedBox.expand(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: const BorderRadius.all(Radius.elliptical(6, 4)),
+                ),
+                child: _buildLabel(context),
+              ),
+            ),
+          ),
+        );
+      }
+    });
+  }
 }
 
 class StandardSquare extends Square {
