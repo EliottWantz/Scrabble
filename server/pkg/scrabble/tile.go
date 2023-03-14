@@ -1,6 +1,6 @@
 package scrabble
 
 type Tile struct {
-	Letter rune
-	Value  int
+	Letter rune `json:"letter"`
+	Value  int  `json:"value"`
 }

@@ -1,0 +1,37 @@
+<div class="container">
+  <nav>
+    <button
+      *ngIf="!isConnected()"
+      mat-raised-button
+      color="primary"
+      routerLink="/login" routerLinkActive="router-link-active" 
+      id="login-button"
+    >
+      Se connecter
+    </button>
+    <button
+      *ngIf="isConnected()"
+      mat-raised-button
+      color="warn"
+      (click)="logout()"
+      id="login-button"
+    >
+      Déconnexion
+    </button>
+
+    <a *ngIf="isConnected()" routerLink="/profile" routerLinkActive="router-link-active" id="login-button">
+      <img id="avatar" src="{{user.value.avatar.url}}">
+    </a>
+    <a *ngIf="isInGame() && isConnected()" routerLink="/game" routerLinkActive="router-link-active" id="rules-button">
+      <div> Game </div>
+    </a>
+    <a *ngIf="isConnected()" routerLink="/rules-slider" routerLinkActive="router-link-active" id="rules-button">
+      <div> Help! </div>
+    </a>
+    <a *ngIf="isConnected()" routerLink="/social" routerLinkActive="router-link-active" id="social-button">
+      <div> Social </div>
+    </a>
+  </nav>
+  <app-parameters *ngIf="isConnected()"></app-parameters>
+  <app-chat-box *ngIf="isConnected()"></app-chat-box>
+</div>

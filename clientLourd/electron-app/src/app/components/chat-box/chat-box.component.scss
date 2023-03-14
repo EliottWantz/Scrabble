@@ -1,0 +1,104 @@
+#chatBox {
+  height: 50%;
+  width: 30%;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  position: absolute;
+  top: 50%;
+}
+
+#chatBoxBody {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  overflow: auto;
+}
+
+.spacer {
+  flex-grow: 1;
+}
+
+#chatBoxMessages {
+  overflow-y: auto;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
+}
+
+.message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  word-wrap: break-word;
+  margin: 1rem 0;
+  font-size: 3ch;
+  max-width: 80%;
+  width: max-content;
+  line-height: normal;
+  padding: 1rem;
+  border-radius: 0.75rem;
+}
+
+.message p {
+  margin: 0;
+}
+
+.message.sent {
+  background-color: #bae0ff;
+  align-self: flex-end;
+}
+
+.message.received {
+  background-color: #f0f0f0;
+  color: rgb(41, 41, 41);
+  box-shadow: 0.25rem 0.25rem 1.5rem rgba(0, 0, 0, 0.05);
+}
+
+.message .timestamp {
+  font-size: 1.5ch;
+}
+
+form {
+  padding: 0 0.75rem;
+  display: flex;
+  align-items: center;
+}
+
+form > mat-form-field {
+  margin-right: 0.5rem;
+  width: 100%;
+}
+
+form > button {
+  margin-bottom: 1rem;
+}
+
+#popout {
+  height: 20px;
+  width: 20px;
+  border: none;
+  cursor: pointer;
+  background-color: transparent;
+}
+
+// form {
+//     padding: 0 0.75rem;
+//     display: flex;
+//     align-items: center;
+//     position: fixed;
+//     bottom: 0;
+//     left: 0;
+//     right: 100%;
+//     width: 90%;
+// }
+
+// form > mat-form-field {
+//     margin-right: 0.5rem;
+//     width: 95%;
+// }
+
+// form > button {
+//     margin-bottom: 1rem;
+// }

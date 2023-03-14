@@ -1,0 +1,82 @@
+.switch {
+    float: right;
+}
+
+.container {
+    width: 100vw;
+    height: 100vh;
+    background: rgb(208, 144, 90);
+    background: linear-gradient(
+      150deg,
+      rgba(208, 143, 90, 0.65) 0%,
+      rgba(159, 205, 110, 0.3) 35%,
+      rgb(52, 75, 138) 100%
+    );
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.card {
+  width:50%;
+  display: flex;
+  align-items: center;
+}
+
+.center {
+  display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.home-button {
+  position: absolute;
+  top: 2%;
+  left: 2%;
+}
+
+mat-divider {
+  width: 100%;
+  margin-bottom: 5%;
+}
+
+.switch {
+  margin-top: 5%;
+  margin-bottom: 5%;
+}
+
+#play-button {
+  position:absolute;
+  left: 85%;
+  top:50%;
+}
+
+#pass-button {
+  position:absolute;
+  left: 85%;
+  top: 65%;
+}
+
+#exchange-button {
+  position:absolute;
+  left: 85%;
+  top: 80%;
+}
+
+app-timer {
+  position:absolute;
+  left: 85%;
+  top:25%;
+}
+
+#indice-button {
+  position: absolute;
+  left: 85%;
+  top: 90%;
+}
+
+#indice {
+  position: absolute;
+  left: 8%;
+  top: 0%
+}

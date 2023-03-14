@@ -1,0 +1,54 @@
+<div class="container">
+    <button mat-fab color="primary" class="home-button" routerLink="/home" routerLinkActive="router-link-active">
+        <mat-icon>home</mat-icon>
+      </button>
+    <app-board></app-board>
+    <app-rack></app-rack>
+    <app-timer></app-timer>
+    <button
+      *ngIf="isTurn()"
+      mat-raised-button
+      color="warn"
+      (click)="submit()"
+      id="play-button"
+      [disabled]="!hasPlacedLetters()"
+    >
+      Envoyer
+    </button>
+
+    <button
+      *ngIf="isTurn()"
+      mat-raised-button
+      color="warn"
+      (click)="pass()"
+      id="pass-button"
+    >
+      Passer
+    </button>
+
+    <button
+      *ngIf="isTurn()"
+      mat-raised-button
+      color="warn"
+      (click)="exchange()"
+      id="exchange-button"
+      [disabled]="!hasSelectedLetters()"
+    >
+      Échanger
+    </button>
+
+    <button
+      *ngIf="isTurn()"
+      mat-raised-button
+      color="warn"
+      (click)="indice()"
+      id="indice-button"
+    >
+      Indice
+    </button>
+    <mat-card id="indice" *ngIf="moves.value.length > 0">
+      <mat-card-content>
+        <p *ngFor="let move of getIndice()">{{move}}</p>
+      </mat-card-content>
+    </mat-card>
+</div>

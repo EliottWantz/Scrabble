@@ -9,7 +9,7 @@ const (
 var ErrTileNotInRack = errors.New("tile not in rack")
 
 type Rack struct {
-	Tiles []*Tile
+	Tiles []*Tile `json:"tiles"`
 }
 
 func NewRack(b *Bag) *Rack {
@@ -42,6 +42,10 @@ func (r *Rack) Index(letter rune) int {
 
 func (r *Rack) Contains(letter rune) bool {
 	return r.Index(letter) >= 0
+}
+
+func (r *Rack) ContainsAsString(letter string) bool {
+	return r.Index([]rune(letter)[0]) >= 0
 }
 
 func (r *Rack) Remove(letter rune) error {

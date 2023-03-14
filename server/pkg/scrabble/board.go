@@ -64,14 +64,15 @@ type Board struct {
 }
 
 type Square struct {
-	Tile             *Tile
-	LetterMultiplier int
-	WordMultiplier   int
-	Position         Position
+	Tile             *Tile    `json:"tile"`
+	LetterMultiplier int      `json:"letterMultiplier"`
+	WordMultiplier   int      `json:"wordMultiplier"`
+	Position         Position `json:"position"`
 }
 
 type Position struct {
-	Row, Col int
+	Row int `json:"row"`
+	Col int `json:"col"`
 }
 
 type Direction = int

@@ -7,37 +7,46 @@ import (
 	"time"
 
 	"github.com/alphadose/haxmap"
+	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
 	"golang.org/x/exp/slog"
 )
 
-var ErrLeavingOwnRoom = errors.New("trying to leave own room")
+var (
+	ErrLeavingOwnRoom     = errors.New("trying to leave own room")
+	ErrLeavingGloabalRoom = errors.New("client trying to leave global room")
+)
 
-type client struct {
+type Client struct {
 	ID        string
 	Manager   *Manager
 	Conn      *websocket.Conn
-	Rooms     *haxmap.Map[string, *room]
+	Rooms     *haxmap.Map[string, *Room]
 	logger    *slog.Logger
-	sendCh    chan *packet
-	receiveCh chan *packet
+	sendCh    chan *Packet
+	receiveCh chan *Packet
+	quitCh    chan struct{}
 }
 
-func NewClient(conn *websocket.Conn, cID string, m *Manager) *client {
-	c := &client{
+func NewClient(conn *websocket.Conn, cID string, m *Manager) *Client {
+	c := &Client{
 		ID:        cID,
 		Manager:   m,
 		Conn:      conn,
-		Rooms:     haxmap.New[string, *room](),
-		sendCh:    make(chan *packet, 10),
-		receiveCh: make(chan *packet, 10),
+		Rooms:     haxmap.New[string, *Room](),
+		logger:    slog.With("client", cID),
+		sendCh:    make(chan *Packet, 10),
+		receiveCh: make(chan *Packet, 10),
+		quitCh:    make(chan struct{}),
 	}
-	c.logger = slog.With("client", c.ID)
+
+	go c.write()
+	go c.read()
 
 	return c
 }
 
-func (c *client) write() {
+func (c *Client) write() {
 	for p := range c.sendCh {
 		if err := c.Conn.WriteJSON(p); err != nil {
 			c.logger.Error("write packet", err)
@@ -45,15 +54,15 @@ func (c *client) write() {
 	}
 }
 
-func (c *client) send(p *packet) {
+func (c *Client) send(p *Packet) {
 	c.sendCh <- p
 }
 
-func (c *client) read() {
+func (c *Client) read() {
 	go c.receive()
 
 	for {
-		p := &packet{}
+		p := &Packet{}
 		err := c.Conn.ReadJSON(p)
 		if err != nil {
 			var syntaxError *json.SyntaxError
@@ -61,84 +70,335 @@ func (c *client) read() {
 				c.logger.Info("json syntax error in packet", syntaxError)
 				continue
 			}
-			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure, websocket.CloseNoStatusReceived) {
-				c.logger.Error("client read packet", err)
-				return
-			}
-
-			c.logger.Info("client disconnected")
+			c.quitCh <- struct{}{}
 			return
 		}
 
-		p.Timestamp = time.Now().Format(time.TimeOnly)
 		c.receiveCh <- p
 	}
 }
 
-func (c *client) receive() {
+func (c *Client) receive() {
 	for p := range c.receiveCh {
-		c.logger.Info("received packet", "packet", p)
+		c.logger.Info("received packet", "event", p.Event)
 		if err := c.handlePacket(p); err != nil {
 			c.logger.Error("handlePacket", err)
+			errPacket, err := NewErrorPacket(err)
+			if err != nil {
+				c.logger.Error("new error packet", err)
+			}
+			c.send(errPacket)
 		}
+		c.Manager.logger.Info("rooms remaining", "rooms", c.Manager.Rooms.Len())
 	}
 }
 
-func (c *client) handlePacket(p *packet) error {
-	switch p.Action {
-	case "":
+func (c *Client) handlePacket(p *Packet) error {
+	switch p.Event {
+	case ClientEventNoEvent:
 		c.logger.Info("received packet with no action")
-	case "broadcast":
-		return c.broadcast(p)
-	case "join":
-		return c.joinRoom(p.RoomID)
-	case "leave":
-		return c.leaveRoom(p.RoomID)
+	case ClientEventChatMessage:
+		return c.HandleChatMessage(p)
+	case ClientEventJoinRoom:
+		return c.HandleJoinRoomRequest(p)
+	case ClientEventJoinDMRoom:
+		return c.HandleJoinDMRoomRequest(p)
+	case ClientEventJoinGameRoom:
+		return c.HandleJoinGameRoomRequest(p)
+	case ClientEventCreateRoom:
+		return c.HandleCreateRoomRequest(p)
+	case ClientEventCreateGameRoom:
+		return c.HandleCreateGameRoomRequest(p)
+	case ClientEventLeaveRoom:
+		return c.HandleLeaveRoomRequest(p)
+	case ClientEventStartGame:
+		return c.HandleStartGameRequest(p)
+	case ClientEventPlayMove:
+		return c.PlayMove(p)
+	case ClientEventIndice:
+		return c.HandleIndiceRequest(p)
 	}
 
 	return nil
 }
 
-func (c *client) broadcast(p *packet) error {
-	r, err := c.Manager.getRoom(p.RoomID)
+func (c *Client) BroadcastToRoom(rID string, p *Packet) (*Room, error) {
+	r, err := c.Manager.GetRoom(rID)
 	if err != nil {
-		return fmt.Errorf("broadcast: %w", err)
+		return nil, fmt.Errorf("failed to get room: %w", err)
 	}
 
 	if !r.has(c.ID) {
-		return fmt.Errorf("%w %s", ErrNotInRoom, p.RoomID)
+		return nil, fmt.Errorf("%w %s", ErrNotInRoom, rID)
 	}
 
-	r.broadcast(p, c.ID)
+	r.Broadcast(p)
 
-	return nil
+	return r, nil
 }
 
-func (c *client) joinRoom(rID string) error {
-	r, err := c.Manager.getRoom(rID)
+func (c *Client) HandleChatMessage(p *Packet) error {
+	payload := ChatMessage{}
+	if err := json.Unmarshal(p.Payload, &payload); err != nil {
+		return fmt.Errorf("failed to unmarshal ChatMessage: %w", err)
+	}
+	payload.Timestamp = time.Now().UTC()
+	slog.Info("room-message", "payload", payload)
+	if err := p.setPayload(payload); err != nil {
+		return err
+	}
+
+	r, err := c.BroadcastToRoom(payload.RoomID, p)
 	if err != nil {
 		return err
 	}
 
-	if err := r.addClient(c.ID); err != nil {
+	if err := r.Manager.MessageRepo.InsertOne(r.ID, &payload); err != nil {
+		slog.Error("failed to insert message in db", err)
+	}
+
+	return nil
+}
+
+func (c *Client) HandleJoinRoomRequest(p *Packet) error {
+	payload := JoinRoomPayload{}
+	if err := json.Unmarshal(p.Payload, &payload); err != nil {
+		return err
+	}
+
+	r, err := c.Manager.GetRoom(payload.RoomID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	if err := c.Manager.RoomSvc.AddUser(payload.RoomID, c.ID); err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, "failed to join room: "+err.Error())
+	}
+	if err := c.Manager.UserSvc.Repo.AddJoinedRoom(payload.RoomID, c.ID); err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, "failed to add user to room"+err.Error())
+	}
+
+	if err := r.AddClient(c.ID); err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+
+	return nil
+}
+
+func (c *Client) HandleJoinDMRoomRequest(p *Packet) error {
+	payload := JoinDMPayload{}
+	if err := json.Unmarshal(p.Payload, &payload); err != nil {
+		return err
+	}
+
+	// Create room with both users in it
+	roomName := fmt.Sprintf("%s/%s", payload.Username, payload.ToUsername)
+	return createRoomWithUsers(c, roomName, payload.ToID)
+}
+
+func (c *Client) HandleJoinGameRoomRequest(p *Packet) error {
+	payload := JoinRoomPayload{}
+	if err := json.Unmarshal(p.Payload, &payload); err != nil {
+		return err
+	}
+
+	r, err := c.Manager.GetRoom(payload.RoomID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	if err := c.Manager.RoomSvc.AddUser(payload.RoomID, c.ID); err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, "failed to join room: "+err.Error())
+	}
+	if err := r.AddClient(c.ID); err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+
+	return nil
+}
+
+func (c *Client) HandleCreateRoomRequest(p *Packet) error {
+	payload := CreateRoomPayload{}
+	if err := json.Unmarshal(p.Payload, &payload); err != nil {
+		return err
+	}
+
+	err := createRoomWithUsers(c, payload.RoomName, payload.UserIDs...)
+	if err != nil {
+		return err
+	}
+
+	if err := c.Manager.UpdateChatRooms(); err != nil {
+		slog.Error("send joinable games update:", err)
+	}
+
+	return nil
+}
+
+func (c *Client) HandleCreateGameRoomRequest(p *Packet) error {
+	payload := CreateGameRoomPayload{}
+	if err := json.Unmarshal(p.Payload, &payload); err != nil {
+		return err
+	}
+
+	err := createGameRoomWithUsers(c, "", payload.UserIDs...)
+	if err != nil {
+		return err
+	}
+
+	if err := c.Manager.UpdateJoinableGames(); err != nil {
+		slog.Error("send joinable games update:", err)
+	}
+
+	return nil
+}
+
+func (c *Client) HandleLeaveRoomRequest(p *Packet) error {
+	payload := LeaveRoomPayload{}
+	if err := json.Unmarshal(p.Payload, &payload); err != nil {
+		return err
+	}
+
+	if payload.RoomID == c.ID {
+		return fiber.NewError(fiber.StatusBadRequest, "You cannot leave your own room")
+	}
+	if payload.RoomID == c.Manager.GlobalRoom.ID {
+		return fiber.NewError(fiber.StatusBadRequest, "You cannot leave the global room")
+	}
+
+	r, err := c.Manager.GetRoom(payload.RoomID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+
+	if err := c.Manager.RoomSvc.RemoveUser(payload.RoomID, c.ID); err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+	if err := c.Manager.UserSvc.LeaveRoom(payload.RoomID, c.ID); err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+
+	return c.Manager.RemoveClientFromRoom(c, r)
+}
+
+func (c *Client) HandleStartGameRequest(p *Packet) error {
+	payload := StartGamePayload{}
+	if err := json.Unmarshal(p.Payload, &payload); err != nil {
+		return fiber.NewError(fiber.StatusUnprocessableEntity, "parse request: "+err.Error())
+	}
+	dbRoom, err := c.Manager.RoomSvc.Find(payload.RoomID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusNotFound, "Room not found")
+	}
+	if !dbRoom.IsGameRoom {
+		return fiber.NewError(fiber.StatusBadRequest, "Room is not a game room")
+	}
+	if c.ID != dbRoom.CreatorID {
+		return fiber.NewError(fiber.StatusForbidden, "You are not the room creator")
+	}
+
+	g, err := c.Manager.GameSvc.StartGame(dbRoom)
+	if err != nil {
+		return err
+	}
+
+	r, err := c.Manager.GetRoom(payload.RoomID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "ws room not found: "+err.Error())
+	}
+	// Start game timer
+	g.Timer.OnTick(func() {
+		timerPacket, err := NewTimerUpdatePacket(TimerUpdatePayload{
+			Timer: g.Timer.TimeRemaining(),
+		})
+		if err != nil {
+			slog.Error("failed to create timer update packet:", err)
+			return
+		}
+		r.Broadcast(timerPacket)
+	})
+	g.Timer.OnDone(func() {
+		g.SkipTurn()
+		gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
+			Game: makeGamePayload(g),
+		})
+		if err != nil {
+			slog.Error("failed to create game update packet:", err)
+			return
+		}
+		r.Broadcast(gamePacket)
+
+		// Make bots move if applicable
+		go c.Manager.MakeBotMoves(g.ID)
+	})
+	g.Timer.Start()
+
+	gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
+		Game: makeGamePayload(g),
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = c.BroadcastToRoom(g.ID, gamePacket)
+	if err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (c *client) leaveRoom(rID string) error {
-	if rID == c.ID {
-		return ErrLeavingOwnRoom
+func (c *Client) PlayMove(p *Packet) error {
+	payload := PlayMovePayload{}
+	if err := json.Unmarshal(p.Payload, &payload); err != nil {
+		return fmt.Errorf("failed to unmarshal PlayMovePayload: %w", err)
 	}
-	r, err := c.Manager.getRoom(rID)
+	slog.Info("playMove", "payload", payload)
+
+	g, err := c.Manager.GameSvc.ApplyPlayerMove(payload.GameID, c.ID, payload.MoveInfo)
 	if err != nil {
 		return err
 	}
 
-	if err = r.removeClient(c.ID); err != nil {
+	gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
+		Game: makeGamePayload(g),
+	})
+	if err != nil {
 		return err
 	}
+
+	_, err = c.BroadcastToRoom(payload.GameID, gamePacket)
+	if err != nil {
+		return err
+	}
+
+	if g.IsOver() {
+		return c.Manager.HandleGameOver(g)
+	}
+
+	// Make bots move if applicable
+	go c.Manager.MakeBotMoves(payload.GameID)
+
+	return nil
+}
+
+func (c *Client) HandleIndiceRequest(p *Packet) error {
+	payload := IndicePayload{}
+	if err := json.Unmarshal(p.Payload, &payload); err != nil {
+		return err
+	}
+
+	moves, err := c.Manager.GameSvc.GetIndices(payload.GameID)
+	if err != nil {
+		return err
+	}
+
+	response, err := NewServerIndicePacket(ServerIndicePayload{
+		Moves: moves,
+	})
+	if err != nil {
+		return err
+	}
+
+	c.send(response)
 
 	return nil
 }
