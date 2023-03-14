@@ -85,4 +85,6 @@ func (api *API) setupRoutes(cfg *config.Config) {
 	// r.Post("/room/joindm", api.Ctrls.WebSocketManager.JoinDMRoom)
 	// r.Post("/room/leave", api.Ctrls.WebSocketManager.LeaveRoom)
 	r.Get("/room/:id/messages", api.Ctrls.WebSocketManager.GetMessages)
+	r.Patch("/room/:id/protectGame", api.Ctrls.WebSocketManager.ProtectRoom)
+	r.Patch("/room/:id/unprotectGame", api.Ctrls.WebSocketManager.UnprotectRoom)
 }

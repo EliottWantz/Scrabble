@@ -19,7 +19,10 @@ func (r *Repository) Insert(room *Room) error {
 	_, err := r.coll.InsertOne(context.Background(), room)
 	return err
 }
-
+func (r *Repository) Update(room *Room) error {
+	_, err := r.coll.UpdateByID(context.Background(), room.ID, bson.M{"$set": room})
+	return err
+}
 func (r *Repository) Find(ID string) (*Room, error) {
 	var roomDB Room
 	err := r.coll.FindOne(

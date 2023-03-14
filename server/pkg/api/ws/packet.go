@@ -47,7 +47,8 @@ type ChatMessage struct {
 }
 
 type JoinRoomPayload struct {
-	RoomID string `json:"roomId"`
+	RoomID   string `json:"roomId"`
+	Password string `json:"password,omitempty"`
 }
 
 type JoinDMPayload struct {
@@ -66,7 +67,8 @@ type CreateRoomPayload struct {
 }
 
 type CreateGameRoomPayload struct {
-	UserIDs []string `json:"userIds"`
+	Password string   `json:"password,omitempty"`
+	UserIDs  []string `json:"userIds"`
 }
 
 type LeaveRoomPayload struct {
