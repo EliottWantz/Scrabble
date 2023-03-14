@@ -24,6 +24,11 @@ class GameService extends GetxService {
     }
     return null;
   }
+
+  bool isMyTurn() {
+    return currentGame.value!.turn == userService.user.value!.id;
+  }
+
   bool isCurrentPlayer(String playerId) {
     return currentGame.value!.turn == playerId;
   }

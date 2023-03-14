@@ -154,18 +154,23 @@ class StartingSquare extends Square {
   @override
   Widget build(BuildContext context) {
     return DragTarget<Tile>(onWillAccept: (data) {
-      List<List<String>> positions = [];
-      controller.covers.forEach((key, value) => {
-        positions.add(key.split('/'))
-      });
-      for (final coverPosition in positions) {
-        if (coverPosition[0] == position.row.toString()
-            && coverPosition[1] == position.col.toString()) {
-          print('cannot place here');
-          return false;
+      if (controller.gameService.isMyTurn()) {
+        List<List<String>> positions = [];
+        controller.covers.forEach((key, value) =>
+        {
+          positions.add(key.split('/'))
+        });
+        for (final coverPosition in positions) {
+          if (coverPosition[0] == position.row.toString()
+              && coverPosition[1] == position.col.toString()) {
+            print('cannot place here');
+            return false;
+          }
         }
+        return _gameService.currentGame.value!.board[position.row][position.col]
+            .tile == null;
       }
-      return _gameService.currentGame.value!.board[position.row][position.col].tile == null;
+      return false;
     }, onAccept: (data) {
       currentData = data;
       _isDropped.value = true;
@@ -229,23 +234,28 @@ class DoubleLetterSquare extends Square {
   @override
   Widget build(BuildContext context) {
     return DragTarget<Tile>(onWillAccept: (data) {
-      List<List<String>> positions = [];
-      controller.covers.forEach((key, value) =>
-      {
-        positions.add(key.split('/'))
-      });
-      for (final coverPosition in positions) {
-        if (coverPosition[0] == position.row.toString()
-            && coverPosition[1] == position.col.toString()) {
-          print('cannot place here');
-          return false;
+      if (controller.gameService.isMyTurn()) {
+        List<List<String>> positions = [];
+        controller.covers.forEach((key, value) =>
+        {
+          positions.add(key.split('/'))
+        });
+        for (final coverPosition in positions) {
+          if (coverPosition[0] == position.row.toString()
+              && coverPosition[1] == position.col.toString()) {
+            print('cannot place here');
+            return false;
+          }
         }
+        return _gameService.currentGame.value!.board[position.row][position.col]
+            .tile == null;
       }
-      return _gameService.currentGame.value!.board[position.row][position.col]
-          .tile == null;
+      return false;
     }, onAccept: (data) {
-      currentData = data;
-      _isDropped.value = true;
+      if (controller.gameService.isMyTurn()) {
+        currentData = data;
+        _isDropped.value = true;
+      }
     }, builder: (BuildContext context,
         List<dynamic> accepted,
         List<dynamic> rejected,) {
@@ -305,23 +315,28 @@ class DoubleWordSquare extends Square {
   @override
   Widget build(BuildContext context) {
     return DragTarget<Tile>(onWillAccept: (data) {
-      List<List<String>> positions = [];
-      controller.covers.forEach((key, value) =>
-      {
-        positions.add(key.split('/'))
-      });
-      for (final coverPosition in positions) {
-        if (coverPosition[0] == position.row.toString()
-            && coverPosition[1] == position.col.toString()) {
-          print('cannot place here');
-          return false;
+      if (controller.gameService.isMyTurn()) {
+        List<List<String>> positions = [];
+        controller.covers.forEach((key, value) =>
+        {
+          positions.add(key.split('/'))
+        });
+        for (final coverPosition in positions) {
+          if (coverPosition[0] == position.row.toString()
+              && coverPosition[1] == position.col.toString()) {
+            print('cannot place here');
+            return false;
+          }
         }
+        return _gameService.currentGame.value!.board[position.row][position.col]
+            .tile == null;
       }
-      return _gameService.currentGame.value!.board[position.row][position.col]
-          .tile == null;
+      return false;
     }, onAccept: (data) {
-      currentData = data;
-      _isDropped.value = true;
+      if (controller.gameService.isMyTurn()) {
+        currentData = data;
+        _isDropped.value = true;
+      }
     }, builder: (BuildContext context,
         List<dynamic> accepted,
         List<dynamic> rejected,) {
@@ -381,23 +396,28 @@ class TripleLetterSquare extends Square {
   @override
   Widget build(BuildContext context) {
     return DragTarget<Tile>(onWillAccept: (data) {
-      List<List<String>> positions = [];
-      controller.covers.forEach((key, value) =>
-      {
-        positions.add(key.split('/'))
-      });
-      for (final coverPosition in positions) {
-        if (coverPosition[0] == position.row.toString()
-            && coverPosition[1] == position.col.toString()) {
-          print('cannot place here');
-          return false;
+      if (controller.gameService.isMyTurn()) {
+        List<List<String>> positions = [];
+        controller.covers.forEach((key, value) =>
+        {
+          positions.add(key.split('/'))
+        });
+        for (final coverPosition in positions) {
+          if (coverPosition[0] == position.row.toString()
+              && coverPosition[1] == position.col.toString()) {
+            print('cannot place here');
+            return false;
+          }
         }
+        return _gameService.currentGame.value!.board[position.row][position.col]
+            .tile == null;
       }
-      return _gameService.currentGame.value!.board[position.row][position.col]
-          .tile == null;
+      return false;
     }, onAccept: (data) {
-      currentData = data;
-      _isDropped.value = true;
+      if (controller.gameService.isMyTurn()) {
+        currentData = data;
+        _isDropped.value = true;
+      }
     }, builder: (BuildContext context,
         List<dynamic> accepted,
         List<dynamic> rejected,) {
@@ -457,23 +477,28 @@ class TripleWordSquare extends Square {
   @override
   Widget build(BuildContext context) {
     return DragTarget<Tile>(onWillAccept: (data) {
-      List<List<String>> positions = [];
-      controller.covers.forEach((key, value) =>
-      {
-        positions.add(key.split('/'))
-      });
-      for (final coverPosition in positions) {
-        if (coverPosition[0] == position.row.toString()
-            && coverPosition[1] == position.col.toString()) {
-          print('cannot place here');
-          return false;
+      if (controller.gameService.isMyTurn()) {
+        List<List<String>> positions = [];
+        controller.covers.forEach((key, value) =>
+        {
+          positions.add(key.split('/'))
+        });
+        for (final coverPosition in positions) {
+          if (coverPosition[0] == position.row.toString()
+              && coverPosition[1] == position.col.toString()) {
+            print('cannot place here');
+            return false;
+          }
         }
+        return _gameService.currentGame.value!.board[position.row][position.col]
+            .tile == null;
       }
-      return _gameService.currentGame.value!.board[position.row][position.col]
-          .tile == null;
+      return false;
     }, onAccept: (data) {
-      currentData = data;
-      _isDropped.value = true;
+      if (controller.gameService.isMyTurn()) {
+        currentData = data;
+        _isDropped.value = true;
+      }
     }, builder: (BuildContext context,
         List<dynamic> accepted,
         List<dynamic> rejected,) {
@@ -532,21 +557,28 @@ class StandardSquare extends Square {
   @override
   Widget build(BuildContext context) {
     return DragTarget<Tile>(onWillAccept: (data) {
-      List<List<String>> positions = [];
-      controller.covers.forEach((key, value) => {
-        positions.add(key.split('/'))
-      });
-      for (final coverPosition in positions) {
-        if (coverPosition[0] == position.row.toString()
-            && coverPosition[1] == position.col.toString()) {
-          print('cannot place here');
-          return false;
+      if (controller.gameService.isMyTurn()) {
+        List<List<String>> positions = [];
+        controller.covers.forEach((key, value) =>
+        {
+          positions.add(key.split('/'))
+        });
+        for (final coverPosition in positions) {
+          if (coverPosition[0] == position.row.toString()
+              && coverPosition[1] == position.col.toString()) {
+            print('cannot place here');
+            return false;
+          }
         }
+        return _gameService.currentGame.value!.board[position.row][position.col]
+            .tile == null;
       }
-      return _gameService.currentGame.value!.board[position.row][position.col].tile == null;
+      return false;
     }, onAccept: (data) {
-      currentData = data;
-      _isDropped.value = true;
+      if (controller.gameService.isMyTurn()) {
+        currentData = data;
+        _isDropped.value = true;
+      }
     }, builder: (
       BuildContext context,
       List<dynamic> accepted,
