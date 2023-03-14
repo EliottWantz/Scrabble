@@ -272,7 +272,7 @@ class WebsocketService extends GetxService {
     socket.sink.add(startGameRequest.toRawJson());
   }
 
-  void playMove(String type, MoveInfo moveInfo) {
+  void playMove(MoveInfo moveInfo) {
     final playMovePayload = PlayMovePayload(
         gameId: gameService.currentGameRoom.value!.roomId,
         moveInfo: moveInfo

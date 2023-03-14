@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 
+import '../models/move_info.dart';
+import '../models/move_types.dart';
 import '../widgets/player_info.dart';
 
 
@@ -49,6 +51,14 @@ class GameScreen extends GetView<GameController> {
                           children: [
                             ElevatedButton.icon(
                               onPressed: () {
+                                final moveInfo = MoveInfo(
+                                  type: MoveTypePlayTile,
+                                  letters: controller.letters.join(),
+                                  covers: controller.covers
+                                );
+                                controller.websocketService.playMove(moveInfo);
+                                controller.letters = [];
+                                controller.covers = {};
                               },
                               icon: const Icon(
                                 // <-- Icon

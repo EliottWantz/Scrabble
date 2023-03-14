@@ -178,11 +178,11 @@ class StartingSquare extends Square {
         _isDropped.value = false;
         print('has been dropped');
         controller.letters.add(String.fromCharCode(currentData.letter));
-        controller.covers['${position.row}/${position.col}'] = String.fromCharCode(currentData.letter);
+        controller.covers['${position.col}/${position.row}'] = String.fromCharCode(currentData.letter);
         return LetterTile(letter: String.fromCharCode(currentData.letter));
         // return LetterTile(letter: 'a');
       } else {
-        String currentPosition = '${position.row}/${position.col}';
+        String currentPosition = '${position.col}/${position.row}';
         if (controller.covers[currentPosition] != null) {
           return LetterTile(letter: controller.covers[currentPosition]!);
         }
@@ -253,12 +253,12 @@ class DoubleLetterSquare extends Square {
         _isDropped.value = false;
         print('has been dropped');
         controller.letters.add(String.fromCharCode(currentData.letter));
-        controller.covers['${position.row}/${position.col}'] =
+        controller.covers['${position.col}/${position.row}'] =
             String.fromCharCode(currentData.letter);
         return LetterTile(letter: String.fromCharCode(currentData.letter));
         // return LetterTile(letter: 'a');
       } else {
-        String currentPosition = '${position.row}/${position.col}';
+        String currentPosition = '${position.col}/${position.row}';
         if (controller.covers[currentPosition] != null) {
           return LetterTile(letter: controller.covers[currentPosition]!);
         }
@@ -329,12 +329,12 @@ class DoubleWordSquare extends Square {
         _isDropped.value = false;
         print('has been dropped');
         controller.letters.add(String.fromCharCode(currentData.letter));
-        controller.covers['${position.row}/${position.col}'] =
+        controller.covers['${position.col}/${position.row}'] =
             String.fromCharCode(currentData.letter);
         return LetterTile(letter: String.fromCharCode(currentData.letter));
         // return LetterTile(letter: 'a');
       } else {
-        String currentPosition = '${position.row}/${position.col}';
+        String currentPosition = '${position.col}/${position.row}';
         if (controller.covers[currentPosition] != null) {
           return LetterTile(letter: controller.covers[currentPosition]!);
         }
@@ -405,12 +405,12 @@ class TripleLetterSquare extends Square {
         _isDropped.value = false;
         print('has been dropped');
         controller.letters.add(String.fromCharCode(currentData.letter));
-        controller.covers['${position.row}/${position.col}'] =
+        controller.covers['${position.col}/${position.row}'] =
             String.fromCharCode(currentData.letter);
         return LetterTile(letter: String.fromCharCode(currentData.letter));
         // return LetterTile(letter: 'a');
       } else {
-        String currentPosition = '${position.row}/${position.col}';
+        String currentPosition = '${position.col}/${position.row}';
         if (controller.covers[currentPosition] != null) {
           return LetterTile(letter: controller.covers[currentPosition]!);
         }
@@ -481,12 +481,12 @@ class TripleWordSquare extends Square {
         _isDropped.value = false;
         print('has been dropped');
         controller.letters.add(String.fromCharCode(currentData.letter));
-        controller.covers['${position.row}/${position.col}'] =
+        controller.covers['${position.col}/${position.row}'] =
             String.fromCharCode(currentData.letter);
         return LetterTile(letter: String.fromCharCode(currentData.letter));
         // return LetterTile(letter: 'a');
       } else {
-        String currentPosition = '${position.row}/${position.col}';
+        String currentPosition = '${position.col}/${position.row}';
         if (controller.covers[currentPosition] != null) {
           return LetterTile(letter: controller.covers[currentPosition]!);
         }
@@ -556,11 +556,11 @@ class StandardSquare extends Square {
         _isDropped.value = false;
         print('has been dropped');
         controller.letters.add(String.fromCharCode(currentData.letter));
-        controller.covers['${position.row}/${position.col}'] = String.fromCharCode(currentData.letter);
+        controller.covers['${position.col}/${position.row}'] = String.fromCharCode(currentData.letter);
         return LetterTile(letter: String.fromCharCode(currentData.letter));
         // return LetterTile(letter: 'a');
       } else {
-        String currentPosition = '${position.row}/${position.col}';
+        String currentPosition = '${position.col}/${position.row}';
         if (controller.covers[currentPosition] != null) {
           return LetterTile(letter: controller.covers[currentPosition]!);
         }
