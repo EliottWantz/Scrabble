@@ -83,6 +83,17 @@ class GameScreen extends GetView<GameController> {
                             const Gap(20),
                             ElevatedButton.icon(
                               onPressed: () {
+                                if (_gameService.currentGame.value!.turn != _userService.user.value!.id) {
+                                  return;
+                                }
+                                final moveInfo = MoveInfo(
+                                    type: MoveTypePass,
+                                    letters: controller.letters.join(),
+                                    covers: controller.covers
+                                );
+                                controller.websocketService.playMove(moveInfo);
+                                controller.letters = [];
+                                controller.covers = {};
                               },
                               icon: const Icon(
                                 // <-- Icon
