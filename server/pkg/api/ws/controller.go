@@ -40,3 +40,37 @@ func (m *Manager) GetMessages(c *fiber.Ctx) error {
 		Messages: msgs,
 	})
 }
+
+type ProtectedRoomRequest struct {
+	Password string `json:"password,omitempty"`
+}
+
+func (m *Manager) ProtectRoom(c *fiber.Ctx) error {
+	roomID := c.Params("id")
+	ProtectedRoom := ProtectedRoomRequest{}
+	if err := c.BodyParser(&ProtectedRoom); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "decode req: "+err.Error())
+	}
+
+	if roomID == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "Room ID is required")
+	}
+
+	_, err := m.RoomSvc.ProtectGameRoom(roomID, ProtectedRoom.Password)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	m.UpdateJoinableGames()
+	return c.SendStatus(fiber.StatusOK)
+}
+
+func (m *Manager) UnprotectRoom(c *fiber.Ctx) error {
+	roomID := c.Params("id")
+	if roomID == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "Room ID is required")
+	}
+
+	m.RoomSvc.UnprotectGameRoom(roomID)
+	m.UpdateJoinableGames()
+	return c.SendStatus(fiber.StatusOK)
+}
