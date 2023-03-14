@@ -1,3 +1,4 @@
+import 'package:client_leger/services/game_service.dart';
 import 'package:client_leger/services/user_service.dart';
 import 'package:client_leger/services/websocket_service.dart';
 import 'package:flutter/cupertino.dart';
@@ -10,6 +11,7 @@ class ChatController extends GetxController {
   final RoomService roomService = Get.find();
   final UserService userService = Get.find();
   final WebsocketService websocketService = Get.find();
+  final GameService gameService = Get.find();
 
   final messageController = TextEditingController();
 
@@ -17,6 +19,11 @@ class ChatController extends GetxController {
 
   void sendMessage() {
     websocketService.sendMessage(roomService.currentRoomId, messageController.text);
+    messageController.text = '';
+  }
+
+  void sendMessageToGameRoom() {
+    websocketService.sendMessage(gameService.currentGameRoom.value!.roomId, messageController.text);
     messageController.text = '';
   }
 

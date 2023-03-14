@@ -3,6 +3,7 @@ import 'package:client_leger/models/user.dart';
 import 'package:client_leger/services/user_service.dart';
 import 'package:get/get.dart';
 
+import '../models/chat_message_payload.dart';
 import '../models/game_update_payload.dart';
 import '../models/player.dart';
 import '../models/room.dart';
@@ -13,6 +14,7 @@ class GameService extends GetxService {
   final joinableGames = Rxn<List<GameRoom>>();
 
   final currentGameRoom = Rxn<Room>();
+  final currentRoomMessages = <ChatMessagePayload>[].obs;
   // final currentGameRoomUsers = Rxn<List<User>>();
   final currentGameRoomUsers = <User>[].obs;
 
