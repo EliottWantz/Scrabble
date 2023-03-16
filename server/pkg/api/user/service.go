@@ -120,7 +120,7 @@ func (s *Service) SignUp(username, password, email string, uploadAvatar UploadAv
 	s.NewUserChan <- u
 
 	// Join global room
-	err = s.RoomSvc.AddUser("global", u.ID)
+	err = s.RoomSvc.Repo.AddUser("global", u.ID)
 	if err != nil {
 		return nil, fiber.NewError(fiber.StatusInternalServerError, "failed to join global room: "+err.Error())
 	}

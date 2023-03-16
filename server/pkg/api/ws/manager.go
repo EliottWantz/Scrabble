@@ -9,7 +9,6 @@ import (
 	"scrabble/pkg/api/game"
 	"scrabble/pkg/api/room"
 	"scrabble/pkg/api/user"
-	"scrabble/pkg/scrabble"
 
 	"github.com/alphadose/haxmap"
 	"github.com/gofiber/fiber/v2"
@@ -39,11 +38,11 @@ func NewManager(messageRepo *MessageRepository, roomSvc *room.Service, userSvc *
 		GameSvc:     gameSvc,
 	}
 
-	dbRoom, err := m.RoomSvc.Find("global")
+	dbRoom, err := m.RoomSvc.Repo.Find("global")
 	if err != nil {
 		return nil, fmt.Errorf("global room not found")
 	}
-	r := m.AddRoom(dbRoom)
+	r := m.AddRoom(dbRoom.ID, dbRoom.Name)
 	m.GlobalRoom = r
 
 	go m.ListNewUser()
@@ -76,7 +75,7 @@ func (m *Manager) Accept(cID string) fiber.Handler {
 		}
 		{
 			// List available chat rooms
-			rooms, err := m.RoomSvc.GetAllChatRooms()
+			rooms, err := m.RoomSvc.Repo.FindAll()
 			if err != nil {
 				m.logger.Error("list chat rooms", err)
 			}
@@ -90,7 +89,7 @@ func (m *Manager) Accept(cID string) fiber.Handler {
 		}
 		{
 			// List available games
-			games, err := m.RoomSvc.GetAllGameRooms()
+			games, err := m.GameSvc.Repo.FindAll()
 			if err != nil {
 				m.logger.Error("list joinable games", err)
 			}
@@ -154,11 +153,11 @@ func (m *Manager) AddClient(c *Client) error {
 	for _, roomID := range user.JoinedChatRooms {
 		r, err := m.GetRoom(roomID)
 		if err != nil {
-			dbRoom, err := m.RoomSvc.Find(roomID)
+			dbRoom, err := m.RoomSvc.Repo.Find(roomID)
 			if err != nil {
 				return err
 			}
-			r = m.AddRoom(dbRoom)
+			r = m.AddRoom(dbRoom.ID, dbRoom.Name)
 		}
 		if err := r.AddClient(c.ID); err != nil {
 			return err
@@ -223,30 +222,27 @@ func (m *Manager) RemoveClientFromRoom(c *Client, r *Room) error {
 		return fiber.NewError(fiber.StatusInternalServerError, "failed to create packet: "+err.Error())
 	}
 
-	dbRoom, err := c.Manager.RoomSvc.Find(r.ID)
-	if err != nil {
-		return nil
-	}
+	// if c.ID == dbRoom.CreatorID && dbRoom.IsGameRoom {
+	// 	_, err := c.Manager.GameSvc.Repo.Find(dbRoom.ID)
+	// 	if err != nil {
+	// 		// Game has not started yet
+	// 		r.Broadcast(leftRoomPacket)
+	// 		if err := r.Manager.RemoveRoom(r.ID); err != nil {
+	// 			return err
+	// 		}
+	// 		if err := c.Manager.RoomSvc.Delete(r.ID); err != nil {
+	// 			return err
+	// 		}
+	// 	}
+	// }
 
-	if c.ID == dbRoom.CreatorID && dbRoom.IsGameRoom {
-		_, err := c.Manager.GameSvc.Repo.GetGame(dbRoom.ID)
-		if err != nil {
-			// Game has not started yet
-			r.Broadcast(leftRoomPacket)
-			if err := r.Manager.RemoveRoom(r.ID); err != nil {
-				return err
-			}
-			if err := c.Manager.RoomSvc.Delete(r.ID); err != nil {
-				return err
-			}
-		}
-	}
-	c.send(leftRoomPacket)
+	r.Broadcast(leftRoomPacket)
+	// c.send(leftRoomPacket)
 
 	// Replace player with bot if game room
-	if dbRoom.IsGameRoom {
-		m.ReplacePlayerWithBot(c.ID, r, dbRoom)
-	}
+	// if dbRoom.IsGameRoom {
+	// 	m.ReplacePlayerWithBot(c.ID, r, dbRoom)
+	// }
 
 	return nil
 }
@@ -263,8 +259,8 @@ func (m *Manager) DisconnectClient(cID string) error {
 	)
 }
 
-func (m *Manager) AddRoom(dbRoom *room.Room) *Room {
-	r := NewRoom(m, dbRoom)
+func (m *Manager) AddRoom(ID, name string) *Room {
+	r := NewRoom(m, ID, name)
 	m.Rooms.Set(r.ID, r)
 	m.logger.Info(
 		"room registered",
@@ -312,7 +308,7 @@ func (m *Manager) Shutdown() {
 }
 
 func (m *Manager) UpdateChatRooms() error {
-	rooms, err := m.RoomSvc.GetAllChatRooms()
+	rooms, err := m.RoomSvc.Repo.FindAll()
 	if err != nil {
 		return err
 	}
@@ -328,7 +324,7 @@ func (m *Manager) UpdateChatRooms() error {
 }
 
 func (m *Manager) UpdateJoinableGames() error {
-	joinableGames, err := m.RoomSvc.GetAllGameRooms()
+	joinableGames, err := m.GameSvc.Repo.FindAll()
 	if err != nil {
 		return err
 	}
@@ -414,7 +410,6 @@ func (m *Manager) watchFriendRequests(id string) {
 }
 
 func (m *Manager) MakeBotMoves(gID string) {
-	// Make bots move if applicable
 	for {
 		g, err := m.GameSvc.ApplyBotMove(gID)
 		if err != nil {
@@ -434,7 +429,7 @@ func (m *Manager) MakeBotMoves(gID string) {
 			break
 		}
 
-		if g.IsOver() {
+		if g.ScrabbleGame.IsOver() {
 			m.HandleGameOver(g)
 		}
 	}
@@ -459,13 +454,13 @@ func (m *Manager) ReplacePlayerWithBot(pID string, r *Room, dbRoom *room.Room) e
 	return nil
 }
 
-func (m *Manager) HandleGameOver(g *scrabble.Game) error {
+func (m *Manager) HandleGameOver(g *game.Game) error {
 	r, err := m.GetRoom(g.ID)
 	if err != nil {
 		return err
 	}
 
-	winnerID := g.Winner().ID
+	winnerID := g.ScrabbleGame.Winner().ID
 	gameOverPacket, err := NewGameOverPacket(GameOverPayload{
 		WinnerID: winnerID,
 	})
@@ -474,9 +469,9 @@ func (m *Manager) HandleGameOver(g *scrabble.Game) error {
 	}
 
 	r.Broadcast(gameOverPacket)
-	g.Timer.Stop()
+	g.ScrabbleGame.Timer.Stop()
 
-	for _, p := range g.Players {
+	for _, p := range g.ScrabbleGame.Players {
 		u, err := m.UserSvc.GetUser(p.ID)
 		if err != nil {
 			continue
@@ -494,10 +489,6 @@ func (m *Manager) HandleGameOver(g *scrabble.Game) error {
 	}
 	r.Broadcast(leftRoomPacket)
 
-	err = m.RoomSvc.Delete(r.ID)
-	if err != nil {
-		return err
-	}
 	err = m.RemoveRoom(r.ID)
 	if err != nil {
 		return err

@@ -15,7 +15,6 @@ const (
 var ErrPlayerNotFound = errors.New("player not found")
 
 type Game struct {
-	ID           string
 	Players      []*Player
 	Board        *Board
 	Bag          *Bag
@@ -56,9 +55,8 @@ type MoveItem struct {
 	Move       Move
 }
 
-func NewGame(ID string, dawg *DAWG, botStrategy Strategy) *Game {
+func NewGame(dawg *DAWG, botStrategy Strategy) *Game {
 	g := &Game{
-		ID:       ID,
 		Players:  []*Player{},
 		Board:    NewBoard(),
 		Bag:      NewBag(DefaultTileSet),

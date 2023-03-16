@@ -66,7 +66,7 @@ type CreateRoomPayload struct {
 	UserIDs  []string `json:"userIds"`
 }
 
-type CreateGameRoomPayload struct {
+type CreateGamePayload struct {
 	Password string   `json:"password,omitempty"`
 	UserIDs  []string `json:"userIds"`
 }
@@ -90,12 +90,10 @@ type IndicePayload struct {
 
 // Server events payloads
 type JoinedRoomPayload struct {
-	RoomID     string        `json:"roomId"`
-	RoomName   string        `json:"roomName"`
-	CreatorID  string        `json:"creatorId"`
-	Users      []*user.User  `json:"users"`
-	Messages   []ChatMessage `json:"messages"`
-	IsGameRoom bool          `json:"isGameRoom"`
+	RoomID   string        `json:"roomId"`
+	RoomName string        `json:"roomName"`
+	Users    []*user.User  `json:"users"`
+	Messages []ChatMessage `json:"messages"`
 }
 
 func NewJoinedRoomPacket(payload JoinedRoomPayload) (*Packet, error) {
@@ -144,14 +142,14 @@ func NewListChatRoomsPacket(payload ListChatRoomsPayload) (*Packet, error) {
 }
 
 type ListJoinableGamesPayload struct {
-	Games []room.Room `json:"games"`
+	Games []*game.Game `json:"games"`
 }
 
 func NewJoinableGamesPacket(payload ListJoinableGamesPayload) (*Packet, error) {
 	return NewPacket(ServerEventJoinableGames, payload)
 }
 
-type Game struct {
+type GamePayload struct {
 	ID           string                  `json:"id"`
 	Players      []*scrabble.Player      `json:"players"`
 	Board        [15][15]scrabble.Square `json:"board"`
@@ -161,20 +159,20 @@ type Game struct {
 	Timer        time.Duration           `json:"timer"`
 }
 
-func makeGamePayload(g *scrabble.Game) *Game {
-	return &Game{
+func makeGamePayload(g *game.Game) *GamePayload {
+	return &GamePayload{
 		ID:           g.ID,
-		Players:      g.Players,
-		Board:        g.Board.Squares,
-		Finished:     g.Finished,
-		NumPassMoves: g.NumPassMoves,
-		Turn:         g.Turn,
-		Timer:        g.Timer.TimeRemaining(),
+		Players:      g.ScrabbleGame.Players,
+		Board:        g.ScrabbleGame.Board.Squares,
+		Finished:     g.ScrabbleGame.Finished,
+		NumPassMoves: g.ScrabbleGame.NumPassMoves,
+		Turn:         g.ScrabbleGame.Turn,
+		Timer:        g.ScrabbleGame.Timer.TimeRemaining(),
 	}
 }
 
 type GameUpdatePayload struct {
-	Game *Game `json:"game"`
+	Game *GamePayload `json:"game"`
 }
 
 func NewGameUpdatePacket(payload GameUpdatePayload) (*Packet, error) {

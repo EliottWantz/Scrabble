@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"scrabble/pkg/api/auth"
 	"time"
 
 	"github.com/alphadose/haxmap"
@@ -109,7 +108,7 @@ func (c *Client) handlePacket(p *Packet) error {
 	case ClientEventCreateRoom:
 		return c.HandleCreateRoomRequest(p)
 	case ClientEventCreateGameRoom:
-		return c.HandleCreateGameRoomRequest(p)
+		return c.HandleCreateGameRequest(p)
 	case ClientEventLeaveRoom:
 		return c.HandleLeaveRoomRequest(p)
 	case ClientEventStartGame:
@@ -171,7 +170,7 @@ func (c *Client) HandleJoinRoomRequest(p *Packet) error {
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
-	if err := c.Manager.RoomSvc.AddUser(payload.RoomID, c.ID); err != nil {
+	if err := c.Manager.RoomSvc.Repo.AddUser(payload.RoomID, c.ID); err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, "failed to join room: "+err.Error())
 	}
 	if err := c.Manager.UserSvc.Repo.AddJoinedRoom(payload.RoomID, c.ID); err != nil {
@@ -206,17 +205,16 @@ func (c *Client) HandleJoinGameRoomRequest(p *Packet) error {
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
-	dbRoom, err := c.Manager.RoomSvc.Find(payload.RoomID)
-	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, err.Error())
-	}
+	// dbRoom, err := c.Manager.RoomSvc.Repo.Find(payload.RoomID)
+	// if err != nil {
+	// 	return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	// }
 
-	if dbRoom.IsProtected && !auth.PasswordsMatch(payload.Password, dbRoom.HashPassword) {
-		return fiber.NewError(fiber.StatusBadRequest, "wrong password")
+	// if dbRoom.IsProtected && !auth.PasswordsMatch(payload.Password, dbRoom.HashPassword) {
+	// 	return fiber.NewError(fiber.StatusBadRequest, "wrong password")
+	// }
 
-	}
-
-	if err := c.Manager.RoomSvc.AddUser(payload.RoomID, c.ID); err != nil {
+	if err := c.Manager.RoomSvc.Repo.AddUser(payload.RoomID, c.ID); err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, "failed to join room: "+err.Error())
 	}
 	if err := r.AddClient(c.ID); err != nil {
@@ -244,17 +242,18 @@ func (c *Client) HandleCreateRoomRequest(p *Packet) error {
 	return nil
 }
 
-func (c *Client) HandleCreateGameRoomRequest(p *Packet) error {
-	payload := CreateGameRoomPayload{}
+func (c *Client) HandleCreateGameRequest(p *Packet) error {
+	payload := CreateGamePayload{}
 	if err := json.Unmarshal(p.Payload, &payload); err != nil {
 		return err
 	}
-	password := ""
-	if payload.Password != "" {
-		password = payload.Password
-	}
 
-	err := createGameRoomWithUsers(c, "", password, payload.UserIDs...)
+	var err error
+	if payload.Password != "" {
+		_, err = c.Manager.GameSvc.NewProtected(c.ID, payload.Password)
+	} else {
+		_, err = c.Manager.GameSvc.New(c.ID)
+	}
 	if err != nil {
 		return err
 	}
@@ -284,7 +283,7 @@ func (c *Client) HandleLeaveRoomRequest(p *Packet) error {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
 
-	if err := c.Manager.RoomSvc.RemoveUser(payload.RoomID, c.ID); err != nil {
+	if err := c.Manager.RoomSvc.Repo.RemoveUser(payload.RoomID, c.ID); err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
 	if err := c.Manager.UserSvc.LeaveRoom(payload.RoomID, c.ID); err != nil {
@@ -299,30 +298,30 @@ func (c *Client) HandleStartGameRequest(p *Packet) error {
 	if err := json.Unmarshal(p.Payload, &payload); err != nil {
 		return fiber.NewError(fiber.StatusUnprocessableEntity, "parse request: "+err.Error())
 	}
-	dbRoom, err := c.Manager.RoomSvc.Find(payload.RoomID)
+	g, err := c.Manager.GameSvc.Repo.Find(payload.RoomID)
 	if err != nil {
 		return fiber.NewError(fiber.StatusNotFound, "Room not found")
 	}
-	if !dbRoom.IsGameRoom {
-		return fiber.NewError(fiber.StatusBadRequest, "Room is not a game room")
-	}
-	if c.ID != dbRoom.CreatorID {
+	if c.ID != g.CreatorID {
 		return fiber.NewError(fiber.StatusForbidden, "You are not the room creator")
 	}
+	if g.ScrabbleGame != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "Game already started")
+	}
 
-	g, err := c.Manager.GameSvc.StartGame(dbRoom)
+	err = c.Manager.GameSvc.StartGame(g)
 	if err != nil {
 		return err
 	}
 
-	r, err := c.Manager.GetRoom(payload.RoomID)
+	r, err := c.Manager.GetRoom(g.ID)
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, "ws room not found: "+err.Error())
 	}
 	// Start game timer
-	g.Timer.OnTick(func() {
+	g.ScrabbleGame.Timer.OnTick(func() {
 		timerPacket, err := NewTimerUpdatePacket(TimerUpdatePayload{
-			Timer: g.Timer.TimeRemaining(),
+			Timer: g.ScrabbleGame.Timer.TimeRemaining(),
 		})
 		if err != nil {
 			slog.Error("failed to create timer update packet:", err)
@@ -330,8 +329,8 @@ func (c *Client) HandleStartGameRequest(p *Packet) error {
 		}
 		r.Broadcast(timerPacket)
 	})
-	g.Timer.OnDone(func() {
-		g.SkipTurn()
+	g.ScrabbleGame.Timer.OnDone(func() {
+		g.ScrabbleGame.SkipTurn()
 		gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
 			Game: makeGamePayload(g),
 		})
@@ -344,7 +343,7 @@ func (c *Client) HandleStartGameRequest(p *Packet) error {
 		// Make bots move if applicable
 		go c.Manager.MakeBotMoves(g.ID)
 	})
-	g.Timer.Start()
+	g.ScrabbleGame.Timer.Start()
 
 	gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
 		Game: makeGamePayload(g),
@@ -353,10 +352,7 @@ func (c *Client) HandleStartGameRequest(p *Packet) error {
 		return err
 	}
 
-	_, err = c.BroadcastToRoom(g.ID, gamePacket)
-	if err != nil {
-		return err
-	}
+	r.Broadcast(gamePacket)
 
 	return nil
 }
@@ -385,7 +381,7 @@ func (c *Client) PlayMove(p *Packet) error {
 		return err
 	}
 
-	if g.IsOver() {
+	if g.ScrabbleGame.IsOver() {
 		return c.Manager.HandleGameOver(g)
 	}
 
