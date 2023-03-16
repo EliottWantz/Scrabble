@@ -1,15 +1,36 @@
-<mat-sidenav-container>
-    <mat-sidenav>
-        <a>Home</a>
-    </mat-sidenav>
-    <mat-sidenav-content>
-        <div class="light-dark-side-placeholder">
-            <mat-slide-toggle
-              #lightDarkToggle
-              class="toggle-light-dark-theme"
-              (click)="doToggleLightDark()">
-              <mat-icon>{{lightDarkToggleIcon}}</mat-icon>
-            </mat-slide-toggle>
-          </div>
-    </mat-sidenav-content>
-</mat-sidenav-container>
+<mat-drawer-container>
+    <mat-drawer opened="true" disableClose="true" mode="side">
+        <div id="box">
+            <div>
+                <div id="box3">
+                    <mat-icon class="navs">account_circle</mat-icon>
+                </div>
+                <hr>
+
+            </div>
+
+            
+                
+            <div>
+                <a *ngIf="isInGame() && isConnected()" routerLink="/game" routerLinkActive="router-link-active" id="rules-button">
+                    Game
+                  </a>
+                  <a *ngIf="isConnected()" routerLink="/rules-slider" routerLinkActive="router-link-active" id="rules-button">
+                    <div> Help! </div>
+                  </a>
+                  <a *ngIf="isConnected()" routerLink="/social" routerLinkActive="router-link-active" id="social-button">
+                    <div> Social </div>
+                  </a>
+            </div>
+            
+            
+            
+        </div>
+        <div id="box2">
+            <mat-icon id="theme" (click)="doToggleLightDark()">{{lightDarkToggleIcon}}</mat-icon>
+        </div>
+    </mat-drawer>
+    <mat-drawer-content>
+        <router-outlet></router-outlet>
+    </mat-drawer-content>
+</mat-drawer-container>

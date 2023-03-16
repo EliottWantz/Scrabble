@@ -1,3 +1,56 @@
-mat-sidenav-container {
-    background-color: blue;
+.mat-drawer-container {
+    height: 100%;
+}
+
+.mat-drawer {
+    width: 200px;
+    background-color: #2e2e48;
+}
+mat-icon {
+    color: white;
+    transform: scale(2);
+}
+
+#box {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    row-gap: 20px;
+    height: 90%;
+}
+
+#box3 {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    height: 20%;
+}
+
+#box2 {
+    display: flex;
+    justify-content: center;
+    top: 60%;
+    height: 10%;
+}
+
+.navs {
+    justify-content: center;
+    margin-top: 10%;
+}
+
+#theme {
+    margin-bottom: auto;
+}
+
+#theme:hover {
+    cursor: pointer;
+}
+
+hr {
+    flex-basis: 100%;
+    flex-grow: 1;
+    width: 200px;
+    height: 2px;
+    background: white;
+    align-self: flex-start;
 }
