@@ -1,16 +1,11 @@
 <mat-drawer-container>
     <mat-drawer opened="true" disableClose="true" mode="side">
         <div id="box">
-            <div>
-                <div id="box3">
-                    <mat-icon class="navs">account_circle</mat-icon>
-                </div>
+            <mat-icon class="navs">account_circle</mat-icon>
+            <div id="break">
                 <hr>
-
             </div>
-
-            
-                
+     
             <div>
                 <a *ngIf="isInGame() && isConnected()" routerLink="/game" routerLinkActive="router-link-active" id="rules-button">
                     Game
@@ -23,10 +18,6 @@
                   </a>
             </div>
             
-            
-            
-        </div>
-        <div id="box2">
             <mat-icon id="theme" (click)="doToggleLightDark()">{{lightDarkToggleIcon}}</mat-icon>
         </div>
     </mat-drawer>

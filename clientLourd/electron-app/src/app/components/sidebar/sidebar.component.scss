@@ -8,29 +8,16 @@
 }
 mat-icon {
     color: white;
-    transform: scale(2);
+    transform: scale(1.7);
 }
 
 #box {
     display: flex;
-    justify-content: center;
+    align-items: center;
     flex-wrap: wrap;
     row-gap: 20px;
-    height: 90%;
-}
-
-#box3 {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    height: 20%;
-}
-
-#box2 {
-    display: flex;
-    justify-content: center;
-    top: 60%;
-    height: 10%;
+    flex-direction: column;
+    height: 95%;
 }
 
 .navs {
@@ -39,7 +26,8 @@ mat-icon {
 }
 
 #theme {
-    margin-bottom: auto;
+    //margin-bottom: auto;
+    margin-top: auto;
 }
 
 #theme:hover {
@@ -49,8 +37,12 @@ mat-icon {
 hr {
     flex-basis: 100%;
     flex-grow: 1;
-    width: 200px;
-    height: 2px;
+    width: auto;
+    height: 1px;
     background: white;
-    align-self: flex-start;
+    //align-self: flex-start;
+}
+
+#break {
+    width: 100%;
 }
