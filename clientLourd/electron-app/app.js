@@ -1,43 +1,45 @@
-const { app, BrowserWindow } = require("electron");
+const { app, BrowserWindow } = require('electron');
 
 let appWindow;
 
 function initWindow() {
-  appWindow = new BrowserWindow({
-    height: 800,
-    width: 1000,
-    webPreferences: {
-      nodeIntegration: true,
-    },
-  });
-  appWindow.maximize();
+    appWindow = new BrowserWindow({
+        // fullscreen: true,
+        height: 800,
+        width: 1000,
+        webPreferences: {
+            nodeIntegration: true,
+        },
+    });
 
-  // Electron Build Path
-  const path = `file://${__dirname}/dist/electron-app/index.html`;
-  appWindow.loadURL(path);
+    appWindow.maximize();
 
-  appWindow.setMenuBarVisibility(false);
+    // Electron Build Path
+    const path = `http://localhost:4200`;
+    appWindow.loadURL(path);
 
-  // Initialize the DevTools.
-  //appWindow.webContents.openDevTools()
+    appWindow.setMenuBarVisibility(false)
 
-  appWindow.on("closed", function () {
-    appWindow = null;
-  });
+    // Initialize the DevTools.
+    appWindow.webContents.openDevTools()
+
+    appWindow.on('closed', function () {
+        appWindow = null;
+    });
 }
 
-app.on("ready", initWindow);
+app.on('ready', initWindow);
 
 // Close when all windows are closed.
-app.on("window-all-closed", function () {
-  // On macOS specific close process
-  if (process.platform !== "darwin") {
-    app.quit();
-  }
+app.on('window-all-closed', function () {
+    // On macOS specific close process
+    if (process.platform !== 'darwin') {
+        app.quit();
+    }
 });
 
-app.on("activate", function () {
-  if (appWindow === null) {
-    initWindow();
-  }
+app.on('activate', function () {
+    if (appWindow === null) {
+        initWindow();
+    }
 });
