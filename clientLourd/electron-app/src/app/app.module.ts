@@ -29,6 +29,9 @@ import { TileComponent } from '@app/components/tile/tile.component';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { RackComponent } from '@app/components/rack/rack.component';
 import { TimerComponent } from '@app/components/timer/timer.component';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { SidebarComponent } from '@app/components/sidebar/sidebar.component';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 @NgModule({
   declarations: [
@@ -46,7 +49,8 @@ import { TimerComponent } from '@app/components/timer/timer.component';
     TileComponent,
     RackComponent,
     SocialPageComponent,
-    TimerComponent
+    TimerComponent,
+    SidebarComponent
   ],
   imports: [
     BrowserModule,
@@ -61,7 +65,9 @@ import { TimerComponent } from '@app/components/timer/timer.component';
     BrowserAnimationsModule,
     MatIconModule,
     MatDividerModule,
-    DragDropModule
+    DragDropModule,
+    MatSidenavModule,
+    MatSlideToggleModule
   ],
   providers: [
     {

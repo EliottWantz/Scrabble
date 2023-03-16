@@ -1,0 +1,15 @@
+<mat-sidenav-container>
+    <mat-sidenav>
+        <a>Home</a>
+    </mat-sidenav>
+    <mat-sidenav-content>
+        <div class="light-dark-side-placeholder">
+            <mat-slide-toggle
+              #lightDarkToggle
+              class="toggle-light-dark-theme"
+              (click)="doToggleLightDark()">
+              <mat-icon>{{lightDarkToggleIcon}}</mat-icon>
+            </mat-slide-toggle>
+          </div>
+    </mat-sidenav-content>
+</mat-sidenav-container>

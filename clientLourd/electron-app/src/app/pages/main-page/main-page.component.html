@@ -1,4 +1,4 @@
-<div class="container">
+<div>
   <nav>
     <button
       *ngIf="!isConnected()"
@@ -34,4 +34,5 @@
   </nav>
   <app-parameters *ngIf="isConnected()"></app-parameters>
   <app-chat-box *ngIf="isConnected()"></app-chat-box>
+
 </div>
