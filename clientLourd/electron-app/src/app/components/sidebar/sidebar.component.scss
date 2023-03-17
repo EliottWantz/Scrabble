@@ -8,25 +8,27 @@
 }
 mat-icon {
     color: white;
-    transform: scale(1.7);
+    transform: scale(1.5);
+    margin-top: 15%;
 }
 
-#box {
+.box {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
     row-gap: 20px;
     flex-direction: column;
-    height: 95%;
+    height: 98%;
 }
 
-.navs {
-    justify-content: center;
-    margin-top: 10%;
+.nav {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
 }
 
 #theme {
-    //margin-bottom: auto;
     margin-top: auto;
 }
 
@@ -45,4 +47,35 @@ hr {
 
 #break {
     width: 100%;
+}
+
+.mat-button-toggle {
+    margin-bottom: 5%;
+    background-color: #30304b;
+    color: white;
+}
+
+.nav-button {
+    width: 97%;
+    border-radius: 12px;
+    outline-color: #66678e;
+    outline-width: 1px;
+    outline-style: solid;
+}
+
+.nav-button-div {
+    width: 190px;
+    height: 100%;
+    display: flex;
+    justify-content: left;
+    align-items: center;
+    flex-direction: row;
+}
+
+.text {
+    margin-left: 20%;
+}
+
+.mat-icon-button {
+    margin-left: 5%;
 }

@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
 import { FormControl } from "@angular/forms";
 import { MatSidenav } from "@angular/material/sidenav";
 import { MatSlideToggle } from "@angular/material/slide-toggle";
+import { NavigationStart, Router } from "@angular/router";
 import { RoomService } from "@app/services/room/room.service";
 import { ThemeService } from "@app/services/theme/theme.service";
 import { UserService } from "@app/services/user/user.service";
@@ -20,10 +21,30 @@ export class SidebarComponent {
   private darkThemeIcon = 'nightlight_round';
   private lightThemeIcon = 'wb_sunny';
   public lightDarkToggleIcon = this.lightThemeIcon;
+  currentRoute = "PolyScrabble";
+  currentRouteName = "/home";
 
-  constructor(private userService: UserService, private socketService: WebSocketService, private roomService: RoomService, private themeService: ThemeService) {
+  constructor(private userService: UserService, private socketService: WebSocketService, private roomService: RoomService, private themeService: ThemeService, private router: Router) {
     this.user = this.userService.subjectUser;
     document.getElementById("avatar")?.setAttribute("src", this.user.value.avatar.url);
+    this.router.events.subscribe((e) => {
+      if (e instanceof NavigationStart) {
+        this.currentRouteName = e.url;
+        switch (e.url) {
+          case "/home":
+            this.currentRoute = "PolyScrabble";
+            break;
+        
+          case "/login":
+            this.currentRoute = "Connexion";
+            break;
+
+            case "/register":
+              this.currentRoute = "Inscription";
+              break;
+        }
+      }
+    });
   }
 
   public doToggleLightDark() {

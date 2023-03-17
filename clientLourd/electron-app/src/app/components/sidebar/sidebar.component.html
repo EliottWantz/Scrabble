@@ -1,24 +1,30 @@
 <mat-drawer-container>
     <mat-drawer opened="true" disableClose="true" mode="side">
-        <div id="box">
-            <mat-icon class="navs">account_circle</mat-icon>
+        <div class="box">
+            <mat-icon>account_circle</mat-icon>
             <div id="break">
                 <hr>
             </div>
      
-            <div>
-                <a *ngIf="isInGame() && isConnected()" routerLink="/game" routerLinkActive="router-link-active" id="rules-button">
-                    Game
-                  </a>
-                  <a *ngIf="isConnected()" routerLink="/rules-slider" routerLinkActive="router-link-active" id="rules-button">
-                    <div> Help! </div>
-                  </a>
-                  <a *ngIf="isConnected()" routerLink="/social" routerLinkActive="router-link-active" id="social-button">
-                    <div> Social </div>
-                  </a>
+            <div class="nav">
+                <button mat-raised-button color="accent" class="nav-button" routerLink="{{currentRouteName}}">
+                    <div class="nav-button-div">
+                        <div class="mat-icon-button">
+                            <mat-icon inline="true" >home</mat-icon>
+                        </div>
+                        <div class="text">{{currentRoute}}</div>
+                    </div> 
+                </button>
             </div>
-            
-            <mat-icon id="theme" (click)="doToggleLightDark()">{{lightDarkToggleIcon}}</mat-icon>
+
+            <div id="theme" class="nav">
+                <div id="break">
+                    <hr>
+                </div>
+                
+                <mat-icon (click)="doToggleLightDark()">{{lightDarkToggleIcon}}</mat-icon>
+                <mat-icon *ngIf="currentRoute !== 'PolyScrabble'" routerLink="/home">keyboard_backspace</mat-icon>
+            </div>
         </div>
     </mat-drawer>
     <mat-drawer-content>
