@@ -114,11 +114,11 @@ func (c *Client) handlePacket(p *Packet) error {
 	case ClientEventJoinGame:
 		return c.HandleJoinGameRequest(p)
 	case ClientEventLeaveGame:
-		return c.HandleLeaveGameRoomRequest(p)
+		return c.HandleLeaveGameRequest(p)
 	case ClientEventStartGame:
 		return c.HandleStartGameRequest(p)
 	case ClientEventPlayMove:
-		return c.PlayMove(p)
+		return c.HandlePlayMoveRequest(p)
 	case ClientEventIndice:
 		return c.HandleIndiceRequest(p)
 	}
@@ -376,7 +376,7 @@ func (c *Client) HandleJoinGameRequest(p *Packet) error {
 	return r.BroadcastJoinGamePackets(c, g)
 }
 
-func (c *Client) HandleLeaveGameRoomRequest(p *Packet) error {
+func (c *Client) HandleLeaveGameRequest(p *Packet) error {
 	payload := LeaveGamePayload{}
 	if err := json.Unmarshal(p.Payload, &payload); err != nil {
 		return err
@@ -506,7 +506,7 @@ func (c *Client) HandleStartGameRequest(p *Packet) error {
 	return nil
 }
 
-func (c *Client) PlayMove(p *Packet) error {
+func (c *Client) HandlePlayMoveRequest(p *Packet) error {
 	payload := PlayMovePayload{}
 	if err := json.Unmarshal(p.Payload, &payload); err != nil {
 		return fmt.Errorf("failed to unmarshal PlayMovePayload: %w", err)

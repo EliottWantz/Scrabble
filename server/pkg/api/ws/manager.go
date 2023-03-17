@@ -291,18 +291,6 @@ func (m *Manager) RemoveClient(c *Client) error {
 	return nil
 }
 
-func (m *Manager) DisconnectClient(cID string) error {
-	c, err := m.GetClient(cID)
-	if err != nil {
-		return err
-	}
-
-	return c.Conn.WriteMessage(
-		websocket.CloseMessage,
-		websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""),
-	)
-}
-
 func (m *Manager) AddRoom(ID, name string) *Room {
 	r := NewRoom(m, ID, name)
 	m.Rooms.Set(r.ID, r)
@@ -526,24 +514,6 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 		}
 		m.UserSvc.AddGameStats(u, time.Now().UnixMilli(), winnerID == p.ID)
 		m.UserSvc.UpdateUserStats(u, winnerID == p.ID, p.Score, time.Now().UnixMilli())
-		m.UserSvc.Repo.RemoveJoinedRoom(r.ID, u.ID)
-	}
-
-	leftRoomPacket, err := NewLeftRoomPacket(LeftRoomPayload{
-		RoomID: r.ID,
-	})
-	if err != nil {
-		return err
-	}
-	r.Broadcast(leftRoomPacket)
-
-	err = m.RemoveRoom(r.ID)
-	if err != nil {
-		return err
-	}
-	err = m.GameSvc.DeleteGame(g.ID)
-	if err != nil {
-		return err
 	}
 
 	return nil

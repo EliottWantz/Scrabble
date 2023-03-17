@@ -22,6 +22,7 @@ var (
 	ErrInvalidMove     = errors.New("invalid move")
 	ErrInvalidPosition = errors.New("invalid position")
 	ErrGameNotStarted  = errors.New("game not started")
+	ErrGameOver        = errors.New("game is over")
 
 	botNames = []string{"Bot1", "Bot2", "Bot3", "Bot4"}
 )
@@ -182,6 +183,9 @@ func (s *Service) ApplyPlayerMove(gID, pID string, req MoveInfo) (*Game, error) 
 	g, err := s.Repo.Find(gID)
 	if err != nil {
 		return nil, err
+	}
+	if g.ScrabbleGame.IsOver() {
+		return nil, ErrGameOver
 	}
 	player := g.ScrabbleGame.PlayerToMove()
 	if player.ID != pID {
