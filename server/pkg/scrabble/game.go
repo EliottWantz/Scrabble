@@ -98,6 +98,17 @@ func (g *Game) GetPlayer(pID string) (*Player, error) {
 	return nil, ErrPlayerNotFound
 }
 
+func (g *Game) NumberOfBots() int {
+	count := 0
+	for _, p := range g.Players {
+		if p.IsBot {
+			count++
+		}
+	}
+
+	return count
+}
+
 // PlayTile moves a tile from the player's rack to the board
 func (g *Game) PlayTile(t *Tile, pos Position, r *Rack) error {
 	err := r.Remove(t.Letter)

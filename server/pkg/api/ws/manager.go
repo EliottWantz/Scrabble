@@ -472,12 +472,18 @@ func (m *Manager) ReplacePlayerWithBot(gID, pID string) error {
 	if err != nil {
 		return err
 	}
+	if len(g.ScrabbleGame.Players) == g.ScrabbleGame.NumberOfBots() {
+		// Everyone left, delete the game, don't continue
+		return m.GameSvc.DeleteGame(gID)
+	}
+
 	gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
 		Game: makeGamePayload(g),
 	})
 	if err != nil {
-		slog.Error("failed to create game update packet:", err)
+		return err
 	}
+
 	r, err := m.GetRoom(gID)
 	if err != nil {
 		return err
