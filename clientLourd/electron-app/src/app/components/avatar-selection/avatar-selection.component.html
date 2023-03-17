@@ -1,0 +1,15 @@
+<div id="container">
+    <h1>Choisissez un avatar qui vous correspond</h1>
+    <p>Les photos rendent votre profil plus attrayant</p>
+    <button mat-flat-button color="primary" (click)="openDialog()"> Choisir un avatar</button>
+    <p>Ou</p>
+    <button mat-flat-button color="primary" (click)="fileInput.click()"> Choisir votre propre avatar</button>
+    <input hidden (change)="onFileSelected($event)" #fileInput type="file">
+    <span class="file-name">{{selectedFile?.name}}</span>
+    <p>Ou</p>
+    <button mat-flat-button color="primary"> Personnaliser votre avatar</button>
+
+    <button mat-flat-button color="primary" id="button-next"> Continuer vers le menu principal</button>
+</div>
+
+    
