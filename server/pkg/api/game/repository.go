@@ -4,8 +4,6 @@ import (
 	"errors"
 	"sync"
 
-	"scrabble/pkg/scrabble"
-
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -15,20 +13,17 @@ var (
 )
 
 type Repository struct {
-	coll *mongo.Collection
-
 	mu    sync.Mutex
-	games map[string]*scrabble.Game
+	games map[string]*Game
 }
 
 func NewRepository(db *mongo.Database) *Repository {
 	return &Repository{
-		coll:  db.Collection("games"),
-		games: make(map[string]*scrabble.Game),
+		games: make(map[string]*Game),
 	}
 }
 
-func (r *Repository) GetGame(ID string) (*scrabble.Game, error) {
+func (r *Repository) Find(ID string) (*Game, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -40,7 +35,19 @@ func (r *Repository) GetGame(ID string) (*scrabble.Game, error) {
 	return g, nil
 }
 
-func (r *Repository) Insert(g *scrabble.Game) error {
+func (r *Repository) FindAll() ([]*Game, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	games := make([]*Game, 0, len(r.games))
+	for _, g := range r.games {
+		games = append(games, g)
+	}
+
+	return games, nil
+}
+
+func (r *Repository) Insert(g *Game) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
