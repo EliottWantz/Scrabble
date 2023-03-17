@@ -12,6 +12,7 @@ import (
 	"scrabble/pkg/scrabble"
 
 	"github.com/google/uuid"
+	"golang.org/x/exp/slices"
 	"golang.org/x/exp/slog"
 )
 
@@ -106,6 +107,37 @@ func (s *Service) UnprotectGame(gID string) (*Game, error) {
 
 	g.IsProtected = false
 	g.HashedPassword = ""
+
+	return g, nil
+}
+
+func (s *Service) AddUser(gID, userID, password string) (*Game, error) {
+	g, err := s.Repo.Find(gID)
+	if err != nil {
+		return nil, err
+	}
+
+	if g.IsProtected && !auth.PasswordsMatch(g.HashedPassword, password) {
+		return nil, fmt.Errorf("password mismatch")
+	}
+
+	g.UserIDs = append(g.UserIDs, userID)
+
+	return g, nil
+}
+
+func (s *Service) RemoveUser(gID, userID string) (*Game, error) {
+	g, err := s.Repo.Find(gID)
+	if err != nil {
+		return nil, err
+	}
+
+	idx := slices.Index(g.UserIDs, userID)
+	if idx == -1 {
+		return nil, fmt.Errorf("user not found")
+	}
+
+	g.UserIDs = append(g.UserIDs[:idx], g.UserIDs[idx+1:]...)
 
 	return g, nil
 }

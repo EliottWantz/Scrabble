@@ -92,11 +92,11 @@ func (r *Room) AddClient(cID string) error {
 			r.logger.Error("find user that joined", err)
 		}
 
-		payload := UserJoinedPayload{
+		payload := UserJoinedRoomPayload{
 			RoomID: r.ID,
 			User:   u,
 		}
-		p, err := NewUserJoinedPacket(payload)
+		p, err := NewUserJoinedRoomPacket(payload)
 		if err != nil {
 			r.logger.Error("creating packet", err)
 			return nil
@@ -115,6 +115,26 @@ func (r *Room) RemoveClient(cID string) error {
 
 	r.Clients.Del(cID)
 	r.logger.Info("client removed from room", "client", c.ID)
+
+	{
+		userLeftRoomPacket, err := NewUserLeftRoomPacket(UserLeftRoomPayload{
+			RoomID: r.ID,
+			UserID: c.ID,
+		})
+		if err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, "failed to create packet: "+err.Error())
+		}
+		r.BroadcastSkipSelf(userLeftRoomPacket, c.ID)
+	}
+	{
+		leftRoomPacket, err := NewLeftRoomPacket(LeftRoomPayload{
+			RoomID: r.ID,
+		})
+		if err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, "failed to create packet: "+err.Error())
+		}
+		c.send(leftRoomPacket)
+	}
 
 	if r.Clients.Len() == 0 && r.ID != r.Manager.GlobalRoom.ID {
 		if err := r.Manager.RemoveRoom(r.ID); err != nil {

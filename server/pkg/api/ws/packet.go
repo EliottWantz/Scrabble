@@ -46,24 +46,23 @@ type ChatMessage struct {
 	Timestamp time.Time `json:"timestamp" bson:"timestamp"`
 }
 
-type JoinRoomPayload struct {
-	RoomID   string `json:"roomId"`
-	Password string `json:"password,omitempty"`
-}
-
-type JoinDMPayload struct {
-	Username   string `json:"username"`
-	ToID       string `json:"toId"`
-	ToUsername string `json:"toUsername"`
-}
-
-type JoinGameRoomPayload struct {
-	RoomID string `json:"roomId"`
-}
-
 type CreateRoomPayload struct {
 	RoomName string   `json:"roomName"`
 	UserIDs  []string `json:"userIds"`
+}
+
+type JoinRoomPayload struct {
+	RoomID string `json:"roomId"`
+}
+
+type LeaveRoomPayload struct {
+	RoomID string `json:"roomId"`
+}
+
+type CreateDMRoomPayload struct {
+	Username   string `json:"username"`
+	ToID       string `json:"toId"`
+	ToUsername string `json:"toUsername"`
 }
 
 type CreateGamePayload struct {
@@ -71,17 +70,22 @@ type CreateGamePayload struct {
 	UserIDs  []string `json:"userIds"`
 }
 
-type LeaveRoomPayload struct {
+type JoinGamePayload struct {
+	GameID   string `json:"gameId"`
+	Password string `json:"password,omitempty"`
+}
+
+type LeaveGamePayload struct {
+	GameID string `json:"gameId"`
+}
+
+type StartGamePayload struct {
 	RoomID string `json:"roomId"`
 }
 
 type PlayMovePayload struct {
 	GameID   string        `json:"gameId"`
 	MoveInfo game.MoveInfo `json:"moveInfo"`
-}
-
-type StartGamePayload struct {
-	RoomID string `json:"roomId"`
 }
 
 type IndicePayload struct {
@@ -108,13 +112,22 @@ func NewLeftRoomPacket(payload LeftRoomPayload) (*Packet, error) {
 	return NewPacket(ServerEventLeftRoom, payload)
 }
 
-type UserJoinedPayload struct {
+type UserJoinedRoomPayload struct {
 	RoomID string     `json:"roomId"`
 	User   *user.User `json:"user"`
 }
 
-func NewUserJoinedPacket(payload UserJoinedPayload) (*Packet, error) {
-	return NewPacket(ServerEventUserJoined, payload)
+func NewUserJoinedRoomPacket(payload UserJoinedRoomPayload) (*Packet, error) {
+	return NewPacket(ServerEventUserJoinedRoom, payload)
+}
+
+type UserLeftRoomPayload struct {
+	RoomID string `json:"roomId"`
+	UserID string `json:"userId"`
+}
+
+func NewUserLeftRoomPacket(payload UserLeftRoomPayload) (*Packet, error) {
+	return NewPacket(ServerEventUserLeftRoom, payload)
 }
 
 type ListUsersPayload struct {
@@ -147,6 +160,40 @@ type ListJoinableGamesPayload struct {
 
 func NewJoinableGamesPacket(payload ListJoinableGamesPayload) (*Packet, error) {
 	return NewPacket(ServerEventJoinableGames, payload)
+}
+
+type JoinedGamePayload struct {
+	Game *game.Game `json:"game"`
+}
+
+func NewJoinedGamePacket(payload JoinedGamePayload) (*Packet, error) {
+	return NewPacket(ServerEventJoinedGame, payload)
+}
+
+type UserJoinedGamePayload struct {
+	Game   *game.Game `json:"game"`
+	UserID string     `json:"userId"`
+}
+
+func NewUserJoinedGamePacket(payload UserJoinedGamePayload) (*Packet, error) {
+	return NewPacket(ServerEventUserJoinedGame, payload)
+}
+
+type LeftGamePayload struct {
+	GameID string `json:"gameId"`
+}
+
+func NewLeftGamePacket(payload LeftGamePayload) (*Packet, error) {
+	return NewPacket(ServerEventLeftGame, payload)
+}
+
+type UserLeftGamePayload struct {
+	GameID string `json:"gameId"`
+	UserID string `json:"userId"`
+}
+
+func NewUserLeftGamePacket(payload UserLeftGamePayload) (*Packet, error) {
+	return NewPacket(ServerEventUserLeftGame, payload)
 }
 
 type GamePayload struct {

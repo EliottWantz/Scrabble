@@ -182,7 +182,7 @@ func (m *Manager) GetClient(cID string) (*Client, error) {
 
 func (m *Manager) RemoveClient(c *Client) error {
 	c.Rooms.ForEach(func(rID string, r *Room) bool {
-		err := m.RemoveClientFromRoom(c, r)
+		err := r.RemoveClient(c.ID)
 		if err != nil {
 			m.logger.Error("remove client from room", err)
 		}
@@ -206,43 +206,6 @@ func (m *Manager) RemoveClient(c *Client) error {
 	if err != nil {
 		return fmt.Errorf("removeClient: %w", err)
 	}
-
-	return nil
-}
-
-func (m *Manager) RemoveClientFromRoom(c *Client, r *Room) error {
-	if err := r.RemoveClient(c.ID); err != nil {
-		return fiber.NewError(fiber.StatusInternalServerError, "failed to leave ws room: "+err.Error())
-	}
-
-	leftRoomPacket, err := NewLeftRoomPacket(LeftRoomPayload{
-		RoomID: r.ID,
-	})
-	if err != nil {
-		return fiber.NewError(fiber.StatusInternalServerError, "failed to create packet: "+err.Error())
-	}
-
-	// if c.ID == dbRoom.CreatorID && dbRoom.IsGameRoom {
-	// 	_, err := c.Manager.GameSvc.Repo.Find(dbRoom.ID)
-	// 	if err != nil {
-	// 		// Game has not started yet
-	// 		r.Broadcast(leftRoomPacket)
-	// 		if err := r.Manager.RemoveRoom(r.ID); err != nil {
-	// 			return err
-	// 		}
-	// 		if err := c.Manager.RoomSvc.Delete(r.ID); err != nil {
-	// 			return err
-	// 		}
-	// 	}
-	// }
-
-	r.Broadcast(leftRoomPacket)
-	// c.send(leftRoomPacket)
-
-	// Replace player with bot if game room
-	// if dbRoom.IsGameRoom {
-	// 	m.ReplacePlayerWithBot(c.ID, r, dbRoom)
-	// }
 
 	return nil
 }
@@ -435,8 +398,8 @@ func (m *Manager) MakeBotMoves(gID string) {
 	}
 }
 
-func (m *Manager) ReplacePlayerWithBot(pID string, r *Room, dbRoom *room.Room) error {
-	g, err := m.GameSvc.ReplacePlayerWithBot(dbRoom.ID, pID)
+func (m *Manager) ReplacePlayerWithBot(gID, pID string) error {
+	g, err := m.GameSvc.ReplacePlayerWithBot(gID, pID)
 	if err != nil {
 		return err
 	}
@@ -446,10 +409,14 @@ func (m *Manager) ReplacePlayerWithBot(pID string, r *Room, dbRoom *room.Room) e
 	if err != nil {
 		slog.Error("failed to create game update packet:", err)
 	}
+	r, err := m.GetRoom(gID)
+	if err != nil {
+		return err
+	}
 	r.Broadcast(gamePacket)
 
 	// Make bots move if applicable
-	go m.MakeBotMoves(dbRoom.ID)
+	go m.MakeBotMoves(gID)
 
 	return nil
 }
