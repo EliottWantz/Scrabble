@@ -240,6 +240,9 @@ func (m *Manager) RemoveClient(c *Client) error {
 			// Game has not started yet
 			if c.ID == g.CreatorID {
 				// Delete the game and remove all users
+				if err := c.Manager.GameSvc.Repo.Delete(g.ID); err != nil {
+					return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+				}
 				for _, uID := range g.UserIDs {
 					if err := r.RemoveClient(uID); err != nil {
 						slog.Error("remove user from game room", err)
@@ -258,9 +261,6 @@ func (m *Manager) RemoveClient(c *Client) error {
 						slog.Error("broadcast leave game packets", err)
 						continue
 					}
-				}
-				if err := c.Manager.GameSvc.Repo.Delete(g.ID); err != nil {
-					return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 				}
 				return nil
 			} else {
