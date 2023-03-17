@@ -84,7 +84,7 @@ type LeaveGamePayload struct {
 }
 
 type StartGamePayload struct {
-	RoomID string `json:"roomId"`
+	GameID string `json:"gameId"`
 }
 
 type PlayMovePayload struct {
@@ -212,8 +212,8 @@ func NewJoinedGamePacket(payload JoinedGamePayload) (*Packet, error) {
 }
 
 type UserJoinedGamePayload struct {
-	Game   *game.Game `json:"game"`
-	UserID string     `json:"userId"`
+	GameID string `json:"gameId"`
+	UserID string `json:"userId"`
 }
 
 func NewUserJoinedGamePacket(payload UserJoinedGamePayload) (*Packet, error) {

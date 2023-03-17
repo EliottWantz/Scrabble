@@ -8,7 +8,6 @@ import (
 
 	"scrabble/pkg/api/game"
 
-	"github.com/alphadose/haxmap"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
 	"github.com/google/uuid"
@@ -24,7 +23,6 @@ type Client struct {
 	ID        string
 	Manager   *Manager
 	Conn      *websocket.Conn
-	Rooms     *haxmap.Map[string, *Room]
 	logger    *slog.Logger
 	sendCh    chan *Packet
 	receiveCh chan *Packet
@@ -36,7 +34,6 @@ func NewClient(conn *websocket.Conn, cID string, m *Manager) *Client {
 		ID:        cID,
 		Manager:   m,
 		Conn:      conn,
-		Rooms:     haxmap.New[string, *Room](),
 		logger:    slog.With("client", cID),
 		sendCh:    make(chan *Packet, 10),
 		receiveCh: make(chan *Packet, 10),
@@ -347,6 +344,9 @@ func (c *Client) HandleCreateGameRequest(p *Packet) error {
 	if err := r.AddClient(c.ID); err != nil {
 		return err
 	}
+	if err := c.Manager.UserSvc.Repo.SetJoinedGame(g.ID, c.ID); err != nil {
+		return err
+	}
 
 	return r.BroadcastJoinGamePackets(c, g)
 }
@@ -369,6 +369,9 @@ func (c *Client) HandleJoinGameRequest(p *Packet) error {
 	if err := r.AddClient(c.ID); err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
+	if err := c.Manager.UserSvc.Repo.SetJoinedGame(g.ID, c.ID); err != nil {
+		return err
+	}
 
 	return r.BroadcastJoinGamePackets(c, g)
 }
@@ -379,48 +382,65 @@ func (c *Client) HandleLeaveGameRoomRequest(p *Packet) error {
 		return err
 	}
 
-	g, err := c.Manager.GameSvc.Repo.Find(payload.GameID)
-	if err != nil {
-		return fiber.NewError(fiber.StatusNotFound, err.Error())
-	}
-
 	r, err := c.Manager.GetRoom(payload.GameID)
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
+	g, err := c.Manager.GameSvc.Repo.Find(payload.GameID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusNotFound, err.Error())
+	}
+	if g.ScrabbleGame == nil {
+		// Game has not started yet
+		if c.ID == g.CreatorID {
+			// Delete the game and remove all users
+			for _, uID := range g.UserIDs {
+				if err := r.RemoveClient(uID); err != nil {
+					slog.Error("remove user from game room", err)
+					continue
+				}
+				if err := c.Manager.UserSvc.Repo.UnSetJoinedGame(uID); err != nil {
+					slog.Error("remove user from game room", err)
+					continue
+				}
+				client, err := c.Manager.GetClient(uID)
+				if err != nil {
+					slog.Error("remove user from game room", err)
+					continue
+				}
+				if err := r.BroadcastLeaveGamePackets(client, g.ID); err != nil {
+					slog.Error("broadcast leave game packets", err)
+					continue
+				}
+			}
+			if err := c.Manager.GameSvc.Repo.Delete(g.ID); err != nil {
+				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+			}
+			return nil
+		} else {
+			// Remove the user from the game
+			if _, err := c.Manager.GameSvc.RemoveUser(payload.GameID, c.ID); err != nil {
+				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+			}
+			if err := c.Manager.UserSvc.Repo.UnSetJoinedGame(c.ID); err != nil {
+				return err
+			}
+		}
+	} else {
+		// Game has started, replace player with a bot
+		if err := c.Manager.ReplacePlayerWithBot(g.ID, c.ID); err != nil {
+			slog.Error("replace player with bot", err)
+		}
+		if err := c.Manager.UserSvc.Repo.UnSetJoinedGame(c.ID); err != nil {
+			return err
+		}
+	}
+
 	if err = r.RemoveClient(c.ID); err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
 
-	if c.ID == g.CreatorID && g.ScrabbleGame == nil {
-		if err := c.Manager.GameSvc.Repo.Delete(g.ID); err != nil {
-			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
-		}
-		for _, uID := range g.UserIDs {
-			if err := c.Manager.RoomSvc.Repo.RemoveUser(g.ID, uID); err != nil {
-				slog.Error("remove user from game room", err)
-				continue
-			}
-			if err := r.RemoveClient(uID); err != nil {
-				slog.Error("remove user from game room", err)
-				continue
-			}
-			if err := r.BroadcastLeaveGamePackets(c, g); err != nil {
-				slog.Error("broadcast leave game packets", err)
-				continue
-			}
-		}
-	} else {
-		if err := c.Manager.ReplacePlayerWithBot(g.ID, c.ID); err != nil {
-			slog.Error("replace player with bot", err)
-		}
-	}
-
-	if err := r.BroadcastLeaveGamePackets(c, g); err != nil {
-		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
-	}
-
-	return nil
+	return r.BroadcastLeaveGamePackets(c, g.ID)
 }
 
 func (c *Client) HandleStartGameRequest(p *Packet) error {
@@ -428,7 +448,7 @@ func (c *Client) HandleStartGameRequest(p *Packet) error {
 	if err := json.Unmarshal(p.Payload, &payload); err != nil {
 		return fiber.NewError(fiber.StatusUnprocessableEntity, "parse request: "+err.Error())
 	}
-	g, err := c.Manager.GameSvc.Repo.Find(payload.RoomID)
+	g, err := c.Manager.GameSvc.Repo.Find(payload.GameID)
 	if err != nil {
 		return fiber.NewError(fiber.StatusNotFound, "Room not found")
 	}
@@ -439,8 +459,7 @@ func (c *Client) HandleStartGameRequest(p *Packet) error {
 		return fiber.NewError(fiber.StatusBadRequest, "Game already started")
 	}
 
-	err = c.Manager.GameSvc.StartGame(g)
-	if err != nil {
+	if err := c.Manager.GameSvc.StartGame(g); err != nil {
 		return err
 	}
 

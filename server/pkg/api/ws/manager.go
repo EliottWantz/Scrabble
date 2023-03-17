@@ -181,32 +181,113 @@ func (m *Manager) GetClient(cID string) (*Client, error) {
 }
 
 func (m *Manager) RemoveClient(c *Client) error {
-	c.Rooms.ForEach(func(rID string, r *Room) bool {
-		err := r.RemoveClient(c.ID)
-		if err != nil {
-			m.logger.Error("remove client from room", err)
-		}
-
-		return true
-	})
-
-	m.Clients.Del(c.ID)
 	user, err := m.UserSvc.GetUser(c.ID)
 	if err != nil {
 		return fmt.Errorf("removeClient: %w", err)
 	}
+
 	m.UserSvc.AddNetworkingLog(user, "Logout", time.Now().UnixMilli())
 	m.logger.Info(
 		"client disconnected",
 		"client_id", c.ID,
 		"total_rooms", m.Rooms.Len(),
 	)
-
-	err = c.Conn.Close()
-	if err != nil {
-		return fmt.Errorf("removeClient: %w", err)
+	m.Clients.Del(c.ID)
+	if err := c.Conn.Close(); err != nil {
+		slog.Error("close connection", err)
 	}
 
+	for _, chatRoomID := range user.JoinedChatRooms {
+		r, err := m.GetRoom(chatRoomID)
+		if err != nil {
+			slog.Error("removeClient get room", err)
+			continue
+		}
+		if err := r.RemoveClient(c.ID); err != nil {
+			slog.Error("removeClient from room", err)
+			continue
+		}
+		if err := r.BroadcastLeaveRoomPackets(c); err != nil {
+			slog.Error("removeClient broadcast packets", err)
+			continue
+		}
+	}
+	for _, DMRoomID := range user.JoinedDMRooms {
+		r, err := m.GetRoom(DMRoomID)
+		if err != nil {
+			slog.Error("removeClient get room", err)
+			continue
+		}
+		if err := r.RemoveClient(c.ID); err != nil {
+			slog.Error("removeClient from room", err)
+			continue
+		}
+		if err := r.BroadcastLeaveDMRoomPackets(c); err != nil {
+			slog.Error("removeClient broadcast packets", err)
+			continue
+		}
+	}
+	if user.JoinedGame != "" {
+		r, err := c.Manager.GetRoom(user.JoinedGame)
+		if err != nil {
+			return fiber.NewError(fiber.StatusBadRequest, err.Error())
+		}
+		g, err := c.Manager.GameSvc.Repo.Find(user.JoinedGame)
+		if err != nil {
+			return fiber.NewError(fiber.StatusNotFound, err.Error())
+		}
+		if g.ScrabbleGame == nil {
+			// Game has not started yet
+			if c.ID == g.CreatorID {
+				// Delete the game and remove all users
+				for _, uID := range g.UserIDs {
+					if err := r.RemoveClient(uID); err != nil {
+						slog.Error("remove user from game room", err)
+						continue
+					}
+					if err := c.Manager.UserSvc.Repo.UnSetJoinedGame(uID); err != nil {
+						slog.Error("remove user from game room", err)
+						continue
+					}
+					client, err := c.Manager.GetClient(uID)
+					if err != nil {
+						slog.Error("remove user from game room", err)
+						continue
+					}
+					if err := r.BroadcastLeaveGamePackets(client, g.ID); err != nil {
+						slog.Error("broadcast leave game packets", err)
+						continue
+					}
+				}
+				if err := c.Manager.GameSvc.Repo.Delete(g.ID); err != nil {
+					return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+				}
+				return nil
+			} else {
+				// Remove the user from the game
+				if _, err := c.Manager.GameSvc.RemoveUser(user.JoinedGame, c.ID); err != nil {
+					slog.Error("remove user from game room", err)
+				}
+				if err := c.Manager.UserSvc.Repo.UnSetJoinedGame(c.ID); err != nil {
+					slog.Error("remove user from game room", err)
+				}
+			}
+		} else {
+			// Game has started, replace player with a bot
+			if err := c.Manager.ReplacePlayerWithBot(g.ID, c.ID); err != nil {
+				slog.Error("replace player with bot", err)
+			}
+			if err := c.Manager.UserSvc.Repo.UnSetJoinedGame(c.ID); err != nil {
+				slog.Error("remove user from game room", err)
+			}
+		}
+		if err := r.RemoveClient(c.ID); err != nil {
+			slog.Error("remove client from ws room", err)
+		}
+		if err := r.BroadcastLeaveGamePackets(c, g.ID); err != nil {
+			slog.Error("broadcast leave game packets", err)
+		}
+	}
 	return nil
 }
 

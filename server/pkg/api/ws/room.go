@@ -62,7 +62,6 @@ func (r *Room) AddClient(cID string) error {
 	}
 
 	r.Clients.Set(cID, c)
-	c.Rooms.Set(r.ID, r)
 	r.logger.Info("client added in room", "client", c.ID)
 
 	return nil
@@ -224,10 +223,6 @@ func (r *Room) BroadcastLeaveDMRoomPackets(c *Client) error {
 }
 
 func (r *Room) BroadcastJoinGamePackets(c *Client, g *game.Game) error {
-	if err := c.Manager.UpdateJoinableGames(); err != nil {
-		slog.Error("send joinable games update:", err)
-	}
-
 	{
 		p, err := NewJoinedGamePacket(JoinedGamePayload{
 			Game: g,
@@ -239,7 +234,7 @@ func (r *Room) BroadcastJoinGamePackets(c *Client, g *game.Game) error {
 	}
 	{
 		p, err := NewUserJoinedGamePacket(UserJoinedGamePayload{
-			Game:   g,
+			GameID: g.ID,
 			UserID: c.ID,
 		})
 		if err != nil {
@@ -248,17 +243,13 @@ func (r *Room) BroadcastJoinGamePackets(c *Client, g *game.Game) error {
 		r.BroadcastSkipSelf(p, c.ID)
 	}
 
-	return r.BroadcastJoinRoomPackets(c)
+	return c.Manager.UpdateJoinableGames()
 }
 
-func (r *Room) BroadcastLeaveGamePackets(c *Client, g *game.Game) error {
-	if err := c.Manager.UpdateJoinableGames(); err != nil {
-		slog.Error("send joinable games update:", err)
-	}
-
+func (r *Room) BroadcastLeaveGamePackets(c *Client, gID string) error {
 	{
 		p, err := NewUserLeftGamePacket(UserLeftGamePayload{
-			GameID: g.ID,
+			GameID: gID,
 			UserID: c.ID,
 		})
 		if err != nil {
@@ -268,7 +259,7 @@ func (r *Room) BroadcastLeaveGamePackets(c *Client, g *game.Game) error {
 	}
 	{
 		p, err := NewLeftGamePacket(LeftGamePayload{
-			GameID: g.ID,
+			GameID: gID,
 		})
 		if err != nil {
 			return err
@@ -276,7 +267,7 @@ func (r *Room) BroadcastLeaveGamePackets(c *Client, g *game.Game) error {
 		c.send(p)
 	}
 
-	return r.BroadcastLeaveRoomPackets(c)
+	return c.Manager.UpdateJoinableGames()
 }
 
 func (r *Room) ListUsers() []string {

@@ -9,6 +9,7 @@ type User struct {
 	Preferences     Preferences `bson:"preferences" json:"preferences"`
 	JoinedChatRooms []string    `bson:"joinedChatRooms" json:"joinedChatRooms"`
 	JoinedDMRooms   []string    `bson:"joinedDMRooms" json:"joinedDMRooms"`
+	JoinedGame      string      `bson:"joinedGame" json:"joinedGame"`
 	Friends         []string    `bson:"friends" json:"friends"`
 	PendingRequests []string    `bson:"pendingRequests" json:"pendingRequests"`
 	Summary         Summary     `bson:"summary" json:"summary,omitempty"`
