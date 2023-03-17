@@ -65,6 +65,10 @@ type CreateDMRoomPayload struct {
 	ToUsername string `json:"toUsername"`
 }
 
+type LeaveDMRoomPayload struct {
+	RoomID string `json:"roomId"`
+}
+
 type CreateGamePayload struct {
 	Password string   `json:"password,omitempty"`
 	UserIDs  []string `json:"userIds"`
@@ -96,7 +100,7 @@ type IndicePayload struct {
 type JoinedRoomPayload struct {
 	RoomID   string        `json:"roomId"`
 	RoomName string        `json:"roomName"`
-	Users    []*user.User  `json:"users"`
+	UserIDs  []string      `json:"userIds"`
 	Messages []ChatMessage `json:"messages"`
 }
 
@@ -113,8 +117,8 @@ func NewLeftRoomPacket(payload LeftRoomPayload) (*Packet, error) {
 }
 
 type UserJoinedRoomPayload struct {
-	RoomID string     `json:"roomId"`
-	User   *user.User `json:"user"`
+	RoomID string `json:"roomId"`
+	UserID string `json:"userId"`
 }
 
 func NewUserJoinedRoomPacket(payload UserJoinedRoomPayload) (*Packet, error) {
@@ -128,6 +132,43 @@ type UserLeftRoomPayload struct {
 
 func NewUserLeftRoomPacket(payload UserLeftRoomPayload) (*Packet, error) {
 	return NewPacket(ServerEventUserLeftRoom, payload)
+}
+
+type JoinedDMRoomPayload struct {
+	RoomID   string        `json:"roomId"`
+	RoomName string        `json:"roomName"`
+	UserIDs  []string      `json:"userIds"`
+	Messages []ChatMessage `json:"messages"`
+}
+
+func NewJoinedDMRoomPacket(payload JoinedDMRoomPayload) (*Packet, error) {
+	return NewPacket(ServerEventJoinedDMRoom, payload)
+}
+
+type LeftDMRoomPayload struct {
+	RoomID string `json:"roomId"`
+}
+
+func NewLeftDMRoomPacket(payload LeftDMRoomPayload) (*Packet, error) {
+	return NewPacket(ServerEventLeftDMRoom, payload)
+}
+
+type UserJoinedDMRoomPayload struct {
+	RoomID string `json:"roomId"`
+	UserID string `json:"userId"`
+}
+
+func NewUserJoinedDMRoomPacket(payload UserJoinedDMRoomPayload) (*Packet, error) {
+	return NewPacket(ServerEventUserJoinedDMRoom, payload)
+}
+
+type UserLeftDMRoomPayload struct {
+	RoomID string `json:"roomId"`
+	UserID string `json:"userId"`
+}
+
+func NewUserLeftDMRoomPacket(payload UserLeftDMRoomPayload) (*Packet, error) {
+	return NewPacket(ServerEventUserLeftDMRoom, payload)
 }
 
 type ListUsersPayload struct {

@@ -445,7 +445,7 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 		}
 		m.UserSvc.AddGameStats(u, time.Now().UnixMilli(), winnerID == p.ID)
 		m.UserSvc.UpdateUserStats(u, winnerID == p.ID, p.Score, time.Now().UnixMilli())
-		m.UserSvc.LeaveRoom(r.ID, u.ID)
+		m.UserSvc.Repo.RemoveJoinedRoom(r.ID, u.ID)
 	}
 
 	leftRoomPacket, err := NewLeftRoomPacket(LeftRoomPayload{

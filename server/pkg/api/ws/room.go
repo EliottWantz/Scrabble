@@ -3,11 +3,10 @@ package ws
 import (
 	"errors"
 
-	"scrabble/pkg/api/user"
+	"scrabble/pkg/api/game"
 
 	"github.com/alphadose/haxmap"
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 	"golang.org/x/exp/slog"
 )
 
@@ -66,44 +65,6 @@ func (r *Room) AddClient(cID string) error {
 	c.Rooms.Set(r.ID, r)
 	r.logger.Info("client added in room", "client", c.ID)
 
-	{
-		payload := JoinedRoomPayload{
-			RoomID:   r.ID,
-			RoomName: r.Name,
-			Users:    r.ListUsers(),
-		}
-		msgs, err := r.Manager.MessageRepo.LatestMessage(r.ID, 0)
-		if err != nil || len(msgs) == 0 {
-			msgs = make([]ChatMessage, 0)
-		}
-		payload.Messages = msgs
-
-		p, err := NewJoinedRoomPacket(payload)
-		if err != nil {
-			r.logger.Error("creating packet", err)
-			return nil
-		}
-		c.send(p)
-	}
-
-	{
-		u, err := r.Manager.UserSvc.Repo.Find(cID)
-		if err != nil {
-			r.logger.Error("find user that joined", err)
-		}
-
-		payload := UserJoinedRoomPayload{
-			RoomID: r.ID,
-			User:   u,
-		}
-		p, err := NewUserJoinedRoomPacket(payload)
-		if err != nil {
-			r.logger.Error("creating packet", err)
-			return nil
-		}
-		r.BroadcastSkipSelf(p, c.ID)
-	}
-
 	return nil
 }
 
@@ -115,26 +76,6 @@ func (r *Room) RemoveClient(cID string) error {
 
 	r.Clients.Del(cID)
 	r.logger.Info("client removed from room", "client", c.ID)
-
-	{
-		userLeftRoomPacket, err := NewUserLeftRoomPacket(UserLeftRoomPayload{
-			RoomID: r.ID,
-			UserID: c.ID,
-		})
-		if err != nil {
-			return fiber.NewError(fiber.StatusInternalServerError, "failed to create packet: "+err.Error())
-		}
-		r.BroadcastSkipSelf(userLeftRoomPacket, c.ID)
-	}
-	{
-		leftRoomPacket, err := NewLeftRoomPacket(LeftRoomPayload{
-			RoomID: r.ID,
-		})
-		if err != nil {
-			return fiber.NewError(fiber.StatusInternalServerError, "failed to create packet: "+err.Error())
-		}
-		c.send(leftRoomPacket)
-	}
 
 	if r.Clients.Len() == 0 && r.ID != r.Manager.GlobalRoom.ID {
 		if err := r.Manager.RemoveRoom(r.ID); err != nil {
@@ -162,23 +103,188 @@ func (r *Room) has(cID string) bool {
 	return err == nil
 }
 
-func (r *Room) ListUsers() []*user.User {
-	users := make([]*user.User, 0, r.Clients.Len())
+func (r *Room) BroadcastJoinRoomPackets(c *Client) error {
+	{
+		payload := JoinedRoomPayload{
+			RoomID:   r.ID,
+			RoomName: r.Name,
+			UserIDs:  r.ListUsers(),
+		}
+		msgs, err := r.Manager.MessageRepo.LatestMessage(r.ID, 0)
+		if err != nil || len(msgs) == 0 {
+			msgs = make([]ChatMessage, 0)
+		}
+		payload.Messages = msgs
+
+		p, err := NewJoinedRoomPacket(payload)
+		if err != nil {
+			r.logger.Error("creating packet", err)
+			return nil
+		}
+		c.send(p)
+	}
+
+	{
+		p, err := NewUserJoinedRoomPacket(UserJoinedRoomPayload{
+			RoomID: r.ID,
+			UserID: c.ID,
+		})
+		if err != nil {
+			r.logger.Error("creating packet", err)
+			return nil
+		}
+		r.BroadcastSkipSelf(p, c.ID)
+	}
+
+	return nil
+}
+
+func (r *Room) BroadcastLeaveRoomPackets(c *Client) error {
+	{
+		userLeftRoomPacket, err := NewUserLeftRoomPacket(UserLeftRoomPayload{
+			RoomID: r.ID,
+			UserID: c.ID,
+		})
+		if err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, "failed to create packet: "+err.Error())
+		}
+		r.BroadcastSkipSelf(userLeftRoomPacket, c.ID)
+	}
+	{
+		leftRoomPacket, err := NewLeftRoomPacket(LeftRoomPayload{
+			RoomID: r.ID,
+		})
+		if err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, "failed to create packet: "+err.Error())
+		}
+		c.send(leftRoomPacket)
+	}
+
+	return nil
+}
+
+func (r *Room) BroadcastJoinDMRoomPackets(c *Client) error {
+	{
+		payload := JoinedDMRoomPayload{
+			RoomID:   r.ID,
+			RoomName: r.Name,
+			UserIDs:  r.ListUsers(),
+		}
+		msgs, err := r.Manager.MessageRepo.LatestMessage(r.ID, 0)
+		if err != nil || len(msgs) == 0 {
+			msgs = make([]ChatMessage, 0)
+		}
+		payload.Messages = msgs
+
+		p, err := NewJoinedDMRoomPacket(payload)
+		if err != nil {
+			r.logger.Error("creating packet", err)
+			return nil
+		}
+		c.send(p)
+	}
+
+	{
+		p, err := NewUserJoinedDMRoomPacket(UserJoinedDMRoomPayload{
+			RoomID: r.ID,
+			UserID: c.ID,
+		})
+		if err != nil {
+			r.logger.Error("creating packet", err)
+			return nil
+		}
+		r.BroadcastSkipSelf(p, c.ID)
+	}
+
+	return nil
+}
+
+func (r *Room) BroadcastLeaveDMRoomPackets(c *Client) error {
+	{
+		userLeftRoomPacket, err := NewUserLeftDMRoomPacket(UserLeftDMRoomPayload{
+			RoomID: r.ID,
+			UserID: c.ID,
+		})
+		if err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, "failed to create packet: "+err.Error())
+		}
+		r.BroadcastSkipSelf(userLeftRoomPacket, c.ID)
+	}
+	{
+		leftRoomPacket, err := NewLeftDMRoomPacket(LeftDMRoomPayload{
+			RoomID: r.ID,
+		})
+		if err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, "failed to create packet: "+err.Error())
+		}
+		c.send(leftRoomPacket)
+	}
+
+	return nil
+}
+
+func (r *Room) BroadcastJoinGamePackets(c *Client, g *game.Game) error {
+	if err := c.Manager.UpdateJoinableGames(); err != nil {
+		slog.Error("send joinable games update:", err)
+	}
+
+	{
+		p, err := NewJoinedGamePacket(JoinedGamePayload{
+			Game: g,
+		})
+		if err != nil {
+			return err
+		}
+		c.send(p)
+	}
+	{
+		p, err := NewUserJoinedGamePacket(UserJoinedGamePayload{
+			Game:   g,
+			UserID: c.ID,
+		})
+		if err != nil {
+			return err
+		}
+		r.BroadcastSkipSelf(p, c.ID)
+	}
+
+	return r.BroadcastJoinRoomPackets(c)
+}
+
+func (r *Room) BroadcastLeaveGamePackets(c *Client, g *game.Game) error {
+	if err := c.Manager.UpdateJoinableGames(); err != nil {
+		slog.Error("send joinable games update:", err)
+	}
+
+	{
+		p, err := NewUserLeftGamePacket(UserLeftGamePayload{
+			GameID: g.ID,
+			UserID: c.ID,
+		})
+		if err != nil {
+			return err
+		}
+		r.BroadcastSkipSelf(p, c.ID)
+	}
+	{
+		p, err := NewLeftGamePacket(LeftGamePayload{
+			GameID: g.ID,
+		})
+		if err != nil {
+			return err
+		}
+		c.send(p)
+	}
+
+	return r.BroadcastLeaveRoomPackets(c)
+}
+
+func (r *Room) ListUsers() []string {
 	dbRoom, err := r.Manager.RoomSvc.Repo.Find(r.ID)
 	if err != nil {
-		return users
+		return []string{}
 	}
-
-	for _, uID := range dbRoom.UserIDs {
-		u, err := r.Manager.UserSvc.Repo.Find(uID)
-		if err != nil {
-			r.logger.Error("list users", err)
-			continue
-		}
-		users = append(users, u)
-	}
-
-	return users
+	return dbRoom.UserIDs
 }
 
 func (r *Room) ListClientIDs() []string {
@@ -189,27 +295,4 @@ func (r *Room) ListClientIDs() []string {
 	})
 
 	return clientIDs
-}
-
-func createRoomWithUsers(c *Client, roomName string, userIDs ...string) error {
-	dbRoom, err := c.Manager.RoomSvc.CreateRoom(
-		uuid.NewString(),
-		roomName,
-		userIDs...,
-	)
-	if err != nil {
-		return fiber.NewError(fiber.StatusInternalServerError, "failed to create new room: "+err.Error())
-	}
-
-	r := c.Manager.AddRoom(dbRoom.ID, dbRoom.Name)
-	for _, uID := range dbRoom.UserIDs {
-		if err := c.Manager.UserSvc.Repo.AddJoinedRoom(dbRoom.ID, uID); err != nil {
-			slog.Error("add user to room", err)
-		}
-		if err := r.AddClient(uID); err != nil {
-			slog.Error("add client to ws room", err)
-		}
-	}
-
-	return nil
 }

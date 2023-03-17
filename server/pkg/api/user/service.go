@@ -106,6 +106,9 @@ func (s *Service) SignUp(username, password, email string, uploadAvatar UploadAv
 		Email:           email,
 		Preferences:     Preferences,
 		JoinedChatRooms: make([]string, 0),
+		JoinedDMRooms:   make([]string, 0),
+		Friends:         make([]string, 0),
+		PendingRequests: make([]string, 0),
 	}
 
 	// Add avatar strategy
@@ -161,16 +164,4 @@ func (s *Service) GetUser(ID string) (*User, error) {
 	}
 
 	return u, nil
-}
-
-func (s *Service) JoinRoom(roomID, userID string) error {
-	return s.Repo.AddJoinedRoom(roomID, userID)
-}
-
-func (s *Service) LeaveRoom(roomID, userID string) error {
-	err := s.Repo.RemoveJoinedRoom(roomID, userID)
-	if err != nil {
-		return fiber.NewError(fiber.StatusInternalServerError, "failed to remove joined room: "+err.Error())
-	}
-	return nil
 }

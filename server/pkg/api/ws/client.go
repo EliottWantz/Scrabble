@@ -11,6 +11,7 @@ import (
 	"github.com/alphadose/haxmap"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
+	"github.com/google/uuid"
 	"golang.org/x/exp/slog"
 )
 
@@ -109,6 +110,8 @@ func (c *Client) handlePacket(p *Packet) error {
 		return c.HandleLeaveRoomRequest(p)
 	case ClientEventCreateDMRoom:
 		return c.HandleCreateDMRoomRequest(p)
+	case ClientEventLeaveDMRoom:
+		return c.HandleLeaveDMRoomRequest(p)
 	case ClientEventCreateGame:
 		return c.HandleCreateGameRequest(p)
 	case ClientEventJoinGame:
@@ -170,9 +173,33 @@ func (c *Client) HandleCreateRoomRequest(p *Packet) error {
 		return err
 	}
 
-	err := createRoomWithUsers(c, payload.RoomName, append(payload.UserIDs, c.ID)...)
+	dbRoom, err := c.Manager.RoomSvc.CreateRoom(
+		uuid.NewString(),
+		payload.RoomName,
+		c.ID,
+	)
 	if err != nil {
-		return err
+		return fiber.NewError(fiber.StatusInternalServerError, "failed to create new room: "+err.Error())
+	}
+
+	r := c.Manager.AddRoom(dbRoom.ID, dbRoom.Name)
+	userIds := append([]string{c.ID}, payload.UserIDs...)
+	for _, uID := range userIds {
+		if err := c.Manager.RoomSvc.Repo.AddUser(r.ID, uID); err != nil {
+			slog.Error("add user to room", err)
+		}
+		if err := c.Manager.UserSvc.Repo.AddJoinedRoom(r.ID, uID); err != nil {
+			slog.Error("add user to room", err)
+		}
+		if err := r.AddClient(uID); err != nil {
+			slog.Error("add client to ws room", err)
+		}
+		client, err := c.Manager.GetClient(uID)
+		if err == nil {
+			if err := r.BroadcastJoinRoomPackets(client); err != nil {
+				slog.Error("broadcast join room packets", err)
+			}
+		}
 	}
 
 	if err := c.Manager.UpdateChatRooms(); err != nil {
@@ -198,8 +225,10 @@ func (c *Client) HandleJoinRoomRequest(p *Packet) error {
 	if err := c.Manager.UserSvc.Repo.AddJoinedRoom(payload.RoomID, c.ID); err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, "failed to add user to room"+err.Error())
 	}
-
 	if err := r.AddClient(c.ID); err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+	if err := r.BroadcastJoinRoomPackets(c); err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
 
@@ -216,7 +245,7 @@ func (c *Client) HandleLeaveRoomRequest(p *Packet) error {
 		return fiber.NewError(fiber.StatusBadRequest, "You cannot leave the global room")
 	}
 
-	if err := c.Manager.UserSvc.LeaveRoom(payload.RoomID, c.ID); err != nil {
+	if err := c.Manager.UserSvc.Repo.RemoveJoinedRoom(payload.RoomID, c.ID); err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
 	if err := c.Manager.RoomSvc.Repo.RemoveUser(payload.RoomID, c.ID); err != nil {
@@ -227,7 +256,11 @@ func (c *Client) HandleLeaveRoomRequest(p *Packet) error {
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
-	return r.RemoveClient(c.ID)
+	if err := r.RemoveClient(c.ID); err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+
+	return r.BroadcastLeaveRoomPackets(c)
 }
 
 func (c *Client) HandleCreateDMRoomRequest(p *Packet) error {
@@ -236,9 +269,61 @@ func (c *Client) HandleCreateDMRoomRequest(p *Packet) error {
 		return err
 	}
 
-	// Create room with both users in it
 	roomName := fmt.Sprintf("%s/%s", payload.Username, payload.ToUsername)
-	return createRoomWithUsers(c, roomName, c.ID, payload.ToID)
+	dbRoom, err := c.Manager.RoomSvc.CreateRoom(
+		uuid.NewString(),
+		roomName,
+		c.ID,
+	)
+	if err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, "failed to create new room: "+err.Error())
+	}
+
+	r := c.Manager.AddRoom(dbRoom.ID, roomName)
+	userIds := []string{c.ID, payload.ToID}
+	for _, uID := range userIds {
+		if err := c.Manager.RoomSvc.Repo.AddUser(r.ID, uID); err != nil {
+			slog.Error("add user to room", err)
+		}
+		if err := c.Manager.UserSvc.Repo.AddJoinedDMRoom(r.ID, uID); err != nil {
+			slog.Error("add user to room", err)
+		}
+		if err := r.AddClient(uID); err != nil {
+			slog.Error("add client to ws room", err)
+		}
+		client, err := c.Manager.GetClient(uID)
+		if err == nil {
+			if err := r.BroadcastJoinDMRoomPackets(client); err != nil {
+				slog.Error("broadcast join room packets", err)
+			}
+		}
+	}
+
+	return nil
+}
+
+func (c *Client) HandleLeaveDMRoomRequest(p *Packet) error {
+	payload := LeaveDMRoomPayload{}
+	if err := json.Unmarshal(p.Payload, &payload); err != nil {
+		return err
+	}
+
+	if err := c.Manager.UserSvc.Repo.RemoveJoinedDMRoom(payload.RoomID, c.ID); err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+	if err := c.Manager.RoomSvc.Repo.RemoveUser(payload.RoomID, c.ID); err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+
+	r, err := c.Manager.GetRoom(payload.RoomID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	if err := r.RemoveClient(c.ID); err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+
+	return r.BroadcastLeaveDMRoomPackets(c)
 }
 
 func (c *Client) HandleCreateGameRequest(p *Packet) error {
@@ -257,21 +342,13 @@ func (c *Client) HandleCreateGameRequest(p *Packet) error {
 	if err != nil {
 		return err
 	}
-	c.Manager.AddRoom(g.ID, "")
 
-	if err := c.Manager.UpdateJoinableGames(); err != nil {
-		slog.Error("send joinable games update:", err)
-	}
-
-	gamePacket, err := NewJoinedGamePacket(JoinedGamePayload{
-		Game: g,
-	})
-	if err != nil {
+	r := c.Manager.AddRoom(g.ID, "")
+	if err := r.AddClient(c.ID); err != nil {
 		return err
 	}
-	c.send(gamePacket)
 
-	return nil
+	return r.BroadcastJoinGamePackets(c, g)
 }
 
 func (c *Client) HandleJoinGameRequest(p *Packet) error {
@@ -280,50 +357,31 @@ func (c *Client) HandleJoinGameRequest(p *Packet) error {
 		return err
 	}
 
-	r, err := c.Manager.GetRoom(payload.GameID)
-	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, err.Error())
-	}
-
 	g, err := c.Manager.GameSvc.AddUser(payload.GameID, c.ID, payload.Password)
 	if err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+
+	r, err := c.Manager.GetRoom(payload.GameID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
 	if err := r.AddClient(c.ID); err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
 
-	{
-		p, err := NewJoinedGamePacket(JoinedGamePayload{
-			Game: g,
-		})
-		if err != nil {
-			r.logger.Error("creating packet", err)
-			return nil
-		}
-		c.send(p)
-	}
-
-	{
-		payload := UserJoinedGamePayload{
-			Game:   g,
-			UserID: c.ID,
-		}
-		p, err := NewUserJoinedGamePacket(payload)
-		if err != nil {
-			r.logger.Error("creating packet", err)
-			return nil
-		}
-		r.BroadcastSkipSelf(p, c.ID)
-	}
-
-	return nil
+	return r.BroadcastJoinGamePackets(c, g)
 }
 
 func (c *Client) HandleLeaveGameRoomRequest(p *Packet) error {
 	payload := LeaveGamePayload{}
 	if err := json.Unmarshal(p.Payload, &payload); err != nil {
 		return err
+	}
+
+	g, err := c.Manager.GameSvc.Repo.Find(payload.GameID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusNotFound, err.Error())
 	}
 
 	r, err := c.Manager.GetRoom(payload.GameID)
@@ -333,39 +391,33 @@ func (c *Client) HandleLeaveGameRoomRequest(p *Packet) error {
 	if err = r.RemoveClient(c.ID); err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
-	g, err := c.Manager.GameSvc.Repo.Find(payload.GameID)
-	if err != nil {
-		return fiber.NewError(fiber.StatusNotFound, err.Error())
-	}
-
-	leftGamePacket, err := NewLeftGamePacket(LeftGamePayload{
-		GameID: g.ID,
-	})
-	if err != nil {
-		r.logger.Error("creating packet", err)
-		return nil
-	}
 
 	if c.ID == g.CreatorID && g.ScrabbleGame == nil {
-		err := c.Manager.GameSvc.Repo.Delete(g.ID)
-		if err != nil {
+		if err := c.Manager.GameSvc.Repo.Delete(g.ID); err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
-		r.Broadcast(leftGamePacket)
-	} else {
-		c.Manager.ReplacePlayerWithBot(g.ID, c.ID)
-		c.send(leftGamePacket)
-	}
-	{
-		p, err := NewUserLeftGamePacket(UserLeftGamePayload{
-			GameID: g.ID,
-			UserID: c.ID,
-		})
-		if err != nil {
-			r.logger.Error("creating packet", err)
-			return nil
+		for _, uID := range g.UserIDs {
+			if err := c.Manager.RoomSvc.Repo.RemoveUser(g.ID, uID); err != nil {
+				slog.Error("remove user from game room", err)
+				continue
+			}
+			if err := r.RemoveClient(uID); err != nil {
+				slog.Error("remove user from game room", err)
+				continue
+			}
+			if err := r.BroadcastLeaveGamePackets(c, g); err != nil {
+				slog.Error("broadcast leave game packets", err)
+				continue
+			}
 		}
-		r.BroadcastSkipSelf(p, c.ID)
+	} else {
+		if err := c.Manager.ReplacePlayerWithBot(g.ID, c.ID); err != nil {
+			slog.Error("replace player with bot", err)
+		}
+	}
+
+	if err := r.BroadcastLeaveGamePackets(c, g); err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
 
 	return nil
