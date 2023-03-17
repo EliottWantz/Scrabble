@@ -382,65 +382,7 @@ func (c *Client) HandleLeaveGameRequest(p *Packet) error {
 		return err
 	}
 
-	r, err := c.Manager.GetRoom(payload.GameID)
-	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, err.Error())
-	}
-	g, err := c.Manager.GameSvc.Repo.Find(payload.GameID)
-	if err != nil {
-		return fiber.NewError(fiber.StatusNotFound, err.Error())
-	}
-	if g.ScrabbleGame == nil {
-		// Game has not started yet
-		if c.ID == g.CreatorID {
-			// Delete the game and remove all users
-			for _, uID := range g.UserIDs {
-				if err := r.RemoveClient(uID); err != nil {
-					slog.Error("remove user from game room", err)
-					continue
-				}
-				if err := c.Manager.UserSvc.Repo.UnSetJoinedGame(uID); err != nil {
-					slog.Error("remove user from game room", err)
-					continue
-				}
-				client, err := c.Manager.GetClient(uID)
-				if err != nil {
-					slog.Error("remove user from game room", err)
-					continue
-				}
-				if err := r.BroadcastLeaveGamePackets(client, g.ID); err != nil {
-					slog.Error("broadcast leave game packets", err)
-					continue
-				}
-			}
-			if err := c.Manager.GameSvc.Repo.Delete(g.ID); err != nil {
-				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
-			}
-			return nil
-		} else {
-			// Remove the user from the game
-			if _, err := c.Manager.GameSvc.RemoveUser(payload.GameID, c.ID); err != nil {
-				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
-			}
-			if err := c.Manager.UserSvc.Repo.UnSetJoinedGame(c.ID); err != nil {
-				return err
-			}
-		}
-	} else {
-		// Game has started, replace player with a bot
-		if err := c.Manager.ReplacePlayerWithBot(g.ID, c.ID); err != nil {
-			slog.Error("replace player with bot", err)
-		}
-		if err := c.Manager.UserSvc.Repo.UnSetJoinedGame(c.ID); err != nil {
-			return err
-		}
-	}
-
-	if err = r.RemoveClient(c.ID); err != nil {
-		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
-	}
-
-	return r.BroadcastLeaveGamePackets(c, g.ID)
+	return c.Manager.RemoveClientFromGame(c, payload.GameID)
 }
 
 func (c *Client) HandleStartGameRequest(p *Packet) error {

@@ -2,8 +2,6 @@ package ws
 
 import (
 	"fmt"
-	"reflect"
-	"strings"
 	"time"
 
 	"scrabble/pkg/api/game"
@@ -228,66 +226,72 @@ func (m *Manager) RemoveClient(c *Client) error {
 		}
 	}
 	if user.JoinedGame != "" {
-		r, err := c.Manager.GetRoom(user.JoinedGame)
-		if err != nil {
-			return fiber.NewError(fiber.StatusBadRequest, err.Error())
-		}
-		g, err := c.Manager.GameSvc.Repo.Find(user.JoinedGame)
-		if err != nil {
-			return fiber.NewError(fiber.StatusNotFound, err.Error())
-		}
-		if g.ScrabbleGame == nil {
-			// Game has not started yet
-			if c.ID == g.CreatorID {
-				// Delete the game and remove all users
-				if err := c.Manager.GameSvc.Repo.Delete(g.ID); err != nil {
-					return fiber.NewError(fiber.StatusInternalServerError, err.Error())
-				}
-				for _, uID := range g.UserIDs {
-					if err := r.RemoveClient(uID); err != nil {
-						slog.Error("remove user from game room", err)
-						continue
-					}
-					if err := c.Manager.UserSvc.Repo.UnSetJoinedGame(uID); err != nil {
-						slog.Error("remove user from game room", err)
-						continue
-					}
-					client, err := c.Manager.GetClient(uID)
-					if err != nil {
-						slog.Error("remove user from game room", err)
-						continue
-					}
-					if err := r.BroadcastLeaveGamePackets(client, g.ID); err != nil {
-						slog.Error("broadcast leave game packets", err)
-						continue
-					}
-				}
-				return nil
-			} else {
-				// Remove the user from the game
-				if _, err := c.Manager.GameSvc.RemoveUser(user.JoinedGame, c.ID); err != nil {
+		return m.RemoveClientFromGame(c, user.JoinedGame)
+	}
+	return nil
+}
+
+func (m *Manager) RemoveClientFromGame(c *Client, gID string) error {
+	r, err := c.Manager.GetRoom(gID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	g, err := c.Manager.GameSvc.Repo.Find(gID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusNotFound, err.Error())
+	}
+	if g.ScrabbleGame == nil {
+		// Game has not started yet
+		if c.ID == g.CreatorID {
+			// Delete the game and remove all users
+			if err := c.Manager.GameSvc.Repo.Delete(g.ID); err != nil {
+				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+			}
+			for _, uID := range g.UserIDs {
+				if err := r.RemoveClient(uID); err != nil {
 					slog.Error("remove user from game room", err)
+					continue
 				}
-				if err := c.Manager.UserSvc.Repo.UnSetJoinedGame(c.ID); err != nil {
+				if err := c.Manager.UserSvc.Repo.UnSetJoinedGame(uID); err != nil {
 					slog.Error("remove user from game room", err)
+					continue
+				}
+				client, err := c.Manager.GetClient(uID)
+				if err != nil {
+					slog.Error("remove user from game room", err)
+					continue
+				}
+				if err := r.BroadcastLeaveGamePackets(client, g.ID); err != nil {
+					slog.Error("broadcast leave game packets", err)
+					continue
 				}
 			}
+			return nil
 		} else {
-			// Game has started, replace player with a bot
-			if err := c.Manager.ReplacePlayerWithBot(g.ID, c.ID); err != nil {
-				slog.Error("replace player with bot", err)
+			// Remove the user from the game
+			if _, err := c.Manager.GameSvc.RemoveUser(gID, c.ID); err != nil {
+				slog.Error("remove user from game room", err)
 			}
 			if err := c.Manager.UserSvc.Repo.UnSetJoinedGame(c.ID); err != nil {
 				slog.Error("remove user from game room", err)
 			}
 		}
-		if err := r.RemoveClient(c.ID); err != nil {
-			slog.Error("remove client from ws room", err)
+	} else {
+		// Game has started, replace player with a bot
+		if err := c.Manager.ReplacePlayerWithBot(g.ID, c.ID); err != nil {
+			slog.Error("replace player with bot", err)
 		}
-		if err := r.BroadcastLeaveGamePackets(c, g.ID); err != nil {
-			slog.Error("broadcast leave game packets", err)
+		if err := c.Manager.UserSvc.Repo.UnSetJoinedGame(c.ID); err != nil {
+			slog.Error("remove user from game room", err)
 		}
 	}
+	if err := r.RemoveClient(c.ID); err != nil {
+		slog.Error("remove client from ws room", err)
+	}
+	if err := r.BroadcastLeaveGamePackets(c, g.ID); err != nil {
+		slog.Error("broadcast leave game packets", err)
+	}
+
 	return nil
 }
 
@@ -372,73 +376,73 @@ func (m *Manager) UpdateJoinableGames() error {
 }
 
 func (m *Manager) watchFriendRequests(id string) {
-	oldUser, _ := m.UserSvc.GetUser(id)
-	oldPendingRequests := oldUser.PendingRequests
+	// oldUser, _ := m.UserSvc.GetUser(id)
+	// oldPendingRequests := oldUser.PendingRequests
 
-	go func() {
-		for {
+	// go func() {
+	// 	for {
 
-			newUser, _ := m.UserSvc.GetUser(id)
-			newRequests := newUser.PendingRequests
-			time.Sleep(1 * time.Second)
-			if !reflect.DeepEqual(newRequests, oldPendingRequests) {
+	// 		newUser, _ := m.UserSvc.GetUser(id)
+	// 		newRequests := newUser.PendingRequests
+	// 		time.Sleep(1 * time.Second)
+	// 		if !reflect.DeepEqual(newRequests, oldPendingRequests) {
 
-				incomingFriendsRequests := getArrayDifference(newRequests, oldPendingRequests)
+	// 			incomingFriendsRequests := getArrayDifference(newRequests, oldPendingRequests)
 
-				if len(incomingFriendsRequests) > 0 {
-					m.logger.Info("new friend request", "user_id", id, "friend_requests", incomingFriendsRequests)
-					for _, friend := range incomingFriendsRequests {
-						isJustFriendRequest := !strings.Contains(strings.Join(newUser.Friends, ""), friend) && strings.Contains(strings.Join(newUser.PendingRequests, ""), friend)
-						isAcceptFriendRequest := strings.Contains(strings.Join(newUser.Friends, ""), friend)
-						isDeleteFriendRequest := !strings.Contains(strings.Join(newUser.PendingRequests, ""), friend)
+	// 			if len(incomingFriendsRequests) > 0 {
+	// 				m.logger.Info("new friend request", "user_id", id, "friend_requests", incomingFriendsRequests)
+	// 				for _, friend := range incomingFriendsRequests {
+	// 					isJustFriendRequest := !strings.Contains(strings.Join(newUser.Friends, ""), friend) && strings.Contains(strings.Join(newUser.PendingRequests, ""), friend)
+	// 					isAcceptFriendRequest := strings.Contains(strings.Join(newUser.Friends, ""), friend)
+	// 					isDeleteFriendRequest := !strings.Contains(strings.Join(newUser.PendingRequests, ""), friend)
 
-						if isJustFriendRequest {
-							friendUser, _ := m.UserSvc.GetUser(friend)
-							friendRequestPayload := FriendRequestPayload{
-								FromID:       friendUser.ID,
-								FromUsername: friendUser.Username,
-							}
-							p, err := NewFriendRequestPacket(friendRequestPayload)
-							if err != nil {
-								m.logger.Error("failed to create friend request packet", err)
-							}
-							client, _ := m.GetClient(id)
-							client.send(p)
-						} else if isAcceptFriendRequest {
-							friendUser, _ := m.UserSvc.GetUser(friend)
-							friendRequestPayload := FriendRequestPayload{
-								FromID:       friendUser.ID,
-								FromUsername: friendUser.Username,
-							}
-							p, err := AcceptFRiendRequestPacket(friendRequestPayload)
-							if err != nil {
-								m.logger.Error("failed to create friend request packet", err)
-							}
-							client, _ := m.GetClient(id)
-							client.send(p)
-						} else if isDeleteFriendRequest {
-							friendUser, _ := m.UserSvc.GetUser(friend)
-							friendRequestPayload := FriendRequestPayload{
-								FromID:       friendUser.ID,
-								FromUsername: friendUser.Username,
-							}
-							p, err := DeclineFriendRequestPacket(friendRequestPayload)
-							if err != nil {
-								m.logger.Error("failed to create friend request packet", err)
-							}
-							client, _ := m.GetClient(id)
-							client.send(p)
-						}
+	// 					if isJustFriendRequest {
+	// 						friendUser, _ := m.UserSvc.GetUser(friend)
+	// 						friendRequestPayload := FriendRequestPayload{
+	// 							FromID:       friendUser.ID,
+	// 							FromUsername: friendUser.Username,
+	// 						}
+	// 						p, err := NewFriendRequestPacket(friendRequestPayload)
+	// 						if err != nil {
+	// 							m.logger.Error("failed to create friend request packet", err)
+	// 						}
+	// 						client, _ := m.GetClient(id)
+	// 						client.send(p)
+	// 					} else if isAcceptFriendRequest {
+	// 						friendUser, _ := m.UserSvc.GetUser(friend)
+	// 						friendRequestPayload := FriendRequestPayload{
+	// 							FromID:       friendUser.ID,
+	// 							FromUsername: friendUser.Username,
+	// 						}
+	// 						p, err := AcceptFRiendRequestPacket(friendRequestPayload)
+	// 						if err != nil {
+	// 							m.logger.Error("failed to create friend request packet", err)
+	// 						}
+	// 						client, _ := m.GetClient(id)
+	// 						client.send(p)
+	// 					} else if isDeleteFriendRequest {
+	// 						friendUser, _ := m.UserSvc.GetUser(friend)
+	// 						friendRequestPayload := FriendRequestPayload{
+	// 							FromID:       friendUser.ID,
+	// 							FromUsername: friendUser.Username,
+	// 						}
+	// 						p, err := DeclineFriendRequestPacket(friendRequestPayload)
+	// 						if err != nil {
+	// 							m.logger.Error("failed to create friend request packet", err)
+	// 						}
+	// 						client, _ := m.GetClient(id)
+	// 						client.send(p)
+	// 					}
 
-					}
+	// 				}
 
-					oldPendingRequests = newRequests
+	// 				oldPendingRequests = newRequests
 
-				}
+	// 			}
 
-			}
-		}
-	}()
+	// 		}
+	// 	}
+	// }()
 }
 
 func (m *Manager) MakeBotMoves(gID string) {
