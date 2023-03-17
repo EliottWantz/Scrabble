@@ -12,23 +12,4 @@ import { BehaviorSubject } from "rxjs";
 })
 export class MainPageComponent {
   readonly title: string = "Scrabble";
-  isJoining = false;
-  public user: BehaviorSubject<User>;
-
-  constructor(private userService: UserService, private socketService: WebSocketService, private roomService: RoomService) {
-    this.user = this.userService.subjectUser;
-    document.getElementById("avatar")?.setAttribute("src", this.user.value.avatar.url);
-  }
-
-  isConnected(): boolean {
-    return this.userService.isLoggedIn;
-  }
-
-  logout(): void {
-    this.socketService.disconnect();
-  }
-
-  isInGame(): boolean {
-    return this.roomService.currentGameRoom.value.id != "";
-  }
 }
