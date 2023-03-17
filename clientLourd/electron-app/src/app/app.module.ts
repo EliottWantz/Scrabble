@@ -32,6 +32,12 @@ import { TimerComponent } from '@app/components/timer/timer.component';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { SidebarComponent } from '@app/components/sidebar/sidebar.component';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { RegisterPageComponent } from '@app/pages/register-page/register-page.component';
+import { AvatarSelectionPageComponent } from '@app/pages/avatar-selection-page/avatar-selection-page.component';
+import { AvatarSelectionComponent } from '@app/components/avatar-selection/avatar-selection.component';
+import { DefaultAvatarSelectionComponent } from '@app/components/default-avatar-selection/default-avatar-selection.component';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
 
 @NgModule({
   declarations: [
@@ -50,7 +56,11 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
     RackComponent,
     SocialPageComponent,
     TimerComponent,
-    SidebarComponent
+    SidebarComponent,
+    RegisterPageComponent,
+    AvatarSelectionPageComponent,
+    AvatarSelectionComponent,
+    DefaultAvatarSelectionComponent
   ],
   imports: [
     BrowserModule,
@@ -67,7 +77,10 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
     MatDividerModule,
     DragDropModule,
     MatSidenavModule,
-    MatSlideToggleModule
+    MatSlideToggleModule,
+    MatDialogModule,
+    MatButtonModule,
+    BrowserAnimationsModule,
   ],
   providers: [
     {
