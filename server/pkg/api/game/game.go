@@ -8,5 +8,5 @@ type Game struct {
 	UserIDs        []string       `json:"userIds"`
 	IsProtected    bool           `json:"isProtected"`
 	HashedPassword string         `json:"-"`
-	ScrabbleGame   *scrabble.Game `json:"scrabbleGame"`
+	ScrabbleGame   *scrabble.Game `json:"-"`
 }
