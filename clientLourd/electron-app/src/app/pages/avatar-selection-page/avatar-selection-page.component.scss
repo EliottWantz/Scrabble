@@ -1,0 +1,12 @@
+#container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  flex-direction: column;
+  height: 100vh;
+}
+
+app-login {
+  width: 100%;
+}
