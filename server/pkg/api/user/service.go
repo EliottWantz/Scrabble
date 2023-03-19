@@ -162,14 +162,6 @@ func (s *Service) GetUser(ID string) (*User, error) {
 
 	return u, nil
 }
-func (s *Service) GetUserByUsername(username string) (*User, error) {
-	u, err := s.Repo.FindByUsername(username)
-	if err != nil {
-		return nil, fiber.NewError(fiber.StatusNotFound, "user not found")
-	}
-
-	return u, nil
-}
 
 func (s *Service) JoinRoom(roomID, userID string) error {
 	return s.Repo.AddJoinedRoom(roomID, userID)
