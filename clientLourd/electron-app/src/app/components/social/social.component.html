@@ -1,0 +1,41 @@
+<div id="container">
+    <div class="nav">
+        <div class="nav-text" style="background-color: #424260; outline-color: #66678e; outline-width: 1px; outline-style: solid;" (click)="selectNavButton(0)">
+            En ligne
+        </div>
+        <div class="nav-text" (click)="selectNavButton(1)">
+            Tous
+        </div>
+        <div class="nav-text" (click)="selectNavButton(2)">
+            En attente
+        </div>
+        <div class="nav-text" (click)="selectNavButton(3)">
+            Ajouter un ami
+        </div>
+    </div>
+    <div class="content">
+
+        <div *ngIf="activeScreen === 'En ligne'"class="screen">
+            <div class="form">
+                <form>
+                    <mat-form-field appearance="fill">
+                      <mat-label for="username">Rechercher un ami</mat-label>
+                      <input #usernameInput matInput placeholder="Rechercher un ami" name="username" [(ngModel)]="onlineFriendUserNameSearch">
+                    </mat-form-field>
+                </form>
+            </div>
+        </div>
+
+        <div *ngIf="activeScreen === 'Ajouter un ami'" class="screen">
+            <div class="form">
+                <form>
+                    <mat-form-field appearance="fill">
+                      <mat-label for="username">Rechercher un ami</mat-label>
+                      <input #usernameInput matInput placeholder="Rechercher un ami" name="username" [(ngModel)]="addFriendUserName">
+                    </mat-form-field>
+                    <button mat-flat-button color="primary" type="submit" (click)="sendFriendRequest()">Envoyer une demande d'ami</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
