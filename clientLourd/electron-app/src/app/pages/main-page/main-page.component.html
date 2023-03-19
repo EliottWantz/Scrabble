@@ -2,6 +2,7 @@
     <img id="scrabble-img" src="../../../assets/scrabble.png">
     <p>Bienvenue à PolyScrabble</p>
     <p>Commençons</p>
-    <button mat-flat-button color="primary" [routerLink]="'/login'">Se connecter</button>
-    <button mat-flat-button color="primary" [routerLink]="'/register'">S'inscrire</button>
+    <button *ngIf="!isLoggedIn()" mat-flat-button color="primary" [routerLink]="'/login'">Se connecter</button>
+    <button *ngIf="!isLoggedIn()" mat-flat-button color="primary" [routerLink]="'/register'">S'inscrire</button>
+    <button mat-flat-button color="primary" routerLink="/game">Game</button>
 </div>
