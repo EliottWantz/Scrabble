@@ -2,13 +2,15 @@
   <mat-drawer-container>
 
     <mat-drawer opened="true" disableClose="true" mode="side">
-
       <div class="box">
-        <div id="add-friend" (click)="addFriendPage()">
+        <div id="title">
           <div class="mat-icon-button">
-            <mat-icon inline="true">person_add</mat-icon>
+            <mat-icon inline="true">people</mat-icon>
           </div>
-          <div class="text">Ajouter un ami</div>
+          <div class="text">Amis</div>
+        </div>
+        <div id="break">
+          <hr>
         </div>
 
         <div *ngFor="let friend of user.value.friends; let i = index" class="friends">
@@ -24,8 +26,9 @@
     </mat-drawer>
 
     <mat-drawer-content>
-
-      <div *ngIf="addFriend" class="content">
+      <app-social></app-social>
+      <!--
+        <div *ngIf="addFriend" class="content">
         <h1>Ajouter un ami</h1>
         <form id="form">
           <mat-form-field appearance="fill">
@@ -39,6 +42,7 @@
       <div *ngIf="chatFriend" class="content">
         <app-chat-box></app-chat-box>
       </div>
+      -->
     </mat-drawer-content>
 
   </mat-drawer-container>

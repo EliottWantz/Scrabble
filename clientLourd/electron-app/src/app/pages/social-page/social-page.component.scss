@@ -31,19 +31,14 @@ mat-icon {
   color: white;
 }
 
-#add-friend {
-  margin-top: 62%;
+#title {
+  margin-top: 15%;
   display: flex;
   justify-content: left;
   align-items: center;
   flex-direction: row;
   width: 190px;
-  border-radius: 12px;
-  padding-bottom: 5%;
-  padding-top: 5%;
-  padding-left: 2%;
-  padding-right: 2%;
-  margin-bottom: 8%;
+  margin-bottom: 2%;
 }
 
 .friend {
@@ -100,6 +95,19 @@ button {
   border-radius: 20px;
   padding-top: 2%;
   padding-bottom: 2%;
+}
+
+hr {
+  flex-basis: 100%;
+  flex-grow: 1;
+  width: auto;
+  height: 1px;
+  background: white;
+  //align-self: flex-start;
+}
+
+#break {
+  width: 100%;
 }
 
 /*#chatBox {
