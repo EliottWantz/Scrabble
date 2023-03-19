@@ -58,9 +58,9 @@ hr {
 .nav-button {
     width: 97%;
     border-radius: 12px;
-    outline-color: #66678e;
-    outline-width: 1px;
-    outline-style: solid;
+    padding-top: 4%;
+    padding-bottom: 4%;
+    margin-bottom: 8%;
 }
 
 .nav-button-div {
@@ -72,10 +72,21 @@ hr {
     flex-direction: row;
 }
 
+.nav-button-div:hover {
+    cursor: pointer;
+}
+
 .text {
     margin-left: 20%;
+    color: white;
 }
 
 .mat-icon-button {
     margin-left: 5%;
+}
+
+.avatar {
+    border-radius: 50%;
+    width: 100px;
+    width: 100px;
 }

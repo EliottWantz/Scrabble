@@ -21,27 +21,37 @@ export class SidebarComponent {
   private darkThemeIcon = 'nightlight_round';
   private lightThemeIcon = 'wb_sunny';
   public lightDarkToggleIcon = this.lightThemeIcon;
+  readonly title: string = "Scrabble";
+  isJoining = false;
+  public user: BehaviorSubject<User>;
   currentRoute = "PolyScrabble";
   currentRouteName = "/home";
+  previousRouteName = ["/home"];
 
   constructor(private userService: UserService, private socketService: WebSocketService, private roomService: RoomService, private themeService: ThemeService, private router: Router) {
     this.user = this.userService.subjectUser;
     document.getElementById("avatar")?.setAttribute("src", this.user.value.avatar.url);
     this.router.events.subscribe((e) => {
       if (e instanceof NavigationStart) {
+        this.previousRouteName.push(this.currentRouteName);
         this.currentRouteName = e.url;
         switch (e.url) {
           case "/home":
             this.currentRoute = "PolyScrabble";
+            this.selectNav(0)
             break;
         
           case "/login":
             this.currentRoute = "Connexion";
             break;
 
-            case "/register":
-              this.currentRoute = "Inscription";
-              break;
+          case "/register":
+            this.currentRoute = "Inscription";
+            break;
+
+          case "/avatar":
+            this.currentRoute = "Choix de l'avatar";
+            break;
         }
       }
     });
@@ -56,19 +66,41 @@ export class SidebarComponent {
     }
   }
 
-  readonly title: string = "Scrabble";
-  isJoining = false;
-  public user: BehaviorSubject<User>;
-
   isConnected(): boolean {
     return this.userService.isLoggedIn;
   }
 
   logout(): void {
+    this.router.navigate(['/home']);
     this.socketService.disconnect();
   }
 
   isInGame(): boolean {
     return this.roomService.currentGameRoom.value.id != "";
+  }
+
+  return(): void {
+    if (this.previousRouteName[this.previousRouteName.length - 1] == '/home') {
+      this.previousRouteName = ['/home'];
+      this.router.navigate(['/home']);
+    } else {
+      const routeToGo = this.previousRouteName.pop();
+      this.router.navigate([routeToGo]);
+    }
+  }
+
+  getFriends(): string[] {
+    return this.user.value.friends;
+  }
+
+  selectNav(index: number): void {
+    const navButtons = document.getElementsByClassName('nav-button');
+    for (let i = 0; i < navButtons.length; i++) {
+      if (i != index) {
+        navButtons[i].setAttribute("style", "");
+      } else {
+        navButtons[i].setAttribute("style", "background-color: #424260; outline-color: #66678e; outline-width: 1px; outline-style: solid;");
+      }
+    }
   }
 }
