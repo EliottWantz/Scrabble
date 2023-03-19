@@ -8,4 +8,7 @@ export type ServerEvent = "listUsers"
 | "userJoined"
 | "error"
 | "indice"
-| "newUser";
+| "newUser"
+| "friendRequest"
+| "acceptFriendRequest"
+| "declineFriendRequest";
