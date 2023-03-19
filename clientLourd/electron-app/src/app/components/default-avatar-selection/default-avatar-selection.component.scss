@@ -4,38 +4,45 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    flex-direction: column;
+    flex-direction: row;
     flex-wrap: wrap;
 }
 
-.row:after {
-    content: "";
-    display: table;
-    clear: both;
-}
-
-.column {
-    float: left;
-    width: 33.33%;
-}
-
 img {
-    margin: 10%;
+    margin: 5%;
     border-radius: 50%;
     width: 75px;
 }
 
 .card {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     outline-style: solid;
     outline-width: 1px;
     border-radius: 10px;
-    width: 150px;
+    width: 100px;
+    height: 100px;
+    margin-top: 3%;
+    margin-left: 2%;
+    background-color: white;
+}
+
+.flexy {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    flex-direction: row;
+    width: 100%;
 }
 
 button {
-    margin-top: 2%;
-    width: 100%;
+    margin-top: 1%;
+    width: 51%;
     border-radius: 20px;
-    padding-top: 4%;
-    padding-bottom: 4%;
+    background-color: #dcdcdc;
+    border-width: 0;
+    padding-top: 1%;
+    padding-bottom: 1%;
 }
