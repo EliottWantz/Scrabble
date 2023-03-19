@@ -1,4 +1,108 @@
-#chatBox {
+.mat-drawer-container {
+  height: 100%;
+}
+
+.mat-drawer {
+  width: 200px;
+  height: 100%;
+  background-color: rgba(46, 46, 72, 0.8);
+}
+
+.box {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  row-gap: 20px;
+  flex-direction: column;
+  height: 100%;
+}
+
+mat-icon {
+  color: white;
+  transform: scale(1.5);
+}
+
+.mat-icon-button {
+  margin-left: 5%;
+  margin-right: 20%;
+}
+
+.text {
+  color: white;
+}
+
+#add-friend {
+  margin-top: 62%;
+  display: flex;
+  justify-content: left;
+  align-items: center;
+  flex-direction: row;
+  width: 190px;
+  border-radius: 12px;
+  padding-bottom: 5%;
+  padding-top: 5%;
+  padding-left: 2%;
+  padding-right: 2%;
+  margin-bottom: 8%;
+}
+
+.friend {
+  width: 190px;
+  height: 100%;
+  display: flex;
+  justify-content: left;
+  align-items: center;
+  flex-direction: row;
+  border-radius: 12px;
+  padding-top: 4%;
+  padding-bottom: 4%;
+  margin-bottom: 8%;
+}
+
+.mat-drawer-content {
+  height: 100%;
+  width: 100%;
+}
+
+.content {
+  width: calc(100% - 200px);
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  flex-wrap: wrap;
+}
+
+#form {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  flex-direction: column;
+  flex-wrap: wrap;
+}
+
+.form-group {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+mat-form-field {
+  width: 75%;
+}
+
+button {
+  margin-top: 2%;
+  width: 75%;
+  border-radius: 20px;
+  padding-top: 2%;
+  padding-bottom: 2%;
+}
+
+/*#chatBox {
     height: 100%;
     width: 30%;
     display: grid;
@@ -79,7 +183,7 @@
     border: none;
     cursor: pointer;
     background-color: transparent;
-  }
+  }*/
   
   // form {
   //     padding: 0 0.75rem;
