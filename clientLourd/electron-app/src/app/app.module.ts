@@ -38,6 +38,7 @@ import { AvatarSelectionComponent } from '@app/components/avatar-selection/avata
 import { DefaultAvatarSelectionComponent } from '@app/components/default-avatar-selection/default-avatar-selection.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
+import { SocialComponent } from '@app/components/social/social.component';
 
 @NgModule({
   declarations: [
@@ -60,7 +61,8 @@ import { MatButtonModule } from '@angular/material/button';
     RegisterPageComponent,
     AvatarSelectionPageComponent,
     AvatarSelectionComponent,
-    DefaultAvatarSelectionComponent
+    DefaultAvatarSelectionComponent,
+    SocialComponent
   ],
   imports: [
     BrowserModule,
