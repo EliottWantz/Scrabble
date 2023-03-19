@@ -12,4 +12,10 @@ import { BehaviorSubject } from "rxjs";
 })
 export class MainPageComponent {
   readonly title: string = "Scrabble";
+
+  constructor(private userService: UserService) {}
+
+  isLoggedIn(): boolean {
+    return this.userService.isLoggedIn;
+  }
 }
