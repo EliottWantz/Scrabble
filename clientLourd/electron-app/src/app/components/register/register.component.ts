@@ -15,48 +15,38 @@ export class RegisterComponent implements OnInit {
     email = "";
     avatar: {url: string, fileId: string} = {url: "", fileId: ""};
     isRegisterFailed = false;
-    selectedFile: any = null;
     defaultAvatars: {url: string, fileId: string}[];
+    errorMessage = "";
     
     constructor(private authService: AuthenticationService, private router: Router, private commService: CommunicationService) { 
         this.defaultAvatars = [];
+        this.authService.tempUserLogin.username = "";
+        this.authService.tempUserLogin.password = "";
+        this.authService.tempUserLogin.email = "";
     }
     
     ngOnInit(): void {
         this.commService.getDefaultAvatars().then((res) => {
             this.defaultAvatars = res.avatars;
         });
+
+        this.errorMessage = this.authService.errorMessage;
     }
     
-    async onSubmit() {
-        if (this.username == "" || this.password == "" || this.email =="" || this.avatar.url == "")
+    onSubmit() {
+        if (this.username == "" || this.password == "" || this.email =="")
             return;
-        const isLoggedIn = await this.authService.register(this.username, this.password, this.email, this.avatar.url, this.avatar.fileId);
 
-        if (isLoggedIn) {
+        this.authService.tempUserLogin.username = this.username;
+        this.authService.tempUserLogin.password = this.password;
+        this.authService.tempUserLogin.email = this.email;
+        this.router.navigate(['/avatar']);
+        //const isLoggedIn = await this.authService.register(this.username, this.password, this.email, this.avatar.url, this.avatar.fileId);
+
+        /*if (isLoggedIn) {
             this.router.navigate(['/home']);
         } else {
             this.isRegisterFailed = true;
-        }
-    }
-
-    selectAvatar(num: number): void {
-        let src;
-        for(let i = 0; i < document.getElementsByClassName("avatar").length; i++) {
-            if (i != num) {
-                document.getElementsByClassName("avatar")[i].setAttribute("style", "");
-                this.selectedFile = null;
-            } else {
-                src = this.defaultAvatars[num];
-                document.getElementsByClassName("avatar")[i].setAttribute("style", "background: -webkit-linear-gradient(left top, crimson 0%, #f90 100%);");
-            }
-        }
-        if (src)
-            this.avatar = src;
-    }
-
-    onFileSelected(event: any): void {
-        this.selectedFile = event.target.files[0] ?? null;
-        this.selectAvatar(-1);
+        }*/
     }
 }

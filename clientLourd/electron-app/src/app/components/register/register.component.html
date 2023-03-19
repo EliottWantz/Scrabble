@@ -22,14 +22,11 @@
                 </mat-form-field>
             </div>
         
-            <button mat-raised-button color="primary" id="btn-submit" (click)="onSubmit()">S'inscrire</button>
+            <button mat-raised-button type="submit" color="primary" id="btn-submit" (click)="onSubmit()">S'inscrire</button>
         </form>
         
     
-        <div *ngIf="isRegisterFailed" id="error">
-            <strong style="color: red;">Le nom d'utilisateur n'est pas disponible</strong>
-        </div>
-        <button mat-raised-button color="primary" id="btn-submit" routerLink="/avatar" >avatar</button>
+        <p *ngIf="errorMessage !== ''" style="color: red; text-align: center; width: 100%; margin-top: 2%;">Le nom d'utilisateur n'est pas disponible</p>
     </div>
 </div>
 
