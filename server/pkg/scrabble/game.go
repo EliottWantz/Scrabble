@@ -15,7 +15,6 @@ const (
 var ErrPlayerNotFound = errors.New("player not found")
 
 type Game struct {
-	ID           string
 	Players      []*Player
 	Board        *Board
 	Bag          *Bag
@@ -56,9 +55,8 @@ type MoveItem struct {
 	Move       Move
 }
 
-func NewGame(ID string, dawg *DAWG, botStrategy Strategy) *Game {
+func NewGame(dawg *DAWG, botStrategy Strategy) *Game {
 	g := &Game{
-		ID:       ID,
 		Players:  []*Player{},
 		Board:    NewBoard(),
 		Bag:      NewBag(DefaultTileSet),
@@ -98,6 +96,17 @@ func (g *Game) GetPlayer(pID string) (*Player, error) {
 		}
 	}
 	return nil, ErrPlayerNotFound
+}
+
+func (g *Game) NumberOfBots() int {
+	count := 0
+	for _, p := range g.Players {
+		if p.IsBot {
+			count++
+		}
+	}
+
+	return count
 }
 
 // PlayTile moves a tile from the player's rack to the board
