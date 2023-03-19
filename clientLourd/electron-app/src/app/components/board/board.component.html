@@ -11,7 +11,10 @@
             #elem
             squareHost
         >
-            <app-tile *ngIf="col.tile" [tile]="col.tile" [disabled]="true"></app-tile>
+            {{getTextSquare(col.wordMultiplier, col.letterMultiplier)}}
+            <!--
+                <app-tile *ngIf="col.tile" [tile]="col.tile" [disabled]="true"></app-tile>
+            -->
         </th>
     </tr>
 </div>

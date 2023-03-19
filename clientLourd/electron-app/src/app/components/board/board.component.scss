@@ -1,6 +1,6 @@
 .square-multiplier {
-    width: 45px;
-    height: 45px;
+    width: min(4.2vh, 4.2vw);
+    height: min(4.2vh, 4.2vw);
     outline-style: solid;
     outline-color: black;
     outline-width: 1px;
@@ -8,26 +8,21 @@
     justify-items: center;
     align-items: center;
     vertical-align: middle;
+    border-radius: 10px;
 }
 
 .square-multiplier.word3 {
-    background: red;
+    background: #f01c7a;
 }
 
 .square-multiplier.word2 {
-    background: pink;
+    background: #fd8e73;
 }
 
 .square-multiplier.letter2 {
-    background: lightblue;
+    background: #8ecafc;
 }
 
 .square-multiplier.letter3 {
-    background: blue;
-}
-
-.board {
-    position: absolute;
-    top: 17%;
-    left:20%;
+    background: #1375b0;
 }

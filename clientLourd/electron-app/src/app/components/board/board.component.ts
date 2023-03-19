@@ -29,4 +29,17 @@ export class BoardComponent implements OnInit {
             this.mouseService.place(currentElem.nativeElement, row, col);
         }
     }
+
+    getTextSquare(wordMultiplier: number, letterMultiplier: number): string {
+        if (wordMultiplier == 2) {
+            return "DW";
+        } else if (wordMultiplier == 3) {
+            return "TW";
+        } else if (letterMultiplier == 2) {
+            return "DL";
+        } else if (letterMultiplier == 3) {
+            return "TL";
+        }
+        return "";
+    }
 }
