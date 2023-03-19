@@ -1,3 +1,5 @@
+/* eslint-disable prefer-const */
+/* eslint-disable no-case-declarations */
 import { Injectable } from "@angular/core";
 import { UserService } from "@app/services/user/user.service";
 import { User } from "@app/utils/interfaces/user";
@@ -10,6 +12,7 @@ import { ClientEvent } from "@app/utils/events/client-events";
 import { ServerEvent } from "@app/utils/events/server-events";
 import { GameService } from "@app/services/game/game.service";
 import { RackService } from "@app/services/game/rack.service";
+import { StorageService } from "@app/services/storage/storage.service";
 
 @Injectable({
     providedIn: "root",
@@ -18,7 +21,12 @@ export class WebSocketService {
     socket!: WebSocket;
     user: BehaviorSubject<User>;
 
-    constructor(private userService: UserService, private roomService: RoomService, private gameService: GameService, private rackService: RackService) {
+    constructor(private userService: UserService,
+        private roomService: RoomService,
+        private gameService: GameService,
+        private rackService: RackService,
+        private storageService: StorageService
+        ) {
         this.user = this.userService.subjectUser;
     }
 
@@ -80,6 +88,8 @@ export class WebSocketService {
                 break;
     
             case "listUsers":
+                const payloadListUsers = packet.payload as {users: User[]};
+                this.storageService.listUsers = payloadListUsers.users;
                 break;
 
             case "listChatRooms":
@@ -123,6 +133,11 @@ export class WebSocketService {
             case "indice":
                 const indicePayload = packet.payload as IndiceServerPayload;
                 this.gameService.moves.next(indicePayload.moves);
+                break;
+
+            case "newUser":
+                const newUserPayload = packet.payload as {user: User};
+                this.storageService.listUsers.push(newUserPayload.user);
                 break;
         }
     }
