@@ -1,6 +1,7 @@
 package ws
 
 import (
+	"scrabble/pkg/api/user"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
@@ -73,4 +74,133 @@ func (m *Manager) UnprotectGame(c *fiber.Ctx) error {
 	m.GameSvc.UnprotectGame(gameID)
 	m.UpdateJoinableGames()
 	return c.SendStatus(fiber.StatusOK)
+}
+
+func (m *Manager) SendFriendRequest(c *fiber.Ctx) error {
+	id := c.Params("id")
+	friendId := c.Params("friendId")
+
+	err := m.sendFriendRequest(id, friendId)
+	if err != nil {
+		return err
+	}
+	user, _ := m.UserSvc.GetUser(id)
+	friendRequestPayload := FriendRequestPayload{
+		FromID:       id,
+		FromUsername: user.Username,
+	}
+	p, err := NewFriendRequestPacket(friendRequestPayload)
+	if err != nil {
+		m.logger.Error("failed to create friend request packet", err)
+	}
+	client, _ := m.GetClient(friendId)
+	client.send(p)
+	return c.SendStatus(fiber.StatusOK)
+}
+
+func (m *Manager) AcceptFriendRequest(c *fiber.Ctx) error {
+	id := c.Params("id")
+	friendId := c.Params("friendId")
+
+	err := m.acceptFriendRequest(id, friendId)
+	if err != nil {
+		return err
+	}
+	user, _ := m.UserSvc.GetUser(friendId)
+	friendRequestPayload := FriendRequestPayload{
+		FromID:       id,
+		FromUsername: user.Username,
+	}
+	p, err := AcceptFRiendRequestPacket(friendRequestPayload)
+	if err != nil {
+		m.logger.Error("failed to create friend request packet", err)
+	}
+	client, _ := m.GetClient(friendId)
+	client.send(p)
+	return c.SendStatus(fiber.StatusOK)
+}
+
+func (m *Manager) RejectFriendRequest(c *fiber.Ctx) error {
+	id := c.Params("id")
+	friendId := c.Params("friendId")
+
+	err := m.rejectFriendRequest(id, friendId)
+	if err != nil {
+		return err
+	}
+	user, _ := m.UserSvc.GetUser(id)
+	friendRequestPayload := FriendRequestPayload{
+		FromID:       id,
+		FromUsername: user.Username,
+	}
+	p, err := DeclineFriendRequestPacket(friendRequestPayload)
+	if err != nil {
+		m.logger.Error("failed to create friend request packet", err)
+	}
+	client, _ := m.GetClient(friendId)
+	client.send(p)
+	return c.SendStatus(fiber.StatusOK)
+}
+
+type GetFriendsResponse struct {
+	Friends []*user.User `json:"friends,omitempty"`
+}
+
+func (m *Manager) GetFriends(c *fiber.Ctx) error {
+	id := c.Params("id")
+	friends, err := m.GetFriendsList(id)
+	if err != nil {
+		return err
+	}
+	return c.JSON(GetFriendsResponse{
+		Friends: friends,
+	})
+}
+
+type GetUserResponse struct {
+	User *user.User `json:"user,omitempty"`
+}
+
+func (m *Manager) GetFriendById(c *fiber.Ctx) error {
+	id := c.Params("id")
+	friendId := c.Params("friendId")
+	friend, err := m.GetFriendlistById(id, friendId)
+	if err != nil {
+		return err
+	}
+	return c.JSON(GetUserResponse{
+		User: friend,
+	})
+}
+
+func (m *Manager) RemoveFriend(c *fiber.Ctx) error {
+	id := c.Params("id")
+	friendId := c.Params("friendId")
+
+	err := m.RemoveFriendFromList(id, friendId)
+	if err != nil {
+		return err
+	}
+	return c.SendStatus(fiber.StatusOK)
+}
+
+type GetFriendRequestsResponse struct {
+	FriendRequests []*user.User `json:"friendRequests,omitempty"`
+}
+
+func (m *Manager) GetPendingFriendRequests(c *fiber.Ctx) error {
+
+	id := c.Params("id")
+	friendRequests, err := m.GetPendingFriendlistRequests(id)
+	if err != nil {
+		return err
+	}
+	return c.JSON(GetFriendRequestsResponse{
+		FriendRequests: friendRequests,
+	})
+}
+
+type PreferencesRequest struct {
+	Theme    string `json:"theme,omitempty"`
+	Language string `json:"language,omitempty"`
 }
