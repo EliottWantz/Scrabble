@@ -323,3 +323,14 @@ func (ctrl *Controller) GetDefaultAvatars(c *fiber.Ctx) error {
 		Avatars: ctrl.svc.DefaultAvatars,
 	})
 }
+
+func (ctrl *Controller) GetUserByName(c *fiber.Ctx) error {
+	name := c.Params("name")
+	user, err := ctrl.svc.GetUserByUsername(name)
+	if err != nil {
+		return err
+	}
+	return c.JSON(GetUserResponse{
+		User: user,
+	})
+}
