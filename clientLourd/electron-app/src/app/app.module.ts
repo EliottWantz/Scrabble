@@ -39,6 +39,8 @@ import { DefaultAvatarSelectionComponent } from '@app/components/default-avatar-
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { SocialComponent } from '@app/components/social/social.component';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { WaitRoomPageComponent } from '@app/pages/waiting-room-page/waiting-room-page.component';
 
 @NgModule({
   declarations: [
@@ -62,7 +64,8 @@ import { SocialComponent } from '@app/components/social/social.component';
     AvatarSelectionPageComponent,
     AvatarSelectionComponent,
     DefaultAvatarSelectionComponent,
-    SocialComponent
+    SocialComponent,
+    WaitRoomPageComponent
   ],
   imports: [
     BrowserModule,
@@ -83,6 +86,7 @@ import { SocialComponent } from '@app/components/social/social.component';
     MatDialogModule,
     MatButtonModule,
     BrowserAnimationsModule,
+    MatProgressSpinnerModule
   ],
   providers: [
     {
