@@ -2,19 +2,22 @@ package ws
 
 // Client events
 var (
-	ClientEventNoEvent      = ""
-	ClientEventChatMessage  = "chat-message"
-	ClientEventCreateRoom   = "create-room"
-	ClientEventJoinRoom     = "join-room"
-	ClientEventLeaveRoom    = "leave-room"
-	ClientEventCreateDMRoom = "create-dm-room"
-	ClientEventLeaveDMRoom  = "leave-dm-room"
-	ClientEventCreateGame   = "create-game"
-	ClientEventJoinGame     = "join-game"
-	ClientEventLeaveGame    = "leave-game"
-	ClientEventStartGame    = "start-game"
-	ClientEventPlayMove     = "playMove"
-	ClientEventIndice       = "indice"
+	ClientEventNoEvent            = ""
+	ClientEventChatMessage        = "chat-message"
+	ClientEventJoinAsObservateur  = "join-as-observateur"
+	ClientEventLeaveAsObservateur = "leave-as-observateur"
+	ClientEventPutMeIn            = "put-me-in"
+	ClientEventCreateRoom         = "create-room"
+	ClientEventJoinRoom           = "join-room"
+	ClientEventLeaveRoom          = "leave-room"
+	ClientEventCreateDMRoom       = "create-dm-room"
+	ClientEventLeaveDMRoom        = "leave-dm-room"
+	ClientEventCreateGame         = "create-game"
+	ClientEventJoinGame           = "join-game"
+	ClientEventLeaveGame          = "leave-game"
+	ClientEventStartGame          = "start-game"
+	ClientEventPlayMove           = "playMove"
+	ClientEventIndice             = "indice"
 )
 
 // Server events

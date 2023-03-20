@@ -246,6 +246,21 @@ func (r *Room) BroadcastJoinGamePackets(c *Client, g *game.Game) error {
 	return c.Manager.UpdateJoinableGames()
 }
 
+func (r *Room) BroadcastObserverJoinGamePacket(c *Client, g *game.Game) error {
+	{
+		p, err := NewUserJoinedGamePacket(UserJoinedGamePayload{
+			GameID: g.ID,
+			UserID: c.ID,
+		})
+		if err != nil {
+			return err
+		}
+		r.BroadcastSkipSelf(p, c.ID)
+	}
+
+	return nil
+}
+
 func (r *Room) BroadcastLeaveGamePackets(c *Client, gID string) error {
 	{
 		p, err := NewUserLeftGamePacket(UserLeftGamePayload{
@@ -268,6 +283,21 @@ func (r *Room) BroadcastLeaveGamePackets(c *Client, gID string) error {
 	}
 
 	return c.Manager.UpdateJoinableGames()
+}
+
+func (r *Room) BroadcastObserverLeaveGamePacket(c *Client, gID string) error {
+	{
+		p, err := NewUserLeftGamePacket(UserLeftGamePayload{
+			GameID: gID,
+			UserID: c.ID,
+		})
+		if err != nil {
+			return err
+		}
+		r.BroadcastSkipSelf(p, c.ID)
+	}
+
+	return nil
 }
 
 func (r *Room) ListUsers() []string {

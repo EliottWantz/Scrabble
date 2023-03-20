@@ -78,6 +78,9 @@ type JoinGamePayload struct {
 	GameID   string `json:"gameId"`
 	Password string `json:"password,omitempty"`
 }
+type joinGameAsObserverPayload struct {
+	GameID string `json:"gameId"`
+}
 
 type LeaveGamePayload struct {
 	GameID string `json:"gameId"`

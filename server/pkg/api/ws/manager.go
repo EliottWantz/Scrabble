@@ -192,10 +192,6 @@ func (m *Manager) RemoveClient(c *Client) error {
 		"client_id", c.ID,
 		"total_rooms", m.Rooms.Len(),
 	)
-	m.Clients.Del(c.ID)
-	if err := c.Conn.Close(); err != nil {
-		slog.Error("close connection", err)
-	}
 
 	for _, chatRoomID := range user.JoinedChatRooms {
 		r, err := m.GetRoom(chatRoomID)
@@ -234,8 +230,15 @@ func (m *Manager) RemoveClient(c *Client) error {
 		slog.Error("removeClient broadcast packets", err)
 	}
 	if user.JoinedGame != "" {
-		return m.RemoveClientFromGame(c, user.JoinedGame)
+		if err := m.RemoveClientFromGame(c, user.JoinedGame); err != nil {
+			slog.Error("removeClient from game", err)
+		}
 	}
+
+	if err := c.Conn.Close(); err != nil {
+		slog.Error("close connection", err)
+	}
+	m.Clients.Del(c.ID)
 	return nil
 }
 
@@ -248,6 +251,14 @@ func (m *Manager) RemoveClientFromGame(c *Client, gID string) error {
 	if err != nil {
 		return fiber.NewError(fiber.StatusNotFound, err.Error())
 	}
+
+	if err := r.RemoveClient(c.ID); err != nil {
+		slog.Error("remove client from ws room", err)
+	}
+	if err := r.BroadcastLeaveGamePackets(c, g.ID); err != nil {
+		slog.Error("broadcast leave game packets", err)
+	}
+
 	if g.ScrabbleGame == nil {
 		// Game has not started yet
 		if c.ID == g.CreatorID {
@@ -285,6 +296,13 @@ func (m *Manager) RemoveClientFromGame(c *Client, gID string) error {
 			}
 		}
 	} else {
+		// if Game has started and is a spectator
+		if strings.Contains(strings.Join(g.ObservateurIDs, ""), c.ID) == true {
+			if err := r.RemoveClient(c.ID); err != nil {
+				slog.Error("remove spectator from game room", err)
+			}
+			return nil
+		}
 		// Game has started, replace player with a bot
 		if err := c.Manager.ReplacePlayerWithBot(g.ID, c.ID); err != nil {
 			slog.Error("replace player with bot", err)
@@ -293,13 +311,6 @@ func (m *Manager) RemoveClientFromGame(c *Client, gID string) error {
 			slog.Error("remove user from game room", err)
 		}
 	}
-	if err := r.RemoveClient(c.ID); err != nil {
-		slog.Error("remove client from ws room", err)
-	}
-	if err := r.BroadcastLeaveGamePackets(c, g.ID); err != nil {
-		slog.Error("broadcast leave game packets", err)
-	}
-
 	return nil
 }
 
@@ -478,188 +489,4 @@ func (m *Manager) ListNewUser() {
 
 		m.Broadcast(p)
 	}
-}
-
-func getArrayDifference(a, b []string) []string {
-	diff := []string{}
-	for _, value := range a {
-		found := false
-		for _, otherValue := range b {
-			if value == otherValue {
-				found = true
-				break
-			}
-		}
-		if !found {
-			diff = append(diff, value)
-		}
-	}
-	for _, value := range b {
-		found := false
-		for _, otherValue := range a {
-			if value == otherValue {
-				found = true
-				break
-			}
-		}
-		if !found {
-			diff = append(diff, value)
-		}
-	}
-	return diff
-}
-
-func (m *Manager) sendFriendRequest(id string, friendId string) error {
-	friend, err := m.UserSvc.GetUser(friendId)
-	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, "no user found")
-	}
-	if strings.Contains(strings.Join(friend.PendingRequests, ""), id) {
-		return fiber.NewError(fiber.StatusBadRequest, "already sent a friend request")
-	}
-
-	if strings.Contains(strings.Join(friend.Friends, ""), id) {
-		return fiber.NewError(fiber.StatusBadRequest, "already friends")
-	}
-
-	friend.PendingRequests = append(friend.PendingRequests, id)
-	return m.UserSvc.Repo.Update(friend)
-}
-
-func (m *Manager) acceptFriendRequest(id string, friendId string) error {
-	user, err := m.UserSvc.GetUser(id)
-	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, "no user found")
-	}
-	friend, err := m.UserSvc.GetUser(friendId)
-	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, "no user found")
-	}
-
-	if !strings.Contains(strings.Join(user.PendingRequests, ""), friendId) {
-		return fiber.NewError(fiber.StatusBadRequest, "no friend request found")
-	}
-
-	if strings.Contains(strings.Join(user.Friends, ""), friendId) {
-		return fiber.NewError(fiber.StatusBadRequest, "already friends")
-	}
-	for i, pending_id := range friend.PendingRequests {
-		if pending_id == id {
-			friend.PendingRequests = append(friend.PendingRequests[:i], friend.PendingRequests[i+1:]...)
-		}
-	}
-	for i, pending_id := range user.PendingRequests {
-		if pending_id == friendId {
-			user.PendingRequests = append(user.PendingRequests[:i], user.PendingRequests[i+1:]...)
-		}
-	}
-	user.Friends = append(user.Friends, friendId)
-	friend.Friends = append(friend.Friends, id)
-	m.UserSvc.Repo.Update(friend)
-	return m.UserSvc.Repo.Update(user)
-}
-
-func (m *Manager) rejectFriendRequest(id string, friendId string) error {
-	friend, err := m.UserSvc.GetUser(friendId)
-	if err != nil {
-		return fmt.Errorf("get user: %w", err)
-	}
-	user, err := m.UserSvc.GetUser(id)
-	if err != nil {
-		return fmt.Errorf("get user: %w", err)
-	}
-	for i, pending_id := range user.PendingRequests {
-		if pending_id == friendId {
-			user.PendingRequests = append(user.PendingRequests[:i], user.PendingRequests[i+1:]...)
-			m.UserSvc.Repo.Update(user)
-		}
-	}
-
-	for i, pending_id := range friend.PendingRequests {
-		if pending_id == id {
-			friend.PendingRequests = append(friend.PendingRequests[:i], friend.PendingRequests[i+1:]...)
-			m.UserSvc.Repo.Update(friend)
-		}
-	}
-	for i, pending_id := range friend.Friends {
-		if pending_id == id {
-			friend.Friends = append(friend.Friends[:i], friend.Friends[i+1:]...)
-			m.UserSvc.Repo.Update(friend)
-		}
-	}
-
-	return nil
-}
-
-func (m *Manager) GetFriendsList(id string) ([]*user.User, error) {
-	usr, err := m.UserSvc.GetUser(id)
-	if err != nil {
-		return nil, fiber.NewError(fiber.StatusBadRequest, "no user found")
-	}
-	friends := make([]*user.User, 0, len(usr.Friends))
-	for _, id := range usr.Friends {
-		f, err := m.UserSvc.GetUser(id)
-		if err != nil {
-			return nil, fiber.NewError(fiber.StatusBadRequest, "no user found")
-		}
-		friends = append(friends, f)
-	}
-	return friends, nil
-}
-
-func (m *Manager) GetFriendlistById(id string, friendId string) (*user.User, error) {
-	user, err := m.UserSvc.GetUser(id)
-	if err != nil {
-		return nil, fiber.NewError(fiber.StatusBadRequest, "no user found")
-	}
-	for _, id := range user.Friends {
-		if id == friendId {
-			f, err := m.UserSvc.GetUser(id)
-			if err != nil {
-				return nil, fiber.NewError(fiber.StatusBadRequest, "no user found")
-			}
-			return f, nil
-		}
-	}
-	return nil, fiber.NewError(fiber.StatusBadRequest, "no friend found")
-}
-
-func (m *Manager) RemoveFriendFromList(id string, friendId string) error {
-	user, err := m.UserSvc.GetUser(id)
-	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, "no user found")
-	}
-	for i, id := range user.Friends {
-		if id == friendId {
-			user.Friends = append(user.Friends[:i], user.Friends[i+1:]...)
-			m.UserSvc.Repo.Update(user)
-		}
-	}
-	friend, err := m.UserSvc.GetUser(friendId)
-	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, "no user found")
-	}
-	for i, id := range friend.Friends {
-		if id == id {
-			friend.Friends = append(friend.Friends[:i], friend.Friends[i+1:]...)
-			m.UserSvc.Repo.Update(friend)
-		}
-	}
-	return nil
-}
-
-func (m *Manager) GetPendingFriendlistRequests(id string) ([]*user.User, error) {
-	usr, err := m.UserSvc.GetUser(id)
-	if err != nil {
-		return nil, fiber.NewError(fiber.StatusBadRequest, "no user found")
-	}
-	friends := make([]*user.User, 0, len(usr.PendingRequests))
-	for _, id := range usr.PendingRequests {
-		f, err := m.UserSvc.GetUser(id)
-		if err != nil {
-			return nil, fiber.NewError(fiber.StatusBadRequest, "no user found")
-		}
-		friends = append(friends, f)
-	}
-	return friends, nil
 }
