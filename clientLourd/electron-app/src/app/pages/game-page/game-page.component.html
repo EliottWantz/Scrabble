@@ -1,52 +1,58 @@
 <div class="container">
-  <div *ngFor="let player of game.value.players">
-    {{player.username}} {{player.score}}
+  <div class="left">
+    <div *ngFor="let player of game.value.players">
+      {{player.username}} {{player.score}}
+    </div>
   </div>
+  <div class="middle">
     <app-board></app-board>
     <app-rack></app-rack>
-    <app-timer></app-timer>
-    <app-chat-box></app-chat-box>
     <button
-      *ngIf="isTurn()"
-      mat-raised-button
-      color="warn"
-      (click)="submit()"
-      id="play-button"
-      [disabled]="!hasPlacedLetters()"
-    >
-      Envoyer
-    </button>
+    *ngIf="isTurn()"
+    mat-raised-button
+    color="warn"
+    (click)="submit()"
+    id="play-button"
+    [disabled]="!hasPlacedLetters()"
+  >
+    Envoyer
+  </button>
 
-    <button
-      *ngIf="isTurn()"
-      mat-raised-button
-      color="warn"
-      (click)="pass()"
-      id="pass-button"
-    >
-      Passer
-    </button>
+  <button
+    *ngIf="isTurn()"
+    mat-raised-button
+    color="warn"
+    (click)="pass()"
+    id="pass-button"
+  >
+    Passer
+  </button>
 
-    <button
-      *ngIf="isTurn()"
-      mat-raised-button
-      color="warn"
-      (click)="exchange()"
-      id="exchange-button"
-      [disabled]="!hasSelectedLetters()"
-    >
-      Échanger
-    </button>
+  <button
+    *ngIf="isTurn()"
+    mat-raised-button
+    color="warn"
+    (click)="exchange()"
+    id="exchange-button"
+    [disabled]="!hasSelectedLetters()"
+  >
+    Échanger
+  </button>
 
-    <button
-      *ngIf="isTurn()"
-      mat-raised-button
-      color="warn"
-      (click)="indice()"
-      id="indice-button"
-    >
-      Indice
-    </button>
+  <button
+    *ngIf="isTurn()"
+    mat-raised-button
+    color="warn"
+    (click)="indice()"
+    id="indice-button"
+  >
+    Indice
+  </button>
+  </div>
+  <div class="right">
+    <app-timer id="timer"></app-timer>
+    <app-chat-box id="chat-box"></app-chat-box>
+  </div>
     <!--
       <mat-card id="indice" *ngIf="moves.value.length > 0">
       <mat-card-content>

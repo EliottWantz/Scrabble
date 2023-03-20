@@ -1,17 +1,39 @@
 .container {
-  display: flexbox;
+  display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   flex-wrap: wrap;
-  flex-direction: column;
+  flex-direction: row;
   height: 100vh;
   width: 100%;
 }
 
-app-timer {
-  float: right;
+.left {
+  width: 18%;
+  margin-right: 2%;
 }
 
-app-board {
-  
+.middle {
+  width: 53%;
+  margin-right: 2%;
+  position: relative;
 }
+
+.right {
+  width: 25%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  flex-direction: column;
+  flex-wrap: wrap;
+  height: 100%;
+}
+
+#timer {
+  margin-top: 20%;
+}
+
+#chat-box {
+  margin-top: auto;
+}
+

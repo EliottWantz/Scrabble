@@ -1,6 +1,6 @@
 .square-multiplier {
-    width: min(4.2vh, 4.2vw);
-    height: min(4.2vh, 4.2vw);
+    width: 4%;
+    height: 4%;
     outline-style: solid;
     outline-color: black;
     outline-width: 1px;
@@ -25,4 +25,10 @@
 
 .square-multiplier.letter3 {
     background: #1375b0;
+}
+
+.board {
+    height: 50vmin;
+    width: 50vmin;
+    aspect-ratio: 1/1;
 }
