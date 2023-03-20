@@ -8,6 +8,7 @@ import { GamePageComponent } from '@app/pages/game-page/game-page.component';
 import { SocialPageComponent } from '@app/pages/social-page/social-page.component';
 import { RegisterPageComponent } from '@app/pages/register-page/register-page.component';
 import { AvatarSelectionPageComponent } from '@app/pages/avatar-selection-page/avatar-selection-page.component'
+import { WaitRoomPageComponent } from '@app/pages/waiting-room-page/waiting-room-page.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' },
@@ -18,7 +19,8 @@ const routes: Routes = [
   { path: 'register', component: RegisterPageComponent },
   { path: 'avatar', component: AvatarSelectionPageComponent },
   { path: 'game', component: GamePageComponent },
-  { path: 'social', component: SocialPageComponent }
+  { path: 'social', component: SocialPageComponent },
+  { path: 'waitingRoom', component: WaitRoomPageComponent }
 ];
 
 @NgModule({
