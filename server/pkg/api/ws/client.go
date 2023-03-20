@@ -121,6 +121,12 @@ func (c *Client) handlePacket(p *Packet) error {
 		return c.HandlePlayMoveRequest(p)
 	case ClientEventIndice:
 		return c.HandleIndiceRequest(p)
+	case ClientEventJoinAsObservateur:
+		return c.HandleJoinAsObserverRequest(p)
+	case ClientEventLeaveAsObservateur:
+		return c.HandleObservateurLeaveGameRequest(p)
+	case ClientEventPutMeIn:
+		return c.HandlePutMeInRequest(p)
 	}
 
 	return nil
@@ -376,6 +382,47 @@ func (c *Client) HandleJoinGameRequest(p *Packet) error {
 	return r.BroadcastJoinGamePackets(c, g)
 }
 
+func (c *Client) HandleJoinAsObserverRequest(p *Packet) error {
+	payload := joinGameAsObserverPayload{}
+	if err := json.Unmarshal(p.Payload, &payload); err != nil {
+		return err
+	}
+
+	g, err := c.Manager.GameSvc.AddObserver(payload.GameID, c.ID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+
+	r, err := c.Manager.GetRoom(payload.GameID)
+
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+
+	if err := r.AddClient(c.ID); err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+	gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
+		Game: makeGamePayload(g),
+	})
+	c.send(gamePacket)
+	return r.BroadcastObserverJoinGamePacket(c, g)
+}
+
+func (c *Client) HandleObservateurLeaveGameRequest(p *Packet) error {
+	payload := LeaveGamePayload{}
+	if err := json.Unmarshal(p.Payload, &payload); err != nil {
+		return err
+	}
+
+	_, err := c.Manager.GameSvc.RemoveObserver(payload.GameID, c.ID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+	return c.Manager.RemoveClientFromGame(c, payload.GameID)
+
+}
+
 func (c *Client) HandleLeaveGameRequest(p *Packet) error {
 	payload := LeaveGamePayload{}
 	if err := json.Unmarshal(p.Payload, &payload); err != nil {
@@ -501,6 +548,32 @@ func (c *Client) HandleIndiceRequest(p *Packet) error {
 	}
 
 	c.send(response)
+
+	return nil
+}
+
+func (c *Client) HandlePutMeInRequest(p *Packet) error {
+	payload := joinGameAsObserverPayload{}
+	if err := json.Unmarshal(p.Payload, &payload); err != nil {
+		return err
+	}
+
+	g, err := c.Manager.GameSvc.ReplaceBotByObserver(payload.GameID, c.ID)
+	if err != nil {
+		return err
+	}
+
+	gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
+		Game: makeGamePayload(g),
+	})
+	if err != nil {
+		return err
+	}
+	c.send(gamePacket)
+	_, err = c.BroadcastToRoom(payload.GameID, gamePacket)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
