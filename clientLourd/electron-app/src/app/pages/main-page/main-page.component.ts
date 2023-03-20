@@ -1,4 +1,5 @@
 import { Component } from "@angular/core";
+import { GameService } from "@app/services/game/game.service";
 import { RoomService } from "@app/services/room/room.service";
 import { UserService } from "@app/services/user/user.service";
 import { WebSocketService } from "@app/services/web-socket/web-socket.service";
@@ -15,7 +16,7 @@ export class MainPageComponent {
   isJoining = false;
   public user: BehaviorSubject<User>;
 
-  constructor(private userService: UserService, private socketService: WebSocketService, private roomService: RoomService) {
+  constructor(private userService: UserService, private socketService: WebSocketService, private gameService: GameService) {
     this.user = this.userService.subjectUser;
     document.getElementById("avatar")?.setAttribute("src", this.user.value.avatar.url);
   }
@@ -29,6 +30,8 @@ export class MainPageComponent {
   }
 
   isInGame(): boolean {
-    return this.roomService.currentGameRoom.value.id != "";
+    if (this.gameService.game.value)
+      return this.gameService.game.value.id != "";
+    return false;
   }
 }

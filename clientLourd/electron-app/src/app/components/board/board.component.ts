@@ -1,6 +1,6 @@
 import { Component, ElementRef, OnInit, ViewChildren, QueryList } from "@angular/core";
 import { BehaviorSubject } from "rxjs";
-import { Game } from "@app/utils/interfaces/game/game";
+import { Game, ScrabbleGame } from "@app/utils/interfaces/game/game";
 import { GameService } from "@app/services/game/game.service";
 import { MouseService } from "@app/services/mouse/mouse.service";
 import { MoveService } from "@app/services/game/move.service";
@@ -11,9 +11,9 @@ import { MoveService } from "@app/services/game/move.service";
     styleUrls: ["./board.component.scss"],
 })
 export class BoardComponent implements OnInit {
-    game!: BehaviorSubject<Game>;
+    game!: BehaviorSubject<ScrabbleGame>;
     constructor(private gameService: GameService, private mouseService: MouseService, private moveService: MoveService) {
-        this.game = this.gameService.game;
+        this.game = this.gameService.scrabbleGame;
     }
 
     ngOnInit(): void {

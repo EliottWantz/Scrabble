@@ -5,7 +5,7 @@ import { CommunicationService } from "@app/services/communication/communication.
 import { UserService } from "@app/services/user/user.service";
 import { WebSocketService } from "@app/services/web-socket/web-socket.service";
 import { ClientEvent } from "@app/utils/events/client-events";
-import { JoinDMPayload } from "@app/utils/interfaces/packet";
+import { CreateDMRoomPayload } from "@app/utils/interfaces/packet";
 import { User } from "@app/utils/interfaces/user";
 import { BehaviorSubject } from "rxjs";
 
@@ -54,12 +54,12 @@ export class SocialPageComponent {
   async friendChat(friendId: string):Promise<void>{
     this.inDM=true;
     const friend = await this.communicationService.getFriendByID(this.user.value.id, friendId)
-    const payload: JoinDMPayload = {
+    const payload: CreateDMRoomPayload = {
       username:this.user.value.username,
       toId: friend.friend.id,
       toUsername:friend.friend.username
     }
-    const event : ClientEvent = "join-dm-room";
+    const event : ClientEvent = "create-dm-room";
     this.socketService.send(event, payload);
   }
 }
