@@ -53,6 +53,8 @@ export class AuthenticationService {
             avatar: res.user.avatar,
             preferences: res.user.preferences,
             joinedChatRooms: res.user.joinedChatRooms,
+            joinedDMRooms: res.user.joinedDMRooms,
+            joinedGame: res.user.joinedGame,
             friends: res.user.friends,
             pendingRequests: res.user.pendingRequests,
             summary: res.user.summary

@@ -10,57 +10,53 @@ import { User } from "@app/utils/interfaces/user";
     providedIn: 'root',
 })
 export class RoomService {
-    rooms!: BehaviorSubject<Room[]>;
     currentRoomChat!: BehaviorSubject<Room>;
-    joinableGames!: BehaviorSubject<Room[]>;
     listChatRooms!: BehaviorSubject<Room[]>;
-    currentGameRoom!: BehaviorSubject<Room>;
+    listJoinedChatRooms!: BehaviorSubject<Room[]>;
 
     constructor(private commService: CommunicationService, private userService: UserService) {
-        this.rooms = new BehaviorSubject<Room[]>([]);
+        this.listChatRooms = new BehaviorSubject<Room[]>([]);
+        this.listJoinedChatRooms = new BehaviorSubject<Room[]>([]);
         this.currentRoomChat = new BehaviorSubject<Room>({
             id: "",
+            name: "",
             userIds: [],
             messages: [],
-            creatorId : "",
-            isGameRoom: false
         });
-        this.currentGameRoom = new BehaviorSubject<Room>({
-            id: "",
-            userIds: [],
-            messages: [],
-            creatorId : "",
-            isGameRoom: true
-        });
-        this.joinableGames = new BehaviorSubject<Room[]>([]);
-        this.listChatRooms = new BehaviorSubject<Room[]>([]);
     }
 
     addRoom(room: Room): void {
         //console.log(room);
         console.log("room");
         console.log(room);
-        this.rooms.next([...this.rooms.value, room]);
-        if (room.isGameRoom) {
-            this.currentGameRoom.next(room);
-        } else {
-            this.currentRoomChat.next(room);
-        }
+        this.listJoinedChatRooms.next([...this.listJoinedChatRooms.value, room]);
+        const updatedChatRooms = this.userService.currentUserValue.joinedChatRooms;
+        updatedChatRooms.push(room.id);
+        this.userService.subjectUser.next({...this.userService.subjectUser.value, joinedChatRooms: updatedChatRooms});
+        this.currentRoomChat.next(room);
     }
 
     removeRoom(roomID: string): void {
-        const currentRooms = this.rooms.getValue();
+        const currentRooms = this.listChatRooms.getValue();
         const index = this.findRoom(roomID);
         if (index !== undefined)
             currentRooms.splice(index, 1);
 
-        this.rooms.next(currentRooms);
+        this.listChatRooms.next(currentRooms);
+        const updatedChatRooms = this.userService.currentUserValue.joinedChatRooms;
+        const indexChat = updatedChatRooms.indexOf(roomID, 0);
+        if (indexChat > -1) {
+            updatedChatRooms.splice(indexChat, 1);
+        }
+        this.userService.subjectUser.next({...this.userService.subjectUser.value, joinedChatRooms: updatedChatRooms});
+        if (this.listChatRooms.value.length > 0)
+            this.currentRoomChat.next(this.listChatRooms.value[0]);
     }
 
     changeRoom(roomId: string): void {
         const index = this.findRoom(roomId);
         if (index !== undefined)
-            this.currentRoomChat.next(this.rooms.value[index]);
+            this.currentRoomChat.next(this.listChatRooms.value[index]);
     }
 
     addMessage(msg: ChatMessage): void {
@@ -68,53 +64,61 @@ export class RoomService {
             const currentMessages = this.currentRoomChat.value.messages;
             currentMessages.push(msg);
             this.currentRoomChat.next({...this.currentRoomChat.value, messages: currentMessages});
-        } else if (msg.roomId== this.currentGameRoom.value.id) {
-            const currentMessages = this.currentGameRoom.value.messages;
-            currentMessages.push(msg);
-            this.currentGameRoom.next({...this.currentGameRoom.value, messages: currentMessages});
         } else {
             const index = this.findRoom(msg.roomId);
             if (index) {
-                const currentMessages = this.rooms.value[index].messages;
+                const currentMessages = this.listChatRooms.value[index].messages;
                 currentMessages.push(msg);
-                const newRooms = this.rooms.value;
+                const newRooms = this.listChatRooms.value;
                 newRooms[index] = {...newRooms[index], messages: currentMessages};
-                this.rooms.next(newRooms);
+                this.listChatRooms.next(newRooms);
             }
         }
     }
 
     findRoom(roomIdTocHeck: string): number | undefined {
-        for (let i = 0; i < this.rooms.value.length; i++) {
-            if (this.rooms.value[i].id == roomIdTocHeck)
+        for (let i = 0; i < this.listJoinedChatRooms.value.length; i++) {
+            if (this.listJoinedChatRooms.value[i].id == roomIdTocHeck)
                 return i;         
         }
         return undefined;
     }
 
-    findGame(roomIdTocHeck: string): number | undefined {
-        for (let i = 0; i < this.joinableGames.value.length; i++) {
-            if (this.joinableGames.value[i].id == roomIdTocHeck)
-                return i;         
-        }
-        return undefined;
-    }
-
-    addUser(roomId: string, user: User): void {
+    addUser(roomId: string, userId: string): void {
         if (roomId == this.currentRoomChat.value.id) {
             const currentRoom = this.currentRoomChat.value;
-            currentRoom.userIds = [...currentRoom.userIds, user.id]
+            currentRoom.userIds = [...currentRoom.userIds, userId]
             this.currentRoomChat.next(currentRoom);
-        } else if (roomId == this.currentGameRoom.value.id) {
-            const currentGameRoom = this.currentGameRoom.value;
-            currentGameRoom.userIds = [...currentGameRoom.userIds, user.id]
-            this.currentGameRoom.next(currentGameRoom);
         } else {
-            const rooms = this.rooms.value;
-            for (let i = 0; i < this.rooms.value.length; i++) {
+            const rooms = this.listChatRooms.value;
+            for (let i = 0; i < this.listChatRooms.value.length; i++) {
                 if (rooms[i].id == roomId) {
-                    rooms[i].userIds = [...rooms[i].userIds, user.id];
-                    this.rooms.next(rooms);
+                    rooms[i].userIds = [...rooms[i].userIds, userId];
+                    this.listChatRooms.next(rooms);
+                }
+            }
+        }
+    }
+
+    removeUser(roomId: string, userId: string): void {
+        if (roomId == this.currentRoomChat.value.id) {
+            const currentUsers = this.currentRoomChat.value.userIds;
+            const indexUser = currentUsers.indexOf(userId, 0);
+            if (indexUser > -1) {
+                currentUsers.splice(indexUser, 1);
+                this.currentRoomChat.next({...this.currentRoomChat.value, userIds: currentUsers});
+            }
+        } else {
+            const index = this.findRoom(roomId);
+            if (index) {
+                const rooms = this.listChatRooms.value;
+                const indexUser = rooms[index].userIds.indexOf(userId, 0);
+                if (indexUser > -1) {
+                    rooms[index].userIds.splice(indexUser, 1);
+                    if (rooms[index].userIds.length == 0) {
+                        this.listChatRooms.value.splice(index, 1);
+                    }
+                    this.listChatRooms.next(rooms);
                 }
             }
         }

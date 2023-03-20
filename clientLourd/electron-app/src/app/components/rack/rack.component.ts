@@ -1,6 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { BehaviorSubject } from "rxjs";
-import { Game } from "@app/utils/interfaces/game/game";
+import { Game, ScrabbleGame } from "@app/utils/interfaces/game/game";
 import { GameService } from "@app/services/game/game.service";
 import { UserService } from "@app/services/user/user.service";
 import { Tile } from "@app/utils/interfaces/game/tile";
@@ -11,10 +11,10 @@ import { Tile } from "@app/utils/interfaces/game/tile";
     styleUrls: ["./rack.component.scss"],
 })
 export class RackComponent implements OnInit {
-    game!: BehaviorSubject<Game>;
+    game!: BehaviorSubject<ScrabbleGame>;
     rack: Tile[] = [];
     constructor(private gameService: GameService, private userService: UserService) {
-        this.game = this.gameService.game;
+        this.game = this.gameService.scrabbleGame;
         const currentRack = this.getPlayerRack();
         if (currentRack)    
             this.rack = currentRack;

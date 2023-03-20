@@ -28,6 +28,8 @@ export class UserService {
             avatar:{url:"a", fileId:"a"},
             preferences:{theme:"a"},
             joinedChatRooms: [],
+            joinedDMRooms: [],
+            joinedGame: "",
             friends: [],
             pendingRequests: [],
             summary: summary
@@ -58,6 +60,8 @@ export class UserService {
             avatar:{url:"a", fileId:"a"},
             preferences:{theme:"a"},
             joinedChatRooms: [],
+            joinedDMRooms: [],
+            joinedGame: "",
             friends: [],
             pendingRequests: [],
             summary: summary

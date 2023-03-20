@@ -42,22 +42,22 @@ func (m *Manager) GetMessages(c *fiber.Ctx) error {
 	})
 }
 
-type ProtectedRoomRequest struct {
+type ProtectedGameRequest struct {
 	Password string `json:"password,omitempty"`
 }
 
-func (m *Manager) ProtectRoom(c *fiber.Ctx) error {
-	roomID := c.Params("id")
-	ProtectedRoom := ProtectedRoomRequest{}
-	if err := c.BodyParser(&ProtectedRoom); err != nil {
+func (m *Manager) ProtectGame(c *fiber.Ctx) error {
+	req := ProtectedGameRequest{}
+	if err := c.BodyParser(&req); err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, "decode req: "+err.Error())
 	}
 
-	if roomID == "" {
-		return fiber.NewError(fiber.StatusBadRequest, "Room ID is required")
+	gameID := c.Params("id")
+	if gameID == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "Game ID is required")
 	}
 
-	_, err := m.RoomSvc.ProtectGameRoom(roomID, ProtectedRoom.Password)
+	_, err := m.GameSvc.ProtectGame(gameID, req.Password)
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
@@ -65,13 +65,13 @@ func (m *Manager) ProtectRoom(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusOK)
 }
 
-func (m *Manager) UnprotectRoom(c *fiber.Ctx) error {
-	roomID := c.Params("id")
-	if roomID == "" {
-		return fiber.NewError(fiber.StatusBadRequest, "Room ID is required")
+func (m *Manager) UnprotectGame(c *fiber.Ctx) error {
+	gameID := c.Params("id")
+	if gameID == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "Game ID is required")
 	}
 
-	m.RoomSvc.UnprotectGameRoom(roomID)
+	m.GameSvc.UnprotectGame(gameID)
 	m.UpdateJoinableGames()
 	return c.SendStatus(fiber.StatusOK)
 }

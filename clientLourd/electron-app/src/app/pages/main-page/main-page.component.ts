@@ -1,4 +1,5 @@
 import { Component } from "@angular/core";
+import { GameService } from "@app/services/game/game.service";
 import { RoomService } from "@app/services/room/room.service";
 import { UserService } from "@app/services/user/user.service";
 import { WebSocketService } from "@app/services/web-socket/web-socket.service";

@@ -1,6 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { GameService } from "@app/services/game/game.service";
-import { Game } from "@app/utils/interfaces/game/game";
+import { Game, ScrabbleGame } from "@app/utils/interfaces/game/game";
 import { BehaviorSubject } from "rxjs";
 import { UserService } from "@app/services/user/user.service";
 import { MoveService } from "@app/services/game/move.service";
@@ -12,12 +12,12 @@ import { MoveInfo } from "@app/utils/interfaces/game/move";
     styleUrls: ["./game-page.component.scss"],
 })
 export class GamePageComponent implements OnInit {
-    game!: BehaviorSubject<Game>;
+    game!: BehaviorSubject<ScrabbleGame>;
     moves!: BehaviorSubject<MoveInfo[]>
     constructor(private gameService: GameService, private userService: UserService, private moveService: MoveService) { }
 
     ngOnInit(): void {
-        this.game = this.gameService.game;
+        this.game = this.gameService.scrabbleGame;
         this.game.subscribe();
         this.moves = this.gameService.moves;
     }
@@ -52,7 +52,7 @@ export class GamePageComponent implements OnInit {
 
     /*getIndice(): string[] {
         const strings = [];
-        for (let move of this.moves.value) {
+        for (const move of this.moves.value) {
             strings.push(JSON.stringify(move));
         }
         return strings;
