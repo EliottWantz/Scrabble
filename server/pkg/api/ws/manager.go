@@ -145,6 +145,9 @@ func (m *Manager) AddClient(c *Client) error {
 	if err := m.GlobalRoom.AddClient(c.ID); err != nil {
 		return err
 	}
+	if err := m.GlobalRoom.BroadcastJoinRoomPackets(c); err != nil {
+		slog.Error("failed to broadcast join room packets", err)
+	}
 
 	// Add the client to all his joined rooms
 	for _, roomID := range user.JoinedChatRooms {
@@ -501,7 +504,6 @@ func getArrayDifference(a, b []string) []string {
 }
 
 func (m *Manager) sendFriendRequest(id string, friendId string) error {
-
 	friend, err := m.UserSvc.GetUser(friendId)
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, "no user found")
