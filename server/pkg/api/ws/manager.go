@@ -480,35 +480,6 @@ func (m *Manager) ListNewUser() {
 	}
 }
 
-func getArrayDifference(a, b []string) []string {
-	diff := []string{}
-	for _, value := range a {
-		found := false
-		for _, otherValue := range b {
-			if value == otherValue {
-				found = true
-				break
-			}
-		}
-		if !found {
-			diff = append(diff, value)
-		}
-	}
-	for _, value := range b {
-		found := false
-		for _, otherValue := range a {
-			if value == otherValue {
-				found = true
-				break
-			}
-		}
-		if !found {
-			diff = append(diff, value)
-		}
-	}
-	return diff
-}
-
 func (m *Manager) sendFriendRequest(id string, friendId string) error {
 	friend, err := m.UserSvc.GetUser(friendId)
 	if err != nil {
@@ -624,8 +595,8 @@ func (m *Manager) GetFriendlistById(id string, friendId string) (*user.User, err
 	return nil, fiber.NewError(fiber.StatusBadRequest, "no friend found")
 }
 
-func (m *Manager) RemoveFriendFromList(id string, friendId string) error {
-	user, err := m.UserSvc.GetUser(id)
+func (m *Manager) RemoveFriendFromList(uID string, friendId string) error {
+	user, err := m.UserSvc.GetUser(uID)
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, "no user found")
 	}
@@ -640,7 +611,7 @@ func (m *Manager) RemoveFriendFromList(id string, friendId string) error {
 		return fiber.NewError(fiber.StatusBadRequest, "no user found")
 	}
 	for i, id := range friend.Friends {
-		if id == id {
+		if id == uID {
 			friend.Friends = append(friend.Friends[:i], friend.Friends[i+1:]...)
 			m.UserSvc.Repo.Update(friend)
 		}
