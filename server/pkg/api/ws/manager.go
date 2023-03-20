@@ -192,10 +192,6 @@ func (m *Manager) RemoveClient(c *Client) error {
 		"client_id", c.ID,
 		"total_rooms", m.Rooms.Len(),
 	)
-	m.Clients.Del(c.ID)
-	if err := c.Conn.Close(); err != nil {
-		slog.Error("close connection", err)
-	}
 
 	for _, chatRoomID := range user.JoinedChatRooms {
 		r, err := m.GetRoom(chatRoomID)
@@ -234,8 +230,15 @@ func (m *Manager) RemoveClient(c *Client) error {
 		slog.Error("removeClient broadcast packets", err)
 	}
 	if user.JoinedGame != "" {
-		return m.RemoveClientFromGame(c, user.JoinedGame)
+		if err := m.RemoveClientFromGame(c, user.JoinedGame); err != nil {
+			slog.Error("removeClient from game", err)
+		}
 	}
+
+	if err := c.Conn.Close(); err != nil {
+		slog.Error("close connection", err)
+	}
+	m.Clients.Del(c.ID)
 	return nil
 }
 
@@ -248,6 +251,14 @@ func (m *Manager) RemoveClientFromGame(c *Client, gID string) error {
 	if err != nil {
 		return fiber.NewError(fiber.StatusNotFound, err.Error())
 	}
+
+	if err := r.RemoveClient(c.ID); err != nil {
+		slog.Error("remove client from ws room", err)
+	}
+	if err := r.BroadcastLeaveGamePackets(c, g.ID); err != nil {
+		slog.Error("broadcast leave game packets", err)
+	}
+
 	if g.ScrabbleGame == nil {
 		// Game has not started yet
 		if c.ID == g.CreatorID {
@@ -300,13 +311,6 @@ func (m *Manager) RemoveClientFromGame(c *Client, gID string) error {
 			slog.Error("remove user from game room", err)
 		}
 	}
-	if err := r.RemoveClient(c.ID); err != nil {
-		slog.Error("remove client from ws room", err)
-	}
-	if err := r.BroadcastLeaveGamePackets(c, g.ID); err != nil {
-		slog.Error("broadcast leave game packets", err)
-	}
-
 	return nil
 }
 
