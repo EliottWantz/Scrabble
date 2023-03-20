@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { Game } from "@app/utils/interfaces/game/game";
+import { Game, ScrabbleGame } from "@app/utils/interfaces/game/game";
 import { BehaviorSubject } from "rxjs";
 import { WebSocketService } from "@app/services/web-socket/web-socket.service";
 import { PlayMovePayload } from "@app/utils/interfaces/packet";
@@ -13,9 +13,9 @@ import { GameService } from "@app/services/game/game.service";
 export class MoveService {
     selectedTiles: Tile[] = [];
     placedTiles: Tile[] = [];
-    game!: BehaviorSubject<Game>;
+    game!: BehaviorSubject<ScrabbleGame>;
     constructor(private webSocketService: WebSocketService, private gameService: GameService) {
-        this.game = this.gameService.game;
+        this.game = this.gameService.scrabbleGame;
         this.game.subscribe(() => {
             this.selectedTiles = [];
             this.placedTiles = [];

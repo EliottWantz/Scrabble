@@ -122,6 +122,42 @@ func (r *Repository) RemoveJoinedRoom(roomID, userID string) error {
 	return err
 }
 
+func (r *Repository) AddJoinedDMRoom(roomID, userID string) error {
+	_, err := r.coll.UpdateByID(
+		context.Background(),
+		userID,
+		bson.M{"$addToSet": bson.M{"joinedDMRooms": roomID}},
+	)
+	return err
+}
+
+func (r *Repository) RemoveJoinedDMRoom(roomID, userID string) error {
+	_, err := r.coll.UpdateByID(
+		context.Background(),
+		userID,
+		bson.M{"$pull": bson.M{"joinedDMRooms": roomID}},
+	)
+	return err
+}
+
+func (r *Repository) SetJoinedGame(gameID, userID string) error {
+	_, err := r.coll.UpdateByID(
+		context.Background(),
+		userID,
+		bson.M{"$set": bson.M{"joinedGame": gameID}},
+	)
+	return err
+}
+
+func (r *Repository) UnSetJoinedGame(userID string) error {
+	_, err := r.coll.UpdateByID(
+		context.Background(),
+		userID,
+		bson.M{"$unset": bson.M{"joinedGame": ""}},
+	)
+	return err
+}
+
 func (r *Repository) Delete(ID string) error {
 	_, err := r.coll.DeleteOne(context.TODO(), bson.M{"_id": ID})
 	if err != nil {
