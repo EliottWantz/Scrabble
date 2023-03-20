@@ -3,6 +3,7 @@ import { FormControl } from "@angular/forms";
 import { MatSidenav } from "@angular/material/sidenav";
 import { MatSlideToggle } from "@angular/material/slide-toggle";
 import { NavigationStart, Router } from "@angular/router";
+import { GameService } from "@app/services/game/game.service";
 import { RoomService } from "@app/services/room/room.service";
 import { ThemeService } from "@app/services/theme/theme.service";
 import { UserService } from "@app/services/user/user.service";
@@ -28,7 +29,7 @@ export class SidebarComponent {
   currentRouteName = "/home";
   previousRouteName = ["/home"];
 
-  constructor(private userService: UserService, private socketService: WebSocketService, private roomService: RoomService, private themeService: ThemeService, private router: Router) {
+  constructor(private userService: UserService, private socketService: WebSocketService, private gameService: GameService, private themeService: ThemeService, private router: Router) {
     this.user = this.userService.subjectUser;
     document.getElementById("avatar")?.setAttribute("src", this.user.value.avatar.url);
     this.router.events.subscribe((e) => {
@@ -76,7 +77,7 @@ export class SidebarComponent {
   }
 
   isInGame(): boolean {
-    return this.roomService.currentGameRoom.value.id != "";
+    return this.gameService.scrabbleGame.value.id != "";
   }
 
   return(): void {

@@ -9,7 +9,7 @@ import { UserService } from "@app/services/user/user.service";
 import { WebSocketService } from "@app/services/web-socket/web-socket.service";
 import { ClientEvent } from "@app/utils/events/client-events";
 import { Game } from "@app/utils/interfaces/game/game";
-import { JoinDMPayload, StartGame } from "@app/utils/interfaces/packet";
+import { StartGamePayload } from "@app/utils/interfaces/packet";
 import { Summary, UserStats } from "@app/utils/interfaces/summary";
 import { User } from "@app/utils/interfaces/user";
 import { BehaviorSubject } from "rxjs";
@@ -20,7 +20,7 @@ import { BehaviorSubject } from "rxjs";
   styleUrls: ["./waiting-room-page.component.scss"],
 })
 export class WaitRoomPageComponent {
-  gameRoom!: BehaviorSubject<Game>;
+  gameRoom!: BehaviorSubject<Game | undefined>;
   constructor(private gameService: GameService, private userService: UserService, private socketService: WebSocketService) {
     this.gameRoom = this.gameService.game
   }
@@ -31,13 +31,21 @@ export class WaitRoomPageComponent {
 
   startGame(): void {
       console.log(this.gameRoom.value);
-      if(this.gameRoom.value.players.length < 2){
+      if (this.gameRoom.value) {
+        if(this.gameRoom.value.userIds.length < 2){
           return;
-      }
-      const payload: StartGame = {
-          roomId: this.gameRoom.value.id
+        }
+        const payload: StartGamePayload = {
+          gameId: this.gameRoom.value.id
         }
         const event : ClientEvent = "start-game";
         this.socketService.send(event, payload);
+      }
+  }
+
+  getNumUsers(): number {
+    if (this.gameRoom.value)
+      return this.gameRoom.value.userIds.length;
+    return 0;
   }
 }

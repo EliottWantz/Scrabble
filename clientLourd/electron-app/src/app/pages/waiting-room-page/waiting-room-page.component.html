@@ -3,9 +3,9 @@
   <h3>En attente d'autre joueurs... Veuillez patienter</h3>
   <mat-spinner color="accent"></mat-spinner>
   <div>
-    <h4>{{gameRoom.value.players.length}}/4 joueurs présents</h4>
+    <h4>{{getNumUsers()}}/4 joueurs présents</h4>
   </div>
-  <div *ngIf="gameRoom.value.players.length >= 2">
-
+  <div *ngIf="getNumUsers() >= 2">
+    <button mat-flat-button color="primary" (click)="startGame()"></button>
   </div>
 </div>
