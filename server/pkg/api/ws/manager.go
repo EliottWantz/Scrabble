@@ -163,6 +163,23 @@ func (m *Manager) AddClient(c *Client) error {
 			return err
 		}
 	}
+	// Add the client to all his joined dm rooms
+	for _, roomID := range user.JoinedDMRooms {
+		r, err := m.GetRoom(roomID)
+		if err != nil {
+			dbRoom, err := m.RoomSvc.Repo.Find(roomID)
+			if err != nil {
+				return err
+			}
+			r = m.AddRoom(dbRoom.ID, dbRoom.Name)
+		}
+		if err := r.AddClient(c.ID); err != nil {
+			return err
+		}
+		if err := r.BroadcastJoinDMRoomPackets(c); err != nil {
+			slog.Error("failed to broadcast join dm room packets", err)
+		}
+	}
 
 	m.logger.Info(
 		"client registered",
@@ -297,7 +314,7 @@ func (m *Manager) RemoveClientFromGame(c *Client, gID string) error {
 		}
 	} else {
 		// if Game has started and is a spectator
-		if strings.Contains(strings.Join(g.ObservateurIDs, ""), c.ID) == true {
+		if strings.Contains(strings.Join(g.ObservateurIDs, ""), c.ID) {
 			if err := r.RemoveClient(c.ID); err != nil {
 				slog.Error("remove spectator from game room", err)
 			}
