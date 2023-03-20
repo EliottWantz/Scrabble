@@ -227,6 +227,12 @@ func (m *Manager) RemoveClient(c *Client) error {
 			continue
 		}
 	}
+	if err := m.GlobalRoom.RemoveClient(c.ID); err != nil {
+		slog.Error("removeClient from global room", err)
+	}
+	if err := m.GlobalRoom.BroadcastLeaveRoomPackets(c); err != nil {
+		slog.Error("removeClient broadcast packets", err)
+	}
 	if user.JoinedGame != "" {
 		return m.RemoveClientFromGame(c, user.JoinedGame)
 	}
