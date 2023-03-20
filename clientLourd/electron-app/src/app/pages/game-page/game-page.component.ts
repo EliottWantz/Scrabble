@@ -50,11 +50,11 @@ export class GamePageComponent implements OnInit {
         this.moveService.indice();
     }
 
-    getIndice(): string[] {
+    /*getIndice(): string[] {
         const strings = [];
         for (let move of this.moves.value) {
             strings.push(JSON.stringify(move));
         }
         return strings;
-    }
+    }*/
 }

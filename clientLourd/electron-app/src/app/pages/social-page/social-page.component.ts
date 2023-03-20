@@ -13,7 +13,7 @@ import { User } from "@app/utils/interfaces/user";
 import { BehaviorSubject } from "rxjs";
 
 @Component({
-  selector: "app-main-page",
+  selector: "app-social-page",
   templateUrl: "./social-page.component.html",
   styleUrls: ["./social-page.component.scss"],
 })

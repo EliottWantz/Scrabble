@@ -5,4 +5,5 @@
     <button *ngIf="!isLoggedIn()" mat-flat-button color="primary" [routerLink]="'/login'">Se connecter</button>
     <button *ngIf="!isLoggedIn()" mat-flat-button color="primary" [routerLink]="'/register'">S'inscrire</button>
     <button mat-flat-button color="primary" routerLink="/game">Game</button>
+    <button *ngIf="!isLoggedIn()" mat-flat-button color="primary" [routerLink]="'/waitingRoom'">Waiting room</button>
 </div>
