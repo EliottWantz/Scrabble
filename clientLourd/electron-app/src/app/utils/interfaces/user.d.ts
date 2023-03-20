@@ -7,6 +7,8 @@ export interface User {
     avatar: {url: string, fileId: string};
     preferences: {theme: string};
     joinedChatRooms: string[];
+    joinedDMRooms: string[];
+    joinedGame: string;
 	friends: string[];
 	pendingRequests: string[];
 	summary: Summary;
