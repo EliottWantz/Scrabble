@@ -29,7 +29,7 @@ export class RoomService {
         //console.log(room);
         console.log("room");
         console.log(room);
-        this.listChatRooms.next([...this.listChatRooms.value, room]);
+        this.listJoinedChatRooms.next([...this.listJoinedChatRooms.value, room]);
         const updatedChatRooms = this.userService.currentUserValue.joinedChatRooms;
         updatedChatRooms.push(room.id);
         this.userService.subjectUser.next({...this.userService.subjectUser.value, joinedChatRooms: updatedChatRooms});
@@ -77,8 +77,8 @@ export class RoomService {
     }
 
     findRoom(roomIdTocHeck: string): number | undefined {
-        for (let i = 0; i < this.listChatRooms.value.length; i++) {
-            if (this.listChatRooms.value[i].id == roomIdTocHeck)
+        for (let i = 0; i < this.listJoinedChatRooms.value.length; i++) {
+            if (this.listJoinedChatRooms.value[i].id == roomIdTocHeck)
                 return i;         
         }
         return undefined;
