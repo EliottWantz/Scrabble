@@ -2,8 +2,8 @@
     <img id="scrabble-img" src="../../../assets/scrabble.png">
     <p>Bienvenue à PolyScrabble</p>
     <p>Commençons</p>
-    <button *ngIf="!isLoggedIn()" mat-flat-button color="primary" [routerLink]="'/login'">Se connecter</button>
-    <button *ngIf="!isLoggedIn()" mat-flat-button color="primary" [routerLink]="'/register'">S'inscrire</button>
-    <button mat-flat-button color="primary" routerLink="/game">Game</button>
-    <button *ngIf="!isLoggedIn()" mat-flat-button color="primary" [routerLink]="'/waitingRoom'">Waiting room</button>
+    <button *ngIf="!isLoggedIn()" mat-flat-button color="primary" routerLink="/login">Se connecter</button>
+    <button *ngIf="!isLoggedIn()" mat-flat-button color="primary" routerLink="/register">S'inscrire</button>
+    <button *ngIf="isLoggedIn()" mat-flat-button color="primary" routerLink="/waitingRoom" (click)="createGame()">Créer une partie</button>
+    <button *ngIf="!isLoggedIn()" mat-flat-button color="primary" routerLink="/waitingRoom">Waiting room</button>
 </div>
