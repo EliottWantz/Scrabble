@@ -127,6 +127,10 @@ func (c *Client) handlePacket(p *Packet) error {
 		return c.HandleObservateurLeaveGameRequest(p)
 	case ClientEventPutMeIn:
 		return c.HandlePutMeInRequest(p)
+	case ClientEventGamePrivate:
+		return c.HandleGamePrivateRequest(p)
+	case ClientEventGamePublic:
+		return c.HandleGamePublicRequest(p)
 	}
 
 	return nil
@@ -393,6 +397,10 @@ func (c *Client) HandleJoinAsObserverRequest(p *Packet) error {
 		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
 
+	if g.IsPrivateGame == true {
+		return fiber.NewError(fiber.StatusUnauthorized, "game is private")
+	}
+
 	r, err := c.Manager.GetRoom(payload.GameID)
 
 	if err != nil {
@@ -575,5 +583,67 @@ func (c *Client) HandlePutMeInRequest(p *Packet) error {
 		return err
 	}
 
+	return nil
+}
+
+func (c *Client) HandleGamePrivateRequest(p *Packet) error {
+	payload := MakeGamePrivatePayload{}
+	if err := json.Unmarshal(p.Payload, &payload); err != nil {
+		return err
+	}
+	g, err := c.Manager.GameSvc.MakeGamePrivate(payload.GameID)
+	if err != nil {
+		return err
+
+	}
+	r, err := c.Manager.GetRoom(g.ID)
+	for _, observateur := range g.ObservateurIDs {
+		if err != nil {
+			slog.Error("get room", err)
+		}
+		if err := r.RemoveClient(observateur); err != nil {
+			slog.Error("remove spectator from game room", err)
+		}
+
+	}
+	g.ObservateurIDs = []string{}
+	gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
+		Game: makeGamePayload(g),
+	})
+	if err != nil {
+		return err
+	}
+	c.send(gamePacket)
+	_, err = c.BroadcastToRoom(payload.GameID, gamePacket)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (c *Client) HandleGamePublicRequest(p *Packet) error {
+	payload := MakeGamePublicPayload{}
+	if err := json.Unmarshal(p.Payload, &payload); err != nil {
+		return err
+	}
+	g, err := c.Manager.GameSvc.MakeGamePublic(payload.GameID)
+	if err != nil {
+		return err
+
+	}
+	if err != nil {
+		slog.Error("get room", err)
+	}
+	gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
+		Game: makeGamePayload(g),
+	})
+	if err != nil {
+		return err
+	}
+	c.send(gamePacket)
+	_, err = c.BroadcastToRoom(payload.GameID, gamePacket)
+	if err != nil {
+		return err
+	}
 	return nil
 }

@@ -24,6 +24,7 @@ var (
 	ErrGameNotStarted    = errors.New("game not started")
 	ErrGameOver          = errors.New("game is over")
 	ErrPrivateGame       = errors.New("game is private")
+	ErrPublicGame        = errors.New("game is public")
 	ErrGameHasNotStarted = errors.New("game has not started")
 	ErrObserverNotFound  = errors.New("observer not found")
 
@@ -383,6 +384,34 @@ func (s *Service) ReplaceBotByObserver(gID string, oId string) (*Game, error) {
 		}
 	}
 	return nil, errors.New("no bot in that game")
+}
+func (s *Service) MakeGamePrivate(gId string) (*Game, error) {
+	g, err := s.Repo.Find(gId)
+	if err != nil {
+		return nil, err
+	}
+	if g.IsPrivateGame == true {
+		return nil, ErrPrivateGame
+	}
+	if g.ScrabbleGame.IsOver() {
+		return nil, ErrGameOver
+	}
+	g.IsPrivateGame = true
+	return g, nil
+}
+func (s *Service) MakeGamePublic(gId string) (*Game, error) {
+	g, err := s.Repo.Find(gId)
+	if err != nil {
+		return nil, err
+	}
+	if g.IsPrivateGame == false {
+		return nil, ErrPublicGame
+	}
+	if g.ScrabbleGame.IsOver() {
+		return nil, ErrGameOver
+	}
+	g.IsPrivateGame = false
+	return g, nil
 }
 
 func parsePoint(str string) (scrabble.Position, error) {

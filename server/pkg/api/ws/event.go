@@ -6,6 +6,8 @@ var (
 	ClientEventChatMessage        = "chat-message"
 	ClientEventJoinAsObservateur  = "join-as-observateur"
 	ClientEventLeaveAsObservateur = "leave-as-observateur"
+	ClientEventGamePrivate        = "game-private"
+	ClientEventGamePublic         = "game-public"
 	ClientEventPutMeIn            = "put-me-in"
 	ClientEventCreateRoom         = "create-room"
 	ClientEventJoinRoom           = "join-room"
