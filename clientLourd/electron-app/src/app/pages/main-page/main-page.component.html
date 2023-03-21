@@ -5,5 +5,12 @@
     <button *ngIf="!isLoggedIn()" mat-flat-button color="primary" routerLink="/login">Se connecter</button>
     <button *ngIf="!isLoggedIn()" mat-flat-button color="primary" routerLink="/register">S'inscrire</button>
     <button *ngIf="isLoggedIn()" mat-flat-button color="primary" routerLink="/waitingRoom" (click)="createGame()">Créer une partie</button>
-    <button *ngIf="!isLoggedIn()" mat-flat-button color="primary" routerLink="/waitingRoom">Waiting room</button>
+    <button mat-flat-button color="primary" routerLink="/game">Game</button>
+
+    <div *ngIf="isLoggedIn()">
+        <div class="list-games" *ngFor="let game of joinableGames.value; let i = index">
+            <h4>{{game.id}}     {{game.userIds.length}}/4</h4>
+            <button mat-flat-button color="primary" (click)="joinGame(game.id, ' ')" routerLink="/waitingRoom">Rejoindre la partie</button>
+        </div>
+    </div>
 </div>
