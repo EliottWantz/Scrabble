@@ -51,3 +51,6 @@
         <router-outlet></router-outlet>
     </mat-drawer-content>
 </mat-drawer-container>
+<div *ngIf="isInGame()">
+    <router-outlet></router-outlet>
+</div>

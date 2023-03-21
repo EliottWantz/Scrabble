@@ -183,6 +183,7 @@ export class WebSocketService {
             case "gameUpdate": {
                 const payloadUpdateGame = packet.payload as GameUpdatePayload;
                 this.gameService.updateGame(payloadUpdateGame.game);
+                this.rackService.deleteRecycled();
                 break;
             }
 

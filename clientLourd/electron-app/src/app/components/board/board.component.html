@@ -13,12 +13,10 @@
                     #elem
                     squareHost
                 >
-                    <div #multis>
+                    <div *ngIf="!col.tile" #multis>
                         {{getTextSquare(col.wordMultiplier, col.letterMultiplier)}}
                     </div>
-                    <!--
-                        <app-tile *ngIf="col.tile" [tile]="col.tile" [disabled]="true"></app-tile>
-                    -->
+                    <app-tile *ngIf="col.tile" [tile]="col.tile" [disabled]="true"></app-tile>
                 </th>
             </tr>
         </tbody>

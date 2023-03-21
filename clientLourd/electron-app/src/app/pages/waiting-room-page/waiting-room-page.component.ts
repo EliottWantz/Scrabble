@@ -48,4 +48,8 @@ export class WaitRoomPageComponent {
       return this.gameRoom.value.userIds.length;
     return 0;
   }
+
+  checkIfCreator(): boolean {
+    return this.userService.currentUserValue.id == this.gameRoom.value?.creatorId;
+  }
 }
