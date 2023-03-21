@@ -1,26 +1,34 @@
 .container {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: flex-start;
   flex-wrap: wrap;
   flex-direction: row;
+  //column-gap: 2%;
   height: 100vh;
   width: 100%;
 }
 
 .left {
-  width: 18%;
-  margin-right: 2%;
+  width: 15%;
+  height: 100%;
+  //margin-right: 2%;
 }
 
 .middle {
-  width: 53%;
-  margin-right: 2%;
-  position: relative;
+  width: 50%;
+  //margin-right: 2%;
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  row-gap: 2%;
 }
 
 .right {
-  width: 25%;
+  width: 30%;
   display: flex;
   justify-content: flex-start;
   align-items: center;
@@ -35,5 +43,36 @@
 
 #chat-box {
   margin-top: auto;
+  width: 80%;
 }
 
+.board {
+  //margin-top: 2%;
+  position: relative;
+  width: 100%;
+  //margin-bottom: 2%;
+}
+
+#rack {
+  width: 75%;
+  //margin-bottom: 2%;
+}
+
+.play-buttons {
+  display: flex;
+  width: 75%;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+}
+
+.player {
+  width: 90%;
+  height: 20%;
+  background-color: grey;
+}
+
+.player.isTurn {
+  background: #f01c7a;
+}
