@@ -80,11 +80,25 @@ $dark-theme: mat.define-dark-theme(
 
 .dark-theme {
     @include mat.all-component-colors($dark-theme);
+    //.mat-mdc-input-element {
+      //  margin-top: 5%;
+    //}
   }
   
   .light-theme {
     @include mat.all-component-themes($light-theme);
   }
+
+.mat-mdc-form-field-infix {
+  display: flex;
+  flex-direction: column;
+  
+    min-width: 0;
+    width: 180px;
+    position: relative;
+    box-sizing: border-box;
+    min-height: 56px;
+}
 
   html,
 body {
