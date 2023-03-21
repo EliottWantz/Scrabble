@@ -1,7 +1,7 @@
 .ship-box, #columns, #rows {
-    width: 40px;
-    height: 40px;
-    outline: solid 2px black;
+    width: 35px;
+    height: 35px;
+    outline: solid 2px #e6d9b7;
     color: rgba(0, 0, 0, 0.87);
     cursor: move;
     justify-content: center;
@@ -16,4 +16,16 @@
     display: inline-block;
     vertical-align: top;
     margin: 1%;
-  }
+    background-color: #faeac2;
+}
+
+.letter {
+  line-height: 40px;
+  font-size: large;
+}
+
+.value {
+  position: absolute;
+  right: 1px;
+  bottom: 1px;
+}
