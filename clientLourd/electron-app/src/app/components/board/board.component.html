@@ -1,20 +1,26 @@
 <div class="board">
-    <tr *ngFor="let row of game.value.board; let i = index">
-        <th *ngFor="let col of row, let j = index"
-            class="square-multiplier"
-            [class.word3]="col.wordMultiplier === 3"
-            [class.word2]="col.wordMultiplier === 2"
-            [class.letter2]="col.letterMultiplier === 2"
-            [class.letter3]="col.letterMultiplier === 3"
-            id="square"
-            (click)="clicked(i, j)"
-            #elem
-            squareHost
-        >
-            {{getTextSquare(col.wordMultiplier, col.letterMultiplier)}}
-            <!--
-                <app-tile *ngIf="col.tile" [tile]="col.tile" [disabled]="true"></app-tile>
-            -->
-        </th>
-    </tr>
+    <table>
+        <tbody>
+            <tr *ngFor="let row of game.value.board; let i = index">
+                <th *ngFor="let col of row, let j = index"
+                    class="square-multiplier"
+                    [class.word3]="col.wordMultiplier === 3"
+                    [class.word2]="col.wordMultiplier === 2"
+                    [class.letter2]="col.letterMultiplier === 2"
+                    [class.letter3]="col.letterMultiplier === 3"
+                    id="square"
+                    (click)="clicked(i, j)"
+                    #elem
+                    squareHost
+                >
+                    <div #multis>
+                        {{getTextSquare(col.wordMultiplier, col.letterMultiplier)}}
+                    </div>
+                    <!--
+                        <app-tile *ngIf="col.tile" [tile]="col.tile" [disabled]="true"></app-tile>
+                    -->
+                </th>
+            </tr>
+        </tbody>
+    </table>
 </div>

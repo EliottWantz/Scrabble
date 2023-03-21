@@ -23,10 +23,15 @@ export class BoardComponent implements OnInit {
     }
 
     @ViewChildren('elem') elements!: QueryList<ElementRef>;
+    @ViewChildren('multis') multis!: QueryList<ElementRef>;
     clicked(row: number, col: number): void {
+        console.log("allo");
         const currentElem = this.elements.toArray()[row * 15 + col];
-        if (currentElem.nativeElement.children.length == 0 && this.moveService.selectedTiles.length == 1) {
+        const multiElem = this.multis.toArray()[row * 15 + col];
+        if (currentElem.nativeElement.children.length == 1 && this.moveService.selectedTiles.length == 1) {
             this.mouseService.place(currentElem.nativeElement, row, col);
+            console.log("allo");
+            multiElem.nativeElement.remove();
         }
     }
 
