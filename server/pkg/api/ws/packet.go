@@ -82,6 +82,14 @@ type joinGameAsObserverPayload struct {
 	GameID string `json:"gameId"`
 }
 
+type MakeGamePrivatePayload struct {
+	GameID string `json:"gameId"`
+}
+
+type MakeGamePublicPayload struct {
+	GameID string `json:"gameId"`
+}
+
 type LeaveGamePayload struct {
 	GameID string `json:"gameId"`
 }
