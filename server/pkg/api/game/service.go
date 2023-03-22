@@ -7,20 +7,26 @@ import (
 	"strings"
 	"time"
 
-	"scrabble/pkg/api/room"
+	"scrabble/pkg/api/auth"
 	"scrabble/pkg/api/user"
 	"scrabble/pkg/scrabble"
 
 	"github.com/google/uuid"
+	"golang.org/x/exp/slices"
 	"golang.org/x/exp/slog"
 )
 
 var (
-	ErrNotPlayerTurn   = errors.New("not player's turn")
-	ErrNotBotTurn      = errors.New("not bot's turn")
-	ErrInvalidMove     = errors.New("invalid move")
-	ErrInvalidPosition = errors.New("invalid position")
-	ErrGameNotStarted  = errors.New("game not started")
+	ErrNotPlayerTurn     = errors.New("not player's turn")
+	ErrNotBotTurn        = errors.New("not bot's turn")
+	ErrInvalidMove       = errors.New("invalid move")
+	ErrInvalidPosition   = errors.New("invalid position")
+	ErrGameNotStarted    = errors.New("game not started")
+	ErrGameOver          = errors.New("game is over")
+	ErrPrivateGame       = errors.New("game is private")
+	ErrPublicGame        = errors.New("game is public")
+	ErrGameHasNotStarted = errors.New("game has not started")
+	ErrObserverNotFound  = errors.New("observer not found")
 
 	botNames = []string{"Bot1", "Bot2", "Bot3", "Bot4"}
 )
@@ -46,26 +52,12 @@ func NewService(repo *Repository, userSvc *user.Service) *Service {
 	return s
 }
 
-func (s *Service) StartGame(room *room.Room) (*scrabble.Game, error) {
-	humanPlayers := len(room.UserIDs)
-	if humanPlayers < 2 {
-		return nil, errors.New("must have at least 2 players")
+func (s *Service) New(creatorID string) (*Game, error) {
+	g := &Game{
+		ID:        uuid.NewString(),
+		CreatorID: creatorID,
+		UserIDs:   []string{creatorID},
 	}
-	botPlayers := 4 - humanPlayers
-	slog.Info("Starting game", "room", room.ID, "human", humanPlayers, "ai", botPlayers)
-
-	g := scrabble.NewGame(room.ID, s.DAWG, &scrabble.HighScore{})
-	for _, uID := range room.UserIDs {
-		u, err := s.UserSvc.GetUser(uID)
-		if err != nil {
-			return nil, err
-		}
-		g.AddPlayer(scrabble.NewPlayer(u.ID, u.Username, g.Bag))
-	}
-	for i := 0; i < botPlayers; i++ {
-		g.AddPlayer(scrabble.NewBot(uuid.NewString(), botNames[i], g.Bag))
-	}
-	g.Turn = g.PlayerToMove().ID
 
 	err := s.Repo.Insert(g)
 	if err != nil {
@@ -73,6 +65,110 @@ func (s *Service) StartGame(room *room.Room) (*scrabble.Game, error) {
 	}
 
 	return g, nil
+}
+
+func (s *Service) NewProtected(creatorID, password string) (*Game, error) {
+	hashedPassword, err := auth.HashPassword(password)
+	if err != nil {
+		return nil, err
+	}
+
+	g, err := s.New(creatorID)
+	if err != nil {
+		return nil, err
+	}
+
+	g.HashedPassword = hashedPassword
+	g.IsProtected = true
+
+	return g, nil
+}
+
+func (s *Service) ProtectGame(gID, password string) (*Game, error) {
+	g, err := s.Repo.Find(gID)
+	if err != nil {
+		return nil, err
+	}
+	if g.IsProtected {
+		return nil, fmt.Errorf("game is already protected")
+	}
+
+	hashPassword, err := auth.HashPassword(password)
+	if err != nil {
+		return nil, fmt.Errorf("hash password: %w", err)
+	}
+
+	g.IsProtected = true
+	g.HashedPassword = hashPassword
+
+	return g, nil
+}
+
+func (s *Service) UnprotectGame(gID string) (*Game, error) {
+	g, err := s.Repo.Find(gID)
+	if err != nil {
+		return nil, err
+	}
+
+	g.IsProtected = false
+	g.HashedPassword = ""
+
+	return g, nil
+}
+
+func (s *Service) AddUser(gID, userID, password string) (*Game, error) {
+	g, err := s.Repo.Find(gID)
+	if err != nil {
+		return nil, err
+	}
+
+	if g.IsProtected && !auth.PasswordsMatch(g.HashedPassword, password) {
+		return nil, fmt.Errorf("password mismatch")
+	}
+
+	g.UserIDs = append(g.UserIDs, userID)
+
+	return g, nil
+}
+
+func (s *Service) RemoveUser(gID, userID string) (*Game, error) {
+	g, err := s.Repo.Find(gID)
+	if err != nil {
+		return nil, err
+	}
+
+	idx := slices.Index(g.UserIDs, userID)
+	if idx == -1 {
+		return nil, fmt.Errorf("user not found")
+	}
+
+	g.UserIDs = append(g.UserIDs[:idx], g.UserIDs[idx+1:]...)
+
+	return g, nil
+}
+
+func (s *Service) StartGame(g *Game) error {
+	humanPlayers := len(g.UserIDs)
+	if humanPlayers < 2 {
+		return errors.New("must have at least 2 players")
+	}
+	botPlayers := 4 - humanPlayers
+	slog.Info("Starting game", "ID", g.ID, "human", humanPlayers, "ai", botPlayers)
+
+	g.ScrabbleGame = scrabble.NewGame(s.DAWG, &scrabble.HighScore{})
+	for _, uID := range g.UserIDs {
+		u, err := s.UserSvc.GetUser(uID)
+		if err != nil {
+			return err
+		}
+		g.ScrabbleGame.AddPlayer(scrabble.NewPlayer(u.ID, u.Username, g.ScrabbleGame.Bag))
+	}
+	for i := 0; i < botPlayers; i++ {
+		g.ScrabbleGame.AddPlayer(scrabble.NewBot(uuid.NewString(), botNames[i], g.ScrabbleGame.Bag))
+	}
+	g.ScrabbleGame.Turn = g.ScrabbleGame.PlayerToMove().ID
+
+	return nil
 }
 
 type MoveInfo struct {
@@ -87,12 +183,15 @@ const (
 	MoveTypePass     = "pass"
 )
 
-func (s *Service) ApplyPlayerMove(gID, pID string, req MoveInfo) (*scrabble.Game, error) {
-	g, err := s.Repo.GetGame(gID)
+func (s *Service) ApplyPlayerMove(gID, pID string, req MoveInfo) (*Game, error) {
+	g, err := s.Repo.Find(gID)
 	if err != nil {
 		return nil, err
 	}
-	player := g.PlayerToMove()
+	if g.ScrabbleGame.IsOver() {
+		return nil, ErrGameOver
+	}
+	player := g.ScrabbleGame.PlayerToMove()
 	if player.ID != pID {
 		return nil, ErrNotPlayerTurn
 	}
@@ -114,7 +213,7 @@ func (s *Service) ApplyPlayerMove(gID, pID string, req MoveInfo) (*scrabble.Game
 			}
 			covers[p] = []rune(letter)[0]
 		}
-		move = scrabble.NewTileMove(g.Board, covers)
+		move = scrabble.NewTileMove(g.ScrabbleGame.Board, covers)
 	case MoveTypeExchange:
 		move = scrabble.NewExchangeMove(req.Letters)
 	case MoveTypePass:
@@ -123,11 +222,11 @@ func (s *Service) ApplyPlayerMove(gID, pID string, req MoveInfo) (*scrabble.Game
 		return nil, fmt.Errorf("invalid move type: %s", req.Type)
 	}
 
-	if !move.IsValid(g) {
+	if !move.IsValid(g.ScrabbleGame) {
 		return nil, ErrInvalidMove
 	}
 
-	err = g.ApplyValid(move)
+	err = g.ScrabbleGame.ApplyValid(move)
 	if err != nil {
 		// Should not happen because move is valid
 		return nil, fmt.Errorf("should not have ended up here. cannot apply move that was validated: %v", err)
@@ -136,22 +235,22 @@ func (s *Service) ApplyPlayerMove(gID, pID string, req MoveInfo) (*scrabble.Game
 	return g, nil
 }
 
-func (s *Service) ApplyBotMove(gID string) (*scrabble.Game, error) {
-	g, err := s.Repo.GetGame(gID)
+func (s *Service) ApplyBotMove(gID string) (*Game, error) {
+	g, err := s.Repo.Find(gID)
 	if err != nil {
 		return nil, err
 	}
 
-	if !g.PlayerToMove().IsBot {
+	if !g.ScrabbleGame.PlayerToMove().IsBot {
 		return nil, ErrNotBotTurn
 	}
 
 	// Make the bot think
 	time.Sleep(time.Second * 1)
 
-	state := g.State()
-	move := g.Engine.GenerateMove(state)
-	err = g.ApplyValid(move)
+	state := g.ScrabbleGame.State()
+	move := g.ScrabbleGame.Engine.GenerateMove(state)
+	err = g.ScrabbleGame.ApplyValid(move)
 	if err != nil {
 		slog.Error("apply bot move", err)
 	}
@@ -159,13 +258,13 @@ func (s *Service) ApplyBotMove(gID string) (*scrabble.Game, error) {
 	return g, nil
 }
 
-func (s *Service) ReplacePlayerWithBot(gID, pID string) (*scrabble.Game, error) {
-	g, err := s.Repo.GetGame(gID)
+func (s *Service) ReplacePlayerWithBot(gID, pID string) (*Game, error) {
+	g, err := s.Repo.Find(gID)
 	if err != nil {
 		return nil, err
 	}
 
-	p, err := g.GetPlayer(pID)
+	p, err := g.ScrabbleGame.GetPlayer(pID)
 	if err != nil {
 		return nil, err
 	}
@@ -180,12 +279,12 @@ func (s *Service) ReplacePlayerWithBot(gID, pID string) (*scrabble.Game, error) 
 }
 
 func (s *Service) GetIndices(gID string) ([]MoveInfo, error) {
-	g, err := s.Repo.GetGame(gID)
+	g, err := s.Repo.Find(gID)
 	if err != nil {
 		return nil, err
 	}
 
-	moves := g.Engine.GenerateBestTileMoves(g.State())
+	moves := g.ScrabbleGame.Engine.GenerateBestTileMoves(g.ScrabbleGame.State())
 	var indices []MoveInfo
 	for _, move := range moves {
 		tileMove := move.(*scrabble.TileMove)
@@ -211,6 +310,108 @@ func (s *Service) DeleteGame(gID string) error {
 	}
 
 	return nil
+}
+
+func (s *Service) AddObserver(gID string, oId string) (*Game, error) {
+	g, err := s.Repo.Find(gID)
+	if err != nil {
+		return nil, err
+	}
+
+	if g.ScrabbleGame == nil {
+		return nil, ErrGameNotStarted
+	}
+
+	if g.IsPrivateGame == true {
+		return nil, ErrPrivateGame
+	}
+
+	if g.ScrabbleGame.IsOver() {
+		return nil, ErrGameOver
+	}
+	g.ObservateurIDs = append(g.ObservateurIDs, oId)
+	return g, nil
+}
+func (s *Service) RemoveObserver(gID string, oId string) (*Game, error) {
+	g, err := s.Repo.Find(gID)
+	if err != nil {
+		return nil, err
+	}
+	if g.IsPrivateGame == true {
+		return nil, ErrPrivateGame
+	}
+	if g.ScrabbleGame.IsOver() {
+		return nil, ErrGameOver
+	}
+	for i, v := range g.ObservateurIDs {
+		if v == oId {
+			g.ObservateurIDs = append(g.ObservateurIDs[:i], g.ObservateurIDs[i+1:]...)
+			return g, nil
+		}
+	}
+	return nil, ErrObserverNotFound
+}
+
+func (s *Service) ReplaceBotByObserver(gID string, oId string) (*Game, error) {
+	g, err := s.Repo.Find(gID)
+	if err != nil {
+		return nil, err
+	}
+	if g.IsPrivateGame == true {
+		return nil, ErrPrivateGame
+	}
+	if g.ScrabbleGame.IsOver() {
+		return nil, ErrGameOver
+	}
+	user, err := s.UserSvc.GetUser(oId)
+	if err != nil {
+		return nil, err
+	}
+
+	for i, p := range g.ScrabbleGame.Players {
+		if p.IsBot == true {
+			g.ScrabbleGame.Players[i].IsBot = false
+			g.ScrabbleGame.Players[i].Username = user.Username
+			g.ScrabbleGame.Players[i].ID = user.ID
+			for i, v := range g.ObservateurIDs {
+				if v == oId {
+					g.ObservateurIDs = append(g.ObservateurIDs[:i], g.ObservateurIDs[i+1:]...)
+					break
+				}
+			}
+
+			return g, nil
+		}
+	}
+	return nil, errors.New("no bot in that game")
+}
+func (s *Service) MakeGamePrivate(gId string) (*Game, error) {
+	g, err := s.Repo.Find(gId)
+	if err != nil {
+		return nil, err
+	}
+	if g.IsPrivateGame == true {
+		return nil, ErrPrivateGame
+	}
+	if g.ScrabbleGame.IsOver() {
+		return nil, ErrGameOver
+	}
+	g.IsPrivateGame = true
+	return g, nil
+}
+func (s *Service) MakeGamePublic(gId string) (*Game, error) {
+	g, err := s.Repo.Find(gId)
+	if err != nil {
+		return nil, err
+	}
+	if g.IsPrivateGame == false {
+		return nil, ErrPublicGame
+	}
+	if g.ScrabbleGame.IsOver() {
+		return nil, ErrGameOver
+	}
+	g.IsPrivateGame = false
+	return g, nil
 }
 
 func parsePoint(str string) (scrabble.Position, error) {
