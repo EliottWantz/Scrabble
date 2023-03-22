@@ -57,7 +57,7 @@ class WebsocketService extends GetxService {
     socket = WebSocketChannel.connect(Uri(
         scheme: ApiConstants.wsScheme,
         host: ApiConstants.wsHost,
-        // port: ApiConstants.wsPort,
+        port: ApiConstants.wsPort,
         path: ApiConstants.wsPath,
         queryParameters: { 'id': userService.user.value!.id, 'username': userService.user.value!.username }
     ));
