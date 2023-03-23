@@ -30,7 +30,7 @@
 -->
 
 <div class="container">
-  <button mat-fab color="primary" class="home-button" routerLink="/home" routerLinkActive="router-link-active">
+  <button mat-fab color="accent" class="home-button" routerLink="/home" routerLinkActive="router-link-active">
     <mat-icon>home</mat-icon>
   </button>
   <div class="row">
@@ -65,7 +65,7 @@
             <input hidden (change)="onFileSelected($event)" #fileInput type="file">
             <span class="file-name">{{selectedFile.name}}</span>
           </div>
-          <button mat-raised-button color="primary" type="button" (click)="submit()">Enregistrer</button>
+          <button mat-raised-button color="accent" type="button" (click)="submit()">Enregistrer</button>
           
         </mat-card-content>
       </mat-card>

@@ -6,6 +6,6 @@
     <h4>{{getNumUsers()}}/4 joueurs présents</h4>
   </div>
   <div *ngIf="getNumUsers() >= 2 && checkIfCreator()">
-    <button mat-flat-button color="primary" (click)="startGame()" routerLink="/game">Débuter la partie</button>
+    <button mat-flat-button color="accent" (click)="startGame()" routerLink="/game">Débuter la partie</button>
   </div>
 </div>
