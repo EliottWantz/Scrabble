@@ -3,6 +3,7 @@ import { FormControl } from "@angular/forms";
 import { MatSidenav } from "@angular/material/sidenav";
 import { MatSlideToggle } from "@angular/material/slide-toggle";
 import { NavigationStart, Router } from "@angular/router";
+import { AuthenticationService } from "@app/services/authentication/authentication.service";
 import { GameService } from "@app/services/game/game.service";
 import { RoomService } from "@app/services/room/room.service";
 import { ThemeService } from "@app/services/theme/theme.service";
@@ -29,7 +30,7 @@ export class SidebarComponent {
   currentRouteName = "/home";
   previousRouteName = ["/home"];
 
-  constructor(private userService: UserService, private socketService: WebSocketService, private gameService: GameService, private themeService: ThemeService, private router: Router) {
+  constructor(private userService: UserService, private authService: AuthenticationService, private gameService: GameService, private themeService: ThemeService, private router: Router) {
     this.user = this.userService.subjectUser;
     document.getElementById("avatar")?.setAttribute("src", this.user.value.avatar.url);
     this.router.events.subscribe((e) => {
@@ -73,7 +74,7 @@ export class SidebarComponent {
 
   logout(): void {
     this.router.navigate(['/home']);
-    this.socketService.disconnect();
+    this.authService.logout();
   }
 
   isInGame(): boolean {
