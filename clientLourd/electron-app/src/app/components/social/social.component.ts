@@ -1,6 +1,10 @@
 import { Component } from "@angular/core";
+import { CommunicationService } from "@app/services/communication/communication.service";
+import { StorageService } from "@app/services/storage/storage.service";
 import { UserService } from "@app/services/user/user.service";
 import { WebSocketService } from "@app/services/web-socket/web-socket.service";
+import { User } from "@app/utils/interfaces/user";
+import { BehaviorSubject } from "rxjs";
 
 @Component({
     selector: "app-social",
@@ -12,15 +16,26 @@ export class SocialComponent {
   screens = ["En ligne", "Tous", "En attente", "Ajouter un ami"];
   onlineFriendUserNameSearch = ""
   addFriendUserName = "";
+  user: BehaviorSubject<User>;
+  listUserDisplay: User[] = [];
+  listUsers: User[] = [];
+  usernameInput: any;
 
-  constructor(private userService: UserService, private websocketService: WebSocketService) {}
+  constructor(private userService: UserService, private websocketService: WebSocketService, private communicationService: CommunicationService, private storageService: StorageService) {
+    this.user = this.userService.subjectUser;
+    for (const user of this.storageService.listUsers) {
+      if (user.id != this.user.value.id)
+        this.listUsers.push(user);
+    }
+    this.listUserDisplay = [...this.listUsers];
+  }
 
   /*filterOnlineFriends(): string[] {
     return this.userService.currentUserValue.
   }*/
 
   sendFriendRequest(): void {
-
+    this.communicationService.sendFriendRequest(this.userService.currentUserValue.id, this.addFriendUserName);
     //this.websocketService.send()
   }
 
@@ -35,4 +50,28 @@ export class SocialComponent {
       }
     }
   }
+
+  getUserAvatarUrl(id: string): string {
+    const requestUser = this.storageService.getUserFromId(id);
+    if (requestUser) {
+      return requestUser.avatar.url;
+    }
+    return "";
+  }
+
+  getUserUsername(id: string): string {
+    const requestUser = this.storageService.getUserFromId(id);
+    if (requestUser) {
+      return requestUser.username;
+    }
+    return "";
+  }
+
+  onSearchChange(input: string): void {
+    this.listUserDisplay = this.listUsers.filter((user) => { return user.username.toLowerCase().includes(input.toLowerCase())});
+  }
+
+  acceptFriendRequest(id: string): void {return;}
+
+  denyFriendRequest(id: string): void {return;}
 }

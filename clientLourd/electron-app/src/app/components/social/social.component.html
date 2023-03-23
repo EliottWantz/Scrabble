@@ -26,15 +26,38 @@
             </div>
         </div>
 
-        <div *ngIf="activeScreen === 'Ajouter un ami'" class="screen">
+        <div *ngIf="activeScreen === 'Ajouter un ami'" class="add-friend">
             <div class="form">
                 <form>
                     <mat-form-field appearance="fill">
                       <mat-label for="username">Rechercher un ami</mat-label>
-                      <input #usernameInput matInput placeholder="Rechercher un ami" name="username" [(ngModel)]="addFriendUserName">
+                      <input #usernameInput matInput placeholder="Rechercher un ami" name="username" [(ngModel)]="addFriendUserName" type="text" (input)="onSearchChange(usernameInput.value)">
                     </mat-form-field>
-                    <button mat-flat-button color="primary" type="submit" (click)="sendFriendRequest()">Envoyer une demande d'ami</button>
                 </form>
+            </div>
+            <div class="users">
+                <div *ngFor="let user of listUserDisplay" class="user">
+                    <img src="{{user.avatar.url}}" class="avatar">
+                    <h3>{{user.username}}</h3>
+                    <button mat-fab class="send-request" (click)="sendFriendRequest()">
+                        <mat-icon>send</mat-icon>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div *ngIf="activeScreen === 'En attente'" class="screen">
+            <div class="users">
+                <div *ngFor="let user of user.value.pendingRequests" class="user">
+                    <img src="{{getUserAvatarUrl(user)}}" class="avatar">
+                    <h3>{{getUserUsername(user)}}</h3>
+                    <button mat-fab class="accept-button" (click)="acceptFriendRequest(user)">
+                        <mat-icon>check</mat-icon>
+                    </button>
+                    <button mat-fab class="deny-button" (click)="denyFriendRequest(user)">
+                        <mat-icon>close</mat-icon>
+                    </button>
+                </div>
             </div>
         </div>
     </div>

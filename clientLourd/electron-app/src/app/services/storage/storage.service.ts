@@ -15,6 +15,14 @@ export class StorageService {
         return undefined;
     }
 
+    getUserFromId(id: string): User | undefined {
+        for (const user of this.listUsers) {
+            if (user.id == id)
+                return user;
+        }
+        return undefined;
+    }
+
     clean(): void {
         sessionStorage.clear();
     }
