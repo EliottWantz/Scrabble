@@ -104,25 +104,22 @@ export class WebSocketService {
                     messages: payloadRoom.messages,
                 }
                 //this.roomService.addRoom(room);
-                if (this.roomService.findRoom(room.id) === undefined) {
+                this.roomService.addRoom(room);
+                /*if (this.roomService.findRoom(room.id) === undefined) {
                     this.roomService.addRoom(room);
-                }
+                }*/
                 break;
             }
 
             case "leftDMRoom": {
                 const payloadLeftRoom = packet.payload as LeftDMRoomPayload;
-                if (this.roomService.findRoom(payloadLeftRoom.roomId) !== undefined) {
-                    this.roomService.removeRoom(payloadLeftRoom.roomId);
-                }
+                this.roomService.removeRoom(payloadLeftRoom.roomId);
                 break;
             }
 
             case "userJoinedDMRoom": {
                 const payloadUserJoinedRoom = packet.payload as UserJoinedDMRoomPayload;
-                if (this.roomService.findRoom(payloadUserJoinedRoom.roomId) !== undefined) {
-                    this.roomService.addUser(payloadUserJoinedRoom.roomId, payloadUserJoinedRoom.userId);
-                }
+                this.roomService.addUser(payloadUserJoinedRoom.roomId, payloadUserJoinedRoom.userId);
                 break;
             }
 
@@ -206,6 +203,7 @@ export class WebSocketService {
 
             case "acceptFriendRequest": {
                 const payloadAcceptFriendRequest = packet.payload as FriendRequestPayload;
+                this.userService.subjectUser.next({...this.userService.currentUserValue, friends: [...this.userService.currentUserValue.friends, payloadAcceptFriendRequest.fromId]});
                 break;
             }
 

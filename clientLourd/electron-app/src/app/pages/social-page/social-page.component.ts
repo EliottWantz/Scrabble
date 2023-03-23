@@ -19,7 +19,6 @@ import { BehaviorSubject } from "rxjs";
 export class SocialPageComponent {
   public user: BehaviorSubject<User>;
   public inDM:boolean;
-  addFriend = true;
   chatFriend = false;
   friendUsername = "";
   addFriendErrorMessage = "";
@@ -31,14 +30,14 @@ export class SocialPageComponent {
     private roomService: RoomService) {
     this.user = this.userService.subjectUser;
     this.inDM = false;
-    this.addFriendPage();
+    //this.addFriendPage();
     //document.getElementById("avatar")?.setAttribute("src", this.user.value.avatar.url);
     // this.friendForm = this.fb.group({
     //     input: ["", [Validators.required]],
     //   });
   }
 
-  addFriendPage(): void {
+  /*addFriendPage(): void {
     this.chatFriend = false;
     this.addFriend = true;
     document.getElementById('add-friend')?.setAttribute("style", "background-color: #424260; outline-color: #66678e; outline-width: 1px; outline-style: solid;");
@@ -46,10 +45,9 @@ export class SocialPageComponent {
     for (let i = 0; i < friends.length; i++) {
       friends[i].setAttribute("style", "");
     }
-  }
+  }*/
 
   chatFriendPage(index: number): void {
-    this.addFriend = false;
     this.chatFriend = true;
     document.getElementById('add-friend')?.setAttribute("style", "");
     const friends = document.getElementsByClassName('friend');
@@ -61,24 +59,28 @@ export class SocialPageComponent {
       }
     }
 
-
-    //this.roomService.currentRoomChat = this.roomService.listChatRooms this.user.value.friends[index];
-  }
-
-  async sendFriendRequest(): Promise<void> {
-    const user: User | undefined = this.storageService.getUserFromName(this.friendUsername);
-    if (user) {
-      await this.communicationService.sendFriendRequest(this.user.value.id, user.id).then((res) => {
-        console.log(res);
-        console.log("allo")
-        /*const newFriendsList = this.user.value.friends;
-        newFriendsList.push(user.id);
-        this.userService.subjectUser.next({...this.userService.subjectUser.value, friends: newFriendsList});*/
-      })
-      .catch((err) => {
-        this.addFriendErrorMessage = err.message;
-      });
+    for (const room of this.roomService.listJoinedChatRooms.value) {
+      const usersInRoom = room.name.split("/");
+      console.log(usersInRoom);
+      if (usersInRoom[0] == this.user.value.username && usersInRoom[1] == this.getUsernameFriend(index) ||
+         usersInRoom[0] == this.getUsernameFriend(index) && usersInRoom[1] == this.user.value.username) {
+          this.roomService.currentRoomChat.next(room);
+          return;
+      }
     }
+
+    const friend = this.storageService.getUserFromId(this.user.value.friends[index]);
+      if (friend) {
+        this.friendUsername = friend.username;
+        const payload: CreateDMRoomPayload = {
+          username:this.user.value.username,
+          toId: friend.id,
+          toUsername:friend.username
+        }
+        const event : ClientEvent = "create-dm-room";
+        this.socketService.send(event, payload);
+      }
+    //this.roomService.currentRoomChat = this.roomService.listChatRooms this.user.value.friends[index];
   }
 
   // async addFriend(friendName: string): Promise<void> {
@@ -102,15 +104,9 @@ export class SocialPageComponent {
     this.user.value.friends = ["bruh"];
   }
 
-  async friendChat(friendId: string):Promise<void>{
-    this.inDM=true;
-    const friend = await this.communicationService.getFriendByID(this.user.value.id, friendId)
-    const payload: CreateDMRoomPayload = {
-      username:this.user.value.username,
-      toId: friend.friend.id,
-      toUsername:friend.friend.username
-    }
-    const event : ClientEvent = "create-dm-room";
-    this.socketService.send(event, payload);
+  getUsernameFriend(index: number): string {
+    const username = this.storageService.getUserFromId(this.user.value.friends[index]);
+    if (username) return username.username;
+    return "";
   }
 }

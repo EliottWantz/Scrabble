@@ -13,10 +13,12 @@ export class RoomService {
     currentRoomChat!: BehaviorSubject<Room>;
     listChatRooms!: BehaviorSubject<Room[]>;
     listJoinedChatRooms!: BehaviorSubject<Room[]>;
+    //listJoinedDMRooms!: BehaviorSubject<Room[]>;
 
     constructor(private commService: CommunicationService, private userService: UserService) {
         this.listChatRooms = new BehaviorSubject<Room[]>([]);
         this.listJoinedChatRooms = new BehaviorSubject<Room[]>([]);
+        //this.listJoinedDMRooms = new BehaviorSubject<Room[]>([]);
         this.currentRoomChat = new BehaviorSubject<Room>({
             id: "",
             name: "",
@@ -35,6 +37,14 @@ export class RoomService {
         this.userService.subjectUser.next({...this.userService.subjectUser.value, joinedChatRooms: updatedChatRooms});
         this.currentRoomChat.next(room);
     }
+
+    /*addDMRoom(room: Room): void {
+        this.listJoinedDMRooms.next([...this.listJoinedDMRooms.value, room]);
+        const updatedDMRooms = this.userService.currentUserValue.joinedDMRooms;
+        updatedDMRooms.push(room.id);
+        this.userService.subjectUser.next({...this.userService.subjectUser.value, joinedDMRooms: updatedDMRooms});
+        this.currentRoomChat.next(room);
+    }*/
 
     removeRoom(roomID: string): void {
         const currentRooms = this.listChatRooms.getValue();
@@ -56,7 +66,7 @@ export class RoomService {
     changeRoom(roomId: string): void {
         const index = this.findRoom(roomId);
         if (index !== undefined)
-            this.currentRoomChat.next(this.listChatRooms.value[index]);
+            this.currentRoomChat.next(this.listJoinedChatRooms.value[index]);
     }
 
     addMessage(msg: ChatMessage): void {
@@ -99,6 +109,22 @@ export class RoomService {
             }
         }
     }
+
+    /*addUserDM(roomId: string, userId: string): void {
+        if (roomId == this.currentRoomChat.value.id) {
+            const currentRoom = this.currentRoomChat.value;
+            currentRoom.userIds = [...currentRoom.userIds, userId]
+            this.currentRoomChat.next(currentRoom);
+        } else {
+            const rooms = this.listJoinedDMRooms.value;
+            for (let i = 0; i < this.listJoinedDMRooms.value.length; i++) {
+                if (rooms[i].id == roomId) {
+                    rooms[i].userIds = [...rooms[i].userIds, userId];
+                    this.listJoinedDMRooms.next(rooms);
+                }
+            }
+        }
+    }*/
 
     removeUser(roomId: string, userId: string): void {
         if (roomId == this.currentRoomChat.value.id) {

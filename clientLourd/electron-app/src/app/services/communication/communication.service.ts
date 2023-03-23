@@ -99,6 +99,24 @@ export class CommunicationService {
         return this.http.post<string>(`${this.baseUrl}/user/friends/request/${id}/${friendId}`, { id, friendId }).pipe(catchError(this.handleError));
     }
 
+    async acceptFriendRequest(id: string, friendId: string): Promise<string> {
+        const res: any = (await lastValueFrom(this.requestAcceptFriendRequest(id, friendId)));
+        return res;
+    }
+
+    private requestAcceptFriendRequest(id: string, friendId: string): Observable<string> {
+        return this.http.patch<string>(`${this.baseUrl}/user/friends/accept/${id}/${friendId}`, { id, friendId }).pipe(catchError(this.handleError));
+    }
+
+    async declineFriendRequest(id: string, friendId: string): Promise<string> {
+        const res: any = (await lastValueFrom(this.requestDeclineFriendRequest(id, friendId)));
+        return res;
+    }
+
+    private requestDeclineFriendRequest(id: string, friendId: string): Observable<string> {
+        return this.http.delete<string>(`${this.baseUrl}/user/friends/accept/${id}/${friendId}`).pipe(catchError(this.handleError));
+    }
+
     private handleError(error: HttpErrorResponse) {
         if (error.status === 0) {
           // A client-side or network error occurred. Handle it accordingly.

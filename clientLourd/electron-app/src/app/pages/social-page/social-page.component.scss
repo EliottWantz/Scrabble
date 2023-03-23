@@ -49,9 +49,13 @@ mat-icon {
   align-items: center;
   flex-direction: row;
   border-radius: 12px;
-  padding-top: 4%;
-  padding-bottom: 4%;
+  padding-top: 2%;
+  padding-bottom: 2%;
   margin-bottom: 8%;
+}
+
+.friend:hover {
+  cursor: pointer;
 }
 
 .mat-drawer-content {
@@ -60,13 +64,13 @@ mat-icon {
 }
 
 .content {
-  width: calc(100% - 200px);
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  flex-wrap: wrap;
+  margin-left: 5%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    width: 95%;
+    height: 100%;
 }
 
 #form {
@@ -108,6 +112,11 @@ hr {
 
 #break {
   width: 100%;
+}
+
+.chat-box {
+  width: 70%;
+  height: 70%
 }
 
 /*#chatBox {

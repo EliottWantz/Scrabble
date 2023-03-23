@@ -18,7 +18,7 @@
             <div class="mat-icon-button">
               <mat-icon inline="true" >person</mat-icon>
             </div>
-            <div class="text">{{user.value.friends[i]}}</div>
+            <div class="text">{{getUsernameFriend(i)}}</div>
           </div> 
         </div>
 
@@ -26,7 +26,10 @@
     </mat-drawer>
 
     <mat-drawer-content>
-      <app-social></app-social>
+      <app-social *ngIf="!chatFriend"></app-social>
+      <div class="content" *ngIf="chatFriend">
+        <app-chat-box class="chat-box"></app-chat-box>
+      </div>
       <!--
         <div *ngIf="addFriend" class="content">
         <h1>Ajouter un ami</h1>
