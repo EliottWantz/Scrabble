@@ -1,14 +1,15 @@
 import { Injectable } from '@angular/core';
 import { User } from '@app/utils/interfaces/user';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
     providedIn: 'root',
 })
 export class StorageService {
-    listUsers: User[] = [];
+    listUsers: BehaviorSubject<User[]> = new BehaviorSubject<User[]>([]);
 
     getUserFromName(username: string): User | undefined {
-        for (const user of this.listUsers) {
+        for (const user of this.listUsers.value) {
             if (user.username == username)
                 return user;
         }
@@ -16,7 +17,7 @@ export class StorageService {
     }
 
     getUserFromId(id: string): User | undefined {
-        for (const user of this.listUsers) {
+        for (const user of this.listUsers.value) {
             if (user.id == id)
                 return user;
         }

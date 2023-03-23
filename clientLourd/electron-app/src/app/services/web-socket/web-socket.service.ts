@@ -131,13 +131,13 @@ export class WebSocketService {
 
             case "listUsers": {
                 const payloadListUsers = packet.payload as ListUsersPayload;
-                this.storageService.listUsers = payloadListUsers.users;
+                this.storageService.listUsers.next(payloadListUsers.users);
                 break;
             }
 
             case "newUser": {
                 const newUserPayload = packet.payload as NewUserPayload;
-                this.storageService.listUsers.push(newUserPayload.user);
+                this.storageService.listUsers.next([...this.storageService.listUsers.value, newUserPayload.user]);
                 break;
             }
 

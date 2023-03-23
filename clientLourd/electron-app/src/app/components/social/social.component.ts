@@ -17,17 +17,25 @@ export class SocialComponent {
   onlineFriendUserNameSearch = ""
   addFriendUserName = "";
   user: BehaviorSubject<User>;
-  listUserDisplay: User[] = [];
-  listUsers: User[] = [];
+  listUserDisplay: User[];
+  listUsers: BehaviorSubject<User[]>;
   usernameInput: any;
 
   constructor(private userService: UserService, private websocketService: WebSocketService, private communicationService: CommunicationService, private storageService: StorageService) {
     this.user = this.userService.subjectUser;
-    for (const user of this.storageService.listUsers) {
-      if (user.id != this.user.value.id)
-        this.listUsers.push(user);
-    }
-    this.listUserDisplay = [...this.listUsers];
+    //this.listUsers = this.storageService.listUsers;
+    this.listUsers = new BehaviorSubject<User[]>([]);
+    this.listUserDisplay = [];
+    this.storageService.listUsers.subscribe((users) => {
+      const usersWithoutSelf = [];
+      for (const user of users) {
+        if (user.id != this.user.value.id) {
+          usersWithoutSelf.push(user);
+        }
+      }
+      this.listUsers.next(usersWithoutSelf);
+      this.listUserDisplay = usersWithoutSelf;
+    });
   }
 
   /*filterOnlineFriends(): string[] {
@@ -49,6 +57,7 @@ export class SocialComponent {
         navButtons[i].setAttribute("style", "background-color: #424260; outline-color: #66678e; outline-width: 1px; outline-style: solid;");
       }
     }
+    this.listUserDisplay = this.listUsers.value;
   }
 
   getUserAvatarUrl(id: string): string {
@@ -68,7 +77,7 @@ export class SocialComponent {
   }
 
   onSearchChange(input: string): void {
-    this.listUserDisplay = this.listUsers.filter((user) => { return user.username.toLowerCase().includes(input.toLowerCase())});
+    this.listUserDisplay = this.listUsers.value.filter((user) => { return user.username.toLowerCase().includes(input.toLowerCase())});
   }
 
   async acceptFriendRequest(id: string): Promise<void> {
