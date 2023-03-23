@@ -71,7 +71,37 @@ export class SocialComponent {
     this.listUserDisplay = this.listUsers.filter((user) => { return user.username.toLowerCase().includes(input.toLowerCase())});
   }
 
-  acceptFriendRequest(id: string): void {return;}
+  async acceptFriendRequest(id: string): Promise<void> {
+    await this.communicationService.acceptFriendRequest(this.userService.currentUserValue.id, id).then((res) => {
+      console.log(res);
+      const pendingRequests = this.userService.currentUserValue.pendingRequests;
+      const index = pendingRequests.indexOf(id);
+      if (index > -1) {
+        pendingRequests.splice(index, 1);
+      }
+      this.userService.subjectUser.next({...this.userService.currentUserValue, pendingRequests: pendingRequests});
+      this.userService.subjectUser.next({...this.userService.currentUserValue, friends: [...this.userService.currentUserValue.friends, id]});
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 
-  denyFriendRequest(id: string): void {return;}
+    const pendingRequests = this.userService.currentUserValue.pendingRequests;
+      const index = pendingRequests.indexOf(id);
+      if (index > -1) {
+        pendingRequests.splice(index, 1);
+      }
+      this.userService.subjectUser.next({...this.userService.currentUserValue, pendingRequests: pendingRequests});
+      this.userService.subjectUser.next({...this.userService.currentUserValue, friends: [...this.userService.currentUserValue.friends, id]});
+  }
+
+  denyFriendRequest(id: string): void {
+    this.communicationService.declineFriendRequest(this.userService.currentUserValue.id, id);
+    const pendingRequests = this.userService.currentUserValue.pendingRequests;
+    const index = pendingRequests.indexOf(id);
+    if (index > -1) {
+      pendingRequests.splice(index, 1);
+    }
+    this.userService.subjectUser.next({...this.userService.currentUserValue, pendingRequests: pendingRequests});
+  }
 }
