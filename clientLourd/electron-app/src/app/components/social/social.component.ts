@@ -34,8 +34,8 @@ export class SocialComponent {
     return this.userService.currentUserValue.
   }*/
 
-  sendFriendRequest(): void {
-    this.communicationService.sendFriendRequest(this.userService.currentUserValue.id, this.addFriendUserName);
+  sendFriendRequest(id: string): void {
+    this.communicationService.sendFriendRequest(this.userService.currentUserValue.id, id);
     //this.websocketService.send()
   }
 

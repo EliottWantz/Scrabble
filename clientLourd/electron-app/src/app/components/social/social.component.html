@@ -39,7 +39,7 @@
                 <div *ngFor="let user of listUserDisplay" class="user">
                     <img src="{{user.avatar.url}}" class="avatar">
                     <h3>{{user.username}}</h3>
-                    <button mat-fab class="send-request" (click)="sendFriendRequest()">
+                    <button mat-fab class="send-request" (click)="sendFriendRequest(user.id)">
                         <mat-icon>send</mat-icon>
                     </button>
                 </div>
