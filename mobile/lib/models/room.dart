@@ -4,42 +4,41 @@ import 'package:client_leger/models/user.dart';
 class Room {
   String roomId;
   String roomName;
-  String? creatorId;
-  List<User> users;
+  // String? creatorId;
+  List<String> userIds;
   List<ChatMessagePayload>? messages;
-  bool? isGameRoom;
+  // bool? isGameRoom;
 
 
   Room(
     {required this.roomId,
     required this.roomName,
-    required this.creatorId,
-    required this.users,
+    // required this.creatorId,
+    required this.userIds,
     this.messages,
-    this.isGameRoom});
+    // this.isGameRoom
+    });
 
   factory Room.fromJson(Map<String, dynamic> json) {
     return Room(
       roomId: json["roomId"],
       roomName: json["roomName"],
-      creatorId: json["creatorId"],
-      users: List<User>.from((json["users"] as List).map(
-              (user) => User.fromJson(user))
-      ),
+      // creatorId: json["creatorId"],
+      userIds: List<String>.from((json["userIds"] as List)),
       messages: List<ChatMessagePayload>.from((json["messages"] as List).map(
           (message) => ChatMessagePayload.fromJson(message)
       )),
-      isGameRoom: json["isGameRoom"]
+      // isGameRoom: json["isGameRoom"]
     );
   }
 
   Map<String, dynamic> toJson() => {
     "id": roomId,
     "name": roomName,
-    "creatorId": creatorId,
-    "users": users.map((user) => user.toJson()).toList(),
+    // "creatorId": creatorId,
+    "userIds": userIds.toList(),
     "messages": messages?.map((message) => message.toJson()).toList(),
-    "isGameRoom": isGameRoom,
+    // "isGameRoom": isGameRoom,
   };
 
 }

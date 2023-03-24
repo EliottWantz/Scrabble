@@ -4,6 +4,7 @@ import 'package:client_leger/services/user_service.dart';
 import 'package:get/get.dart';
 
 import '../models/chat_message_payload.dart';
+import '../models/game.dart';
 import '../models/game_update_payload.dart';
 import '../models/player.dart';
 import '../models/room.dart';
@@ -11,12 +12,13 @@ import '../models/room.dart';
 class GameService extends GetxService {
   final UserService userService = Get.find();
 
-  final joinableGames = Rxn<List<GameRoom>>();
+  final joinableGames = Rxn<List<Game>>();
 
-  final currentGameRoom = Rxn<Room>();
+  // final currentGameRoom = Rxn<Room>();
+  late String currentGameId;
   final currentRoomMessages = <ChatMessagePayload>[].obs;
   // final currentGameRoomUsers = Rxn<List<User>>();
-  final currentGameRoomUsers = <User>[].obs;
+  final currentGameRoomUserIds = <String>[].obs;
 
   final currentGame = Rxn<GameUpdatePayload>();
   final currentGameTimer = Rxn<int>();
@@ -34,6 +36,10 @@ class GameService extends GetxService {
 
   bool isCurrentPlayer(String playerId) {
     return currentGame.value!.turn == playerId;
+  }
+
+  bool isCurrentGameId(String roomId) {
+    return currentGameId == roomId;
   }
   // final currentGameTimer = Rxn<
 }

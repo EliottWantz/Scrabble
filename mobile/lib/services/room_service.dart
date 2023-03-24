@@ -70,10 +70,10 @@ class RoomService extends GetxService {
     return messages;
   }
 
-  List<User> getRoomUsers(String roomId) {
-    List<User> users = roomsMap[roomId]!.users;
-    return users;
-  }
+  // List<User> getRoomUsers(String roomId) {
+  //   List<User> users = roomsMap[roomId]!.users;
+  //   return users;
+  // }
 
   void addMessagePayloadToRoom(String roomId, ChatMessagePayload chatMessagePayload) {
     roomsMap.value[roomId]!.messages!.add(chatMessagePayload);

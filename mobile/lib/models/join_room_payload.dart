@@ -1,13 +1,13 @@
 class JoinRoomPayload {
-  String roomId;
+  String gameId;
 
-  JoinRoomPayload({required this.roomId});
+  JoinRoomPayload({required this.gameId});
 
   factory JoinRoomPayload.fromJson(Map<String, dynamic> json) => JoinRoomPayload(
-      roomId: json["roomId"]
+      gameId: json["gameId"]
   );
 
   Map<String, dynamic> toJson() => {
-    "roomId": roomId
+    "gameId": gameId
   };
 }

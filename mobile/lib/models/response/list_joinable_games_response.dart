@@ -3,23 +3,23 @@ import 'dart:convert';
 import 'package:client_leger/models/joined_room_payload.dart';
 import 'package:client_leger/models/list_joinable_games_payload.dart';
 
-class ListJoinableGamesResponse {
-  ListJoinableGamesResponse({
+class JoinableGamesResponse {
+  JoinableGamesResponse({
     required this.event,
     required this.payload
   });
 
   String event;
-  ListJoinableGamesPayload payload;
+  JoinableGamesPayload payload;
 
-  factory ListJoinableGamesResponse.fromRawJson(String str) =>
-      ListJoinableGamesResponse.fromJson(json.decode(str));
+  factory JoinableGamesResponse.fromRawJson(String str) =>
+      JoinableGamesResponse.fromJson(json.decode(str));
 
   String toRawJson() => json.encode(toJson());
 
-  factory ListJoinableGamesResponse.fromJson(Map<String, dynamic> json) => ListJoinableGamesResponse(
+  factory JoinableGamesResponse.fromJson(Map<String, dynamic> json) => JoinableGamesResponse(
       event: json["event"],
-      payload: ListJoinableGamesPayload.fromJson(json["payload"])
+      payload: JoinableGamesPayload.fromJson(json["payload"])
   );
 
   Map<String, dynamic> toJson() => {

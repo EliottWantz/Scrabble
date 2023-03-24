@@ -1,15 +1,15 @@
 class StartGamePayload {
-  String roomId;
+  String gameId;
 
   StartGamePayload({
-    required this.roomId
+    required this.gameId
   });
 
   factory StartGamePayload.fromJson(Map<dynamic, dynamic> json) => StartGamePayload(
-      roomId: json["roomId"]
+      gameId: json["gameId"]
   );
 
   Map<String, dynamic> toJson() => {
-    "roomId": roomId
+    "gameId": gameId
   };
 }

@@ -14,9 +14,12 @@ import 'package:client_leger/models/requests/join_room_request.dart';
 import 'package:client_leger/models/requests/play_move_request.dart';
 import 'package:client_leger/models/response/chat_message_response.dart';
 import 'package:client_leger/models/response/game_update_response.dart';
+import 'package:client_leger/models/response/joined_game_response.dart';
 import 'package:client_leger/models/response/joined_room_response.dart';
 import 'package:client_leger/models/response/timer_response.dart';
+import 'package:client_leger/models/response/user_joined_game_response.dart';
 import 'package:client_leger/models/response/user_joined_response.dart';
+import 'package:client_leger/models/response/user_joined_room_response.dart';
 import 'package:client_leger/models/start_game_payload.dart';
 import 'package:client_leger/models/user.dart';
 import 'package:client_leger/routes/app_routes.dart';
@@ -80,10 +83,10 @@ class WebsocketService extends GetxService {
       case ServerEventJoinedRoom: {
         print('event joinedRoom');
         JoinedRoomResponse joinedRoomResponse = JoinedRoomResponse.fromRawJson(data);
-        joinedRoomResponse.payload.users.forEach(
-                (user) => print(user.username)
-        );
-        print(joinedRoomResponse.payload.users);
+        // joinedRoomResponse.payload.users.forEach(
+        //         (user) => print(user.username)
+        // );
+        // print(joinedRoomResponse.payload.users);
         print('joined room response above');
         print(jsonDecode(data)['payload']['roomId']);
         handleEventJoinedRoom(joinedRoomResponse);
@@ -91,9 +94,24 @@ class WebsocketService extends GetxService {
         // print(roomId);
       }
       break;
-      case ServerEventUserJoined: {
-        UserJoinedResponse userJoinedResponse = UserJoinedResponse.fromRawJson(data);
-        handleEventUserJoined(userJoinedResponse);
+      case ServerEventUserJoinedRoom: {
+        UserJoinedRoomResponse userJoinedRoomResponse = UserJoinedRoomResponse.fromRawJson(data);
+        handleEventUserJoinedRoom(userJoinedRoomResponse);
+      }
+      break;
+      case ServerEventJoinedGame: {
+        JoinedGameResponse joinedGameRoomResponse = JoinedGameResponse.fromRawJson(data);
+        handleEventJoinedGame(joinedGameRoomResponse);
+      }
+      break;
+      // case ServerEventUserJoined: {
+      //   UserJoinedResponse userJoinedResponse = UserJoinedResponse.fromRawJson(data);
+      //   handleEventUserJoined(userJoinedResponse);
+      // }
+      // break;
+      case ServerEventUserJoinedGame: {
+        UserJoinedGameResponse userJoinedGameResponse = UserJoinedGameResponse.fromRawJson(data);
+        handleEventUserJoinedGame(userJoinedGameResponse);
       }
       break;
       case ServerEventChatMessage: {
@@ -114,9 +132,9 @@ class WebsocketService extends GetxService {
       case ServerEventJoinableGames: {
         print('joinable games event object from server');
         // print(jsonDecode(data)['payload']['games'][0]['UserIDs'][0].runtimeType);
-        ListJoinableGamesResponse listJoinableGamesResponse = ListJoinableGamesResponse.fromRawJson(data);
+        JoinableGamesResponse joinableGamesResponse = JoinableGamesResponse.fromRawJson(data);
         // print(listJoinableGamesResponse.payload.games[0].usersIds.toString());
-        handleServerEventJoinableGames(listJoinableGamesResponse);
+        handleServerEventJoinableGames(joinableGamesResponse);
       }
       break;
       case ServerEventGameUpdate: {
@@ -140,43 +158,65 @@ class WebsocketService extends GetxService {
   }
 
   void handleEventJoinedRoom(JoinedRoomResponse joinedRoomResponse) {
-    if (!joinedRoomResponse.payload.isGameRoom!) {
-      roomService.addRoom(joinedRoomResponse.payload.roomId, joinedRoomResponse.payload);
-      return;
-    }
+    // if (joinedRoomResponse.payload.isGameRoom != null
+    //       && !joinedRoomResponse.payload.isGameRoom!) {
+    //   roomService.addRoom(joinedRoomResponse.payload.roomId, joinedRoomResponse.payload);
+    //   return;
+    // }
     print('joined game room');
-    if (gameService.currentGameRoom.value == null) {
-      gameService.currentGameRoom.value = joinedRoomResponse.payload;
-      gameService.currentGameRoomUsers.value =
-          joinedRoomResponse.payload.users;
-      return;
-    }
+    // if (gameService.currentGameRoom.value == null) {
+    //   gameService.currentGameRoom.value = joinedRoomResponse.payload;
+    //   gameService.currentGameRoomUserIds.value =
+    //       joinedRoomResponse.payload.userIds;
+    //   return;
+    // }
     // if (joinedRoomResponse.payload.roomId ==
     //     gameService.currentGameRoom.value!.roomId) {
-    gameService.currentGameRoom.value = joinedRoomResponse.payload;
-    gameService.currentGameRoomUsers.value = joinedRoomResponse.payload.users;
+    // gameService.currentGameRoom.value = joinedRoomResponse.payload;
+    // gameService.currentGameRoomUserIds.value = joinedRoomResponse.payload.userIds;
     // }
+    roomService.addRoom(joinedRoomResponse.payload.roomId, joinedRoomResponse.payload);
   }
 
-  void handleEventUserJoined(UserJoinedResponse userJoinedResponse) {
-    // Room currentGameRoom = gameService.currentGameRoom.value!;
-    // currentGameRoom.users.add(userJoinedResponse.payload.user);
-    // gameService.currentGameRoom.value = currentGameRoom;
-    // print('new current game room state');
-    // print(gameService.currentGameRoom.value!.users.toString());
-    if (gameService.currentGameRoom.value == null) return;
-    if (userJoinedResponse.payload.roomId == gameService.currentGameRoom.value!.roomId) {
-      gameService.currentGameRoomUsers!.add(userJoinedResponse.payload.user);
-    }
+  void handleEventUserJoinedRoom(UserJoinedRoomResponse userJoinedRoomResponse) {
+    roomService.roomsMap[userJoinedRoomResponse.payload.roomId]!.userIds.add(userJoinedRoomResponse.payload.userId);
+  }
+
+  void handleEventJoinedGame(JoinedGameResponse joinedGameResponse) {
+    // gameService.currentGameRoom.value = joinedGameRoomResponse.gam
+    gameService.currentGameId = joinedGameResponse.payload.id;
+    gameService.currentGameRoomUserIds!.add(userService.user.value!.id);
+  }
+
+  // void handleEventUserJoined(UserJoinedResponse userJoinedResponse) {
+  //   // Room currentGameRoom = gameService.currentGameRoom.value!;
+  //   // currentGameRoom.users.add(userJoinedResponse.payload.user);
+  //   // gameService.currentGameRoom.value = currentGameRoom;
+  //   // print('new current game room state');
+  //   // print(gameService.currentGameRoom.value!.users.toString());
+  //
+  //   if (gameService.currentGameRoom.value == null) return;
+  //   if (userJoinedResponse.payload.roomId == gameService.currentGameRoom.value!.roomId) {
+  //     gameService.currentGameRoomUserIds!.add(userJoinedResponse.payload.user.id);
+  //   }
+  // }
+
+  void handleEventUserJoinedGame(UserJoinedGameResponse userJoinedGameResponse) {
+    gameService.currentGameRoomUserIds!.add(userJoinedGameResponse.payload.userId);
+    print(gameService.currentGameRoomUserIds!.length);
   }
 
   void handleServerEventChatMessage(ChatMessageResponse chatMessageResponse) {
-    if (gameService.currentGameRoom.value != null) {
-      if (chatMessageResponse.payload!.roomId ==
-          gameService.currentGameRoom.value!.roomId) {
-        gameService.currentRoomMessages.add(chatMessageResponse.payload!);
-        return;
-      }
+    // if (gameService.currentGameRoom.value != null) {
+    //   if (chatMessageResponse.payload!.roomId ==
+    //       gameService.currentGameRoom.value!.roomId) {
+    //     gameService.currentRoomMessages.add(chatMessageResponse.payload!);
+    //     return;
+    //   }
+    // }
+    if (gameService.isCurrentGameId(chatMessageResponse.payload!.roomId)) {
+      gameService.currentRoomMessages.add(chatMessageResponse.payload!);
+      return;
     }
     roomService.addMessagePayloadToRoom(chatMessageResponse.payload!.roomId, chatMessageResponse.payload!);
     if (chatMessageResponse.payload!.roomId == roomService.currentRoomId) {
@@ -184,9 +224,9 @@ class WebsocketService extends GetxService {
     }
   }
 
-  void handleServerEventJoinableGames(ListJoinableGamesResponse listJoinableGamesResponse) {
+  void handleServerEventJoinableGames(JoinableGamesResponse joinableGamesResponse) {
     print('before first joinable game userids');
-    gameService.joinableGames.value = listJoinableGamesResponse.payload.games;
+    gameService.joinableGames.value = joinableGamesResponse.payload.games;
     // print(listJoinableGamesResponse.payload.games[0].usersIds.toString());
 
   }
@@ -222,38 +262,38 @@ class WebsocketService extends GetxService {
         userIds: userIds
     );
     final createGameRoomRequest = CreateGameRoomRequest(
-        event: ClientEventCreateGameRoom,
+        event: ClientEventCreateGame,
         payload: createGameRoomPayload
     );
     socket.sink.add(createGameRoomRequest.toRawJson());
   }
 
-  void joinRoom(String roomId) {
-    final joinRoomPayload = JoinRoomPayload(roomId: roomId);
-    final joinRoomRequest = JoinRoomRequest(
-        event: ClientEventJoinRoom,
-        payload: joinRoomPayload
-    );
-    socket.sink.add(joinRoomRequest.toRawJson());
-  }
+  // void joinRoom(String roomId) {
+  //   final joinRoomPayload = JoinRoomPayload(roomId: roomId);
+  //   final joinRoomRequest = JoinRoomRequest(
+  //       event: ClientEventJoinRoom,
+  //       payload: joinRoomPayload
+  //   );
+  //   socket.sink.add(joinRoomRequest.toRawJson());
+  // }
 
-  void joinDMRoom(String toId, String toUsername) {
-    final joinDMPayload = JoinDMPayload(
-        username: userService.user.value!.username,
-        toId: toId,
-        toUsername: toUsername
-    );
-    final joinDMRequest = JoinDMRequest(
-        event: ClientEventJoinDMRoom,
-        payload: joinDMPayload
-    );
-    socket.sink.add(joinDMRequest.toRawJson());
-  }
+  // void joinDMRoom(String toId, String toUsername) {
+  //   final joinDMPayload = JoinDMPayload(
+  //       username: userService.user.value!.username,
+  //       toId: toId,
+  //       toUsername: toUsername
+  //   );
+  //   final joinDMRequest = JoinDMRequest(
+  //       event: ClientEventJoinDMRoom,
+  //       payload: joinDMPayload
+  //   );
+  //   socket.sink.add(joinDMRequest.toRawJson());
+  // }
 
-  void joinGameRoom(String roomId) {
-    final joinGameRoomPayload = JoinRoomPayload(roomId: roomId);
+  void joinGame(String gameId) {
+    final joinGameRoomPayload = JoinRoomPayload(gameId: gameId);
     final joinGameRoomRequest = JoinRoomRequest(
-        event: ClientEventJoinGameRoom,
+        event: ClientEventJoinGame,
         payload: joinGameRoomPayload
     );
     socket.sink.add(joinGameRoomRequest.toRawJson());
@@ -280,8 +320,8 @@ class WebsocketService extends GetxService {
     socket.sink.add(listJoinableGamesRequest.toRawJson());
   }
 
-  void startGame(String roomId) {
-    final startGamePayload = StartGamePayload(roomId: roomId);
+  void startGame(String gameId) {
+    final startGamePayload = StartGamePayload(gameId: gameId);
     final startGameRequest = StartGameRequest(
       event: ClientEventStartGame,
       payload: startGamePayload
@@ -291,7 +331,7 @@ class WebsocketService extends GetxService {
 
   void playMove(MoveInfo moveInfo) {
     final playMovePayload = PlayMovePayload(
-        gameId: gameService.currentGameRoom.value!.roomId,
+        gameId: gameService.currentGameId,
         moveInfo: moveInfo
     );
     final playMoveRequest = PlayMoveRequest(

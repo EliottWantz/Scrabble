@@ -52,7 +52,7 @@ class GameLobbyScreen extends StatelessWidget {
                   Gap(Get.height / 5),
                   const CircularProgressIndicator(),
                   Gap(200),
-                  Obx(() => Text('${_gameService.currentGameRoomUsers.value!.length}/4 joueurs présents',
+                  Obx(() => Text('${_gameService.currentGameRoomUserIds.value!.length}/4 joueurs présents',
                       style: Theme.of(context).textTheme.headline6)),
                 ],
               )),
@@ -62,13 +62,13 @@ class GameLobbyScreen extends StatelessWidget {
   }
 
   Widget _buildStartButton(BuildContext context) {
-    if (_gameService.currentGameRoomUsers.value!.length < 2) {
+    if (_gameService.currentGameRoomUserIds.value!.length < 2) {
       return Text('En attente d\'autre joueurs... Veuillez patientez',
           style: Theme.of(context).textTheme.headline6);
     } else {
       return ElevatedButton.icon(
         onPressed: () {
-          _websocketService.startGame(_gameService.currentGameRoom!.value!.roomId);
+          _websocketService.startGame(_gameService.currentGameId);
         },
         icon: const Icon(
           // <-- Icon
