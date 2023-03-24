@@ -59,7 +59,7 @@
 }
 
 .message .timestamp {
-  font-size: 1.5ch;
+  font-size: 1ch;
 }
 
 form {
@@ -83,6 +83,11 @@ form > button {
   border: none;
   cursor: pointer;
   background-color: transparent;
+}
+
+img {
+  border-radius: 50%;
+  width: 25%;
 }
 
 // form {

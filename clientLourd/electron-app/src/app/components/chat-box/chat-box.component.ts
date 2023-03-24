@@ -18,6 +18,7 @@ import { User } from "@app/utils/interfaces/user";
 import { RoomService } from "@app/services/room/room.service";
 import { Room } from "@app/utils/interfaces/room";
 import { UserService } from "@app/services/user/user.service";
+import { StorageService } from "@app/services/storage/storage.service";
 
 @Component({
   selector: "app-chat-box",
@@ -38,12 +39,14 @@ export class ChatBoxComponent implements OnInit, AfterViewInit {
   @ViewChild("chatBoxInput")
   chatBoxInput!: ElementRef;
   user!: User;
+  currentRoomId = "";
 
   constructor(
     private fb: FormBuilder,
     private chatService: ChatService,
     private roomService: RoomService,
-    private userService: UserService
+    private userService: UserService,
+    private storageService: StorageService
   ) {
     this.chatBoxForm = this.fb.group({
       input: ["", [Validators.required]],
@@ -56,6 +59,7 @@ export class ChatBoxComponent implements OnInit, AfterViewInit {
     this.room$.subscribe(() => {
       setTimeout(() => this.scrollBottom());
     });
+    this.currentRoomId = this.room$.value.id;
   }
 
   ngAfterViewInit(): void {
@@ -103,5 +107,20 @@ export class ChatBoxComponent implements OnInit, AfterViewInit {
     this.chatBoxMessagesContainer.nativeElement.scrollTop =
       this.chatBoxMessagesContainer.nativeElement.scrollHeight;
     // }
+  }
+
+  getAvatarMessage(id: string): string {
+    const avatar = this.storageService.getAvatar(id);
+    if (avatar) return avatar;
+    return "";
+  }
+
+  getRooms(): Room[] {
+    return this.roomService.listJoinedChatRooms.value;
+  }
+
+  changeRoom(): void {
+    console.log(this.currentRoomId);
+    this.roomService.changeRoom(this.currentRoomId);
   }
 }

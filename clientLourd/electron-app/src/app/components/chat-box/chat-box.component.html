@@ -1,3 +1,12 @@
+<mat-form-field appearance="fill">
+  <mat-label>Salle</mat-label>
+  <mat-select [(value)]="currentRoomId" (selectionChange)="changeRoom()">
+    <mat-option *ngFor="let room of getRooms()" [value]="room.id">
+      {{ room.name }}
+    </mat-option>
+  </mat-select>
+</mat-form-field>
+
 <div id="chatBox" #chatBox>
   <mat-card>
     <div id="chatBoxBody" #chatBoxBody>
@@ -10,6 +19,7 @@
             received: msg.from !== user.id
           }"
         >
+          <img src="{{getAvatarMessage(msg.fromId)}}">
           <p>{{ msg.from }}: {{ msg.message }}</p>
           <p class="timestamp">{{ msg.timestamp }}</p>
         </div>
