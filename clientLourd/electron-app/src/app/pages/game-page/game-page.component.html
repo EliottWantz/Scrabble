@@ -1,7 +1,12 @@
 <div class="container">
   <div class="left">
+    <button mat-flat-button color="primary" (click)="leaveGame()">Quitter la partie</button>
     <div *ngFor="let player of game.value.players" class="player" [class.isTurn]="game.value.turn === player.id">
-      {{player.username}} {{player.score}}
+      <h5>
+        <img src="{{getPlayerAvatar(player.id)}}">
+        {{player.username}}
+      </h5>
+      <p>Score : {{player.score}}</p>
     </div>
   </div>
   <div class="middle">
@@ -10,22 +15,22 @@
     </div>
     <app-rack class="rack"></app-rack>
     <div class="play-buttons">
-      <button mat-raised-button color="accent" (click)="submit()" id="play-button" [disabled]="!hasPlacedLetters()">
+      <button mat-raised-button color="primary" (click)="submit()" id="play-button" [disabled]="!hasPlacedLetters()">
         <mat-icon>done</mat-icon>
         Envoyer
       </button>
 
-      <button mat-raised-button color="accent" (click)="pass()" id="pass-button">
+      <button mat-raised-button color="primary" (click)="pass()" id="pass-button">
         <mat-icon>fast_forward</mat-icon>
         Passer
       </button>
 
-      <button mat-raised-button color="accent" (click)="exchange()" id="exchange-button" [disabled]="!hasSelectedLetters()">
+      <button mat-raised-button color="primary" (click)="exchange()" id="exchange-button" [disabled]="!hasSelectedLetters()">
         <mat-icon>swap_horiz</mat-icon>
         Échanger
       </button>
 
-      <button mat-raised-button color="accent" (click)="indice()" id="indice-button">
+      <button mat-raised-button color="primary" (click)="indice()" id="indice-button">
         <mat-icon>lightbulb</mat-icon>
         Indice
       </button>
