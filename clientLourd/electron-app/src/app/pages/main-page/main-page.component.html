@@ -13,4 +13,7 @@
             <button mat-flat-button color="accent" (click)="joinGame(game.id, ' ')" routerLink="/waitingRoom">Rejoindre la partie</button>
         </div>
     </div>
+    <div class="bottom">
+        <app-chat-box *ngIf="isLoggedIn()"></app-chat-box>
+    </div>
 </div>
