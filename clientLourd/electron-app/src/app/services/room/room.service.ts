@@ -70,18 +70,18 @@ export class RoomService {
     }
 
     addMessage(msg: ChatMessage): void {
+        console.log(this.listJoinedChatRooms.value);
         if (msg.roomId== this.currentRoomChat.value.id) {
             const currentMessages = this.currentRoomChat.value.messages;
             currentMessages.push(msg);
             this.currentRoomChat.next({...this.currentRoomChat.value, messages: currentMessages});
         } else {
             const index = this.findRoom(msg.roomId);
-            if (index) {
-                const currentMessages = this.listChatRooms.value[index].messages;
-                currentMessages.push(msg);
-                const newRooms = this.listChatRooms.value;
-                newRooms[index] = {...newRooms[index], messages: currentMessages};
-                this.listChatRooms.next(newRooms);
+            console.log(index);
+            if (index !== undefined) {
+                const newRooms = this.listJoinedChatRooms.value;
+                newRooms[index].messages.push(msg);
+                this.listJoinedChatRooms.next(newRooms);
             }
         }
     }
