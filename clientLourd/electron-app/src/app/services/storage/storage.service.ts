@@ -7,6 +7,18 @@ import { BehaviorSubject } from 'rxjs';
 })
 export class StorageService {
     listUsers: BehaviorSubject<User[]> = new BehaviorSubject<User[]>([]);
+    avatars: BehaviorSubject<Map<string, string>> = new BehaviorSubject<Map<string, string>>(new Map<string, string>());
+
+    addAvatar(id: string, url: string): void {
+        const map = this.avatars.value;
+        map.set(id, url);
+        this.avatars.next(map);
+    }
+
+    getAvatar(id: string): string | undefined {
+        const map = this.avatars.value;
+        return map.get(id);
+    }
 
     getUserFromName(username: string): User | undefined {
         for (const user of this.listUsers.value) {

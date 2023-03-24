@@ -132,12 +132,16 @@ export class WebSocketService {
             case "listUsers": {
                 const payloadListUsers = packet.payload as ListUsersPayload;
                 this.storageService.listUsers.next(payloadListUsers.users);
+                for (const user of payloadListUsers.users) {
+                    this.storageService.addAvatar(user.id, user.avatar.url);
+                }
                 break;
             }
 
             case "newUser": {
                 const newUserPayload = packet.payload as NewUserPayload;
                 this.storageService.listUsers.next([...this.storageService.listUsers.value, newUserPayload.user]);
+                this.storageService.addAvatar(newUserPayload.user.id, newUserPayload.user.avatar.url);
                 break;
             }
 
