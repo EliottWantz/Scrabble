@@ -23,6 +23,7 @@ class User {
   Avatar avatar;
   Preferences preferences;
   List<dynamic> joinedChatRooms;
+  List<dynamic> friends;
 
   User(
       {required this.id,
@@ -30,7 +31,8 @@ class User {
       required this.email,
       required this.avatar,
       required this.preferences,
-      required this.joinedChatRooms});
+      required this.joinedChatRooms,
+      required this.friends});
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
@@ -39,7 +41,8 @@ class User {
         email: json["email"],
         avatar: Avatar.fromJson(json["avatar"]),
         preferences: Preferences.fromJson(json["preferences"]),
-        joinedChatRooms: json["joinedChatRooms"]);
+        joinedChatRooms: json["joinedChatRooms"],
+        friends: json["friends"]);
   }
 
   Map<String, dynamic> toJson() => {
@@ -49,5 +52,6 @@ class User {
         "avatar": avatar.toJson(),
         "preferences": preferences.toJson(),
         "joinedChatRooms": joinedChatRooms,
+        "friends": friends
       };
 }

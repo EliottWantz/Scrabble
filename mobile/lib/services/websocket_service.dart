@@ -16,6 +16,7 @@ import 'package:client_leger/models/response/chat_message_response.dart';
 import 'package:client_leger/models/response/game_update_response.dart';
 import 'package:client_leger/models/response/joined_game_response.dart';
 import 'package:client_leger/models/response/joined_room_response.dart';
+import 'package:client_leger/models/response/list_users_response.dart';
 import 'package:client_leger/models/response/timer_response.dart';
 import 'package:client_leger/models/response/user_joined_game_response.dart';
 import 'package:client_leger/models/response/user_joined_response.dart';
@@ -24,6 +25,7 @@ import 'package:client_leger/models/start_game_payload.dart';
 import 'package:client_leger/models/user.dart';
 import 'package:client_leger/routes/app_routes.dart';
 import 'package:client_leger/services/room_service.dart';
+import 'package:client_leger/services/users_service.dart';
 import 'package:get/get.dart';
 // import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:client_leger/api/api_constants.dart';
@@ -42,11 +44,13 @@ import 'game_service.dart';
 
 class WebsocketService extends GetxService {
   final UserService userService;
+  final UsersService usersService;
   final RoomService roomService;
   final GameService gameService = Get.find();
 
   WebsocketService(
       {required this.userService,
+        required this.usersService,
       required this.roomService
       });
 
@@ -80,6 +84,11 @@ class WebsocketService extends GetxService {
     // print(data.payload!.message);
       print(jsonDecode(data)['event']);
     switch(jsonDecode(data)['event']) {
+      case ServerEventListUsers: {
+        ListUsersResponse listUsersResponse = ListUsersResponse.fromRawJson(data);
+        handleEventListUsers(listUsersResponse);
+      }
+      break;
       case ServerEventJoinedRoom: {
         print('event joinedRoom');
         JoinedRoomResponse joinedRoomResponse = JoinedRoomResponse.fromRawJson(data);
@@ -155,6 +164,10 @@ class WebsocketService extends GetxService {
       }
       break;
     }
+  }
+
+  void handleEventListUsers(ListUsersResponse listUsersResponse) {
+    usersService.users.addAll(listUsersResponse.payload.users);
   }
 
   void handleEventJoinedRoom(JoinedRoomResponse joinedRoomResponse) {

@@ -12,6 +12,7 @@ import 'package:client_leger/services/room_service.dart';
 import 'package:client_leger/services/settings_service.dart';
 import 'package:client_leger/services/storage_service.dart';
 import 'package:client_leger/services/user_service.dart';
+import 'package:client_leger/services/users_service.dart';
 import 'package:client_leger/services/websocket_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -57,13 +58,15 @@ Future<void> initGlobalServices() async {
   Get.put(RoomService());
   Get.put(GameService());
   Get.put(ApiProvider(), permanent: true);
+  Get.put(ApiRepository(apiProvider: Get.find()), permanent: true);
+  Get.put(UsersService());
   Get.put(
       WebsocketService(
         userService: Get.find(),
+        usersService: Get.find(),
         roomService: Get.find(),
       ),
       permanent: false);
-  Get.put(ApiRepository(apiProvider: Get.find()), permanent: true);
   Get.put(SettingsService(storageService: Get.find()));
   Get.put(AvatarService());
   Get.put(AuthService(

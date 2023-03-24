@@ -53,7 +53,8 @@ class FriendRequestScreen extends StatelessWidget {
                   hintText: "Entrez un nom d'utilisateur",
                   border: OutlineInputBorder(
                       borderRadius:
-                      BorderRadius.all(Radius.circular(8)))),
+                      BorderRadius.all(Radius.circular(8)))
+              ),
             ),
           ),
         )

@@ -75,4 +75,12 @@ class ApiRepository {
     }
     return null;
   }
+
+  // Future<FriendRequestResponse?> sendFriendRequest(FriendRequest data) async {
+  //   final res = await apiProvider.login('/user/friends/request ', data);
+  //   if (res.statusCode == 200) {
+  //     return FriendRequest.fromJson(res.body);
+  //   }
+  //   return null;
+  // }
 }
