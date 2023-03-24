@@ -2,27 +2,34 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class Timer extends StatelessWidget {
-  Timer ({
-    Key? key,
-    required this.time
-  }) : super(key: key);
-  
-  final time;
+  Timer({Key? key, required this.time}) : super(key: key);
+
+  int time;
+  final size = 130.0;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 75,
-      height: 45,
-      child: Row(
+    return Container(
+      height: size,
+      width: size,
+      child: Stack(
+        fit: StackFit.loose,
         children: [
-          const Icon(
-            Icons.timer,
-            color: Colors.black,
-            size: 12.0,
+          Center(
+            child: SizedBox(
+                width: size,
+                height: size,
+                child: CircularProgressIndicator(
+                  value: 1 - time / 60,
+                  strokeWidth: 8,
+                  valueColor: const AlwaysStoppedAnimation(
+                      Color.fromARGB(255, 255, 255, 255)),
+                  backgroundColor: Color.fromARGB(255, 27, 53, 94),
+                )),
           ),
-          // const Spacer(),
-          _buildTimeText(context)
+          Center(
+            child: _buildTimeText(context),
+          )
         ],
       ),
     );

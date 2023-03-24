@@ -1,86 +1,122 @@
 import 'package:client_leger/controllers/game_controller.dart';
 import 'package:client_leger/models/position.dart';
+import 'package:client_leger/models/tile.dart';
 import 'package:client_leger/services/game_service.dart';
 import 'package:client_leger/utils/constants/board.dart';
 import 'package:client_leger/widgets/board_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_layout_grid/flutter_layout_grid.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 
-const trackCount = 15;
+const trackCount = 16;
 const doubleLetterCount = 24;
 const List<List<int>> DLPositions = [
-  [0, 3],
-  [0, 1],
-  [2, 6],
-  [2, 8],
-  [3, 0],
+  [1, 4],
+  [1, 2],
   [3, 7],
-  [3, 14],
-  [6, 2],
-  [6, 6],
-  [6, 8],
-  [6, 1],
+  [3, 9],
+  [4, 1],
+  [4, 8],
+  [4, 15],
   [7, 3],
-  [7, 1],
+  [7, 7],
+  [7, 9],
+  [7, 2],
+  [8, 4],
   [8, 2],
-  [8, 6],
-  [8, 8],
-  [8, 12],
-  [11, 0],
-  [11, 7],
-  [11, 14],
-  [12, 6],
+  [9, 3],
+  [9, 7],
+  [9, 9],
+  [9, 13],
+  [12, 1],
   [12, 8],
-  [14, 3],
-  [14, 11],
+  [12, 15],
+  [13, 7],
+  [13, 9],
+  [15, 4],
+  [15, 12],
 ];
 const doubleWordCount = 16;
 const List<List<int>> DWPositions = [
-  [1, 1],
-  [1, 13],
   [2, 2],
-  [2, 12],
+  [2, 14],
   [3, 3],
-  [3, 11],
+  [3, 13],
   [4, 4],
-  [4, 10],
-  [10, 4],
-  [10, 10],
-  [11, 3],
+  [4, 12],
+  [5, 5],
+  [5, 11],
+  [11, 5],
   [11, 11],
-  [12, 2],
+  [12, 4],
   [12, 12],
-  [13, 1],
-  [13, 13]
+  [13, 3],
+  [13, 13],
+  [14, 2],
+  [14, 14]
 ];
 const tripleLetterCount = 12;
 const List<List<int>> TLPositions = [
-  [1, 5],
-  [1, 9],
-  [5, 1],
-  [5, 5],
-  [5, 9],
-  [5, 13],
-  [9, 1],
-  [9, 5],
-  [9, 9],
-  [9, 13],
-  [13, 5],
-  [13, 9]
+  [2, 6],
+  [2, 10],
+  [6, 2],
+  [6, 6],
+  [6, 10],
+  [6, 14],
+  [10, 2],
+  [10, 6],
+  [10, 10],
+  [10, 14],
+  [14, 6],
+  [14, 10]
 ];
 const tripleWordCount = 8;
 const List<List<int>> TWPositions = [
-  [0, 0],
-  [0, 7],
-  [0, 14],
-  [7, 0],
-  [7, 14],
-  [14, 0],
-  [14, 7],
-  [14, 14]
+  [1, 1],
+  [1, 8],
+  [1, 15],
+  [8, 1],
+  [8, 15],
+  [15, 1],
+  [15, 8],
+  [15, 15]
 ];
 const tileCount = trackCount * trackCount;
+
+const letterPointMapping = {
+  // row,col
+  '01': 'A',
+  '02': 'B',
+  '03': 'C',
+  '04': 'D',
+  '05': 'E',
+  '06': 'F',
+  '07': 'G',
+  '08': 'H',
+  '09': 'I',
+  '010': 'J',
+  '011': 'K',
+  '012': 'L',
+  '013': 'M',
+  '014': 'N',
+  '015': 'O',
+  '10': '1',
+  '20': '2',
+  '30': '3',
+  '40': '4',
+  '50': '5',
+  '60': '6',
+  '70': '7',
+  '80': '8',
+  '90': '9',
+  '100': '10',
+  '110': '11',
+  '120': '12',
+  '130': '13',
+  '140': '14',
+  '150': '15',
+};
 
 class ScrabbleBoard extends GetView<GameController> {
   ScrabbleBoard({
@@ -91,46 +127,72 @@ class ScrabbleBoard extends GetView<GameController> {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() => LayoutGrid(
-          areas: BoardConstants.boardArea,
-          columnSizes: repeat(trackCount, [40.px]),
-          rowSizes: repeat(trackCount, [40.px]),
-          children: [
-            // First, square bases
-            for (int i = 0; i < trackCount; i++)
-              for (int j = 0; j < trackCount; j++)
-                // if (gameService.currentGame.value!.board[i][j].tile == null)
-                  StandardSquare(position: Position(row: i, col: j))
-                      .withGridPlacement(columnStart: i, rowStart: j),
-            // Then put bonuses on top
-            StartingSquare(position: Position(row: 7, col: 7)).inGridArea('★'),
-            for (int i = 0; i < doubleLetterCount; i++)
-              DoubleLetterSquare(
-                position: Position(row: DLPositions[i][0], col: DLPositions[i][1]))
-                  .inGridArea('dl${i.toRadixString(36)}'),
-            for (int i = 0; i < doubleWordCount; i++)
-              DoubleWordSquare(
-                  position: Position(row: DWPositions[i][0], col: DWPositions[i][1]))
+    return Obx(() => Padding(
+          padding: const EdgeInsets.only(top: 10),
+          child: LayoutGrid(
+            areas: BoardConstants.boardArea,
+            columnSizes: repeat(trackCount, [38.px]),
+            rowSizes: repeat(trackCount, [36.px]),
+            children: [
+              for (int i = 0; i < trackCount; i++)
+                for (int j = 0; j < trackCount; j++)
+                  if (letterPointMapping
+                      .containsKey(i.toString() + j.toString()))
+                    Center(
+                            child: Text(letterPointMapping[
+                                i.toString() + j.toString()]!))
+                        .inGridArea(
+                            letterPointMapping[i.toString() + j.toString()]!),
+              for (int i = 1; i < trackCount; i++)
+                for (int j = 1; j < trackCount; j++)
+                  if (gameService.currentGame.value!.board[i - 1][j - 1].tile ==
+                      null)
+                    StandardSquare(position: Position(row: j, col: i))
+                        .withGridPlacement(columnStart: i, rowStart: j),
+              StartingSquare(position: Position(row: 8, col: 8))
+                  .inGridArea('★'),
+              for (int i = 0; i < doubleLetterCount; i++)
+                DoubleLetterSquare(
+                        position: Position(
+                            row: DLPositions[i][0], col: DLPositions[i][1]))
+                    .inGridArea('dl${i.toRadixString(36)}'),
+              for (int i = 0; i < doubleWordCount; i++)
+                DoubleWordSquare(
+                        position: Position(
+                            row: DWPositions[i][0], col: DWPositions[i][1]))
                     .inGridArea('dw${i.toRadixString(36)}'),
-            for (int i = 0; i < tripleLetterCount; i++)
-              TripleLetterSquare(
-                  position: Position(row: TLPositions[i][0], col: TLPositions[i][1]))
-                  .inGridArea('tl${i.toRadixString(36)}'),
-            for (int i = 0; i < tripleWordCount; i++)
-              TripleWordSquare(
-                  position: Position(row: TWPositions[i][0], col: TWPositions[i][1]))
-                  .inGridArea('tw${i.toRadixString(36)}'),
-
-            // Then place tiles on top of those
-            for (final row in gameService.currentGame.value!.board)
-              for (final square in row)
-                if (square.tile != null)
-                  LetterTile(letter: String.fromCharCode(square.tile!.letter))
-                      .withGridPlacement(
-                    columnStart: square.position.col,
-                    rowStart: square.position.row,
-                  )
-          ],
+              for (int i = 0; i < tripleLetterCount; i++)
+                TripleLetterSquare(
+                        position: Position(
+                            row: TLPositions[i][0], col: TLPositions[i][1]))
+                    .inGridArea('tl${i.toRadixString(36)}'),
+              for (int i = 0; i < tripleWordCount; i++)
+                TripleWordSquare(
+                        position: Position(
+                            row: TWPositions[i][0], col: TWPositions[i][1]))
+                    .inGridArea('tw${i.toRadixString(36)}'),
+              for (final tile in controller.lettersPlaced)
+                Draggable<Tile>(
+                    data: tile.tile,
+                    onDragCompleted: () =>
+                        controller.lettersPlaced.remove(tile),
+                    feedback: SizedBox(
+                        height: 70,
+                        width: 70,
+                        child: LetterTile(
+                          tile: tile.tile,
+                        )),
+                    child: SizedBox(
+                        height: 70,
+                        width: 70,
+                        child: LetterTile(
+                          tile: tile.tile,
+                        ))).withGridPlacement(
+                  columnStart: tile.position.col,
+                  rowStart: tile.position.row,
+                )
+            ],
+          ),
         ));
   }
 }
