@@ -41,6 +41,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { SocialComponent } from '@app/components/social/social.component';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { WaitRoomPageComponent } from '@app/pages/waiting-room-page/waiting-room-page.component';
+import { MatSelectModule } from '@angular/material/select';
 
 @NgModule({
   declarations: [
@@ -86,7 +87,8 @@ import { WaitRoomPageComponent } from '@app/pages/waiting-room-page/waiting-room
     MatDialogModule,
     MatButtonModule,
     BrowserAnimationsModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatSelectModule
   ],
   providers: [
     {
