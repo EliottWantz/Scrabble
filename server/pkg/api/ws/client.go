@@ -342,9 +342,9 @@ func (c *Client) HandleCreateGameRequest(p *Packet) error {
 	var err error
 	var g *game.Game
 	if payload.Password != "" {
-		g, err = c.Manager.GameSvc.NewProtected(c.ID, payload.Password)
+		g, err = c.Manager.GameSvc.NewProtectedGame(c.ID, payload.Password)
 	} else {
-		g, err = c.Manager.GameSvc.New(c.ID)
+		g, err = c.Manager.GameSvc.NewGame(c.ID)
 	}
 	if err != nil {
 		return err
@@ -367,7 +367,7 @@ func (c *Client) HandleJoinGameRequest(p *Packet) error {
 		return err
 	}
 
-	g, err := c.Manager.GameSvc.AddUser(payload.GameID, c.ID, payload.Password)
+	g, err := c.Manager.GameSvc.AddUserToGame(payload.GameID, c.ID, payload.Password)
 	if err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
@@ -402,7 +402,6 @@ func (c *Client) HandleJoinAsObserverRequest(p *Packet) error {
 	}
 
 	r, err := c.Manager.GetRoom(payload.GameID)
-
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
@@ -428,7 +427,6 @@ func (c *Client) HandleObservateurLeaveGameRequest(p *Packet) error {
 		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
 	return c.Manager.RemoveClientFromGame(c, payload.GameID)
-
 }
 
 func (c *Client) HandleLeaveGameRequest(p *Packet) error {
@@ -445,7 +443,7 @@ func (c *Client) HandleStartGameRequest(p *Packet) error {
 	if err := json.Unmarshal(p.Payload, &payload); err != nil {
 		return fiber.NewError(fiber.StatusUnprocessableEntity, "parse request: "+err.Error())
 	}
-	g, err := c.Manager.GameSvc.Repo.Find(payload.GameID)
+	g, err := c.Manager.GameSvc.Repo.FindGame(payload.GameID)
 	if err != nil {
 		return fiber.NewError(fiber.StatusNotFound, "Room not found")
 	}
@@ -594,7 +592,6 @@ func (c *Client) HandleGamePrivateRequest(p *Packet) error {
 	g, err := c.Manager.GameSvc.MakeGamePrivate(payload.GameID)
 	if err != nil {
 		return err
-
 	}
 	r, err := c.Manager.GetRoom(g.ID)
 	for _, observateur := range g.ObservateurIDs {
@@ -629,7 +626,6 @@ func (c *Client) HandleGamePublicRequest(p *Packet) error {
 	g, err := c.Manager.GameSvc.MakeGamePublic(payload.GameID)
 	if err != nil {
 		return err
-
 	}
 	if err != nil {
 		slog.Error("get room", err)
@@ -646,4 +642,59 @@ func (c *Client) HandleGamePublicRequest(p *Packet) error {
 		return err
 	}
 	return nil
+}
+
+func (c *Client) HandleCreateTournamentRequest(p *Packet) error {
+	payload := CreateTournamentPayload{}
+	if err := json.Unmarshal(p.Payload, &payload); err != nil {
+		return err
+	}
+	t, err := c.Manager.GameSvc.NewTournament(c.ID, payload.WithUserIDs)
+	if err != nil {
+		return err
+	}
+
+	r := c.Manager.AddRoom(t.ID, "")
+	if err := r.AddClient(c.ID); err != nil {
+		return err
+	}
+	if err := c.Manager.UserSvc.Repo.SetJoinedGame(t.ID, c.ID); err != nil {
+		return err
+	}
+
+	return r.BroadcastJoinTournamentPackets(c, t)
+}
+
+func (c *Client) HandleJoinTournamentRequest(p *Packet) error {
+	payload := JoinTournamentPayload{}
+	if err := json.Unmarshal(p.Payload, &payload); err != nil {
+		return err
+	}
+
+	t, err := c.Manager.GameSvc.AddUserToTournament(payload.TournamentID, c.ID, payload.Password)
+	if err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+
+	r, err := c.Manager.GetRoom(payload.TournamentID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	if err := r.AddClient(c.ID); err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+	if err := c.Manager.UserSvc.Repo.SetJoinedTournament(t.ID, c.ID); err != nil {
+		return err
+	}
+
+	return r.BroadcastJoinTournamentPackets(c, t)
+}
+
+func (c *Client) HandleLeaveTournamentRequest(p *Packet) error {
+	payload := LeaveTournamentPayload{}
+	if err := json.Unmarshal(p.Payload, &payload); err != nil {
+		return err
+	}
+
+	return c.Manager.RemoveClientFromTournament(c, payload.TournamentID)
 }

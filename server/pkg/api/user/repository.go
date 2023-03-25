@@ -158,6 +158,24 @@ func (r *Repository) UnSetJoinedGame(userID string) error {
 	return err
 }
 
+func (r *Repository) SetJoinedTournament(tournamentID, userID string) error {
+	_, err := r.coll.UpdateByID(
+		context.Background(),
+		userID,
+		bson.M{"$set": bson.M{"joinedTournament": tournamentID}},
+	)
+	return err
+}
+
+func (r *Repository) UnSetJoinedTournament(userID string) error {
+	_, err := r.coll.UpdateByID(
+		context.Background(),
+		userID,
+		bson.M{"$unset": bson.M{"joinedTournament": ""}},
+	)
+	return err
+}
+
 func (r *Repository) Delete(ID string) error {
 	_, err := r.coll.DeleteOne(context.TODO(), bson.M{"_id": ID})
 	if err != nil {

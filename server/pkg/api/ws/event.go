@@ -18,6 +18,10 @@ var (
 	ClientEventJoinGame           = "join-game"
 	ClientEventLeaveGame          = "leave-game"
 	ClientEventStartGame          = "start-game"
+	ClientEventCreateTournament   = "create-tournament"
+	ClientEventJoinTournament     = "join-tournament"
+	ClientEventLeaveTournament    = "leave-tournament"
+	ClientEventStartTournament    = "start-tournament"
 	ClientEventPlayMove           = "playMove"
 	ClientEventIndice             = "indice"
 )
@@ -36,6 +40,7 @@ var (
 	ServerEventNewUser              = "newUser"
 	ServerEventListChatRooms        = "listChatRooms"
 	ServerEventJoinableGames        = "joinableGames"
+	ServerEventJoinableTournaments  = "joinableTournaments"
 	ServerEventJoinedGame           = "joinedGame"
 	ServerEventLeftGame             = "leftGame"
 	ServerEventUserJoinedGame       = "userJoinedGame"
@@ -47,6 +52,10 @@ var (
 	ServerEventAcceptFriendRequest  = "acceptFriendRequest"
 	ServerEventDeclineFriendRequest = "declineFriendRequest"
 	ServerEventIndice               = "indice"
+	ServerEventJoinedTournament     = "joinedTournament"
+	ServerEventLeftTournament       = "leftTournament"
+	ServerEventUserJoinedTournament = "userJoinedTournament"
+	ServerEventUserLeftTournament   = "userLeftTournament"
 
 	ServerEventError = "error"
 )

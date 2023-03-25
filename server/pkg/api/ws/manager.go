@@ -86,7 +86,7 @@ func (m *Manager) Accept(cID string) fiber.Handler {
 		}
 		{
 			// List available games
-			games, err := m.GameSvc.Repo.FindAll()
+			games, err := m.GameSvc.Repo.FindAllGames()
 			if err != nil {
 				m.logger.Error("list joinable games", err)
 			}
@@ -264,7 +264,7 @@ func (m *Manager) RemoveClientFromGame(c *Client, gID string) error {
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
-	g, err := c.Manager.GameSvc.Repo.Find(gID)
+	g, err := c.Manager.GameSvc.Repo.FindGame(gID)
 	if err != nil {
 		return fiber.NewError(fiber.StatusNotFound, err.Error())
 	}
@@ -280,7 +280,7 @@ func (m *Manager) RemoveClientFromGame(c *Client, gID string) error {
 		// Game has not started yet
 		if c.ID == g.CreatorID {
 			// Delete the game and remove all users
-			if err := c.Manager.GameSvc.Repo.Delete(g.ID); err != nil {
+			if err := c.Manager.GameSvc.Repo.DeleteGame(g.ID); err != nil {
 				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 			}
 			for _, uID := range g.UserIDs {
@@ -305,7 +305,7 @@ func (m *Manager) RemoveClientFromGame(c *Client, gID string) error {
 			return nil
 		} else {
 			// Remove the user from the game
-			if _, err := c.Manager.GameSvc.RemoveUser(gID, c.ID); err != nil {
+			if _, err := c.Manager.GameSvc.RemoveUserFromGame(gID, c.ID); err != nil {
 				slog.Error("remove user from game room", err)
 			}
 			if err := c.Manager.UserSvc.Repo.UnSetJoinedGame(c.ID); err != nil {
@@ -327,6 +327,78 @@ func (m *Manager) RemoveClientFromGame(c *Client, gID string) error {
 		if err := c.Manager.UserSvc.Repo.UnSetJoinedGame(c.ID); err != nil {
 			slog.Error("remove user from game room", err)
 		}
+	}
+	return nil
+}
+
+func (m *Manager) RemoveClientFromTournament(c *Client, gID string) error {
+	r, err := c.Manager.GetRoom(gID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	t, err := c.Manager.GameSvc.Repo.FindTournament(gID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusNotFound, err.Error())
+	}
+
+	if err := r.RemoveClient(c.ID); err != nil {
+		slog.Error("remove client from ws room", err)
+	}
+	if err := r.BroadcastLeaveTournamentPackets(c, t.ID); err != nil {
+		slog.Error("broadcast leave tournament packets", err)
+	}
+
+	if !t.HasStarted {
+		// Tournament has not started yet
+		if c.ID == t.CreatorID {
+			// Delete the Tournament and remove all users
+			if err := c.Manager.GameSvc.Repo.DeleteTournament(t.ID); err != nil {
+				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+			}
+			for _, uID := range t.UserIDs {
+				if err := r.RemoveClient(uID); err != nil {
+					slog.Error("remove user from tournament room", err)
+					continue
+				}
+				if err := c.Manager.UserSvc.Repo.UnSetJoinedTournament(uID); err != nil {
+					slog.Error("remove user from tournament room", err)
+					continue
+				}
+				client, err := c.Manager.GetClient(uID)
+				if err != nil {
+					slog.Error("remove user from tournament room", err)
+					continue
+				}
+				if err := r.BroadcastLeaveTournamentPackets(client, t.ID); err != nil {
+					slog.Error("broadcast leave tournament packets", err)
+					continue
+				}
+			}
+			return nil
+		} else {
+			// Remove the user from the Tournament
+			if _, err := c.Manager.GameSvc.RemoveUserFromTournament(gID, c.ID); err != nil {
+				slog.Error("remove user from Tournament room", err)
+			}
+			if err := c.Manager.UserSvc.Repo.UnSetJoinedTournament(c.ID); err != nil {
+				slog.Error("remove user from Tournament room", err)
+			}
+		}
+	} else {
+		// if Tournament has started and is a spectator
+		// if strings.Contains(strings.Join(t.ObservateurIDs, ""), c.ID) {
+		// 	if err := r.RemoveClient(c.ID); err != nil {
+		// 		slog.Error("remove spectator from Tournament room", err)
+		// 	}
+		// 	return nil
+		// }
+		// // Tournament has started, replace player with a bot
+		// if err := c.Manager.ReplacePlayerWithBot(t.ID, c.ID); err != nil {
+		// 	slog.Error("replace player with bot", err)
+		// }
+		// if err := c.Manager.UserSvc.Repo.UnSetJoinedTournament(c.ID); err != nil {
+		// 	slog.Error("remove user from Tournament room", err)
+		// }
 	}
 	return nil
 }
@@ -396,7 +468,7 @@ func (m *Manager) UpdateChatRooms() error {
 }
 
 func (m *Manager) UpdateJoinableGames() error {
-	joinableGames, err := m.GameSvc.Repo.FindAll()
+	joinableGames, err := m.GameSvc.Repo.FindAllGames()
 	if err != nil {
 		return err
 	}
@@ -407,6 +479,22 @@ func (m *Manager) UpdateJoinableGames() error {
 		return err
 	}
 	m.Broadcast(joinableGamesPacket)
+
+	return nil
+}
+
+func (m *Manager) UpdateJoinableTournaments() error {
+	tournaments, err := m.GameSvc.Repo.FindAllTournaments()
+	if err != nil {
+		return err
+	}
+	joinableTournamentsPacket, err := NewJoinableTournamentsPacket(ListJoinableTournamentsPayload{
+		Tournaments: tournaments,
+	})
+	if err != nil {
+		return err
+	}
+	m.Broadcast(joinableTournamentsPacket)
 
 	return nil
 }

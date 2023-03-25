@@ -1,6 +1,8 @@
 package game
 
-import "scrabble/pkg/scrabble"
+import (
+	"scrabble/pkg/scrabble"
+)
 
 type Game struct {
 	ID             string         `json:"id"`

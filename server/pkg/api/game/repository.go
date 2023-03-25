@@ -8,13 +8,18 @@ import (
 )
 
 var (
-	ErrGameNotFound       = errors.New("game not found")
-	ErrInsertExistingGame = errors.New("game already exists, cannot insert")
+	ErrGameNotFound             = errors.New("game not found")
+	ErrTournamentNotFound       = errors.New("tournament not found")
+	ErrInsertExistingGame       = errors.New("game already exists, cannot insert")
+	ErrInsertExistingTournament = errors.New("tournament already exists, cannot insert")
 )
 
 type Repository struct {
 	mu    sync.Mutex
 	games map[string]*Game
+
+	tmu         sync.Mutex
+	tournaments map[string]*Tournament
 }
 
 func NewRepository(db *mongo.Database) *Repository {
@@ -23,7 +28,7 @@ func NewRepository(db *mongo.Database) *Repository {
 	}
 }
 
-func (r *Repository) Find(ID string) (*Game, error) {
+func (r *Repository) FindGame(ID string) (*Game, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -35,7 +40,7 @@ func (r *Repository) Find(ID string) (*Game, error) {
 	return g, nil
 }
 
-func (r *Repository) FindAll() ([]*Game, error) {
+func (r *Repository) FindAllGames() ([]*Game, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -47,7 +52,7 @@ func (r *Repository) FindAll() ([]*Game, error) {
 	return games, nil
 }
 
-func (r *Repository) Insert(g *Game) error {
+func (r *Repository) InsertGame(g *Game) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -61,7 +66,7 @@ func (r *Repository) Insert(g *Game) error {
 	return nil
 }
 
-func (r *Repository) Delete(ID string) error {
+func (r *Repository) DeleteGame(ID string) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -71,6 +76,58 @@ func (r *Repository) Delete(ID string) error {
 	}
 
 	delete(r.games, ID)
+
+	return nil
+}
+
+func (r *Repository) FindTournament(ID string) (*Tournament, error) {
+	r.tmu.Lock()
+	defer r.tmu.Unlock()
+
+	t, ok := r.tournaments[ID]
+	if !ok {
+		return nil, ErrTournamentNotFound
+	}
+
+	return t, nil
+}
+
+func (r *Repository) FindAllTournaments() ([]*Tournament, error) {
+	r.tmu.Lock()
+	defer r.tmu.Unlock()
+
+	tournaments := make([]*Tournament, 0, len(r.tournaments))
+	for _, t := range r.tournaments {
+		tournaments = append(tournaments, t)
+	}
+
+	return tournaments, nil
+}
+
+func (r *Repository) InsertTournament(t *Tournament) error {
+	r.tmu.Lock()
+	defer r.tmu.Unlock()
+
+	_, ok := r.tournaments[t.ID]
+	if ok {
+		return ErrInsertExistingTournament
+	}
+
+	r.tournaments[t.ID] = t
+
+	return nil
+}
+
+func (r *Repository) DeleteTournament(ID string) error {
+	r.tmu.Lock()
+	defer r.tmu.Unlock()
+
+	_, ok := r.tournaments[ID]
+	if !ok {
+		return ErrTournamentNotFound
+	}
+
+	delete(r.tournaments, ID)
 
 	return nil
 }

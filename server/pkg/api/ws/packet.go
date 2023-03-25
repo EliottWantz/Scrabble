@@ -98,6 +98,24 @@ type StartGamePayload struct {
 	GameID string `json:"gameId"`
 }
 
+type CreateTournamentPayload struct {
+	Password    string   `json:"password,omitempty"`
+	WithUserIDs []string `json:"withUserIds"`
+}
+
+type JoinTournamentPayload struct {
+	TournamentID string `json:"tournamentId"`
+	Password     string `json:"password,omitempty"`
+}
+
+type LeaveTournamentPayload struct {
+	TournamentID string `json:"tournamentId"`
+}
+
+type StartTournamentPayload struct {
+	TournamentID string `json:"tournamentId"`
+}
+
 type PlayMovePayload struct {
 	GameID   string        `json:"gameId"`
 	MoveInfo game.MoveInfo `json:"moveInfo"`
@@ -214,6 +232,14 @@ func NewJoinableGamesPacket(payload ListJoinableGamesPayload) (*Packet, error) {
 	return NewPacket(ServerEventJoinableGames, payload)
 }
 
+type ListJoinableTournamentsPayload struct {
+	Tournaments []*game.Tournament `json:"tournaments"`
+}
+
+func NewJoinableTournamentsPacket(payload ListJoinableTournamentsPayload) (*Packet, error) {
+	return NewPacket(ServerEventJoinableTournaments, payload)
+}
+
 type JoinedGamePayload struct {
 	Game *game.Game `json:"game"`
 }
@@ -317,6 +343,40 @@ type ServerIndicePayload struct {
 
 func NewServerIndicePacket(payload ServerIndicePayload) (*Packet, error) {
 	return NewPacket(ServerEventIndice, payload)
+}
+
+type JoinedTournamentPayload struct {
+	Tournament *game.Tournament `json:"tournament"`
+}
+
+func NewJoinedTournamentPacket(payload JoinedTournamentPayload) (*Packet, error) {
+	return NewPacket(ServerEventJoinedTournament, payload)
+}
+
+type UserJoinedTournamentPayload struct {
+	TournamentID string `json:"tournamentId"`
+	UserID       string `json:"userId"`
+}
+
+func NewUserJoinedTournamentPacket(payload UserJoinedTournamentPayload) (*Packet, error) {
+	return NewPacket(ServerEventUserJoinedTournament, payload)
+}
+
+type LeftTournamentPayload struct {
+	TournamentID string `json:"tournamentId"`
+}
+
+func NewLeftTournamentPacket(payload LeftTournamentPayload) (*Packet, error) {
+	return NewPacket(ServerEventLeftTournament, payload)
+}
+
+type UserLeftTournamentPayload struct {
+	TournamentID string `json:"tournamentId"`
+	UserID       string `json:"userId"`
+}
+
+func NewUserLeftTournamentPacket(payload UserLeftTournamentPayload) (*Packet, error) {
+	return NewPacket(ServerEventUserLeftTournament, payload)
 }
 
 func NewErrorPacket(err error) (*Packet, error) {

@@ -300,6 +300,54 @@ func (r *Room) BroadcastObserverLeaveGamePacket(c *Client, gID string) error {
 	return nil
 }
 
+func (r *Room) BroadcastJoinTournamentPackets(c *Client, t *game.Tournament) error {
+	{
+		p, err := NewJoinedTournamentPacket(JoinedTournamentPayload{
+			Tournament: t,
+		})
+		if err != nil {
+			return err
+		}
+		c.send(p)
+	}
+	{
+		p, err := NewUserJoinedTournamentPacket(UserJoinedTournamentPayload{
+			TournamentID: t.ID,
+			UserID:       c.ID,
+		})
+		if err != nil {
+			return err
+		}
+		r.BroadcastSkipSelf(p, c.ID)
+	}
+
+	return c.Manager.UpdateJoinableTournaments()
+}
+
+func (r *Room) BroadcastLeaveTournamentPackets(c *Client, gID string) error {
+	{
+		p, err := NewUserLeftTournamentPacket(UserLeftTournamentPayload{
+			TournamentID: gID,
+			UserID:       c.ID,
+		})
+		if err != nil {
+			return err
+		}
+		r.BroadcastSkipSelf(p, c.ID)
+	}
+	{
+		p, err := NewLeftTournamentPacket(LeftTournamentPayload{
+			TournamentID: gID,
+		})
+		if err != nil {
+			return err
+		}
+		c.send(p)
+	}
+
+	return c.Manager.UpdateJoinableTournaments()
+}
+
 func (r *Room) ListUsers() []string {
 	dbRoom, err := r.Manager.RoomSvc.Repo.Find(r.ID)
 	if err != nil {
