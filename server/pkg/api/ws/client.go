@@ -662,7 +662,7 @@ func (c *Client) HandleCreateTournamentRequest(p *Packet) error {
 		return err
 	}
 
-	r := c.Manager.AddRoom(t.ID, "")
+	r := c.Manager.AddRoom(c.ID, "")
 	if err := r.AddClient(c.ID); err != nil {
 		return err
 	}
