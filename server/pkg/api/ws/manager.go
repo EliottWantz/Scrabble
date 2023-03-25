@@ -344,9 +344,6 @@ func (m *Manager) RemoveClientFromTournament(c *Client, gID string) error {
 	if err := r.RemoveClient(c.ID); err != nil {
 		slog.Error("remove client from ws room", err)
 	}
-	if err := r.BroadcastLeaveTournamentPackets(c, t.ID); err != nil {
-		slog.Error("broadcast leave tournament packets", err)
-	}
 
 	if !t.HasStarted {
 		// Tournament has not started yet
@@ -400,6 +397,11 @@ func (m *Manager) RemoveClientFromTournament(c *Client, gID string) error {
 		// 	slog.Error("remove user from Tournament room", err)
 		// }
 	}
+
+	if err := r.BroadcastLeaveTournamentPackets(c, t.ID); err != nil {
+		slog.Error("broadcast leave tournament packets", err)
+	}
+
 	return nil
 }
 

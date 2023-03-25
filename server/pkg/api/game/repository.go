@@ -24,7 +24,8 @@ type Repository struct {
 
 func NewRepository(db *mongo.Database) *Repository {
 	return &Repository{
-		games: make(map[string]*Game),
+		games:       make(map[string]*Game),
+		tournaments: make(map[string]*Tournament),
 	}
 }
 
