@@ -3,6 +3,7 @@ const String ServerEventJoinedRoom = "joinedRoom";
 // const String ServerEventUserJoined = "userJoined";
 const String ServerEventUserJoinedRoom = "userJoinedRoom";
 const String ServerEventListUsers    = "listUsers";
+const String ServerEventNewUser = "newUser";
 const String ServerEventUsersInRoom  = "usersInRoom";
 const String ServerEventChatMessage = "chat-message";
 const String ServerEventJoinableGames = "joinableGames";

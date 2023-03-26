@@ -39,6 +39,7 @@ import '../models/requests/create_room_request.dart';
 import '../models/requests/list_joinable_games_request.dart';
 import '../models/requests/start_game_request.dart';
 import '../models/response/list_joinable_games_response.dart';
+import '../models/response/new_user_response.dart';
 import '../models/room.dart';
 import 'game_service.dart';
 
@@ -87,6 +88,11 @@ class WebsocketService extends GetxService {
       case ServerEventListUsers: {
         ListUsersResponse listUsersResponse = ListUsersResponse.fromRawJson(data);
         handleEventListUsers(listUsersResponse);
+      }
+      break;
+      case ServerEventNewUser: {
+        NewUserResponse newUserResponse = NewUserResponse.fromRawJson(data);
+        handleEventNewUser(newUserResponse);
       }
       break;
       case ServerEventJoinedRoom: {
@@ -168,6 +174,10 @@ class WebsocketService extends GetxService {
 
   void handleEventListUsers(ListUsersResponse listUsersResponse) {
     usersService.users.addAll(listUsersResponse.payload.users);
+  }
+
+  void handleEventNewUser(NewUserResponse newUserResponse) {
+    usersService.users.add(newUserResponse.payload.user);
   }
 
   void handleEventJoinedRoom(JoinedRoomResponse joinedRoomResponse) {

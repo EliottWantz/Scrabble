@@ -6,6 +6,7 @@ import 'package:client_leger/models/requests/login_request.dart';
 import 'package:client_leger/models/requests/register_request.dart';
 import 'package:client_leger/models/response/login_response.dart';
 import 'package:client_leger/models/response/register_response.dart';
+import 'package:client_leger/services/storage_service.dart';
 import 'package:client_leger/services/user_service.dart';
 import 'package:get/get.dart';
 
@@ -17,6 +18,7 @@ class ApiRepository {
 
   final ApiProvider apiProvider;
   final UserService userService = Get.find();
+  final StorageService storageService = Get.find();
 
   Future<LoginResponse?> login(LoginRequest data) async {
     final res = await apiProvider.login('/login', data);
@@ -78,12 +80,12 @@ class ApiRepository {
   }
 
   Future<void> sendFriendRequest(SendFriendRequest requestData) async {
-    final Map<String, dynamic> data = {
-      "id": userService.user.value!.id,
-      "friendId": requestData.friendId
-    };
+    // final Map<String, String> headers = {
+    //   "Authorization": "Bearer ${storageService.read("token")}"
+    // };
     await apiProvider.sendFriendRequest(
-        '/user/friends/request/${userService.user.value!.id}/${requestData.friendId}'
+        '/user/friends/request/${userService.user.value!.id}/${requestData.friendId}',
+        // headers
     );
     // if (res.statusCode == 200) {
     //   return FriendRequestResponse.fromJson(res.body);

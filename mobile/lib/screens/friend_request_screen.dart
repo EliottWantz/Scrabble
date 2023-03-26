@@ -50,8 +50,9 @@ class FriendRequestScreen extends StatelessWidget {
               controller: friendRequestTextInputController,
               keyboardType: TextInputType.text,
               focusNode: messageInputFocusNode,
-              onSubmitted: (_) {
-                _usersService.sendFriendRequest("4a84eecd-dc61-4ad4-9e53-01c40ebd91ba");
+              onSubmitted: (_) async {
+                await _usersService.sendFriendRequest(friendRequestTextInputController.text);
+                friendRequestTextInputController.text = '';
                 messageInputFocusNode.requestFocus();
               },
               decoration: const InputDecoration(

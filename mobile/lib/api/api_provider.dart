@@ -21,6 +21,9 @@ class ApiProvider extends BaseProvider {
   }
 
   Future<Response> sendFriendRequest(String path) {
+    // dynamic data = {
+    //   "headers": requestData
+    // };
     return post(path, {});
   }
 

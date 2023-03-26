@@ -11,11 +11,23 @@ class UsersService extends GetxService {
   final ApiRepository apiRepository = Get.find();
   final UserService userService = Get.find();
 
-  Future<void> sendFriendRequest(String friendId) async {
+  String getUserId(String username) {
+    for (User user in users) {
+      if (user.username == username) {
+        return user.id;
+      }
+    }
+    return '';
+  }
+
+  Future<void> sendFriendRequest(String friendUsername) async {
+    String friendId = getUserId(friendUsername);
     final request = SendFriendRequest(
       friendId: friendId
     );
     await apiRepository.sendFriendRequest(request);
     // if (res == null) return;
   }
+
+
 }
