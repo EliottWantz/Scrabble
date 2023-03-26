@@ -1,70 +1,68 @@
-<form>
-  <mat-form-field appearance="fill">
-    <mat-label>Salon</mat-label>
-    <mat-select (selectionChange)="changeRoom($event)" [(value)]="currentRoomId" id="selectionElem"> 
-      <mat-select-trigger *ngIf="room$.value.name !== 'Global Room'">{{room$.value.name}}</mat-select-trigger>
-      <mat-select-trigger *ngIf="room$.value.name === 'Global Room'">Global Room</mat-select-trigger>
-      <div *ngFor="let room of getRooms(); let last = last; let i = index">
-        <div class="item">
-          <mat-option [value]="room.id">
-            {{ room.name }}
-          </mat-option>
-          <!--
-            <mat-divider [vertical]="true" style="height: auto;"></mat-divider>
-          -->
-          <mat-icon class="close-icon" (click)="leaveRoom(i)" *ngIf="room.id !== 'global'">close</mat-icon>
+
+    <mat-card id="chatBox">
+      <form>
+        <mat-form-field appearance="fill">
+          <mat-label>Salon</mat-label>
+          <mat-select (selectionChange)="changeRoom($event)" [(value)]="currentRoomId" id="selectionElem"> 
+            <mat-select-trigger *ngIf="room$.value.name !== 'Global Room'">{{room$.value.name}}</mat-select-trigger>
+            <mat-select-trigger *ngIf="room$.value.name === 'Global Room'">Global Room</mat-select-trigger>
+            <div *ngFor="let room of getRooms(); let last = last; let i = index">
+              <div class="item">
+                <mat-option [value]="room.id">
+                  {{ room.name }}
+                </mat-option>
+                <!--
+                  <mat-divider [vertical]="true" style="height: auto;"></mat-divider>
+                -->
+                <mat-icon class="close-icon" (click)="leaveRoom(i)" *ngIf="room.id !== 'global'">close</mat-icon>
+              </div>
+              <mat-divider *ngIf="!last"></mat-divider>
+            </div>
+          </mat-select>
+        </mat-form-field>
+      </form>
+
+      <div id="chatBoxBody" #chatBoxBody>
+        <div id="chatBoxMessages" #chatBoxMessages>
+          <div
+            class="message"
+            *ngFor="let msg of room$.value.messages"
+            [ngClass]="{
+              sent: msg.from === user.id,
+              received: msg.from !== user.id
+            }"
+          >
+            <img src="{{getAvatarMessage(msg.fromId)}}">
+            <p>{{ msg.from }}: {{ msg.message }}</p>
+            <p class="timestamp">{{ msg.timestamp }}</p>
+          </div>
         </div>
-        <mat-divider *ngIf="!last"></mat-divider>
       </div>
-    </mat-select>
-  </mat-form-field>
-</form>
-
-
-<div id="chatBox" #chatBox>
-  <mat-card>
-    <div id="chatBoxBody" #chatBoxBody>
-      <div id="chatBoxMessages" #chatBoxMessages>
-        <div
-          class="message"
-          *ngFor="let msg of room$.value.messages"
-          [ngClass]="{
-            sent: msg.from === user.id,
-            received: msg.from !== user.id
-          }"
+    
+      <form #chatForm id="chatBoxForm">
+        <mat-form-field appearance="fill">
+          <mat-label for="message">Entrez votre message</mat-label>
+          <input
+            #chatBoxInput
+            type="text"
+            id="chatBoxInput"
+            autocomplete="off"
+            matInput
+            name="password"
+            [(ngModel)]="message"
+          />
+          <!-- <mat-error *ngIf="input.hasError('maxlength')">Votre message <strong>excède</strong> la limite de charactères</mat-error> -->
+        </mat-form-field>
+        <button
+          #submitBtn
+          mat-mini-fab
+          color="primary"
+          [disabled]="false"
+          id="submitBtn"
+          type="submit"
+          (click)="send()"
         >
-          <img src="{{getAvatarMessage(msg.fromId)}}">
-          <p>{{ msg.from }}: {{ msg.message }}</p>
-          <p class="timestamp">{{ msg.timestamp }}</p>
-        </div>
-      </div>
-    </div>
-  
-    <form #chatForm id="chatBoxForm">
-      <mat-form-field appearance="fill">
-        <mat-label for="message">Entrez votre message</mat-label>
-        <input
-          #chatBoxInput
-          type="text"
-          id="chatBoxInput"
-          autocomplete="off"
-          matInput
-          name="password"
-          [(ngModel)]="message"
-        />
-        <!-- <mat-error *ngIf="input.hasError('maxlength')">Votre message <strong>excède</strong> la limite de charactères</mat-error> -->
-      </mat-form-field>
-      <button
-        #submitBtn
-        mat-mini-fab
-        color="primary"
-        [disabled]="false"
-        id="submitBtn"
-        type="submit"
-        (click)="send()"
-      >
-        <mat-icon>send</mat-icon>
-      </button>
-    </form>
-  </mat-card>
-</div>
+          <mat-icon>send</mat-icon>
+        </button>
+      </form>
+    </mat-card>

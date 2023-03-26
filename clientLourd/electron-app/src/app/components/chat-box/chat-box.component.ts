@@ -44,7 +44,6 @@ export class ChatBoxComponent implements AfterViewInit {
   ws!: WebSocket;
   @ViewChild("chatBoxInput")
   chatBoxInput!: ElementRef;
-  @ViewChild("roomSelect") roomSelect!: ElementRef;
   user!: User;
   currentRoomId = "";
   message = "";

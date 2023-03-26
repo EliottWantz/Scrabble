@@ -57,7 +57,7 @@
     </div>
 
     <div *ngIf="screen === 'Historique'">
-      <div *ngFor="let networkLog of user.value.summary.networkLogs">{{networkLog.eventType}}: {{getDate(networkLog.evenTime)}}</div>
+      <div *ngFor="let networkLog of user.value.summary.networkLogs">{{networkLog.eventType}}: {{getDate(networkLog.eventTime)}}</div>
           <mat-divider></mat-divider>
           <div *ngFor="let gameStat of user.value.summary.gamesStats">{{gameStat.gameWon}}: {{gameStat.eventDate}}</div>
     </div>
