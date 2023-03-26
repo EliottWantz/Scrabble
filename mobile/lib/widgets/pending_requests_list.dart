@@ -1,4 +1,5 @@
 import 'package:client_leger/services/users_service.dart';
+import 'package:client_leger/services/websocket_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -11,6 +12,7 @@ class PendingRequestsList extends StatelessWidget {
 
   final UserService _userService = Get.find();
   final UsersService _usersService = Get.find();
+  final WebsocketService _websocketService = Get.find();
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +57,8 @@ class PendingRequestsList extends StatelessWidget {
                       _userService.user.value!.pendingRequests.remove(username);
                       _userService.user.value!.friends.add(username);
                       _userService.friends.add(username);
+                      String toId = _usersService.getUserId(username);
+                      _websocketService.createDMRoom(toId, username);
                     }
                   },
                   icon: const Icon(Icons.check)

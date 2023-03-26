@@ -22,6 +22,15 @@ class UsersService extends GetxService {
     return '';
   }
 
+  String getUserUsername(String userId) {
+    for (User user in users) {
+      if (user.id == userId) {
+        return user.username;
+      }
+    }
+    return '';
+  }
+
   Future<void> sendFriendRequest(String friendUsername) async {
     String friendId = getUserId(friendUsername);
     final request = SendFriendRequest(

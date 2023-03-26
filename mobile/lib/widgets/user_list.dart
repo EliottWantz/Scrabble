@@ -78,19 +78,13 @@ class UserList extends StatelessWidget {
                       }
                     },
                     icon: const Icon(Icons.close)
-                )
+                ),
+          onTap: () {
+
+          }
           ),
           // trailing: Icon(alreadySaved ? Icons.favorite : Icons.favorite_border,
           //     color: alreadySaved ? Colors.red : null),
-          // onTap: () {
-          //   setState(() {
-          //     if (alreadySaved) {
-          //       _savedWordPairs.remove(pair);
-          //     } else {
-          //       _savedWordPairs.add(pair);
-          //     }
-          //   });
-          // }
       ],
     );
   }

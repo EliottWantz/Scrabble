@@ -9,6 +9,7 @@ import 'package:client_leger/models/join_room_payload.dart';
 import 'package:client_leger/models/play_move_payload.dart';
 import 'package:client_leger/models/requests/accept_friend_request.dart';
 import 'package:client_leger/models/requests/chat_message_request.dart';
+import 'package:client_leger/models/requests/create_dm_room_request.dart';
 import 'package:client_leger/models/requests/create_game_room_request.dart';
 import 'package:client_leger/models/requests/join_dm_request.dart';
 import 'package:client_leger/models/requests/join_room_request.dart';
@@ -17,6 +18,7 @@ import 'package:client_leger/models/response/accept_friend_response.dart';
 import 'package:client_leger/models/response/chat_message_response.dart';
 import 'package:client_leger/models/response/friend_request_response.dart';
 import 'package:client_leger/models/response/game_update_response.dart';
+import 'package:client_leger/models/response/joined_dm_room_response.dart';
 import 'package:client_leger/models/response/joined_game_response.dart';
 import 'package:client_leger/models/response/joined_room_response.dart';
 import 'package:client_leger/models/response/list_users_response.dart';
@@ -37,6 +39,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:client_leger/services/user_service.dart';
 
+import '../models/create_dm_room_payload.dart';
 import '../models/create_game_room_payload.dart';
 import '../models/move_info.dart';
 import '../models/requests/create_room_request.dart';
@@ -44,6 +47,7 @@ import '../models/requests/list_joinable_games_request.dart';
 import '../models/requests/start_game_request.dart';
 import '../models/response/list_joinable_games_response.dart';
 import '../models/response/new_user_response.dart';
+import '../models/response/user_joined_dm_room_response.dart';
 import '../models/room.dart';
 import 'game_service.dart';
 
@@ -98,6 +102,17 @@ class WebsocketService extends GetxService {
         NewUserResponse newUserResponse = NewUserResponse.fromRawJson(data);
         handleEventNewUser(newUserResponse);
       }
+      break;
+      case ServerEventJoinedDMRoom: {
+        JoinedDMRoomResponse joinedDMRoomResponse = JoinedDMRoomResponse.fromRawJson(data);
+        handleEventJoinedDMRoom(joinedDMRoomResponse);
+      }
+      break;
+      case ServerEventUserJoinedDMRoom: {
+        UserJoinedDMRoomResponse userJoinedDMRoomResponse = UserJoinedDMRoomResponse.fromRawJson(data);
+        handleEventUserJoinedDMRoom(userJoinedDMRoomResponse);
+      }
+      break;
       break;
       case ServerEventJoinedRoom: {
         print('event joinedRoom');
@@ -192,6 +207,14 @@ class WebsocketService extends GetxService {
 
   void handleEventNewUser(NewUserResponse newUserResponse) {
     usersService.users.add(newUserResponse.payload.user);
+  }
+
+  void handleEventJoinedDMRoom(JoinedDMRoomResponse joinedDMRoomResponse) {
+    roomService.addRoom(joinedDMRoomResponse.payload.roomId, joinedDMRoomResponse.payload);
+  }
+
+  void handleEventUserJoinedDMRoom(UserJoinedDMRoomResponse userJoinedDMRoomResponse) {
+    roomService.roomsMap[userJoinedDMRoomResponse.payload.roomId]!.userIds.add(userJoinedDMRoomResponse.payload.userId);
   }
 
   void handleEventJoinedRoom(JoinedRoomResponse joinedRoomResponse) {
@@ -293,6 +316,7 @@ class WebsocketService extends GetxService {
     userService.user.value!.pendingRequests.remove(acceptFriendRequest.payload!.fromUsername);
     userService.user.value!.friends.add(acceptFriendRequest.payload!.fromId);
     userService.friends.add(acceptFriendRequest.payload!.fromUsername);
+    // createDMRoom(acceptFriendRequest.payload!.fromId, acceptFriendRequest.payload!.fromUsername);
   }
 
   void createRoom(String roomName, { List<String> userIds = const [] }) {
@@ -303,6 +327,19 @@ class WebsocketService extends GetxService {
     final createRoomRequest = CreateRoomRequest(
       event: ClientEventCreateRoom,
       payload: createRoomPayload
+    );
+    socket.sink.add(createRoomRequest.toRawJson());
+  }
+
+  void createDMRoom(String toId, String toUsername) {
+    final createDMRoomPayload = CreateDMRoomPayload(
+        username: userService.user.value!.username,
+        toId: toId,
+        toUsername: toUsername
+    );
+    final createRoomRequest = CreateDMRoomRequest(
+        event: ClientEventCreateDMRoom,
+        payload: createDMRoomPayload
     );
     socket.sink.add(createRoomRequest.toRawJson());
   }
