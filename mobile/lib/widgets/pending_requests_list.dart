@@ -41,7 +41,7 @@ class PendingRequestsList extends StatelessWidget {
   Widget _buildRow(dynamic username) {
     return Column(
       children: [
-        Divider(),
+        const Divider(),
         ListTile(
           title: Text(username, style: TextStyle(fontSize: 18.0)),
           trailing: Row(
@@ -54,6 +54,7 @@ class PendingRequestsList extends StatelessWidget {
                       _userService.pendingRequest.remove(username);
                       _userService.user.value!.pendingRequests.remove(username);
                       _userService.user.value!.friends.add(username);
+                      _userService.friends.add(username);
                     }
                   },
                   icon: const Icon(Icons.check)

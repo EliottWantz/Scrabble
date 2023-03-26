@@ -292,6 +292,7 @@ class WebsocketService extends GetxService {
   void handleAcceptFriendRequest(AcceptFriendResponse acceptFriendRequest) {
     userService.user.value!.pendingRequests.remove(acceptFriendRequest.payload!.fromUsername);
     userService.user.value!.friends.add(acceptFriendRequest.payload!.fromId);
+    userService.friends.add(acceptFriendRequest.payload!.fromUsername);
   }
 
   void createRoom(String roomName, { List<String> userIds = const [] }) {

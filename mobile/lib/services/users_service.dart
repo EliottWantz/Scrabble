@@ -43,12 +43,27 @@ class UsersService extends GetxService {
     return null;
   }
 
-  Future<void> deleteFriendRequest(String friendUsername) async {
+  Future<bool?> deleteFriendRequest(String friendUsername) async {
     String friendId = getUserId(friendUsername);
     final request = DeleteFriendRequest(
         friendId: friendId
     );
-    await apiRepository.deleteFriendRequest(request);
-    // if (res == null) return;
+    final res = await apiRepository.deleteFriendRequest(request);
+    if (res == true) {
+      return true;
+    }
+    return null;
+  }
+
+  Future<bool?> deleteFriend(String friendUsername) async {
+    String friendId = getUserId(friendUsername);
+    final request = DeleteFriendRequest(
+        friendId: friendId
+    );
+    final res = await apiRepository.deleteFriend(request);
+    if (res == true) {
+      return true;
+    }
+    return null;
   }
 }

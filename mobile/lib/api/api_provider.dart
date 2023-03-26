@@ -32,6 +32,10 @@ class ApiProvider extends BaseProvider {
   }
 
   Future<Response> deleteFriendRequest(String path) {
-    return post(path, {});
+    return delete(path);
+  }
+
+  Future<Response> deleteFriend(String path) {
+    return delete(path);
   }
 }

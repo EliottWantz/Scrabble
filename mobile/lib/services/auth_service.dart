@@ -33,6 +33,7 @@ class AuthService extends GetxService {
     if (res == null) return;
     userService.user.value = res.user;
     userService.pendingRequest.addAll(res.user.pendingRequests);
+    userService.friends.addAll(res.user.friends);
     await _setSession(res.token);
     websocketService.connect();
   }

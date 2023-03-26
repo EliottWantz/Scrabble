@@ -105,10 +105,25 @@ class ApiRepository {
     return null;
   }
 
-  Future<void> deleteFriendRequest(DeleteFriendRequest requestData) async {
-    await apiProvider.deleteFriendRequest(
+  Future<bool?> deleteFriendRequest(DeleteFriendRequest requestData) async {
+    final res = await apiProvider.deleteFriendRequest(
       '/user/friends/accept/${userService.user.value!.id}/${requestData.friendId}',
       // headers
     );
+    if (res.statusCode == 200) {
+      return true;
+    }
+    return null;
+  }
+
+  Future<bool?> deleteFriend(DeleteFriendRequest requestData) async {
+    final res = await apiProvider.deleteFriend(
+      '/user/friends/${userService.user.value!.id}/${requestData.friendId}',
+      // headers
+    );
+    if (res.statusCode == 200) {
+      return true;
+    }
+    return null;
   }
 }
