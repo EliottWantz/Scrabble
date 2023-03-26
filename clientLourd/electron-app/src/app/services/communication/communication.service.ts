@@ -1,4 +1,4 @@
-import { HttpClient, HttpErrorResponse } from "@angular/common/http";
+import { HttpClient, HttpErrorResponse, HttpResponse } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { environment } from 'src/environments/environment';
 import { User } from "@app/utils/interfaces/user";
@@ -18,8 +18,8 @@ export class CommunicationService {
         return res;
     }
 
-    async register(username: string, password: string, email: string, avatarURL: string, fileID: string): Promise<{user: User, token: string}> {
-        const res: any = (await lastValueFrom(this.requestRegister(username, password, email, avatarURL, fileID)));
+    async register(username: string, password: string, email: string, avatar: {url: string, fileId: string} | FormData): Promise<{user: User, token: string}> {
+        const res: any = (await lastValueFrom(this.requestRegister(username, password, email, avatar)));
         return res;
     }
 
@@ -27,8 +27,16 @@ export class CommunicationService {
         return this.http.post<{user: User}>(`${this.baseUrl}/login`, { username, password }).pipe(catchError(this.handleError));
     }
 
-    private requestRegister(username: string, password: string, email: string, avatarURL: string, fileID: string): Observable<{user: User}> {
-        return this.http.post<{user: User}>(`${this.baseUrl}/signup`, { username, password, email, avatarURL, fileID }).pipe(catchError(this.handleError));
+    private requestRegister(username: string, password: string, email: string, avatar: {url: string, fileId: string} | FormData): Observable<{user: User}> {
+        if (avatar instanceof FormData) {
+            console.log("custom image");
+            return this.http.post<{user: User}>(`${this.baseUrl}/signup`, { username, password, email, avatar }).pipe(catchError(this.handleError));
+        }
+
+        const avatarUrl = avatar.url;
+        const avatarId = avatar.fileId;
+
+        return this.http.post<{user: User}>(`${this.baseUrl}/signup`, { username, password, email, avatarUrl, avatarId }).pipe(catchError(this.handleError));
     }
 
     async uploadAvatar(file: File, user: User): Promise<{url: string, fileId: string}> {
@@ -79,6 +87,34 @@ export class CommunicationService {
     async getFriendByID(userId:string, friendId:string): Promise<{friend: User}> {
         const res:any = (await lastValueFrom(this.requestGetFriendByID(userId, friendId)));
         return res;
+    }
+
+
+    async sendFriendRequest(id: string, friendId: string): Promise<string> {
+        const res: any = (await lastValueFrom(this.requestSendFriendRequest(id, friendId)));
+        return res;
+    }
+
+    private requestSendFriendRequest(id: string, friendId: string): Observable<string> {
+        return this.http.post<string>(`${this.baseUrl}/user/friends/request/${id}/${friendId}`, { id, friendId }).pipe(catchError(this.handleError));
+    }
+
+    async acceptFriendRequest(id: string, friendId: string): Promise<string> {
+        const res: any = (await lastValueFrom(this.requestAcceptFriendRequest(id, friendId)));
+        return res;
+    }
+
+    private requestAcceptFriendRequest(id: string, friendId: string): Observable<string> {
+        return this.http.patch<string>(`${this.baseUrl}/user/friends/accept/${id}/${friendId}`, { id, friendId }).pipe(catchError(this.handleError));
+    }
+
+    async declineFriendRequest(id: string, friendId: string): Promise<string> {
+        const res: any = (await lastValueFrom(this.requestDeclineFriendRequest(id, friendId)));
+        return res;
+    }
+
+    private requestDeclineFriendRequest(id: string, friendId: string): Observable<string> {
+        return this.http.delete<string>(`${this.baseUrl}/user/friends/accept/${id}/${friendId}`).pipe(catchError(this.handleError));
     }
 
     private handleError(error: HttpErrorResponse) {

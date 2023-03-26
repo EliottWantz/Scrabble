@@ -5,6 +5,10 @@ import { BehaviorSubject } from "rxjs";
 import { UserService } from "@app/services/user/user.service";
 import { MoveService } from "@app/services/game/move.service";
 import { MoveInfo } from "@app/utils/interfaces/game/move";
+import { StorageService } from "@app/services/storage/storage.service";
+import { LeaveGamePayload } from "@app/utils/interfaces/packet";
+import { WebSocketService } from "@app/services/web-socket/web-socket.service";
+import { Router } from "@angular/router";
 
 @Component({
     selector: "app-game-page",
@@ -14,7 +18,7 @@ import { MoveInfo } from "@app/utils/interfaces/game/move";
 export class GamePageComponent implements OnInit {
     game!: BehaviorSubject<ScrabbleGame>;
     moves!: BehaviorSubject<MoveInfo[]>
-    constructor(private gameService: GameService, private userService: UserService, private moveService: MoveService) { }
+    constructor(private gameService: GameService, private userService: UserService, private moveService: MoveService, private storageService: StorageService, private socketService: WebSocketService, private router: Router) { }
 
     ngOnInit(): void {
         this.game = this.gameService.scrabbleGame;
@@ -50,11 +54,26 @@ export class GamePageComponent implements OnInit {
         this.moveService.indice();
     }
 
-    getIndice(): string[] {
+    getPlayerAvatar(id: string): string {
+        const avatar = this.storageService.getAvatar(id);
+        if (avatar != undefined)
+            return avatar;
+        return "";
+    }
+
+    leaveGame(): void {
+        const payload: LeaveGamePayload = {
+            gameId: this.game.value.id
+        };
+        this.socketService.send("leave-game", payload);
+        this.router.navigate(["/home"]);
+    }
+
+    /*getIndice(): string[] {
         const strings = [];
         for (const move of this.moves.value) {
             strings.push(JSON.stringify(move));
         }
         return strings;
-    }
+    }*/
 }

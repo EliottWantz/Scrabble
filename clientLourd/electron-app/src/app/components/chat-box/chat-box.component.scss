@@ -1,10 +1,6 @@
 #chatBox {
-  height: 50%;
-  width: 30%;
-  display: grid;
-  grid-template-rows: 1fr auto;
-  position: absolute;
-  top: 50%;
+  height: 100%;
+  width: 100%;
 }
 
 #chatBoxBody {
@@ -57,13 +53,16 @@
 }
 
 .message .timestamp {
-  font-size: 1.5ch;
+  font-size: 1ch;
 }
 
 form {
   padding: 0 0.75rem;
   display: flex;
   align-items: center;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  padding-top: 3%;
 }
 
 form > mat-form-field {
@@ -82,6 +81,46 @@ form > button {
   cursor: pointer;
   background-color: transparent;
 }
+
+img {
+  border-radius: 50%;
+  width: 25%;
+}
+
+.item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.close-icon {
+  margin-left: auto;
+}
+
+.close-icon:hover {
+  cursor: pointer;
+}
+
+mat-option {
+  width: -webkit-fill-available;
+}
+
+.englober {
+  width: 100%;
+  height: 100%;
+}
+
+/*.delete-divider {
+  margin-left: auto;
+}*/
+
+/*.mat-divider-vertical{
+  height: 100%;
+  width: 0px !important;
+  position: inherit !important;
+  margin-left: auto;
+}*/
 
 // form {
 //     padding: 0 0.75rem;

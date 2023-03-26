@@ -76,4 +76,8 @@ export class UserService {
     public get currentUserValue(): User {
         return this.subjectUser.value;
     }
+
+    addFriendRequest(friendRequestId: string): void {
+        this.subjectUser.next({...this.subjectUser.value, pendingRequests: [...this.subjectUser.value.pendingRequests, friendRequestId]});
+    }
 }

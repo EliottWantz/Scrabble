@@ -1,36 +1,72 @@
-<!--
-  <div id="main">
-  <nav>
-    <button
-      *ngIf="!isConnected()"
-      mat-raised-button
-      color="primary"
-      (click)="openLoginDialog()"
-      id="login-button"
-    >
-      Se connecter
-    </button>
-    <button
-      *ngIf="isConnected()"
-      mat-raised-button
-      color="warn"
-      (click)="logout()"
-      id="login-button"
-    >
-      Déconnexion
-    </button>
+<div class="content">
+  <div class="nav">
+    <div class="nav-text" (click)="selectNavButton(0)" style="background-color: #424260; outline-color: #66678e; outline-width: 1px; outline-style: solid;">
+      Modifier mon profil
+    </div>
+    <div class="nav-text" (click)="selectNavButton(1)">
+      Statistiques
+    </div>
+    <div class="nav-text" (click)="selectNavButton(2)">
+      Historique
+    </div>
+  </div>
 
-    <a *ngIf="isConnected()" href="/profile" id="login-button">
-      HELLO
-      <img src="">
-    </a>
-  </nav>
-  <app-chat-box-prototype *ngIf="isConnected()"></app-chat-box-prototype>
+  <div class="context">
+    <div *ngIf="screen === 'Modifier mon profil'">
+      <h2>Modifier votre avatar</h2>
+      <div>
+        <img id="avatar" width="50%" src="{{user.value.avatar.url}}">
+        <button id="upload-button" type="button" mat-raised-button (click)="fileInput.click()">Choisir une image</button>
+            <input hidden (change)="onFileSelected($event)" #fileInput type="file">
+            <span class="file-name">{{selectedFile.name}}</span>
+            <button mat-raised-button type="submit">Enregistrer</button>
+      </div>
+      <h2>Modifier vos informations personnelles</h2>
+      <div>
+        <div>
+          <h4>Modifier votre pseudonyme</h4>
+          <div class="">Pseudonyme : {{user.value.username}}</div>
+          <div class="form">
+            <mat-form-field appearance="fill">
+              <mat-label>Pseudonyme</mat-label>
+              <input matInput placeholder="Entrez votre nouveau pseudonyme" name="usename" [(ngModel)] ="username">
+            </mat-form-field>
+            <button mat-raised-button type="submit">Enregistrer</button>
+          </div>
+        </div>
+
+        <div>
+          <h4>Modifier votre adresse courriel</h4>
+          <div class="">Adresse courriel : {{user.value.email}}</div>
+          <div class="form">
+            <mat-form-field appearance="fill">
+              <mat-label class="labels">Adresse courriel</mat-label>
+              <input matInput type="email" class="form-control" value="" placeholder="Entrez votre nouvelle adresse courriel">
+            </mat-form-field>
+            <button mat-raised-button type="submit">Enregistrer</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="screen === 'Statistiques'">
+      <div>Nombre de parties jouées: {{user.value.summary.userStats.nbGamesPlayed}}</div>
+          <div>Nombre de parties gagnées: {{user.value.summary.userStats.nbGamesWon}}</div>
+          <div>Moyenne de points par partie: {{user.value.summary.userStats.averagePointsPerGame}}</div>
+          <div>Moyenne de temps joué: {{user.value.summary.userStats.averageTimePlayed}}</div>
+    </div>
+
+    <div *ngIf="screen === 'Historique'">
+      <div *ngFor="let networkLog of user.value.summary.networkLogs">{{networkLog.eventType}}: {{getDate(networkLog.eventTime)}}</div>
+          <mat-divider></mat-divider>
+          <div *ngFor="let gameStat of user.value.summary.gamesStats">{{gameStat.gameWon}}: {{gameStat.eventDate}}</div>
+    </div>
+  </div>
 </div>
--->
 
-<div class="container">
-  <button mat-fab color="primary" class="home-button" routerLink="/home" routerLinkActive="router-link-active">
+
+  <!--
+    <button mat-fab color="accent" class="home-button" routerLink="/home" routerLinkActive="router-link-active">
     <mat-icon>home</mat-icon>
   </button>
   <div class="row">
@@ -65,7 +101,7 @@
             <input hidden (change)="onFileSelected($event)" #fileInput type="file">
             <span class="file-name">{{selectedFile.name}}</span>
           </div>
-          <button mat-raised-button color="primary" type="button" (click)="submit()">Enregistrer</button>
+          <button mat-raised-button color="accent" type="button" (click)="submit()">Enregistrer</button>
           
         </mat-card-content>
       </mat-card>
@@ -106,44 +142,6 @@
   </div>
 </div>
 
-<!--
-    <div class="container justified-center">
-    <div id="header">
-        <span class="animate scrabble" style="--n: 8">
-            <span>{{ title }}</span>
-        </span>
-        <div id="rightdiv">
-            <button *ngIf="!isConnected()" mat-raised-button class="pull-right" (click)="openLoginDialog()" id="login-button">Se connecter</button>
-            <button *ngIf="isConnected()" mat-raised-button class="pull-right" (click)="logout()" id="login-button">Déconnexion</button>
-        </div>
-    </div>
 
-    <section id="server-message">
-        <div class="justifiediv">
-            <app-welcome-button
-                imageSrc="assets/image/scrabble.png"
-                letterSrc="assets/image/classique.png"
-                message="Jouer Scrabble version Classique"
-                (click)="openParameterDialog('Classic')"
-            ></app-welcome-button>
-            <app-welcome-button
-                imageSrc="assets/image/scrabble.png"
-                letterSrc="assets/image/polymtl.png"
-                message="Jouer Scrabble version Log2990"
-                (click)="openParameterDialog('Log2990')"
-            ></app-welcome-button>
-            <app-welcome-button
-                version="High Score"
-                imageSrc="assets/image/throphie.jpg"
-                letterSrc="assets/image/high-score.png"
-                message="Voir les meilleurs Scores"
-                (click)="openScoreDialog()"
-            ></app-welcome-button>
-        </div>
-    </section>
-    <div>
-        <img src="assets/image/team.png" class="team-img" (click)="openAboutUsDialog()" />
-        <h2>Notre équipe</h2>
-    </div>
-</div>
--->
+  -->
+  

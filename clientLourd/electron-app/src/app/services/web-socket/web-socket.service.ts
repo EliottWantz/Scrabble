@@ -1,3 +1,5 @@
+/* eslint-disable prefer-const */
+/* eslint-disable no-case-declarations */
 import { Injectable } from "@angular/core";
 import { UserService } from "@app/services/user/user.service";
 import { User } from "@app/utils/interfaces/user";
@@ -102,25 +104,22 @@ export class WebSocketService {
                     messages: payloadRoom.messages,
                 }
                 //this.roomService.addRoom(room);
-                if (this.roomService.findRoom(room.id) === undefined) {
+                this.roomService.addRoom(room);
+                /*if (this.roomService.findRoom(room.id) === undefined) {
                     this.roomService.addRoom(room);
-                }
+                }*/
                 break;
             }
 
             case "leftDMRoom": {
                 const payloadLeftRoom = packet.payload as LeftDMRoomPayload;
-                if (this.roomService.findRoom(payloadLeftRoom.roomId) !== undefined) {
-                    this.roomService.removeRoom(payloadLeftRoom.roomId);
-                }
+                this.roomService.removeRoom(payloadLeftRoom.roomId);
                 break;
             }
 
             case "userJoinedDMRoom": {
                 const payloadUserJoinedRoom = packet.payload as UserJoinedDMRoomPayload;
-                if (this.roomService.findRoom(payloadUserJoinedRoom.roomId) !== undefined) {
-                    this.roomService.addUser(payloadUserJoinedRoom.roomId, payloadUserJoinedRoom.userId);
-                }
+                this.roomService.addUser(payloadUserJoinedRoom.roomId, payloadUserJoinedRoom.userId);
                 break;
             }
 
@@ -132,13 +131,17 @@ export class WebSocketService {
 
             case "listUsers": {
                 const payloadListUsers = packet.payload as ListUsersPayload;
-                this.storageService.listUsers = payloadListUsers.users;
+                this.storageService.listUsers.next(payloadListUsers.users);
+                for (const user of payloadListUsers.users) {
+                    this.storageService.addAvatar(user.id, user.avatar.url);
+                }
                 break;
             }
 
             case "newUser": {
                 const newUserPayload = packet.payload as NewUserPayload;
-                this.storageService.listUsers.push(newUserPayload.user);
+                this.storageService.listUsers.next([...this.storageService.listUsers.value, newUserPayload.user]);
+                this.storageService.addAvatar(newUserPayload.user.id, newUserPayload.user.avatar.url);
                 break;
             }
 
@@ -181,6 +184,7 @@ export class WebSocketService {
             case "gameUpdate": {
                 const payloadUpdateGame = packet.payload as GameUpdatePayload;
                 this.gameService.updateGame(payloadUpdateGame.game);
+                this.rackService.deleteRecycled();
                 break;
             }
 
@@ -197,11 +201,13 @@ export class WebSocketService {
 
             case "friendRequest": {
                 const payloadFriendRequest = packet.payload as FriendRequestPayload;
+                this.userService.addFriendRequest(payloadFriendRequest.fromId);
                 break;
             }
 
             case "acceptFriendRequest": {
                 const payloadAcceptFriendRequest = packet.payload as FriendRequestPayload;
+                this.userService.subjectUser.next({...this.userService.currentUserValue, friends: [...this.userService.currentUserValue.friends, payloadAcceptFriendRequest.fromId]});
                 break;
             }
 

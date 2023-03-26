@@ -15,7 +15,7 @@ export class MouseService {
             console.log("hello");
             element.appendChild(this.tileElems[0]);
             this.rackService.placedTiles.push(element);
-            this.tileElems[0].style.outlineColor = "black";
+            this.tileElems[0].style.outlineColor = "#e6d9b7";
             this.tileElems = [];
             
             const indexMove = this.moveService.placedTiles.indexOf(this.moveService.selectedTiles[0], 0);

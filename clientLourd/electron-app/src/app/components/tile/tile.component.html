@@ -1,3 +1,8 @@
-<div #elem class="ship-box" (click)="clicked()" id="tile">
-    {{getASCII()}} {{tile.value}}
+<div #elem id="ship-box" (click)="clicked()" class="tile">
+    <div class="letter">
+        {{getASCII()}}
+    </div>
+    <div class="value">
+        {{tile.value}}
+    </div>
 </div>

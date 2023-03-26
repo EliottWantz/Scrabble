@@ -29,6 +29,19 @@ import { TileComponent } from '@app/components/tile/tile.component';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { RackComponent } from '@app/components/rack/rack.component';
 import { TimerComponent } from '@app/components/timer/timer.component';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { SidebarComponent } from '@app/components/sidebar/sidebar.component';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { RegisterPageComponent } from '@app/pages/register-page/register-page.component';
+import { AvatarSelectionPageComponent } from '@app/pages/avatar-selection-page/avatar-selection-page.component';
+import { AvatarSelectionComponent } from '@app/components/avatar-selection/avatar-selection.component';
+import { DefaultAvatarSelectionComponent } from '@app/components/default-avatar-selection/default-avatar-selection.component';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
+import { SocialComponent } from '@app/components/social/social.component';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { WaitRoomPageComponent } from '@app/pages/waiting-room-page/waiting-room-page.component';
+import { MatSelectModule } from '@angular/material/select';
 
 @NgModule({
   declarations: [
@@ -46,7 +59,14 @@ import { TimerComponent } from '@app/components/timer/timer.component';
     TileComponent,
     RackComponent,
     SocialPageComponent,
-    TimerComponent
+    TimerComponent,
+    SidebarComponent,
+    RegisterPageComponent,
+    AvatarSelectionPageComponent,
+    AvatarSelectionComponent,
+    DefaultAvatarSelectionComponent,
+    SocialComponent,
+    WaitRoomPageComponent
   ],
   imports: [
     BrowserModule,
@@ -61,7 +81,14 @@ import { TimerComponent } from '@app/components/timer/timer.component';
     BrowserAnimationsModule,
     MatIconModule,
     MatDividerModule,
-    DragDropModule
+    DragDropModule,
+    MatSidenavModule,
+    MatSlideToggleModule,
+    MatDialogModule,
+    MatButtonModule,
+    BrowserAnimationsModule,
+    MatProgressSpinnerModule,
+    MatSelectModule
   ],
   providers: [
     {

@@ -18,7 +18,6 @@ export class RackComponent implements OnInit {
         const currentRack = this.getPlayerRack();
         if (currentRack)    
             this.rack = currentRack;
-
         console.log(this.rack);
         console.log(this.userService.subjectUser.value.id);
     }

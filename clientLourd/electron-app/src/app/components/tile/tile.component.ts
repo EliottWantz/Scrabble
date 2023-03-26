@@ -18,7 +18,7 @@ export class TileComponent {
         if (!this.disabled) {
             console.log("clicked");
             if (this.alreadyClicked) {
-                this.renderer.setStyle(this.element.nativeElement, "outline-color", "black");
+                this.renderer.setStyle(this.element.nativeElement, "outline-color", "#e6d9b7");
                 this.alreadyClicked = false;
                 this.mouseService.remove(this.tile);
                 const index = this.mouseService.tileElems.indexOf(this.element.nativeElement, 0);

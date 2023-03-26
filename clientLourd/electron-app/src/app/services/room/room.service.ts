@@ -13,10 +13,12 @@ export class RoomService {
     currentRoomChat!: BehaviorSubject<Room>;
     listChatRooms!: BehaviorSubject<Room[]>;
     listJoinedChatRooms!: BehaviorSubject<Room[]>;
+    //listJoinedDMRooms!: BehaviorSubject<Room[]>;
 
     constructor(private commService: CommunicationService, private userService: UserService) {
         this.listChatRooms = new BehaviorSubject<Room[]>([]);
         this.listJoinedChatRooms = new BehaviorSubject<Room[]>([]);
+        //this.listJoinedDMRooms = new BehaviorSubject<Room[]>([]);
         this.currentRoomChat = new BehaviorSubject<Room>({
             id: "",
             name: "",
@@ -33,45 +35,64 @@ export class RoomService {
         const updatedChatRooms = this.userService.currentUserValue.joinedChatRooms;
         updatedChatRooms.push(room.id);
         this.userService.subjectUser.next({...this.userService.subjectUser.value, joinedChatRooms: updatedChatRooms});
-        this.currentRoomChat.next(room);
+        //if (room.id == "global")
+            this.currentRoomChat.next(room);
     }
 
+    /*addDMRoom(room: Room): void {
+        this.listJoinedDMRooms.next([...this.listJoinedDMRooms.value, room]);
+        const updatedDMRooms = this.userService.currentUserValue.joinedDMRooms;
+        updatedDMRooms.push(room.id);
+        this.userService.subjectUser.next({...this.userService.subjectUser.value, joinedDMRooms: updatedDMRooms});
+        this.currentRoomChat.next(room);
+    }*/
+
     removeRoom(roomID: string): void {
-        const currentRooms = this.listChatRooms.getValue();
+        const joinedRooms = this.listJoinedChatRooms.getValue();
         const index = this.findRoom(roomID);
         if (index !== undefined)
-            currentRooms.splice(index, 1);
+            joinedRooms.splice(index, 1);
 
-        this.listChatRooms.next(currentRooms);
+        this.listJoinedChatRooms.next(joinedRooms);
         const updatedChatRooms = this.userService.currentUserValue.joinedChatRooms;
         const indexChat = updatedChatRooms.indexOf(roomID, 0);
-        if (indexChat > -1) {
+        if (indexChat > -1) 
             updatedChatRooms.splice(indexChat, 1);
-        }
+
         this.userService.subjectUser.next({...this.userService.subjectUser.value, joinedChatRooms: updatedChatRooms});
-        if (this.listChatRooms.value.length > 0)
-            this.currentRoomChat.next(this.listChatRooms.value[0]);
+        if (this.listJoinedChatRooms.value.length > 0)
+            this.currentRoomChat.next(this.listJoinedChatRooms.value[0]);
     }
 
     changeRoom(roomId: string): void {
         const index = this.findRoom(roomId);
         if (index !== undefined)
-            this.currentRoomChat.next(this.listChatRooms.value[index]);
+            this.currentRoomChat.next(this.listJoinedChatRooms.value[index]);
+    }
+
+    changeDMRoom(friendName: string): void {
+        for (const room of this.listJoinedChatRooms.value) {
+            if (room.name == this.userService.currentUserValue.username + "/" + friendName || room.name == friendName + "/" + this.userService.currentUserValue.username) {
+                console.log("changed room to dm");
+                this.currentRoomChat.next(room);
+                return;
+            }
+        }
     }
 
     addMessage(msg: ChatMessage): void {
+        console.log(this.listJoinedChatRooms.value);
         if (msg.roomId== this.currentRoomChat.value.id) {
             const currentMessages = this.currentRoomChat.value.messages;
             currentMessages.push(msg);
             this.currentRoomChat.next({...this.currentRoomChat.value, messages: currentMessages});
         } else {
             const index = this.findRoom(msg.roomId);
-            if (index) {
-                const currentMessages = this.listChatRooms.value[index].messages;
-                currentMessages.push(msg);
-                const newRooms = this.listChatRooms.value;
-                newRooms[index] = {...newRooms[index], messages: currentMessages};
-                this.listChatRooms.next(newRooms);
+            console.log(index);
+            if (index !== undefined) {
+                const newRooms = this.listJoinedChatRooms.value;
+                newRooms[index].messages.push(msg);
+                this.listJoinedChatRooms.next(newRooms);
             }
         }
     }
@@ -99,6 +120,22 @@ export class RoomService {
             }
         }
     }
+
+    /*addUserDM(roomId: string, userId: string): void {
+        if (roomId == this.currentRoomChat.value.id) {
+            const currentRoom = this.currentRoomChat.value;
+            currentRoom.userIds = [...currentRoom.userIds, userId]
+            this.currentRoomChat.next(currentRoom);
+        } else {
+            const rooms = this.listJoinedDMRooms.value;
+            for (let i = 0; i < this.listJoinedDMRooms.value.length; i++) {
+                if (rooms[i].id == roomId) {
+                    rooms[i].userIds = [...rooms[i].userIds, userId];
+                    this.listJoinedDMRooms.next(rooms);
+                }
+            }
+        }
+    }*/
 
     removeUser(roomId: string, userId: string): void {
         if (roomId == this.currentRoomChat.value.id) {

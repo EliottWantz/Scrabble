@@ -3,6 +3,9 @@ import { GameService } from "@app/services/game/game.service";
 import { RoomService } from "@app/services/room/room.service";
 import { UserService } from "@app/services/user/user.service";
 import { WebSocketService } from "@app/services/web-socket/web-socket.service";
+import { ClientEvent } from "@app/utils/events/client-events";
+import { Game } from "@app/utils/interfaces/game/game";
+import { CreateGamePayload, JoinGamePayload } from "@app/utils/interfaces/packet";
 import { User } from "@app/utils/interfaces/user";
 import { BehaviorSubject } from "rxjs";
 
@@ -13,25 +16,31 @@ import { BehaviorSubject } from "rxjs";
 })
 export class MainPageComponent {
   readonly title: string = "Scrabble";
-  isJoining = false;
-  public user: BehaviorSubject<User>;
-
-  constructor(private userService: UserService, private socketService: WebSocketService, private gameService: GameService) {
-    this.user = this.userService.subjectUser;
-    document.getElementById("avatar")?.setAttribute("src", this.user.value.avatar.url);
+  joinableGames!: BehaviorSubject<Game[]>;
+  constructor(private userService: UserService, private webSocketService: WebSocketService, private gameService: GameService) {
+    this.joinableGames = this.gameService.joinableGames;
   }
 
-  isConnected(): boolean {
+  isLoggedIn(): boolean {
     return this.userService.isLoggedIn;
   }
 
-  logout(): void {
-    this.socketService.disconnect();
+  createGame(): void {
+    const payload: CreateGamePayload = {
+        password: "",
+        userIds: []
+      }
+      const event : ClientEvent = "create-game";
+      this.webSocketService.send(event, payload);
   }
 
-  isInGame(): boolean {
-    if (this.gameService.game.value)
-      return this.gameService.game.value.id != "";
-    return false;
-  }
+  joinGame(gameId: string, password: string): void {
+    //this.stepper.selectedIndex = STEPPER_PAGE_IDX.confirmationPage;
+    const payload: JoinGamePayload = {
+        gameId: gameId,
+        password: password
+      }
+      const event : ClientEvent = "join-game";
+      this.webSocketService.send(event, payload);
+}
 }

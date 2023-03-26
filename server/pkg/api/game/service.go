@@ -17,12 +17,16 @@ import (
 )
 
 var (
-	ErrNotPlayerTurn   = errors.New("not player's turn")
-	ErrNotBotTurn      = errors.New("not bot's turn")
-	ErrInvalidMove     = errors.New("invalid move")
-	ErrInvalidPosition = errors.New("invalid position")
-	ErrGameNotStarted  = errors.New("game not started")
-	ErrGameOver        = errors.New("game is over")
+	ErrNotPlayerTurn     = errors.New("not player's turn")
+	ErrNotBotTurn        = errors.New("not bot's turn")
+	ErrInvalidMove       = errors.New("invalid move")
+	ErrInvalidPosition   = errors.New("invalid position")
+	ErrGameNotStarted    = errors.New("game not started")
+	ErrGameOver          = errors.New("game is over")
+	ErrPrivateGame       = errors.New("game is private")
+	ErrPublicGame        = errors.New("game is public")
+	ErrGameHasNotStarted = errors.New("game has not started")
+	ErrObserverNotFound  = errors.New("observer not found")
 
 	botNames = []string{"Bot1", "Bot2", "Bot3", "Bot4"}
 )
@@ -306,6 +310,108 @@ func (s *Service) DeleteGame(gID string) error {
 	}
 
 	return nil
+}
+
+func (s *Service) AddObserver(gID string, oId string) (*Game, error) {
+	g, err := s.Repo.Find(gID)
+	if err != nil {
+		return nil, err
+	}
+
+	if g.ScrabbleGame == nil {
+		return nil, ErrGameNotStarted
+	}
+
+	if g.IsPrivateGame == true {
+		return nil, ErrPrivateGame
+	}
+
+	if g.ScrabbleGame.IsOver() {
+		return nil, ErrGameOver
+	}
+	g.ObservateurIDs = append(g.ObservateurIDs, oId)
+	return g, nil
+}
+func (s *Service) RemoveObserver(gID string, oId string) (*Game, error) {
+	g, err := s.Repo.Find(gID)
+	if err != nil {
+		return nil, err
+	}
+	if g.IsPrivateGame == true {
+		return nil, ErrPrivateGame
+	}
+	if g.ScrabbleGame.IsOver() {
+		return nil, ErrGameOver
+	}
+	for i, v := range g.ObservateurIDs {
+		if v == oId {
+			g.ObservateurIDs = append(g.ObservateurIDs[:i], g.ObservateurIDs[i+1:]...)
+			return g, nil
+		}
+	}
+	return nil, ErrObserverNotFound
+}
+
+func (s *Service) ReplaceBotByObserver(gID string, oId string) (*Game, error) {
+	g, err := s.Repo.Find(gID)
+	if err != nil {
+		return nil, err
+	}
+	if g.IsPrivateGame == true {
+		return nil, ErrPrivateGame
+	}
+	if g.ScrabbleGame.IsOver() {
+		return nil, ErrGameOver
+	}
+	user, err := s.UserSvc.GetUser(oId)
+	if err != nil {
+		return nil, err
+	}
+
+	for i, p := range g.ScrabbleGame.Players {
+		if p.IsBot == true {
+			g.ScrabbleGame.Players[i].IsBot = false
+			g.ScrabbleGame.Players[i].Username = user.Username
+			g.ScrabbleGame.Players[i].ID = user.ID
+			for i, v := range g.ObservateurIDs {
+				if v == oId {
+					g.ObservateurIDs = append(g.ObservateurIDs[:i], g.ObservateurIDs[i+1:]...)
+					break
+				}
+			}
+
+			return g, nil
+		}
+	}
+	return nil, errors.New("no bot in that game")
+}
+func (s *Service) MakeGamePrivate(gId string) (*Game, error) {
+	g, err := s.Repo.Find(gId)
+	if err != nil {
+		return nil, err
+	}
+	if g.IsPrivateGame == true {
+		return nil, ErrPrivateGame
+	}
+	if g.ScrabbleGame.IsOver() {
+		return nil, ErrGameOver
+	}
+	g.IsPrivateGame = true
+	return g, nil
+}
+func (s *Service) MakeGamePublic(gId string) (*Game, error) {
+	g, err := s.Repo.Find(gId)
+	if err != nil {
+		return nil, err
+	}
+	if g.IsPrivateGame == false {
+		return nil, ErrPublicGame
+	}
+	if g.ScrabbleGame.IsOver() {
+		return nil, ErrGameOver
+	}
+	g.IsPrivateGame = false
+	return g, nil
 }
 
 func parsePoint(str string) (scrabble.Position, error) {

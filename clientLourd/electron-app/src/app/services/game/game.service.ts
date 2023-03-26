@@ -23,7 +23,7 @@ export class GameService {
             finished: false,
             numPassMoves: 0,
             turn: "",
-            timer: 0,
+            timer: 0
         });
         this.game = new BehaviorSubject<Game | undefined>({
             id: "",
@@ -37,6 +37,7 @@ export class GameService {
     }
 
     updateGame(game: ScrabbleGame): void {
+        console.log(game);
         this.scrabbleGame.next(game);
         this.timer.next(game.timer / 1000000000);
         this.moves.next([]);

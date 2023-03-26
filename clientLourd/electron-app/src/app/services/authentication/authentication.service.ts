@@ -4,6 +4,7 @@ import { CommunicationService } from "@app/services/communication/communication.
 import { StorageService } from "../storage/storage.service";
 import { UserService } from "@app/services/user/user.service";
 import { WebSocketService } from "@app/services/web-socket/web-socket.service";
+import { BehaviorSubject } from "rxjs";
 
 @Injectable({
     providedIn: 'root',
@@ -13,7 +14,10 @@ export class AuthenticationService {
     password = "";
     isLoginFailed = false;
     errorMessage = '';
-    constructor(private commService: CommunicationService, private storageService: StorageService, private userService: UserService, private socketService: WebSocketService) {}
+    tempUserLogin: {username: string, password: string, email: string, avatar: BehaviorSubject<{url: string, fileId: string} | FormData>};
+    constructor(private commService: CommunicationService, private storageService: StorageService, private userService: UserService, private socketService: WebSocketService) {
+        this.tempUserLogin = {username: "", password: "", email: "", avatar: new BehaviorSubject<{url: string, fileId: string} | FormData>({url: "", fileId: ""})};
+    }
 
     async login(username: string, password: string): Promise<boolean> {
         return await this.commService.login(username, password).then((res) => {
@@ -28,8 +32,8 @@ export class AuthenticationService {
         });
     }
 
-    async register(username: string, password: string, email: string, avatarURL: string, fileID: string): Promise<boolean> {
-        return await this.commService.register(username, password, email, avatarURL, fileID).then((res) => {
+    async register(username: string, password: string, email: string, avatar: {url: string, fileId: string} | FormData): Promise<boolean> {
+        return await this.commService.register(username, password, email, avatar).then((res) => {
             this.setUser(res);
             this.socketService.connect();
             return true;

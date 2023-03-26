@@ -8,7 +8,7 @@ type Summary struct {
 
 type NetworkLog struct {
 	EventType string `bson:"eventType" json:"eventType,omitempty"`
-	EvenTime  int64  `bson:"evenTime" json:"evenTime,omitempty"`
+	EventTime int64  `bson:"eventTime" json:"eventTime,omitempty"`
 }
 type GameStats struct {
 	EventDate int64 `bson:"eventDate" json:"eventDate,omitempty"`
@@ -26,7 +26,7 @@ func (s *Service) AddNetworkingLog(u *User, eventType string, eventTime int64) {
 	networkLogs := &u.Summary.NetworkLogs
 	*networkLogs = append(*networkLogs, NetworkLog{
 		EventType: eventType,
-		EvenTime:  eventTime,
+		EventTime: eventTime,
 	})
 	s.Repo.Update(u)
 }

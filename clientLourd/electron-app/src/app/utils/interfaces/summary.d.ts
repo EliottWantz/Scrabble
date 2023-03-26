@@ -6,7 +6,7 @@ export interface Summary {
 
 export interface NetworkLog {
     eventType: string;
-    evenTime: number;
+    eventTime: number;
 }
 
 export interface GameStats {

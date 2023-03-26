@@ -1,82 +1,109 @@
-.switch {
-    float: right;
-}
-
 .container {
-    width: 100vw;
-    height: 100vh;
-    background: rgb(208, 144, 90);
-    background: linear-gradient(
-      150deg,
-      rgba(208, 143, 90, 0.65) 0%,
-      rgba(159, 205, 110, 0.3) 35%,
-      rgb(52, 75, 138) 100%
-    );
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.card {
-  width:50%;
   display: flex;
-  align-items: center;
-}
-
-.center {
-  display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.home-button {
-  position: absolute;
-  top: 2%;
-  left: 2%;
-}
-
-mat-divider {
+  justify-content: space-evenly;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  flex-direction: row;
+  //column-gap: 2%;
+  height: 100vh;
   width: 100%;
-  margin-bottom: 5%;
 }
 
-.switch {
-  margin-top: 5%;
-  margin-bottom: 5%;
+.left {
+  width: 15%;
+  height: 100%;
+  margin-left: 1%;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  justify-content: space-evenly;
+  align-items: center;
+  //margin-right: 2%;
 }
 
-#play-button {
-  position:absolute;
-  left: 85%;
-  top:50%;
+.middle {
+  width: 50%;
+  //margin-right: 2%;
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: center;
+  height: 100%;
+  row-gap: 2%;
 }
 
-#pass-button {
-  position:absolute;
-  left: 85%;
-  top: 65%;
+.right {
+  width: 30%;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  flex-direction: column;
+  flex-wrap: wrap;
+  height: 100%;
 }
 
-#exchange-button {
-  position:absolute;
-  left: 85%;
-  top: 80%;
+#timer {
+  //margin-top: 20%;
 }
 
-app-timer {
-  position:absolute;
-  left: 85%;
-  top:25%;
+#chat-box {
+  //margin-top: auto;
+  width: 80%;
+  height: 65vh;
 }
 
-#indice-button {
-  position: absolute;
-  left: 85%;
-  top: 90%;
+.board {
+  //margin-top: 2%;
+  position: relative;
+  width: 100%;
+  //margin-bottom: 2%;
 }
 
-#indice {
-  position: absolute;
-  left: 8%;
-  top: 0%
+.rack {
+  width: 75%;
+  //margin-bottom: 2%;
+}
+
+.play-buttons {
+  display: flex;
+  width: 75%;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+}
+
+.player {
+  width: 90%;
+  height: 15%;
+  background-color: grey;
+  border-radius: 25px;
+  text-align: center;
+}
+
+.player.isTurn {
+  background: #448aff;
+}
+
+img {
+  border-radius: 50%;
+  width: 25%;
+}
+
+.playerInfo {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+#reserve {
+  border-radius: 25px;
+  border-color: black;
+  border-width: 8px;
+  border-style: solid;
+  //padding: 1%;
+  text-align: center;
+  width: 70%;
 }

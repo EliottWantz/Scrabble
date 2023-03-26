@@ -1,13 +1,91 @@
-<div class="container">
-    <button mat-fab color="primary" class="home-button" routerLink="/home" routerLinkActive="router-link-active">
+
+  <mat-drawer-container>
+
+    <mat-drawer opened="true" disableClose="true" mode="side">
+      <div class="box">
+        <div id="title">
+          <div class="mat-icon-button">
+            <mat-icon inline="true">people</mat-icon>
+          </div>
+          <div class="text">Amis</div>
+        </div>
+        <div id="break">
+          <hr>
+        </div>
+
+        <div *ngFor="let friend of user.value.friends; let i = index" class="friends">
+          <div class="friend" (click)="chatFriendPage(i)">
+            <div class="mat-icon-button">
+              <mat-icon inline="true" >person</mat-icon>
+            </div>
+            <div class="text">{{getUsernameFriend(i)}}</div>
+          </div> 
+        </div>
+
+      </div>
+    </mat-drawer>
+
+    <mat-drawer-content>
+      <app-social *ngIf="!chatFriend"></app-social>
+      <div class="content" *ngIf="chatFriend">
+        <div class="nav">
+          <div class="nav-text" (click)="selectNavButton(0)">
+              En ligne
+          </div>
+          <div class="nav-text" (click)="selectNavButton(1)">
+              Tous
+          </div>
+          <div class="nav-text" (click)="selectNavButton(2)">
+              En attente
+          </div>
+          <div class="nav-text" (click)="selectNavButton(3)">
+              Ajouter un ami
+          </div>
+      </div>
+        <app-chat-box class="chat-box"></app-chat-box>
+      </div>
+      <!--
+        <div *ngIf="addFriend" class="content">
+        <h1>Ajouter un ami</h1>
+        <form id="form">
+          <mat-form-field appearance="fill">
+            <mat-label for="username">Entrez le pseudonyme de l'utilisateur</mat-label>
+            <input #usernameInput matInput placeholder="Entrez le pseudonyme de l'utilisateur" name="usename" [(ngModel)]="friendUsername" required>
+          </mat-form-field>
+          <button mat-flat-button color="primary" type="submit" (click)="sendFriendRequest()">Envoyer une demande d'ami</button>
+        </form>
+      </div>
+
+      <div *ngIf="chatFriend" class="content">
+        <app-chat-box></app-chat-box>
+      </div>
+      -->
+    </mat-drawer-content>
+
+  </mat-drawer-container>
+
+    <!--
+      <button mat-fab color="primary" class="home-button" routerLink="/home" routerLinkActive="router-link-active">
         <mat-icon>home</mat-icon>
       </button>
-    <div *ngIf="user.value.friends.length === 0">No friends ?</div>
     <div *ngFor="let friend of user.value.friends">
         <a (click)="friendChat(friend)">{{friend}}</a>
     </div>
 
     <app-chat-box *ngIf="inDM"></app-chat-box>
+      <button (click)="console()">
+        Bruh
+      </button>
+
+      <button (click)="initFriend()">
+        Bruh2
+      </button>
+
+      <button (click)="addFriendTemp()">
+        Bruh3
+      </button>
+    -->
+    
     <!-- <form (ngSubmit)="addFriend(friendInput.value)" [formGroup]="friendForm">
         <mat-form-field appearance="fill">
           <mat-label>Entrez le nom de l'ami que vous souhaitez ajouter</mat-label>
@@ -35,15 +113,4 @@
         </button>
       </form> -->
 
-      <button (click)="console()">
-        Bruh
-      </button>
-
-      <button (click)="initFriend()">
-        Bruh2
-      </button>
-
-      <button (click)="addFriendTemp()">
-        Bruh3
-      </button>
-</div>
+      

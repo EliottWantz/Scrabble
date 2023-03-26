@@ -1,4 +1,41 @@
-img {
+#container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+#form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.form-group {
+  width: 100%;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+#info {
+  width: 60%;
+}
+
+button {
+  margin-top: 2%;
+  width: 100%;
+  border-radius: 20px;
+  padding-top: 4%;
+  padding-bottom: 4%;
+}
+
+
+/*img {
   width: 75px;
   height: 75px;
   padding: 5px;
@@ -32,4 +69,4 @@ mat-card-subtitle {
 
 #upload-button {
   margin-top: 3%;
-}
+}*/

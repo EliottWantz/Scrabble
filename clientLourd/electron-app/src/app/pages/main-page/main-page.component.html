@@ -1,37 +1,19 @@
-<div class="container">
-  <nav>
-    <button
-      *ngIf="!isConnected()"
-      mat-raised-button
-      color="primary"
-      routerLink="/login" routerLinkActive="router-link-active" 
-      id="login-button"
-    >
-      Se connecter
-    </button>
-    <button
-      *ngIf="isConnected()"
-      mat-raised-button
-      color="warn"
-      (click)="logout()"
-      id="login-button"
-    >
-      Déconnexion
-    </button>
+<div id="container">
+    <img id="scrabble-img" src="../../../assets/scrabble.png">
+    <p>Bienvenue à PolyScrabble</p>
+    <p>Commençons</p>
+    <button *ngIf="!isLoggedIn()" mat-flat-button color="accent" routerLink="/login">Se connecter</button>
+    <button *ngIf="!isLoggedIn()" mat-flat-button color="accent" routerLink="/register">S'inscrire</button>
+    <button *ngIf="isLoggedIn()" mat-flat-button color="accent" routerLink="/waitingRoom" (click)="createGame()">Créer une partie</button>
+    <button mat-flat-button color="accent" routerLink="/game">Game</button>
 
-    <a *ngIf="isConnected()" routerLink="/profile" routerLinkActive="router-link-active" id="login-button">
-      <img id="avatar" src="{{user.value.avatar.url}}">
-    </a>
-    <a *ngIf="isInGame() && isConnected()" routerLink="/game" routerLinkActive="router-link-active" id="rules-button">
-      <div> Game </div>
-    </a>
-    <a *ngIf="isConnected()" routerLink="/rules-slider" routerLinkActive="router-link-active" id="rules-button">
-      <div> Help! </div>
-    </a>
-    <a *ngIf="isConnected()" routerLink="/social" routerLinkActive="router-link-active" id="social-button">
-      <div> Social </div>
-    </a>
-  </nav>
-  <app-parameters *ngIf="isConnected()"></app-parameters>
-  <app-chat-box *ngIf="isConnected()"></app-chat-box>
+    <div *ngIf="isLoggedIn()">
+        <div class="list-games" *ngFor="let game of joinableGames.value; let i = index">
+            <h4>{{game.id}}     {{game.userIds.length}}/4</h4>
+            <button mat-flat-button color="accent" (click)="joinGame(game.id, ' ')" routerLink="/waitingRoom">Rejoindre la partie</button>
+        </div>
+    </div>
+    <div class="bottom">
+        <app-chat-box *ngIf="isLoggedIn()"></app-chat-box>
+    </div>
 </div>

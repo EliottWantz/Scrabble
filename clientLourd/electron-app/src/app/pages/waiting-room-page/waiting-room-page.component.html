@@ -1,0 +1,11 @@
+<div id="container">
+  <img id="scrabble-img" src="../../../assets/scrabble.png">
+  <h3>En attente d'autre joueurs... Veuillez patienter</h3>
+  <mat-spinner color="accent"></mat-spinner>
+  <div>
+    <h4>{{getNumUsers()}}/4 joueurs présents</h4>
+  </div>
+  <div *ngIf="getNumUsers() >= 2 && checkIfCreator()">
+    <button mat-flat-button color="accent" (click)="startGame()" routerLink="/game">Débuter la partie</button>
+  </div>
+</div>
