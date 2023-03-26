@@ -5,7 +5,7 @@
     <button *ngIf="!isLoggedIn()" mat-flat-button color="accent" routerLink="/login">Se connecter</button>
     <button *ngIf="!isLoggedIn()" mat-flat-button color="accent" routerLink="/register">S'inscrire</button>
     <button *ngIf="isLoggedIn()" mat-flat-button color="accent" routerLink="/waitingRoom" (click)="createGame()">Créer une partie</button>
-    <button mat-flat-button color="accent" routerLink="/game">Game</button>
+    <button mat-flat-button color="accent" routerLink="/profile">Game</button>
 
     <div *ngIf="isLoggedIn()">
         <div class="list-games" *ngFor="let game of joinableGames.value; let i = index">

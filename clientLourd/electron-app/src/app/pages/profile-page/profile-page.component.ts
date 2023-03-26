@@ -15,6 +15,8 @@ export class ProfilePageComponent implements OnInit {
   selectedFile: File = new File([], "");
   hasError = false;
   user!: BehaviorSubject<User>;
+  screen = "Modifier mon profil";
+  screens = ["Modifier mon profil", "Statistiques", "Historique"];
   constructor(private communicationService: CommunicationService, private userService: UserService) {
     this.user = this.userService.subjectUser;
   }
@@ -39,5 +41,17 @@ export class ProfilePageComponent implements OnInit {
 
   getDate(time: number) {
     return new Date(time).toLocaleString()
+  }
+
+  selectNavButton(index: number): void {
+    this.screen = this.screens[index];
+    const navButtons = document.getElementsByClassName('nav-text');
+    for (let i = 0; i < navButtons.length; i++) {
+      if (i != index) {
+        navButtons[i].setAttribute("style", "");
+      } else {
+        navButtons[i].setAttribute("style", "background-color: #424260; outline-color: #66678e; outline-width: 1px; outline-style: solid;");
+      }
+    }
   }
 }
