@@ -28,6 +28,20 @@
     <mat-drawer-content>
       <app-social *ngIf="!chatFriend"></app-social>
       <div class="content" *ngIf="chatFriend">
+        <div class="nav">
+          <div class="nav-text" (click)="selectNavButton(0)">
+              En ligne
+          </div>
+          <div class="nav-text" (click)="selectNavButton(1)">
+              Tous
+          </div>
+          <div class="nav-text" (click)="selectNavButton(2)">
+              En attente
+          </div>
+          <div class="nav-text" (click)="selectNavButton(3)">
+              Ajouter un ami
+          </div>
+      </div>
         <app-chat-box class="chat-box"></app-chat-box>
       </div>
       <!--

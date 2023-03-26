@@ -2,6 +2,7 @@ import { Component } from "@angular/core";
 import { FormBuilder } from "@angular/forms";
 import { CommunicationService } from "@app/services/communication/communication.service";
 import { RoomService } from "@app/services/room/room.service";
+import { SocialService } from "@app/services/social/social.service";
 import { StorageService } from "@app/services/storage/storage.service";
 // import { MessageErrorStateMatcher } from "@app/classes/form-error/error-state-form";
 import { UserService } from "@app/services/user/user.service";
@@ -27,7 +28,7 @@ export class SocialPageComponent {
   // friendInput!: ElementRef;
 
   constructor(private fb: FormBuilder, private userService: UserService, private socketService: WebSocketService, private communicationService: CommunicationService, private storageService: StorageService,
-    private roomService: RoomService) {
+    private roomService: RoomService, private socialService: SocialService) {
     this.user = this.userService.subjectUser;
     this.inDM = false;
     //this.addFriendPage();
@@ -91,11 +92,6 @@ export class SocialPageComponent {
   //   this.friendInput.nativeElement.focus();
   //   //console.log(this.messages$);
   // }
-
-  async console():Promise<void>{
-    console.log(this.user.value);
-  }
-
   async initFriend():Promise<void>{
     this.user.value.friends = [];
   }
@@ -108,5 +104,14 @@ export class SocialPageComponent {
     const username = this.storageService.getUserFromId(this.user.value.friends[index]);
     if (username) return username.username;
     return "";
+  }
+
+  selectNavButton(index: number): void {
+    this.chatFriend = false;
+    this.socialService.activeScreen = this.socialService.screens[index];
+    const friends = document.getElementsByClassName('friend');
+    for (let i = 0; i < friends.length; i++) {
+      friends[i].setAttribute("style", "");
+    }
   }
 }

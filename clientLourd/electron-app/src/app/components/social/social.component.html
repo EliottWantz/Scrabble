@@ -1,6 +1,6 @@
 <div id="container">
     <div class="nav">
-        <div class="nav-text" style="background-color: #424260; outline-color: #66678e; outline-width: 1px; outline-style: solid;" (click)="selectNavButton(0)">
+        <div class="nav-text" (click)="selectNavButton(0)">
             En ligne
         </div>
         <div class="nav-text" (click)="selectNavButton(1)">
@@ -15,18 +15,43 @@
     </div>
     <div class="content">
 
-        <div *ngIf="activeScreen === 'En ligne'"class="screen">
+        <div *ngIf="getScreen() === 'En ligne'" class="screen">
             <div class="form">
                 <form>
                     <mat-form-field appearance="fill">
                       <mat-label for="username">Rechercher un ami</mat-label>
-                      <input #usernameInput matInput placeholder="Rechercher un ami" name="username" [(ngModel)]="onlineFriendUserNameSearch">
+                      <input #usernameInput matInput placeholder="Rechercher un ami" name="username" [(ngModel)]="onlineFriendUserNameSearch" (input)="onSearchChange(usernameInput.value)">
                     </mat-form-field>
                 </form>
             </div>
+            <div class="users">
+                <div *ngFor="let user of listFriendsDisplay" class="user">
+                    <div *ngIf="checkIfOnline(user.id)">
+                        <img src="{{user.avatar.url}}" class="avatar">
+                        <h3>{{user.username}}</h3>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div *ngIf="activeScreen === 'Ajouter un ami'" class="add-friend">
+        <div *ngIf="getScreen() === 'Tous'" class="screen">
+            <div class="form">
+                <form>
+                    <mat-form-field appearance="fill">
+                      <mat-label for="username">Rechercher un ami</mat-label>
+                      <input #usernameInput matInput placeholder="Rechercher un ami" name="username" [(ngModel)]="allFriendUserNameSearch">
+                    </mat-form-field>
+                </form>
+            </div>
+            <div class="users">
+                <div *ngFor="let user of listFriendsDisplay" class="user">
+                    <img src="{{user.avatar.url}}" class="avatar">
+                    <h3>{{user.username}}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div *ngIf="getScreen() === 'Ajouter un ami'" class="add-friend">
             <div class="form">
                 <form>
                     <mat-form-field appearance="fill">
@@ -46,7 +71,7 @@
             </div>
         </div>
 
-        <div *ngIf="activeScreen === 'En attente'" class="screen">
+        <div *ngIf="getScreen() === 'En attente'" class="screen">
             <div class="users">
                 <div *ngFor="let user of user.value.pendingRequests" class="user">
                     <img src="{{getUserAvatarUrl(user)}}" class="avatar">
