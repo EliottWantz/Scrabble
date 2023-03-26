@@ -1,11 +1,25 @@
-<mat-form-field appearance="fill">
-  <mat-label>Salle</mat-label>
-  <mat-select [(value)]="currentRoomId" (selectionChange)="changeRoom()">
-    <mat-option *ngFor="let room of getRooms()" [value]="room.id">
-      {{ room.name }}
-    </mat-option>
-  </mat-select>
-</mat-form-field>
+<form>
+  <mat-form-field appearance="fill">
+    <mat-label>Salon</mat-label>
+    <mat-select (selectionChange)="changeRoom($event)" [(value)]="currentRoomId" id="selectionElem"> 
+      <mat-select-trigger *ngIf="room$.value.name !== 'Global Room'">{{room$.value.name}}</mat-select-trigger>
+      <mat-select-trigger *ngIf="room$.value.name === 'Global Room'">Global Room</mat-select-trigger>
+      <div *ngFor="let room of getRooms(); let last = last; let i = index">
+        <div class="item">
+          <mat-option [value]="room.id">
+            {{ room.name }}
+          </mat-option>
+          <!--
+            <mat-divider [vertical]="true" style="height: auto;"></mat-divider>
+          -->
+          <mat-icon class="close-icon" (click)="leaveRoom(i)" *ngIf="room.id !== 'global'">close</mat-icon>
+        </div>
+        <mat-divider *ngIf="!last"></mat-divider>
+      </div>
+    </mat-select>
+  </mat-form-field>
+</form>
+
 
 <div id="chatBox" #chatBox>
   <mat-card>
@@ -26,27 +40,28 @@
       </div>
     </div>
   
-    <form (ngSubmit)="send(chatBoxInput.value)" [formGroup]="chatBoxForm">
+    <form #chatForm id="chatBoxForm">
       <mat-form-field appearance="fill">
-        <mat-label>Entrez votre message</mat-label>
+        <mat-label for="message">Entrez votre message</mat-label>
         <input
           #chatBoxInput
           type="text"
           id="chatBoxInput"
-          formControlName="input"
           autocomplete="off"
-          (keypress.enter)="submitBtn._elementRef.nativeElement.click()"
           matInput
+          name="password"
+          [(ngModel)]="message"
         />
         <!-- <mat-error *ngIf="input.hasError('maxlength')">Votre message <strong>excède</strong> la limite de charactères</mat-error> -->
       </mat-form-field>
       <button
         #submitBtn
         mat-mini-fab
-        color="accent"
+        color="primary"
         [disabled]="false"
         id="submitBtn"
         type="submit"
+        (click)="send()"
       >
         <mat-icon>send</mat-icon>
       </button>

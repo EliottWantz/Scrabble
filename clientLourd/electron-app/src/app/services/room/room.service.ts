@@ -35,7 +35,8 @@ export class RoomService {
         const updatedChatRooms = this.userService.currentUserValue.joinedChatRooms;
         updatedChatRooms.push(room.id);
         this.userService.subjectUser.next({...this.userService.subjectUser.value, joinedChatRooms: updatedChatRooms});
-        this.currentRoomChat.next(room);
+        //if (room.id == "global")
+            this.currentRoomChat.next(room);
     }
 
     /*addDMRoom(room: Room): void {
@@ -47,26 +48,36 @@ export class RoomService {
     }*/
 
     removeRoom(roomID: string): void {
-        const currentRooms = this.listChatRooms.getValue();
+        const joinedRooms = this.listJoinedChatRooms.getValue();
         const index = this.findRoom(roomID);
         if (index !== undefined)
-            currentRooms.splice(index, 1);
+            joinedRooms.splice(index, 1);
 
-        this.listChatRooms.next(currentRooms);
+        this.listJoinedChatRooms.next(joinedRooms);
         const updatedChatRooms = this.userService.currentUserValue.joinedChatRooms;
         const indexChat = updatedChatRooms.indexOf(roomID, 0);
-        if (indexChat > -1) {
+        if (indexChat > -1) 
             updatedChatRooms.splice(indexChat, 1);
-        }
+
         this.userService.subjectUser.next({...this.userService.subjectUser.value, joinedChatRooms: updatedChatRooms});
-        if (this.listChatRooms.value.length > 0)
-            this.currentRoomChat.next(this.listChatRooms.value[0]);
+        if (this.listJoinedChatRooms.value.length > 0)
+            this.currentRoomChat.next(this.listJoinedChatRooms.value[0]);
     }
 
     changeRoom(roomId: string): void {
         const index = this.findRoom(roomId);
         if (index !== undefined)
             this.currentRoomChat.next(this.listJoinedChatRooms.value[index]);
+    }
+
+    changeDMRoom(friendName: string): void {
+        for (const room of this.listJoinedChatRooms.value) {
+            if (room.name == this.userService.currentUserValue.username + "/" + friendName || room.name == friendName + "/" + this.userService.currentUserValue.username) {
+                console.log("changed room to dm");
+                this.currentRoomChat.next(room);
+                return;
+            }
+        }
     }
 
     addMessage(msg: ChatMessage): void {

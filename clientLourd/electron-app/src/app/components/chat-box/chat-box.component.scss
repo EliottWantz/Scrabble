@@ -90,6 +90,36 @@ img {
   width: 25%;
 }
 
+.item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.close-icon {
+  margin-left: auto;
+}
+
+.close-icon:hover {
+  cursor: pointer;
+}
+
+mat-option {
+  width: -webkit-fill-available;
+}
+
+/*.delete-divider {
+  margin-left: auto;
+}*/
+
+/*.mat-divider-vertical{
+  height: 100%;
+  width: 0px !important;
+  position: inherit !important;
+  margin-left: auto;
+}*/
+
 // form {
 //     padding: 0 0.75rem;
 //     display: flex;
