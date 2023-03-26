@@ -49,7 +49,12 @@ class PendingRequestsList extends StatelessWidget {
             children: [
               IconButton(
                   onPressed: () async {
-                    await _usersService.acceptFriendRequest(username);
+                    final res = await _usersService.acceptFriendRequest(username);
+                    if (res == true) {
+                      _userService.pendingRequest.remove(username);
+                      _userService.user.value!.pendingRequests.remove(username);
+                      _userService.user.value!.friends.add(username);
+                    }
                   },
                   icon: const Icon(Icons.check)
               ),

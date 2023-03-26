@@ -94,11 +94,15 @@ class ApiRepository {
     // }
   }
 
-  Future<void> acceptFriendRequest(AcceptFriendRequest requestData) async {
-    await apiProvider.acceptFriendRequest(
+  Future<bool?> acceptFriendRequest(AcceptFriendRequest requestData) async {
+    final res = await apiProvider.acceptFriendRequest(
       '/user/friends/accept/${userService.user.value!.id}/${requestData.friendId}',
       // headers
     );
+    if (res.statusCode == 200) {
+      return true;
+    }
+    return null;
   }
 
   Future<void> deleteFriendRequest(DeleteFriendRequest requestData) async {

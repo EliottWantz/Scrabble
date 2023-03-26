@@ -40,7 +40,7 @@ class FriendsController extends GetxController {
     print(items);
     widgetOptions = <Widget>[
       UserList(items: items),
-      UserList(items: items2),
+      UserList(items: userService.user.value!.friends),
       // UserList(items: items2),
       PendingRequestsList(),
       FriendRequestScreen()

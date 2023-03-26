@@ -31,13 +31,16 @@ class UsersService extends GetxService {
     // if (res == null) return;
   }
 
-  Future<void> acceptFriendRequest(String friendUsername) async {
+  Future<bool?> acceptFriendRequest(String friendUsername) async {
     String friendId = getUserId(friendUsername);
     final request = AcceptFriendRequest(
         friendId: friendId
     );
-    await apiRepository.acceptFriendRequest(request);
-    // if (res == null) return;
+    final res = await apiRepository.acceptFriendRequest(request);
+    if (res == true) {
+      return true;
+    }
+    return null;
   }
 
   Future<void> deleteFriendRequest(String friendUsername) async {

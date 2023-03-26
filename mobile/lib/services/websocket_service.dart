@@ -251,10 +251,12 @@ class WebsocketService extends GetxService {
     //     return;
     //   }
     // }
-    if (gameService.isCurrentGameId(chatMessageResponse.payload!.roomId)) {
+    if (gameService.currentGame.value != null
+      && gameService.isCurrentGameId(chatMessageResponse.payload!.roomId)) {
       gameService.currentRoomMessages.add(chatMessageResponse.payload!);
       return;
     }
+
     roomService.addMessagePayloadToRoom(chatMessageResponse.payload!.roomId, chatMessageResponse.payload!);
     if (chatMessageResponse.payload!.roomId == roomService.currentRoomId) {
       roomService.currentRoomMessages!.add(chatMessageResponse.payload!);
