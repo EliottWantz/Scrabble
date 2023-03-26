@@ -9,6 +9,7 @@ import 'package:client_leger/models/response/register_response.dart';
 import 'package:client_leger/services/user_service.dart';
 import 'package:get/get.dart';
 
+import '../models/requests/send_friend_request.dart';
 import 'api_provider.dart';
 
 class ApiRepository {
@@ -76,11 +77,16 @@ class ApiRepository {
     return null;
   }
 
-  // Future<FriendRequestResponse?> sendFriendRequest(FriendRequest data) async {
-  //   final res = await apiProvider.login('/user/friends/request ', data);
-  //   if (res.statusCode == 200) {
-  //     return FriendRequest.fromJson(res.body);
-  //   }
-  //   return null;
-  // }
+  Future<void> sendFriendRequest(SendFriendRequest requestData) async {
+    final Map<String, dynamic> data = {
+      "id": userService.user.value!.id,
+      "friendId": requestData.friendId
+    };
+    await apiProvider.sendFriendRequest(
+        '/user/friends/request/${userService.user.value!.id}/${requestData.friendId}'
+    );
+    // if (res.statusCode == 200) {
+    //   return FriendRequestResponse.fromJson(res.body);
+    // }
+  }
 }

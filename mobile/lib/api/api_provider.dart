@@ -20,11 +20,8 @@ class ApiProvider extends BaseProvider {
     return get(path);
   }
 
-  Future<Response> sendFriendRequest(String path, Map<String, dynamic> query) {
-    dynamic body = {
-      query: query
-    };
-    return post(path, body);
+  Future<Response> sendFriendRequest(String path) {
+    return post(path, {});
   }
 
 }

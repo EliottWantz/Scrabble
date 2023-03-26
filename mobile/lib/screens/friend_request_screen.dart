@@ -1,8 +1,13 @@
+import 'package:client_leger/services/users_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 
 class FriendRequestScreen extends StatelessWidget {
   FriendRequestScreen({Key? key}) : super(key: key);
+
+  final UsersService _usersService = Get.find();
 
   final friendRequestTextInputController = TextEditingController();
   final FocusNode messageInputFocusNode = FocusNode();
@@ -46,8 +51,8 @@ class FriendRequestScreen extends StatelessWidget {
               keyboardType: TextInputType.text,
               focusNode: messageInputFocusNode,
               onSubmitted: (_) {
-                // controller.sendMessage();
-                // messageInputFocusNode.requestFocus();
+                _usersService.sendFriendRequest("4a84eecd-dc61-4ad4-9e53-01c40ebd91ba");
+                messageInputFocusNode.requestFocus();
               },
               decoration: const InputDecoration(
                   hintText: "Entrez un nom d'utilisateur",
