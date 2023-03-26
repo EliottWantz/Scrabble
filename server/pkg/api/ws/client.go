@@ -662,7 +662,7 @@ func (c *Client) HandleCreateTournamentRequest(p *Packet) error {
 		return err
 	}
 
-	r := c.Manager.AddRoom(c.ID, "")
+	r := c.Manager.AddRoom(t.ID, "")
 	if err := r.AddClient(c.ID); err != nil {
 		return err
 	}
@@ -707,65 +707,88 @@ func (c *Client) HandleLeaveTournamentRequest(p *Packet) error {
 	return c.Manager.RemoveClientFromTournament(c, payload.TournamentID)
 }
 
-// func (c *Client) HandleStartTournamentRequest(p *Packet) error {
-// 	payload := StartTournamentPayload{}
-// 	if err := json.Unmarshal(p.Payload, &payload); err != nil {
-// 		return fiber.NewError(fiber.StatusUnprocessableEntity, "parse request: "+err.Error())
-// 	}
-// 	g, err := c.Manager.TournamentSvc.Repo.FindTournament(payload.TournamentID)
-// 	if err != nil {
-// 		return fiber.NewError(fiber.StatusNotFound, "Room not found")
-// 	}
-// 	if c.ID != g.CreatorID {
-// 		return fiber.NewError(fiber.StatusForbidden, "You are not the room creator")
-// 	}
-// 	if g.ScrabbleTournament != nil {
-// 		return fiber.NewError(fiber.StatusBadRequest, "Tournament already started")
-// 	}
+func (c *Client) HandleStartTournamentRequest(p *Packet) error {
+	payload := StartTournamentPayload{}
+	if err := json.Unmarshal(p.Payload, &payload); err != nil {
+		return fiber.NewError(fiber.StatusUnprocessableEntity, "parse request: "+err.Error())
+	}
+	t, err := c.Manager.GameSvc.Repo.FindTournament(payload.TournamentID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusNotFound, "Tournament not found")
+	}
+	if c.ID != t.CreatorID {
+		return fiber.NewError(fiber.StatusForbidden, "You are not the tournament creator")
+	}
+	if t.HasStarted {
+		return fiber.NewError(fiber.StatusBadRequest, "Tournament already started")
+	}
 
-// 	if err := c.Manager.TournamentSvc.StartTournament(g); err != nil {
-// 		return err
-// 	}
+	if err := c.Manager.GameSvc.StartTournament(t); err != nil {
+		return err
+	}
 
-// 	r, err := c.Manager.GetRoom(g.ID)
-// 	if err != nil {
-// 		return fiber.NewError(fiber.StatusBadRequest, "ws room not found: "+err.Error())
-// 	}
-// 	// Start Tournament timer
-// 	g.ScrabbleTournament.Timer.OnTick(func() {
-// 		timerPacket, err := NewTimerUpdatePacket(TimerUpdatePayload{
-// 			Timer: g.ScrabbleTournament.Timer.TimeRemaining(),
-// 		})
-// 		if err != nil {
-// 			slog.Error("failed to create timer update packet:", err)
-// 			return
-// 		}
-// 		r.Broadcast(timerPacket)
-// 	})
-// 	g.ScrabbleTournament.Timer.OnDone(func() {
-// 		g.ScrabbleTournament.SkipTurn()
-// 		TournamentPacket, err := NewTournamentUpdatePacket(TournamentUpdatePayload{
-// 			Tournament: makeTournamentPayload(g),
-// 		})
-// 		if err != nil {
-// 			slog.Error("failed to create Tournament update packet:", err)
-// 			return
-// 		}
-// 		r.Broadcast(TournamentPacket)
+	for _, b := range t.Rounds[1].Brackets {
+		for _, g := range b.Games {
+			gameRoom := c.Manager.AddRoom(g.ID, "")
 
-// 		// Make bots move if applicable
-// 		go c.Manager.MakeBotMoves(g.ID)
-// 	})
-// 	g.ScrabbleTournament.Timer.Start()
+			for _, playerID := range g.UserIDs {
+				player, err := c.Manager.GetClient(playerID)
+				if err != nil {
+					slog.Error("get client", err)
+					continue
+				}
 
-// 	TournamentPacket, err := NewTournamentUpdatePacket(TournamentUpdatePayload{
-// 		Tournament: makeTournamentPayload(g),
-// 	})
-// 	if err != nil {
-// 		return err
-// 	}
+				if err := gameRoom.AddClient(player.ID); err != nil {
+					slog.Error("add client to room", err)
+					continue
+				}
+				if err := c.Manager.UserSvc.Repo.SetJoinedGame(g.ID, playerID); err != nil {
+					slog.Error("set joined game", err)
+					continue
+				}
+				if err := gameRoom.BroadcastJoinGamePackets(player, g); err != nil {
+					slog.Error("broadcast join game packets", err)
+					continue
+				}
+			}
 
-// 	r.Broadcast(TournamentPacket)
+			// Start game timer
+			g.ScrabbleGame.Timer.OnTick(func() {
+				timerPacket, err := NewTimerUpdatePacket(TimerUpdatePayload{
+					Timer: g.ScrabbleGame.Timer.TimeRemaining(),
+				})
+				if err != nil {
+					slog.Error("failed to create timer update packet:", err)
+					return
+				}
+				gameRoom.Broadcast(timerPacket)
+			})
+			g.ScrabbleGame.Timer.OnDone(func() {
+				g.ScrabbleGame.SkipTurn()
+				GamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
+					Game: makeGamePayload(g),
+				})
+				if err != nil {
+					slog.Error("failed to create Game update packet:", err)
+					return
+				}
+				gameRoom.Broadcast(GamePacket)
 
-// 	return nil
-// }
+				// Make bots move if applicable
+				go c.Manager.MakeBotMoves(g.ID)
+			})
+			g.ScrabbleGame.Timer.Start()
+
+			gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
+				Game: makeGamePayload(g),
+			})
+			if err != nil {
+				return err
+			}
+
+			gameRoom.Broadcast(gamePacket)
+		}
+	}
+
+	return nil
+}

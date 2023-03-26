@@ -16,9 +16,21 @@ type Tournament struct {
 }
 
 type Round struct {
-	RoundNumber int              `json:"roundNumber"`
-	UserIDs     []string         `json:"userIds"`
-	Games       map[string]*Game `json:"games"`
+	RoundNumber int       `json:"roundNumber"`
+	UserIDs     []string  `json:"userIds"`
+	Brackets    []Bracket `json:"brackets"`
+}
+
+type Bracket struct {
+	UserIDs []string         `json:"userIds"`
+	Games   map[string]*Game `json:"games"`
+	Winners []string         `json:"winners"`
+}
+
+type Finale struct {
+	UserIDs []string `json:"userIds"`
+	Game    *Game    `json:"game"`
+	Winner  string   `json:"winner"`
 }
 
 func NewTournament(creatorID string, withUserIDs []string) *Tournament {
@@ -34,7 +46,7 @@ func NewTournament(creatorID string, withUserIDs []string) *Tournament {
 	return t
 }
 
-func (t *Tournament) start() error {
+func (t *Tournament) Setup(s *Service) error {
 	numPlayers := len(t.UserIDs)
 	var numRounds int
 	switch numPlayers {
@@ -46,27 +58,48 @@ func (t *Tournament) start() error {
 		numRounds = 4
 	}
 
+	gameCounter := 1
 	for roundNumber := 1; roundNumber <= numRounds; roundNumber++ {
 		round := Round{
 			RoundNumber: roundNumber,
-			Games:       make(map[string]*Game),
+			Brackets:    make([]Bracket, 0),
+			UserIDs:     make([]string, 0),
+		}
+		if roundNumber == 1 {
+			round.UserIDs = t.UserIDs
 		}
 
-		// Determine the number of matches in this round
-		numMatches := numPlayers / (1 << uint(roundNumber))
+		numGames := numPlayers / (1 << uint(roundNumber))
+		numBrackets := numGames / 2
+		gamesPerBracket := 2
+		if numBrackets == 0 {
+			gamesPerBracket = 1
+			numBrackets = 1
+		}
 
-		// Create and print the matches
-		for matchNumber := 1; matchNumber <= numMatches; matchNumber++ {
-			game := &Game{ID: uuid.NewString()}
-			if roundNumber == 1 {
-				game.UserIDs = []string{
-					t.UserIDs[matchNumber-1],
-					t.UserIDs[numMatches*2-matchNumber],
-				}
+		for len(round.Brackets) < numBrackets {
+			bracket := Bracket{
+				UserIDs: make([]string, 0),
+				Games:   make(map[string]*Game),
+				Winners: make([]string, 0, 2),
 			}
-			round.Games[game.ID] = game
-		}
+			for len(bracket.Games) < gamesPerBracket {
+				game := &Game{ID: uuid.NewString()}
+				if roundNumber == 1 {
+					game.UserIDs = []string{
+						t.UserIDs[gameCounter-1],
+						t.UserIDs[numGames*2-gameCounter],
+					}
+				}
+				if err := s.Repo.InsertGame(game); err != nil {
+					return err // Should never happen
+				}
 
+				bracket.Games[game.ID] = game
+				gameCounter++
+			}
+			round.Brackets = append(round.Brackets, bracket)
+		}
 		t.Rounds[roundNumber] = round
 	}
 
@@ -75,4 +108,11 @@ func (t *Tournament) start() error {
 
 func (t *Tournament) NumberOfRounds() int {
 	return len(t.Rounds)
+}
+
+func (r *Round) IsFinale() bool {
+	if len(r.Brackets) != 1 {
+		return false
+	}
+	return len(r.Brackets[0].Games) == 1
 }

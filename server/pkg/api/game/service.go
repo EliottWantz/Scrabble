@@ -456,9 +456,21 @@ func (s *Service) NewTournament(creatorID string, withUserIDs []string) (*Tourna
 }
 
 func (s *Service) StartTournament(t *Tournament) error {
-	for _, g := range t.Rounds[1].Games {
-		if err := s.StartGame(g); err != nil {
-			return err
+	if err := t.Setup(s); err != nil {
+		return err
+	}
+
+	for _, b := range t.Rounds[1].Brackets {
+		for _, g := range b.Games {
+			g.ScrabbleGame = scrabble.NewGame(s.DAWG, &scrabble.HighScore{})
+			for _, uID := range g.UserIDs {
+				u, err := s.UserSvc.GetUser(uID)
+				if err != nil {
+					return err
+				}
+				g.ScrabbleGame.AddPlayer(scrabble.NewPlayer(u.ID, u.Username, g.ScrabbleGame.Bag))
+			}
+			g.ScrabbleGame.Turn = g.ScrabbleGame.PlayerToMove().ID
 		}
 	}
 	t.HasStarted = true
