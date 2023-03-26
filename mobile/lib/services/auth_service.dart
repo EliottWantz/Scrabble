@@ -32,6 +32,7 @@ class AuthService extends GetxService {
     var res = await apiRepository.login(loginRequest);
     if (res == null) return;
     userService.user.value = res.user;
+    userService.pendingRequest.addAll(res.user.pendingRequests);
     await _setSession(res.token);
     websocketService.connect();
   }
@@ -40,6 +41,7 @@ class AuthService extends GetxService {
     var res = await apiRepository.signup(registerRequest, imagePath: imagePath);
     if (res == null) return;
     userService.user.value = res.user;
+    userService.pendingRequest.addAll(res.user.pendingRequests);
     await _setSession(res.token);
     websocketService.connect();
   }

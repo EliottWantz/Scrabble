@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:client_leger/models/avatar.dart';
+import 'package:client_leger/models/requests/accept_friend_request.dart';
 import 'package:client_leger/models/requests/login_request.dart';
 import 'package:client_leger/models/requests/register_request.dart';
 import 'package:client_leger/models/response/login_response.dart';
@@ -10,6 +11,7 @@ import 'package:client_leger/services/storage_service.dart';
 import 'package:client_leger/services/user_service.dart';
 import 'package:get/get.dart';
 
+import '../models/requests/delete_friend_request.dart';
 import '../models/requests/send_friend_request.dart';
 import 'api_provider.dart';
 
@@ -90,5 +92,19 @@ class ApiRepository {
     // if (res.statusCode == 200) {
     //   return FriendRequestResponse.fromJson(res.body);
     // }
+  }
+
+  Future<void> acceptFriendRequest(AcceptFriendRequest requestData) async {
+    await apiProvider.acceptFriendRequest(
+      '/user/friends/accept/${userService.user.value!.id}/${requestData.friendId}',
+      // headers
+    );
+  }
+
+  Future<void> deleteFriendRequest(DeleteFriendRequest requestData) async {
+    await apiProvider.deleteFriendRequest(
+      '/user/friends/accept/${userService.user.value!.id}/${requestData.friendId}',
+      // headers
+    );
   }
 }

@@ -3,4 +3,5 @@ import 'package:get/get.dart';
 
 class UserService extends GetxService {
   final user = Rxn<User>();
+  final pendingRequest = <dynamic>[].obs;
 }

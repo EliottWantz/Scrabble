@@ -24,6 +24,7 @@ class User {
   Preferences preferences;
   List<dynamic> joinedChatRooms;
   List<dynamic> friends;
+  List<dynamic> pendingRequests;
 
   User(
       {required this.id,
@@ -32,7 +33,8 @@ class User {
       required this.avatar,
       required this.preferences,
       required this.joinedChatRooms,
-      required this.friends});
+      required this.friends,
+      required this.pendingRequests});
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
@@ -42,7 +44,8 @@ class User {
         avatar: Avatar.fromJson(json["avatar"]),
         preferences: Preferences.fromJson(json["preferences"]),
         joinedChatRooms: json["joinedChatRooms"],
-        friends: json["friends"]);
+        friends: json["friends"],
+        pendingRequests: json["pendingRequests"]);
   }
 
   Map<String, dynamic> toJson() => {
@@ -52,6 +55,7 @@ class User {
         "avatar": avatar.toJson(),
         "preferences": preferences.toJson(),
         "joinedChatRooms": joinedChatRooms,
-        "friends": friends
+        "friends": friends,
+        "pendingRequest": pendingRequests
       };
 }

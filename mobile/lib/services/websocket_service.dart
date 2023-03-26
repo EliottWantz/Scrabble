@@ -7,16 +7,20 @@ import 'package:client_leger/models/events.dart';
 import 'package:client_leger/models/join_dm_payload.dart';
 import 'package:client_leger/models/join_room_payload.dart';
 import 'package:client_leger/models/play_move_payload.dart';
+import 'package:client_leger/models/requests/accept_friend_request.dart';
 import 'package:client_leger/models/requests/chat_message_request.dart';
 import 'package:client_leger/models/requests/create_game_room_request.dart';
 import 'package:client_leger/models/requests/join_dm_request.dart';
 import 'package:client_leger/models/requests/join_room_request.dart';
 import 'package:client_leger/models/requests/play_move_request.dart';
+import 'package:client_leger/models/response/accept_friend_response.dart';
 import 'package:client_leger/models/response/chat_message_response.dart';
+import 'package:client_leger/models/response/friend_request_response.dart';
 import 'package:client_leger/models/response/game_update_response.dart';
 import 'package:client_leger/models/response/joined_game_response.dart';
 import 'package:client_leger/models/response/joined_room_response.dart';
 import 'package:client_leger/models/response/list_users_response.dart';
+import 'package:client_leger/models/response/send_friend_response.dart';
 import 'package:client_leger/models/response/timer_response.dart';
 import 'package:client_leger/models/response/user_joined_game_response.dart';
 import 'package:client_leger/models/response/user_joined_response.dart';
@@ -164,6 +168,16 @@ class WebsocketService extends GetxService {
         handleServerEventTimerUpdate(timerResponse);
       }
       break;
+      case ServerEventFriendRequest: {
+        FriendRequestResponse friendRequestResponse = FriendRequestResponse.fromRawJson(data);
+        handleFriendRequest(friendRequestResponse);
+      }
+      break;
+      case ServerEventAcceptFriendRequest: {
+        AcceptFriendResponse acceptFriendRequest = AcceptFriendResponse.fromRawJson(data);
+        handleAcceptFriendRequest(acceptFriendRequest);
+      }
+      break;
       // case game timer
       default: {
         print('no event in package received');
@@ -266,6 +280,16 @@ class WebsocketService extends GetxService {
 
   void handleServerEventTimerUpdate(TimerResponse timerResponse) {
     gameService.currentGameTimer.value = timerResponse.payload.timer;
+  }
+
+  void handleFriendRequest(FriendRequestResponse friendRequestResponse) {
+    userService.user.value!.pendingRequests.add(friendRequestResponse.payload!.fromUsername);
+    userService.pendingRequest.add(friendRequestResponse.payload!.fromUsername);
+  }
+
+  void handleAcceptFriendRequest(AcceptFriendResponse acceptFriendRequest) {
+    userService.user.value!.pendingRequests.remove(acceptFriendRequest.payload!.fromUsername);
+    userService.user.value!.friends.add(acceptFriendRequest.payload!.fromId);
   }
 
   void createRoom(String roomName, { List<String> userIds = const [] }) {

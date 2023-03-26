@@ -1,6 +1,7 @@
 import 'package:client_leger/screens/friend_request_screen.dart';
 import 'package:client_leger/services/room_service.dart';
 import 'package:client_leger/services/websocket_service.dart';
+import 'package:client_leger/widgets/pending_requests_list.dart';
 import 'package:client_leger/widgets/user_list.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:client_leger/services/user_service.dart';
@@ -40,7 +41,8 @@ class FriendsController extends GetxController {
     widgetOptions = <Widget>[
       UserList(items: items),
       UserList(items: items2),
-      UserList(items: items2),
+      // UserList(items: items2),
+      PendingRequestsList(),
       FriendRequestScreen()
       // Column(
       //   children: [
