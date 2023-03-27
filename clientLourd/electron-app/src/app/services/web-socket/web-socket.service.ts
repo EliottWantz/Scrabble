@@ -14,6 +14,7 @@ import { GameService } from "@app/services/game/game.service";
 import { RackService } from "@app/services/game/rack.service";
 import { StorageService } from "@app/services/storage/storage.service";
 import { ScrabbleGame } from "@app/utils/interfaces/game/game";
+import { Router } from "@angular/router";
 
 @Injectable({
     providedIn: "root",
@@ -22,7 +23,8 @@ export class WebSocketService {
     socket!: WebSocket;
     user: BehaviorSubject<User>;
 
-    constructor(private userService: UserService, private roomService: RoomService, private gameService: GameService, private rackService: RackService, private storageService: StorageService) {
+    constructor(private userService: UserService, private roomService: RoomService, private gameService: GameService, private rackService: RackService,
+        private storageService: StorageService, private router: Router) {
         this.user = this.userService.subjectUser;
     }
 
@@ -160,6 +162,7 @@ export class WebSocketService {
             case "joinedGame": {
                 const joinedGamePayload = packet.payload as JoinedGamePayload;
                 this.gameService.game.next(joinedGamePayload.game);
+                this.router.navigate(["/waitingRoom"]);
                 break;
             }
 

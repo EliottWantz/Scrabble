@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-
 import { AppRoutingModule } from './modules/app-routing.module';
 import { AppComponent } from './pages/app/app.component';
 import { LoginComponent } from '@app/components/login/login.component';
@@ -42,6 +41,10 @@ import { SocialComponent } from '@app/components/social/social.component';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { WaitRoomPageComponent } from '@app/pages/waiting-room-page/waiting-room-page.component';
 import { MatSelectModule } from '@angular/material/select';
+import { FindGamePageComponent } from '@app/pages/find-game-page/find-game-page.component';
+import { MatGridListModule } from '@angular/material/grid-list';
+import { JoinGameComponent } from '@app/components/join-game/join-game.component';
+import { CreateGameComponent } from '@app/components/create-game/create-game.component';
 
 @NgModule({
   declarations: [
@@ -66,7 +69,10 @@ import { MatSelectModule } from '@angular/material/select';
     AvatarSelectionComponent,
     DefaultAvatarSelectionComponent,
     SocialComponent,
-    WaitRoomPageComponent
+    WaitRoomPageComponent,
+    FindGamePageComponent,
+    JoinGameComponent,
+    CreateGameComponent
   ],
   imports: [
     BrowserModule,
@@ -88,7 +94,8 @@ import { MatSelectModule } from '@angular/material/select';
     MatButtonModule,
     BrowserAnimationsModule,
     MatProgressSpinnerModule,
-    MatSelectModule
+    MatSelectModule,
+    MatGridListModule
   ],
   providers: [
     {
