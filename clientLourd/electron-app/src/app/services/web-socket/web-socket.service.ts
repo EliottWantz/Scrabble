@@ -22,6 +22,7 @@ import { Router } from "@angular/router";
 export class WebSocketService {
     socket!: WebSocket;
     user: BehaviorSubject<User>;
+    error: BehaviorSubject<string> = new BehaviorSubject<string>("");
 
     constructor(private userService: UserService, private roomService: RoomService, private gameService: GameService, private rackService: RackService,
         private storageService: StorageService, private router: Router) {
@@ -49,6 +50,7 @@ export class WebSocketService {
     private async handleSocket(e: MessageEvent): Promise<void> {
         const packet: Packet = JSON.parse(e.data);
         const event: ServerEvent = packet.event as ServerEvent;
+        this.error.next("");
 
         switch (event) {
             case "joinedRoom": {
@@ -249,6 +251,8 @@ export class WebSocketService {
                 if (errorPayload.error == "invalid move") {
                     this.rackService.replaceTilesInRack();
                     //this.gameService.game.next(this.gameService.game.value);
+                } else {
+                    this.error.next(errorPayload.error);
                 }
                 break;
             }
