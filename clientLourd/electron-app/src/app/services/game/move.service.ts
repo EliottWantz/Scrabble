@@ -19,7 +19,7 @@ export class MoveService {
         this.game.subscribe(() => {
             this.selectedTiles = [];
             this.placedTiles = [];
-        })
+        });
     }
 
     async playTiles(): Promise<void> {
