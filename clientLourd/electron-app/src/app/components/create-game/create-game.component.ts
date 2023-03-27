@@ -5,7 +5,7 @@ import { StorageService } from "@app/services/storage/storage.service";
 import { WebSocketService } from "@app/services/web-socket/web-socket.service";
 import { ClientEvent } from "@app/utils/events/client-events";
 import { Game } from "@app/utils/interfaces/game/game";
-import { JoinGamePayload } from "@app/utils/interfaces/packet";
+import { CreateGamePayload, JoinGamePayload } from "@app/utils/interfaces/packet";
 import { BehaviorSubject } from "rxjs";
 
 @Component({
@@ -34,17 +34,26 @@ export class CreateGameComponent {
         return names;
     }
 
-    joinGame(gameId: string, password: string): void {
-        //this.stepper.selectedIndex = STEPPER_PAGE_IDX.confirmationPage;
-        const payload: JoinGamePayload = {
-            gameId: gameId,
-            password: password
-          }
-          const event : ClientEvent = "join-game";
-          this.webSocketService.send(event, payload);
+    createGame(): void {
+        const payload: CreateGamePayload = {
+            password: this.password,
+            userIds: []
+        }
+        const event : ClientEvent = "create-game";
+        console.log(payload);
+        this.webSocketService.send(event, payload);
+        this.close();
     }
 
     close() {
         this.dialogRef.close();
+    }
+
+    onPrivateChange(): void {
+        if (!this.isPrivate) 
+            this.password = "";
+
+        console.log(this.isPrivate);
+        console.log(this.password);
     }
 }

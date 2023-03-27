@@ -1,4 +1,25 @@
-::ng-deep #container {
+::ng-deep .mat-mdc-form-field-infix {
+  display: flex;
+  flex-direction: column;
+  
+    min-width: 0;
+    width: 180px;
+    position: relative;
+    box-sizing: border-box;
+    min-height: 56px;
+}
+
+::ng-deep .dark-theme .mat-mdc-text-field-wrapper:not(.mdc-text-field--outlined) .mat-mdc-form-field-infix {
+    padding-top: 24px;
+    padding-bottom: 8px;
+}
+
+::ng-deep .mat-mdc-text-field-wrapper:not(.mdc-text-field--outlined) .mat-mdc-form-field-infix {
+  padding-top: 24px;
+  padding-bottom: 8px;
+}
+
+#container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -29,4 +50,21 @@ mat-divider {
 
 #close-button {
   position: sticky;
+}
+
+.password {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+button {
+  width: 51%;
+  border-radius: 20px;
+  background-color: #dcdcdc;
+  border-width: 0;
+  padding-top: 1%;
+  padding-bottom: 1%;
 }

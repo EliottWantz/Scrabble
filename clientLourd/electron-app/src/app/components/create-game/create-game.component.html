@@ -1,29 +1,32 @@
 <div id="container">
     <h1>Créer une nouvelle partie</h1>
-    <form id="form">
-        <mat-form-field>
-            <mat-label>Mode de jeu</mat-label>
-            <mat-select>
-                <mat-option *ngFor="let gameMode of gameModes" [value]="selectedGameMode">
-                    {{gameMode}}
-                </mat-option>
-            </mat-select>
-        </mat-form-field>
-    </form>
+    <mat-form-field id="form">
+        <mat-label>Mode de jeu</mat-label>
+        <mat-select [(value)]="selectedGameMode">
+            <mat-option *ngFor="let gameMode of gameModes" [value]="selectedGameMode">
+                {{gameMode}}
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
 
-    <label>Partie privée?</label>
-        <mat-radio-group [(ngModel)]="isPrivate">
-            <mat-radio-button [value]="true">Privée</mat-radio-button>
-            <mat-radio-button [value]="false">Publique</mat-radio-button>
+    <div>
+        <label>Partie privée?</label>
+        <mat-radio-group [(ngModel)]="isPrivate" (ngModelChange)="onPrivateChange()">
+            <mat-radio-button color="primary" [value]="true">Privée</mat-radio-button>
+            <mat-radio-button color="primary" [value]="false">Publique</mat-radio-button>
         </mat-radio-group>
-    <div>{{isPrivate}}</div>
-
-    <div class="form-group">
-        <mat-form-field appearance="fill">
-            <mat-label for="password">Entrez le mot de passe de la partie</mat-label>
-            <input type="password" matInput placeholder="Entrez le mot de passe de la partie" name="password" [(ngModel)] ="password" required>
-        </mat-form-field>
     </div>
 
-    <button mat-raised-button color="primary" (click)="close()" id="close-button">Fermer</button>
+    <form class="password">
+        <div class="form-group" *ngIf="isPrivate">
+            <mat-form-field appearance="fill">
+                <mat-label for="password">Entrez le mot de passe de la partie</mat-label>
+                <input type="password" matInput placeholder="Entrez le mot de passe de la partie" name="password" [(ngModel)] ="password" required>
+            </mat-form-field>
+        </div>
+    
+        <button (click)="createGame()">Créer la partie</button>
+    </form>
+
+    <button (click)="close()" id="close-button">Fermer</button>
 </div>
