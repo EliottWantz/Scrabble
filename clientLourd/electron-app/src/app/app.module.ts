@@ -45,6 +45,7 @@ import { FindGamePageComponent } from '@app/pages/find-game-page/find-game-page.
 import { MatGridListModule } from '@angular/material/grid-list';
 import { JoinGameComponent } from '@app/components/join-game/join-game.component';
 import { CreateGameComponent } from '@app/components/create-game/create-game.component';
+import { JoinPrivateGameComponent } from '@app/components/join-private-game/join-private-game.component';
 
 @NgModule({
   declarations: [
@@ -72,7 +73,8 @@ import { CreateGameComponent } from '@app/components/create-game/create-game.com
     WaitRoomPageComponent,
     FindGamePageComponent,
     JoinGameComponent,
-    CreateGameComponent
+    CreateGameComponent,
+    JoinPrivateGameComponent
   ],
   imports: [
     BrowserModule,
