@@ -54,6 +54,10 @@ export class SidebarComponent {
           case "/avatar":
             this.currentRoute = "Choix de l'avatar";
             break;
+          
+          case "/find-game":
+            this.currentRoute = "Options de jeu";
+            break;
         }
       }
     });
