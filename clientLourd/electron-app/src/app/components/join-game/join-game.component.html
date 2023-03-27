@@ -28,7 +28,7 @@
                 <mat-icon *ngIf="game.isProtected">clear</mat-icon>
             </mat-grid-tile>
             <mat-grid-tile [colspan]="1" [rowspan]="1">
-                <button mat-raised-button color="primary" (click)="joinGame(game.id, ' ')">
+                <button (click)="joinGame(game)">
                     <mat-icon>play_arrow</mat-icon>
                     Rejoindre la partie
                 </button>
@@ -38,5 +38,5 @@
             </mat-grid-tile>
         </div>
     </mat-grid-list>
-    <button mat-raised-button color="primary" (click)="close()" id="close-button">Fermer</button>
+    <button (click)="close()" id="close-button">Fermer</button>
 </div>
