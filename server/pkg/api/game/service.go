@@ -467,7 +467,9 @@ func (s *Service) StartTournament(t *Tournament) error {
 	case 16:
 		numRounds = 4
 	}
-
+	if numRounds == 0 {
+		return errors.New("invalid number of players")
+	}
 	gameCounter := 1
 	for roundNumber := 1; roundNumber <= numRounds; roundNumber++ {
 		round := &Round{
