@@ -30,17 +30,26 @@ function initWindow() {
   });
 
   chatWindow = new BrowserWindow({
-    width: 400,
-    height: 400,
+    height: 600,
+    width: 800,
+    minHeight: 600,
+    minWidth: 800,
+    maxHeight: 1080,
+    maxWidth: 1920,
+    show: false,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+    },
   });
 
-  chatWindow.loadURL("http://localhost:4200/game");
+  chatWindow.loadURL("http://localhost:4200/chatbox");
   chatWindow.setMenuBarVisibility(false);
   chatWindow.webContents.openDevTools();
-  chatWindow.on("closed", function () {
-    chatWindow = null;
+  chatWindow.on("closed", function (e) {
+    e.preventDefault();
+    console.log("closing the chat window tab is disable");
   });
-  chatWindow.hide();
 }
 
 app.on("ready", initWindow);
@@ -54,7 +63,7 @@ app.on("window-all-closed", function () {
 });
 
 app.on("activate", function () {
-  if (appWindow === null) {
+  if (appWindow === null || chatWindow === null) {
     initWindow();
   }
 });
