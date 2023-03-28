@@ -97,7 +97,7 @@ func (s *Service) SignUp(username, password, email string, uploadAvatar UploadAv
 	ID := uuid.NewString()
 	Preferences := Preferences{
 		Theme:    "light",
-		Language: "en",
+		Language: "fr",
 	}
 	u := &User{
 		ID:              ID,

@@ -198,6 +198,8 @@ func (m *Manager) GetClient(cID string) (*Client, error) {
 }
 
 func (m *Manager) RemoveClient(c *Client) error {
+	close(c.receiveCh)
+	close(c.sendCh)
 	user, err := m.UserSvc.GetUser(c.ID)
 	if err != nil {
 		return fmt.Errorf("removeClient: %w", err)
@@ -220,10 +222,14 @@ func (m *Manager) RemoveClient(c *Client) error {
 			slog.Error("removeClient from room", err)
 			continue
 		}
-		if err := r.BroadcastLeaveRoomPackets(c); err != nil {
-			slog.Error("removeClient broadcast packets", err)
-			continue
+		userLeftRoomPacket, err := NewUserLeftRoomPacket(UserLeftRoomPayload{
+			RoomID: r.ID,
+			UserID: c.ID,
+		})
+		if err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, "failed to create packet: "+err.Error())
 		}
+		r.BroadcastSkipSelf(userLeftRoomPacket, c.ID)
 	}
 	for _, DMRoomID := range user.JoinedDMRooms {
 		r, err := m.GetRoom(DMRoomID)
@@ -235,16 +241,27 @@ func (m *Manager) RemoveClient(c *Client) error {
 			slog.Error("removeClient from room", err)
 			continue
 		}
-		if err := r.BroadcastLeaveDMRoomPackets(c); err != nil {
-			slog.Error("removeClient broadcast packets", err)
-			continue
+		userLeftDMRoomPacket, err := NewUserLeftDMRoomPacket(UserLeftDMRoomPayload{
+			RoomID: r.ID,
+			UserID: c.ID,
+		})
+		if err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, "failed to create packet: "+err.Error())
 		}
+		r.BroadcastSkipSelf(userLeftDMRoomPacket, c.ID)
 	}
 	if err := m.GlobalRoom.RemoveClient(c.ID); err != nil {
 		slog.Error("removeClient from global room", err)
 	}
-	if err := m.GlobalRoom.BroadcastLeaveRoomPackets(c); err != nil {
-		slog.Error("removeClient broadcast packets", err)
+	{
+		userLeftGLobalRoomPacket, err := NewUserLeftRoomPacket(UserLeftRoomPayload{
+			RoomID: m.GlobalRoom.ID,
+			UserID: c.ID,
+		})
+		if err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, "failed to create packet: "+err.Error())
+		}
+		m.GlobalRoom.BroadcastSkipSelf(userLeftGLobalRoomPacket, c.ID)
 	}
 	if user.JoinedGame != "" {
 		if err := m.RemoveClientFromGame(c, user.JoinedGame); err != nil {
