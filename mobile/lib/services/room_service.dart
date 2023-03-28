@@ -10,9 +10,11 @@ import '../models/user.dart';
 class RoomService extends GetxService {
   RxMap<String, Room> roomsMap = RxMap<String, Room>();
   final currentRoomMessages = <ChatMessagePayload>[].obs;
+  final currentFloatingRoomMessages = <ChatMessagePayload>[].obs;
   // final currentRoomMessages = List<ChatMessagePayload>().obs;
 
   var currentRoomId = 'global';
+  final currentFloatingChatRoomId = Rxn<String>();
 
   void updateCurrentRoomId(String newCurrentRoomId) {
     currentRoomId = newCurrentRoomId;
@@ -24,8 +26,17 @@ class RoomService extends GetxService {
     currentRoomMessages.addAll(getCurrentRoomChatMessagePayloads());
   }
 
+  void updateCurrentFloatingRoomMessages() {
+    currentFloatingRoomMessages.clear();
+    currentFloatingRoomMessages.addAll(getCurrentRoomChatMessagePayloads());
+  }
+
   List<ChatMessagePayload> getCurrentRoomChatMessagePayloads() {
     return getCurrentRoom().messages!;
+  }
+
+  List<ChatMessagePayload> getCurrentFloatingRoomChatMessagePayloads() {
+    return getCurrentFloatingRoom().messages!;
   }
 
   Map<String, Room> getMapOfRoomsByIds() {
@@ -58,6 +69,10 @@ class RoomService extends GetxService {
 
   Room getCurrentRoom() {
     return roomsMap[currentRoomId]!;
+  }
+
+  Room getCurrentFloatingRoom() {
+    return roomsMap[currentFloatingChatRoomId]!;
   }
 
   Room getRoom(String roomId) {

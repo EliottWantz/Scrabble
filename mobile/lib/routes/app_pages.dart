@@ -2,6 +2,7 @@ import 'package:client_leger/bindings/auth_binding.dart';
 import 'package:client_leger/bindings/avatar_selection_binding.dart';
 import 'package:client_leger/bindings/game_binding.dart';
 import 'package:client_leger/screens/auth/auth_screen.dart';
+import 'package:client_leger/screens/chat_screen.dart';
 import 'package:client_leger/screens/game_screen.dart';
 import 'package:client_leger/screens/home/game_lobby_screen.dart';
 import 'package:client_leger/screens/home/game_start_screen.dart';
@@ -12,6 +13,7 @@ import 'package:client_leger/screens/auth/register_screen.dart';
 import 'package:client_leger/screens/home/profile_edit_screen.dart';
 import 'package:get/get.dart';
 import 'package:client_leger/bindings/chatbox_binding.dart';
+import '../screens/floating_chat_screen.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -53,6 +55,8 @@ class AppPages {
         GetPage(name: Routes.PROFILE_EDIT, page: () => ProfieEditScreen())
       ],
     ),
-    GetPage(name: Routes.GAME, page: () => GameScreen(), binding: GameBinding())
+    GetPage(name: Routes.GAME, page: () => GameScreen(), binding: GameBinding()),
+    // GetPage(name: Routes.CHAT, page: () => ChatScreen(), binding: ChatBoxBinding())
+    // GetPage(name: Routes.CHAT, page: () => FloatingChatScreen())
   ];
 }

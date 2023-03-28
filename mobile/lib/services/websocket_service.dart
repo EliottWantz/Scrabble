@@ -284,6 +284,9 @@ class WebsocketService extends GetxService {
     if (chatMessageResponse.payload!.roomId == roomService.currentRoomId) {
       roomService.currentRoomMessages!.add(chatMessageResponse.payload!);
     }
+    if (chatMessageResponse.payload!.roomId == roomService.currentFloatingChatRoomId.value) {
+      roomService.currentFloatingRoomMessages!.add(chatMessageResponse.payload!);
+    }
   }
 
   void handleServerEventJoinableGames(JoinableGamesResponse joinableGamesResponse) {

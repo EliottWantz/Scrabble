@@ -22,6 +22,11 @@ class ChatController extends GetxController {
     messageController.text = '';
   }
 
+  void sendMessageToCurrentFloatingChatRoom() {
+    websocketService.sendMessage(roomService.currentFloatingChatRoomId.value!, messageController.text);
+    messageController.text = '';
+  }
+
   void sendMessageToGameRoom() {
     websocketService.sendMessage(gameService.currentGameId, messageController.text);
     messageController.text = '';

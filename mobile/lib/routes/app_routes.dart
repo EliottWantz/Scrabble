@@ -9,4 +9,5 @@ abstract class Routes {
   static const LOBBY = '/lobby';
   static const GAME = '/game';
   static const PROFILE_EDIT = '/profile-edit';
+  static const CHAT = '/chat';
 }
