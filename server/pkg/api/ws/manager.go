@@ -557,12 +557,23 @@ func (m *Manager) ReplacePlayerWithBot(gID, pID string) error {
 }
 
 func (m *Manager) HandleGameOver(g *game.Game) error {
+	g.ScrabbleGame.Timer.Stop()
 	r, err := m.GetRoom(g.ID)
 	if err != nil {
 		return err
 	}
 
 	winnerID := g.ScrabbleGame.Winner().ID
+	g.Winner = winnerID
+
+	gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
+		Game: makeGamePayload(g),
+	})
+	if err != nil {
+		return err
+	}
+	r.Broadcast(gamePacket)
+
 	gameOverPacket, err := NewGameOverPacket(GameOverPayload{
 		WinnerID: winnerID,
 	})
@@ -571,7 +582,6 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 	}
 
 	r.Broadcast(gameOverPacket)
-	g.ScrabbleGame.Timer.Stop()
 
 	for _, p := range g.ScrabbleGame.Players {
 		u, err := m.UserSvc.GetUser(p.ID)
@@ -580,6 +590,37 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 		}
 		m.UserSvc.AddGameStats(u, time.Now().UnixMilli(), winnerID == p.ID)
 		m.UserSvc.UpdateUserStats(u, winnerID == p.ID, p.Score, time.Now().UnixMilli())
+	}
+
+	if g.IsTournamentGame() {
+		t, err := m.GameSvc.UpdateTournamentGameOver(g.ID)
+		if err != nil {
+			return err
+		}
+
+		r, err := m.GetRoom(t.ID)
+		if err != nil {
+			return err
+		}
+		{
+			p, err := NewTournamentUpdatePacket(TournamentUpdatePayload{
+				Tournament: makeTournamentPayload(t),
+			})
+			if err != nil {
+				return err
+			}
+			r.Broadcast(p)
+		}
+		if t.IsOver {
+			p, err := NewTournamentOverPacket(TournamentOverPayload{
+				TournamentID: t.ID,
+				WinnerID:     t.WinnerID,
+			})
+			if err != nil {
+				return err
+			}
+			r.Broadcast(p)
+		}
 	}
 
 	return nil

@@ -379,6 +379,81 @@ func NewUserLeftTournamentPacket(payload UserLeftTournamentPayload) (*Packet, er
 	return NewPacket(ServerEventUserLeftTournament, payload)
 }
 
+type TournamentPayload struct {
+	ID         string                `json:"id"`
+	CreatorID  string                `json:"creatorId"`
+	UserIDs    []string              `json:"userIds"`
+	Rounds     map[int]*RoundPayload `json:"rounds"`
+	HasStarted bool                  `json:"hasStarted"`
+	IsOver     bool                  `json:"isOver"`
+	WinnerID   string                `json:"winnerId"`
+}
+
+func makeTournamentPayload(t *game.Tournament) *TournamentPayload {
+	rounds := make(map[int]*RoundPayload, 0)
+	for _, r := range t.Rounds {
+		brackets := make(map[int]*BracketPayload, 0)
+		for _, b := range r.Brackets {
+			games := make(map[string]*GamePayload, 0)
+			for _, g := range b.Games {
+				games[g.ID] = makeGamePayload(g)
+			}
+			brackets[b.BracketNumber] = &BracketPayload{
+				BracketNumber: b.BracketNumber,
+				UserIDs:       b.UserIDs,
+				Games:         games,
+				WinnersIDs:    b.WinnersIDs,
+			}
+		}
+		rounds[r.RoundNumber] = &RoundPayload{
+			RoundNumber: r.RoundNumber,
+			UserIDs:     r.UserIDs,
+			Brackets:    brackets,
+			HasStarted:  r.HasStarted,
+		}
+	}
+	return &TournamentPayload{
+		ID:         t.ID,
+		CreatorID:  t.CreatorID,
+		UserIDs:    t.UserIDs,
+		Rounds:     rounds,
+		HasStarted: t.HasStarted,
+		IsOver:     t.IsOver,
+		WinnerID:   t.WinnerID,
+	}
+}
+
+type RoundPayload struct {
+	RoundNumber int                     `json:"roundNumber"`
+	UserIDs     []string                `json:"userIds"`
+	Brackets    map[int]*BracketPayload `json:"brackets"`
+	HasStarted  bool                    `json:"hasStarted"`
+}
+
+type BracketPayload struct {
+	BracketNumber int                     `json:"bracketNumber"`
+	UserIDs       []string                `json:"userIds"`
+	Games         map[string]*GamePayload `json:"games"`
+	WinnersIDs    []string                `json:"winnersIds"`
+}
+
+type TournamentUpdatePayload struct {
+	Tournament *TournamentPayload `json:"tournament"`
+}
+
+func NewTournamentUpdatePacket(payload TournamentUpdatePayload) (*Packet, error) {
+	return NewPacket(ServerEventTournamentUpdate, payload)
+}
+
+type TournamentOverPayload struct {
+	TournamentID string `json:"tournamentId"`
+	WinnerID     string `json:"winnerId"`
+}
+
+func NewTournamentOverPacket(payload TournamentOverPayload) (*Packet, error) {
+	return NewPacket(ServerEventTournamentOver, payload)
+}
+
 func NewErrorPacket(err error) (*Packet, error) {
 	type ErrorPayload struct {
 		Error string `json:"error"`

@@ -56,6 +56,8 @@ var (
 	ServerEventLeftTournament       = "leftTournament"
 	ServerEventUserJoinedTournament = "userJoinedTournament"
 	ServerEventUserLeftTournament   = "userLeftTournament"
+	ServerEventTournamentUpdate     = "tournamentUpdate"
+	ServerEventTournamentOver       = "tournamentOver"
 
 	ServerEventError = "error"
 )

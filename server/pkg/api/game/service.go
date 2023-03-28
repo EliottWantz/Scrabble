@@ -3,6 +3,7 @@ package game
 import (
 	"errors"
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 	"time"
@@ -474,8 +475,62 @@ func (s *Service) StartTournament(t *Tournament) error {
 		}
 	}
 	t.HasStarted = true
+	t.Rounds[1].HasStarted = true
 
 	return nil
+}
+
+func (s *Service) UpdateTournamentGameOver(gID string) (*Tournament, error) {
+	g, err := s.Repo.FindGame(gID)
+	if err != nil {
+		return nil, err
+	}
+
+	if !g.IsTournamentGame() {
+		return nil, errors.New("not a tournament game")
+	}
+
+	t, err := s.Repo.FindTournament(g.TournamentGameInfo.TournamentID)
+	if err != nil {
+		return nil, err
+	}
+
+	currentRound := t.Rounds[g.TournamentGameInfo.RoundNumber]
+	currentBracket := currentRound.Brackets[g.TournamentGameInfo.BracketNumber]
+	currentBracket.WinnersIDs = append(currentBracket.WinnersIDs, g.ScrabbleGame.Winner().ID)
+
+	if len(currentBracket.WinnersIDs) == 2 {
+		nextRound, ok := t.Rounds[currentRound.RoundNumber+1]
+		if !ok {
+			// It was the finale
+			t.IsOver = true
+			return t, nil
+		}
+		// Start next round with both winners
+		nextRound.HasStarted = true
+		nextRound.UserIDs = currentBracket.WinnersIDs
+
+		nextBracketNum := int(math.Round(float64(currentBracket.BracketNumber) / 2))
+		nextBracket := nextRound.Brackets[nextBracketNum]
+
+		// Create new game with both winners
+		game := &Game{
+			ID: uuid.NewString(),
+			TournamentGameInfo: &TournamentGameInfo{
+				TournamentID:  t.ID,
+				RoundNumber:   nextRound.RoundNumber,
+				BracketNumber: nextBracket.BracketNumber,
+			},
+			UserIDs: currentBracket.WinnersIDs,
+		}
+		if err := s.Repo.InsertGame(game); err != nil {
+			return nil, err // Should never happen
+		}
+
+		nextBracket.Games[game.ID] = game
+	}
+
+	return t, nil
 }
 
 func parsePoint(str string) (scrabble.Position, error) {
