@@ -32,6 +32,14 @@ export class MouseService {
         }
     }
 
+    place_drag_drop(element: HTMLElement, row: number, col: number, tile: Tile): void {
+        let elem = document.querySelector(`[data-x="${row}"][data-y="${col}"]`);
+        if(elem){
+            elem.appendChild(element);
+            this.moveService.placedTiles.push({...tile, x: row, y: col});
+        }
+    }
+
     select(tile: Tile): void {
         this.moveService.selectedTiles.push(tile);
         console.log(this.moveService.selectedTiles);

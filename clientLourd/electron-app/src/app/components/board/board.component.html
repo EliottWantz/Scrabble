@@ -10,6 +10,8 @@
                     [class.letter3]="col.letterMultiplier === 3"
                     id="square"
                     (click)="clicked(i, j)"
+                    [attr.data-x]="i"
+                    [attr.data-y]="j"
                     #elem
                     squareHost
                 >
