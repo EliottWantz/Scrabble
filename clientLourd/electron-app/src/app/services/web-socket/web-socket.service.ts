@@ -71,6 +71,19 @@ export class WebSocketService {
       };
     }
   }
+  async connectWithUser(user: User): Promise<void> {
+    console.log('user', user);
+    if (user) {
+      this.socket = new WebSocket(
+        `${environment.wsUrl}/?id=${user.id}&username=${user.username}`
+      );
+      this.socket.onopen = () => {
+        this.socket.onmessage = (e) => {
+          this.handleSocket(e);
+        };
+      };
+    }
+  }
 
   disconnect(): void {
     this.socket.close();

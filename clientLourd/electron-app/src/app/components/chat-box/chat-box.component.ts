@@ -95,10 +95,12 @@ export class ChatBoxComponent implements AfterViewInit {
         async (event: any, data: { user: User }) => {
           this.userService.setUser(data.user);
           this.user = data.user;
+          if (this.user.id !== '0') {
+            await this.socketService.connectWithUser(this.user);
+          }
           console.log('user-data', data.user);
         }
       );
-      await this.socketService.connect();
     }
   }
 
