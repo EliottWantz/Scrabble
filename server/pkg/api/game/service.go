@@ -457,42 +457,98 @@ func (s *Service) NewTournament(creatorID string, withUserIDs []string) (*Tourna
 }
 
 func (s *Service) StartTournament(t *Tournament) error {
-	if err := t.Setup(s); err != nil {
-		return err
+	numPlayers := len(t.UserIDs)
+	var numRounds int
+	switch numPlayers {
+	case 4:
+		numRounds = 2
+	case 8:
+		numRounds = 3
+	case 16:
+		numRounds = 4
 	}
 
-	for _, b := range t.Rounds[1].Brackets {
-		for _, g := range b.Games {
-			g.ScrabbleGame = scrabble.NewGame(s.DAWG, &scrabble.HighScore{})
-			for _, uID := range g.UserIDs {
-				u, err := s.UserSvc.GetUser(uID)
-				if err != nil {
-					return err
-				}
-				g.ScrabbleGame.AddPlayer(scrabble.NewPlayer(u.ID, u.Username, g.ScrabbleGame.Bag))
-			}
-			g.ScrabbleGame.Turn = g.ScrabbleGame.PlayerToMove().ID
+	gameCounter := 1
+	for roundNumber := 1; roundNumber <= numRounds; roundNumber++ {
+		round := &Round{
+			RoundNumber: roundNumber,
+			Brackets:    make(map[int]*Bracket, 0),
+			UserIDs:     make([]string, 0),
 		}
+		if roundNumber == 1 {
+			round.UserIDs = t.UserIDs
+		}
+
+		numGames := numPlayers / (1 << uint(roundNumber))
+		numBrackets := numGames / 2
+		gamesPerBracket := 2
+		if numBrackets == 0 {
+			gamesPerBracket = 1
+			numBrackets = 1
+		}
+
+		for bracketNumber := 1; bracketNumber <= numBrackets; bracketNumber++ {
+			bracket := &Bracket{
+				BracketNumber: bracketNumber,
+				UserIDs:       make([]string, 0),
+				Games:         make(map[string]*Game),
+				WinnersIDs:    make([]string, 0, 2),
+			}
+			for len(bracket.Games) < gamesPerBracket {
+				g := &Game{
+					ID: uuid.NewString(),
+					TournamentGameInfo: &TournamentGameInfo{
+						TournamentID:  t.ID,
+						RoundNumber:   roundNumber,
+						BracketNumber: bracketNumber,
+					},
+				}
+				if roundNumber == 1 {
+					g.UserIDs = []string{
+						t.UserIDs[gameCounter-1],
+						t.UserIDs[numGames*2-gameCounter],
+					}
+					g.ScrabbleGame = scrabble.NewGame(s.DAWG, &scrabble.HighScore{})
+					for _, uID := range g.UserIDs {
+						u, err := s.UserSvc.GetUser(uID)
+						if err != nil {
+							return err
+						}
+						g.ScrabbleGame.AddPlayer(scrabble.NewPlayer(u.ID, u.Username, g.ScrabbleGame.Bag))
+					}
+					g.ScrabbleGame.Turn = g.ScrabbleGame.PlayerToMove().ID
+				}
+				if err := s.Repo.InsertGame(g); err != nil {
+					return err // Should never happen
+				}
+
+				bracket.Games[g.ID] = g
+				gameCounter++
+			}
+			round.Brackets[bracketNumber] = bracket
+		}
+		t.Rounds[roundNumber] = round
 	}
+
 	t.HasStarted = true
 	t.Rounds[1].HasStarted = true
 
 	return nil
 }
 
-func (s *Service) UpdateTournamentGameOver(gID string) (*Tournament, error) {
+func (s *Service) UpdateTournamentGameOver(gID string) (*Tournament, *Game, error) {
 	g, err := s.Repo.FindGame(gID)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	if !g.IsTournamentGame() {
-		return nil, errors.New("not a tournament game")
+		return nil, nil, errors.New("not a tournament game")
 	}
 
 	t, err := s.Repo.FindTournament(g.TournamentGameInfo.TournamentID)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	currentRound := t.Rounds[g.TournamentGameInfo.RoundNumber]
@@ -504,7 +560,7 @@ func (s *Service) UpdateTournamentGameOver(gID string) (*Tournament, error) {
 		if !ok {
 			// It was the finale
 			t.IsOver = true
-			return t, nil
+			return t, nil, nil
 		}
 		// Start next round with both winners
 		nextRound.HasStarted = true
@@ -513,8 +569,8 @@ func (s *Service) UpdateTournamentGameOver(gID string) (*Tournament, error) {
 		nextBracketNum := int(math.Round(float64(currentBracket.BracketNumber) / 2))
 		nextBracket := nextRound.Brackets[nextBracketNum]
 
-		// Create new game with both winners
-		game := &Game{
+		// Create new nextGame with both winners
+		nextGame := &Game{
 			ID: uuid.NewString(),
 			TournamentGameInfo: &TournamentGameInfo{
 				TournamentID:  t.ID,
@@ -523,14 +579,14 @@ func (s *Service) UpdateTournamentGameOver(gID string) (*Tournament, error) {
 			},
 			UserIDs: currentBracket.WinnersIDs,
 		}
-		if err := s.Repo.InsertGame(game); err != nil {
-			return nil, err // Should never happen
+		if err := s.Repo.InsertGame(nextGame); err != nil {
+			return nil, nextGame, err // Should never happen
 		}
 
-		nextBracket.Games[game.ID] = game
+		nextBracket.Games[nextGame.ID] = nextGame
 	}
 
-	return t, nil
+	return t, nil, nil
 }
 
 func parsePoint(str string) (scrabble.Position, error) {

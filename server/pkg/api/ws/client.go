@@ -137,8 +137,8 @@ func (c *Client) handlePacket(p *Packet) error {
 		return c.HandleJoinTournamentRequest(p)
 	case ClientEventLeaveTournament:
 		return c.HandleLeaveTournamentRequest(p)
-		// case ClientEventStartTournament:
-		// return c.HandleStartTournamentRequest(p)
+	case ClientEventStartTournament:
+		return c.HandleStartTournamentRequest(p)
 	}
 
 	return nil
