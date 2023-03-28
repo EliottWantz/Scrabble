@@ -4,7 +4,7 @@ import {
   ElementRef,
   OnInit,
   ViewChild,
-} from "@angular/core";
+} from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -12,27 +12,27 @@ import {
   FormGroup,
   NgForm,
   Validators,
-} from "@angular/forms";
+} from '@angular/forms';
 //import { MessageErrorStateMatcher } from "@app/classes/form-error/error-state-form";
-import { ChatService } from "@app/services/chat/chat.service";
-import { BehaviorSubject } from "rxjs";
-import { User } from "@app/utils/interfaces/user";
-import { RoomService } from "@app/services/room/room.service";
-import { Room } from "@app/utils/interfaces/room";
-import { UserService } from "@app/services/user/user.service";
-import { StorageService } from "@app/services/storage/storage.service";
-import { WebSocketService } from "@app/services/web-socket/web-socket.service";
-import { ClientEvent } from "@app/utils/events/client-events";
-import { LeaveRoomPayload } from "@app/utils/interfaces/packet";
-import { MatSelectChange } from "@angular/material/select";
+import { ChatService } from '@app/services/chat/chat.service';
+import { BehaviorSubject } from 'rxjs';
+import { User } from '@app/utils/interfaces/user';
+import { RoomService } from '@app/services/room/room.service';
+import { Room } from '@app/utils/interfaces/room';
+import { UserService } from '@app/services/user/user.service';
+import { StorageService } from '@app/services/storage/storage.service';
+import { WebSocketService } from '@app/services/web-socket/web-socket.service';
+import { ClientEvent } from '@app/utils/events/client-events';
+import { LeaveRoomPayload } from '@app/utils/interfaces/packet';
+import { MatSelectChange } from '@angular/material/select';
 
 @Component({
-  selector: "app-chat-box",
-  templateUrl: "./chat-box.component.html",
-  styleUrls: ["./chat-box.component.scss"],
+  selector: 'app-chat-box',
+  templateUrl: './chat-box.component.html',
+  styleUrls: ['./chat-box.component.scss'],
 })
 export class ChatBoxComponent implements AfterViewInit {
-  @ViewChild("chatBoxMessages")
+  @ViewChild('chatBoxMessages')
   chatBoxMessagesContainer!: ElementRef;
   // @ViewChild("chatBoxMessages")
   // chatBoxMessagesContainer: CdkVirtualScrollViewport;
@@ -42,16 +42,16 @@ export class ChatBoxComponent implements AfterViewInit {
   room$!: BehaviorSubject<Room>;
   //messageValidator: MessageErrorStateMatcher = new MessageErrorStateMatcher;
   ws!: WebSocket;
-  @ViewChild("chatBoxInput")
+  @ViewChild('chatBoxInput')
   chatBoxInput!: ElementRef;
   user!: User;
-  currentRoomId = "";
-  message = "";
+  currentRoomId = '';
+  message = '';
   roomsFormControl = new FormControl();
 
   constructor(
     private fb: FormBuilder,
-    private chatService: ChatService,
+    public chatService: ChatService,
     private roomService: RoomService,
     private userService: UserService,
     private storageService: StorageService,
@@ -78,10 +78,9 @@ export class ChatBoxComponent implements AfterViewInit {
       // })
       this.chatBoxMessagesContainer.nativeElement.scrollTop =
         this.chatBoxMessagesContainer.nativeElement.scrollHeight;
-        this.chatBoxMessagesContainer.nativeElement.scrollTop;
-        this.chatBoxMessagesContainer.nativeElement.scrollHeight;
+      this.chatBoxMessagesContainer.nativeElement.scrollTop;
+      this.chatBoxMessagesContainer.nativeElement.scrollHeight;
 
-        
       // this.scrollBottom();
       // this.messages$.subscribe(() => {
       //   this.scrollBottom();
@@ -91,12 +90,12 @@ export class ChatBoxComponent implements AfterViewInit {
 
   send(): void {
     console.log(this.currentRoomId);
-    console.log(document.getElementById("selectionElem"));
+    console.log(document.getElementById('selectionElem'));
     if (!this.message || !this.message.replace(/\s/g, '')) return;
 
     this.chatService.send(this.message, this.roomService.currentRoomChat.value);
     //this.chatBoxForm.get('message')?.reset();
-    this.message = "";
+    this.message = '';
     //this.chatBoxInput.nativeElement.focus();
     //console.log(this.messages$);
   }
@@ -110,12 +109,13 @@ export class ChatBoxComponent implements AfterViewInit {
     //   this.chatBoxMessagesContainer.nativeElement.scrollTop +
     //     this.chatBoxMessagesContainer.nativeElement.clientHeight !==
     //   this.chatBoxMessagesContainer.nativeElement.scrollHeight;
-    
+
     // console.log(shouldScroll);
-    this.chatBoxMessagesContainer.nativeElement.scrollTop
-    this.chatBoxMessagesContainer.nativeElement.scrollHeight
-    this.chatBoxMessagesContainer.nativeElement.clientHeight
-    this.chatBoxMessagesContainer.nativeElement.scrollTop + this.chatBoxMessagesContainer.nativeElement.clientHeight
+    this.chatBoxMessagesContainer.nativeElement.scrollTop;
+    this.chatBoxMessagesContainer.nativeElement.scrollHeight;
+    this.chatBoxMessagesContainer.nativeElement.clientHeight;
+    this.chatBoxMessagesContainer.nativeElement.scrollTop +
+      this.chatBoxMessagesContainer.nativeElement.clientHeight;
     // if (shouldScroll) {
     this.chatBoxMessagesContainer.nativeElement.scrollTop =
       this.chatBoxMessagesContainer.nativeElement.scrollHeight;
@@ -125,7 +125,7 @@ export class ChatBoxComponent implements AfterViewInit {
   getAvatarMessage(id: string): string {
     const avatar = this.storageService.getAvatar(id);
     if (avatar) return avatar;
-    return "";
+    return '';
   }
 
   getRooms(): Room[] {
@@ -133,11 +133,11 @@ export class ChatBoxComponent implements AfterViewInit {
   }
 
   getRoomName(id: string): string {
-    if (id == "global") return "Global Room";
+    if (id == 'global') return 'Global Room';
     for (const room of this.roomService.listChatRooms.value) {
       if (room.id === id) return room.name;
     }
-    return "";
+    return '';
   }
 
   changeRoom(event: MatSelectChange): void {
@@ -149,15 +149,24 @@ export class ChatBoxComponent implements AfterViewInit {
   leaveRoom(index: number): void {
     const roomClicked = this.roomService.listJoinedChatRooms.value[index];
     const payload: LeaveRoomPayload = {
-      roomId: roomClicked.id
-    }
+      roomId: roomClicked.id,
+    };
     let event: ClientEvent;
-    if (roomClicked.name.includes(`${this.userService.currentUserValue.username}/`) || roomClicked.name.includes(`/${this.userService.currentUserValue.username}`)) {
-      event = "leave-dm-room";
+    if (
+      roomClicked.name.includes(
+        `${this.userService.currentUserValue.username}/`
+      ) ||
+      roomClicked.name.includes(
+        `/${this.userService.currentUserValue.username}`
+      )
+    ) {
+      event = 'leave-dm-room';
     } else {
-      event = "leave-room";
+      event = 'leave-room';
     }
-    this.roomService.currentRoomChat.next(this.roomService.listJoinedChatRooms.value[0]);
+    this.roomService.currentRoomChat.next(
+      this.roomService.listJoinedChatRooms.value[0]
+    );
     console.log(this.roomService.currentRoomChat.value);
     this.socketService.send(event, payload);
     console.log(this.roomService.listJoinedChatRooms.value);
