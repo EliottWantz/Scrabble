@@ -25,6 +25,7 @@ export class ChatService {
 
   send(msg: string, room: Room): void {
     console.log(this.roomService.listJoinedChatRooms.value);
+    console.log('currr', this.userService.currentUserValue);
     if (
       this.userService.isLoggedIn &&
       this.roomService.findRoom(room.id) !== undefined
@@ -43,7 +44,8 @@ export class ChatService {
 
   openChat(): any {
     const text = 'Hello World';
-    electron.ipcRenderer.send('open-chat', text);
+    const user = this.userService.currentUserValue;
+    electron.ipcRenderer.send('open-chat', { text, user });
     electron.ipcRenderer.on('open-chat-reply', (event: any, arg: any) => {
       console.log(arg);
     });

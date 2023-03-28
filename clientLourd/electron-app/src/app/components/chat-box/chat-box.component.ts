@@ -25,6 +25,7 @@ import { WebSocketService } from '@app/services/web-socket/web-socket.service';
 import { ClientEvent } from '@app/utils/events/client-events';
 import { LeaveRoomPayload } from '@app/utils/interfaces/packet';
 import { MatSelectChange } from '@angular/material/select';
+const electron = (window as any).require('electron');
 
 @Component({
   selector: 'app-chat-box',
@@ -60,6 +61,7 @@ export class ChatBoxComponent implements AfterViewInit {
     this.room$ = this.roomService.currentRoomChat;
     this.currentRoomId = this.room$.value.id;
     this.user = this.userService.currentUserValue;
+
     this.room$.subscribe(() => {
       this.currentRoomId = this.room$.value.id;
       //console.log(this.chatBoxForm);
@@ -69,8 +71,7 @@ export class ChatBoxComponent implements AfterViewInit {
       input: ["", [Validators.required]],
     });*/
   }
-
-  ngAfterViewInit(): void {
+  async ngAfterViewInit(): Promise<void> {
     setTimeout(() => {
       this.chatBoxInput.nativeElement.focus();
       // this.messages$.subscribe(() => {
@@ -86,6 +87,19 @@ export class ChatBoxComponent implements AfterViewInit {
       //   this.scrollBottom();
       // });
     });
+    // });
+    if (this.user.id === '0') {
+      electron.ipcRenderer.send('request-user-data');
+      electron.ipcRenderer.on(
+        'user-data',
+        async (event: any, data: { user: User }) => {
+          this.userService.setUser(data.user);
+          this.user = data.user;
+          console.log('user-data', data.user);
+        }
+      );
+      await this.socketService.connect();
+    }
   }
 
   send(): void {
