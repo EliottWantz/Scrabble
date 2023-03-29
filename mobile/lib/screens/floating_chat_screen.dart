@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:get_storage/get_storage.dart';
 
 import '../controllers/chat_controller.dart';
 import '../services/room_service.dart';
@@ -33,11 +34,14 @@ class FloatingChatScreen extends GetView<ChatController> {
         Container(
           height: 100,
           width: double.infinity,
-          child: const DrawerHeader(
-            decoration: BoxDecoration(
+          child: DrawerHeader(
+            decoration: const BoxDecoration(
               color: Colors.blue,
             ),
-            child: Text('Drawer Header'),
+            child: TextButton(
+              onPressed: () => { _selectedChatRoom.value = !_selectedChatRoom.value},
+              child: const Text('Go back'),
+            ),
           ),
         ),
         Expanded(

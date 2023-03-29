@@ -330,7 +330,7 @@ class WebsocketService extends GetxService {
   }
 
   void handleIndiceResponse(IndiceResponse indiceResponse) {
-    gameService.indices.addAll(indiceResponse.moves);
+    gameService.indices.addAll(indiceResponse.payload);
   }
 
   void createRoom(String roomName, { List<String> userIds = const [] }) {

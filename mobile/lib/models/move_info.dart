@@ -8,11 +8,14 @@ class MoveInfo {
     required this.letters,
     required this.covers});
 
-  factory MoveInfo.fromJson(Map<String, dynamic> json) {
+  factory MoveInfo.fromJson(Map<dynamic, dynamic> json) {
     return MoveInfo(
         type: json["type"],
         letters: json["letters"],
-        covers: Map.from(json["covers"].map((key, value) => json[key][value]))
+        // covers: Map.from((json["covers"] as Map).map
+        //   ((key, value) => json["covers"][key][value])
+        // )
+        covers: Map.from(json["covers"] as Map)
     );
   }
 
