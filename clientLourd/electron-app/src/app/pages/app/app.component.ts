@@ -10,7 +10,7 @@ import {TranslateService} from "@ngx-translate/core";
 })
 export class AppComponent {
   title = 'electron-app';
-  isDarkMode: BehaviorSubject<boolean>;
+  theme: BehaviorSubject<string>;
   language: BehaviorSubject<string>;
 
   constructor(private renderer: Renderer2, private themeService: ThemeService, private translate: TranslateService) {
@@ -20,20 +20,20 @@ export class AppComponent {
     this.themeService.language.subscribe(() => {
       this.translate.use(this.language.value);
     });
-    this.isDarkMode = this.themeService.isDark;
-    this.isDarkMode.subscribe(() => {
+    this.theme = this.themeService.theme;
+    this.theme.subscribe(() => {
       this.renderPageBodyColor();
     })
   }
 
   @HostBinding('class')
   public get themeMode() {
-    return this.isDarkMode.value ? 'dark-theme' : 'light-theme';
+    return this.theme.value === "dark" ? 'dark-theme' : 'light-theme';
   }
 
   private renderPageBodyColor() {
     this.renderer.removeClass(document.body, 'dark');
     this.renderer.removeClass(document.body, 'light');
-    this.renderer.addClass(document.body, this.isDarkMode.value ? 'dark' : 'light');
+    this.renderer.addClass(document.body, this.theme.value === "dark" ? 'dark' : 'light');
   }
 }

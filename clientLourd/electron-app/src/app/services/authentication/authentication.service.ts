@@ -5,6 +5,7 @@ import { StorageService } from "../storage/storage.service";
 import { UserService } from "@app/services/user/user.service";
 import { WebSocketService } from "@app/services/web-socket/web-socket.service";
 import { BehaviorSubject } from "rxjs";
+import { ThemeService } from "@app/services/theme/theme.service";
 
 @Injectable({
     providedIn: 'root',
@@ -15,7 +16,8 @@ export class AuthenticationService {
     isLoginFailed = false;
     errorMessage = '';
     tempUserLogin: {username: string, password: string, email: string, avatar: BehaviorSubject<{url: string, fileId: string} | FormData>};
-    constructor(private commService: CommunicationService, private storageService: StorageService, private userService: UserService, private socketService: WebSocketService) {
+    constructor(private commService: CommunicationService, private storageService: StorageService, private userService: UserService, private socketService: WebSocketService,
+        private themeService: ThemeService) {
         this.tempUserLogin = {username: "", password: "", email: "", avatar: new BehaviorSubject<{url: string, fileId: string} | FormData>({url: "", fileId: ""})};
     }
 
@@ -51,7 +53,7 @@ export class AuthenticationService {
             username: res.user.username,
             email: res.user.email,
             avatar: res.user.avatar,
-            preferences: res.user.preferences,
+            preferences: {theme: this.themeService.theme.value, language: this.themeService.language.value},
             joinedChatRooms: res.user.joinedChatRooms,
             joinedDMRooms: res.user.joinedDMRooms,
             joinedGame: res.user.joinedGame,
