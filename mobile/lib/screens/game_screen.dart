@@ -141,8 +141,9 @@ class GameScreen extends GetView<GameController> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.all(Radius.circular(12)),
                         side: BorderSide(
-                          color:
-                              Get.isDarkMode ? Colors.greenAccent : Colors.black,
+                          color: Get.isDarkMode
+                              ? Colors.greenAccent
+                              : Colors.black,
                         ),
                       ),
                       elevation: 10,
@@ -157,16 +158,18 @@ class GameScreen extends GetView<GameController> {
                     ),
                     const Gap(100),
                     Obx(() => ElevatedButton.icon(
-                          onPressed: controller.isClientTurn() ? () {
-                            controller.getIndices();
-                            showDialog(
-                                context: context,
-                                builder: (BuildContext context) => AlertDialog(
-                                  title: const Text('Indices'),
-                                  content: _buildIndices(),
-                                )
-                            );
-                          } : null,
+                          onPressed: controller.isClientTurn()
+                              ? () {
+                                  controller.getIndices();
+                                  showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) =>
+                                          AlertDialog(
+                                            title: const Text('Indices'),
+                                            content: _buildIndices(),
+                                          ));
+                                }
+                              : null,
                           icon: const Icon(
                             Icons.lightbulb,
                             size: 30,
@@ -195,7 +198,8 @@ class GameScreen extends GetView<GameController> {
                               .rack
                               .tiles
                               .asMap()
-                              .map((idx, e) => MapEntry(idx, _buildEasel(e, idx)))
+                              .map((idx, e) =>
+                                  MapEntry(idx, _buildEasel(e, idx)))
                               .values
                               .toList()),
                     ),
@@ -264,6 +268,7 @@ class GameScreen extends GetView<GameController> {
       playerInfoPanels.add(PlayerInfo(
           playerName: player.username,
           isPlayerTurn: _gameService.isCurrentPlayer(player.id),
+          playerId: player.id,
           score: player.score,
           isBot: player.isBot));
       playerInfoPanels.add(const Gap(20));
@@ -280,12 +285,9 @@ class GameScreen extends GetView<GameController> {
           itemCount: _gameService.indices.length,
           itemBuilder: (context, item) {
             final index = item;
-            return _buildIndice(
-                _gameService.indices.value![index]
-            );
+            return _buildIndice(_gameService.indices.value![index]);
           },
-        )
-    );
+        ));
   }
 
   Widget _buildIndice(MoveInfo moveInfo) {
@@ -324,18 +326,15 @@ class GameScreen extends GetView<GameController> {
           ),
           Expanded(
               child: ListView.builder(
-                // padding: const EdgeInsets.all(16.0),
-                padding: EdgeInsets.zero,
-                itemCount: _roomService.getRooms().length,
-                itemBuilder: (context, item) {
-                  final index = item;
-                  return _buildChatRoomRow(
-                      _roomService.getRooms()[index].roomName,
-                      _roomService.getRooms()[index].roomId
-                  );
-                },
-              )
-          )
+            // padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.zero,
+            itemCount: _roomService.getRooms().length,
+            itemBuilder: (context, item) {
+              final index = item;
+              return _buildChatRoomRow(_roomService.getRooms()[index].roomName,
+                  _roomService.getRooms()[index].roomId);
+            },
+          ))
         ],
       );
     } else {

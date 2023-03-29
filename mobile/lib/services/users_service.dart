@@ -13,6 +13,15 @@ class UsersService extends GetxService {
   final ApiRepository apiRepository = Get.find();
   final UserService userService = Get.find();
 
+  User? getUserById(String userId) {
+    for (User user in users) {
+      if (user.id == userId) {
+        return user;
+      }
+    }
+    return null;
+  }
+
   String getUserId(String username) {
     for (User user in users) {
       if (user.username == username) {
@@ -33,18 +42,14 @@ class UsersService extends GetxService {
 
   Future<void> sendFriendRequest(String friendUsername) async {
     String friendId = getUserId(friendUsername);
-    final request = SendFriendRequest(
-      friendId: friendId
-    );
+    final request = SendFriendRequest(friendId: friendId);
     await apiRepository.sendFriendRequest(request);
     // if (res == null) return;
   }
 
   Future<bool?> acceptFriendRequest(String friendUsername) async {
     String friendId = getUserId(friendUsername);
-    final request = AcceptFriendRequest(
-        friendId: friendId
-    );
+    final request = AcceptFriendRequest(friendId: friendId);
     final res = await apiRepository.acceptFriendRequest(request);
     if (res == true) {
       return true;
@@ -54,9 +59,7 @@ class UsersService extends GetxService {
 
   Future<bool?> deleteFriendRequest(String friendUsername) async {
     String friendId = getUserId(friendUsername);
-    final request = DeleteFriendRequest(
-        friendId: friendId
-    );
+    final request = DeleteFriendRequest(friendId: friendId);
     final res = await apiRepository.deleteFriendRequest(request);
     if (res == true) {
       return true;
@@ -66,9 +69,7 @@ class UsersService extends GetxService {
 
   Future<bool?> deleteFriend(String friendUsername) async {
     String friendId = getUserId(friendUsername);
-    final request = DeleteFriendRequest(
-        friendId: friendId
-    );
+    final request = DeleteFriendRequest(friendId: friendId);
     final res = await apiRepository.deleteFriend(request);
     if (res == true) {
       return true;

@@ -1,16 +1,20 @@
+import 'package:client_leger/services/users_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class PlayerInfo extends StatelessWidget {
   final String playerName;
+  final String playerId;
   final bool isPlayerTurn;
   final int score;
   final bool isBot;
+  final UsersService usersService = Get.find();
 
   PlayerInfo(
       {Key? key,
       required this.playerName,
+      required this.playerId,
       required this.isPlayerTurn,
       required this.score,
       required this.isBot});
@@ -57,8 +61,9 @@ class PlayerInfo extends StatelessWidget {
                 ],
               )),
         ),
-        circularImageWithBorder(
-            'https://ucarecdn.com/add70d69-c5c0-46b3-9a36-10c62fb0bf61/'),
+        circularImageWithBorder(isBot
+            ? 'https://api.dicebear.com/6.x/bottts/png?seed=Felix&scale=70'
+            : usersService.getUserById(playerId)!.avatar.url),
       ],
     );
   }
