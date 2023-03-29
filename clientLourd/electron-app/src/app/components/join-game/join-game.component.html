@@ -15,7 +15,7 @@
         <mat-grid-tile [colspan]="4">
             <mat-divider></mat-divider>
         </mat-grid-tile>
-        <div *ngFor="let game of games.value; let i = index">
+        <div *ngFor="let game of gamesNotFull; let i = index">
             <mat-grid-tile [colspan]="1" [rowspan]="1">{{game.id}}</mat-grid-tile>
             <mat-grid-tile [colspan]="1" [rowspan]="1" class="user-ids">
                 <div *ngFor="let playerId of getUserNames(game.userIds); let last = last;">

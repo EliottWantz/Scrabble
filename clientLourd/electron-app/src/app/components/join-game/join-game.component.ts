@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { MatDialog, MatDialogConfig, MatDialogRef } from "@angular/material/dialog";
 import { GameService } from "@app/services/game/game.service";
 import { StorageService } from "@app/services/storage/storage.service";
@@ -14,10 +14,27 @@ import { JoinPrivateGameComponent } from "@app/components/join-private-game/join
     templateUrl: "./join-game.component.html",
     styleUrls: ["./join-game.component.scss"],
 })
-export class JoinGameComponent {
-    games: BehaviorSubject<Game[]>;
+export class JoinGameComponent implements OnInit {
+    gamesNotFull: Game[] = [];
     constructor(public dialogRef: MatDialogRef<JoinGameComponent>, public dialog: MatDialog, private gameService: GameService, private webSocketService: WebSocketService, private storageService: StorageService) {
-        this.games = this.gameService.joinableGames;
+        
+    }
+
+    ngOnInit(): void {
+        for (const game of this.gameService.joinableGames.value) {
+            if (game.userIds.length < 4) {
+                this.gamesNotFull.push(game);
+            }
+        }
+
+        this.gameService.joinableGames.subscribe(() => {
+            this.gamesNotFull = [];
+            for (const game of this.gameService.joinableGames.value) {
+                if (game.userIds.length < 4) {
+                    this.gamesNotFull.push(game);
+                }
+            }
+        });
     }
 
     getUserNames(ids: string[]): string[] {
