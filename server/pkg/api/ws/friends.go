@@ -2,8 +2,9 @@ package ws
 
 import (
 	"fmt"
-	"scrabble/pkg/api/user"
 	"strings"
+
+	"scrabble/pkg/api/user"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -139,7 +140,7 @@ func (m *Manager) RemoveFriendFromList(id string, friendId string) error {
 		return fiber.NewError(fiber.StatusBadRequest, "no user found")
 	}
 	for i, id := range friend.Friends {
-		if id == id {
+		if friendId == id {
 			friend.Friends = append(friend.Friends[:i], friend.Friends[i+1:]...)
 			m.UserSvc.Repo.Update(friend)
 		}
