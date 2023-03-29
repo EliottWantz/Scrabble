@@ -145,6 +145,7 @@ class GameScreen extends GetView<GameController> {
                               Get.isDarkMode ? Colors.greenAccent : Colors.black,
                         ),
                       ),
+                      elevation: 10,
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Text(
