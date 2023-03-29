@@ -53,10 +53,17 @@ export class RackComponent implements OnInit {
         console.log(event);
         console.log(event.dropPoint);
         console.log(document.elementFromPoint(event.dropPoint.x,event.dropPoint.y));
-        let x = Number(document.elementFromPoint(event.dropPoint.x, event.dropPoint.y)?.getAttribute("data-x"));
-        let y = Number(document.elementFromPoint(event.dropPoint.x, event.dropPoint.y)?.getAttribute("data-y"));
-        let elem = event.item.element.nativeElement;
-        let tile : Tile = {letter: Number(elem.getAttribute("data-letter")), value: Number(elem.getAttribute("data-value"))};
+        let bruh = document.elementFromPoint(event.dropPoint.x, event.dropPoint.y);
+        if (document.getElementById("board")?.contains(bruh) == false) {
+            return;
+        }
+        if (bruh && bruh?.tagName === "DIV") {
+            bruh = bruh.parentElement;
+        }
+        const x = Number(bruh?.getAttribute("data-x"));
+        const y = Number(bruh?.getAttribute("data-y"));
+        const elem = event.item.element.nativeElement;
+        const tile : Tile = {letter: Number(elem.getAttribute("data-letter")), value: Number(elem.getAttribute("data-value"))};
         console.log(tile);
         this.mouseService.place_drag_drop(elem, x, y, tile);
       }

@@ -33,8 +33,10 @@ export class MouseService {
     }
 
     place_drag_drop(element: HTMLElement, row: number, col: number, tile: Tile): void {
-        let elem = document.querySelector(`[data-x="${row}"][data-y="${col}"]`);
+        const elem = document.querySelector(`[data-x="${row}"][data-y="${col}"]`);
         if(elem){
+            if (elem.children.length == 1 && elem.children[0].tagName == "DIV")
+                elem.removeChild(elem.children[0]);
             elem.appendChild(element);
             this.moveService.placedTiles.push({...tile, x: row, y: col});
         }
