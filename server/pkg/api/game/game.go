@@ -20,3 +20,10 @@ type Game struct {
 func (g *Game) IsTournamentGame() bool {
 	return g.TournamentGameInfo != nil
 }
+
+func (g *Game) IsJoinable() bool {
+	if g.ScrabbleGame != nil {
+		return false
+	}
+	return len(g.UserIDs) < 4
+}

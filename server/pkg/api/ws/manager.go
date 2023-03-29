@@ -487,12 +487,19 @@ func (m *Manager) UpdateChatRooms() error {
 }
 
 func (m *Manager) UpdateJoinableGames() error {
-	joinableGames, err := m.GameSvc.Repo.FindAllGames()
+	games, err := m.GameSvc.Repo.FindAllGames()
 	if err != nil {
 		return err
 	}
+	joinable := make([]*game.Game, 0, len(games))
+	for _, g := range games {
+		if g.IsJoinable() {
+			joinable = append(joinable, g)
+		}
+	}
+
 	joinableGamesPacket, err := NewJoinableGamesPacket(ListJoinableGamesPayload{
-		Games: joinableGames,
+		Games: joinable,
 	})
 	if err != nil {
 		return err
