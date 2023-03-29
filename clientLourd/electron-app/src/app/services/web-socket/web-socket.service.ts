@@ -64,6 +64,7 @@ export class WebSocketService {
       this.socket = new WebSocket(
         `${environment.wsUrl}/?id=${this.user.value.id}&username=${this.user.value.username}`
       );
+
       this.socket.onopen = () => {
         this.socket.onmessage = (e) => {
           this.handleSocket(e);
@@ -77,6 +78,8 @@ export class WebSocketService {
       this.socket = new WebSocket(
         `${environment.wsUrl}/?id=${user.id}&username=${user.username}`
       );
+      console.log('user', user);
+      console.log('socket', this.socket);
       this.socket.onopen = () => {
         this.socket.onmessage = (e) => {
           this.handleSocket(e);
@@ -146,6 +149,7 @@ export class WebSocketService {
       }
 
       case 'joinedDMRoom': {
+        console.log('joinedDMRoom');
         const payloadRoom = packet.payload as JoinedDMRoomPayload;
         const userIds = [];
         for (const id of payloadRoom.userIds) {

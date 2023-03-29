@@ -26,6 +26,7 @@ export class ChatService {
   send(msg: string, room: Room): void {
     console.log(this.roomService.listJoinedChatRooms.value);
     console.log('currr', this.userService.currentUserValue);
+    console.log('room Services', this.roomService);
     if (
       this.userService.isLoggedIn &&
       this.roomService.findRoom(room.id) !== undefined

@@ -2,6 +2,7 @@ package ws
 
 import (
 	"errors"
+	"fmt"
 
 	"scrabble/pkg/api/game"
 
@@ -194,6 +195,8 @@ func (r *Room) BroadcastJoinDMRoomPackets(c *Client) error {
 		}
 		r.BroadcastSkipSelf(p, c.ID)
 	}
+
+	fmt.Printf("broadcast join dm room packets")
 
 	return nil
 }
