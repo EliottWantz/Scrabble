@@ -3,6 +3,7 @@ import 'package:client_leger/models/move_types.dart';
 import 'package:client_leger/models/square.dart';
 import 'package:client_leger/models/tile.dart';
 import 'package:client_leger/models/tile_info.dart';
+import 'package:client_leger/routes/app_routes.dart';
 import 'package:client_leger/services/game_service.dart';
 import 'package:client_leger/services/user_service.dart';
 import 'package:client_leger/services/websocket_service.dart';
@@ -21,11 +22,16 @@ class GameController extends GetxController {
   final UserService userService = Get.find();
 
   RxList<TileInfo> lettersPlaced = <TileInfo>[].obs;
-  RxList<String> lettersToExchange = <String>[].obs;
   RxBool placeIndiceIsCalled = false.obs;
+  RxMap<int, String> lettersToExchange = <int, String>{}.obs;
 
   bool isClientTurn() {
     return gameService.currentGame.value!.turn == userService.user.value!.id;
+  }
+
+  void onLeaveGame() {
+    websocketService.leaveGame(gameService.currentGameId);
+    Get.offAllNamed(Routes.HOME);
   }
 
   void exchangeLetters() {
@@ -39,13 +45,13 @@ class GameController extends GetxController {
 
     final moveInfo = MoveInfo(
       type: MoveTypeExchange,
-      letters: lettersToExchange.join(),
+      letters: lettersToExchange.values.toList().join(),
       covers: {'': ''},
     );
 
     websocketService.playMove(moveInfo);
     lettersPlaced.value = [];
-    lettersToExchange.value = [];
+    lettersToExchange.value = {};
   }
 
   void skipTurn() {
@@ -59,7 +65,7 @@ class GameController extends GetxController {
     );
     websocketService.playMove(moveInfo);
     lettersPlaced.value = [];
-    lettersToExchange.value = [];
+    lettersToExchange.value = {};
   }
 
   void placeLetters() {
@@ -77,25 +83,7 @@ class GameController extends GetxController {
 
     websocketService.playMove(moveInfo);
     lettersPlaced.value = [];
-    lettersToExchange.value = [];
-  }
-
-  void placeIndice(MoveInfo moveInfo) {
-    if (!isClientTurn()) {
-      return;
-    }
-
-    websocketService.playMove(moveInfo);
-    lettersPlaced.value = [];
-    lettersToExchange.value = [];
-  }
-
-  void getIndice() {
-    // if (!isClientTurn()) {
-    //   return;
-    // }
-
-    websocketService.getIndice();
+    lettersToExchange.value = {};
   }
 
   String generateLetters() {
@@ -106,7 +94,7 @@ class GameController extends GetxController {
   Map<String, String> generateCovers() {
     Map<String, String> covers = {};
     for (var tile in lettersPlaced) {
-      String mapKey = '${tile.position.row-1}/${tile.position.col-1}';
+      String mapKey = '${tile.position.row - 1}/${tile.position.col - 1}';
       String mapValue = String.fromCharCode(tile.tile.letter);
       covers[mapKey] = mapValue;
     }
@@ -118,64 +106,58 @@ class GameController extends GetxController {
     return tilesPlaced.contains(tile);
   }
 
-  Widget getEaselChildToDisplay(Tile tile) {
-    // if (!isClientTurn()) {
-    //   return SizedBox(
-    //       height: 70,
-    //       width: 70,
-    //       child: LetterTile(
-    //         tile: tile,
-    //       ));
-    // }
+  Widget getEaselChildToDisplay(Tile tile, int index) {
+    if (!isClientTurn()) {
+      return SizedBox(
+          height: 70,
+          width: 70,
+          child: LetterTile(
+            isEasel: true,
+            tile: tile,
+          ));
+    } else if (isTileInBoard(tile)) {
+      return SizedBox(
+          height: 70,
+          width: 70,
+          child: LetterTileDark(
+            tile: tile,
+          ));
+    }
     return DragTarget<Tile>(builder: (
       BuildContext context,
       List<dynamic> accepted,
       List<dynamic> rejected,
     ) {
-      return isTileInBoard(tile)
-          ? SizedBox(
+      return Draggable<Tile>(
+          data: tile,
+          feedback: SizedBox(
               height: 70,
               width: 70,
-              child: LetterTileDark(
+              child: LetterTile(
                 tile: tile,
-              ))
-          : Draggable<Tile>(
-              data: tile,
-              onDragCompleted: () {
-
+                isEasel: true,
+              )),
+          child: GestureDetector(
+              onTap: () {
+                if (!lettersToExchange.containsKey(index)) {
+                  lettersToExchange[index] = String.fromCharCode(tile.letter);
+                } else {
+                  lettersToExchange.remove(index);
+                }
               },
-              feedback: SizedBox(
-                  height: 70,
-                  width: 70,
-                  child: LetterTile(
-                    tile: tile,
-                  )),
-              onDragEnd: (details) {
-              },
-              child: GestureDetector(
-                  onTap: () {
-
-                    if (!lettersToExchange
-                        .contains(String.fromCharCode(tile.letter))) {
-                      lettersToExchange.add(String.fromCharCode(tile.letter));
-                    } else {
-                      lettersToExchange
-                          .remove(String.fromCharCode(tile.letter));
-                    }
-                  },
-                  child: Container(
-                    // decoration: lettersToExchange
-                    //         .contains(String.fromCharCode(tile.letter))
-                    //     ? BoxDecoration(
-                    //         border: Border.all(color: Colors.blueAccent))
-                    //     : null,
+              child: Obx(() => Container(
+                    decoration: lettersToExchange.containsKey(index)
+                        ? BoxDecoration(
+                            border: Border.all(color: Colors.blueAccent))
+                        : null,
                     child: SizedBox(
                         height: 70,
                         width: 70,
                         child: LetterTile(
                           tile: tile,
+                          isEasel: true,
                         )),
-                  )));
+                  ))));
     });
   }
 }

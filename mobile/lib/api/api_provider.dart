@@ -1,5 +1,6 @@
 import 'package:client_leger/models/requests/login_request.dart';
 import 'package:client_leger/models/requests/logout_request.dart';
+import 'package:client_leger/models/user.dart';
 import 'package:get/get.dart';
 import 'base_provider.dart';
 
@@ -14,6 +15,14 @@ class ApiProvider extends BaseProvider {
 
   Future<Response> upload(String path, FormData data) {
     return post(path, data);
+  }
+
+  Future<Response> user(String path) {
+    return get(path);
+  }
+
+  Future<Response> preferences(String path, Map<String, dynamic> data) {
+    return patch(path,data);
   }
 
   Future<Response> avatars(String path) {

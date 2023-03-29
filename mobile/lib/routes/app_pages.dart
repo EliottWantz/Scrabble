@@ -10,7 +10,6 @@ import 'package:client_leger/screens/auth/avatar_selection_screen.dart';
 import 'package:client_leger/screens/home/home_screen.dart';
 import 'package:client_leger/screens/auth/login_screen.dart';
 import 'package:client_leger/screens/auth/register_screen.dart';
-import 'package:client_leger/screens/home/profile_edit_screen.dart';
 import 'package:get/get.dart';
 import 'package:client_leger/bindings/chatbox_binding.dart';
 import '../screens/floating_chat_screen.dart';
@@ -52,7 +51,6 @@ class AppPages {
             ),
           ],
         ),
-        GetPage(name: Routes.PROFILE_EDIT, page: () => ProfieEditScreen())
       ],
     ),
     GetPage(name: Routes.GAME, page: () => GameScreen(), binding: GameBinding()),

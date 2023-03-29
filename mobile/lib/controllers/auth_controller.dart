@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:client_leger/models/avatar.dart';
 import 'package:client_leger/models/requests/login_request.dart';
 import 'package:client_leger/models/requests/register_request.dart';
 import 'package:client_leger/routes/app_routes.dart';
@@ -22,13 +23,6 @@ class AuthController extends GetxController {
       {required this.settingsService,
       required this.authService,
       required this.avatarService});
-
-  @override
-  void onInit() {
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
-        overlays: [SystemUiOverlay.bottom]);
-    super.onInit();
-  }
 
   // Register
   final GlobalKey<FormState> registerFormKey = GlobalKey<FormState>();
@@ -74,14 +68,14 @@ class AuthController extends GetxController {
     }
   }
 
-  Future<void> onRegister() async {
+  Future<void> onRegister({String? avatarCustomizedUrl}) async {
     final request = RegisterRequest(
         email: registerEmailController.text,
         username: registerUsernameController.text,
         password: registerPasswordController.text,
-        avatar: avatarService.isAvatar.value
+        avatar: (avatarService.isAvatar.value && avatarCustomizedUrl == null)
             ? avatarService.avatars[avatarService.currentAvatarIndex.value]
-            : null);
+            : Avatar(url: avatarCustomizedUrl!, fileId: ''));
     await DialogHelper.showLoading('Connexion au serveur');
     await authService.register(request,
         imagePath: avatarService.isAvatar.value == false

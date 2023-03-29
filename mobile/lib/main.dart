@@ -17,16 +17,21 @@ import 'package:client_leger/services/websocket_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:timezone/data/latest.dart' as tz;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initGlobalServices();
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
-      overlays: [SystemUiOverlay.bottom]);
+  tz.initializeTimeZones();
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.landscapeRight,
     DeviceOrientation.landscapeLeft,
   ]);
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+  await SystemChrome.setSystemUIChangeCallback(
+      (systemOverlaysAreVisible) async {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+  });
   runApp(MyApp());
 }
 
@@ -54,11 +59,11 @@ class MyApp extends StatelessWidget {
 Future<void> initGlobalServices() async {
   await Get.putAsync(() => StorageService().init());
   Get.put(UserService());
+  Get.put(ApiProvider(), permanent: true);
+  Get.put(ApiRepository(apiProvider: Get.find()), permanent: true);
   Get.put(GameService());
   Get.put(RoomService());
   Get.put(GameService());
-  Get.put(ApiProvider(), permanent: true);
-  Get.put(ApiRepository(apiProvider: Get.find()), permanent: true);
   Get.put(UsersService());
   Get.put(
       WebsocketService(
@@ -67,7 +72,7 @@ Future<void> initGlobalServices() async {
         roomService: Get.find(),
       ),
       permanent: false);
-  Get.put(SettingsService(storageService: Get.find()));
+  Get.put(SettingsService());
   Get.put(AvatarService());
   Get.put(AuthService(
       storageService: Get.find(),

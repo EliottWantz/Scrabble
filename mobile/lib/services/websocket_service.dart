@@ -430,6 +430,15 @@ class WebsocketService extends GetxService {
     socket.sink.add(startGameRequest.toRawJson());
   }
 
+  void leaveGame(String gameId) {
+    final leaveGamePayload = StartGamePayload(gameId: gameId);
+    final leaveGameRequest = StartGameRequest(
+        event: ClientEventLeaveGame,
+        payload: leaveGamePayload
+    );
+    socket.sink.add(leaveGameRequest.toRawJson());
+  }
+
   void playMove(MoveInfo moveInfo) {
     final playMovePayload = PlayMovePayload(
         gameId: gameService.currentGameId,

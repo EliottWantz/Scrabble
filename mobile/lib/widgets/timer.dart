@@ -1,10 +1,12 @@
+import 'dart:math';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class Timer extends StatelessWidget {
   Timer({Key? key, required this.time}) : super(key: key);
 
-  int time;
+  num time = 0;
   final size = 130.0;
 
   @override
@@ -20,11 +22,11 @@ class Timer extends StatelessWidget {
                 width: size,
                 height: size,
                 child: CircularProgressIndicator(
-                  value: 1 - time / 60,
+                  value: 1 - (time / pow(10, 9)) / 60,
                   strokeWidth: 8,
                   valueColor: const AlwaysStoppedAnimation(
-                      Color.fromARGB(255, 255, 255, 255)),
-                  backgroundColor: Color.fromARGB(255, 27, 53, 94),
+                      Colors.red),
+                  backgroundColor: const Color.fromARGB(255, 27, 53, 94),
                 )),
           ),
           Center(
@@ -36,12 +38,11 @@ class Timer extends StatelessWidget {
   }
 
   Widget _buildTimeText(BuildContext context) {
-    if (time.toString().length > 2) {
-      return Text(time.toString().substring(0, 2));
-    }
-    if (time.toString().length == 10) {
-      return Text(time.toString().substring(0));
-    }
-    return Text('00');
+    int sec = ((time / pow(10, 9)) % 60).toInt();
+    int min = ((time / pow(10, 9)) / 60).floor();
+    String minute = min.toString().length <= 1 ? "0$min" : "$min";
+    String second = sec.toString().length <= 1 ? "0$sec" : "$sec";
+    return Text('$minute : $second',
+        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20));
   }
 }

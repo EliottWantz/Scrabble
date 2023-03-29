@@ -46,6 +46,7 @@ class LoginScreen extends StatelessWidget {
                     children: [
                       Text(
                         'authLoginWelcome'.tr,
+                          style: Theme.of(context).textTheme.headline6
                       ),
                       const Gap(20.0),
                       InputField(
@@ -67,18 +68,14 @@ class LoginScreen extends StatelessWidget {
                         validator: ValidationBuilder(
                                 requiredMessage:
                                     'Le champ ne peut pas être vide')
-                            .regExp(
-                                RegExp(
-                                    r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{3,}$'),
-                                'Veuillez entrez un mot de passe valide')
                             .build(),
                       ),
                       const Gap(50.0),
-                      CustomButton(
-                        text: 'authLoginBtn'.tr,
+                      ElevatedButton.icon(
                         onPressed: () async {
                           await controller.onLogin(context);
-                        },
+                        }, icon: const Icon(Icons.login,size: 50,),
+                        label: Text('authLoginBtn'.tr),
                       ),
                       const Gap(50.0),
                     ],

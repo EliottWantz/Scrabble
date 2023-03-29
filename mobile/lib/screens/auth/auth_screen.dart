@@ -43,26 +43,24 @@ class AuthScreen extends GetView<AuthController> {
                       image: AssetImage('assets/images/scrabble.png'),
                     ),
                     const Gap(20.0),
-                    Text('authWelcome'.tr),
+                    Text('authWelcome'.tr,style: Theme.of(context).textTheme.headline6,),
                     const Gap(10.0),
-                    Text('authStart'.tr),
+                    Text('authStart'.tr,style: Theme.of(context).textTheme.headline6),
                     const Gap(50.0),
-                    CustomButton(
-                      text: 'authLoginBtn'.tr,
-                      width: Get.width / 3,
+                    ElevatedButton.icon(
                       onPressed: () {
                         Get.toNamed(Routes.AUTH + Routes.LOGIN,
                             arguments: controller);
-                      },
+                      }, icon: const Icon(Icons.login,size: 50,),
+                      label: Text('authLoginBtn'.tr),
                     ),
-                    const Gap(20.0),
-                    CustomButton(
-                      text: 'authRegisterBtn'.tr,
-                      width: Get.width / 3,
+                    const Gap(50.0),
+                    ElevatedButton.icon(
                       onPressed: () {
                         Get.toNamed(Routes.AUTH + Routes.REGISTER,
                             arguments: controller);
-                      },
+                      }, icon: const Icon(Icons.app_registration,size: 50,),
+                      label: Text('authRegisterBtn'.tr),
                     ),
                     const Gap(62.0),
                   ],

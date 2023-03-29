@@ -199,8 +199,3 @@ func (m *Manager) GetPendingFriendRequests(c *fiber.Ctx) error {
 		FriendRequests: friendRequests,
 	})
 }
-
-type PreferencesRequest struct {
-	Theme    string `json:"theme,omitempty"`
-	Language string `json:"language,omitempty"`
-}

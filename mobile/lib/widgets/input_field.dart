@@ -33,16 +33,9 @@ class InputField extends StatelessWidget {
         ),
         floatingLabelBehavior: FloatingLabelBehavior.always,
         labelText: labelText,
-        labelStyle: TextStyle(
-          fontSize: fontSize - 2,
-          height: 0.2,
-          fontWeight: FontWeight.normal,
-        ),
+        labelStyle: Theme.of(context).textTheme.headline6,
         hintText: placeholder,
-        hintStyle: TextStyle(
-          fontSize: fontSize,
-          fontWeight: FontWeight.normal,
-        ),
+        hintStyle: Theme.of(context).textTheme.bodyMedium,
         filled: true,
         isDense: true,
       ),

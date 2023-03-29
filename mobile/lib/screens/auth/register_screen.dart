@@ -47,6 +47,7 @@ class RegisterScreen extends StatelessWidget {
                     children: [
                       Text(
                         'authRegisterWelcome'.tr,
+                          style: Theme.of(context).textTheme.headline6
                       ),
                       const Gap(20.0),
                       InputField(
@@ -89,11 +90,11 @@ class RegisterScreen extends StatelessWidget {
                             .build(),
                       ),
                       const Gap(50.0),
-                      CustomButton(
-                        text: 'Choisir son Avatar',
+                      ElevatedButton.icon(
                         onPressed: () {
                           controller.onAvatarClick(context);
-                        },
+                        }, icon: const Icon(Icons.perm_identity_sharp,size: 50,),
+                        label: Text('Choisir son avatar'),
                       ),
                       const Gap(50.0),
                     ],

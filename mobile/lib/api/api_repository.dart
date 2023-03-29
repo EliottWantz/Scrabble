@@ -7,6 +7,7 @@ import 'package:client_leger/models/requests/login_request.dart';
 import 'package:client_leger/models/requests/register_request.dart';
 import 'package:client_leger/models/response/login_response.dart';
 import 'package:client_leger/models/response/register_response.dart';
+import 'package:client_leger/models/user.dart';
 import 'package:client_leger/services/storage_service.dart';
 import 'package:client_leger/services/user_service.dart';
 import 'package:get/get.dart';
@@ -20,7 +21,6 @@ class ApiRepository {
 
   final ApiProvider apiProvider;
   final UserService userService = Get.find();
-  final StorageService storageService = Get.find();
 
   Future<LoginResponse?> login(LoginRequest data) async {
     final res = await apiProvider.login('/login', data);
@@ -28,6 +28,20 @@ class ApiRepository {
       return LoginResponse.fromJson(res.body);
     }
     return null;
+  }
+
+  Future<User?> user() async {
+    final res = await apiProvider.user('/user/${userService.user.value!.id}');
+    if (res.statusCode == 200) {
+      return User.fromJson(res.body['user']);
+    }
+    return null;
+  }
+
+  Future<void> preferences() async {
+    await apiProvider.preferences('/user/${userService.user.value!.id}/config',
+        userService.user.value!.preferences.toJson());
+    return;
   }
 
   Future<RegisterResponse?> signup(RegisterRequest data,
