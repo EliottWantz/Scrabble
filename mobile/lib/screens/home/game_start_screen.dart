@@ -62,63 +62,62 @@ class GameStartScreen extends StatelessWidget {
                   Gap(Get.height / 8),
                   SizedBox(
                     width: 230,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: ElevatedButton.icon(
-                        onPressed: () {
-                          // _websocketService.createGameRoom();
-                          // Get.toNamed(
-                          //     Routes.HOME + Routes.GAME_START + Routes.LOBBY);
-                        },
-                        icon: const Icon(
-                          // <-- Icon
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        // _websocketService.createGameRoom();
+                        // Get.toNamed(
+                        //     Routes.HOME + Routes.GAME_START + Routes.LOBBY);
+                      },
+                      icon: const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Icon(
                           Icons.create,
                           size: 50,
                         ),
-                        label: Text(
-                            '${gameMode == 'tournoi' ? 'Créer un tournoi' : 'Créer une partie'}'), // <-- Text
                       ),
+                      label: Text(
+                          '${gameMode == 'tournoi' ? 'Créer un tournoi' : 'Créer une partie'}'), // <-- Text
                     ),
                   ),
                   const Gap(40),
                   SizedBox(
                     width: 230,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: ElevatedButton.icon(
-                        onPressed: () {
-                          _showJoinableGamesDialog(context);
-                        },
-                        icon: const Icon(
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        _showJoinableGamesDialog(context);
+                      },
+                      icon: const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Icon(
                           // <-- Icon
                           Icons.format_list_numbered_sharp,
                           size: 50,
                         ),
-                        label: Text(
-                            '${gameMode == 'tournoi' ? 'Rejoindre un tournoi' : 'Rejoindre une partie'}'), // <-- Text
                       ),
+                      label: Text(
+                          '${gameMode == 'tournoi' ? 'Rejoindre un tournoi' : 'Rejoindre une partie'}'), // <-- Text
                     ),
                   ),
                   const Gap(40),
                   gameMode != 'tournoi'
                       ? SizedBox(
                           width: 230,
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: ElevatedButton.icon(
-                              onPressed: () {
-                                // _websocketService.createGameRoom();
-                                // Get.toNamed(
-                                //     Routes.HOME + Routes.GAME_START + Routes.LOBBY);
-                              },
-                              icon: const Icon(
+                          child: ElevatedButton.icon(
+                            onPressed: () {
+                              // _websocketService.createGameRoom();
+                              // Get.toNamed(
+                              //     Routes.HOME + Routes.GAME_START + Routes.LOBBY);
+                            },
+                            icon: const Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Icon(
                                 // <-- Icon
                                 MdiIcons.eye,
                                 size: 50,
                               ),
-                              label:
-                                  const Text('Observer une partie'), // <-- Text
                             ),
+                            label:
+                                const Text('Observer une partie'), // <-- Text
                           ),
                         )
                       : const SizedBox(),
@@ -219,7 +218,7 @@ class GameStartScreen extends StatelessWidget {
           .toList();
     }
     return [
-      DataRow(cells: [DataCell(Text('')), DataCell(Text(''))])
+      const DataRow(cells: [DataCell(Text('')), DataCell(Text(''))])
     ];
   }
 

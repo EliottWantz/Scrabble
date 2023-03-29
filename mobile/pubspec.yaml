@@ -51,6 +51,7 @@ dependencies:
   im_stepper: ^1.0.1+1
   flutter_colorpicker: ^1.0.3
   material_design_icons_flutter: ^6.0.7096
+  timezone: ^0.9.1
 
 
 dev_dependencies:

@@ -1,5 +1,5 @@
 import 'dart:math';
-
+import 'package:timezone/timezone.dart' as tz;
 import 'package:client_leger/api/api_repository.dart';
 import 'package:client_leger/models/avatar.dart';
 import 'package:client_leger/models/user.dart';
@@ -17,6 +17,7 @@ class ProfileScreen extends StatelessWidget {
 
   final UserService userService = Get.find();
   final ApiRepository apiRepository = Get.find();
+  final montreal = tz.getLocation('America/Montreal');
 
   @override
   Widget build(BuildContext context) {
@@ -201,10 +202,12 @@ class ProfileScreen extends StatelessWidget {
           DataCell(Text(networkLogs.eventType.toLowerCase() == 'login'
               ? 'Connexion'
               : 'Déconnexion')),
-          DataCell(Text(DateFormat('yyyy-MM-dd').format(
-              DateTime.fromMillisecondsSinceEpoch(networkLogs.eventTime)))),
-          DataCell(Text(DateFormat('jms').format(
-              DateTime.fromMillisecondsSinceEpoch(networkLogs.eventTime)))),
+          DataCell(Text(DateFormat('yyyy-MM-dd').format(tz.TZDateTime.from(
+              DateTime.fromMillisecondsSinceEpoch(networkLogs.eventTime),
+              montreal)))),
+          DataCell(Text(DateFormat('jms').format(tz.TZDateTime.from(
+              DateTime.fromMillisecondsSinceEpoch(networkLogs.eventTime),
+              montreal)))),
         ]),
     ];
   }
@@ -254,10 +257,12 @@ class ProfileScreen extends StatelessWidget {
         DataRow(cells: [
           DataCell(Text(
               'Partie ${gameStats.gameWon != null ? 'gagnée' : 'perdue'}')),
-          DataCell(Text(DateFormat('yyyy-MM-dd').format(
-              DateTime.fromMillisecondsSinceEpoch(gameStats.eventDate)))),
-          DataCell(Text(DateFormat('jms').format(
-              DateTime.fromMillisecondsSinceEpoch(gameStats.eventDate)))),
+          DataCell(Text(DateFormat('yyyy-MM-dd').format(tz.TZDateTime.from(
+              DateTime.fromMillisecondsSinceEpoch(gameStats.eventDate),
+              montreal)))),
+          DataCell(Text(DateFormat('jms').format(tz.TZDateTime.from(
+              DateTime.fromMillisecondsSinceEpoch(gameStats.eventDate),
+              montreal)))),
         ]),
     ];
   }
