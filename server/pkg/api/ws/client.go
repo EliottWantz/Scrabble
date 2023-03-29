@@ -508,6 +508,7 @@ func (c *Client) HandleStartGameRequest(p *Packet) error {
 	}
 
 	r.Broadcast(gamePacket)
+	r.Manager.UpdateJoinableGames()
 
 	return nil
 }

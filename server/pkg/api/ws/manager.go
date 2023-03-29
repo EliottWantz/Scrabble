@@ -289,9 +289,6 @@ func (m *Manager) RemoveClientFromGame(c *Client, gID string) error {
 	if err := r.RemoveClient(c.ID); err != nil {
 		slog.Error("remove client from ws room", err)
 	}
-	if err := r.BroadcastLeaveGamePackets(c, g.ID); err != nil {
-		slog.Error("broadcast leave game packets", err)
-	}
 
 	if g.ScrabbleGame == nil {
 		// Game has not started yet
@@ -345,6 +342,11 @@ func (m *Manager) RemoveClientFromGame(c *Client, gID string) error {
 			slog.Error("remove user from game room", err)
 		}
 	}
+
+	if err := r.BroadcastLeaveGamePackets(c, g.ID); err != nil {
+		slog.Error("broadcast leave game packets", err)
+	}
+
 	return nil
 }
 
