@@ -52,6 +52,7 @@ class GameController extends GetxController {
     websocketService.playMove(moveInfo);
     lettersPlaced.value = [];
     lettersToExchange.value = {};
+    gameService.indices.value = [];
   }
 
   void skipTurn() {
@@ -66,6 +67,7 @@ class GameController extends GetxController {
     websocketService.playMove(moveInfo);
     lettersPlaced.value = [];
     lettersToExchange.value = {};
+    gameService.indices.value = [];
   }
 
   void placeLetters() {
@@ -84,6 +86,26 @@ class GameController extends GetxController {
     websocketService.playMove(moveInfo);
     lettersPlaced.value = [];
     lettersToExchange.value = {};
+    gameService.indices.value = [];
+  }
+
+  void placeIndice(MoveInfo moveInfo) {
+    if (!isClientTurn()) {
+      return;
+    }
+
+    websocketService.playMove(moveInfo);
+    lettersPlaced.value = [];
+    lettersToExchange.value = {};
+    gameService.indices.value = [];
+  }
+
+  void getIndices() {
+    if (!isClientTurn()) {
+      return;
+    }
+
+    websocketService.getIndices();
   }
 
   String generateLetters() {

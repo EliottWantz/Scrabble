@@ -451,7 +451,7 @@ class WebsocketService extends GetxService {
     socket.sink.add(playMoveRequest.toRawJson());
   }
 
-  void getIndice() {
+  void getIndices() {
     final indicePayload = IndicePayload(
       gameId: gameService.currentGameId
     );
