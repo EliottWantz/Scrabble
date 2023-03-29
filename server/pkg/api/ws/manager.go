@@ -627,7 +627,7 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 	}
 
 	if g.IsTournamentGame() {
-		t, nextGame, err := m.GameSvc.UpdateTournamentGameOver(g.ID)
+		t, err := m.GameSvc.UpdateTournamentGameOver(g.ID)
 		if err != nil {
 			return err
 		}
@@ -677,67 +677,68 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 				return err
 			}
 		} else {
-			if nextGame != nil {
-				// Join new game
-				nextGameRoom := m.AddRoom(nextGame.ID, "")
-				for _, playerID := range nextGame.UserIDs {
+			if t.Finale != nil {
+				// Join the finale
+				finaleRoom := m.AddRoom(t.Finale.ID, "")
+				for _, playerID := range t.Finale.UserIDs {
 					player, err := m.GetClient(playerID)
 					if err != nil {
 						slog.Error("get client", err)
 						continue
 					}
 
-					if err := nextGameRoom.AddClient(player.ID); err != nil {
+					if err := finaleRoom.AddClient(player.ID); err != nil {
 						slog.Error("add client to room", err)
 						continue
 					}
-					if err := m.UserSvc.Repo.SetJoinedGame(nextGame.ID, playerID); err != nil {
+					if err := m.UserSvc.Repo.SetJoinedGame(t.Finale.ID, playerID); err != nil {
 						slog.Error("set joined game", err)
 						continue
 					}
-					if err := nextGameRoom.BroadcastJoinGamePackets(player, nextGame); err != nil {
+					if err := finaleRoom.BroadcastJoinGamePackets(player, t.Finale); err != nil {
 						slog.Error("broadcast join game packets", err)
 						continue
 					}
 				}
 
 				// Start game timer
-				nextGame.ScrabbleGame.Timer.OnTick(func() {
+				t.Finale.ScrabbleGame.Timer.OnTick(func() {
 					timerPacket, err := NewTimerUpdatePacket(TimerUpdatePayload{
-						Timer: nextGame.ScrabbleGame.Timer.TimeRemaining(),
+						Timer: t.Finale.ScrabbleGame.Timer.TimeRemaining(),
 					})
 					if err != nil {
 						slog.Error("failed to create timer update packet:", err)
 						return
 					}
-					nextGameRoom.Broadcast(timerPacket)
+					finaleRoom.Broadcast(timerPacket)
 				})
-				nextGame.ScrabbleGame.Timer.OnDone(func() {
-					nextGame.ScrabbleGame.SkipTurn()
+				t.Finale.ScrabbleGame.Timer.OnDone(func() {
+					t.Finale.ScrabbleGame.SkipTurn()
 					GamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
-						Game: makeGamePayload(nextGame),
+						Game: makeGamePayload(t.Finale),
 					})
 					if err != nil {
 						slog.Error("failed to create Game update packet:", err)
 						return
 					}
-					nextGameRoom.Broadcast(GamePacket)
+					finaleRoom.Broadcast(GamePacket)
 
 					// Make bots move if applicable
-					go m.MakeBotMoves(nextGame.ID)
+					go m.MakeBotMoves(t.Finale.ID)
 				})
-				nextGame.ScrabbleGame.Timer.Start()
+				t.Finale.ScrabbleGame.Timer.Start()
 
 				gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
-					Game: makeGamePayload(nextGame),
+					Game: makeGamePayload(t.Finale),
 				})
 				if err != nil {
 					return err
 				}
 
-				nextGameRoom.Broadcast(gamePacket)
+				finaleRoom.Broadcast(gamePacket)
 			} else {
 				// We are wainting for next winner to finish his previous game
+				// make the winner an observer of the other game
 			}
 		}
 	}

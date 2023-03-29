@@ -3,7 +3,6 @@ package game
 import (
 	"errors"
 	"fmt"
-	"math"
 	"strconv"
 	"strings"
 	"time"
@@ -458,138 +457,76 @@ func (s *Service) NewTournament(creatorID string, withUserIDs []string) (*Tourna
 
 func (s *Service) StartTournament(t *Tournament) error {
 	numPlayers := len(t.UserIDs)
-	var numRounds int
-	switch numPlayers {
-	case 4:
-		numRounds = 2
-	case 8:
-		numRounds = 3
-	case 16:
-		numRounds = 4
+	if numPlayers != 4 {
+		return fmt.Errorf("expected 4 players for tournament, got %d", numPlayers)
 	}
-	if numRounds == 0 {
-		return errors.New("invalid number of players")
-	}
-	gameCounter := 1
-	for roundNumber := 1; roundNumber <= numRounds; roundNumber++ {
-		round := &Round{
-			RoundNumber: roundNumber,
-			Brackets:    make(map[int]*Bracket, 0),
-			UserIDs:     make([]string, 0),
-		}
-		if roundNumber == 1 {
-			round.UserIDs = t.UserIDs
-		}
 
-		numGames := numPlayers / (1 << uint(roundNumber))
-		numBrackets := numGames / 2
-		gamesPerBracket := 2
-		if numBrackets == 0 {
-			gamesPerBracket = 1
-			numBrackets = 1
+	numGames := 2
+	for i := 1; i <= numGames; i++ {
+		g := &Game{
+			ID: uuid.NewString(),
+			UserIDs: []string{
+				t.UserIDs[i-1],
+				t.UserIDs[numGames*2-i],
+			},
+			ScrabbleGame: scrabble.NewGame(s.DAWG, &scrabble.HighScore{}),
+			TournamentID: t.ID,
 		}
-
-		for bracketNumber := 1; bracketNumber <= numBrackets; bracketNumber++ {
-			bracket := &Bracket{
-				BracketNumber:  bracketNumber,
-				UserIDs:        make([]string, 0),
-				Games:          make(map[string]*Game, 0),
-				WinnersIDs:     make([]string, 0, 2),
-				NextBracketNum: int(math.Round(float64(bracketNumber) / 2)),
+		for _, uID := range g.UserIDs {
+			u, err := s.UserSvc.GetUser(uID)
+			if err != nil {
+				return err
 			}
-			if roundNumber == 1 {
-				for len(bracket.Games) < gamesPerBracket {
-					g := &Game{
-						ID: uuid.NewString(),
-						TournamentGameInfo: &TournamentGameInfo{
-							TournamentID:  t.ID,
-							RoundNumber:   roundNumber,
-							BracketNumber: bracketNumber,
-						},
-					}
-					g.UserIDs = []string{
-						t.UserIDs[gameCounter-1],
-						t.UserIDs[numGames*2-gameCounter],
-					}
-					bracket.UserIDs = append(bracket.UserIDs, g.UserIDs...)
-					g.ScrabbleGame = scrabble.NewGame(s.DAWG, &scrabble.HighScore{})
-					for _, uID := range g.UserIDs {
-						u, err := s.UserSvc.GetUser(uID)
-						if err != nil {
-							return err
-						}
-						g.ScrabbleGame.AddPlayer(scrabble.NewPlayer(u.ID, u.Username, g.ScrabbleGame.Bag))
-					}
-					g.ScrabbleGame.Turn = g.ScrabbleGame.PlayerToMove().ID
-					if err := s.Repo.InsertGame(g); err != nil {
-						return err // Should never happen
-					}
-
-					bracket.Games[g.ID] = g
-					gameCounter++
-				}
-			}
-			round.Brackets[bracketNumber] = bracket
+			g.ScrabbleGame.AddPlayer(scrabble.NewPlayer(u.ID, u.Username, g.ScrabbleGame.Bag))
 		}
-		t.Rounds[roundNumber] = round
+		g.ScrabbleGame.Turn = g.ScrabbleGame.PlayerToMove().ID
+		if err := s.Repo.InsertGame(g); err != nil {
+			return err // Should never happen
+		}
+		t.PoolGames = append(t.PoolGames, g)
 	}
 
 	t.HasStarted = true
-	t.Rounds[1].HasStarted = true
 
 	return nil
 }
 
-func (s *Service) UpdateTournamentGameOver(gID string) (*Tournament, *Game, error) {
+func (s *Service) UpdateTournamentGameOver(gID string) (*Tournament, error) {
 	g, err := s.Repo.FindGame(gID)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	if !g.IsTournamentGame() {
-		return nil, nil, errors.New("not a tournament game")
+		return nil, errors.New("not a tournament game")
 	}
 
-	t, err := s.Repo.FindTournament(g.TournamentGameInfo.TournamentID)
+	t, err := s.Repo.FindTournament(g.TournamentID)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	currentRound := t.Rounds[g.TournamentGameInfo.RoundNumber]
-	currentBracket := currentRound.Brackets[g.TournamentGameInfo.BracketNumber]
-	currentBracket.WinnersIDs = append(currentBracket.WinnersIDs, g.ScrabbleGame.Winner().ID)
-
-	if len(currentBracket.WinnersIDs) == 2 {
-		nextRound, ok := t.Rounds[currentRound.RoundNumber+1]
-		if !ok {
-			// It was the finale
-			t.IsOver = true
-			return t, nil, nil
-		}
-		// Start next round with both winners
-		nextRound.HasStarted = true
-		nextRound.UserIDs = currentBracket.WinnersIDs
-
-		nextBracket := nextRound.Brackets[currentBracket.NextBracketNum]
-
-		// Create new nextGame with both winners
-		nextGame := &Game{
-			ID: uuid.NewString(),
-			TournamentGameInfo: &TournamentGameInfo{
-				TournamentID:  t.ID,
-				RoundNumber:   nextRound.RoundNumber,
-				BracketNumber: nextBracket.BracketNumber,
-			},
-			UserIDs: currentBracket.WinnersIDs,
-		}
-		if err := s.Repo.InsertGame(nextGame); err != nil {
-			return nil, nil, err // Should never happen
-		}
-
-		nextBracket.Games[nextGame.ID] = nextGame
+	if t.Finale != nil && t.Finale.ID == gID {
+		// No more game to play
+		return t, nil
 	}
 
-	return t, nil, nil
+	poolGameWinners := t.PoolGamesWinners()
+	if len(poolGameWinners) == 2 {
+		// Create new finale with both winners
+		finale := &Game{
+			ID:           uuid.NewString(),
+			UserIDs:      poolGameWinners,
+			ScrabbleGame: scrabble.NewGame(s.DAWG, &scrabble.HighScore{}),
+			TournamentID: t.ID,
+		}
+		if err := s.Repo.InsertGame(finale); err != nil {
+			return nil, err // Should never happen
+		}
+		t.Finale = finale
+	}
+
+	return t, nil
 }
 
 func parsePoint(str string) (scrabble.Position, error) {

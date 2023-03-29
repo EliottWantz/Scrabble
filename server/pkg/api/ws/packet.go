@@ -387,64 +387,35 @@ func NewUserLeftTournamentPacket(payload UserLeftTournamentPayload) (*Packet, er
 }
 
 type TournamentPayload struct {
-	ID         string                `json:"id"`
-	CreatorID  string                `json:"creatorId"`
-	UserIDs    []string              `json:"userIds"`
-	Rounds     map[int]*RoundPayload `json:"rounds"`
-	HasStarted bool                  `json:"hasStarted"`
-	IsOver     bool                  `json:"isOver"`
-	WinnerID   string                `json:"winnerId"`
+	ID         string         `json:"id"`
+	CreatorID  string         `json:"creatorId"`
+	UserIDs    []string       `json:"userIds"`
+	PoolGames  []*GamePayload `json:"poolGames"`
+	Finale     *GamePayload   `json:"finale"`
+	HasStarted bool           `json:"hasStarted"`
+	IsOver     bool           `json:"isOver"`
+	WinnerID   string         `json:"winnerId"`
 }
 
 func makeTournamentPayload(t *game.Tournament) *TournamentPayload {
-	rounds := make(map[int]*RoundPayload, 0)
-	for _, r := range t.Rounds {
-		brackets := make(map[int]*BracketPayload, 0)
-		for _, b := range r.Brackets {
-			games := make(map[string]*GamePayload, 0)
-			for _, g := range b.Games {
-				if g.ScrabbleGame == nil {
-					continue
-				}
-				games[g.ID] = makeGamePayload(g)
-			}
-			brackets[b.BracketNumber] = &BracketPayload{
-				BracketNumber: b.BracketNumber,
-				UserIDs:       b.UserIDs,
-				Games:         games,
-				WinnersIDs:    b.WinnersIDs,
-			}
+	games := make([]*GamePayload, len(t.PoolGames))
+	for _, g := range t.PoolGames {
+		if g.ScrabbleGame == nil {
+			continue
 		}
-		rounds[r.RoundNumber] = &RoundPayload{
-			RoundNumber: r.RoundNumber,
-			UserIDs:     r.UserIDs,
-			Brackets:    brackets,
-			HasStarted:  r.HasStarted,
-		}
+		games = append(games, makeGamePayload(g))
 	}
+
 	return &TournamentPayload{
 		ID:         t.ID,
 		CreatorID:  t.CreatorID,
 		UserIDs:    t.UserIDs,
-		Rounds:     rounds,
+		PoolGames:  games,
+		Finale:     makeGamePayload(t.Finale),
 		HasStarted: t.HasStarted,
 		IsOver:     t.IsOver,
 		WinnerID:   t.WinnerID,
 	}
-}
-
-type RoundPayload struct {
-	RoundNumber int                     `json:"roundNumber"`
-	UserIDs     []string                `json:"userIds"`
-	Brackets    map[int]*BracketPayload `json:"brackets"`
-	HasStarted  bool                    `json:"hasStarted"`
-}
-
-type BracketPayload struct {
-	BracketNumber int                     `json:"bracketNumber"`
-	UserIDs       []string                `json:"userIds"`
-	Games         map[string]*GamePayload `json:"games"`
-	WinnersIDs    []string                `json:"winnersIds"`
 }
 
 type TournamentUpdatePayload struct {

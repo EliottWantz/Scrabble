@@ -742,72 +742,81 @@ func (c *Client) HandleStartTournamentRequest(p *Packet) error {
 		return err
 	}
 
-	for _, b := range t.Rounds[1].Brackets {
-		for _, ga := range b.Games {
-			go func(g *game.Game) {
-				slog.Info("bracket 1", "gameID", g.ID)
-				gameRoom := c.Manager.AddRoom(g.ID, "")
+	// Broadcast start tournament packets
+	tournamentPacket, err := NewTournamentUpdatePacket(TournamentUpdatePayload{
+		Tournament: makeTournamentPayload(t),
+	})
+	if err != nil {
+		return err
+	}
+	tournamentRoom, err := c.Manager.GetRoom(t.ID)
+	if err != nil {
+		return err
+	}
+	tournamentRoom.Broadcast(tournamentPacket)
 
-				for _, playerID := range g.UserIDs {
-					player, err := c.Manager.GetClient(playerID)
-					if err != nil {
-						slog.Error("get client", err)
-						continue
-					}
-
-					if err := gameRoom.AddClient(player.ID); err != nil {
-						slog.Error("add client to room", err)
-						continue
-					}
-					if err := c.Manager.UserSvc.Repo.SetJoinedGame(g.ID, playerID); err != nil {
-						slog.Error("set joined game", err)
-						continue
-					}
-					if err := gameRoom.BroadcastJoinGamePackets(player, g); err != nil {
-						slog.Error("broadcast join game packets", err)
-						continue
-					}
+	for _, ga := range t.PoolGames {
+		go func(g *game.Game) {
+			gameRoom := c.Manager.AddRoom(g.ID, "")
+			for _, playerID := range g.UserIDs {
+				player, err := c.Manager.GetClient(playerID)
+				if err != nil {
+					slog.Error("get client", err)
+					continue
 				}
 
-				// Start game timer
-				g.ScrabbleGame.Timer.OnTick(func() {
-					slog.Info("timer tick:", "gameID", g.ID, "timeRemaining", g.ScrabbleGame.Timer.TimeRemaining())
-					timerPacket, err := NewTimerUpdatePacket(TimerUpdatePayload{
-						Timer: g.ScrabbleGame.Timer.TimeRemaining(),
-					})
-					if err != nil {
-						slog.Error("failed to create timer update packet:", err)
-						return
-					}
-					gameRoom.Broadcast(timerPacket)
-				})
-				g.ScrabbleGame.Timer.OnDone(func() {
-					slog.Info("timer done:", "gameID", g.ID)
-					g.ScrabbleGame.SkipTurn()
-					gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
-						Game: makeGamePayload(g),
-					})
-					if err != nil {
-						slog.Error("failed to create Game update packet:", err)
-						return
-					}
-					gameRoom.Broadcast(gamePacket)
+				if err := gameRoom.AddClient(player.ID); err != nil {
+					slog.Error("add client to room", err)
+					continue
+				}
+				if err := c.Manager.UserSvc.Repo.SetJoinedGame(g.ID, playerID); err != nil {
+					slog.Error("set joined game", err)
+					continue
+				}
+				if err := gameRoom.BroadcastJoinGamePackets(player, g); err != nil {
+					slog.Error("broadcast join game packets", err)
+					continue
+				}
+			}
 
-					// Make bots move if applicable
-					go c.Manager.MakeBotMoves(g.ID)
+			// Start game timer
+			g.ScrabbleGame.Timer.OnTick(func() {
+				slog.Info("timer tick:", "gameID", g.ID, "timeRemaining", g.ScrabbleGame.Timer.TimeRemaining())
+				timerPacket, err := NewTimerUpdatePacket(TimerUpdatePayload{
+					Timer: g.ScrabbleGame.Timer.TimeRemaining(),
 				})
-
-				g.ScrabbleGame.Timer.Start()
+				if err != nil {
+					slog.Error("failed to create timer update packet:", err)
+					return
+				}
+				gameRoom.Broadcast(timerPacket)
+			})
+			g.ScrabbleGame.Timer.OnDone(func() {
+				slog.Info("timer done:", "gameID", g.ID)
+				g.ScrabbleGame.SkipTurn()
 				gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
 					Game: makeGamePayload(g),
 				})
 				if err != nil {
 					slog.Error("failed to create Game update packet:", err)
+					return
 				}
-
 				gameRoom.Broadcast(gamePacket)
-			}(ga)
-		}
+
+				// Make bots move if applicable
+				go c.Manager.MakeBotMoves(g.ID)
+			})
+
+			g.ScrabbleGame.Timer.Start()
+			gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
+				Game: makeGamePayload(g),
+			})
+			if err != nil {
+				slog.Error("failed to create Game update packet:", err)
+			}
+
+			gameRoom.Broadcast(gamePacket)
+		}(ga)
 	}
 
 	return nil

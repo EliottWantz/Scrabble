@@ -5,27 +5,27 @@ import (
 )
 
 type Game struct {
-	ID                 string              `json:"id"`
-	CreatorID          string              `json:"creatorId"`
-	UserIDs            []string            `json:"userIds"`
-	ObservateurIDs     []string            `json:"observateurIds"`
-	IsPrivateGame      bool                `json:"isPrivateGame"`
-	IsProtected        bool                `json:"isProtected"`
-	WinnerID           string              `json:"winnerId"`
-	HashedPassword     string              `json:"-"`
-	ScrabbleGame       *scrabble.Game      `json:"-"`
-	TournamentGameInfo *TournamentGameInfo `json:"tournamentGameInfo,omitempty"`
+	ID             string         `json:"id"`
+	CreatorID      string         `json:"creatorId"`
+	UserIDs        []string       `json:"userIds"`
+	ObservateurIDs []string       `json:"observateurIds"`
+	IsPrivateGame  bool           `json:"isPrivateGame"`
+	IsProtected    bool           `json:"isProtected"`
+	WinnerID       string         `json:"winnerId"`
+	HashedPassword string         `json:"-"`
+	ScrabbleGame   *scrabble.Game `json:"-"`
+	TournamentID   string         `json:"tournamentId"`
 }
 
 func (g *Game) IsTournamentGame() bool {
-	return g.TournamentGameInfo != nil
+	return g.TournamentID != ""
 }
 
 func (g *Game) IsJoinable() bool {
 	if g.ScrabbleGame != nil {
 		return false
 	}
-	if g.TournamentGameInfo != nil {
+	if g.TournamentID != "" {
 		return false
 	}
 	return len(g.UserIDs) < 4
