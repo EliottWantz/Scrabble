@@ -405,7 +405,7 @@ func (c *Client) HandleJoinAsObserverRequest(p *Packet) error {
 		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
 
-	if g.IsPrivateGame == true {
+	if g.IsPrivateGame {
 		return fiber.NewError(fiber.StatusUnauthorized, "game is private")
 	}
 
@@ -420,6 +420,9 @@ func (c *Client) HandleJoinAsObserverRequest(p *Packet) error {
 	gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
 		Game: makeGamePayload(g),
 	})
+	if err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
 	c.send(gamePacket)
 	return r.BroadcastObserverJoinGamePacket(c, g)
 }
@@ -728,65 +731,70 @@ func (c *Client) HandleStartTournamentRequest(p *Packet) error {
 	}
 
 	for _, b := range t.Rounds[1].Brackets {
-		for _, g := range b.Games {
-			gameRoom := c.Manager.AddRoom(g.ID, "")
+		for _, ga := range b.Games {
+			go func(g *game.Game) {
+				slog.Info("bracket 1", "gameID", g.ID)
+				gameRoom := c.Manager.AddRoom(g.ID, "")
 
-			for _, playerID := range g.UserIDs {
-				player, err := c.Manager.GetClient(playerID)
-				if err != nil {
-					slog.Error("get client", err)
-					continue
+				for _, playerID := range g.UserIDs {
+					player, err := c.Manager.GetClient(playerID)
+					if err != nil {
+						slog.Error("get client", err)
+						continue
+					}
+
+					if err := gameRoom.AddClient(player.ID); err != nil {
+						slog.Error("add client to room", err)
+						continue
+					}
+					if err := c.Manager.UserSvc.Repo.SetJoinedGame(g.ID, playerID); err != nil {
+						slog.Error("set joined game", err)
+						continue
+					}
+					if err := gameRoom.BroadcastJoinGamePackets(player, g); err != nil {
+						slog.Error("broadcast join game packets", err)
+						continue
+					}
 				}
 
-				if err := gameRoom.AddClient(player.ID); err != nil {
-					slog.Error("add client to room", err)
-					continue
-				}
-				if err := c.Manager.UserSvc.Repo.SetJoinedGame(g.ID, playerID); err != nil {
-					slog.Error("set joined game", err)
-					continue
-				}
-				if err := gameRoom.BroadcastJoinGamePackets(player, g); err != nil {
-					slog.Error("broadcast join game packets", err)
-					continue
-				}
-			}
-
-			// Start game timer
-			g.ScrabbleGame.Timer.OnTick(func() {
-				timerPacket, err := NewTimerUpdatePacket(TimerUpdatePayload{
-					Timer: g.ScrabbleGame.Timer.TimeRemaining(),
+				// Start game timer
+				g.ScrabbleGame.Timer.OnTick(func() {
+					slog.Info("timer tick:", "gameID", g.ID, "timeRemaining", g.ScrabbleGame.Timer.TimeRemaining())
+					timerPacket, err := NewTimerUpdatePacket(TimerUpdatePayload{
+						Timer: g.ScrabbleGame.Timer.TimeRemaining(),
+					})
+					if err != nil {
+						slog.Error("failed to create timer update packet:", err)
+						return
+					}
+					gameRoom.Broadcast(timerPacket)
 				})
-				if err != nil {
-					slog.Error("failed to create timer update packet:", err)
-					return
-				}
-				gameRoom.Broadcast(timerPacket)
-			})
-			g.ScrabbleGame.Timer.OnDone(func() {
-				g.ScrabbleGame.SkipTurn()
-				GamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
+				g.ScrabbleGame.Timer.OnDone(func() {
+					slog.Info("timer done:", "gameID", g.ID)
+					g.ScrabbleGame.SkipTurn()
+					gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
+						Game: makeGamePayload(g),
+					})
+					if err != nil {
+						slog.Error("failed to create Game update packet:", err)
+						return
+					}
+					gameRoom.Broadcast(gamePacket)
+
+					// Make bots move if applicable
+					go c.Manager.MakeBotMoves(g.ID)
+				})
+
+				g.ScrabbleGame.Timer.Start()
+				gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
 					Game: makeGamePayload(g),
 				})
 				if err != nil {
 					slog.Error("failed to create Game update packet:", err)
-					return
 				}
-				gameRoom.Broadcast(GamePacket)
 
-				// Make bots move if applicable
-				go c.Manager.MakeBotMoves(g.ID)
-			})
-			g.ScrabbleGame.Timer.Start()
-
-			gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
-				Game: makeGamePayload(g),
-			})
-			if err != nil {
-				return err
-			}
-
-			gameRoom.Broadcast(gamePacket)
+				gameRoom.Broadcast(gamePacket)
+			}(ga)
 		}
 	}
 
