@@ -66,7 +66,7 @@ class GameStartScreen extends StatelessWidget {
                     },
                     icon: const Icon(
                       // <-- Icon
-                      Icons.videogame_asset_sharp,
+                      Icons.create,
                       size: 60,
                     ),
                     label: const Text('Créer une partie'), // <-- Text
@@ -78,7 +78,7 @@ class GameStartScreen extends StatelessWidget {
                     },
                     icon: const Icon(
                       // <-- Icon
-                      Icons.videogame_asset_sharp,
+                      Icons.format_list_numbered_sharp,
                       size: 60,
                     ),
                     label: const Text('Rejoindre une partie'), // <-- Text

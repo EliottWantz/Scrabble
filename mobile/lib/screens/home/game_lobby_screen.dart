@@ -40,7 +40,7 @@ class GameLobbyScreen extends StatelessWidget {
           return SingleChildScrollView(
             child: Center(
                 child: SizedBox(
-              height: 600,
+              height: 610,
               width: 600,
               child: Column(
                 children: [

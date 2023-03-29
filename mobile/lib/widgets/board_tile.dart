@@ -12,8 +12,6 @@ const magentaSquareBackground = Color(0xfff01c7a);
 const lightBlueSquareBackground = Color(0xff8ecafc);
 const darkBlueSquareBackground = Color(0xff1375b0);
 
-final RxBool _isDropped = false.obs;
-
 class LetterTileDark extends StatelessWidget {
   const LetterTileDark({Key? key, required this.tile}) : super(key: key);
 
@@ -49,14 +47,8 @@ class LetterTileDark extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(1.5),
       child: SizedBox.expand(
-        child: InnerShadow(
-          offset: const Offset(0, -1.5),
-          blurX: 0.8,
-          blurY: 1,
-          color: Colors.black.withOpacity(.25),
           child: _buildTileContents(),
         ),
-      ),
     );
   }
 
@@ -106,9 +98,10 @@ class LetterTileDark extends StatelessWidget {
 }
 
 class LetterTile extends StatelessWidget {
-  const LetterTile({Key? key, required this.tile}) : super(key: key);
+  const LetterTile({Key? key, required this.tile,required this.isEasel}) : super(key: key);
 
   final Tile tile;
+  final bool isEasel;
 
   double get lockupRightPadding {
     switch (String.fromCharCode(tile.letter).toUpperCase()) {
@@ -117,7 +110,7 @@ class LetterTile extends StatelessWidget {
       case 'G':
         return 3;
       default:
-        return 1;
+        return 2;
     }
   }
 
@@ -130,6 +123,7 @@ class LetterTile extends StatelessWidget {
         return 1;
       case 'T':
         return 3;
+      case'K':
       default:
         return 2;
     }
@@ -138,15 +132,9 @@ class LetterTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(1.5),
+      padding: const EdgeInsets.all(3),
       child: SizedBox.expand(
-        child: InnerShadow(
-          offset: const Offset(0, -1.5),
-          blurX: 0.8,
-          blurY: 1,
-          color: Colors.black.withOpacity(.25),
           child: _buildTileContents(),
-        ),
       ),
     );
   }
@@ -163,7 +151,7 @@ class LetterTile extends StatelessWidget {
       ),
       child: Padding(
         padding: EdgeInsets.only(
-          right: lockupRightPadding + 0.3,
+          right: lockupRightPadding + 0.4,
           bottom: 0.8,
         ),
         child: Stack(
@@ -180,7 +168,7 @@ class LetterTile extends StatelessWidget {
   Text _buildLetterLabel() {
     return Text(
       String.fromCharCode(tile.letter).toUpperCase(),
-      style: Get.textTheme.button,
+      style: Get.textTheme.button!.copyWith(color: Colors.black),
     );
   }
 
@@ -190,7 +178,7 @@ class LetterTile extends StatelessWidget {
       bottom: 1,
       child: Text(
         '${tile.value}',
-        style: Get.textTheme.button,
+        style: Get.textTheme.button!.copyWith(color: Colors.black,fontSize: isEasel ? 15 : 9,fontWeight: FontWeight.normal),
       ),
     );
   }
@@ -299,6 +287,7 @@ class Square extends GetView<GameController> {
             edgeInsetsOverride ?? const EdgeInsets.only(top: 1.0, left: 0.5),
         child: Text(
           label,
+          style: const TextStyle(color: Colors.black),
         ),
       ),
     );

@@ -21,4 +21,9 @@ class MoveInfo {
     "letters": letters,
     "covers": covers
   };
+
+  @override
+  String toString() {
+    return '{type: ${type}, covers: ${covers.toString()}}';
+  }
 }
