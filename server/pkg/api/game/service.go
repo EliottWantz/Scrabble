@@ -491,25 +491,27 @@ func (s *Service) StartTournament(t *Tournament) error {
 
 		for bracketNumber := 1; bracketNumber <= numBrackets; bracketNumber++ {
 			bracket := &Bracket{
-				BracketNumber: bracketNumber,
-				UserIDs:       make([]string, 0),
-				Games:         make(map[string]*Game),
-				WinnersIDs:    make([]string, 0, 2),
+				BracketNumber:  bracketNumber,
+				UserIDs:        make([]string, 0),
+				Games:          make(map[string]*Game, 0),
+				WinnersIDs:     make([]string, 0, 2),
+				NextBracketNum: int(math.Round(float64(bracketNumber) / 2)),
 			}
-			for len(bracket.Games) < gamesPerBracket {
-				g := &Game{
-					ID: uuid.NewString(),
-					TournamentGameInfo: &TournamentGameInfo{
-						TournamentID:  t.ID,
-						RoundNumber:   roundNumber,
-						BracketNumber: bracketNumber,
-					},
-				}
-				if roundNumber == 1 {
+			if roundNumber == 1 {
+				for len(bracket.Games) < gamesPerBracket {
+					g := &Game{
+						ID: uuid.NewString(),
+						TournamentGameInfo: &TournamentGameInfo{
+							TournamentID:  t.ID,
+							RoundNumber:   roundNumber,
+							BracketNumber: bracketNumber,
+						},
+					}
 					g.UserIDs = []string{
 						t.UserIDs[gameCounter-1],
 						t.UserIDs[numGames*2-gameCounter],
 					}
+					bracket.UserIDs = append(bracket.UserIDs, g.UserIDs...)
 					g.ScrabbleGame = scrabble.NewGame(s.DAWG, &scrabble.HighScore{})
 					for _, uID := range g.UserIDs {
 						u, err := s.UserSvc.GetUser(uID)
@@ -519,13 +521,13 @@ func (s *Service) StartTournament(t *Tournament) error {
 						g.ScrabbleGame.AddPlayer(scrabble.NewPlayer(u.ID, u.Username, g.ScrabbleGame.Bag))
 					}
 					g.ScrabbleGame.Turn = g.ScrabbleGame.PlayerToMove().ID
-				}
-				if err := s.Repo.InsertGame(g); err != nil {
-					return err // Should never happen
-				}
+					if err := s.Repo.InsertGame(g); err != nil {
+						return err // Should never happen
+					}
 
-				bracket.Games[g.ID] = g
-				gameCounter++
+					bracket.Games[g.ID] = g
+					gameCounter++
+				}
 			}
 			round.Brackets[bracketNumber] = bracket
 		}
@@ -568,8 +570,7 @@ func (s *Service) UpdateTournamentGameOver(gID string) (*Tournament, *Game, erro
 		nextRound.HasStarted = true
 		nextRound.UserIDs = currentBracket.WinnersIDs
 
-		nextBracketNum := int(math.Round(float64(currentBracket.BracketNumber) / 2))
-		nextBracket := nextRound.Brackets[nextBracketNum]
+		nextBracket := nextRound.Brackets[currentBracket.NextBracketNum]
 
 		// Create new nextGame with both winners
 		nextGame := &Game{
@@ -582,7 +583,7 @@ func (s *Service) UpdateTournamentGameOver(gID string) (*Tournament, *Game, erro
 			UserIDs: currentBracket.WinnersIDs,
 		}
 		if err := s.Repo.InsertGame(nextGame); err != nil {
-			return nil, nextGame, err // Should never happen
+			return nil, nil, err // Should never happen
 		}
 
 		nextBracket.Games[nextGame.ID] = nextGame

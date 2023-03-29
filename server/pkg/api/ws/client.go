@@ -667,14 +667,25 @@ func (c *Client) HandleCreateTournamentRequest(p *Packet) error {
 	}
 
 	r := c.Manager.AddRoom(t.ID, "")
-	if err := r.AddClient(c.ID); err != nil {
-		return err
-	}
-	if err := c.Manager.UserSvc.Repo.SetJoinedTournament(t.ID, c.ID); err != nil {
-		return err
+
+	for _, uID := range t.UserIDs {
+		client, err := c.Manager.GetClient(uID)
+		if err != nil {
+			slog.Error("get client", err)
+			continue
+		}
+		if err := r.AddClient(client.ID); err != nil {
+			slog.Error("add client to room", err)
+			continue
+		}
+		if err := c.Manager.UserSvc.Repo.SetJoinedTournament(t.ID, client.ID); err != nil {
+			slog.Error("set joined tournament", err)
+			continue
+		}
+		r.BroadcastJoinTournamentPackets(client, t)
 	}
 
-	return r.BroadcastJoinTournamentPackets(c, t)
+	return nil
 }
 
 func (c *Client) HandleJoinTournamentRequest(p *Packet) error {

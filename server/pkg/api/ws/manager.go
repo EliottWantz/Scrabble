@@ -85,13 +85,27 @@ func (m *Manager) Accept(cID string) fiber.Handler {
 			c.send(p)
 		}
 		{
-			// List available games
-			games, err := m.GameSvc.Repo.FindAllGames()
+			// List joinailable games
+			games, err := m.GameSvc.Repo.FindAllJoinableGames()
 			if err != nil {
 				m.logger.Error("list joinable games", err)
 			}
 			p, err := NewJoinableGamesPacket(ListJoinableGamesPayload{
 				Games: games,
+			})
+			if err != nil {
+				m.logger.Error("list joinable games", err)
+			}
+			c.send(p)
+		}
+		{
+			// List joinailable tournaments
+			tournaments, err := m.GameSvc.Repo.FindAllJoinableTournaments()
+			if err != nil {
+				m.logger.Error("list joinable games", err)
+			}
+			p, err := NewJoinableTournamentsPacket(ListJoinableTournamentsPayload{
+				Tournaments: tournaments,
 			})
 			if err != nil {
 				m.logger.Error("list joinable games", err)
@@ -489,19 +503,13 @@ func (m *Manager) UpdateChatRooms() error {
 }
 
 func (m *Manager) UpdateJoinableGames() error {
-	games, err := m.GameSvc.Repo.FindAllGames()
+	games, err := m.GameSvc.Repo.FindAllJoinableGames()
 	if err != nil {
 		return err
 	}
-	joinable := make([]*game.Game, 0, len(games))
-	for _, g := range games {
-		if g.IsJoinable() {
-			joinable = append(joinable, g)
-		}
-	}
 
 	joinableGamesPacket, err := NewJoinableGamesPacket(ListJoinableGamesPayload{
-		Games: joinable,
+		Games: games,
 	})
 	if err != nil {
 		return err
@@ -584,13 +592,13 @@ func (m *Manager) ReplacePlayerWithBot(gID, pID string) error {
 
 func (m *Manager) HandleGameOver(g *game.Game) error {
 	g.ScrabbleGame.Timer.Stop()
-	r, err := m.GetRoom(g.ID)
+	gameRoom, err := m.GetRoom(g.ID)
 	if err != nil {
 		return err
 	}
 
 	winnerID := g.ScrabbleGame.Winner().ID
-	g.Winner = winnerID
+	g.WinnerID = winnerID
 
 	gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
 		Game: makeGamePayload(g),
@@ -598,7 +606,7 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 	if err != nil {
 		return err
 	}
-	r.Broadcast(gamePacket)
+	gameRoom.Broadcast(gamePacket)
 
 	gameOverPacket, err := NewGameOverPacket(GameOverPayload{
 		WinnerID: winnerID,
@@ -607,7 +615,7 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 		return err
 	}
 
-	r.Broadcast(gameOverPacket)
+	gameRoom.Broadcast(gameOverPacket)
 
 	for _, p := range g.ScrabbleGame.Players {
 		u, err := m.UserSvc.GetUser(p.ID)
@@ -645,19 +653,15 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 				slog.Error("get client", err)
 				continue
 			}
-			if err := r.RemoveClient(client.ID); err != nil {
+			if err := gameRoom.RemoveClient(client.ID); err != nil {
 				slog.Error("remove client from ws room", err)
 			}
-			if err := r.BroadcastLeaveGamePackets(client, g.ID); err != nil {
+			if err := gameRoom.BroadcastLeaveGamePackets(client, g.ID); err != nil {
 				slog.Error("broadcast leave game packets", err)
 			}
 			if err := m.UserSvc.Repo.UnSetJoinedGame(client.ID); err != nil {
 				slog.Error("remove user from game room", err)
 			}
-		}
-
-		if err := m.GameSvc.DeleteGame(g.ID); err != nil {
-			return err
 		}
 
 		if t.IsOver {
@@ -669,66 +673,77 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 				return err
 			}
 			tournamentRoom.Broadcast(p)
-		} else {
-			// Join new game
-			nextGameRoom := m.AddRoom(nextGame.ID, "")
-			for _, playerID := range nextGame.UserIDs {
-				player, err := m.GetClient(playerID)
-				if err != nil {
-					slog.Error("get client", err)
-					continue
-				}
-
-				if err := nextGameRoom.AddClient(player.ID); err != nil {
-					slog.Error("add client to room", err)
-					continue
-				}
-				if err := m.UserSvc.Repo.SetJoinedGame(nextGame.ID, playerID); err != nil {
-					slog.Error("set joined game", err)
-					continue
-				}
-				if err := nextGameRoom.BroadcastJoinGamePackets(player, nextGame); err != nil {
-					slog.Error("broadcast join game packets", err)
-					continue
-				}
+			if err := m.GameSvc.Repo.DeleteTournament(t.ID); err != nil {
+				return err
 			}
+		} else {
+			if nextGame != nil {
+				// Join new game
+				nextGameRoom := m.AddRoom(nextGame.ID, "")
+				for _, playerID := range nextGame.UserIDs {
+					player, err := m.GetClient(playerID)
+					if err != nil {
+						slog.Error("get client", err)
+						continue
+					}
 
-			// Start game timer
-			nextGame.ScrabbleGame.Timer.OnTick(func() {
-				timerPacket, err := NewTimerUpdatePacket(TimerUpdatePayload{
-					Timer: nextGame.ScrabbleGame.Timer.TimeRemaining(),
-				})
-				if err != nil {
-					slog.Error("failed to create timer update packet:", err)
-					return
+					if err := nextGameRoom.AddClient(player.ID); err != nil {
+						slog.Error("add client to room", err)
+						continue
+					}
+					if err := m.UserSvc.Repo.SetJoinedGame(nextGame.ID, playerID); err != nil {
+						slog.Error("set joined game", err)
+						continue
+					}
+					if err := nextGameRoom.BroadcastJoinGamePackets(player, nextGame); err != nil {
+						slog.Error("broadcast join game packets", err)
+						continue
+					}
 				}
-				nextGameRoom.Broadcast(timerPacket)
-			})
-			nextGame.ScrabbleGame.Timer.OnDone(func() {
-				nextGame.ScrabbleGame.SkipTurn()
-				GamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
+
+				// Start game timer
+				nextGame.ScrabbleGame.Timer.OnTick(func() {
+					timerPacket, err := NewTimerUpdatePacket(TimerUpdatePayload{
+						Timer: nextGame.ScrabbleGame.Timer.TimeRemaining(),
+					})
+					if err != nil {
+						slog.Error("failed to create timer update packet:", err)
+						return
+					}
+					nextGameRoom.Broadcast(timerPacket)
+				})
+				nextGame.ScrabbleGame.Timer.OnDone(func() {
+					nextGame.ScrabbleGame.SkipTurn()
+					GamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
+						Game: makeGamePayload(nextGame),
+					})
+					if err != nil {
+						slog.Error("failed to create Game update packet:", err)
+						return
+					}
+					nextGameRoom.Broadcast(GamePacket)
+
+					// Make bots move if applicable
+					go m.MakeBotMoves(nextGame.ID)
+				})
+				nextGame.ScrabbleGame.Timer.Start()
+
+				gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
 					Game: makeGamePayload(nextGame),
 				})
 				if err != nil {
-					slog.Error("failed to create Game update packet:", err)
-					return
+					return err
 				}
-				nextGameRoom.Broadcast(GamePacket)
 
-				// Make bots move if applicable
-				go m.MakeBotMoves(nextGame.ID)
-			})
-			nextGame.ScrabbleGame.Timer.Start()
-
-			gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
-				Game: makeGamePayload(nextGame),
-			})
-			if err != nil {
-				return err
+				nextGameRoom.Broadcast(gamePacket)
+			} else {
+				// We are wainting for next winner to finish his previous game
 			}
-
-			nextGameRoom.Broadcast(gamePacket)
 		}
+	}
+
+	if err := m.GameSvc.Repo.DeleteGame(g.ID); err != nil {
+		return err
 	}
 
 	return nil

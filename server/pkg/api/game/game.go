@@ -11,7 +11,7 @@ type Game struct {
 	ObservateurIDs     []string            `json:"observateurIds"`
 	IsPrivateGame      bool                `json:"isPrivateGame"`
 	IsProtected        bool                `json:"isProtected"`
-	Winner             string              `json:"winner"`
+	WinnerID           string              `json:"winnerId"`
 	HashedPassword     string              `json:"-"`
 	ScrabbleGame       *scrabble.Game      `json:"-"`
 	TournamentGameInfo *TournamentGameInfo `json:"tournamentGameInfo,omitempty"`

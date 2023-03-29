@@ -22,10 +22,11 @@ type Round struct {
 }
 
 type Bracket struct {
-	BracketNumber int              `json:"bracketNumber"`
-	UserIDs       []string         `json:"userIds"`
-	Games         map[string]*Game `json:"games"`
-	WinnersIDs    []string         `json:"winnersIds"`
+	BracketNumber  int              `json:"bracketNumber"`
+	NextBracketNum int              `json:"nextBracketNum"`
+	UserIDs        []string         `json:"userIds"`
+	Games          map[string]*Game `json:"games"`
+	WinnersIDs     []string         `json:"winnersIds"`
 }
 
 type TournamentGameInfo struct {

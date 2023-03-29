@@ -53,6 +53,22 @@ func (r *Repository) FindAllGames() ([]*Game, error) {
 	return games, nil
 }
 
+func (r *Repository) FindAllJoinableGames() ([]*Game, error) {
+	games, err := r.FindAllGames()
+	if err != nil {
+		return nil, err
+	}
+
+	joinable := make([]*Game, 0)
+	for _, g := range games {
+		if g.IsJoinable() {
+			joinable = append(joinable, g)
+		}
+	}
+
+	return joinable, nil
+}
+
 func (r *Repository) InsertGame(g *Game) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -103,6 +119,22 @@ func (r *Repository) FindAllTournaments() ([]*Tournament, error) {
 	}
 
 	return tournaments, nil
+}
+
+func (r *Repository) FindAllJoinableTournaments() ([]*Tournament, error) {
+	tournaments, err := r.FindAllTournaments()
+	if err != nil {
+		return nil, err
+	}
+
+	joinable := make([]*Tournament, 0)
+	for _, t := range tournaments {
+		if !t.HasStarted {
+			joinable = append(joinable, t)
+		}
+	}
+
+	return joinable, nil
 }
 
 func (r *Repository) InsertTournament(t *Tournament) error {

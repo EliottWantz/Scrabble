@@ -276,15 +276,21 @@ func NewUserLeftGamePacket(payload UserLeftGamePayload) (*Packet, error) {
 
 type GamePayload struct {
 	ID           string                  `json:"id"`
-	Players      []*scrabble.Player      `json:"players"`
-	Board        [15][15]scrabble.Square `json:"board"`
-	Finished     bool                    `json:"finished"`
-	NumPassMoves int                     `json:"numPassMoves"`
-	Turn         string                  `json:"turn"`
-	Timer        time.Duration           `json:"timer"`
+	Players      []*scrabble.Player      `json:"players,omitempty"`
+	Board        [15][15]scrabble.Square `json:"board,omitempty"`
+	Finished     bool                    `json:"finished,omitempty"`
+	NumPassMoves int                     `json:"numPassMoves,omitempty"`
+	Turn         string                  `json:"turn,omitempty"`
+	Timer        time.Duration           `json:"timer,omitempty"`
+	WinnerID     string                  `json:"winnerId,omitempty"`
 }
 
 func makeGamePayload(g *game.Game) *GamePayload {
+	if g.ScrabbleGame == nil {
+		return &GamePayload{
+			ID: g.ID,
+		}
+	}
 	return &GamePayload{
 		ID:           g.ID,
 		Players:      g.ScrabbleGame.Players,
@@ -293,6 +299,7 @@ func makeGamePayload(g *game.Game) *GamePayload {
 		NumPassMoves: g.ScrabbleGame.NumPassMoves,
 		Turn:         g.ScrabbleGame.Turn,
 		Timer:        g.ScrabbleGame.Timer.TimeRemaining(),
+		WinnerID:     g.ScrabbleGame.Winner().ID,
 	}
 }
 
@@ -396,6 +403,9 @@ func makeTournamentPayload(t *game.Tournament) *TournamentPayload {
 		for _, b := range r.Brackets {
 			games := make(map[string]*GamePayload, 0)
 			for _, g := range b.Games {
+				if g.ScrabbleGame == nil {
+					continue
+				}
 				games[g.ID] = makeGamePayload(g)
 			}
 			brackets[b.BracketNumber] = &BracketPayload{
