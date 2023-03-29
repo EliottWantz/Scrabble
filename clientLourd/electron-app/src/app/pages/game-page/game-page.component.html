@@ -40,6 +40,15 @@
     </div>
   </div>
   <div class="right">
+    <div>
+      <mat-icon (click)="doToggleLightDark()">{{lightDarkToggleIcon}}</mat-icon>
+  </div>
+  <div class="language">
+      <div class="language-icon">
+          <mat-icon (click)="switchLanguage()" inline="true">language</mat-icon>
+      </div>
+      <div>{{language.value}}</div>
+  </div>
     <app-timer id="timer"></app-timer>
     <div id="reserve">
       <h3>{{'game-page.reserve' | translate}}</h3>
