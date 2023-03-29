@@ -75,7 +75,8 @@ class GameStartScreen extends StatelessWidget {
                           Icons.create,
                           size: 50,
                         ),
-                        label: const Text('Créer une partie'), // <-- Text
+                        label: Text(
+                            '${gameMode == 'tournoi' ? 'Créer un tournoi' : 'Créer une partie'}'), // <-- Text
                       ),
                     ),
                   ),
@@ -93,30 +94,34 @@ class GameStartScreen extends StatelessWidget {
                           Icons.format_list_numbered_sharp,
                           size: 50,
                         ),
-                        label: const Text('Rejoindre une partie'), // <-- Text
+                        label: Text(
+                            '${gameMode == 'tournoi' ? 'Rejoindre un tournoi' : 'Rejoindre une partie'}'), // <-- Text
                       ),
                     ),
                   ),
                   const Gap(40),
-                  SizedBox(
-                    width: 230,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: ElevatedButton.icon(
-                        onPressed: () {
-                          // _websocketService.createGameRoom();
-                          // Get.toNamed(
-                          //     Routes.HOME + Routes.GAME_START + Routes.LOBBY);
-                        },
-                        icon: const Icon(
-                          // <-- Icon
-                          MdiIcons.eye,
-                          size: 50,
-                        ),
-                        label: const Text('Observer une partie'), // <-- Text
-                      ),
-                    ),
-                  ),
+                  gameMode != 'tournoi'
+                      ? SizedBox(
+                          width: 230,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: ElevatedButton.icon(
+                              onPressed: () {
+                                // _websocketService.createGameRoom();
+                                // Get.toNamed(
+                                //     Routes.HOME + Routes.GAME_START + Routes.LOBBY);
+                              },
+                              icon: const Icon(
+                                // <-- Icon
+                                MdiIcons.eye,
+                                size: 50,
+                              ),
+                              label:
+                                  const Text('Observer une partie'), // <-- Text
+                            ),
+                          ),
+                        )
+                      : const SizedBox(),
                 ],
               ),
             )),
