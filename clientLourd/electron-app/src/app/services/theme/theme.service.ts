@@ -6,12 +6,21 @@ import { BehaviorSubject } from "rxjs";
 })
 export class ThemeService {
     isDark: BehaviorSubject<boolean> = new BehaviorSubject(false);
+    language: BehaviorSubject<string> = new BehaviorSubject('fr');
 
-    switchValue(): void {
+    switchTheme(): void {
         if (this.isDark.value) {
             this.isDark.next(false);
         } else {
             this.isDark.next(true);
+        }
+    }
+
+    switchLanguage(): void {
+        if (this.language.value === 'fr') {
+            this.language.next("en");
+        } else {
+            this.language.next("fr");
         }
     }
 }

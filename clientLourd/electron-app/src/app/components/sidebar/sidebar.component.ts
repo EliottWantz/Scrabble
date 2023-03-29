@@ -20,8 +20,8 @@ import { BehaviorSubject } from "rxjs";
 })
 export class SidebarComponent {
     @Input() sidenavHandle!: MatSidenav;
-  private darkThemeIcon = 'nightlight_round';
-  private lightThemeIcon = 'wb_sunny';
+  private darkThemeIcon = 'wb_sunny';
+  private lightThemeIcon = 'nightlight_round';
   public lightDarkToggleIcon = this.lightThemeIcon;
   readonly title: string = "Scrabble";
   isJoining = false;
@@ -29,9 +29,11 @@ export class SidebarComponent {
   currentRoute = "PolyScrabble";
   currentRouteName = "/home";
   previousRouteName = ["/home"];
+  language: BehaviorSubject<string>;
 
   constructor(private userService: UserService, private authService: AuthenticationService, private gameService: GameService, private themeService: ThemeService, private router: Router) {
     this.user = this.userService.subjectUser;
+    this.language = this.themeService.language;
     document.getElementById("avatar")?.setAttribute("src", this.user.value.avatar.url);
     this.router.events.subscribe((e) => {
       if (e instanceof NavigationStart) {
@@ -60,12 +62,16 @@ export class SidebarComponent {
   }
 
   public doToggleLightDark() {
-    this.themeService.switchValue();
+    this.themeService.switchTheme();
     if (this.lightDarkToggleIcon == this.darkThemeIcon) {
         this.lightDarkToggleIcon = this.lightThemeIcon;
     } else {
         this.lightDarkToggleIcon = this.darkThemeIcon;
     }
+  }
+
+  switchLanguage() {
+    this.themeService.switchLanguage();
   }
 
   isConnected(): boolean {

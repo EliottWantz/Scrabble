@@ -2,7 +2,7 @@
   <div class="left">
     <button mat-flat-button color="primary" (click)="leaveGame()">
       <mat-icon>input</mat-icon>
-      Quitter la partie
+      {{'game-page.leave' | translate}}
     </button>
     <div *ngFor="let player of game.value.players" class="player" [class.isTurn]="game.value.turn === player.id">
       <div class="playerInfo">
@@ -20,7 +20,7 @@
     <div class="play-buttons">
       <button mat-raised-button color="primary" (click)="submit()" id="play-button" [disabled]="!hasPlacedLetters()">
         <mat-icon>done</mat-icon>
-        Envoyer
+        {{'game-page.submit' | translate}}
       </button>
 
       <button mat-raised-button color="primary" (click)="pass()" id="pass-button">
@@ -30,19 +30,19 @@
 
       <button mat-raised-button color="primary" (click)="exchange()" id="exchange-button" [disabled]="!hasSelectedLetters()">
         <mat-icon>swap_horiz</mat-icon>
-        Échanger
+        {{'game-page.exchange' | translate}}
       </button>
 
       <button mat-raised-button color="primary" (click)="indice()" id="indice-button">
         <mat-icon>lightbulb</mat-icon>
-        Indice
+        {{'game-page.advice' | translate}}
       </button>
     </div>
   </div>
   <div class="right">
     <app-timer id="timer"></app-timer>
     <div id="reserve">
-      <h3>Lettres en réserve</h3>
+      <h3>{{'game-page.reserve' | translate}}</h3>
       <h3>80</h3>
     </div>
     <app-chat-box id="chat-box"></app-chat-box>

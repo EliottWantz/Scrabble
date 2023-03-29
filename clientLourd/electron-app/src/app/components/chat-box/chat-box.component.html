@@ -2,10 +2,10 @@
     <mat-card id="chatBox">
       <form>
         <mat-form-field appearance="fill">
-          <mat-label>Salon</mat-label>
+          <mat-label>{{'chat-box-component.label' | translate}}</mat-label>
           <mat-select (selectionChange)="changeRoom($event)" [(value)]="currentRoomId" id="selectionElem"> 
             <mat-select-trigger *ngIf="room$.value.name !== 'Global Room'">{{room$.value.name}}</mat-select-trigger>
-            <mat-select-trigger *ngIf="room$.value.name === 'Global Room'">Global Room</mat-select-trigger>
+            <mat-select-trigger *ngIf="room$.value.name === 'Global Room'">{{'chat-box-component.global' | translate}}</mat-select-trigger>
             <div *ngFor="let room of getRooms(); let last = last; let i = index">
               <div class="item">
                 <mat-option [value]="room.id">
@@ -41,7 +41,7 @@
     
       <form #chatForm id="chatBoxForm">
         <mat-form-field appearance="fill">
-          <mat-label for="message">Entrez votre message</mat-label>
+          <mat-label for="message">{{'chat-box-component.enter-message' | translate}}</mat-label>
           <input
             #chatBoxInput
             type="text"
