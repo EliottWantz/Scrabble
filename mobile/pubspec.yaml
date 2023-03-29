@@ -50,6 +50,7 @@ dependencies:
   flutter_layout_grid: ^2.0.1
   im_stepper: ^1.0.1+1
   flutter_colorpicker: ^1.0.3
+  material_design_icons_flutter: ^6.0.7096
 
 
 dev_dependencies:

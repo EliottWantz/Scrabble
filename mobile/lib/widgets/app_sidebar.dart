@@ -500,7 +500,7 @@ class AppSideBar extends StatelessWidget {
         .name == '/home/game-start') {
       return [
         const SidebarXItem(
-          icon: Icons.play_arrow,
+          icon: Icons.settings,
           label: 'Options de Jeu',
         ),
       ];
