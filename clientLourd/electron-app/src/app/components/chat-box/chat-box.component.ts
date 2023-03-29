@@ -32,7 +32,7 @@ const electron = (window as any).require('electron');
   templateUrl: './chat-box.component.html',
   styleUrls: ['./chat-box.component.scss'],
 })
-export class ChatBoxComponent implements AfterViewInit {
+export class ChatBoxComponent implements OnInit, AfterViewInit {
   @ViewChild('chatBoxMessages')
   chatBoxMessagesContainer!: ElementRef;
   // @ViewChild("chatBoxMessages")
@@ -71,6 +71,22 @@ export class ChatBoxComponent implements AfterViewInit {
       input: ["", [Validators.required]],
     });*/
   }
+  async ngOnInit(): Promise<void> {
+    if (this.user.id === '0') {
+      electron.ipcRenderer.send('request-user-data');
+      electron.ipcRenderer.on(
+        'user-data',
+        async (event: any, data: { user: User }) => {
+          this.userService.setUser(data.user);
+          this.user = data.user;
+          if (this.user.id !== '0') {
+            await this.socketService.connect();
+          }
+          console.log('user-data', data.user);
+        }
+      );
+    }
+  }
   async ngAfterViewInit(): Promise<void> {
     setTimeout(() => {
       this.chatBoxInput.nativeElement.focus();
@@ -88,20 +104,6 @@ export class ChatBoxComponent implements AfterViewInit {
       // });
     });
     // });
-    if (this.user.id === '0') {
-      electron.ipcRenderer.send('request-user-data');
-      electron.ipcRenderer.on(
-        'user-data',
-        async (event: any, data: { user: User }) => {
-          this.userService.setUser(data.user);
-          this.user = data.user;
-          if (this.user.id !== '0') {
-            await this.socketService.connectWithUser(this.user);
-          }
-          console.log('user-data', data.user);
-        }
-      );
-    }
   }
 
   send(): void {

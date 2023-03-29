@@ -72,21 +72,6 @@ export class WebSocketService {
       };
     }
   }
-  async connectWithUser(user: User): Promise<void> {
-    console.log('user', user);
-    if (user) {
-      this.socket = new WebSocket(
-        `${environment.wsUrl}/?id=${user.id}&username=${user.username}`
-      );
-      console.log('user', user);
-      console.log('socket', this.socket);
-      this.socket.onopen = () => {
-        this.socket.onmessage = (e) => {
-          this.handleSocket(e);
-        };
-      };
-    }
-  }
 
   disconnect(): void {
     this.socket.close();
@@ -99,6 +84,7 @@ export class WebSocketService {
 
     switch (event) {
       case 'joinedRoom': {
+        console.log('joinedRoom');
         const payloadRoom = packet.payload as JoinedRoomPayload;
         const userIds = [];
         for (const id of payloadRoom.userIds) {
