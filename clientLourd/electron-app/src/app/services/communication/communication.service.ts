@@ -117,9 +117,10 @@ export class CommunicationService {
         return this.http.delete<string>(`${this.baseUrl}/user/friends/accept/${id}/${friendId}`).pipe(catchError(this.handleError));
     }
 
-    public updateTheme(theme: string, language: string, id: string): Observable<void> {
+    public updateTheme(theme: string, language: string, id: string): void {
         console.log("update theme");
-        return this.http.patch<void>(`${this.baseUrl}/user/${id}/config`, {theme: theme, language: language}).pipe(catchError(this.handleError));
+        const patch = this.http.patch<void>(`${this.baseUrl}/user/${id}/config`, {theme: theme, language: language}).pipe(catchError(this.handleError));
+        console.log(patch);
     }
 
     private handleError(error: HttpErrorResponse) {
