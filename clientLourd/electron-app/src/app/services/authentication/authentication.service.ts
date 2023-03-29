@@ -53,7 +53,7 @@ export class AuthenticationService {
             username: res.user.username,
             email: res.user.email,
             avatar: res.user.avatar,
-            preferences: {theme: this.themeService.theme.value, language: this.themeService.language.value},
+            preferences: res.user.preferences,
             joinedChatRooms: res.user.joinedChatRooms,
             joinedDMRooms: res.user.joinedDMRooms,
             joinedGame: res.user.joinedGame,

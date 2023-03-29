@@ -33,6 +33,13 @@ export class GamePageComponent implements OnInit {
         this.game = this.gameService.scrabbleGame;
         this.game.subscribe();
         this.moves = this.gameService.moves;
+        this.themeService.theme.subscribe((theme) => {
+            if (theme == 'dark') {
+              this.lightDarkToggleIcon = this.darkThemeIcon;
+            } else {
+              this.lightDarkToggleIcon = this.lightThemeIcon;
+            }
+        });
     }
 
     isTurn(): boolean {
@@ -80,11 +87,6 @@ export class GamePageComponent implements OnInit {
 
     public doToggleLightDark() {
         this.themeService.switchTheme();
-        if (this.lightDarkToggleIcon == this.darkThemeIcon) {
-            this.lightDarkToggleIcon = this.lightThemeIcon;
-        } else {
-            this.lightDarkToggleIcon = this.darkThemeIcon;
-        }
       }
     
       switchLanguage() {

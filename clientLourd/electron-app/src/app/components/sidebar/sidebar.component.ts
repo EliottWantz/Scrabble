@@ -18,7 +18,7 @@ import { BehaviorSubject } from "rxjs";
     templateUrl: "./sidebar.component.html",
     styleUrls: ["./sidebar.component.scss"],
 })
-export class SidebarComponent {
+export class SidebarComponent implements OnInit {
     @Input() sidenavHandle!: MatSidenav;
   private darkThemeIcon = 'wb_sunny';
   private lightThemeIcon = 'nightlight_round';
@@ -61,13 +61,18 @@ export class SidebarComponent {
     });
   }
 
+  ngOnInit(): void {
+    this.themeService.theme.subscribe((theme) => {
+      if (theme == 'dark') {
+        this.lightDarkToggleIcon = this.darkThemeIcon;
+      } else {
+        this.lightDarkToggleIcon = this.lightThemeIcon;
+      }
+    });
+  }
+
   public doToggleLightDark() {
     this.themeService.switchTheme();
-    if (this.lightDarkToggleIcon == this.darkThemeIcon) {
-        this.lightDarkToggleIcon = this.lightThemeIcon;
-    } else {
-        this.lightDarkToggleIcon = this.darkThemeIcon;
-    }
   }
 
   switchLanguage() {
