@@ -64,9 +64,9 @@ class GameStartScreen extends StatelessWidget {
                     width: 230,
                     child: ElevatedButton.icon(
                       onPressed: () {
-                        // _websocketService.createGameRoom();
-                        // Get.toNamed(
-                        //     Routes.HOME + Routes.GAME_START + Routes.LOBBY);
+                        _websocketService.createGameRoom();
+                        Get.toNamed(
+                            Routes.HOME + Routes.GAME_START + Routes.LOBBY);
                       },
                       icon: const Padding(
                         padding: EdgeInsets.all(8.0),
@@ -104,9 +104,6 @@ class GameStartScreen extends StatelessWidget {
                           width: 230,
                           child: ElevatedButton.icon(
                             onPressed: () {
-                              // _websocketService.createGameRoom();
-                              // Get.toNamed(
-                              //     Routes.HOME + Routes.GAME_START + Routes.LOBBY);
                             },
                             icon: const Padding(
                               padding: EdgeInsets.all(8.0),
