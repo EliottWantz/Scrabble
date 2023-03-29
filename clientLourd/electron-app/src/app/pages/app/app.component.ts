@@ -1,6 +1,7 @@
 import { Component, HostBinding, HostListener, Renderer2 } from '@angular/core';
 import { ThemeService } from '@app/services/theme/theme.service';
 import { BehaviorSubject } from 'rxjs';
+import {TranslateService} from "@ngx-translate/core";
 
 @Component({
   selector: 'app-root',
@@ -9,23 +10,30 @@ import { BehaviorSubject } from 'rxjs';
 })
 export class AppComponent {
   title = 'electron-app';
-  isDarkMode: BehaviorSubject<boolean>;
+  theme: BehaviorSubject<string>;
+  language: BehaviorSubject<string>;
 
-  constructor(private renderer: Renderer2, private themeService: ThemeService) {
-    this.isDarkMode = this.themeService.isDark;
-    this.isDarkMode.subscribe(() => {
+  constructor(private renderer: Renderer2, private themeService: ThemeService, private translate: TranslateService) {
+    this.language = this.themeService.language;
+    this.translate.setDefaultLang('fr');
+    this.translate.use('fr');
+    this.themeService.language.subscribe(() => {
+      this.translate.use(this.language.value);
+    });
+    this.theme = this.themeService.theme;
+    this.theme.subscribe(() => {
       this.renderPageBodyColor();
     })
   }
 
   @HostBinding('class')
   public get themeMode() {
-    return this.isDarkMode.value ? 'dark-theme' : 'light-theme';
+    return this.theme.value === "dark" ? 'dark-theme' : 'light-theme';
   }
 
   private renderPageBodyColor() {
     this.renderer.removeClass(document.body, 'dark');
     this.renderer.removeClass(document.body, 'light');
-    this.renderer.addClass(document.body, this.isDarkMode.value ? 'dark' : 'light');
+    this.renderer.addClass(document.body, this.theme.value === "dark" ? 'dark' : 'light');
   }
 }

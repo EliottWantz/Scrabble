@@ -18,10 +18,10 @@ import { BehaviorSubject } from "rxjs";
     templateUrl: "./sidebar.component.html",
     styleUrls: ["./sidebar.component.scss"],
 })
-export class SidebarComponent {
+export class SidebarComponent implements OnInit {
     @Input() sidenavHandle!: MatSidenav;
-  private darkThemeIcon = 'nightlight_round';
-  private lightThemeIcon = 'wb_sunny';
+  private darkThemeIcon = 'wb_sunny';
+  private lightThemeIcon = 'nightlight_round';
   public lightDarkToggleIcon = this.lightThemeIcon;
   readonly title: string = "Scrabble";
   isJoining = false;
@@ -29,9 +29,11 @@ export class SidebarComponent {
   currentRoute = "PolyScrabble";
   currentRouteName = "/home";
   previousRouteName = ["/home"];
+  language: BehaviorSubject<string>;
 
   constructor(private userService: UserService, private authService: AuthenticationService, private gameService: GameService, private themeService: ThemeService, private router: Router) {
     this.user = this.userService.subjectUser;
+    this.language = this.themeService.language;
     document.getElementById("avatar")?.setAttribute("src", this.user.value.avatar.url);
     this.router.events.subscribe((e) => {
       if (e instanceof NavigationStart) {
@@ -59,13 +61,22 @@ export class SidebarComponent {
     });
   }
 
-  public doToggleLightDark() {
-    this.themeService.switchValue();
-    if (this.lightDarkToggleIcon == this.darkThemeIcon) {
-        this.lightDarkToggleIcon = this.lightThemeIcon;
-    } else {
+  ngOnInit(): void {
+    this.themeService.theme.subscribe((theme) => {
+      if (theme == 'dark') {
         this.lightDarkToggleIcon = this.darkThemeIcon;
-    }
+      } else {
+        this.lightDarkToggleIcon = this.lightThemeIcon;
+      }
+    });
+  }
+
+  public doToggleLightDark() {
+    this.themeService.switchTheme();
+  }
+
+  switchLanguage() {
+    this.themeService.switchLanguage();
   }
 
   isConnected(): boolean {

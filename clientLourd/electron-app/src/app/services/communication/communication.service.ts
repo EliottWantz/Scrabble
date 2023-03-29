@@ -117,6 +117,16 @@ export class CommunicationService {
         return this.http.delete<string>(`${this.baseUrl}/user/friends/accept/${id}/${friendId}`).pipe(catchError(this.handleError));
     }
 
+    async updateTheme(theme: string, language: string, id: string): Promise<void> {
+        const res: any = (await lastValueFrom(this.requestUpdateTheme(theme, language, id)));
+        return res;
+    }
+
+    public requestUpdateTheme(theme: string, language: string, id: string): Observable<void> {
+        console.log("update theme");
+        return this.http.patch<void>(`${this.baseUrl}/user/${id}/config`, {theme: theme, language: language}).pipe(catchError(this.handleError));
+    }
+
     private handleError(error: HttpErrorResponse) {
         if (error.status === 0) {
           // A client-side or network error occurred. Handle it accordingly.

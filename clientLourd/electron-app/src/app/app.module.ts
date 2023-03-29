@@ -43,6 +43,10 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { WaitRoomPageComponent } from '@app/pages/waiting-room-page/waiting-room-page.component';
 import { MatSelectModule } from '@angular/material/select';
 
+import {TranslateLoader, TranslateModule} from '@ngx-translate/core';
+import {TranslateHttpLoader} from '@ngx-translate/http-loader';
+import {HttpClient} from '@angular/common/http';
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -88,7 +92,16 @@ import { MatSelectModule } from '@angular/material/select';
     MatButtonModule,
     BrowserAnimationsModule,
     MatProgressSpinnerModule,
-    MatSelectModule
+    MatSelectModule,
+    HttpClientModule,
+        TranslateModule.forRoot({
+            loader: {
+                provide: TranslateLoader,
+                useFactory: HttpLoaderFactory,
+                deps: [HttpClient]
+            },
+            defaultLanguage: 'fr'
+        })
   ],
   providers: [
     {
@@ -100,3 +113,7 @@ import { MatSelectModule } from '@angular/material/select';
   bootstrap: [AppComponent]
 })
 export class AppModule { }
+
+export function HttpLoaderFactory(http: HttpClient): TranslateHttpLoader {
+  return new TranslateHttpLoader(http);
+}
