@@ -98,10 +98,11 @@ class LetterTileDark extends StatelessWidget {
 }
 
 class LetterTile extends StatelessWidget {
-  const LetterTile({Key? key, required this.tile,required this.isEasel}) : super(key: key);
+  const LetterTile({Key? key, required this.tile,required this.isEasel,this.isEaselPlaced}) : super(key: key);
 
   final Tile tile;
   final bool isEasel;
+  final bool? isEaselPlaced;
 
   double get lockupRightPadding {
     switch (String.fromCharCode(tile.letter).toUpperCase()) {
@@ -142,7 +143,7 @@ class LetterTile extends StatelessWidget {
   DecoratedBox _buildTileContents() {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: const Color(0xfffaeac2),
+        color: isEaselPlaced!=null ? const Color.fromRGBO(250, 234, 194, 0.8):const Color(0xfffaeac2),
         border: Border.all(
           color: Colors.black.withAlpha(18),
           width: 1.5,

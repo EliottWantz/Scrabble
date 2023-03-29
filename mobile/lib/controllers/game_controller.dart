@@ -158,6 +158,7 @@ class GameController extends GetxController {
               child: LetterTile(
                 tile: tile,
                 isEasel: true,
+                isEaselPlaced: true,
               )),
           child: GestureDetector(
               onTap: () {

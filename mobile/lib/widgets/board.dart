@@ -206,6 +206,7 @@ class ScrabbleBoard extends GetView<GameController> {
                       child: LetterTile(
                         tile: tile.tile,
                         isEasel: false,
+                        isEaselPlaced: true,
                       )),
                   child: SizedBox(
                       height: 70,
