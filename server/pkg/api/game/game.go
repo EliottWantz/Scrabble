@@ -25,5 +25,8 @@ func (g *Game) IsJoinable() bool {
 	if g.ScrabbleGame != nil {
 		return false
 	}
+	if g.TournamentGameInfo != nil {
+		return false
+	}
 	return len(g.UserIDs) < 4
 }
