@@ -11,6 +11,7 @@ import 'package:client_leger/models/requests/accept_friend_request.dart';
 import 'package:client_leger/models/requests/chat_message_request.dart';
 import 'package:client_leger/models/requests/create_dm_room_request.dart';
 import 'package:client_leger/models/requests/create_game_room_request.dart';
+import 'package:client_leger/models/requests/indice_request.dart';
 import 'package:client_leger/models/requests/join_dm_request.dart';
 import 'package:client_leger/models/requests/join_room_request.dart';
 import 'package:client_leger/models/requests/play_move_request.dart';
@@ -18,6 +19,7 @@ import 'package:client_leger/models/response/accept_friend_response.dart';
 import 'package:client_leger/models/response/chat_message_response.dart';
 import 'package:client_leger/models/response/friend_request_response.dart';
 import 'package:client_leger/models/response/game_update_response.dart';
+import 'package:client_leger/models/response/indice_response.dart';
 import 'package:client_leger/models/response/joined_dm_room_response.dart';
 import 'package:client_leger/models/response/joined_game_response.dart';
 import 'package:client_leger/models/response/joined_room_response.dart';
@@ -41,6 +43,7 @@ import 'package:client_leger/services/user_service.dart';
 
 import '../models/create_dm_room_payload.dart';
 import '../models/create_game_room_payload.dart';
+import '../models/indice_payload.dart';
 import '../models/move_info.dart';
 import '../models/requests/create_room_request.dart';
 import '../models/requests/list_joinable_games_request.dart';
@@ -193,7 +196,11 @@ class WebsocketService extends GetxService {
         handleAcceptFriendRequest(acceptFriendRequest);
       }
       break;
-      // case game timer
+      case ServerEventIndice: {
+        IndiceResponse indiceResponse = IndiceResponse.fromRawJson(data);
+        handleIndiceResponse(indiceResponse);
+      }
+      break;
       default: {
         print('no event in package received');
       }
@@ -322,6 +329,10 @@ class WebsocketService extends GetxService {
     // createDMRoom(acceptFriendRequest.payload!.fromId, acceptFriendRequest.payload!.fromUsername);
   }
 
+  void handleIndiceResponse(IndiceResponse indiceResponse) {
+    gameService.indices.addAll(indiceResponse.moves);
+  }
+
   void createRoom(String roomName, { List<String> userIds = const [] }) {
     final createRoomPayload = CreateRoomPayload(
         roomName: roomName,
@@ -429,5 +440,16 @@ class WebsocketService extends GetxService {
       payload: playMovePayload
     );
     socket.sink.add(playMoveRequest.toRawJson());
+  }
+
+  void getIndice() {
+    final indicePayload = IndicePayload(
+      gameId: gameService.currentGameId
+    );
+    final indiceRequest = IndiceRequest(
+      event: ClientEventIndice,
+      payload: indicePayload
+    );
+    socket.sink.add(indiceRequest.toRawJson());
   }
 }

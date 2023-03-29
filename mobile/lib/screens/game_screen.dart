@@ -185,7 +185,8 @@ class GameScreen extends GetView<GameController> {
                           size: 30,
                         ),
                         label: const Text('Indices'),
-                      )
+                      ),
+                      Obx(() => _buildIndices())
                     ],
                   ),
                 ).inGridArea('aside'),
@@ -273,6 +274,44 @@ class GameScreen extends GetView<GameController> {
     }
     playerInfoPanels.add(const Gap(20));
     return playerInfoPanels;
+  }
+
+  Widget _buildIndices() {
+    if (controller.placeIndiceIsCalled.value) {
+      return Expanded(
+          child: ListView.builder(
+            // padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.zero,
+            itemCount: _gameService.indices.length,
+            itemBuilder: (context, item) {
+              final index = item;
+              return _buildIndice(
+                  _gameService.indices.value![index]
+              );
+            },
+          )
+      );
+    } else {
+      return const SizedBox.shrink();
+    }
+  }
+
+  Widget _buildIndice(MoveInfo moveInfo) {
+    return Row(
+      children: [
+        Text("${moveInfo.letters} ${moveInfo.covers}"),
+        ElevatedButton.icon(
+          onPressed: () {
+            controller.placeIndice(moveInfo);
+          },
+          icon: const Icon(
+            Icons.check,
+            size: 20,
+          ),
+          label: const Text('Placer'),
+        ),
+      ],
+    );
   }
 
   Widget _buildList() {

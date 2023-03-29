@@ -19,6 +19,7 @@ const String ServerEventGameOver = "gameOver";
 const String ServerEventFriendRequest = "friendRequest";
 const String ServerEventAcceptFriendRequest = "acceptFriendRequest";
 const String ServerEventDeclineFriendRequest = "declineFriendRequest";
+const String ServerEventIndice = "indice";
 
 const String ServerEventError   = "error";
 
@@ -39,4 +40,5 @@ const String ClientEventJoinGame = "join-game";
 const String ClientEventLeaveGame = "leave-game";
 const String ClientEventStartGame = "start-game";
 const String ClientEventPlayMove    = "playMove";
+const String ClientEventIndice = "indice";
 

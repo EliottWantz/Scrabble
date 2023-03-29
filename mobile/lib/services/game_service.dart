@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import '../models/chat_message_payload.dart';
 import '../models/game.dart';
 import '../models/game_update_payload.dart';
+import '../models/move_info.dart';
 import '../models/player.dart';
 import '../models/room.dart';
 
@@ -22,6 +23,8 @@ class GameService extends GetxService {
 
   final currentGame = Rxn<GameUpdatePayload>();
   final currentGameTimer = Rxn<int>();
+
+  RxList<MoveInfo> indices = <MoveInfo>[].obs;
 
   Player? getPlayer() {
     for (final player in currentGame.value!.players) {

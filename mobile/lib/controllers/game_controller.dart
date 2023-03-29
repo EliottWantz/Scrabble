@@ -22,6 +22,7 @@ class GameController extends GetxController {
 
   RxList<TileInfo> lettersPlaced = <TileInfo>[].obs;
   RxList<String> lettersToExchange = <String>[].obs;
+  RxBool placeIndiceIsCalled = false.obs;
 
   bool isClientTurn() {
     return gameService.currentGame.value!.turn == userService.user.value!.id;
@@ -77,6 +78,24 @@ class GameController extends GetxController {
     websocketService.playMove(moveInfo);
     lettersPlaced.value = [];
     lettersToExchange.value = [];
+  }
+
+  void placeIndice(MoveInfo moveInfo) {
+    if (!isClientTurn()) {
+      return;
+    }
+
+    websocketService.playMove(moveInfo);
+    lettersPlaced.value = [];
+    lettersToExchange.value = [];
+  }
+
+  void getIndice() {
+    if (!isClientTurn()) {
+      return;
+    }
+
+    websocketService.getIndice();
   }
 
   String generateLetters() {
