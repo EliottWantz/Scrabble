@@ -44,6 +44,8 @@ import { FindGamePageComponent } from '@app/pages/find-game-page/find-game-page.
 import { MatGridListModule } from '@angular/material/grid-list';
 import { JoinGameComponent } from '@app/components/join-game/join-game.component';
 import { CreateGameComponent } from '@app/components/create-game/create-game.component';
+import { CustomizeAvatarComponent } from '@app/components/customize-avatar/customize-avatar.component';
+import { MatStepperModule } from '@angular/material/stepper';
 
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
@@ -76,6 +78,7 @@ import { HttpClient } from '@angular/common/http';
     FindGamePageComponent,
     JoinGameComponent,
     CreateGameComponent,
+    CustomizeAvatarComponent
   ],
   imports: [
     BrowserModule,
@@ -98,6 +101,7 @@ import { HttpClient } from '@angular/common/http';
     MatSelectModule,
     MatGridListModule,
     HttpClientModule,
+    MatStepperModule,
     TranslateModule.forRoot({
       loader: {
         provide: TranslateLoader,

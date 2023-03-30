@@ -1,0 +1,19 @@
+<mat-dialog-content id="container">
+    <mat-stepper orientation="vertical" #stepper>
+        <mat-step-header>
+            {{'customize-avatar-component.title' | translate}}
+        </mat-step-header>
+
+        <mat-step [stepControl]="firstFormGroup">
+            <form [formGroup]="firstFormGroup">
+                <ng-template matStepLabel>Fill out your name</ng-template>
+                <mat-form-field appearance="fill">
+                    <mat-label>Name</mat-label>
+                    <input matInput placeholder="Last name, First name" formControlName="firstCtrl" required>
+                </mat-form-field>
+            </form>
+        </mat-step>
+
+        <mat-step></mat-step>
+    </mat-stepper>
+</mat-dialog-content>
