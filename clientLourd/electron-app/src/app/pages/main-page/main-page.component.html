@@ -10,9 +10,20 @@
     <div *ngIf="isLoggedIn()">
         <div class="list-games" *ngFor="let game of joinableGames.value; let i = index">
             <h4>{{game.id}}     {{game.userIds.length}}/4</h4>
-            <button mat-flat-button color="accent" (click)="joinGame(game.id, ' ')" routerLink="/waitingRoom">Rejoindre la partie</button>
+        <button mat-flat-button color="accent" (click)="joinGame(game.id, ' ')">Rejoindre la partie</button>
         </div>
     </div>
+    <!--
+        <button *ngIf="isLoggedIn()" mat-flat-button color="accent" routerLink="/waitingRoom" (click)="createGame()">Créer une partie</button>
+        <button mat-flat-button color="accent" routerLink="/game">Game</button>
+
+        <div *ngIf="isLoggedIn()">
+            <div class="list-games" *ngFor="let game of joinableGames.value; let i = index">
+                <h4>{{game.id}}     {{game.userIds.length}}/4</h4>
+            <button mat-flat-button color="accent" (click)="joinGame(game.id, ' ')" routerLink="/waitingRoom">Rejoindre la partie</button>
+            </div>
+        </div>
+    -->
     <div class="bottom">
         <app-chat-box *ngIf="isLoggedIn()"></app-chat-box>
     </div>

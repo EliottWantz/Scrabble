@@ -1,5 +1,5 @@
 <mat-drawer-container *ngIf="!isInGame()">
-    <mat-drawer opened="true" disableClose="true" mode="side">
+    <mat-drawer #drawer opened="true" disableClose="false" mode="side">
         <div class="box">
             <mat-icon *ngIf="user.value.id === '0'">account_circle</mat-icon>
             <img *ngIf="user.value.id !== '0'" src="{{user.value.avatar.url}}" class="avatar">

@@ -51,12 +51,21 @@ func NewManager(messageRepo *MessageRepository, roomSvc *room.Service, userSvc *
 
 func (m *Manager) Accept(cID string) fiber.Handler {
 	return websocket.New(func(conn *websocket.Conn) {
-		c := NewClient(conn, cID, m)
-		err := m.AddClient(c)
+		id := cID + "#1"
+		c, err := m.GetClient(id)
+		if err != nil {
+			m.logger.Error("get client", err)
+		}
+		slog.Info("user already connected:", c, "creating a new socket connection with a different ID")
+		if c != nil {
+			id = cID + "#2"
+		}
+		c = NewClient(conn, id, m)
+		err = m.AddClient(c)
 		if err != nil {
 			m.logger.Error("add client", err)
-			return
 		}
+		// }
 
 		{
 			// List all users registered in the application
@@ -198,8 +207,8 @@ func (m *Manager) GetClient(cID string) (*Client, error) {
 }
 
 func (m *Manager) RemoveClient(c *Client) error {
-	close(c.receiveCh)
-	close(c.sendCh)
+	defer close(c.receiveCh)
+	defer close(c.sendCh)
 	user, err := m.UserSvc.GetUser(c.ID)
 	if err != nil {
 		return fmt.Errorf("removeClient: %w", err)
