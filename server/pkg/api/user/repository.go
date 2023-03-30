@@ -2,7 +2,6 @@ package user
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -22,7 +21,6 @@ func NewRepository(db *mongo.Database) *Repository {
 func (r *Repository) Find(ID string) (*User, error) {
 	u := &User{}
 	filteredId := filterJustId(ID)
-	fmt.Println(filteredId)
 	res := r.coll.FindOne(
 		context.TODO(),
 		bson.M{"_id": filteredId},

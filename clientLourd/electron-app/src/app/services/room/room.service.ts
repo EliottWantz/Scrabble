@@ -31,8 +31,6 @@ export class RoomService {
   }
 
   addRoom(room: Room): void {
-    //console.log(room);
-    console.log('room');
     console.log(room);
     this.listJoinedChatRooms.next([...this.listJoinedChatRooms.value, room]);
     const updatedChatRooms = this.userService.currentUserValue.joinedChatRooms;
@@ -93,7 +91,6 @@ export class RoomService {
   }
 
   addMessage(msg: ChatMessage): void {
-    console.log('add a new message', this.listJoinedChatRooms.value);
     if (msg.roomId == this.currentRoomChat.value.id) {
       const currentMessages = this.currentRoomChat.value.messages;
       currentMessages.push(msg);

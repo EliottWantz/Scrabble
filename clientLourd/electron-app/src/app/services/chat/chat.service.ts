@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { Packet } from '@app/utils/interfaces/packet';
 import { Room } from '@app/utils/interfaces/room';
 import { ChatMessage } from '@app/utils/interfaces/chat-message';
 import { UserService } from '@app/services/user/user.service';
@@ -25,8 +24,7 @@ export class ChatService {
       electron.ipcRenderer.send('request-user-data');
       electron.ipcRenderer.on(
         'user-data',
-        async (event: any, data: { user: User }) => {
-          console.log('user data received', data);
+        async (_: string, data: { user: User }) => {
           this.userService.setUser(data.user);
           this.user.next(data.user);
           if (this.user.value.id !== '0') {
@@ -38,12 +36,6 @@ export class ChatService {
   }
 
   send(msg: string, room: Room): void {
-    console.log(
-      'messages received ',
-      this.roomService.listJoinedChatRooms.value
-    );
-    console.log('currr', this.userService.currentUserValue);
-    console.log('room Services', this.roomService);
     if (
       this.userService.isLoggedIn &&
       this.roomService.findRoom(room.id) !== undefined
@@ -64,14 +56,16 @@ export class ChatService {
     const text = 'Hello World';
     const user = this.userService.currentUserValue;
     electron.ipcRenderer.send('open-chat', { text, user });
-    electron.ipcRenderer.on('open-chat-reply', (event: any, arg: any) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    electron.ipcRenderer.on('open-chat-reply', (_: any, arg: any) => {
       console.log(arg);
     });
   }
   closeChat(): any {
     const text = 'Hello World';
     electron.ipcRenderer.send('close-chat', text);
-    electron.ipcRenderer.on('close-chat-reply', (event: any, arg: any) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    electron.ipcRenderer.on('close-chat-reply', (_: any, arg: any) => {
       console.log(arg);
     });
   }

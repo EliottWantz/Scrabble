@@ -2,20 +2,11 @@ import {
   AfterViewInit,
   Component,
   ElementRef,
-  OnInit,
   ViewChild,
   NgZone,
   ChangeDetectorRef,
 } from '@angular/core';
-import {
-  AbstractControl,
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  NgForm,
-  Validators,
-} from '@angular/forms';
-//import { MessageErrorStateMatcher } from "@app/classes/form-error/error-state-form";
+import * as forms from '@angular/forms';
 import { ChatService } from '@app/services/chat/chat.service';
 import { BehaviorSubject } from 'rxjs';
 import { User } from '@app/utils/interfaces/user';
@@ -37,29 +28,24 @@ const electron = (window as any).require('electron');
   styleUrls: ['./chat-box.component.scss'],
 })
 export class ChatBoxComponent implements AfterViewInit {
-  @ViewChild('chatBoxMessages')
+  @ViewChild('chatBoxBody')
   chatBoxMessagesContainer!: ElementRef;
   fenetrer = false;
   showbutton = true;
-  // @ViewChild("chatBoxMessages")
-  // chatBoxMessagesContainer: CdkVirtualScrollViewport;
-  //chatBoxForm: FormGroup;
-  //   messages: ChatMessage[];
-  //messages$!: BehaviorSubject<ChatMessage[]>;
   room$!: BehaviorSubject<Room>;
-  //messageValidator: MessageErrorStateMatcher = new MessageErrorStateMatcher;
   ws!: WebSocket;
   @ViewChild('chatBoxInput')
   chatBoxInput!: ElementRef;
   user!: User;
   currentRoomId = '';
   message = '';
-  roomsFormControl = new FormControl();
+  roomsFormControl = new forms.FormControl();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private scrollTimeoutId: any;
   private roomSubscription!: Subscription;
 
   constructor(
-    private fb: FormBuilder,
+    private fb: forms.FormBuilder,
     public chatService: ChatService,
     private roomService: RoomService,
     private userService: UserService,
@@ -73,13 +59,9 @@ export class ChatBoxComponent implements AfterViewInit {
     this.user = this.userService.currentUserValue;
     this.fenetrer = false;
     this.subscribeToRoom();
-    /*this.chatBoxForm = this.fb.group({
-      input: ["", [Validators.required]],
-    });*/
     electron.ipcRenderer.on('user-data', async () => {
       this.ngZone.run(() => {
         this.showbutton = false;
-        console.log('room$', this.room$);
       });
     });
     electron.ipcRenderer.on('open-chat', async () => {
@@ -100,55 +82,21 @@ export class ChatBoxComponent implements AfterViewInit {
   async ngAfterViewInit(): Promise<void> {
     setTimeout(() => {
       this.chatBoxInput.nativeElement.focus();
-      // this.messages$.subscribe(() => {
-      //   this.scrollBottom();
-      // })
-      this.chatBoxMessagesContainer.nativeElement.scrollTop =
-        this.chatBoxMessagesContainer.nativeElement.scrollHeight;
-      this.chatBoxMessagesContainer.nativeElement.scrollTop;
-      this.chatBoxMessagesContainer.nativeElement.scrollHeight;
-      // this.scrollBottom();
-      // this.messages$.subscribe(() => {
-      //   this.scrollBottom();
-      // });
+      this.scrollToBottom();
     });
-    // });
+
+    this.room$.subscribe(() => {
+      this.scrollToBottom();
+    });
   }
 
   send(): void {
-    console.log('current room id:' + this.currentRoomId);
     console.log(document.getElementById('selectionElem'));
     if (!this.message || !this.message.replace(/\s/g, '')) return;
 
     this.chatService.send(this.message, this.roomService.currentRoomChat.value);
-    //this.chatBoxForm.get('message')?.reset();
     this.message = '';
-    //this.chatBoxInput.nativeElement.focus();
-    //console.log(this.messages$);
-  }
-
-  /*get input(): AbstractControl {
-    return this.chatBoxForm.controls["input"];
-  }*/
-
-  private scrollBottom(): void {
-    console.log('receive a new message and we need to scroll bottom ');
-    // const shouldScroll =
-    //   this.chatBoxMessagesContainer.nativeElement.scrollTop +
-    //     this.chatBoxMessagesContainer.nativeElement.clientHeight !==
-    //   this.chatBoxMessagesContainer.nativeElement.scrollHeight;
-
-    // console.log(shouldScroll);
-    this.chatBoxMessagesContainer.nativeElement.scrollTop;
-    this.chatBoxMessagesContainer.nativeElement.scrollHeight;
-    this.chatBoxMessagesContainer.nativeElement.clientHeight;
-    this.chatBoxMessagesContainer.nativeElement.scrollTop +
-      this.chatBoxMessagesContainer.nativeElement.clientHeight;
-    // if (shouldScroll) {
-    this.chatBoxMessagesContainer.nativeElement.scrollTop =
-      this.chatBoxMessagesContainer.nativeElement.scrollHeight;
-    // }
-    this.cdr.detectChanges();
+    this.scrollToBottom();
   }
 
   getAvatarMessage(id: string): string {
@@ -199,15 +147,23 @@ export class ChatBoxComponent implements AfterViewInit {
     console.log(this.roomService.currentRoomChat.value);
     this.socketService.send(event, payload);
     console.log(this.roomService.listJoinedChatRooms.value);
-    //this.roomService.currentRoomChat.next(this.roomService.listJoinedChatRooms.value[0]);
-    //this.roomService.changeRoom("global");
   }
 
   private subscribeToRoom(): void {
     this.roomSubscription = this.room$.subscribe(() => {
       this.currentRoomId = this.room$.value.id;
-      //console.log(this.chatBoxForm);
-      this.scrollTimeoutId = setTimeout(() => this.scrollBottom());
+      this.scrollTimeoutId = setTimeout(() => {
+        this.scrollToBottom();
+      });
+    });
+  }
+  private scrollToBottom(): void {
+    setTimeout(() => {
+      if (this.chatBoxMessagesContainer) {
+        const chatBox = this.chatBoxMessagesContainer.nativeElement;
+        chatBox.scrollTop = chatBox.scrollHeight;
+        this.cdr.detectChanges();
+      }
     });
   }
 }

@@ -26,7 +26,7 @@ mat-form-field {
 
 
 .room-form {
-  width: calc(100% - 50px); /* Adjust the "50px" value according to the width of your button */
+  width: calc(100% - 50px); 
 }
 
 
@@ -59,7 +59,7 @@ mat-form-field {
 
 #chatBoxBody {
   flex-grow: 1;
-  overflow: auto;
+  overflow: scroll;
 }
 
 #chatBoxMessages {

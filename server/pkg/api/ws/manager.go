@@ -56,8 +56,7 @@ func (m *Manager) Accept(cID string) fiber.Handler {
 		if err != nil {
 			m.logger.Error("get client", err)
 		}
-
-		fmt.Print("client connected:", c)
+		slog.Info("user already connected:", c, "creating a new socket connection with a different ID")
 		if c != nil {
 			id = cID + "#2"
 		}

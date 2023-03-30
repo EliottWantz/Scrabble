@@ -84,7 +84,6 @@ export class WebSocketService {
 
     switch (event) {
       case 'joinedRoom': {
-        console.log('joinedRoom');
         const payloadRoom = packet.payload as JoinedRoomPayload;
         const userIds = [];
         for (const id of payloadRoom.userIds) {
@@ -135,7 +134,6 @@ export class WebSocketService {
       }
 
       case 'joinedDMRoom': {
-        console.log('joinedDMRoom');
         const payloadRoom = packet.payload as JoinedDMRoomPayload;
         const userIds = [];
         for (const id of payloadRoom.userIds) {
@@ -298,7 +296,6 @@ export class WebSocketService {
       }
 
       case 'chat-message': {
-        console.log('we receive a message ');
         const payloadMessage = packet.payload as ChatMessage;
         const message: ChatMessage = {
           from: payloadMessage.from,
@@ -315,7 +312,6 @@ export class WebSocketService {
       }
 
       case 'error': {
-        console.log('yellow');
         console.log(packet);
         const errorPayload = packet.payload as ErrorPayload;
         console.log(errorPayload);
