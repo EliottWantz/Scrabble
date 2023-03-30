@@ -94,13 +94,27 @@ func (m *Manager) Accept(cID string) fiber.Handler {
 			c.send(p)
 		}
 		{
-			// List available games
-			games, err := m.GameSvc.Repo.FindAll()
+			// List joinailable games
+			games, err := m.GameSvc.Repo.FindAllJoinableGames()
 			if err != nil {
 				m.logger.Error("list joinable games", err)
 			}
 			p, err := NewJoinableGamesPacket(ListJoinableGamesPayload{
 				Games: games,
+			})
+			if err != nil {
+				m.logger.Error("list joinable games", err)
+			}
+			c.send(p)
+		}
+		{
+			// List joinailable tournaments
+			tournaments, err := m.GameSvc.Repo.FindAllJoinableTournaments()
+			if err != nil {
+				m.logger.Error("list joinable games", err)
+			}
+			p, err := NewJoinableTournamentsPacket(ListJoinableTournamentsPayload{
+				Tournaments: makeJoinableTournamentsPayload(tournaments),
 			})
 			if err != nil {
 				m.logger.Error("list joinable games", err)
@@ -290,7 +304,7 @@ func (m *Manager) RemoveClientFromGame(c *Client, gID string) error {
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
-	g, err := c.Manager.GameSvc.Repo.Find(gID)
+	g, err := c.Manager.GameSvc.Repo.FindGame(gID)
 	if err != nil {
 		return fiber.NewError(fiber.StatusNotFound, err.Error())
 	}
@@ -298,15 +312,12 @@ func (m *Manager) RemoveClientFromGame(c *Client, gID string) error {
 	if err := r.RemoveClient(c.ID); err != nil {
 		slog.Error("remove client from ws room", err)
 	}
-	if err := r.BroadcastLeaveGamePackets(c, g.ID); err != nil {
-		slog.Error("broadcast leave game packets", err)
-	}
 
 	if g.ScrabbleGame == nil {
 		// Game has not started yet
 		if c.ID == g.CreatorID {
 			// Delete the game and remove all users
-			if err := c.Manager.GameSvc.Repo.Delete(g.ID); err != nil {
+			if err := c.Manager.GameSvc.Repo.DeleteGame(g.ID); err != nil {
 				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 			}
 			for _, uID := range g.UserIDs {
@@ -331,7 +342,7 @@ func (m *Manager) RemoveClientFromGame(c *Client, gID string) error {
 			return nil
 		} else {
 			// Remove the user from the game
-			if _, err := c.Manager.GameSvc.RemoveUser(gID, c.ID); err != nil {
+			if _, err := c.Manager.GameSvc.RemoveUserFromGame(gID, c.ID); err != nil {
 				slog.Error("remove user from game room", err)
 			}
 			if err := c.Manager.UserSvc.Repo.UnSetJoinedGame(c.ID); err != nil {
@@ -354,6 +365,85 @@ func (m *Manager) RemoveClientFromGame(c *Client, gID string) error {
 			slog.Error("remove user from game room", err)
 		}
 	}
+
+	if err := r.BroadcastLeaveGamePackets(c, g.ID); err != nil {
+		slog.Error("broadcast leave game packets", err)
+	}
+
+	return nil
+}
+
+func (m *Manager) RemoveClientFromTournament(c *Client, gID string) error {
+	r, err := c.Manager.GetRoom(gID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	t, err := c.Manager.GameSvc.Repo.FindTournament(gID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusNotFound, err.Error())
+	}
+
+	if err := r.RemoveClient(c.ID); err != nil {
+		slog.Error("remove client from ws room", err)
+	}
+
+	if !t.HasStarted {
+		// Tournament has not started yet
+		if c.ID == t.CreatorID {
+			// Delete the Tournament and remove all users
+			if err := c.Manager.GameSvc.Repo.DeleteTournament(t.ID); err != nil {
+				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+			}
+			for _, uID := range t.UserIDs {
+				if err := r.RemoveClient(uID); err != nil {
+					slog.Error("remove user from tournament room", err)
+					continue
+				}
+				if err := c.Manager.UserSvc.Repo.UnSetJoinedTournament(uID); err != nil {
+					slog.Error("remove user from tournament room", err)
+					continue
+				}
+				client, err := c.Manager.GetClient(uID)
+				if err != nil {
+					slog.Error("remove user from tournament room", err)
+					continue
+				}
+				if err := r.BroadcastLeaveTournamentPackets(client, t.ID); err != nil {
+					slog.Error("broadcast leave tournament packets", err)
+					continue
+				}
+			}
+			return nil
+		} else {
+			// Remove the user from the Tournament
+			if _, err := c.Manager.GameSvc.RemoveUserFromTournament(gID, c.ID); err != nil {
+				slog.Error("remove user from Tournament room", err)
+			}
+			if err := c.Manager.UserSvc.Repo.UnSetJoinedTournament(c.ID); err != nil {
+				slog.Error("remove user from Tournament room", err)
+			}
+		}
+	} else {
+		// if Tournament has started and is a spectator
+		// if strings.Contains(strings.Join(t.ObservateurIDs, ""), c.ID) {
+		// 	if err := r.RemoveClient(c.ID); err != nil {
+		// 		slog.Error("remove spectator from Tournament room", err)
+		// 	}
+		// 	return nil
+		// }
+		// // Tournament has started, replace player with a bot
+		// if err := c.Manager.ReplacePlayerWithBot(t.ID, c.ID); err != nil {
+		// 	slog.Error("replace player with bot", err)
+		// }
+		// if err := c.Manager.UserSvc.Repo.UnSetJoinedTournament(c.ID); err != nil {
+		// 	slog.Error("remove user from Tournament room", err)
+		// }
+	}
+
+	if err := r.BroadcastLeaveTournamentPackets(c, t.ID); err != nil {
+		slog.Error("broadcast leave tournament packets", err)
+	}
+
 	return nil
 }
 
@@ -421,25 +511,35 @@ func (m *Manager) UpdateChatRooms() error {
 	return nil
 }
 
-func (m *Manager) UpdateJoinableGames() error {
-	games, err := m.GameSvc.Repo.FindAll()
+func (m *Manager) BroadcastJoinableGames() error {
+	games, err := m.GameSvc.Repo.FindAllJoinableGames()
 	if err != nil {
 		return err
 	}
-	joinable := make([]*game.Game, 0, len(games))
-	for _, g := range games {
-		if g.IsJoinable() {
-			joinable = append(joinable, g)
-		}
-	}
 
 	joinableGamesPacket, err := NewJoinableGamesPacket(ListJoinableGamesPayload{
-		Games: joinable,
+		Games: games,
 	})
 	if err != nil {
 		return err
 	}
 	m.Broadcast(joinableGamesPacket)
+
+	return nil
+}
+
+func (m *Manager) BroadcastJoinableTournaments() error {
+	tournaments, err := m.GameSvc.Repo.FindAllJoinableTournaments()
+	if err != nil {
+		return err
+	}
+	joinableTournamentsPacket, err := NewJoinableTournamentsPacket(ListJoinableTournamentsPayload{
+		Tournaments: makeJoinableTournamentsPayload(tournaments),
+	})
+	if err != nil {
+		return err
+	}
+	m.Broadcast(joinableTournamentsPacket)
 
 	return nil
 }
@@ -500,12 +600,23 @@ func (m *Manager) ReplacePlayerWithBot(gID, pID string) error {
 }
 
 func (m *Manager) HandleGameOver(g *game.Game) error {
-	r, err := m.GetRoom(g.ID)
+	g.ScrabbleGame.Timer.Stop()
+	gameRoom, err := m.GetRoom(g.ID)
 	if err != nil {
 		return err
 	}
 
 	winnerID := g.ScrabbleGame.Winner().ID
+	g.WinnerID = winnerID
+
+	gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
+		Game: makeGamePayload(g),
+	})
+	if err != nil {
+		return err
+	}
+	gameRoom.Broadcast(gamePacket)
+
 	gameOverPacket, err := NewGameOverPacket(GameOverPayload{
 		WinnerID: winnerID,
 	})
@@ -513,8 +624,7 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 		return err
 	}
 
-	r.Broadcast(gameOverPacket)
-	g.ScrabbleGame.Timer.Stop()
+	gameRoom.Broadcast(gameOverPacket)
 
 	for _, p := range g.ScrabbleGame.Players {
 		u, err := m.UserSvc.GetUser(p.ID)
@@ -523,6 +633,127 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 		}
 		m.UserSvc.AddGameStats(u, time.Now().UnixMilli(), winnerID == p.ID)
 		m.UserSvc.UpdateUserStats(u, winnerID == p.ID, p.Score, time.Now().UnixMilli())
+	}
+
+	if g.IsTournamentGame() {
+		t, err := m.GameSvc.UpdateTournamentGameOver(g.ID)
+		if err != nil {
+			return err
+		}
+
+		tournamentRoom, err := m.GetRoom(t.ID)
+		if err != nil {
+			return err
+		}
+		{
+			p, err := NewTournamentUpdatePacket(TournamentUpdatePayload{
+				Tournament: makeTournamentPayload(t),
+			})
+			if err != nil {
+				return err
+			}
+			tournamentRoom.Broadcast(p)
+		}
+
+		// Leave old game
+		for _, playerID := range g.UserIDs {
+			client, err := m.GetClient(playerID)
+			if err != nil {
+				slog.Error("get client", err)
+				continue
+			}
+			if err := gameRoom.RemoveClient(client.ID); err != nil {
+				slog.Error("remove client from ws room", err)
+			}
+			if err := gameRoom.BroadcastLeaveGamePackets(client, g.ID); err != nil {
+				slog.Error("broadcast leave game packets", err)
+			}
+			if err := m.UserSvc.Repo.UnSetJoinedGame(client.ID); err != nil {
+				slog.Error("remove user from game room", err)
+			}
+		}
+
+		if t.IsOver {
+			p, err := NewTournamentOverPacket(TournamentOverPayload{
+				TournamentID: t.ID,
+				WinnerID:     t.WinnerID,
+			})
+			if err != nil {
+				return err
+			}
+			tournamentRoom.Broadcast(p)
+			if err := m.GameSvc.Repo.DeleteTournament(t.ID); err != nil {
+				return err
+			}
+		} else {
+			if t.Finale != nil {
+				// Join the finale
+				finaleRoom := m.AddRoom(t.Finale.ID, "")
+				for _, playerID := range t.Finale.UserIDs {
+					player, err := m.GetClient(playerID)
+					if err != nil {
+						slog.Error("get client", err)
+						continue
+					}
+
+					if err := finaleRoom.AddClient(player.ID); err != nil {
+						slog.Error("add client to room", err)
+						continue
+					}
+					if err := m.UserSvc.Repo.SetJoinedGame(t.Finale.ID, playerID); err != nil {
+						slog.Error("set joined game", err)
+						continue
+					}
+					if err := finaleRoom.BroadcastJoinGamePackets(player, t.Finale); err != nil {
+						slog.Error("broadcast join game packets", err)
+						continue
+					}
+				}
+
+				// Start game timer
+				t.Finale.ScrabbleGame.Timer.OnTick(func() {
+					timerPacket, err := NewTimerUpdatePacket(TimerUpdatePayload{
+						Timer: t.Finale.ScrabbleGame.Timer.TimeRemaining(),
+					})
+					if err != nil {
+						slog.Error("failed to create timer update packet:", err)
+						return
+					}
+					finaleRoom.Broadcast(timerPacket)
+				})
+				t.Finale.ScrabbleGame.Timer.OnDone(func() {
+					t.Finale.ScrabbleGame.SkipTurn()
+					GamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
+						Game: makeGamePayload(t.Finale),
+					})
+					if err != nil {
+						slog.Error("failed to create Game update packet:", err)
+						return
+					}
+					finaleRoom.Broadcast(GamePacket)
+
+					// Make bots move if applicable
+					go m.MakeBotMoves(t.Finale.ID)
+				})
+				t.Finale.ScrabbleGame.Timer.Start()
+
+				gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
+					Game: makeGamePayload(t.Finale),
+				})
+				if err != nil {
+					return err
+				}
+
+				finaleRoom.Broadcast(gamePacket)
+			} else {
+				// We are wainting for next winner to finish his previous game
+				// make the winner an observer of the other game
+			}
+		}
+	}
+
+	if err := m.GameSvc.Repo.DeleteGame(g.ID); err != nil {
+		return err
 	}
 
 	return nil
