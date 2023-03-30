@@ -298,6 +298,7 @@ export class WebSocketService {
       }
 
       case 'chat-message': {
+        console.log('we receive a message ');
         const payloadMessage = packet.payload as ChatMessage;
         const message: ChatMessage = {
           from: payloadMessage.from,

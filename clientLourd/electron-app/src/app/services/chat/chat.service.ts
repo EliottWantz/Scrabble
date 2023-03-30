@@ -21,10 +21,27 @@ export class ChatService {
     private socketService: WebSocketService
   ) {
     this.user = this.userService.subjectUser;
+    if (this.user.value.id === '0') {
+      electron.ipcRenderer.send('request-user-data');
+      electron.ipcRenderer.on(
+        'user-data',
+        async (event: any, data: { user: User }) => {
+          console.log('user data received', data);
+          this.userService.setUser(data.user);
+          this.user.next(data.user);
+          if (this.user.value.id !== '0') {
+            await this.socketService.connect();
+          }
+        }
+      );
+    }
   }
 
   send(msg: string, room: Room): void {
-    console.log(this.roomService.listJoinedChatRooms.value);
+    console.log(
+      'messages received ',
+      this.roomService.listJoinedChatRooms.value
+    );
     console.log('currr', this.userService.currentUserValue);
     console.log('room Services', this.roomService);
     if (

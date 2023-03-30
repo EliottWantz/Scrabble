@@ -51,8 +51,9 @@ function openChatwindow() {
   chatWindow.setMenuBarVisibility(false);
   chatWindow.webContents.openDevTools();
 
-  chatWindow.on("closed", function (event) {
+  chatWindow.on("close", function (event) {
     event.preventDefault();
+    appWindow.webContents.send("close-chat");
     chatWindow.hide();
   });
 }
@@ -70,12 +71,12 @@ app.on("window-all-closed", function () {
 app.on("activate", function () {
   if (appWindow === null) {
     initWindow();
+    openChatwindow();
   }
 });
 
 ipcMain.on("open-chat", (event, data) => {
-  console.log("ipcMain received open-chat event. data:", data);
-  event.reply("open-chat-reply", "response from ipcMain (open)");
+  appWindow.webContents.send("open-chat");
   if (chatWindow == null) {
     openChatwindow();
   }
@@ -83,11 +84,6 @@ ipcMain.on("open-chat", (event, data) => {
   chatWindow.show();
 });
 
-ipcMain.on("request-user-data", (event) => {
-  event.reply("user-data", userData);
-});
-
-ipcMain.on("close-chat", (event, data) => {
-  console.log("ipcMain received close-chat event. data:", data);
-  event.reply("close-chat-reply", "response from ipcMain (close)");
+ipcMain.on("request-user-data", (event, data) => {
+  chatWindow.webContents.send("user-data", userData);
 });

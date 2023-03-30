@@ -51,21 +51,22 @@ func NewManager(messageRepo *MessageRepository, roomSvc *room.Service, userSvc *
 
 func (m *Manager) Accept(cID string) fiber.Handler {
 	return websocket.New(func(conn *websocket.Conn) {
-		c, _ := m.GetClient(cID)
+		id := cID + "#1"
+		c, err := m.GetClient(id)
+		if err != nil {
+			m.logger.Error("get client", err)
+		}
+
 		fmt.Print("client connected:", c)
 		if c != nil {
-			err := m.addClientToJoinedRoom(c)
-			if err != nil {
-				m.logger.Error("add client to joined room", err)
-			}
-
-		} else {
-			c = NewClient(conn, cID, m)
-			err := m.AddClient(c)
-			if err != nil {
-				m.logger.Error("add client", err)
-			}
+			id = cID + "#2"
 		}
+		c = NewClient(conn, id, m)
+		err = m.AddClient(c)
+		if err != nil {
+			m.logger.Error("add client", err)
+		}
+		// }
 
 		{
 			// List all users registered in the application
@@ -160,7 +161,6 @@ func (m *Manager) AddClient(c *Client) error {
 
 	// Add the client to all his joined rooms
 	for _, roomID := range user.JoinedChatRooms {
-		fmt.Println("here34")
 		r, err := m.GetRoom(roomID)
 		if err != nil {
 			dbRoom, err := m.RoomSvc.Repo.Find(roomID)
@@ -175,7 +175,6 @@ func (m *Manager) AddClient(c *Client) error {
 	}
 	// Add the client to all his joined dm rooms
 	for _, roomID := range user.JoinedDMRooms {
-		fmt.Println("here345")
 		r, err := m.GetRoom(roomID)
 		if err != nil {
 			dbRoom, err := m.RoomSvc.Repo.Find(roomID)
@@ -205,8 +204,9 @@ func (m *Manager) addClientToJoinedRoom(c *Client) error {
 		return err
 	}
 	m.Clients.Set(c.ID, c)
-	if err := m.GlobalRoom.BroadcastJoinRoomPackets(c); err != nil {
-		slog.Error("failed to broadcast join room packets", err)
+
+	if err := m.GlobalRoom.AddClient(c.ID); err != nil {
+		return err
 	}
 
 	for _, roomID := range user.JoinedChatRooms {

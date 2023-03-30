@@ -4,6 +4,7 @@ import {
   ElementRef,
   OnInit,
   ViewChild,
+  NgZone,
 } from '@angular/core';
 import {
   AbstractControl,
@@ -32,9 +33,11 @@ const electron = (window as any).require('electron');
   templateUrl: './chat-box.component.html',
   styleUrls: ['./chat-box.component.scss'],
 })
-export class ChatBoxComponent implements OnInit, AfterViewInit {
+export class ChatBoxComponent implements AfterViewInit {
   @ViewChild('chatBoxMessages')
   chatBoxMessagesContainer!: ElementRef;
+  fenetrer = false;
+  showbutton = true;
   // @ViewChild("chatBoxMessages")
   // chatBoxMessagesContainer: CdkVirtualScrollViewport;
   //chatBoxForm: FormGroup;
@@ -56,12 +59,13 @@ export class ChatBoxComponent implements OnInit, AfterViewInit {
     private roomService: RoomService,
     private userService: UserService,
     private storageService: StorageService,
-    private socketService: WebSocketService
+    private socketService: WebSocketService,
+    private ngZone: NgZone
   ) {
     this.room$ = this.roomService.currentRoomChat;
     this.currentRoomId = this.room$.value.id;
     this.user = this.userService.currentUserValue;
-
+    this.fenetrer = false;
     this.room$.subscribe(() => {
       this.currentRoomId = this.room$.value.id;
       //console.log(this.chatBoxForm);
@@ -70,23 +74,23 @@ export class ChatBoxComponent implements OnInit, AfterViewInit {
     /*this.chatBoxForm = this.fb.group({
       input: ["", [Validators.required]],
     });*/
+    electron.ipcRenderer.on('user-data', async () => {
+      this.ngZone.run(() => {
+        this.showbutton = false;
+      });
+    });
+    electron.ipcRenderer.on('open-chat', async () => {
+      this.ngZone.run(() => {
+        this.fenetrer = true;
+      });
+    });
+    electron.ipcRenderer.on('close-chat', async () => {
+      this.ngZone.run(() => {
+        this.fenetrer = false;
+      });
+    });
   }
-  async ngOnInit(): Promise<void> {
-    if (this.user.id === '0') {
-      electron.ipcRenderer.send('request-user-data');
-      electron.ipcRenderer.on(
-        'user-data',
-        async (event: any, data: { user: User }) => {
-          this.userService.setUser(data.user);
-          this.user = data.user;
-          if (this.user.id !== '0') {
-            await this.socketService.connect();
-          }
-          console.log('user-data', data.user);
-        }
-      );
-    }
-  }
+
   async ngAfterViewInit(): Promise<void> {
     setTimeout(() => {
       this.chatBoxInput.nativeElement.focus();
@@ -97,7 +101,6 @@ export class ChatBoxComponent implements OnInit, AfterViewInit {
         this.chatBoxMessagesContainer.nativeElement.scrollHeight;
       this.chatBoxMessagesContainer.nativeElement.scrollTop;
       this.chatBoxMessagesContainer.nativeElement.scrollHeight;
-
       // this.scrollBottom();
       // this.messages$.subscribe(() => {
       //   this.scrollBottom();
@@ -107,6 +110,7 @@ export class ChatBoxComponent implements OnInit, AfterViewInit {
   }
 
   send(): void {
+    console.log('current room id:' + this.currentRoomId);
     console.log(this.currentRoomId);
     console.log(document.getElementById('selectionElem'));
     if (!this.message || !this.message.replace(/\s/g, '')) return;
