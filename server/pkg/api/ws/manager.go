@@ -198,60 +198,6 @@ func (m *Manager) AddClient(c *Client) error {
 
 	return nil
 }
-func (m *Manager) addClientToJoinedRoom(c *Client) error {
-	user, err := m.UserSvc.Repo.Find(c.ID)
-	if err != nil {
-		return err
-	}
-	m.Clients.Set(c.ID, c)
-
-	if err := m.GlobalRoom.AddClient(c.ID); err != nil {
-		return err
-	}
-
-	for _, roomID := range user.JoinedChatRooms {
-		r, err := m.GetRoom(roomID)
-		if err != nil {
-			dbRoom, err := m.RoomSvc.Repo.Find(roomID)
-			if err != nil {
-				return err
-			}
-			r = m.AddRoom(dbRoom.ID, dbRoom.Name)
-		}
-		fmt.Println("here1")
-		if err := r.AddClient(c.ID); err != nil {
-			return err
-		}
-	}
-	fmt.Println("user.JoinedDMRooms", user.JoinedDMRooms)
-
-	for _, roomID := range user.JoinedDMRooms {
-		r, err := m.GetRoom(roomID)
-		if err != nil {
-			dbRoom, err := m.RoomSvc.Repo.Find(roomID)
-			if err != nil {
-				return err
-			}
-			r = m.AddRoom(dbRoom.ID, dbRoom.Name)
-		}
-		fmt.Println("here2")
-		if err := r.AddClient(c.ID); err != nil {
-			return err
-		}
-		fmt.Println("here3")
-		if err := r.BroadcastJoinDMRoomPackets(c); err != nil {
-			slog.Error("failed to broadcast join dm room packets", err)
-		}
-		fmt.Println("here4")
-	}
-	m.logger.Info(
-		"client registered a second time",
-		"client_id", c.ID,
-	)
-
-	return nil
-
-}
 
 func (m *Manager) GetClient(cID string) (*Client, error) {
 	c, ok := m.Clients.Get(cID)
