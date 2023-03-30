@@ -40,7 +40,12 @@ export class DefaultAvatarSelectionComponent implements OnInit {
             this.error = true;
             return;
         }
-        this.authService.tempUserLogin.avatar.next(this.selectedAvatar);
+        const formData = this.authService.tempUserLogin.value;
+        if (formData.has("avatar"))
+            formData.delete("avatar");
+        formData.set("avatarUrl", this.selectedAvatar.url);
+        formData.set("fileId", this.selectedAvatar.fileId);
+        this.authService.tempUserLogin.next(formData);
         this.dialogRef.close();
     }
 

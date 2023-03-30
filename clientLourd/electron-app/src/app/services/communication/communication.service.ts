@@ -18,8 +18,8 @@ export class CommunicationService {
         return res;
     }
 
-    async register(username: string, password: string, email: string, avatar: {url: string, fileId: string} | FormData): Promise<{user: User, token: string}> {
-        const res: any = (await lastValueFrom(this.requestRegister(username, password, email, avatar)));
+    async register(data: FormData): Promise<{user: User, token: string}> {
+        const res: any = (await lastValueFrom(this.requestRegister(data)));
         return res;
     }
 
@@ -27,16 +27,8 @@ export class CommunicationService {
         return this.http.post<{user: User}>(`${this.baseUrl}/login`, { username, password }).pipe(catchError(this.handleError));
     }
 
-    private requestRegister(username: string, password: string, email: string, avatar: {url: string, fileId: string} | FormData): Observable<{user: User}> {
-        if (avatar instanceof FormData) {
-            console.log("custom image");
-            return this.http.post<{user: User}>(`${this.baseUrl}/signup`, { username, password, email, avatar }).pipe(catchError(this.handleError));
-        }
-
-        const avatarUrl = avatar.url;
-        const avatarId = avatar.fileId;
-
-        return this.http.post<{user: User}>(`${this.baseUrl}/signup`, { username, password, email, avatarUrl, avatarId }).pipe(catchError(this.handleError));
+    private requestRegister(data: FormData): Observable<{user: User}> {
+        return this.http.post<{user: User}>(`${this.baseUrl}/signup`, data).pipe(catchError(this.handleError));
     }
 
     async uploadAvatar(file: File, user: User): Promise<{url: string, fileId: string}> {
