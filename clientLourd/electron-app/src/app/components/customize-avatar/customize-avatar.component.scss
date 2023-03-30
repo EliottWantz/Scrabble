@@ -121,3 +121,21 @@
     padding-top: 24px;
     padding-bottom: 8px;
 }
+
+::ng-deep .mdc-text-field--filled:not(.mdc-text-field--disabled) {
+  background-color: whitesmoke;
+}
+
+::ng-deep .mdc-text-field {
+  border-top-left-radius: var(--mdc-shape-small, 4px);
+  border-top-right-radius: var(--mdc-shape-small, 4px);
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+  display: inline-flex;
+  align-items: baseline;
+  padding: 0 16px;
+  position: relative;
+  box-sizing: border-box;
+  overflow: hidden;
+  will-change: opacity, transform, color;
+}
