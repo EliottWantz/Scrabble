@@ -25,6 +25,12 @@ function initWindow() {
 
   appWindow.on("closed", function () {
     appWindow = null;
+    if (chatWindow) {
+      chatWindow.destroy();
+    }
+    chatWindow = null;
+
+    app.quit();
   });
 }
 
