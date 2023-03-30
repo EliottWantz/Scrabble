@@ -165,3 +165,21 @@ button:hover {
     background: #dcdcdc;
     height: auto !important;
 }
+
+.dark-theme .mat-stepper-vertical-line::before {
+    top: -16px;
+    bottom: -16px;
+}
+
+.dark-theme .mat-vertical-stepper-header {
+    padding: 24px 24px;
+}
+
+.dark-theme .mat-step-header .mat-step-icon-selected {
+    background-color: #d2d5f2;
+    color: black;
+}
+
+.dark-theme .mat-step-header .mat-step-label.mat-step-label-active {
+    color: white;
+  }
