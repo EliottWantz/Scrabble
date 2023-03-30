@@ -47,7 +47,8 @@ class GameService extends GetxService {
   }
 
   bool isGameCreator() {
-    return currentGameInfo.creatorId == userService.user.value!.id;
+    String creatorId = currentGameInfo.creatorId.split("#")[0];
+    return creatorId == userService.user.value!.id;
   }
 
   Game? getJoinableGameById(String id) {

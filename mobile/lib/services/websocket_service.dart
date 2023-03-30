@@ -255,7 +255,9 @@ class WebsocketService extends GetxService {
     gameService.currentGameInfo = joinedGameResponse.payload;
     gameService.currentGameRoomUserIds!.add(userService.user.value!.id);
     final currentGame = gameService.getJoinableGameById(gameService.currentGameId);
-    gameService.currentGameRoomUserIds.addAll(currentGame!.userIds);
+    if (currentGame != null) {
+      gameService.currentGameRoomUserIds.addAll(currentGame!.userIds);
+    }
   }
 
   // void handleEventUserJoined(UserJoinedResponse userJoinedResponse) {
