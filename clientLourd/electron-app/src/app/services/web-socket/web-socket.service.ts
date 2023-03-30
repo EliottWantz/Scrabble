@@ -177,6 +177,8 @@ export class WebSocketService {
             case "leftGame": {
                 const leftGamePayload = packet.payload as LeftGamePayload;
                 this.gameService.removeUser(leftGamePayload.gameId, this.userService.currentUserValue.id);
+                this.gameService.scrabbleGame.next(undefined);
+                this.gameService.isObserving = false;
                 break;
             }
 
