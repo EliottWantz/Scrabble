@@ -52,14 +52,15 @@ func NewService(repo *Repository, userSvc *user.Service) *Service {
 	return s
 }
 
-func (s *Service) New(creatorID string) (*Game, error) {
+func (s *Service) NewGame(creatorID string, withUserIds []string) (*Game, error) {
 	g := &Game{
 		ID:        uuid.NewString(),
 		CreatorID: creatorID,
 		UserIDs:   []string{creatorID},
 	}
+	g.UserIDs = append(g.UserIDs, withUserIds...)
 
-	err := s.Repo.Insert(g)
+	err := s.Repo.InsertGame(g)
 	if err != nil {
 		return nil, err
 	}
@@ -67,13 +68,13 @@ func (s *Service) New(creatorID string) (*Game, error) {
 	return g, nil
 }
 
-func (s *Service) NewProtected(creatorID, password string) (*Game, error) {
+func (s *Service) NewProtectedGame(creatorID string, withUserIds []string, password string) (*Game, error) {
 	hashedPassword, err := auth.HashPassword(password)
 	if err != nil {
 		return nil, err
 	}
 
-	g, err := s.New(creatorID)
+	g, err := s.NewGame(creatorID, withUserIds)
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +86,7 @@ func (s *Service) NewProtected(creatorID, password string) (*Game, error) {
 }
 
 func (s *Service) ProtectGame(gID, password string) (*Game, error) {
-	g, err := s.Repo.Find(gID)
+	g, err := s.Repo.FindGame(gID)
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +106,7 @@ func (s *Service) ProtectGame(gID, password string) (*Game, error) {
 }
 
 func (s *Service) UnprotectGame(gID string) (*Game, error) {
-	g, err := s.Repo.Find(gID)
+	g, err := s.Repo.FindGame(gID)
 	if err != nil {
 		return nil, err
 	}
@@ -116,8 +117,8 @@ func (s *Service) UnprotectGame(gID string) (*Game, error) {
 	return g, nil
 }
 
-func (s *Service) AddUser(gID, userID, password string) (*Game, error) {
-	g, err := s.Repo.Find(gID)
+func (s *Service) AddUserToGame(gID, userID, password string) (*Game, error) {
+	g, err := s.Repo.FindGame(gID)
 	if err != nil {
 		return nil, err
 	}
@@ -131,8 +132,23 @@ func (s *Service) AddUser(gID, userID, password string) (*Game, error) {
 	return g, nil
 }
 
-func (s *Service) RemoveUser(gID, userID string) (*Game, error) {
-	g, err := s.Repo.Find(gID)
+func (s *Service) AddUserToTournament(tID, userID, password string) (*Tournament, error) {
+	t, err := s.Repo.FindTournament(tID)
+	if err != nil {
+		return nil, err
+	}
+
+	// if g.IsProtected && !auth.PasswordsMatch(g.HashedPassword, password) {
+	// 	return nil, fmt.Errorf("password mismatch")
+	// }
+
+	t.UserIDs = append(t.UserIDs, userID)
+
+	return t, nil
+}
+
+func (s *Service) RemoveUserFromGame(gID, userID string) (*Game, error) {
+	g, err := s.Repo.FindGame(gID)
 	if err != nil {
 		return nil, err
 	}
@@ -145,6 +161,22 @@ func (s *Service) RemoveUser(gID, userID string) (*Game, error) {
 	g.UserIDs = append(g.UserIDs[:idx], g.UserIDs[idx+1:]...)
 
 	return g, nil
+}
+
+func (s *Service) RemoveUserFromTournament(gID, userID string) (*Tournament, error) {
+	t, err := s.Repo.FindTournament(gID)
+	if err != nil {
+		return nil, err
+	}
+
+	idx := slices.Index(t.UserIDs, userID)
+	if idx == -1 {
+		return nil, fmt.Errorf("user not found")
+	}
+
+	t.UserIDs = append(t.UserIDs[:idx], t.UserIDs[idx+1:]...)
+
+	return t, nil
 }
 
 func (s *Service) StartGame(g *Game) error {
@@ -184,7 +216,7 @@ const (
 )
 
 func (s *Service) ApplyPlayerMove(gID, pID string, req MoveInfo) (*Game, error) {
-	g, err := s.Repo.Find(gID)
+	g, err := s.Repo.FindGame(gID)
 	if err != nil {
 		return nil, err
 	}
@@ -236,7 +268,7 @@ func (s *Service) ApplyPlayerMove(gID, pID string, req MoveInfo) (*Game, error) 
 }
 
 func (s *Service) ApplyBotMove(gID string) (*Game, error) {
-	g, err := s.Repo.Find(gID)
+	g, err := s.Repo.FindGame(gID)
 	if err != nil {
 		return nil, err
 	}
@@ -259,7 +291,7 @@ func (s *Service) ApplyBotMove(gID string) (*Game, error) {
 }
 
 func (s *Service) ReplacePlayerWithBot(gID, pID string) (*Game, error) {
-	g, err := s.Repo.Find(gID)
+	g, err := s.Repo.FindGame(gID)
 	if err != nil {
 		return nil, err
 	}
@@ -279,7 +311,7 @@ func (s *Service) ReplacePlayerWithBot(gID, pID string) (*Game, error) {
 }
 
 func (s *Service) GetIndices(gID string) ([]MoveInfo, error) {
-	g, err := s.Repo.Find(gID)
+	g, err := s.Repo.FindGame(gID)
 	if err != nil {
 		return nil, err
 	}
@@ -304,7 +336,7 @@ func (s *Service) GetIndices(gID string) ([]MoveInfo, error) {
 }
 
 func (s *Service) DeleteGame(gID string) error {
-	err := s.Repo.Delete(gID)
+	err := s.Repo.DeleteGame(gID)
 	if err != nil {
 		return err
 	}
@@ -313,7 +345,7 @@ func (s *Service) DeleteGame(gID string) error {
 }
 
 func (s *Service) AddObserver(gID string, oId string) (*Game, error) {
-	g, err := s.Repo.Find(gID)
+	g, err := s.Repo.FindGame(gID)
 	if err != nil {
 		return nil, err
 	}
@@ -332,8 +364,9 @@ func (s *Service) AddObserver(gID string, oId string) (*Game, error) {
 	g.ObservateurIDs = append(g.ObservateurIDs, oId)
 	return g, nil
 }
+
 func (s *Service) RemoveObserver(gID string, oId string) (*Game, error) {
-	g, err := s.Repo.Find(gID)
+	g, err := s.Repo.FindGame(gID)
 	if err != nil {
 		return nil, err
 	}
@@ -353,7 +386,7 @@ func (s *Service) RemoveObserver(gID string, oId string) (*Game, error) {
 }
 
 func (s *Service) ReplaceBotByObserver(gID string, oId string) (*Game, error) {
-	g, err := s.Repo.Find(gID)
+	g, err := s.Repo.FindGame(gID)
 	if err != nil {
 		return nil, err
 	}
@@ -385,8 +418,9 @@ func (s *Service) ReplaceBotByObserver(gID string, oId string) (*Game, error) {
 	}
 	return nil, errors.New("no bot in that game")
 }
+
 func (s *Service) MakeGamePrivate(gId string) (*Game, error) {
-	g, err := s.Repo.Find(gId)
+	g, err := s.Repo.FindGame(gId)
 	if err != nil {
 		return nil, err
 	}
@@ -399,8 +433,9 @@ func (s *Service) MakeGamePrivate(gId string) (*Game, error) {
 	g.IsPrivateGame = true
 	return g, nil
 }
+
 func (s *Service) MakeGamePublic(gId string) (*Game, error) {
-	g, err := s.Repo.Find(gId)
+	g, err := s.Repo.FindGame(gId)
 	if err != nil {
 		return nil, err
 	}
@@ -412,6 +447,97 @@ func (s *Service) MakeGamePublic(gId string) (*Game, error) {
 	}
 	g.IsPrivateGame = false
 	return g, nil
+}
+
+func (s *Service) NewTournament(creatorID string, withUserIDs []string) (*Tournament, error) {
+	t := NewTournament(creatorID, withUserIDs)
+	err := s.Repo.InsertTournament(t)
+
+	return t, err
+}
+
+func (s *Service) StartTournament(t *Tournament) error {
+	numPlayers := len(t.UserIDs)
+	if numPlayers != 4 {
+		return fmt.Errorf("expected 4 players for tournament, got %d", numPlayers)
+	}
+
+	numGames := 2
+	for i := 1; i <= numGames; i++ {
+		g := &Game{
+			ID: uuid.NewString(),
+			UserIDs: []string{
+				t.UserIDs[i-1],
+				t.UserIDs[numGames*2-i],
+			},
+			ScrabbleGame: scrabble.NewGame(s.DAWG, &scrabble.HighScore{}),
+			TournamentID: t.ID,
+		}
+		for _, uID := range g.UserIDs {
+			u, err := s.UserSvc.GetUser(uID)
+			if err != nil {
+				return err
+			}
+			g.ScrabbleGame.AddPlayer(scrabble.NewPlayer(u.ID, u.Username, g.ScrabbleGame.Bag))
+		}
+		g.ScrabbleGame.Turn = g.ScrabbleGame.PlayerToMove().ID
+		if err := s.Repo.InsertGame(g); err != nil {
+			return err // Should never happen
+		}
+		t.PoolGames = append(t.PoolGames, g)
+	}
+
+	t.HasStarted = true
+
+	return nil
+}
+
+func (s *Service) UpdateTournamentGameOver(gID string) (*Tournament, error) {
+	g, err := s.Repo.FindGame(gID)
+	if err != nil {
+		return nil, err
+	}
+
+	if !g.IsTournamentGame() {
+		return nil, errors.New("not a tournament game")
+	}
+
+	t, err := s.Repo.FindTournament(g.TournamentID)
+	if err != nil {
+		return nil, err
+	}
+
+	if t.Finale != nil && t.Finale.ID == gID {
+		// No more game to play
+		t.WinnerID = g.WinnerID
+		t.IsOver = true
+		return t, nil
+	}
+
+	poolGameWinners := t.PoolGamesWinners()
+	if len(poolGameWinners) == 2 {
+		// Create new finale with both winners
+		finale := &Game{
+			ID:           uuid.NewString(),
+			UserIDs:      poolGameWinners,
+			ScrabbleGame: scrabble.NewGame(s.DAWG, &scrabble.HighScore{}),
+			TournamentID: t.ID,
+		}
+		for _, uID := range finale.UserIDs {
+			u, err := s.UserSvc.GetUser(uID)
+			if err != nil {
+				return nil, err
+			}
+			finale.ScrabbleGame.AddPlayer(scrabble.NewPlayer(u.ID, u.Username, finale.ScrabbleGame.Bag))
+		}
+		finale.ScrabbleGame.Turn = finale.ScrabbleGame.PlayerToMove().ID
+		if err := s.Repo.InsertGame(finale); err != nil {
+			return nil, err // Should never happen
+		}
+		t.Finale = finale
+	}
+
+	return t, nil
 }
 
 func parsePoint(str string) (scrabble.Position, error) {
