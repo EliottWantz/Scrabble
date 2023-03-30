@@ -6,16 +6,12 @@ import {
   Output,
   ViewChild,
 } from '@angular/core';
-import { FormControl } from '@angular/forms';
 import { MatDrawer, MatSidenav } from '@angular/material/sidenav';
-import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { NavigationStart, Router } from '@angular/router';
 import { AuthenticationService } from '@app/services/authentication/authentication.service';
 import { GameService } from '@app/services/game/game.service';
-import { RoomService } from '@app/services/room/room.service';
 import { ThemeService } from '@app/services/theme/theme.service';
 import { UserService } from '@app/services/user/user.service';
-import { WebSocketService } from '@app/services/web-socket/web-socket.service';
 import { User } from '@app/utils/interfaces/user';
 import { BehaviorSubject } from 'rxjs';
 
@@ -30,8 +26,8 @@ export class SidebarComponent implements OnInit {
   @Input() sidenavHandle!: MatSidenav;
   @ViewChild('drawer') drawer!: MatDrawer;
 
-  private darkThemeIcon = 'nightlight_round';
-  private lightThemeIcon = 'wb_sunny';
+  private darkThemeIcon = 'wb_sunny';
+  private lightThemeIcon = 'nightlight_round';
   public lightDarkToggleIcon = this.lightThemeIcon;
   readonly title: string = 'Scrabble';
   isJoining = false;
@@ -39,6 +35,7 @@ export class SidebarComponent implements OnInit {
   currentRoute = 'PolyScrabble';
   currentRouteName = '/home';
   previousRouteName = ['/home'];
+  language: BehaviorSubject<string>;
 
   constructor(
     private userService: UserService,
@@ -48,6 +45,10 @@ export class SidebarComponent implements OnInit {
     private router: Router
   ) {
     this.user = this.userService.subjectUser;
+    document
+      .getElementById('avatar')
+      ?.setAttribute('src', this.user.value.avatar.url);
+    this.language = this.themeService.language;
     document
       .getElementById('avatar')
       ?.setAttribute('src', this.user.value.avatar.url);
@@ -84,15 +85,21 @@ export class SidebarComponent implements OnInit {
     electron.ipcRenderer.on('user-data', () => {
       this.drawer.close();
     });
+    this.themeService.theme.subscribe((theme) => {
+      if (theme == 'dark') {
+        this.lightDarkToggleIcon = this.darkThemeIcon;
+      } else {
+        this.lightDarkToggleIcon = this.lightThemeIcon;
+      }
+    });
   }
 
   public doToggleLightDark() {
-    this.themeService.switchValue();
-    if (this.lightDarkToggleIcon == this.darkThemeIcon) {
-      this.lightDarkToggleIcon = this.lightThemeIcon;
-    } else {
-      this.lightDarkToggleIcon = this.darkThemeIcon;
-    }
+    this.themeService.switchTheme();
+  }
+
+  switchLanguage() {
+    this.themeService.switchLanguage();
   }
 
   isConnected(): boolean {

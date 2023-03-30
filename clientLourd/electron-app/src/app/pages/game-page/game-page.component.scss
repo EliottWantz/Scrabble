@@ -107,3 +107,20 @@ img {
   text-align: center;
   width: 70%;
 }
+
+.config {
+  display: flex;
+  flex-direction: row;
+  width: 50%;
+  justify-content: space-evenly;
+  align-items: center;
+}
+
+.language {
+  display: flex;
+  flex-direction: row;
+}
+
+mat-icon:hover {
+  cursor: pointer;
+}

@@ -3,41 +3,41 @@
     <div class="header-content">
       <form class="room-form">
         <div class="room-form-field">
-        <mat-form-field appearance="fill">
-          <mat-label>Room</mat-label>
-          <mat-select
-            (selectionChange)="changeRoom($event)"
-            [(value)]="currentRoomId"
-            id="selectionElem"
-          >
-            <mat-select-trigger *ngIf="room$.value.name !== 'Global Room'">{{
-              room$.value.name
-            }}</mat-select-trigger>
-            <mat-select-trigger *ngIf="room$.value.name === 'Global Room'"
-              >Global Room</mat-select-trigger
+          <mat-form-field appearance="fill">
+            <mat-label>{{ "chat-box-component.label" | translate }}</mat-label>
+            <mat-select
+              (selectionChange)="changeRoom($event)"
+              [(value)]="currentRoomId"
+              id="selectionElem"
             >
-            <div
-              *ngFor="let room of getRooms(); let last = last; let i = index"
-            >
-              <div class="item">
-                <mat-option [value]="room.id">
-                  {{ room.name }}
-                </mat-option>
-                <mat-icon
-                  class="close-icon"
-                  (click)="leaveRoom(i)"
-                  *ngIf="room.id !== 'global'"
-                  >close</mat-icon
-                >
+              <mat-select-trigger *ngIf="room$.value.name !== 'Global Room'">{{
+                room$.value.name
+              }}</mat-select-trigger>
+              <mat-select-trigger *ngIf="room$.value.name === 'Global Room'">{{
+                "chat-box-component.global" | translate
+              }}</mat-select-trigger>
+              <div
+                *ngFor="let room of getRooms(); let last = last; let i = index"
+              >
+                <div class="item">
+                  <mat-option [value]="room.id">
+                    {{ room.name }}
+                  </mat-option>
+                  <mat-icon
+                    class="close-icon"
+                    (click)="leaveRoom(i)"
+                    *ngIf="room.id !== 'global'"
+                    >close</mat-icon
+                  >
+                </div>
+                <mat-divider *ngIf="!last"></mat-divider>
               </div>
-              <mat-divider *ngIf="!last"></mat-divider>
-            </div>
-          </mat-select>
-        </mat-form-field>
+            </mat-select>
+          </mat-form-field>
         </div>
       </form>
       <button
-      color="primary"
+        color="primary"
         class="open-new-button"
         *ngIf="showbutton"
         (click)="this.chatService.openChat()"
@@ -71,7 +71,9 @@
 
   <form #chatForm id="chatBoxForm">
     <mat-form-field appearance="fill">
-      <mat-label for="message">Enter your message</mat-label>
+      <mat-label for="message">{{
+        "chat-box-component.enter-message" | translate
+      }}</mat-label>
       <input
         #chatBoxInput
         type="text"
@@ -81,6 +83,7 @@
         name="password"
         [(ngModel)]="message"
       />
+      <!-- <mat-error *ngIf="input.hasError('maxlength')">Votre message <strong>excède</strong> la limite de charactères</mat-error> -->
     </mat-form-field>
     <button
       #submitBtn

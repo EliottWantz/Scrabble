@@ -7,7 +7,7 @@
           <div class="mat-icon-button">
             <mat-icon inline="true">people</mat-icon>
           </div>
-          <div class="text">Amis</div>
+          <div class="text">{{'social-page.friends' | translate}}</div>
         </div>
         <div id="break">
           <hr>
@@ -30,16 +30,16 @@
       <div class="content" *ngIf="chatFriend">
         <div class="nav">
           <div class="nav-text" (click)="selectNavButton(0)">
-              En ligne
+              {{'social-component.online' | translate}}
           </div>
           <div class="nav-text" (click)="selectNavButton(1)">
-              Tous
+            {{'social-component.all' | translate}}
           </div>
           <div class="nav-text" (click)="selectNavButton(2)">
-              En attente
+              {{'social-component.waiting' | translate}}
           </div>
           <div class="nav-text" (click)="selectNavButton(3)">
-              Ajouter un ami
+              {{'social-component.add' | translate}}
           </div>
       </div>
         <app-chat-box class="chat-box"></app-chat-box>
