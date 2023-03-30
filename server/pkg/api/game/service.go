@@ -52,12 +52,13 @@ func NewService(repo *Repository, userSvc *user.Service) *Service {
 	return s
 }
 
-func (s *Service) NewGame(creatorID string) (*Game, error) {
+func (s *Service) NewGame(creatorID string, withUserIds []string) (*Game, error) {
 	g := &Game{
 		ID:        uuid.NewString(),
 		CreatorID: creatorID,
 		UserIDs:   []string{creatorID},
 	}
+	g.UserIDs = append(g.UserIDs, withUserIds...)
 
 	err := s.Repo.InsertGame(g)
 	if err != nil {
@@ -67,13 +68,13 @@ func (s *Service) NewGame(creatorID string) (*Game, error) {
 	return g, nil
 }
 
-func (s *Service) NewProtectedGame(creatorID, password string) (*Game, error) {
+func (s *Service) NewProtectedGame(creatorID string, withUserIds []string, password string) (*Game, error) {
 	hashedPassword, err := auth.HashPassword(password)
 	if err != nil {
 		return nil, err
 	}
 
-	g, err := s.NewGame(creatorID)
+	g, err := s.NewGame(creatorID, withUserIds)
 	if err != nil {
 		return nil, err
 	}

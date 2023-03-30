@@ -1,0 +1,5 @@
+<mat-card>
+    <mat-card-content id="rack" cdkDropList (cdkDropListDropped)="drop($event)">
+        <app-tile *ngFor="let tile of rack" [tile]="tile" class="tile"></app-tile>
+    </mat-card-content>
+</mat-card>

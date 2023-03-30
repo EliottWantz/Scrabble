@@ -1,0 +1,47 @@
+.square-multiplier {
+    //width: 4%;
+    //height: 4%;
+    outline-style: solid;
+    outline-color: black;
+    outline-width: 1px;
+    background-color: #e7eaef;
+    justify-items: center;
+    align-items: center;
+    vertical-align: middle;
+    border-radius: 10px;
+}
+
+.square-multiplier.word3 {
+    background: #f01c7a;
+}
+
+.square-multiplier.word2 {
+    background: #fd8e73;
+}
+
+.square-multiplier.letter2 {
+    background: #8ecafc;
+}
+
+.square-multiplier.letter3 {
+    background: #1375b0;
+}
+
+#board {
+    position: relative;
+    width: 100%;
+    padding-bottom: 100%;
+}
+
+table {
+    position: absolute;
+    table-layout: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0px;
+    left: 0px;
+}
+
+tr {
+    height: 6.67%;
+}

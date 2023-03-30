@@ -350,23 +350,37 @@ func (c *Client) HandleCreateGameRequest(p *Packet) error {
 	var err error
 	var g *game.Game
 	if payload.Password != "" {
-		g, err = c.Manager.GameSvc.NewProtectedGame(c.ID, payload.Password)
+		g, err = c.Manager.GameSvc.NewProtectedGame(c.ID, payload.WithUserIDs, payload.Password)
 	} else {
-		g, err = c.Manager.GameSvc.NewGame(c.ID)
+		g, err = c.Manager.GameSvc.NewGame(c.ID, payload.WithUserIDs)
 	}
 	if err != nil {
 		return err
 	}
 
 	r := c.Manager.AddRoom(g.ID, "")
-	if err := r.AddClient(c.ID); err != nil {
-		return err
-	}
-	if err := c.Manager.UserSvc.Repo.SetJoinedGame(g.ID, c.ID); err != nil {
-		return err
+	for _, uID := range g.UserIDs {
+		client, err := c.Manager.GetClient(uID)
+		if err != nil {
+			slog.Error("get client", err)
+			continue
+		}
+
+		if err := r.AddClient(client.ID); err != nil {
+			slog.Error("add client to ws room", err)
+			continue
+		}
+		if err := c.Manager.UserSvc.Repo.SetJoinedGame(g.ID, client.ID); err != nil {
+			slog.Error("add user to room", err)
+			continue
+		}
+		if err := r.BroadcastJoinGamePackets(client, g); err != nil {
+			slog.Error("broadcast join room packets", err)
+			continue
+		}
 	}
 
-	return r.BroadcastJoinGamePackets(c, g)
+	return nil
 }
 
 func (c *Client) HandleJoinGameRequest(p *Packet) error {

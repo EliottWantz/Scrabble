@@ -1,0 +1,206 @@
+::ng-deep .mat-horizontal-stepper-header-container {
+    display: none !important;
+}
+::ng-deep .mat-dialog-container {
+    box-shadow: 0 0 15px rgb(97, 241, 241);
+    background: rgb(223, 223, 223);
+    border-radius: 10px;
+}
+
+.primary-mat-card {
+    height: 100%;
+}
+.btn-close {
+    min-height: 30px;
+    height: fit-content;
+    min-width: 5vw;
+    width: fit-content;
+    background-color: skyblue;
+    color: white;
+    border-color: rgb(12, 11, 11);
+    border-radius: 20px;
+}
+.btn-next {
+    min-height: 30px;
+    height: fit-content;
+    width: 10vw;
+    width: fit-content;
+    background-color: skyblue;
+    color: white;
+    border-color: rgb(12, 11, 11);
+    border-radius: 20px;
+}
+#btn-Cancel:hover {
+    background-color: rgb(212, 2, 2);
+}
+
+#btn-Done:hover {
+    background-color: rgb(16, 189, 0);
+}
+
+#Multiplayer {
+    height: 30px;
+    font-size: 16;
+    margin: 30px;
+    color: rgb(65, 65, 65);
+    border-radius: 30px;
+    background-color: rgb(202, 202, 202);
+    color: rgb(0, 0, 0);
+    border-width: 5px;
+    text-align: center;
+}
+#Multiplayer h1 {
+    font-size: 26px;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+}
+#Multiplayer:hover {
+    cursor: pointer;
+    background-color: rgba(158, 127, 70, 0.555);
+    color: white;
+    animation: shake 0.2s;
+    animation-iteration-count: calc(3);
+}
+#timer-box {
+    font-family: 'Tahoma';
+    height: 4vh;
+    width: 10vw;
+    background-color: white;
+    border-radius: 0.5vw;
+    align-items: center;
+    justify-content: space-between;
+    color: black;
+    font-size: 2vh;
+}
+
+.inc-dec-btn {
+    height: 4vh;
+    cursor: pointer;
+    border: none;
+    background-color: lightgrey;
+}
+.inc-dec-btn:disabled {
+    background-color: white;
+    color: white;
+    cursor: default;
+}
+#dec-btn {
+    border-top-left-radius: 0.5vw;
+    border-bottom-left-radius: 0.5vw;
+}
+
+#inc-btn {
+    border-top-right-radius: 0.5vw;
+    border-bottom-right-radius: 0.5vw;
+}
+#btn {
+    display: flex;
+    justify-content: space-between;
+}
+
+@keyframes shake {
+    0% {
+        transform: translate(1px, 1px) rotate(0deg);
+    }
+    25% {
+        transform: translate(-3px, 0px) rotate(1deg);
+    }
+    50% {
+        transform: translate(-1px, 2px) rotate(-1deg);
+    }
+
+    75% {
+        transform: translate(3px, 1px) rotate(-1deg);
+    }
+    100% {
+        transform: translate(1px, -2px) rotate(-1deg);
+    }
+}
+.spinner-box {
+    position: relative;
+    height: 30vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.spinner-box > p {
+    position: absolute;
+    bottom: 0;
+}
+.parameter {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    padding: 30px;
+    margin-top: 10px;
+    border: 2px solid rgba(158, 127, 70, 0.555);
+    box-sizing: border-box;
+}
+.parameter:hover {
+    background-color: rgba(158, 127, 70, 0.555);
+}
+#btn-join:hover {
+    cursor: pointer;
+    background-color: green;
+}
+.container {
+    height: 55vh;
+    width: 55vw;
+}
+.align-center {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.margin {
+    margin-right: 40px;
+    margin-left: 40px;
+}
+
+#accc-ref-game {
+    width: 400px;
+}
+
+.btn-next:disabled {
+    pointer-events: none;
+    width: 13vw;
+    background-color: #cccccc;
+    color: #666666;
+}
+.header-list {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-evenly;
+    margin-right: 10vw;
+}
+
+#status {
+    margin-right: -3vw;
+}
+
+.tooltip {
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dotted black;
+}
+
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 120px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+
+    /* Position the tooltip */
+    position: absolute;
+    z-index: 1;
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+}

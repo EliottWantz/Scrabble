@@ -1,0 +1,16 @@
+<div id="container">
+    <h1>{{'avatar-selection-component.title' | translate}}</h1>
+    <p>{{'avatar-selection-component.text' | translate}}</p>
+    <img id="preview" *ngIf="imagePreview.value !== ''" class="file-name" src="{{imagePreview.value}}">
+    <button mat-flat-button color="accent" (click)="openDialog()">{{'avatar-selection-component.bouton-defaults' | translate}}</button>
+    <p>{{'avatar-selection-component.or' | translate}}</p>
+    <button mat-flat-button color="accent" (click)="fileInput.click()">{{'Choisir votre propre avatar' | translate}}</button>
+    <input hidden (change)="onFileSelected($event)" #fileInput type="file">
+    <p>{{'avatar-selection-component.or' | translate}}</p>
+    <button mat-flat-button color="accent">{{'avatar-selection-component.bouton-personalize' | translate}}</button>
+
+    <strong *ngIf="errorImage" style="color: red; margin-top: 2%;">{{'avatar-selection-component.error' | translate}}</strong>
+    <button mat-flat-button color="accent" id="button-next" (click)="submit()">{{'avatar-selection-component.next-page' | translate}}</button>
+</div>
+
+    

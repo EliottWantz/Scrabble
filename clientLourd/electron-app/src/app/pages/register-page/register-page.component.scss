@@ -1,0 +1,13 @@
+#container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  flex-direction: column;
+  height: 100vh;
+}
+
+app-register {
+  height: 100%;
+  width: 100%;
+}
