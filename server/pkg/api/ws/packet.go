@@ -70,8 +70,8 @@ type LeaveDMRoomPayload struct {
 }
 
 type CreateGamePayload struct {
-	Password string   `json:"password,omitempty"`
-	UserIDs  []string `json:"userIds"`
+	Password    string   `json:"password,omitempty"`
+	WithUserIDs []string `json:"withUserIds"`
 }
 
 type JoinGamePayload struct {

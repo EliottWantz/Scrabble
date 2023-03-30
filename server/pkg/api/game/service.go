@@ -52,12 +52,13 @@ func NewService(repo *Repository, userSvc *user.Service) *Service {
 	return s
 }
 
-func (s *Service) New(creatorID string) (*Game, error) {
+func (s *Service) New(creatorID string, withUserIds []string) (*Game, error) {
 	g := &Game{
 		ID:        uuid.NewString(),
 		CreatorID: creatorID,
 		UserIDs:   []string{creatorID},
 	}
+	g.UserIDs = append(g.UserIDs, withUserIds...)
 
 	err := s.Repo.Insert(g)
 	if err != nil {
@@ -67,13 +68,13 @@ func (s *Service) New(creatorID string) (*Game, error) {
 	return g, nil
 }
 
-func (s *Service) NewProtected(creatorID, password string) (*Game, error) {
+func (s *Service) NewProtected(creatorID string, withUserIds []string, password string) (*Game, error) {
 	hashedPassword, err := auth.HashPassword(password)
 	if err != nil {
 		return nil, err
 	}
 
-	g, err := s.New(creatorID)
+	g, err := s.New(creatorID, withUserIds)
 	if err != nil {
 		return nil, err
 	}
@@ -332,6 +333,7 @@ func (s *Service) AddObserver(gID string, oId string) (*Game, error) {
 	g.ObservateurIDs = append(g.ObservateurIDs, oId)
 	return g, nil
 }
+
 func (s *Service) RemoveObserver(gID string, oId string) (*Game, error) {
 	g, err := s.Repo.Find(gID)
 	if err != nil {
@@ -385,6 +387,7 @@ func (s *Service) ReplaceBotByObserver(gID string, oId string) (*Game, error) {
 	}
 	return nil, errors.New("no bot in that game")
 }
+
 func (s *Service) MakeGamePrivate(gId string) (*Game, error) {
 	g, err := s.Repo.Find(gId)
 	if err != nil {
@@ -399,6 +402,7 @@ func (s *Service) MakeGamePrivate(gId string) (*Game, error) {
 	g.IsPrivateGame = true
 	return g, nil
 }
+
 func (s *Service) MakeGamePublic(gId string) (*Game, error) {
 	g, err := s.Repo.Find(gId)
 	if err != nil {

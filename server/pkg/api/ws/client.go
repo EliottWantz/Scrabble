@@ -342,23 +342,37 @@ func (c *Client) HandleCreateGameRequest(p *Packet) error {
 	var err error
 	var g *game.Game
 	if payload.Password != "" {
-		g, err = c.Manager.GameSvc.NewProtected(c.ID, payload.Password)
+		g, err = c.Manager.GameSvc.NewProtected(c.ID, payload.WithUserIDs, payload.Password)
 	} else {
-		g, err = c.Manager.GameSvc.New(c.ID)
+		g, err = c.Manager.GameSvc.New(c.ID, payload.WithUserIDs)
 	}
 	if err != nil {
 		return err
 	}
 
 	r := c.Manager.AddRoom(g.ID, "")
-	if err := r.AddClient(c.ID); err != nil {
-		return err
-	}
-	if err := c.Manager.UserSvc.Repo.SetJoinedGame(g.ID, c.ID); err != nil {
-		return err
+	for _, uID := range g.UserIDs {
+		client, err := c.Manager.GetClient(uID)
+		if err == nil {
+			slog.Error("add client to ws room", err)
+			continue
+		}
+
+		if err := r.AddClient(client.ID); err != nil {
+			slog.Error("add client to ws room", err)
+			continue
+		}
+		if err := c.Manager.UserSvc.Repo.SetJoinedGame(g.ID, client.ID); err != nil {
+			slog.Error("add user to room", err)
+			continue
+		}
+		if err := r.BroadcastJoinGamePackets(client, g); err != nil {
+			slog.Error("broadcast join room packets", err)
+			continue
+		}
 	}
 
-	return r.BroadcastJoinGamePackets(c, g)
+	return nil
 }
 
 func (c *Client) HandleJoinGameRequest(p *Packet) error {
@@ -402,7 +416,6 @@ func (c *Client) HandleJoinAsObserverRequest(p *Packet) error {
 	}
 
 	r, err := c.Manager.GetRoom(payload.GameID)
-
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
@@ -428,7 +441,6 @@ func (c *Client) HandleObservateurLeaveGameRequest(p *Packet) error {
 		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
 	return c.Manager.RemoveClientFromGame(c, payload.GameID)
-
 }
 
 func (c *Client) HandleLeaveGameRequest(p *Packet) error {
@@ -594,7 +606,6 @@ func (c *Client) HandleGamePrivateRequest(p *Packet) error {
 	g, err := c.Manager.GameSvc.MakeGamePrivate(payload.GameID)
 	if err != nil {
 		return err
-
 	}
 	r, err := c.Manager.GetRoom(g.ID)
 	for _, observateur := range g.ObservateurIDs {
@@ -629,7 +640,6 @@ func (c *Client) HandleGamePublicRequest(p *Packet) error {
 	g, err := c.Manager.GameSvc.MakeGamePublic(payload.GameID)
 	if err != nil {
 		return err
-
 	}
 	if err != nil {
 		slog.Error("get room", err)
