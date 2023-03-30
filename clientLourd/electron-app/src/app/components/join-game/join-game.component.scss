@@ -1,0 +1,32 @@
+#container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  height: 99%;
+}
+
+mat-grid-list {
+  width: 100%;
+}
+
+.user-ids {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  justify-content: center;
+}
+
+mat-grid-list {
+  width: 90%;
+}
+
+mat-divider {
+  width: 100%;
+}
+
+#close-button {
+  margin-top: auto;
+  position: sticky;
+}

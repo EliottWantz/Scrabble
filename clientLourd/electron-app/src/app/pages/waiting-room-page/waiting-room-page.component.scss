@@ -1,0 +1,14 @@
+#container {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  flex-wrap: wrap;
+  flex-direction: column;
+  height: 100vh;
+  row-gap: 10%;
+}
+
+#scrabble-img {
+  width: 50%;
+  padding-top: 5%;
+}
