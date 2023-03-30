@@ -17,10 +17,13 @@ import  {MAT_DIALOG_DATA } from '@angular/material/dialog';
 export class JoinPrivateGameComponent {
     password = "";
     errorMessage = "";
-    constructor(public dialogRef: MatDialogRef<JoinPrivateGameComponent>, @Inject(MAT_DIALOG_DATA) public data: {game: Game}, private webSocketService: WebSocketService, private storageService: StorageService) {
+    constructor(public dialogRef: MatDialogRef<JoinPrivateGameComponent>, @Inject(MAT_DIALOG_DATA) public data: {game: Game, isObserver: boolean},
+        private webSocketService: WebSocketService, private storageService: StorageService, private gameService: GameService
+    ) {
         this.webSocketService.error.subscribe(() => {
             if (this.webSocketService.error.value === "password mismatch") {
                 this.errorMessage = "Mot de passe incorrect";
+                this.gameService.isObserving = false;
             }
         });
     }
@@ -37,13 +40,25 @@ export class JoinPrivateGameComponent {
     }
 
     joinGame(): void {
-        console.log(this.password);
-        const payload: JoinGamePayload = {
-            gameId: this.data.game.id,
-            password: this.password
+        if (this.data.isObserver) {
+            const payload: JoinGamePayload = {
+                gameId: this.data.game.id,
+                password: ""
+            }
+            const event : ClientEvent = "join-as-observateur";
+            this.webSocketService.send(event, payload);
+            // if password is correct
+            this.gameService.isObserving = true;
+            this.close();
+        }  else {
+            console.log(this.password);
+            const payload: JoinGamePayload = {
+                gameId: this.data.game.id,
+                password: this.password
+            }
+            const event : ClientEvent = "join-game";
+            this.webSocketService.send(event, payload);
         }
-        const event : ClientEvent = "join-game";
-        this.webSocketService.send(event, payload);
     }
 
     close() {
