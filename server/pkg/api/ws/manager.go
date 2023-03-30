@@ -105,7 +105,7 @@ func (m *Manager) Accept(cID string) fiber.Handler {
 				m.logger.Error("list joinable games", err)
 			}
 			p, err := NewJoinableTournamentsPacket(ListJoinableTournamentsPayload{
-				Tournaments: tournaments,
+				Tournaments: makeJoinableTournamentsPayload(tournaments),
 			})
 			if err != nil {
 				m.logger.Error("list joinable games", err)
@@ -502,7 +502,7 @@ func (m *Manager) UpdateChatRooms() error {
 	return nil
 }
 
-func (m *Manager) UpdateJoinableGames() error {
+func (m *Manager) BroadcastJoinableGames() error {
 	games, err := m.GameSvc.Repo.FindAllJoinableGames()
 	if err != nil {
 		return err
@@ -519,13 +519,13 @@ func (m *Manager) UpdateJoinableGames() error {
 	return nil
 }
 
-func (m *Manager) UpdateJoinableTournaments() error {
-	tournaments, err := m.GameSvc.Repo.FindAllTournaments()
+func (m *Manager) BroadcastJoinableTournaments() error {
+	tournaments, err := m.GameSvc.Repo.FindAllJoinableTournaments()
 	if err != nil {
 		return err
 	}
 	joinableTournamentsPacket, err := NewJoinableTournamentsPacket(ListJoinableTournamentsPayload{
-		Tournaments: tournaments,
+		Tournaments: makeJoinableTournamentsPayload(tournaments),
 	})
 	if err != nil {
 		return err

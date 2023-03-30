@@ -508,7 +508,7 @@ func (c *Client) HandleStartGameRequest(p *Packet) error {
 	}
 
 	r.Broadcast(gamePacket)
-	r.Manager.UpdateJoinableGames()
+	r.Manager.BroadcastJoinableGames()
 
 	return nil
 }
@@ -754,6 +754,11 @@ func (c *Client) HandleStartTournamentRequest(p *Packet) error {
 		return err
 	}
 	tournamentRoom.Broadcast(tournamentPacket)
+
+	// Broadcast  joinable tournaments
+	if err := c.Manager.BroadcastJoinableTournaments(); err != nil {
+		slog.Error("broadcast joinable tournaments", err)
+	}
 
 	for _, ga := range t.PoolGames {
 		go func(g *game.Game) {

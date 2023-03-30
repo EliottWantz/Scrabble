@@ -508,6 +508,8 @@ func (s *Service) UpdateTournamentGameOver(gID string) (*Tournament, error) {
 
 	if t.Finale != nil && t.Finale.ID == gID {
 		// No more game to play
+		t.WinnerID = g.WinnerID
+		t.IsOver = true
 		return t, nil
 	}
 
@@ -520,6 +522,14 @@ func (s *Service) UpdateTournamentGameOver(gID string) (*Tournament, error) {
 			ScrabbleGame: scrabble.NewGame(s.DAWG, &scrabble.HighScore{}),
 			TournamentID: t.ID,
 		}
+		for _, uID := range finale.UserIDs {
+			u, err := s.UserSvc.GetUser(uID)
+			if err != nil {
+				return nil, err
+			}
+			finale.ScrabbleGame.AddPlayer(scrabble.NewPlayer(u.ID, u.Username, finale.ScrabbleGame.Bag))
+		}
+		finale.ScrabbleGame.Turn = finale.ScrabbleGame.PlayerToMove().ID
 		if err := s.Repo.InsertGame(finale); err != nil {
 			return nil, err // Should never happen
 		}

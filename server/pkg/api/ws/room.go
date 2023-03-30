@@ -243,7 +243,7 @@ func (r *Room) BroadcastJoinGamePackets(c *Client, g *game.Game) error {
 		r.BroadcastSkipSelf(p, c.ID)
 	}
 
-	return c.Manager.UpdateJoinableGames()
+	return c.Manager.BroadcastJoinableGames()
 }
 
 func (r *Room) BroadcastObserverJoinGamePacket(c *Client, g *game.Game) error {
@@ -282,7 +282,7 @@ func (r *Room) BroadcastLeaveGamePackets(c *Client, gID string) error {
 		c.send(p)
 	}
 
-	return c.Manager.UpdateJoinableGames()
+	return c.Manager.BroadcastJoinableGames()
 }
 
 func (r *Room) BroadcastObserverLeaveGamePacket(c *Client, gID string) error {
@@ -321,7 +321,7 @@ func (r *Room) BroadcastJoinTournamentPackets(c *Client, t *game.Tournament) err
 		r.BroadcastSkipSelf(p, c.ID)
 	}
 
-	return c.Manager.UpdateJoinableTournaments()
+	return c.Manager.BroadcastJoinableTournaments()
 }
 
 func (r *Room) BroadcastLeaveTournamentPackets(c *Client, gID string) error {
@@ -345,7 +345,7 @@ func (r *Room) BroadcastLeaveTournamentPackets(c *Client, gID string) error {
 		c.send(p)
 	}
 
-	return c.Manager.UpdateJoinableTournaments()
+	return c.Manager.BroadcastJoinableTournaments()
 }
 
 func (r *Room) ListUsers() []string {

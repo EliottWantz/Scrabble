@@ -233,7 +233,16 @@ func NewJoinableGamesPacket(payload ListJoinableGamesPayload) (*Packet, error) {
 }
 
 type ListJoinableTournamentsPayload struct {
-	Tournaments []*game.Tournament `json:"tournaments"`
+	Tournaments []*TournamentPayload `json:"tournaments"`
+}
+
+func makeJoinableTournamentsPayload(tournaments []*game.Tournament) []*TournamentPayload {
+	payloads := make([]*TournamentPayload, 0, len(tournaments))
+	for _, tournament := range tournaments {
+		payloads = append(payloads, makeTournamentPayload(tournament))
+	}
+
+	return payloads
 }
 
 func NewJoinableTournamentsPacket(payload ListJoinableTournamentsPayload) (*Packet, error) {
@@ -286,6 +295,9 @@ type GamePayload struct {
 }
 
 func makeGamePayload(g *game.Game) *GamePayload {
+	if g == nil {
+		return nil
+	}
 	if g.ScrabbleGame == nil {
 		return &GamePayload{
 			ID: g.ID,
@@ -299,7 +311,7 @@ func makeGamePayload(g *game.Game) *GamePayload {
 		NumPassMoves: g.ScrabbleGame.NumPassMoves,
 		Turn:         g.ScrabbleGame.Turn,
 		Timer:        g.ScrabbleGame.Timer.TimeRemaining(),
-		WinnerID:     g.ScrabbleGame.Winner().ID,
+		WinnerID:     g.WinnerID,
 	}
 }
 
@@ -398,7 +410,7 @@ type TournamentPayload struct {
 }
 
 func makeTournamentPayload(t *game.Tournament) *TournamentPayload {
-	games := make([]*GamePayload, len(t.PoolGames))
+	games := make([]*GamePayload, 0, len(t.PoolGames))
 	for _, g := range t.PoolGames {
 		if g.ScrabbleGame == nil {
 			continue
@@ -406,7 +418,7 @@ func makeTournamentPayload(t *game.Tournament) *TournamentPayload {
 		games = append(games, makeGamePayload(g))
 	}
 
-	return &TournamentPayload{
+	payload := &TournamentPayload{
 		ID:         t.ID,
 		CreatorID:  t.CreatorID,
 		UserIDs:    t.UserIDs,
@@ -416,6 +428,8 @@ func makeTournamentPayload(t *game.Tournament) *TournamentPayload {
 		IsOver:     t.IsOver,
 		WinnerID:   t.WinnerID,
 	}
+
+	return payload
 }
 
 type TournamentUpdatePayload struct {

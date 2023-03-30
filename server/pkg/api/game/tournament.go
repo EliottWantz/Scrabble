@@ -24,7 +24,7 @@ func NewTournament(creatorID string, withUserIDs []string) *Tournament {
 		ID:        uuid.NewString(),
 		CreatorID: creatorID,
 		UserIDs:   []string{creatorID},
-		PoolGames: make([]*Game, 0),
+		PoolGames: make([]*Game, 0, 2),
 	}
 	t.UserIDs = append(t.UserIDs, withUserIDs...)
 
@@ -32,9 +32,12 @@ func NewTournament(creatorID string, withUserIDs []string) *Tournament {
 }
 
 func (t *Tournament) PoolGamesWinners() []string {
-	winners := make([]string, len(t.PoolGames))
-	for i, g := range t.PoolGames {
-		winners[i] = g.WinnerID
+	winners := make([]string, 0)
+	for _, g := range t.PoolGames {
+		if g.WinnerID == "" {
+			continue
+		}
+		winners = append(winners, g.WinnerID)
 	}
 
 	return winners
