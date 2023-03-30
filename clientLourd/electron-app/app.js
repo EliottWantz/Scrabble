@@ -24,12 +24,14 @@ function initWindow() {
   appWindow.webContents.openDevTools();
 
   appWindow.on("closed", function () {
-    appWindow = null;
     if (chatWindow) {
       chatWindow.destroy();
     }
     chatWindow = null;
-
+    if (appWindow) {
+      appWindow.destroy();
+    }
+    appWindow = null;
     app.quit();
   });
 }
@@ -42,10 +44,6 @@ function openChatwindow() {
   chatWindow = new BrowserWindow({
     height: 600,
     width: 800,
-    minHeight: 600,
-    minWidth: 800,
-    maxHeight: 1080,
-    maxWidth: 1920,
     show: false,
     webPreferences: {
       nodeIntegration: true,

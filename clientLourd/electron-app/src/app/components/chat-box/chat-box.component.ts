@@ -5,6 +5,7 @@ import {
   OnInit,
   ViewChild,
   NgZone,
+  ChangeDetectorRef,
 } from '@angular/core';
 import {
   AbstractControl,
@@ -26,6 +27,8 @@ import { WebSocketService } from '@app/services/web-socket/web-socket.service';
 import { ClientEvent } from '@app/utils/events/client-events';
 import { LeaveRoomPayload } from '@app/utils/interfaces/packet';
 import { MatSelectChange } from '@angular/material/select';
+import { Subscription } from 'rxjs';
+
 const electron = (window as any).require('electron');
 
 @Component({
@@ -52,6 +55,8 @@ export class ChatBoxComponent implements AfterViewInit {
   currentRoomId = '';
   message = '';
   roomsFormControl = new FormControl();
+  private scrollTimeoutId: any;
+  private roomSubscription!: Subscription;
 
   constructor(
     private fb: FormBuilder,
@@ -60,33 +65,34 @@ export class ChatBoxComponent implements AfterViewInit {
     private userService: UserService,
     private storageService: StorageService,
     private socketService: WebSocketService,
-    private ngZone: NgZone
+    private ngZone: NgZone,
+    private cdr: ChangeDetectorRef
   ) {
     this.room$ = this.roomService.currentRoomChat;
     this.currentRoomId = this.room$.value.id;
     this.user = this.userService.currentUserValue;
     this.fenetrer = false;
-    this.room$.subscribe(() => {
-      this.currentRoomId = this.room$.value.id;
-      //console.log(this.chatBoxForm);
-      setTimeout(() => this.scrollBottom());
-    });
+    this.subscribeToRoom();
     /*this.chatBoxForm = this.fb.group({
       input: ["", [Validators.required]],
     });*/
     electron.ipcRenderer.on('user-data', async () => {
       this.ngZone.run(() => {
         this.showbutton = false;
+        console.log('room$', this.room$);
       });
     });
     electron.ipcRenderer.on('open-chat', async () => {
       this.ngZone.run(() => {
         this.fenetrer = true;
       });
+      this.roomSubscription.unsubscribe();
+      clearTimeout(this.scrollTimeoutId);
     });
     electron.ipcRenderer.on('close-chat', async () => {
       this.ngZone.run(() => {
         this.fenetrer = false;
+        this.subscribeToRoom();
       });
     });
   }
@@ -111,7 +117,6 @@ export class ChatBoxComponent implements AfterViewInit {
 
   send(): void {
     console.log('current room id:' + this.currentRoomId);
-    console.log(this.currentRoomId);
     console.log(document.getElementById('selectionElem'));
     if (!this.message || !this.message.replace(/\s/g, '')) return;
 
@@ -127,6 +132,7 @@ export class ChatBoxComponent implements AfterViewInit {
   }*/
 
   private scrollBottom(): void {
+    console.log('receive a new message and we need to scroll bottom ');
     // const shouldScroll =
     //   this.chatBoxMessagesContainer.nativeElement.scrollTop +
     //     this.chatBoxMessagesContainer.nativeElement.clientHeight !==
@@ -142,6 +148,7 @@ export class ChatBoxComponent implements AfterViewInit {
     this.chatBoxMessagesContainer.nativeElement.scrollTop =
       this.chatBoxMessagesContainer.nativeElement.scrollHeight;
     // }
+    this.cdr.detectChanges();
   }
 
   getAvatarMessage(id: string): string {
@@ -194,5 +201,13 @@ export class ChatBoxComponent implements AfterViewInit {
     console.log(this.roomService.listJoinedChatRooms.value);
     //this.roomService.currentRoomChat.next(this.roomService.listJoinedChatRooms.value[0]);
     //this.roomService.changeRoom("global");
+  }
+
+  private subscribeToRoom(): void {
+    this.roomSubscription = this.room$.subscribe(() => {
+      this.currentRoomId = this.room$.value.id;
+      //console.log(this.chatBoxForm);
+      this.scrollTimeoutId = setTimeout(() => this.scrollBottom());
+    });
   }
 }
