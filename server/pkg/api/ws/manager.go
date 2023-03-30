@@ -208,8 +208,8 @@ func (m *Manager) GetClient(cID string) (*Client, error) {
 }
 
 func (m *Manager) RemoveClient(c *Client) error {
-	close(c.receiveCh)
-	close(c.sendCh)
+	defer close(c.receiveCh)
+	defer close(c.sendCh)
 	user, err := m.UserSvc.GetUser(c.ID)
 	if err != nil {
 		return fmt.Errorf("removeClient: %w", err)
