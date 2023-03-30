@@ -4,6 +4,7 @@ import { Router } from "@angular/router"
 import { MatDialog, MatDialogConfig } from "@angular/material/dialog";
 import { DefaultAvatarSelectionComponent } from "@app/components/default-avatar-selection/default-avatar-selection.component";
 import { BehaviorSubject } from "rxjs";
+import { CustomizeAvatarComponent } from "@app/components/customize-avatar/customize-avatar.component";
 
 @Component({
     selector: "app-avatar-selection",
@@ -56,10 +57,18 @@ export class AvatarSelectionComponent {
         }
     }
 
-    openDialog(): void {
+    openDialogDefaultAvatars(): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = true;
         this.dialog.open(DefaultAvatarSelectionComponent, {width: '75%',
+        minHeight: '50vh',
+        height : '50vh'});
+    }
+
+    openDialogPersonalizedAvatar(): void {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.disableClose = true;
+        this.dialog.open(CustomizeAvatarComponent, {width: '75%',
         minHeight: '50vh',
         height : '50vh'});
     }
