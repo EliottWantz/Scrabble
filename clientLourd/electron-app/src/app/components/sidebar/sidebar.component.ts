@@ -9,6 +9,7 @@ import { RoomService } from "@app/services/room/room.service";
 import { ThemeService } from "@app/services/theme/theme.service";
 import { UserService } from "@app/services/user/user.service";
 import { WebSocketService } from "@app/services/web-socket/web-socket.service";
+import { LeaveGamePayload } from "@app/utils/interfaces/packet";
 import { User } from "@app/utils/interfaces/user";
 import { BehaviorSubject } from "rxjs";
 //import { FormBuilder, FormGroup, Validators } from "@angular/forms";
@@ -28,19 +29,24 @@ export class SidebarComponent {
   public user: BehaviorSubject<User>;
   currentRoute = "PolyScrabble";
   currentRouteName = "/home";
-  previousRouteName = ["/home"];
+  previousRouteName: string[] = ["/home"];
+  routeIndex = 0;
 
-  constructor(private userService: UserService, private authService: AuthenticationService, private gameService: GameService, private themeService: ThemeService, private router: Router) {
+  constructor(private userService: UserService, private authService: AuthenticationService, private gameService: GameService, private themeService: ThemeService, private router: Router,
+    private webSocketService: WebSocketService) {
     this.user = this.userService.subjectUser;
     document.getElementById("avatar")?.setAttribute("src", this.user.value.avatar.url);
     this.router.events.subscribe((e) => {
       if (e instanceof NavigationStart) {
         this.previousRouteName.push(this.currentRouteName);
+        this.routeIndex++;
         this.currentRouteName = e.url;
         switch (e.url) {
           case "/home":
             this.currentRoute = "PolyScrabble";
-            this.selectNav(0)
+            this.selectNav(0);
+            this.previousRouteName = ['/home'];
+            this.routeIndex = 0;
             break;
         
           case "/login":
@@ -82,16 +88,27 @@ export class SidebarComponent {
   }
 
   isInGame(): boolean {
-    return this.gameService.scrabbleGame.value.id != "";
+    return this.gameService.scrabbleGame.value?.id != "";
+  }
+
+  isInGameLobby(): boolean {
+    return this.gameService.game.value != undefined;
   }
 
   return(): void {
+    if (this.isInGameLobby() && this.gameService.game.value) {
+      const payload: LeaveGamePayload = {
+        gameId: this.gameService.game.value.id
+      } 
+      this.webSocketService.send("leave-game", payload);
+      this.gameService.game.next(undefined);
+    }
     if (this.previousRouteName[this.previousRouteName.length - 1] == '/home') {
       this.previousRouteName = ['/home'];
       this.router.navigate(['/home']);
     } else {
-      const routeToGo = this.previousRouteName.pop();
-      this.router.navigate([routeToGo]);
+      this.routeIndex--;
+      this.router.navigate([this.previousRouteName[this.routeIndex]]);
     }
   }
 
