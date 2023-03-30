@@ -54,9 +54,9 @@ func (m *Manager) Accept(cID string) fiber.Handler {
 		id := cID + "#1"
 		c, err := m.GetClient(id)
 		if err != nil {
-			m.logger.Error("get client", err)
+			m.logger.Info("no ws connection for this client yet", "msg", err)
 		}
-		slog.Info("user already connected:", c, "creating a new socket connection with a different ID")
+		slog.Info("user already connected, creating a new socket connection with a different ID", "client id", cID)
 		if c != nil {
 			id = cID + "#2"
 		}
@@ -64,8 +64,8 @@ func (m *Manager) Accept(cID string) fiber.Handler {
 		err = m.AddClient(c)
 		if err != nil {
 			m.logger.Error("add client", err)
+			return
 		}
-		// }
 
 		{
 			// List all users registered in the application

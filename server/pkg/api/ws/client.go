@@ -353,8 +353,8 @@ func (c *Client) HandleCreateGameRequest(p *Packet) error {
 	r := c.Manager.AddRoom(g.ID, "")
 	for _, uID := range g.UserIDs {
 		client, err := c.Manager.GetClient(uID)
-		if err == nil {
-			slog.Error("add client to ws room", err)
+		if err != nil {
+			slog.Error("get client", err)
 			continue
 		}
 
