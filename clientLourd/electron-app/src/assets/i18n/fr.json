@@ -3,6 +3,7 @@
 	"avatar-selection-component.bouton-defaults": "Choisir un avatar",
 	"avatar-selection-component.bouton-personalize": "Personnaliser votre avatar",
 	"avatar-selection-component.error": "Veuillez choisir un avatar",
+	"avatar-selection-component.error-type": "Veuillez choisir un fichier de type .jpg, .jpeg or .png",
 	"avatar-selection-component.next-page": "Continuer vers le menu principal",
 	"avatar-selection-component.text": "Les photos rendent votre profil plus attrayant",
 	"avatar-selection-component.title": "Choisissez un avatar qui vous correspond",
