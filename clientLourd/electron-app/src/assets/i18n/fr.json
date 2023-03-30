@@ -11,6 +11,7 @@
 	"chat-box-component.enter-message": "Entrez votre message",
 	"chat-box-component.global": "Salle globale",
 	"chat-box-component.label": "Salle",
+	"customize-avatar-component.title": "Personnalisez votre avatar",
 	"default-avatar-selection-component.cancel": "Annuler",
 	"default-avatar-selection-component.confirm": "Confirmer",
 	"default-avatar-selection-component.error": "Veuillez sélectionner un avatar ou appuyer sur Annuler",

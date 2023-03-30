@@ -11,6 +11,7 @@
 	"chat-box-component.enter-message": "Enter your message",
 	"chat-box-component.global": "Global room",
 	"chat-box-component.label": "Room",
+	"customize-avatar-component.title": "Customize your avatar",
 	"default-avatar-selection-component.cancel": "Cancel",
 	"default-avatar-selection-component.confirm": "Submit",
 	"default-avatar-selection-component.error": "Please select an avatar or press cancel",
