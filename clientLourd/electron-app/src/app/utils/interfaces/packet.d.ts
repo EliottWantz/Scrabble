@@ -61,6 +61,15 @@ export interface LeaveGamePayload {
     gameId: string;
 }
 
+export interface JoinGameAsObserverPayload {
+    gameId: string;
+    password: string;
+}
+
+export interface LeaveGameAsObserverPayload {
+    gameId: string;
+}
+
 export interface StartGamePayload {
     gameId: string;
 }

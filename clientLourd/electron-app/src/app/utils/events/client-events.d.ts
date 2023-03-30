@@ -8,6 +8,8 @@ export type ClientEvent = ""
 | "create-game"
 | "join-game"
 | "leave-game"
+| "join-as-observateur"
+| "leave-as-observateur"
 | "start-game"
 | "playMove"
 | "indice";
