@@ -4,47 +4,50 @@
       <mat-icon>input</mat-icon>
       Quitter la partie
     </button>
-    <div *ngFor="let player of game.value.players" class="player" [class.isTurn]="game.value.turn === player.id">
+
+    <div *ngFor="let player of game.value?.players" class="player" [class.isTurn]="game.value?.turn === player.id">
       <div class="playerInfo">
         <img *ngIf="!player.isBot" src="{{getPlayerAvatar(player.id)}}">
         <h3>{{player.username}}</h3>
       </div>
       <p>Score : {{player.score}}</p>
     </div>
+
+    <button *ngIf="!isObserver()" mat-raised-button color="primary" (click)="submit()" id="play-button" [disabled]="!hasPlacedLetters() || !isTurn()">
+      <mat-icon>done</mat-icon>
+      Envoyer
+    </button>
+
+    <button *ngIf="!isObserver()" mat-raised-button color="primary" (click)="exchange()" id="exchange-button" [disabled]="!hasSelectedLetters() || !isTurn()">
+      <mat-icon>swap_horiz</mat-icon>
+      Échanger
+    </button>
   </div>
   <div class="middle">
     <div class="board">
       <app-board></app-board>
     </div>
-    <app-rack class="rack"></app-rack>
-    <div class="play-buttons">
-      <button mat-raised-button color="primary" (click)="submit()" id="play-button" [disabled]="!hasPlacedLetters()">
-        <mat-icon>done</mat-icon>
-        Envoyer
-      </button>
 
-      <button mat-raised-button color="primary" (click)="pass()" id="pass-button">
-        <mat-icon>fast_forward</mat-icon>
-        Passer
-      </button>
-
-      <button mat-raised-button color="primary" (click)="exchange()" id="exchange-button" [disabled]="!hasSelectedLetters()">
-        <mat-icon>swap_horiz</mat-icon>
-        Échanger
-      </button>
-
-      <button mat-raised-button color="primary" (click)="indice()" id="indice-button">
-        <mat-icon>lightbulb</mat-icon>
-        Indice
-      </button>
-    </div>
+    <app-rack *ngIf="!isObserver()" class="rack"></app-rack>
   </div>
   <div class="right">
     <app-timer id="timer"></app-timer>
+
     <div id="reserve">
       <h3>Lettres en réserve</h3>
       <h3>80</h3>
     </div>
+
+    <button *ngIf="!isObserver()" mat-raised-button color="primary" (click)="indice()" id="indice-button" [disabled]="!isTurn()">
+      <mat-icon>lightbulb</mat-icon>
+      Indice
+    </button>
+
+    <button *ngIf="!isObserver()" mat-raised-button color="primary" (click)="pass()" id="pass-button" [disabled]="!isTurn()">
+      <mat-icon>fast_forward</mat-icon>
+      Passer
+    </button>
+
     <app-chat-box id="chat-box"></app-chat-box>
   </div>
     <!--

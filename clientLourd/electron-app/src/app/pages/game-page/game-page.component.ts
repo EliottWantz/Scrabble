@@ -16,7 +16,7 @@ import { Router } from "@angular/router";
     styleUrls: ["./game-page.component.scss"],
 })
 export class GamePageComponent implements OnInit {
-    game!: BehaviorSubject<ScrabbleGame>;
+    game!: BehaviorSubject<ScrabbleGame | undefined>;
     moves!: BehaviorSubject<MoveInfo[]>
     constructor(private gameService: GameService, private userService: UserService, private moveService: MoveService, private storageService: StorageService, private socketService: WebSocketService, private router: Router) { }
 
@@ -27,7 +27,11 @@ export class GamePageComponent implements OnInit {
     }
 
     isTurn(): boolean {
-        return this.game.value.turn == this.userService.currentUserValue.id;
+        return this.game.value?.turn == this.userService.currentUserValue.id;
+    }
+
+    isObserver(): boolean {
+        return this.gameService.isObserving;
     }
 
     hasPlacedLetters(): boolean {
@@ -62,11 +66,13 @@ export class GamePageComponent implements OnInit {
     }
 
     leaveGame(): void {
-        const payload: LeaveGamePayload = {
-            gameId: this.game.value.id
-        };
-        this.socketService.send("leave-game", payload);
-        this.router.navigate(["/home"]);
+        if (this.game.value) {
+            const payload: LeaveGamePayload = {
+                gameId: this.game.value?.id
+            };
+            this.socketService.send("leave-game", payload);
+            this.router.navigate(["/home"]);
+        }
     }
 
     /*getIndice(): string[] {

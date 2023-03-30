@@ -10,13 +10,14 @@ import { BehaviorSubject } from "rxjs";
     providedIn: 'root',
 })
 export class GameService {
-    scrabbleGame!: BehaviorSubject<ScrabbleGame>;
+    scrabbleGame!: BehaviorSubject<ScrabbleGame | undefined>;
     game!: BehaviorSubject<Game | undefined>;
     timer!: BehaviorSubject<number>;
     moves!: BehaviorSubject<MoveInfo[]>;
     joinableGames!: BehaviorSubject<Game[]>;
+    isObserving = false;
     constructor(private router: Router) {
-        this.scrabbleGame = new BehaviorSubject<ScrabbleGame>({
+        this.scrabbleGame = new BehaviorSubject<ScrabbleGame | undefined>({
             id: "",
             players: [],
             board: BoardHelper.createBoard(),

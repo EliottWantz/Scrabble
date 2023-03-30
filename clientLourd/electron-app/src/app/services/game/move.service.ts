@@ -13,7 +13,7 @@ import { GameService } from "@app/services/game/game.service";
 export class MoveService {
     selectedTiles: Tile[] = [];
     placedTiles: Tile[] = [];
-    game!: BehaviorSubject<ScrabbleGame>;
+    game!: BehaviorSubject<ScrabbleGame | undefined>;
     constructor(private webSocketService: WebSocketService, private gameService: GameService) {
         this.game = this.gameService.scrabbleGame;
         this.game.subscribe(() => {
@@ -36,16 +36,17 @@ export class MoveService {
             covers: covers
         };
 
-        const payload: PlayMovePayload = {
-            gameId: this.game.value.id,
-            moveInfo: move
-        };
-
-        this.webSocketService.send("playMove", payload);
-        console.log("Played ");
-        console.log(this.placedTiles);
-        this.placedTiles = [];
-        this.selectedTiles = [];
+        if (this.game.value) {
+            const payload: PlayMovePayload = {
+                gameId: this.game.value.id,
+                moveInfo: move
+            };
+            this.webSocketService.send("playMove", payload);
+            console.log("Played ");
+            console.log(this.placedTiles);
+            this.placedTiles = [];
+            this.selectedTiles = [];
+        }
     }
 
     exchange(): void {
@@ -59,16 +60,18 @@ export class MoveService {
             letters: letters
         };
 
-        const payload: PlayMovePayload = {
-            gameId: this.game.value.id,
-            moveInfo: move
-        };
-
-        this.webSocketService.send("playMove", payload);
-        console.log("Exchanged ");
-        console.log(this.selectedTiles);
-        this.selectedTiles = [];
-        this.placedTiles = [];
+        if (this.game.value) {
+            const payload: PlayMovePayload = {
+                gameId: this.game.value.id,
+                moveInfo: move
+            };
+    
+            this.webSocketService.send("playMove", payload);
+            console.log("Exchanged ");
+            console.log(this.selectedTiles);
+            this.selectedTiles = [];
+            this.placedTiles = [];
+        }
     }
 
     pass(): void {
@@ -76,17 +79,20 @@ export class MoveService {
             type: "pass"
         };
 
-        const payload: PlayMovePayload = {
-            gameId: this.game.value.id,
-            moveInfo: move
-        };
-
-        this.webSocketService.send("playMove", payload)
-        this.selectedTiles = [];
-        this.placedTiles = [];
+        if (this.game.value) {
+            const payload: PlayMovePayload = {
+                gameId: this.game.value.id,
+                moveInfo: move
+            };
+    
+            this.webSocketService.send("playMove", payload)
+            this.selectedTiles = [];
+            this.placedTiles = [];
+        }
     }
 
     indice(): void {
-        this.webSocketService.send("indice", {gameId: this.game.value.id});
+        if (this.game.value)
+            this.webSocketService.send("indice", {gameId: this.game.value.id});
     }
 }

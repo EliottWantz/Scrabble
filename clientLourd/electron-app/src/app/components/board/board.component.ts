@@ -11,7 +11,7 @@ import { MoveService } from "@app/services/game/move.service";
     styleUrls: ["./board.component.scss"],
 })
 export class BoardComponent implements OnInit {
-    game!: BehaviorSubject<ScrabbleGame>;
+    game!: BehaviorSubject<ScrabbleGame | undefined>;
     constructor(private gameService: GameService, private mouseService: MouseService, private moveService: MoveService) {
         this.game = this.gameService.scrabbleGame;
     }

@@ -11,7 +11,7 @@ import { Tile } from "@app/utils/interfaces/game/tile";
     styleUrls: ["./rack.component.scss"],
 })
 export class RackComponent implements OnInit {
-    game!: BehaviorSubject<ScrabbleGame>;
+    game!: BehaviorSubject<ScrabbleGame | undefined>;
     rack: Tile[] = [];
     constructor(private gameService: GameService, private userService: UserService) {
         this.game = this.gameService.scrabbleGame;
@@ -33,8 +33,8 @@ export class RackComponent implements OnInit {
 
     private getPlayerRack(): Tile[] | undefined {
         console.log(this.game.value);
-        console.log(this.game.value.players);
-        if (this.game.value.players) {
+        console.log(this.game.value?.players);
+        if (this.game.value?.players) {
             for (let i = 0; i < this.game.value.players.length; i++) {
                 if (this.game.value.players[i].id == this.userService.subjectUser.value.id) {
                     console.log(this.game.value.players[i].rack);
