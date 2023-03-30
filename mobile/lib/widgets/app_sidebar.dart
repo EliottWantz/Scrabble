@@ -2,6 +2,7 @@ import 'package:client_leger/api/api_repository.dart';
 import 'package:client_leger/routes/app_routes.dart';
 import 'package:client_leger/services/auth_service.dart';
 import 'package:client_leger/services/avatar_service.dart';
+import 'package:client_leger/services/game_service.dart';
 import 'package:client_leger/services/settings_service.dart';
 import 'package:client_leger/services/user_service.dart';
 import 'package:client_leger/utils/dialog_helper.dart';
@@ -26,6 +27,7 @@ class AppSideBar extends StatelessWidget {
   final AuthService authService = Get.find();
   final UserService userService = Get.find();
   final ApiRepository apiRepository = Get.find();
+  final GameService gameService = Get.find();
 
   @override
   Widget build(BuildContext context) {
@@ -268,7 +270,11 @@ class AppSideBar extends StatelessWidget {
               const Gap(40),
               InkWell(
                 onTap: () async {
-                  await DialogHelper.showLobbyQuitDialog();
+                  if (gameService.isGameCreator()) {
+                    await DialogHelper.showLobbyCreatorQuitDialog();
+                  } else {
+                    await DialogHelper.showLobbyQuitDialog();
+                  }
                 },
                 child: const Icon(
                   Icons.arrow_back,
