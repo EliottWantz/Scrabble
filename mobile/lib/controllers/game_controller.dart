@@ -113,9 +113,9 @@ class GameController extends GetxController {
   }
 
   void getIndices() {
-    // if (!isClientTurn() || gameService.getIndicesHasBeenCalled) {
-    //   return;
-    // }
+    if (!isClientTurn() || gameService.getIndicesHasBeenCalled) {
+      return;
+    }
 
     websocketService.getIndices();
     gameService.getIndicesHasBeenCalled = true;

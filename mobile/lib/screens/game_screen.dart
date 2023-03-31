@@ -157,9 +157,9 @@ class GameScreen extends GetView<GameController> {
                       ),
                     ),
                     const Gap(100),
-                    Obx(() => ElevatedButton.icon(
-                          onPressed: controller.isClientTurn() &&
-                              !_gameService.getIndicesHasBeenCalled
+                    ElevatedButton.icon(
+                          onPressed: controller.isClientTurn() // &&
+                              // !_gameService.getIndicesHasBeenCalled
                               ? () {
                                   controller.getIndices();
                                   showDialog(
@@ -176,7 +176,7 @@ class GameScreen extends GetView<GameController> {
                             size: 30,
                           ),
                           label: const Text('Indices'),
-                        )),
+                        ),
                   ],
                 ),
               ).inGridArea('aside'),
@@ -281,14 +281,14 @@ class GameScreen extends GetView<GameController> {
     return Container(
         height: 300,
         width: 500,
-        child: ListView.builder(
+        child: Obx(() => ListView.builder(
           padding: EdgeInsets.zero,
-          itemCount: _gameService.indices.length,
+          itemCount: _gameService.indices.value!.length,
           itemBuilder: (context, item) {
             final index = item;
             return _buildIndice(_gameService.indices.value![index]);
           },
-        ));
+        )));
   }
 
   Widget _buildIndice(MoveInfo moveInfo) {
