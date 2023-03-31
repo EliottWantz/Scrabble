@@ -12,6 +12,7 @@ import (
 	"github.com/alphadose/haxmap"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
+	"golang.org/x/exp/slices"
 	"golang.org/x/exp/slog"
 )
 
@@ -321,6 +322,11 @@ func (m *Manager) RemoveClient(c *Client) error {
 			slog.Error("removeClient from game", err)
 		}
 	}
+	if user.JoinedTournament != "" {
+		if err := m.RemoveClientFromTournament(c, user.JoinedTournament); err != nil {
+			slog.Error("removeClient from tournament", err)
+		}
+	}
 
 	if err := c.Conn.Close(); err != nil {
 		slog.Error("close connection", err)
@@ -381,9 +387,19 @@ func (m *Manager) RemoveClientFromGame(c *Client, gID string) error {
 		}
 	} else {
 		// if Game has started and is a spectator
-		if strings.Contains(strings.Join(g.ObservateurIDs, ""), c.UserId) {
+		if slices.Contains(g.ObservateurIDs, c.UserId) {
 			if err := r.RemoveClient(c.ID); err != nil {
 				slog.Error("remove spectator from game room", err)
+			}
+			{
+				p, err := NewLeftGamePacket(LeftGamePayload{
+					GameID: g.ID,
+				})
+				if err != nil {
+					slog.Error("create left game packet", err)
+					return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+				}
+				c.send(p)
 			}
 			return nil
 		}
@@ -459,19 +475,39 @@ func (m *Manager) RemoveClientFromTournament(c *Client, gID string) error {
 		}
 	} else {
 		// if Tournament has started and is a spectator
-		// if strings.Contains(strings.Join(t.ObservateurIDs, ""), c.ID) {
-		// 	if err := r.RemoveClient(c.ID); err != nil {
-		// 		slog.Error("remove spectator from Tournament room", err)
-		// 	}
-		// 	return nil
-		// }
-		// // Tournament has started, replace player with a bot
-		// if err := c.Manager.ReplacePlayerWithBot(t.ID, c.ID); err != nil {
-		// 	slog.Error("replace player with bot", err)
-		// }
-		// if err := c.Manager.UserSvc.Repo.UnSetJoinedTournament(c.ID); err != nil {
-		// 	slog.Error("remove user from Tournament room", err)
-		// }
+		if slices.Contains(t.ObservateurIDs, c.ID) {
+			if err := r.RemoveClient(c.ID); err != nil {
+				slog.Error("remove spectator from Tournament room", err)
+			}
+			{
+				p, err := NewLeftTournamentPacket(LeftTournamentPayload{
+					TournamentID: t.ID,
+				})
+				if err != nil {
+					slog.Error("create left tournament packet", err)
+					return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+				}
+				c.send(p)
+			}
+			return nil
+		}
+		// Tournament has started, make opponent win his game
+		g, err := m.GameSvc.Repo.FindGame(gID)
+		if err != nil {
+			return err
+		}
+
+		var winnerID string
+		if c.ID == g.UserIDs[0] {
+			winnerID = g.UserIDs[1]
+		} else {
+			winnerID = g.UserIDs[0]
+		}
+		g.WinnerID = winnerID
+		err = m.HandleGameOver(g)
+		if err != nil {
+			return err
+		}
 	}
 
 	if err := r.BroadcastLeaveTournamentPackets(c, t.ID); err != nil {
@@ -782,6 +818,38 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 			} else {
 				// We are wainting for next winner to finish his previous game
 				// make the winner an observer of the other game
+				var otherGame *game.Game
+				if t.PoolGames[0] == g {
+					otherGame = t.PoolGames[1]
+				} else {
+					otherGame = t.PoolGames[0]
+				}
+
+				g, err := m.GameSvc.AddObserver(otherGame.ID, g.WinnerID)
+				if err != nil {
+					return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+				}
+
+				otherGameRoom, err := m.GetRoom(otherGame.ID)
+				if err != nil {
+					return fiber.NewError(fiber.StatusBadRequest, err.Error())
+				}
+				if err := otherGameRoom.AddClient(g.WinnerID); err != nil {
+					return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+				}
+				winnerClient, err := m.getClientByUserID(g.WinnerID)
+				if err != nil {
+					return fiber.NewError(fiber.StatusBadRequest, err.Error())
+				}
+				gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
+					Game: makeGamePayload(g),
+				})
+				if err != nil {
+					return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+				}
+				winnerClient.send(gamePacket)
+				return otherGameRoom.BroadcastObserverJoinGamePacket(winnerClient, g)
+
 			}
 		}
 	}
