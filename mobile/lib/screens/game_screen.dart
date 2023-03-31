@@ -158,7 +158,7 @@ class GameScreen extends GetView<GameController> {
                     ),
                     const Gap(100),
                     Obx(() => ElevatedButton.icon(
-                          onPressed: //controller.isClientTurn() &&
+                          onPressed: controller.isClientTurn() &&
                               !_gameService.getIndicesHasBeenCalled
                               ? () {
                                   controller.getIndices();
