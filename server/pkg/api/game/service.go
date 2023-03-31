@@ -141,6 +141,9 @@ func (s *Service) AddUserToTournament(tID, userID, password string) (*Tournament
 	// if g.IsProtected && !auth.PasswordsMatch(g.HashedPassword, password) {
 	// 	return nil, fmt.Errorf("password mismatch")
 	// }
+	if len(t.UserIDs) == 4 {
+		return nil, fmt.Errorf("tournament is full")
+	}
 
 	t.UserIDs = append(t.UserIDs, userID)
 
