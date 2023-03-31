@@ -23,6 +23,7 @@ import 'package:client_leger/models/response/indice_response.dart';
 import 'package:client_leger/models/response/joined_dm_room_response.dart';
 import 'package:client_leger/models/response/joined_game_response.dart';
 import 'package:client_leger/models/response/joined_room_response.dart';
+import 'package:client_leger/models/response/left_game_response.dart';
 import 'package:client_leger/models/response/list_users_response.dart';
 import 'package:client_leger/models/response/send_friend_response.dart';
 import 'package:client_leger/models/response/timer_response.dart';
@@ -136,6 +137,11 @@ class WebsocketService extends GetxService {
         handleEventUserJoinedRoom(userJoinedRoomResponse);
       }
       break;
+      case ServerEventLeftGame: {
+        LeftGameResponse leftGameResponse = LeftGameResponse.fromRawJson(data);
+        handleEventLeftGame(leftGameResponse);
+      }
+      break;
       case ServerEventJoinedGame: {
         JoinedGameResponse joinedGameRoomResponse = JoinedGameResponse.fromRawJson(data);
         handleEventJoinedGame(joinedGameRoomResponse);
@@ -247,6 +253,18 @@ class WebsocketService extends GetxService {
 
   void handleEventUserJoinedRoom(UserJoinedRoomResponse userJoinedRoomResponse) {
     roomService.roomsMap[userJoinedRoomResponse.payload.roomId]!.userIds.add(userJoinedRoomResponse.payload.userId);
+  }
+
+  void handleEventLeftGame(LeftGameResponse leftGameResponse) {
+    gameService.currentGame.value = null;
+    gameService.currentGameId = '';
+    gameService.currentGameTimer.value = null;
+    gameService.currentGameInfo = null;
+    gameService.currentGameRoomUserIds.value = [];
+    if(gameService.currentGame.value == null) {
+      // Get.toNamed(Routes.HOME + Routes.GAME_START + Routes.LOBBY);
+      Get.back();
+    }
   }
 
   void handleEventJoinedGame(JoinedGameResponse joinedGameResponse) {

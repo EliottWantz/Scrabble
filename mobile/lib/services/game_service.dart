@@ -23,7 +23,7 @@ class GameService extends GetxService {
 
   final currentGame = Rxn<GameUpdatePayload>();
   final currentGameTimer = Rxn<int>();
-  late Game currentGameInfo;
+  late Game? currentGameInfo;
 
   RxList<MoveInfo> indices = <MoveInfo>[].obs;
 
@@ -47,7 +47,7 @@ class GameService extends GetxService {
   }
 
   bool isGameCreator() {
-    String creatorId = currentGameInfo.creatorId.split("#")[0];
+    String creatorId = currentGameInfo!.creatorId.split("#")[0];
     return creatorId == userService.user.value!.id;
   }
 
