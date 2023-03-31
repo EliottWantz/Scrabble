@@ -1,4 +1,6 @@
 import 'dart:math';
+import 'package:client_leger/screens/floating_chat_screen.dart';
+import 'package:client_leger/services/room_service.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:client_leger/api/api_repository.dart';
 import 'package:client_leger/models/avatar.dart';
@@ -17,32 +19,53 @@ class ProfileScreen extends StatelessWidget {
 
   final UserService userService = Get.find();
   final ApiRepository apiRepository = Get.find();
+  final RoomService _roomService = Get.find();
   final montreal = tz.getLocation('America/Montreal');
+
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  RxBool selectedChatRoom = false.obs;
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 3,
-      child: Scaffold(
-        appBar: AppBar(
-          elevation: 0,
-          toolbarHeight: 0,
-          bottom: const TabBar(
-            tabs: [
-              Tab(text: 'Profil utilisateur', icon: Icon(Icons.person)),
-              Tab(text: 'Historique des parties', icon: Icon(Icons.list_alt)),
-              Tab(
-                  text: 'Activité de l\'utilisateur',
-                  icon: Icon(Icons.access_time)),
+    return Scaffold(
+      resizeToAvoidBottomInset: true,
+      drawerScrimColor: Colors.transparent,
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          _scaffoldKey.currentState?.openEndDrawer();
+        },
+        autofocus: true,
+        focusElevation: 5,
+        child: const Icon(
+          Icons.question_answer_rounded,
+        ),
+      ),
+      key: _scaffoldKey,
+      endDrawer: Drawer(child: Obx(() => _buildChatRoomsList())),
+      body: DefaultTabController(
+        length: 3,
+        child: Scaffold(
+          appBar: AppBar(
+            elevation: 0,
+            toolbarHeight: 0,
+            bottom: const TabBar(
+              tabs: [
+                Tab(text: 'Profil utilisateur', icon: Icon(Icons.person)),
+                Tab(text: 'Historique des parties', icon: Icon(Icons.list_alt)),
+                Tab(
+                    text: 'Activité de l\'utilisateur',
+                    icon: Icon(Icons.access_time)),
+              ],
+            ),
+          ),
+          body: TabBarView(
+            children: [
+              _buildUserProfileTab(),
+              _buildGameHistoryTab(),
+              _buildUserActivityTab(),
             ],
           ),
-        ),
-        body: TabBarView(
-          children: [
-            _buildUserProfileTab(),
-            _buildGameHistoryTab(),
-            _buildUserActivityTab(),
-          ],
         ),
       ),
     );
@@ -265,5 +288,58 @@ class ProfileScreen extends StatelessWidget {
               montreal)))),
         ]),
     ];
+  }
+
+  Widget _buildChatRoomsList() {
+    if (!selectedChatRoom.value) {
+      print("selectedchatroom value");
+      print(selectedChatRoom);
+      return Column(
+        children: [
+          Container(
+            height: 100,
+            width: double.infinity,
+            child: const DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.blue,
+              ),
+              child: Text('Drawer Header'),
+            ),
+          ),
+          Expanded(
+              child: ListView.builder(
+                // padding: const EdgeInsets.all(16.0),
+                padding: EdgeInsets.zero,
+                itemCount: _roomService.getRooms().length,
+                itemBuilder: (context, item) {
+                  final index = item;
+                  return _buildChatRoomRow(_roomService.getRooms()[index].roomName,
+                      _roomService.getRooms()[index].roomId);
+                },
+              ))
+        ],
+      );
+    } else {
+      print("selectedchatroom value");
+      print(selectedChatRoom);
+      return FloatingChatScreen(selectedChatRoom);
+    }
+  }
+
+  Widget _buildChatRoomRow(String roomName, String roomId) {
+    return Column(
+      children: [
+        ListTile(
+          title: Text(roomName),
+          // onTap: () => Get.toNamed(Routes.CHAT, arguments: {'text': 'roomName'}),
+          onTap: () {
+            selectedChatRoom.value = !selectedChatRoom.value;
+            _roomService.currentFloatingChatRoomId.value = roomId;
+            _roomService.updateCurrentFloatingRoomMessages();
+          },
+        ),
+        const Divider(),
+      ],
+    );
   }
 }
