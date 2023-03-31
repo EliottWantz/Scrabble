@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:client_leger/controllers/game_controller.dart';
 import 'package:client_leger/models/chat_message_payload.dart';
 import 'package:client_leger/models/create_room_payload.dart';
 import 'package:client_leger/models/events.dart';
@@ -327,12 +328,16 @@ class WebsocketService extends GetxService {
   }
 
   void handleServerEventGameUpdate(GameUpdateResponse gameUpdateResponse) {
-    if(gameService.currentGame.value == null) {
+    if (gameService.currentGame.value == null) {
       gameService.currentGame.value = gameUpdateResponse.payload;
       Get.offAllNamed(Routes.GAME);
-    }
-    else {
+    } else if (Get.isRegistered<GameController>()) {
       gameService.currentGame.value = gameUpdateResponse.payload;
+      GameController gameController = Get.find();
+      gameController.currentSpecialLetter.value = 'A';
+      gameController.lettersPlaced.value = [];
+      gameController.lettersToExchange.value = {};
+      gameService.indices.value = [];
       gameService.getIndicesHasBeenCalled = false;
     }
   }

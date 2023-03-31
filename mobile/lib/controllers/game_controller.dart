@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:client_leger/models/move_info.dart';
 import 'package:client_leger/models/move_types.dart';
 import 'package:client_leger/models/square.dart';
@@ -9,6 +11,7 @@ import 'package:client_leger/services/user_service.dart';
 import 'package:client_leger/services/websocket_service.dart';
 import 'package:client_leger/widgets/board_tile.dart';
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
@@ -26,6 +29,9 @@ class GameController extends GetxController {
   RxList<TileInfo> lettersPlaced = <TileInfo>[].obs;
   RxBool placeIndiceIsCalled = false.obs;
   RxMap<int, String> lettersToExchange = <int, String>{}.obs;
+  RxString currentSpecialLetter = 'A'.obs;
+
+  final dropdownFormKey = GlobalKey<FormState>();
 
   bool isClientTurn() {
     return gameService.currentGame.value!.turn == userService.user.value!.id;
@@ -136,15 +142,16 @@ class GameController extends GetxController {
   }
 
   Widget getEaselChildToDisplay(Tile tile, int index) {
-    if (!isClientTurn()) {
-      return SizedBox(
-          height: 70,
-          width: 70,
-          child: LetterTile(
-            isEasel: true,
-            tile: tile,
-          ));
-    } else if (isTileInBoard(tile)) {
+    // if (!isClientTurn()) {
+    //   return SizedBox(
+    //       height: 70,
+    //       width: 70,
+    //       child: LetterTile(
+    //         isEasel: true,
+    //         tile: tile,
+    //       ));
+    // }
+    if (isTileInBoard(tile)) {
       return SizedBox(
           height: 70,
           width: 70,
@@ -152,6 +159,7 @@ class GameController extends GetxController {
             tile: tile,
           ));
     }
+    if (tile.letter == 42) tile.isSpecial = true;
     return DragTarget<Tile>(builder: (
       BuildContext context,
       List<dynamic> accepted,

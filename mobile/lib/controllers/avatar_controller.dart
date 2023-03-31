@@ -26,6 +26,7 @@ class AvatarController extends GetxController {
   Rx<Color> facialHairColor = const Color(0xFFFFDBB4).obs;
   Rx<String> mouth = 'default'.obs;
   Rx<String> accessories = 'none'.obs;
+  Rx<Color> backgroundColor = const Color(0xFFb6e3f4).obs;
 
   AvatarController({required this.avatarService});
 
@@ -34,14 +35,8 @@ class AvatarController extends GetxController {
 
   String onGenerateAvatar() {
     String baseUrl =
-        'https://api.dicebear.com/6.x/avataaars/png?seed=$gender&skinColor=${formatColor(skinColor.value)}&top=$hairType&mouth=$mouth&hairColor=${formatColor(hairColor.value)}&eyes=$eyeType&eyebrows=$eyeBrows${facialHair.value != 'none' ? '&facialHair=$facialHair&facialHairProbability=100&facialHairColor=${formatColor(facialHairColor.value)}' : ''}&backgroundColor=${generateRandomColor()}${accessories.value != 'none' ? '&accessories=$accessories&accessoriesProbability=100' : ''}';
+        'https://api.dicebear.com/6.x/avataaars/png?seed=$gender&skinColor=${formatColor(skinColor.value)}&top=$hairType&mouth=$mouth&hairColor=${formatColor(hairColor.value)}&eyes=$eyeType&eyebrows=$eyeBrows${facialHair.value != 'none' ? '&facialHair=$facialHair&facialHairProbability=100&facialHairColor=${formatColor(facialHairColor.value)}' : ''}&backgroundColor=${formatColor(backgroundColor.value)}${accessories.value != 'none' ? '&accessories=$accessories&accessoriesProbability=100' : ''}';
     return baseUrl;
-  }
-
-  String generateRandomColor() {
-    var list = ['b6e3f4', 'c0aede', 'd1d4f9', 'ffdfbf', 'ffd5dc'];
-    final random = Random();
-    return list[random.nextInt(list.length)];
   }
 
   String formatColor(Color color) {

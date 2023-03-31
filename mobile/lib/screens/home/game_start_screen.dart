@@ -106,7 +106,11 @@ class GameStartScreen extends StatelessWidget {
                     width: 230,
                     child: ElevatedButton.icon(
                       onPressed: () {
-                        _showJoinableGamesDialog(context);
+                        if (gameMode == 'tournoi') {
+                          _showPainter();
+                        } else {
+                          _showJoinableGamesDialog(context);
+                        }
                       },
                       icon: const Padding(
                         padding: EdgeInsets.all(8.0),
@@ -125,8 +129,7 @@ class GameStartScreen extends StatelessWidget {
                       ? SizedBox(
                           width: 230,
                           child: ElevatedButton.icon(
-                            onPressed: () {
-                            },
+                            onPressed: () {},
                             icon: const Padding(
                               padding: EdgeInsets.all(8.0),
                               child: Icon(
@@ -480,4 +483,116 @@ class GameStartScreen extends StatelessWidget {
 //     barrierDismissible: false,
 //   );
 // }
+  void _showPainter() {
+    Get.dialog(
+        Dialog(
+          child: SizedBox(
+            height: 800,
+            width: 850,
+            child: CustomPaint(
+              painter: TournamentPainter(),
+              child: Align(
+                  alignment: Alignment.topRight,
+                  child: IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () {
+                      DialogHelper.hideLoading();
+                    },
+                  )),
+            ),
+          ),
+        ),
+        barrierDismissible: false);
+  }
+}
+
+class TournamentPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    var padding = 100.0;
+    var width = 150.0;
+    var height = 100.0;
+    var offset = width - height;
+
+    var paint = Paint()
+      ..color = Get.isDarkMode ? Colors.white : Colors.black
+      ..strokeWidth = 5.0
+      ..style = PaintingStyle.stroke;
+
+    final textSpan = TextSpan(
+        text: 'Progression du tournoi en cours',
+        style: Get.textTheme.headline6);
+    final TilePainter = TextPainter(
+      text: textSpan,
+      textDirection: TextDirection.ltr,
+    );
+    TilePainter.layout(
+      minWidth: 0,
+      maxWidth: size.width,
+    );
+    final xCenter = (size.width - TilePainter.width) / 2;
+    final yTop = 20.0;
+    final titlePos = Offset(xCenter, yTop);
+    TilePainter.paint(canvas, titlePos);
+
+    for (int i = 0; i < 4; i++) {
+      var rightSideY = padding * (i + 1) + offset * i;
+      canvas.drawRect(Rect.fromLTWH(padding, rightSideY, width, height), paint);
+      canvas.drawLine(Offset(padding + width, rightSideY + height / 2),
+          Offset(padding + width + offset * 2, rightSideY + height / 2), paint);
+      if (i.isEven) {
+        canvas.drawLine(
+            Offset(padding + width + offset * 2, rightSideY + height / 2 - 2.5),
+            Offset(padding + width + offset * 2,
+                rightSideY + height / 2 + height + offset + 2.5),
+            paint);
+        canvas.drawLine(
+            Offset(
+                padding + width + offset * 2, rightSideY + height + offset / 2),
+            Offset(
+                padding + width + offset * 3, rightSideY + height + offset / 2),
+            paint);
+      }
+    }
+    for (int i = 0; i < 2; i++) {
+      var rightSideY =
+          padding * (i + 1) + offset * i * 4 + height / 2 + offset / 2;
+      canvas.drawRect(
+          Rect.fromLTWH(
+              padding + width + offset * 3, rightSideY, width, height),
+          paint);
+      canvas.drawLine(
+          Offset(padding + width + offset * 3 + width, rightSideY + height / 2),
+          Offset(padding + width + offset * 3 + width + offset,
+              rightSideY + height / 2),
+          paint);
+      if (i.isEven) {
+        canvas.drawLine(
+            Offset(padding + width + offset * 3 + width + offset - 2.5,
+                rightSideY + height / 2),
+            Offset(padding + width + offset * 3 + width + offset,
+                rightSideY + height / 2 + height + offset * 4 + 2.5),
+            paint);
+        canvas.drawLine(
+            Offset(padding + width + offset * 3 + width + offset,
+                rightSideY + height + offset * 2),
+            Offset(padding + width + offset * 3 + width + offset * 2,
+                rightSideY + height + offset * 2),
+            paint);
+      }
+    }
+
+    for (int i = 0; i < 1; i++) {
+      var rightSideY = height * 2 + offset * 2 + offset / 2;
+      canvas.drawRect(
+          Rect.fromLTWH(padding + width + offset * 3 + width + offset * 2,
+              rightSideY, width, height),
+          paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return true;
+  }
 }
