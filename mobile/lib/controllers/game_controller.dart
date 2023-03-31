@@ -21,6 +21,8 @@ class GameController extends GetxController {
   final GameService gameService = Get.find();
   final UserService userService = Get.find();
 
+  // bool getIndicesHasBeenCalled = false;
+
   RxList<TileInfo> lettersPlaced = <TileInfo>[].obs;
   RxBool placeIndiceIsCalled = false.obs;
   RxMap<int, String> lettersToExchange = <int, String>{}.obs;
@@ -53,6 +55,7 @@ class GameController extends GetxController {
     lettersPlaced.value = [];
     lettersToExchange.value = {};
     gameService.indices.value = [];
+    gameService.getIndicesHasBeenCalled = false;
   }
 
   void skipTurn() {
@@ -68,6 +71,7 @@ class GameController extends GetxController {
     lettersPlaced.value = [];
     lettersToExchange.value = {};
     gameService.indices.value = [];
+    gameService.getIndicesHasBeenCalled = false;
   }
 
   void placeLetters() {
@@ -87,6 +91,7 @@ class GameController extends GetxController {
     lettersPlaced.value = [];
     lettersToExchange.value = {};
     gameService.indices.value = [];
+    gameService.getIndicesHasBeenCalled = false;
   }
 
   void placeIndice(MoveInfo moveInfo) {
@@ -98,14 +103,16 @@ class GameController extends GetxController {
     lettersPlaced.value = [];
     lettersToExchange.value = {};
     gameService.indices.value = [];
+    gameService.getIndicesHasBeenCalled = false;
   }
 
   void getIndices() {
-    if (!isClientTurn()) {
-      return;
-    }
+    // if (!isClientTurn() || gameService.getIndicesHasBeenCalled) {
+    //   return;
+    // }
 
     websocketService.getIndices();
+    gameService.getIndicesHasBeenCalled = true;
   }
 
   String generateLetters() {

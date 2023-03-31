@@ -5,8 +5,8 @@ class GameUpdatePayload {
   String id;
   List<Player> players;
   List<List<Square>> board;
-  bool finished;
-  int numPassMoves;
+  bool? finished;
+  int? numPassMoves;
   String turn;
   // duration;
 

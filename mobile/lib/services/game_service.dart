@@ -26,6 +26,7 @@ class GameService extends GetxService {
   late Game? currentGameInfo;
 
   RxList<MoveInfo> indices = <MoveInfo>[].obs;
+  bool getIndicesHasBeenCalled = false;
 
   Player? getPlayer() {
     for (final player in currentGame.value!.players) {

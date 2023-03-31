@@ -333,6 +333,7 @@ class WebsocketService extends GetxService {
     }
     else {
       gameService.currentGame.value = gameUpdateResponse.payload;
+      gameService.getIndicesHasBeenCalled = false;
     }
   }
 
