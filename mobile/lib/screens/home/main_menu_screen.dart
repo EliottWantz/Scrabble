@@ -27,6 +27,8 @@ class MainMenuScreen extends GetView<HomeController> {
         onPressed: () {
           _scaffoldKey.currentState?.openEndDrawer();
         },
+        backgroundColor: Color.fromARGB(255,98,0,238),
+        foregroundColor: Colors.white,
         autofocus: true,
         focusElevation: 5,
         child: const Icon(
