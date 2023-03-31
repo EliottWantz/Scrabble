@@ -250,7 +250,7 @@ class GameStartScreen extends StatelessWidget {
                       ),
                     ),
                   ],
-                  rows: _createJoinableGameRows(),
+                  rows: _createJoinableGameRows(false),
                 ),
               )),
         ),
@@ -297,7 +297,7 @@ class GameStartScreen extends StatelessWidget {
                       ),
                     ),
                   ],
-                  rows: _createJoinableGameRows(),
+                  rows: _createJoinableGameRows(true),
                 ),
               )),
         ),
@@ -321,10 +321,10 @@ class GameStartScreen extends StatelessWidget {
     );
   }
 
-  List<DataRow> _createJoinableGameRows() {
+  List<DataRow> _createJoinableGameRows(bool privateGames) {
     if (_gameService.joinableGames.value != null) {
       return _gameService.joinableGames.value!
-          .map((game) => DataRow(cells: [
+          .expand((game) => [if (game.isPrivateGame == privateGames) DataRow(cells: [
                 DataCell(Text(game.id)),
                 DataCell(
                   ElevatedButton.icon(
@@ -341,7 +341,7 @@ class GameStartScreen extends StatelessWidget {
                     label: const Text('Rejoindre'), // <-- Text
                   ),
                 ),
-              ]))
+              ])])
           .toList();
     }
     return [
