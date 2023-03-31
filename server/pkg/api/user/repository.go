@@ -2,7 +2,6 @@ package user
 
 import (
 	"context"
-	"strings"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -20,10 +19,9 @@ func NewRepository(db *mongo.Database) *Repository {
 
 func (r *Repository) Find(ID string) (*User, error) {
 	u := &User{}
-	filteredId := filterJustId(ID)
 	res := r.coll.FindOne(
 		context.TODO(),
-		bson.M{"_id": filteredId},
+		bson.M{"_id": ID},
 	)
 	if err := res.Err(); err != nil {
 		return nil, err
@@ -185,13 +183,4 @@ func (r *Repository) Delete(ID string) error {
 	}
 
 	return nil
-}
-
-func filterJustId(ID string) string {
-	sepatateur := "#"
-
-	if i := strings.Index(ID, sepatateur); i >= 0 {
-		ID = ID[:i]
-	}
-	return ID
 }
