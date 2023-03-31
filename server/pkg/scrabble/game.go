@@ -76,12 +76,12 @@ func (g *Game) AddPlayer(p *Player) {
 
 // PlayerToMove returns the player which player's move it is
 func (g *Game) PlayerToMove() *Player {
-	return g.Players[len(g.MoveList)%4]
+	return g.Players[len(g.MoveList)%len(g.Players)]
 }
 
 // Returns the player that just played his move. Must be called after the move has been applied.
 func (g *Game) PlayerThatPlayed() *Player {
-	return g.Players[(len(g.MoveList)-1)%4]
+	return g.Players[(len(g.MoveList)-1)%len(g.Players)]
 }
 
 func (g *Game) SkipTurn() {

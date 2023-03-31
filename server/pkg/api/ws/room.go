@@ -243,7 +243,22 @@ func (r *Room) BroadcastJoinGamePackets(c *Client, g *game.Game) error {
 		r.BroadcastSkipSelf(p, c.ID)
 	}
 
-	return c.Manager.UpdateJoinableGames()
+	return c.Manager.BroadcastJoinableGames()
+}
+
+func (r *Room) BroadcastObserverJoinGamePacket(c *Client, g *game.Game) error {
+	{
+		p, err := NewUserJoinedGamePacket(UserJoinedGamePayload{
+			GameID: g.ID,
+			UserID: c.ID,
+		})
+		if err != nil {
+			return err
+		}
+		r.BroadcastSkipSelf(p, c.ID)
+	}
+
+	return nil
 }
 
 func (r *Room) BroadcastLeaveGamePackets(c *Client, gID string) error {
@@ -267,7 +282,70 @@ func (r *Room) BroadcastLeaveGamePackets(c *Client, gID string) error {
 		c.send(p)
 	}
 
-	return c.Manager.UpdateJoinableGames()
+	return c.Manager.BroadcastJoinableGames()
+}
+
+func (r *Room) BroadcastObserverLeaveGamePacket(c *Client, gID string) error {
+	{
+		p, err := NewUserLeftGamePacket(UserLeftGamePayload{
+			GameID: gID,
+			UserID: c.ID,
+		})
+		if err != nil {
+			return err
+		}
+		r.BroadcastSkipSelf(p, c.ID)
+	}
+
+	return nil
+}
+
+func (r *Room) BroadcastJoinTournamentPackets(c *Client, t *game.Tournament) error {
+	{
+		p, err := NewJoinedTournamentPacket(JoinedTournamentPayload{
+			Tournament: t,
+		})
+		if err != nil {
+			return err
+		}
+		c.send(p)
+	}
+	{
+		p, err := NewUserJoinedTournamentPacket(UserJoinedTournamentPayload{
+			TournamentID: t.ID,
+			UserID:       c.ID,
+		})
+		if err != nil {
+			return err
+		}
+		r.BroadcastSkipSelf(p, c.ID)
+	}
+
+	return c.Manager.BroadcastJoinableTournaments()
+}
+
+func (r *Room) BroadcastLeaveTournamentPackets(c *Client, gID string) error {
+	{
+		p, err := NewUserLeftTournamentPacket(UserLeftTournamentPayload{
+			TournamentID: gID,
+			UserID:       c.ID,
+		})
+		if err != nil {
+			return err
+		}
+		r.BroadcastSkipSelf(p, c.ID)
+	}
+	{
+		p, err := NewLeftTournamentPacket(LeftTournamentPayload{
+			TournamentID: gID,
+		})
+		if err != nil {
+			return err
+		}
+		c.send(p)
+	}
+
+	return c.Manager.BroadcastJoinableTournaments()
 }
 
 func (r *Room) ListUsers() []string {

@@ -1,0 +1,53 @@
+#timer {
+  position: relative;
+  height: 100px;
+  width: 100px;
+  text-align: center;
+  font-weight: 600;
+  //background-color: white;
+  border-color: #1b355e;
+  border-width: 8px;
+  border-style: solid;
+  border-radius: 50%;
+}
+
+#timer-num {
+  //color: #fff;
+  display: inline-block;
+  line-height: 100px;
+  letter-spacing: 2px;
+}
+
+.letters-left {
+  color: black;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+svg {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100px;
+  height: 100px;
+  transform: rotateY(-180deg) rotateZ(-90deg);
+}
+
+svg circle {
+  stroke-dasharray: 249px;
+  stroke-dashoffset: 0px;
+  stroke-linecap: round;
+  stroke-width: 5px;
+  stroke: rgb(255, 255, 255);
+  fill: none;
+  animation: timer 1s linear infinite forwards;
+}
+
+@keyframes timer {
+  from {
+      stroke-dashoffset: 0px;
+  }
+  to {
+      stroke-dashoffset: 249px;
+  }
+}

@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"strings"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -19,9 +20,10 @@ func NewRepository(db *mongo.Database) *Repository {
 
 func (r *Repository) Find(ID string) (*User, error) {
 	u := &User{}
+	filteredId := filterJustId(ID)
 	res := r.coll.FindOne(
 		context.TODO(),
-		bson.M{"_id": ID},
+		bson.M{"_id": filteredId},
 	)
 	if err := res.Err(); err != nil {
 		return nil, err
@@ -158,6 +160,24 @@ func (r *Repository) UnSetJoinedGame(userID string) error {
 	return err
 }
 
+func (r *Repository) SetJoinedTournament(tournamentID, userID string) error {
+	_, err := r.coll.UpdateByID(
+		context.Background(),
+		userID,
+		bson.M{"$set": bson.M{"joinedTournament": tournamentID}},
+	)
+	return err
+}
+
+func (r *Repository) UnSetJoinedTournament(userID string) error {
+	_, err := r.coll.UpdateByID(
+		context.Background(),
+		userID,
+		bson.M{"$unset": bson.M{"joinedTournament": ""}},
+	)
+	return err
+}
+
 func (r *Repository) Delete(ID string) error {
 	_, err := r.coll.DeleteOne(context.TODO(), bson.M{"_id": ID})
 	if err != nil {
@@ -165,4 +185,13 @@ func (r *Repository) Delete(ID string) error {
 	}
 
 	return nil
+}
+
+func filterJustId(ID string) string {
+	sepatateur := "#"
+
+	if i := strings.Index(ID, sepatateur); i >= 0 {
+		ID = ID[:i]
+	}
+	return ID
 }
