@@ -157,7 +157,7 @@ class GameScreen extends GetView<GameController> {
                       ),
                     ),
                     const Gap(100),
-                    ElevatedButton.icon(
+                    Obx(() => ElevatedButton.icon(
                           onPressed: controller.isClientTurn() // &&
                               // !_gameService.getIndicesHasBeenCalled
                               ? () {
@@ -176,7 +176,7 @@ class GameScreen extends GetView<GameController> {
                             size: 30,
                           ),
                           label: const Text('Indices'),
-                        ),
+                        )),
                   ],
                 ),
               ).inGridArea('aside'),
