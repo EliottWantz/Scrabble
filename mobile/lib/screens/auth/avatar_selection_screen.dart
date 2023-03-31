@@ -157,6 +157,7 @@ class AvatarSelectionScreen extends GetView<AvatarController> {
                                 ? ElevatedButton(
                                     onPressed: () {
                                       DialogHelper.hideLoading();
+                                      authController.avatarService.isAvatar.value = true;
                                       controller.isAvatarCustomizable.value =
                                           true;
                                     },
@@ -170,7 +171,7 @@ class AvatarSelectionScreen extends GetView<AvatarController> {
                               TextButton(
                                 onPressed: controls.onStepCancel,
                                 child: const Text(
-                                  'Annuler',
+                                  'Revenir',
                                   style: TextStyle(color: Colors.grey),
                                 ),
                               ),
@@ -575,5 +576,27 @@ class AvatarSelectionScreen extends GetView<AvatarController> {
               ? StepState.complete
               : StepState.disabled,
         ),
+    Step(
+      title: const Text('Couleur de l\'arrière plan'),
+      content: SizedBox(
+        height: 80,
+        child: BlockPicker(
+            pickerColor: controller.backgroundColor.value,
+            availableColors: const [
+              Color(0xFFb6e3f4),
+              Color(0xFFc0aede),
+              Color(0xFFd1d4f9),
+              Color(0xFFffdfbf),
+              Color(0xFFffd5dc),
+            ],
+            onColorChanged: (color) {
+              controller.backgroundColor.value = color;
+            }),
+      ),
+      isActive: controller.currentStep.value == 10,
+      state: controller.currentStep.value > 10
+          ? StepState.complete
+          : StepState.disabled,
+    ),
       ];
 }

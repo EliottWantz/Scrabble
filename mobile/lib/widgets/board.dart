@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:client_leger/controllers/game_controller.dart';
 import 'package:client_leger/models/position.dart';
 import 'package:client_leger/models/tile.dart';
@@ -146,9 +148,10 @@ class ScrabbleBoard extends GetView<GameController> {
                     ? StandardSquare(position: Position(row: i, col: j))
                         .withGridPlacement(columnStart: j, rowStart: i)
                     : LetterTile(
-                            tile: gameService.currentGame.value!
-                                .board[i - 1][j - 1].tile as Tile,isEasel: false,)
-                        .withGridPlacement(columnStart: j, rowStart: i),
+                        tile: gameService.currentGame.value!.board[i - 1][j - 1]
+                            .tile as Tile,
+                        isEasel: false,
+                      ).withGridPlacement(columnStart: j, rowStart: i),
             if (gameService.currentGame.value!.board[7][7].tile == null)
               StartingSquare(position: Position(row: 8, col: 8))
                   .inGridArea('★'),
@@ -199,7 +202,9 @@ class ScrabbleBoard extends GetView<GameController> {
             for (final tile in controller.lettersPlaced)
               Draggable<Tile>(
                   data: tile.tile,
-                  onDragStarted: () => controller.lettersPlaced.remove(tile),
+                  onDragStarted: () => {
+                        controller.lettersPlaced.remove(tile),
+                      },
                   feedback: SizedBox(
                       height: 70,
                       width: 70,

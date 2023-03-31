@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:client_leger/controllers/game_controller.dart';
 import 'package:client_leger/models/position.dart';
 import 'package:client_leger/models/tile.dart';
@@ -5,6 +7,7 @@ import 'package:client_leger/models/tile_info.dart';
 import 'package:client_leger/services/game_service.dart';
 import 'package:client_leger/utils/inner_shadow.dart';
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 
 const orangeSquareBackground = Color(0xfffd8e73);
@@ -47,8 +50,8 @@ class LetterTileDark extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(1.5),
       child: SizedBox.expand(
-          child: _buildTileContents(),
-        ),
+        child: _buildTileContents(),
+      ),
     );
   }
 
@@ -98,7 +101,9 @@ class LetterTileDark extends StatelessWidget {
 }
 
 class LetterTile extends StatelessWidget {
-  const LetterTile({Key? key, required this.tile,required this.isEasel,this.isEaselPlaced}) : super(key: key);
+  const LetterTile(
+      {Key? key, required this.tile, required this.isEasel, this.isEaselPlaced})
+      : super(key: key);
 
   final Tile tile;
   final bool isEasel;
@@ -124,7 +129,7 @@ class LetterTile extends StatelessWidget {
         return 1;
       case 'T':
         return 3;
-      case'K':
+      case 'K':
       default:
         return 2;
     }
@@ -135,7 +140,7 @@ class LetterTile extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(3),
       child: SizedBox.expand(
-          child: _buildTileContents(),
+        child: _buildTileContents(),
       ),
     );
   }
@@ -143,7 +148,9 @@ class LetterTile extends StatelessWidget {
   DecoratedBox _buildTileContents() {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: isEaselPlaced!=null ? const Color.fromRGBO(250, 234, 194, 0.8):const Color(0xfffaeac2),
+        color: isEaselPlaced != null
+            ? const Color.fromRGBO(250, 234, 194, 0.8)
+            : const Color(0xfffaeac2),
         border: Border.all(
           color: Colors.black.withAlpha(18),
           width: 1.5,
@@ -167,10 +174,12 @@ class LetterTile extends StatelessWidget {
   }
 
   Text _buildLetterLabel() {
-    return Text(
-      String.fromCharCode(tile.letter).toUpperCase(),
-      style: Get.textTheme.button!.copyWith(color: Colors.black),
-    );
+    if (isEasel == true && tile.isSpecial == true) {
+      tile.letter = 42;
+    }
+
+    return Text(String.fromCharCode(tile.letter).toUpperCase(),
+        style: Get.textTheme.button!.copyWith(color: Colors.black));
   }
 
   Positioned _buildPointLabel() {
@@ -179,7 +188,10 @@ class LetterTile extends StatelessWidget {
       bottom: 1,
       child: Text(
         '${tile.value}',
-        style: Get.textTheme.button!.copyWith(color: Colors.black,fontSize: isEasel ? 15 : 9,fontWeight: FontWeight.normal),
+        style: Get.textTheme.button!.copyWith(
+            color: Colors.black,
+            fontSize: isEasel ? 15 : 9,
+            fontWeight: FontWeight.normal),
       ),
     );
   }
@@ -256,8 +268,153 @@ class Square extends GetView<GameController> {
   @override
   Widget build(BuildContext context) {
     return DragTarget<Tile>(onAccept: (data) {
-      final tileInfo = TileInfo(tile: data, position: position);
-      controller.lettersPlaced.add(tileInfo);
+      if (data.isSpecial == true) {
+        Get.bottomSheet(
+          SizedBox(
+            height: 65,
+            width: 200,
+            child: Form(
+              key: controller.dropdownFormKey,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    height: 60,
+                    width: 200,
+                    child: DropdownButtonFormField<String>(
+                      menuMaxHeight: 150,
+                      alignment: AlignmentDirectional.bottomCenter,
+                      hint: Text('Choisissez une lettre',style: Get.textTheme.button,),
+                      decoration: InputDecoration(
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(
+                              color: Colors.blue, width: 2),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        border: OutlineInputBorder(
+                          borderSide: const BorderSide(
+                              color: Colors.blue, width: 2),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        filled: true,
+                        fillColor: Get.theme.primaryColor,
+                      ),
+                      validator: (value) =>
+                          value == null ? "Choisissez une lettre" : null,
+                      dropdownColor: Get.theme.primaryColor,
+                      onChanged: (String? value) {
+                        controller.currentSpecialLetter.value = value!;
+                        data.letter = ascii
+                            .encode(controller.currentSpecialLetter.value)
+                            .first;
+                        controller.lettersPlaced.add(
+                            TileInfo(tile: data, position: position));
+                      },
+                      items: List<String>.generate(26,
+                              (index) => String.fromCharCode(index + 65))
+                          .map((e) =>
+                              DropdownMenuItem(value: e, child: Text(e)))
+                          .toList(),
+                    ),
+                  ),
+                  const Gap(20),
+                  ElevatedButton.icon(
+                      onPressed: () {
+                        Get.back();
+                      },
+                      icon: const Icon(Icons.check),
+                      label: const Text('Confirmer'))
+                ],
+              ),
+            ),
+            // Form(
+            //   child: Wrap(
+            //     children: [
+            //       // Text(
+            //       //   'Veuillez choisir une lettre à remplacer',
+            //       //   style: Get.textTheme.button,
+            //       // ),
+            //       // const Gap(20),
+            //       Row(
+            //         children: [
+            //           DropdownButtonFormField<String>(
+            //                 menuMaxHeight: 150,
+            //                 hint: const Text('Choisissez une lettre'),
+            //                 decoration: InputDecoration(
+            //                   enabledBorder: OutlineInputBorder(
+            //                     borderSide: const BorderSide(
+            //                         color: Colors.blue, width: 2),
+            //                     borderRadius: BorderRadius.circular(20),
+            //                   ),
+            //                   border: OutlineInputBorder(
+            //                     borderSide: const BorderSide(
+            //                         color: Colors.blue, width: 2),
+            //                     borderRadius: BorderRadius.circular(20),
+            //                   ),
+            //                   filled: true,
+            //                   fillColor: Colors.blueAccent,
+            //                 ),
+            //                 validator: (value) => value == null
+            //                     ? "Choisissez une lettre"
+            //                     : null,
+            //                 dropdownColor: Colors.blueAccent,
+            //                 onChanged: (String? value) {
+            //                   controller.currentSpecialLetter.value =
+            //                       value!;
+            //                   data.letter = ascii
+            //                       .encode(
+            //                           controller.currentSpecialLetter.value)
+            //                       .first;
+            //                   controller.lettersPlaced.add(
+            //                       TileInfo(tile: data, position: position));
+            //                 },
+            //                 items: List<String>.generate(
+            //                         26,
+            //                         (index) =>
+            //                             String.fromCharCode(index + 65))
+            //                     .map((e) => DropdownMenuItem(
+            //                         value: e, child: Text(e)))
+            //                     .toList(),
+            //               ),
+            //         ],
+            //       ),
+            //       // Obx(() => DropdownButton<String>(
+            //       //       menuMaxHeight: 150,
+            //       //       hint: Text('Lettres'),
+            //       //       value: controller.currentSpecialLetter.value,
+            //       //       items: List<String>.generate(26,
+            //       //               (index) => String.fromCharCode(index + 65))
+            //       //           .map((e) =>
+            //       //               DropdownMenuItem(value: e, child: Text(e)))
+            //       //           .toList(),
+            //       //       onChanged: (String? value) {
+            //       //         controller.currentSpecialLetter.value = value!;
+            //       //         data.letter = ascii
+            //       //             .encode(controller.currentSpecialLetter.value)
+            //       //             .first;
+            //       //         controller.lettersPlaced.add(
+            //       //             TileInfo(tile: data, position: position));
+            //       //       },
+            //       //     )),
+            //       const Gap(20),
+            //       ElevatedButton.icon(
+            //           onPressed: () {
+            //             Get.back();
+            //           },
+            //           icon: const Icon(Icons.check),
+            //           label: const Text('Confirmer'))
+            //     ],
+            //   ),
+            // ),
+          ),
+          isDismissible: false,
+          barrierColor: Colors.transparent,
+          enableDrag: false,
+        );
+      } else {
+        final tileInfo = TileInfo(tile: data, position: position);
+        controller.lettersPlaced.add(tileInfo);
+      }
     }, builder: (
       BuildContext context,
       List<dynamic> accepted,

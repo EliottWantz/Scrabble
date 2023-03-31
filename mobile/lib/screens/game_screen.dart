@@ -65,7 +65,7 @@ class GameScreen extends GetView<GameController> {
             nav    content  aside
             options    easel  passer
           ''',
-            rowGap: 10,
+            rowGap: 5,
             columnSizes: [1.fr, 2.fr, 1.fr],
             rowSizes: const [
               auto,
