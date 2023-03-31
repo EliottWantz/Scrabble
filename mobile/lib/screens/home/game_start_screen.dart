@@ -151,65 +151,173 @@ class GameStartScreen extends StatelessWidget {
         child: SizedBox(
           height: 500,
           width: 600,
-          child: Column(
-            children: [
-              const Gap(10),
-              Text('Liste des parties',
-                  style: Theme.of(context).textTheme.headline6),
-              const Gap(10),
-              Obx(
-                () => Expanded(
-                    child: SingleChildScrollView(
-                  child: DataTable(
-                    columns: const <DataColumn>[
-                      DataColumn(
-                        label: Expanded(
-                          child: Text(
-                            'Room Name',
-                          ),
-                        ),
-                      ),
-                      DataColumn(
-                        label: Expanded(
-                          child: Text(
-                            'Users',
-                          ),
-                        ),
-                      ),
-                    ],
-                    rows: _createJoinableGameRows(),
+          child:
+          // child: Column(
+          //   children: [
+              // const Gap(10),
+              // Text('Liste des parties',
+              //     style: Theme.of(context).textTheme.headline6),
+              DefaultTabController(
+                length: 2,
+                child: Scaffold(
+                  appBar: AppBar(
+                    elevation: 0,
+                    toolbarHeight: 0,
+                    bottom: const TabBar(
+                      tabs: [
+                        Tab(text: 'Parties privées'),
+                        Tab(text: 'Parties publiques'),
+                      ],
+                    ),
                   ),
-                )),
+                  body: TabBarView(
+                    children: [
+                      _buildPublicGamesTab(),
+                      _buildPrivateGamesTab()
+                    ],
+                  ),
+                ),
               ),
-              const Gap(10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  TextButton(
-                      style: TextButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              side: const BorderSide(color: Colors.black))),
-                      onPressed: () {},
-                      child: const Text('Confirmer')),
-                  const Gap(10),
-                  TextButton(
-                      style: TextButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              side: const BorderSide(color: Colors.black))),
-                      onPressed: () {
-                        DialogHelper.hideLoading();
-                      },
-                      child: const Text('Annuler')),
-                ],
-              ),
-              const Gap(10),
-            ],
+              // const Gap(10),
+              // Obx(
+              //   () => Expanded(
+              //       child: SingleChildScrollView(
+              //     child: DataTable(
+              //       columns: const <DataColumn>[
+              //         DataColumn(
+              //           label: Expanded(
+              //             child: Text(
+              //               'Room Name',
+              //             ),
+              //           ),
+              //         ),
+              //         DataColumn(
+              //           label: Expanded(
+              //             child: Text(
+              //               'Users',
+              //             ),
+              //           ),
+              //         ),
+              //       ],
+              //       rows: _createJoinableGameRows(),
+              //     ),
+              //   )),
+              // ),
+              // const Gap(10),
+              // Row(
+              //   mainAxisAlignment: MainAxisAlignment.center,
+              //   children: [
+              //     TextButton(
+              //         style: TextButton.styleFrom(
+              //             shape: RoundedRectangleBorder(
+              //                 borderRadius: BorderRadius.circular(12),
+              //                 side: const BorderSide(color: Colors.black))),
+              //         onPressed: () {
+              //           DialogHelper.hideLoading();
+              //         },
+              //         child: const Text('Annuler')),
+              //   ],
+              // ),
+              // const Gap(10),
+            // ],
           ),
         ),
-      ),
-      barrierDismissible: false,
+      // ),
+      // barrierDismissible: false,
+    );
+  }
+
+  Widget _buildPublicGamesTab() {
+    return Column(
+      children: [
+        Obx(
+              () => Expanded(
+              child: SingleChildScrollView(
+                child: DataTable(
+                  columns: const <DataColumn>[
+                    DataColumn(
+                      label: Expanded(
+                        child: Text(
+                          'Room Name',
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Expanded(
+                        child: Text(
+                          'Users',
+                        ),
+                      ),
+                    ),
+                  ],
+                  rows: _createJoinableGameRows(),
+                ),
+              )),
+        ),
+        const Gap(10),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            TextButton(
+                style: TextButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        side: const BorderSide(color: Colors.black))),
+                onPressed: () {
+                  DialogHelper.hideLoading();
+                },
+                child: const Text('Annuler')),
+          ],
+        ),
+        const Gap(10),
+      ],
+    );
+  }
+
+  Widget _buildPrivateGamesTab() {
+    return Column(
+      children: [
+        Obx(
+              () => Expanded(
+              child: SingleChildScrollView(
+                child: DataTable(
+                  columns: const <DataColumn>[
+                    DataColumn(
+                      label: Expanded(
+                        child: Text(
+                          'Room Name',
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Expanded(
+                        child: Text(
+                          'Users',
+                        ),
+                      ),
+                    ),
+                  ],
+                  rows: _createJoinableGameRows(),
+                ),
+              )),
+        ),
+        const Gap(10),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            TextButton(
+                style: TextButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        side: const BorderSide(color: Colors.black))),
+                onPressed: () {
+                  DialogHelper.hideLoading();
+                },
+                child: const Text('Annuler')),
+          ],
+        ),
+        const Gap(10),
+      ],
     );
   }
 
