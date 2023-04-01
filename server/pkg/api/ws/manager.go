@@ -701,7 +701,7 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 		if err != nil {
 			continue
 		}
-		m.UserSvc.AddGameStats(u, time.Now().UnixMilli()-g.StartTime, winnerID == p.ID)
+		m.UserSvc.AddGameStats(u, g.StartTime, time.Now().UnixMilli(), winnerID == p.ID)
 		m.UserSvc.UpdateUserStats(u, winnerID == p.ID, p.Score, time.Now().UnixMilli()-g.StartTime)
 	}
 
