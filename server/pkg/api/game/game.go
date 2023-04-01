@@ -14,6 +14,7 @@ type Game struct {
 	WinnerID       string         `json:"winnerId"`
 	HashedPassword string         `json:"-"`
 	ScrabbleGame   *scrabble.Game `json:"-"`
+	StartTime      int64          `json:"startTime"`
 	TournamentID   string         `json:"tournamentId"`
 }
 

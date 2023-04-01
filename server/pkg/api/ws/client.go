@@ -524,7 +524,7 @@ func (c *Client) HandleStartGameRequest(p *Packet) error {
 		go c.Manager.MakeBotMoves(g.ID)
 	})
 	g.ScrabbleGame.Timer.Start()
-
+	g.StartTime = time.Now().UnixMilli()
 	gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
 		Game: makeGamePayload(g),
 	})
