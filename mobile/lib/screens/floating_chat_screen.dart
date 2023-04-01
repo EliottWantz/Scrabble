@@ -67,7 +67,7 @@ class FloatingChatScreen extends GetView<ChatController> {
                           child: Row(
                               textDirection: controller.isCurrentUser(controller
                                       .roomService
-                                      .currentRoomMessages
+                                      .currentFloatingRoomMessages
                                       .value![index]
                                       .fromId)
                                   ? TextDirection.rtl
@@ -76,7 +76,7 @@ class FloatingChatScreen extends GetView<ChatController> {
                                 circularImageWithBorder(controller.usersService
                                     .getUserById(controller
                                         .roomService
-                                        .currentRoomMessages
+                                        .currentFloatingRoomMessages
                                         .value![index]
                                         .fromId)!
                                     .avatar

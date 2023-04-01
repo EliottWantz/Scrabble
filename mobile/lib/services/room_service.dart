@@ -28,7 +28,7 @@ class RoomService extends GetxService {
 
   void updateCurrentFloatingRoomMessages() {
     currentFloatingRoomMessages.clear();
-    currentFloatingRoomMessages.addAll(getCurrentRoomChatMessagePayloads());
+    currentFloatingRoomMessages.addAll(getCurrentFloatingRoomChatMessagePayloads());
   }
 
   List<ChatMessagePayload> getCurrentRoomChatMessagePayloads() {
@@ -36,7 +36,11 @@ class RoomService extends GetxService {
   }
 
   List<ChatMessagePayload> getCurrentFloatingRoomChatMessagePayloads() {
-    return getCurrentFloatingRoom().messages!;
+    Room currentFloatingRoom = getCurrentFloatingRoom();
+    if (currentFloatingRoom.messages != null) {
+      return getCurrentFloatingRoom().messages!;
+    }
+    return <ChatMessagePayload>[];
   }
 
   Map<String, Room> getMapOfRoomsByIds() {
@@ -72,7 +76,7 @@ class RoomService extends GetxService {
   }
 
   Room getCurrentFloatingRoom() {
-    return roomsMap[currentFloatingChatRoomId]!;
+    return roomsMap[currentFloatingChatRoomId.value]!;
   }
 
   Room getRoom(String roomId) {
@@ -96,5 +100,9 @@ class RoomService extends GetxService {
 
   void addRoom(String roomId, Room room) {
     roomsMap[roomId] = room;
+  }
+
+  void removeRoom(String roomId) {
+    roomsMap.value!.remove(roomId);
   }
 }

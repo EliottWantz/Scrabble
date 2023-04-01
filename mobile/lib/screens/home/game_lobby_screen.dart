@@ -1,3 +1,5 @@
+import 'package:client_leger/screens/floating_chat_screen.dart';
+import 'package:client_leger/services/room_service.dart';
 import 'package:client_leger/services/websocket_service.dart';
 import 'package:client_leger/widgets/app_sidebar.dart';
 import 'package:flutter/material.dart';
@@ -13,13 +15,34 @@ class GameLobbyScreen extends StatelessWidget {
   final sideBarController =
       SidebarXController(selectedIndex: 0, extended: true);
 
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   final GameService _gameService = Get.find();
   final WebsocketService _websocketService = Get.find();
+  final RoomService _roomService = Get.find();
+
+  RxBool selectedChatRoom = false.obs;
 
   @override
   Widget build(BuildContext context) {
     return Builder(
         builder: (BuildContext context) => Scaffold(
+          resizeToAvoidBottomInset: true,
+          drawerScrimColor: Colors.transparent,
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {
+              _scaffoldKey.currentState?.openEndDrawer();
+            },
+            backgroundColor: Color.fromARGB(255,98,0,238),
+            foregroundColor: Colors.white,
+            autofocus: true,
+            focusElevation: 5,
+            child: const Icon(
+              Icons.question_answer_rounded,
+            ),
+          ),
+          key: _scaffoldKey,
+          endDrawer: Drawer(child: Obx(() => _buildChatRoomsList())),
               body: Row(
                 children: [
                   AppSideBar(controller: sideBarController),
@@ -78,5 +101,58 @@ class GameLobbyScreen extends StatelessWidget {
         label: const Text('Démarrer la partie'), // <-- Text
       );
     }
+  }
+
+  Widget _buildChatRoomsList() {
+    if (!selectedChatRoom.value) {
+      print("selectedchatroom value");
+      print(selectedChatRoom);
+      return Column(
+        children: [
+          Container(
+            height: 100,
+            width: double.infinity,
+            child: const DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.blue,
+              ),
+              child: Text('Drawer Header'),
+            ),
+          ),
+          Expanded(
+              child: ListView.builder(
+                // padding: const EdgeInsets.all(16.0),
+                padding: EdgeInsets.zero,
+                itemCount: _roomService.getRooms().length,
+                itemBuilder: (context, item) {
+                  final index = item;
+                  return _buildChatRoomRow(_roomService.getRooms()[index].roomName,
+                      _roomService.getRooms()[index].roomId);
+                },
+              ))
+        ],
+      );
+    } else {
+      print("selectedchatroom value");
+      print(selectedChatRoom);
+      return FloatingChatScreen(selectedChatRoom);
+    }
+  }
+
+  Widget _buildChatRoomRow(String roomName, String roomId) {
+    return Column(
+      children: [
+        ListTile(
+          title: Text(roomName),
+          // onTap: () => Get.toNamed(Routes.CHAT, arguments: {'text': 'roomName'}),
+          onTap: () {
+            selectedChatRoom.value = !selectedChatRoom.value;
+            _roomService.currentFloatingChatRoomId.value = roomId;
+            _roomService.updateCurrentFloatingRoomMessages();
+          },
+        ),
+        const Divider(),
+      ],
+    );
   }
 }

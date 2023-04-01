@@ -280,6 +280,13 @@ class WebsocketService extends GetxService {
     gameService.currentGameId = joinedGameResponse.payload.id;
     gameService.currentGameInfo = joinedGameResponse.payload;
     gameService.currentGameRoomUserIds!.add(userService.user.value!.id);
+    Room gameRoom = Room(
+        roomId: joinedGameResponse.payload.id,
+        roomName: 'Game Room',
+        userIds: joinedGameResponse.payload.userIds,
+        messages: <ChatMessagePayload>[]
+    );
+    roomService.addRoom(joinedGameResponse.payload.id, gameRoom);
     final currentGame = gameService.getJoinableGameById(gameService.currentGameId);
     if (currentGame != null) {
       gameService.currentGameRoomUserIds.addAll(currentGame!.userIds);
@@ -477,6 +484,7 @@ class WebsocketService extends GetxService {
     gameService.currentGameTimer.value = null;
     gameService.currentGameInfo = null;
     gameService.currentGameRoomUserIds.value = [];
+    roomService.removeRoom(gameId);
     final leaveGamePayload = StartGamePayload(gameId: gameId);
     final leaveGameRequest = StartGameRequest(
         event: ClientEventLeaveGame,
