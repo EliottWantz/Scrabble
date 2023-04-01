@@ -2,6 +2,7 @@ package ws
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"scrabble/pkg/api/game"
@@ -51,17 +52,13 @@ func NewManager(messageRepo *MessageRepository, roomSvc *room.Service, userSvc *
 
 func (m *Manager) Accept(cID string) fiber.Handler {
 	return websocket.New(func(conn *websocket.Conn) {
-		id := cID + "#1"
-		c, err := m.GetClient(id)
-		if err != nil {
-			m.logger.Info("no ws connection for this client yet", "msg", err)
+		clients := m.getClientsByUserID(cID)
+		wsID := cID + "#1"
+		if len(clients) > 0 {
+			wsID = cID + "#" + fmt.Sprint(len(clients)+1)
 		}
-		slog.Info("user already connected, creating a new socket connection with a different ID", "client id", cID)
-		if c != nil {
-			id = cID + "#2"
-		}
-		c = NewClient(conn, id, m)
-		err = m.AddClient(c)
+		c := NewClient(conn, wsID, cID, m)
+		err := m.AddClient(c)
 		if err != nil {
 			m.logger.Error("add client", err)
 			return
@@ -157,7 +154,7 @@ func (m *Manager) ListUsers() []user.User {
 }
 
 func (m *Manager) AddClient(c *Client) error {
-	user, err := m.UserSvc.Repo.Find(c.ID)
+	user, err := m.UserSvc.Repo.Find(c.UserId)
 	if err != nil {
 		return err
 	}
@@ -206,13 +203,14 @@ func (m *Manager) AddClient(c *Client) error {
 
 	m.logger.Info(
 		"client registered",
-		"client_id", c.ID,
+		"ws_id", c.ID,
+		"user_id", c.UserId,
 	)
 
 	return nil
 }
 
-func (m *Manager) GetClient(cID string) (*Client, error) {
+func (m *Manager) GetClientByWsID(cID string) (*Client, error) {
 	c, ok := m.Clients.Get(cID)
 	if !ok {
 		return nil, fmt.Errorf("client with id %s not registered", cID)
@@ -220,10 +218,42 @@ func (m *Manager) GetClient(cID string) (*Client, error) {
 	return c, nil
 }
 
+func (m *Manager) getClientByUserID(userID string) (*Client, error) {
+	clients := m.getClientsByUserID(userID)
+	if len(clients) == 0 {
+		return nil, fmt.Errorf("client with user id %s not registered", userID)
+	}
+
+	for _, client := range clients {
+		if strings.Contains(client.ID, "#1") {
+			return client, nil
+		}
+	}
+	return clients[0], nil
+}
+
+func (m *Manager) getClientsByUserID(cUserID string) []*Client {
+	clients := []*Client{}
+	m.Clients.ForEach(func(key string, value *Client) bool {
+		if value.UserId == cUserID {
+			clients = append(clients, value)
+		}
+		return true
+	})
+	return clients
+
+}
+func (m *Manager) getClientUserID(cID string) (string, error) {
+	c, err := m.GetClientByWsID(cID)
+	if err != nil {
+		return "", err
+	}
+	return c.UserId, nil
+}
 func (m *Manager) RemoveClient(c *Client) error {
 	defer close(c.receiveCh)
 	defer close(c.sendCh)
-	user, err := m.UserSvc.GetUser(c.ID)
+	user, err := m.UserSvc.GetUser(c.UserId)
 	if err != nil {
 		return fmt.Errorf("removeClient: %w", err)
 	}
@@ -231,7 +261,8 @@ func (m *Manager) RemoveClient(c *Client) error {
 	m.UserSvc.AddNetworkingLog(user, "Logout", time.Now().UnixMilli())
 	m.logger.Info(
 		"client disconnected",
-		"client_id", c.ID,
+		"ws_id", c.ID,
+		"user_id", c.UserId,
 		"total_rooms", m.Rooms.Len(),
 	)
 
@@ -247,7 +278,7 @@ func (m *Manager) RemoveClient(c *Client) error {
 		}
 		userLeftRoomPacket, err := NewUserLeftRoomPacket(UserLeftRoomPayload{
 			RoomID: r.ID,
-			UserID: c.ID,
+			UserID: c.UserId,
 		})
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, "failed to create packet: "+err.Error())
@@ -266,7 +297,7 @@ func (m *Manager) RemoveClient(c *Client) error {
 		}
 		userLeftDMRoomPacket, err := NewUserLeftDMRoomPacket(UserLeftDMRoomPayload{
 			RoomID: r.ID,
-			UserID: c.ID,
+			UserID: c.UserId,
 		})
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, "failed to create packet: "+err.Error())
@@ -279,7 +310,7 @@ func (m *Manager) RemoveClient(c *Client) error {
 	{
 		userLeftGLobalRoomPacket, err := NewUserLeftRoomPacket(UserLeftRoomPayload{
 			RoomID: m.GlobalRoom.ID,
-			UserID: c.ID,
+			UserID: c.UserId,
 		})
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, "failed to create packet: "+err.Error())
@@ -320,22 +351,22 @@ func (m *Manager) RemoveClientFromGame(c *Client, gID string) error {
 
 	if g.ScrabbleGame == nil {
 		// Game has not started yet
-		if c.ID == g.CreatorID {
+		if c.UserId == g.CreatorID {
 			// Delete the game and remove all users
 			if err := c.Manager.GameSvc.Repo.DeleteGame(g.ID); err != nil {
 				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 			}
 			for _, uID := range g.UserIDs {
-				if err := r.RemoveClient(uID); err != nil {
-					slog.Error("remove user from game room", err)
-					continue
-				}
 				if err := c.Manager.UserSvc.Repo.UnSetJoinedGame(uID); err != nil {
 					slog.Error("remove user from game room", err)
 					continue
 				}
-				client, err := c.Manager.GetClient(uID)
+				client, err := c.Manager.getClientByUserID(uID)
 				if err != nil {
+					slog.Error("remove user from game room", err)
+					continue
+				}
+				if err := r.RemoveClient(client.ID); err != nil { // TODO check again
 					slog.Error("remove user from game room", err)
 					continue
 				}
@@ -347,16 +378,16 @@ func (m *Manager) RemoveClientFromGame(c *Client, gID string) error {
 			return nil
 		} else {
 			// Remove the user from the game
-			if _, err := c.Manager.GameSvc.RemoveUserFromGame(gID, c.ID); err != nil {
+			if _, err := c.Manager.GameSvc.RemoveUserFromGame(gID, c.UserId); err != nil {
 				slog.Error("remove user from game room", err)
 			}
-			if err := c.Manager.UserSvc.Repo.UnSetJoinedGame(c.ID); err != nil {
+			if err := c.Manager.UserSvc.Repo.UnSetJoinedGame(c.UserId); err != nil {
 				slog.Error("remove user from game room", err)
 			}
 		}
 	} else {
 		// if Game has started and is a spectator
-		if slices.Contains(g.ObservateurIDs, c.ID) {
+		if slices.Contains(g.ObservateurIDs, c.UserId) {
 			if err := r.RemoveClient(c.ID); err != nil {
 				slog.Error("remove spectator from game room", err)
 			}
@@ -373,14 +404,13 @@ func (m *Manager) RemoveClientFromGame(c *Client, gID string) error {
 			return nil
 		}
 		// Game has started, replace player with a bot
-		if err := c.Manager.ReplacePlayerWithBot(g.ID, c.ID); err != nil {
+		if err := c.Manager.ReplacePlayerWithBot(g.ID, c.UserId); err != nil {
 			slog.Error("replace player with bot", err)
 		}
-		if err := c.Manager.UserSvc.Repo.UnSetJoinedGame(c.ID); err != nil {
+		if err := c.Manager.UserSvc.Repo.UnSetJoinedGame(c.UserId); err != nil {
 			slog.Error("remove user from game room", err)
 		}
 	}
-
 	if err := r.BroadcastLeaveGamePackets(c, g.ID); err != nil {
 		slog.Error("broadcast leave game packets", err)
 	}
@@ -404,7 +434,7 @@ func (m *Manager) RemoveClientFromTournament(c *Client, gID string) error {
 
 	if !t.HasStarted {
 		// Tournament has not started yet
-		if c.ID == t.CreatorID {
+		if c.UserId == t.CreatorID {
 			// Delete the Tournament and remove all users
 			if err := c.Manager.GameSvc.Repo.DeleteTournament(t.ID); err != nil {
 				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
@@ -418,8 +448,13 @@ func (m *Manager) RemoveClientFromTournament(c *Client, gID string) error {
 					slog.Error("remove user from tournament room", err)
 					continue
 				}
-				client, err := c.Manager.GetClient(uID)
+				client, err := c.Manager.getClientByUserID(uID)
 				if err != nil {
+					slog.Error("remove user from tournament room", err)
+					continue
+				}
+
+				if err := r.RemoveClient(client.ID); err != nil {
 					slog.Error("remove user from tournament room", err)
 					continue
 				}
@@ -431,10 +466,10 @@ func (m *Manager) RemoveClientFromTournament(c *Client, gID string) error {
 			return nil
 		} else {
 			// Remove the user from the Tournament
-			if _, err := c.Manager.GameSvc.RemoveUserFromTournament(gID, c.ID); err != nil {
+			if _, err := c.Manager.GameSvc.RemoveUserFromTournament(gID, c.UserId); err != nil {
 				slog.Error("remove user from Tournament room", err)
 			}
-			if err := c.Manager.UserSvc.Repo.UnSetJoinedTournament(c.ID); err != nil {
+			if err := c.Manager.UserSvc.Repo.UnSetJoinedTournament(c.UserId); err != nil {
 				slog.Error("remove user from Tournament room", err)
 			}
 		}
@@ -692,7 +727,7 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 
 		// Leave old game
 		for _, playerID := range g.UserIDs {
-			client, err := m.GetClient(playerID)
+			client, err := m.getClientByUserID(playerID)
 			if err != nil {
 				slog.Error("get client", err)
 				continue
@@ -703,7 +738,7 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 			if err := gameRoom.BroadcastLeaveGamePackets(client, g.ID); err != nil {
 				slog.Error("broadcast leave game packets", err)
 			}
-			if err := m.UserSvc.Repo.UnSetJoinedGame(client.ID); err != nil {
+			if err := m.UserSvc.Repo.UnSetJoinedGame(client.UserId); err != nil {
 				slog.Error("remove user from game room", err)
 			}
 		}
@@ -725,7 +760,7 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 				// Join the finale
 				finaleRoom := m.AddRoom(t.Finale.ID, "")
 				for _, playerID := range t.Finale.UserIDs {
-					player, err := m.GetClient(playerID)
+					player, err := m.getClientByUserID(playerID)
 					if err != nil {
 						slog.Error("get client", err)
 						continue
@@ -802,7 +837,7 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 				if err := otherGameRoom.AddClient(g.WinnerID); err != nil {
 					return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 				}
-				winnerClient, err := m.GetClient(g.WinnerID)
+				winnerClient, err := m.getClientByUserID(g.WinnerID)
 				if err != nil {
 					return fiber.NewError(fiber.StatusBadRequest, err.Error())
 				}

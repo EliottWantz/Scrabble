@@ -2,6 +2,7 @@ package ws
 
 import (
 	"errors"
+	"fmt"
 
 	"scrabble/pkg/api/game"
 
@@ -56,7 +57,7 @@ func (r *Room) AddClient(cID string) error {
 		return ErrAlreadyInRoom
 	}
 
-	c, err := r.Manager.GetClient(cID)
+	c, err := r.Manager.GetClientByWsID(cID)
 	if err != nil {
 		return err
 	}
@@ -126,7 +127,7 @@ func (r *Room) BroadcastJoinRoomPackets(c *Client) error {
 	{
 		p, err := NewUserJoinedRoomPacket(UserJoinedRoomPayload{
 			RoomID: r.ID,
-			UserID: c.ID,
+			UserID: c.UserId,
 		})
 		if err != nil {
 			r.logger.Error("creating packet", err)
@@ -142,7 +143,7 @@ func (r *Room) BroadcastLeaveRoomPackets(c *Client) error {
 	{
 		userLeftRoomPacket, err := NewUserLeftRoomPacket(UserLeftRoomPayload{
 			RoomID: r.ID,
-			UserID: c.ID,
+			UserID: c.UserId,
 		})
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, "failed to create packet: "+err.Error())
@@ -186,7 +187,7 @@ func (r *Room) BroadcastJoinDMRoomPackets(c *Client) error {
 	{
 		p, err := NewUserJoinedDMRoomPacket(UserJoinedDMRoomPayload{
 			RoomID: r.ID,
-			UserID: c.ID,
+			UserID: c.UserId,
 		})
 		if err != nil {
 			r.logger.Error("creating packet", err)
@@ -202,7 +203,7 @@ func (r *Room) BroadcastLeaveDMRoomPackets(c *Client) error {
 	{
 		userLeftRoomPacket, err := NewUserLeftDMRoomPacket(UserLeftDMRoomPayload{
 			RoomID: r.ID,
-			UserID: c.ID,
+			UserID: c.UserId,
 		})
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, "failed to create packet: "+err.Error())
@@ -235,7 +236,7 @@ func (r *Room) BroadcastJoinGamePackets(c *Client, g *game.Game) error {
 	{
 		p, err := NewUserJoinedGamePacket(UserJoinedGamePayload{
 			GameID: g.ID,
-			UserID: c.ID,
+			UserID: c.UserId,
 		})
 		if err != nil {
 			return err
@@ -250,7 +251,7 @@ func (r *Room) BroadcastObserverJoinGamePacket(c *Client, g *game.Game) error {
 	{
 		p, err := NewUserJoinedGamePacket(UserJoinedGamePayload{
 			GameID: g.ID,
-			UserID: c.ID,
+			UserID: c.UserId,
 		})
 		if err != nil {
 			return err
@@ -265,7 +266,7 @@ func (r *Room) BroadcastLeaveGamePackets(c *Client, gID string) error {
 	{
 		p, err := NewUserLeftGamePacket(UserLeftGamePayload{
 			GameID: gID,
-			UserID: c.ID,
+			UserID: c.UserId,
 		})
 		if err != nil {
 			return err
@@ -289,7 +290,7 @@ func (r *Room) BroadcastObserverLeaveGamePacket(c *Client, gID string) error {
 	{
 		p, err := NewUserLeftGamePacket(UserLeftGamePayload{
 			GameID: gID,
-			UserID: c.ID,
+			UserID: c.UserId,
 		})
 		if err != nil {
 			return err
@@ -313,7 +314,7 @@ func (r *Room) BroadcastJoinTournamentPackets(c *Client, t *game.Tournament) err
 	{
 		p, err := NewUserJoinedTournamentPacket(UserJoinedTournamentPayload{
 			TournamentID: t.ID,
-			UserID:       c.ID,
+			UserID:       c.UserId,
 		})
 		if err != nil {
 			return err
@@ -328,7 +329,7 @@ func (r *Room) BroadcastLeaveTournamentPackets(c *Client, gID string) error {
 	{
 		p, err := NewUserLeftTournamentPacket(UserLeftTournamentPayload{
 			TournamentID: gID,
-			UserID:       c.ID,
+			UserID:       c.UserId,
 		})
 		if err != nil {
 			return err
@@ -349,11 +350,13 @@ func (r *Room) BroadcastLeaveTournamentPackets(c *Client, gID string) error {
 }
 
 func (r *Room) ListUsers() []string {
-	dbRoom, err := r.Manager.RoomSvc.Repo.Find(r.ID)
-	if err != nil {
-		return []string{}
-	}
-	return dbRoom.UserIDs
+	UserIds := make([]string, 0, r.Clients.Len())
+	r.Clients.ForEach(func(cID string, c *Client) bool {
+		UserIds = append(UserIds, c.UserId)
+		return true
+	})
+	fmt.Println(UserIds)
+	return UserIds
 }
 
 func (r *Room) ListClientIDs() []string {
