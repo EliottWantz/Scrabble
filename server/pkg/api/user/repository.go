@@ -20,7 +20,7 @@ func NewRepository(db *mongo.Database) *Repository {
 
 func (r *Repository) Find(ID string) (*User, error) {
 	u := &User{}
-	filteredId := filterJustId(ID)
+	filteredId := FilterJustId(ID)
 	res := r.coll.FindOne(
 		context.TODO(),
 		bson.M{"_id": filteredId},
@@ -187,7 +187,7 @@ func (r *Repository) Delete(ID string) error {
 	return nil
 }
 
-func filterJustId(ID string) string {
+func FilterJustId(ID string) string {
 	sepatateur := "#"
 
 	if i := strings.Index(ID, sepatateur); i >= 0 {
