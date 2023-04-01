@@ -69,8 +69,8 @@ export class AvatarSelectionComponent {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = true;
         this.dialog.open(CustomizeAvatarComponent, {width: '75%',
-        minHeight: '50vh',
-        height : '50vh'});
+        minHeight: '75vh',
+        height : '75vh'});
     }
 
     /*checkIfImage(): boolean {
