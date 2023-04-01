@@ -127,8 +127,8 @@ func (c *Client) handlePacket(p *Packet) error {
 		return c.HandleJoinAsObserverRequest(p)
 	case ClientEventLeaveAsObservateur:
 		return c.HandleObservateurLeaveGameRequest(p)
-	case ClientEventPutMeIn:
-		return c.HandlePutMeInRequest(p)
+	case ClientEventReplaceBotByObserver:
+		return c.HandleClientEventReplaceBotByObserverRequest(p)
 	case ClientEventGamePrivate:
 		return c.HandleGamePrivateRequest(p)
 	case ClientEventGamePublic:
@@ -594,7 +594,7 @@ func (c *Client) HandleIndiceRequest(p *Packet) error {
 	return nil
 }
 
-func (c *Client) HandlePutMeInRequest(p *Packet) error {
+func (c *Client) HandleClientEventReplaceBotByObserverRequest(p *Packet) error {
 	payload := joinGameAsObserverPayload{}
 	if err := json.Unmarshal(p.Payload, &payload); err != nil {
 		return err
