@@ -7,6 +7,7 @@ import 'package:client_leger/models/create_room_payload.dart';
 import 'package:client_leger/models/events.dart';
 import 'package:client_leger/models/game.dart';
 import 'package:client_leger/models/join_dm_payload.dart';
+import 'package:client_leger/models/join_game_payload.dart';
 import 'package:client_leger/models/join_room_payload.dart';
 import 'package:client_leger/models/play_move_payload.dart';
 import 'package:client_leger/models/requests/accept_friend_request.dart';
@@ -15,6 +16,7 @@ import 'package:client_leger/models/requests/create_dm_room_request.dart';
 import 'package:client_leger/models/requests/create_game_room_request.dart';
 import 'package:client_leger/models/requests/indice_request.dart';
 import 'package:client_leger/models/requests/join_dm_request.dart';
+import 'package:client_leger/models/requests/join_game_as_observer_request.dart';
 import 'package:client_leger/models/requests/join_room_request.dart';
 import 'package:client_leger/models/requests/play_move_request.dart';
 import 'package:client_leger/models/response/accept_friend_response.dart';
@@ -514,5 +516,14 @@ class WebsocketService extends GetxService {
       payload: indicePayload
     );
     socket.sink.add(indiceRequest.toRawJson());
+  }
+
+  void joinGameAsObserver(String gameId) {
+    final joinGameAsObserverPayload = JoinGamePayload(gameId: gameId);
+    final joinGameAsObserverRequest = JoinGameAsObserverRequest(
+      event: ClientEventJoinAsObservateur,
+      payload: joinGameAsObserverPayload
+    );
+    socket.sink.add(joinGameAsObserverRequest.toRawJson());
   }
 }

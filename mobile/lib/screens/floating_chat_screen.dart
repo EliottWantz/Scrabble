@@ -37,7 +37,7 @@ class FloatingChatScreen extends GetView<ChatController> {
               width: double.infinity,
               child: DrawerHeader(
                 decoration: const BoxDecoration(
-                  color: Colors.blue,
+                  color: Color.fromARGB(255,98,0,238),
                 ),
                 child: TextButton(
                   onPressed: () =>

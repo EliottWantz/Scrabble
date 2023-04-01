@@ -52,6 +52,14 @@ class GameService extends GetxService {
     return creatorId == userService.user.value!.id;
   }
 
+  bool isGameObserver() {
+    for (final obervateurId in currentGameInfo!.observateurIds) {
+
+    }
+    String creatorId = currentGameInfo!.creatorId.split("#")[0];
+    return creatorId == userService.user.value!.id;
+  }
+
   Game? getJoinableGameById(String id) {
     for (final game in joinableGames.value!) {
       if (game.id == id) {

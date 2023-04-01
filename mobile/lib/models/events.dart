@@ -28,6 +28,8 @@ const String ServerEventError   = "error";
 // Client events
 const String ClientEventNoEvent     = "";
 const String ClientEventChatMessage = "chat-message";
+const String ClientEventJoinAsObservateur  = "join-as-observateur";
+const String ClientEventLeaveAsObservateur = "leave-as-observateur";
 const String ClientEventJoinRoom    = "join-room";
 // const String ClientEventJoinGameRoom = "join-game-room";
 const String ClientEventCreateRoom  = "create-room";
