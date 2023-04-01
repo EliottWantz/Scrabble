@@ -78,7 +78,8 @@ type JoinGamePayload struct {
 	GameID   string `json:"gameId"`
 	Password string `json:"password,omitempty"`
 }
-type joinGameAsObserverPayload struct {
+
+type JoinGameAsObserverPayload struct {
 	GameID string `json:"gameId"`
 }
 
@@ -106,6 +107,10 @@ type CreateTournamentPayload struct {
 type JoinTournamentPayload struct {
 	TournamentID string `json:"tournamentId"`
 	Password     string `json:"password,omitempty"`
+}
+
+type JoinTournamentAsObserverPayload struct {
+	TournamentID string `json:"tournamentId"`
 }
 
 type LeaveTournamentPayload struct {
@@ -399,7 +404,7 @@ func NewServerIndicePacket(payload ServerIndicePayload) (*Packet, error) {
 }
 
 type JoinedTournamentPayload struct {
-	Tournament *game.Tournament `json:"tournament"`
+	Tournament *TournamentPayload `json:"tournament"`
 }
 
 func NewJoinedTournamentPacket(payload JoinedTournamentPayload) (*Packet, error) {

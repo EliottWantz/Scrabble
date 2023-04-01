@@ -123,10 +123,10 @@ func (c *Client) handlePacket(p *Packet) error {
 		return c.HandlePlayMoveRequest(p)
 	case ClientEventIndice:
 		return c.HandleIndiceRequest(p)
-	case ClientEventJoinAsObservateur:
-		return c.HandleJoinAsObserverRequest(p)
-	case ClientEventLeaveAsObservateur:
-		return c.HandleObservateurLeaveGameRequest(p)
+	case ClientEventJoinGameAsObservateur:
+		return c.HandleJoinGameAsObserverRequest(p)
+	case ClientEventLeaveGameAsObservateur:
+		return c.HandleLeaveGameAsObservateurRequest(p)
 	case ClientEventReplaceBotByObserver:
 		return c.HandleClientEventReplaceBotByObserverRequest(p)
 	case ClientEventGamePrivate:
@@ -141,6 +141,10 @@ func (c *Client) handlePacket(p *Packet) error {
 		return c.HandleLeaveTournamentRequest(p)
 	case ClientEventStartTournament:
 		return c.HandleStartTournamentRequest(p)
+	case ClientEventJoinTournamentAsObservateur:
+		return c.HandleJoinTournamentAsObserverRequest(p)
+	case ClientEventLeaveTournamentAsObservateur:
+		return c.HandleLeaveTournamentAsObservateurRequest(p)
 	}
 
 	return nil
@@ -418,13 +422,13 @@ func (c *Client) HandleJoinGameRequest(p *Packet) error {
 	return r.BroadcastJoinGamePackets(c, g)
 }
 
-func (c *Client) HandleJoinAsObserverRequest(p *Packet) error {
-	payload := joinGameAsObserverPayload{}
+func (c *Client) HandleJoinGameAsObserverRequest(p *Packet) error {
+	payload := JoinGameAsObserverPayload{}
 	if err := json.Unmarshal(p.Payload, &payload); err != nil {
 		return err
 	}
 
-	g, err := c.Manager.GameSvc.AddObserver(payload.GameID, c.UserId)
+	g, err := c.Manager.GameSvc.AddObserverToGame(payload.GameID, c.UserId)
 	if err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
@@ -441,23 +445,25 @@ func (c *Client) HandleJoinAsObserverRequest(p *Packet) error {
 	if err := r.AddClient(c.ID); err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
-	gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
-		Game: makeGamePayload(g),
-	})
-	if err != nil {
-		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	{
+		p, err := NewJoinedGamePacket(JoinedGamePayload{
+			Game: g,
+		})
+		if err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+		}
+		c.send(p)
 	}
-	c.send(gamePacket)
 	return r.BroadcastObserverJoinGamePacket(c, g)
 }
 
-func (c *Client) HandleObservateurLeaveGameRequest(p *Packet) error {
+func (c *Client) HandleLeaveGameAsObservateurRequest(p *Packet) error {
 	payload := LeaveGamePayload{}
 	if err := json.Unmarshal(p.Payload, &payload); err != nil {
 		return err
 	}
 
-	_, err := c.Manager.GameSvc.RemoveObserver(payload.GameID, c.UserId)
+	_, err := c.Manager.GameSvc.RemoveObserverFromGame(payload.GameID, c.UserId)
 	if err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
@@ -595,7 +601,7 @@ func (c *Client) HandleIndiceRequest(p *Packet) error {
 }
 
 func (c *Client) HandleClientEventReplaceBotByObserverRequest(p *Packet) error {
-	payload := joinGameAsObserverPayload{}
+	payload := JoinGameAsObserverPayload{}
 	if err := json.Unmarshal(p.Payload, &payload); err != nil {
 		return err
 	}
@@ -849,5 +855,66 @@ func (c *Client) HandleStartTournamentRequest(p *Packet) error {
 		}(ga)
 	}
 
+	return nil
+}
+
+func (c *Client) HandleJoinTournamentAsObserverRequest(p *Packet) error {
+	payload := JoinTournamentAsObserverPayload{}
+	if err := json.Unmarshal(p.Payload, &payload); err != nil {
+		return err
+	}
+
+	t, err := c.Manager.GameSvc.AddObserverToTournament(payload.TournamentID, c.UserId)
+	if err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+
+	r, err := c.Manager.GetRoom(payload.TournamentID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+
+	if err := r.AddClient(c.ID); err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+	{
+		p, err := NewJoinedTournamentPacket(JoinedTournamentPayload{
+			Tournament: makeTournamentPayload(t),
+		})
+		if err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+		}
+		c.send(p)
+	}
+	return nil
+}
+
+func (c *Client) HandleLeaveTournamentAsObservateurRequest(p *Packet) error {
+	payload := LeaveTournamentPayload{}
+	if err := json.Unmarshal(p.Payload, &payload); err != nil {
+		return err
+	}
+
+	t, err := c.Manager.GameSvc.RemoveObserverFromTournament(payload.TournamentID, c.UserId)
+	if err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+	r, err := c.Manager.GetRoom(payload.TournamentID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+
+	if err := r.RemoveClient(c.ID); err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+	{
+		p, err := NewLeftTournamentPacket(LeftTournamentPayload{
+			TournamentID: t.ID,
+		})
+		if err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+		}
+		c.send(p)
+	}
 	return nil
 }

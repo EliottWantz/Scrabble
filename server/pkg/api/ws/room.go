@@ -304,7 +304,7 @@ func (r *Room) BroadcastObserverLeaveGamePacket(c *Client, gID string) error {
 func (r *Room) BroadcastJoinTournamentPackets(c *Client, t *game.Tournament) error {
 	{
 		p, err := NewJoinedTournamentPacket(JoinedTournamentPayload{
-			Tournament: t,
+			Tournament: makeTournamentPayload(t),
 		})
 		if err != nil {
 			return err
