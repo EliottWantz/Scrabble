@@ -1,4 +1,6 @@
+import 'package:client_leger/routes/app_routes.dart';
 import 'package:client_leger/services/game_service.dart';
+import 'package:client_leger/services/users_service.dart';
 import 'package:client_leger/services/websocket_service.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -7,6 +9,7 @@ import 'package:get/get.dart';
 class DialogHelper {
   final WebsocketService _websocketService = Get.find();
   final GameService _gameService = Get.find();
+  final UsersService _usersService = Get.find();
 
   static void showErrorDialog(
       {String title = 'Error', String? description = 'Something went wrong'}) {
@@ -219,5 +222,36 @@ class DialogHelper {
 
   static void hideLoading() {
     if (Get.isDialogOpen!) Get.back();
+  }
+
+  static void showGameOverDialog(String winnerId) {
+    Get.dialog(
+      Dialog(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text("La partie est terminé!",
+                style: Get.textTheme.headline4,
+              ),
+              const Gap(20),
+              Text(
+                "Le gagnant est ${DialogHelper()._usersService.getUserUsername(winnerId)}",
+                style: Get.textTheme.headline6,
+              ),
+              const Gap(20),
+              ElevatedButton(
+                onPressed: () {
+                  Get.offAllNamed(Routes.HOME);
+                },
+                child: const Text('Retourner au menu principal'),
+              ),
+            ],
+          ),
+        ),
+      ),
+      barrierDismissible: false,
+    );
   }
 }

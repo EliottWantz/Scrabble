@@ -5,6 +5,7 @@ import 'package:client_leger/controllers/game_controller.dart';
 import 'package:client_leger/models/chat_message_payload.dart';
 import 'package:client_leger/models/create_room_payload.dart';
 import 'package:client_leger/models/events.dart';
+import 'package:client_leger/models/game.dart';
 import 'package:client_leger/models/join_dm_payload.dart';
 import 'package:client_leger/models/join_room_payload.dart';
 import 'package:client_leger/models/play_move_payload.dart';
@@ -19,6 +20,7 @@ import 'package:client_leger/models/requests/play_move_request.dart';
 import 'package:client_leger/models/response/accept_friend_response.dart';
 import 'package:client_leger/models/response/chat_message_response.dart';
 import 'package:client_leger/models/response/friend_request_response.dart';
+import 'package:client_leger/models/response/game_over_response.dart';
 import 'package:client_leger/models/response/game_update_response.dart';
 import 'package:client_leger/models/response/indice_response.dart';
 import 'package:client_leger/models/response/joined_dm_room_response.dart';
@@ -193,6 +195,11 @@ class WebsocketService extends GetxService {
         handleServerEventTimerUpdate(timerResponse);
       }
       break;
+      case ServerEventGameOver: {
+        GameOverResponse gameOverResponse = GameOverResponse.fromRawJson(data);
+        handleServerEventGameOver(gameOverResponse);
+      }
+      break;
       case ServerEventFriendRequest: {
         FriendRequestResponse friendRequestResponse = FriendRequestResponse.fromRawJson(data);
         handleFriendRequest(friendRequestResponse);
@@ -344,6 +351,11 @@ class WebsocketService extends GetxService {
 
   void handleServerEventTimerUpdate(TimerResponse timerResponse) {
     gameService.currentGameTimer.value = timerResponse.payload.timer;
+  }
+
+  void handleServerEventGameOver(GameOverResponse gameOverResponse) {
+    GameController gameController = Get.find();
+    gameController.showGameOverDialog(gameOverResponse.payload.winnerId);
   }
 
   void handleFriendRequest(FriendRequestResponse friendRequestResponse) {

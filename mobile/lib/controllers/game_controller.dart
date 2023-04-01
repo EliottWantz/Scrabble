@@ -9,6 +9,7 @@ import 'package:client_leger/routes/app_routes.dart';
 import 'package:client_leger/services/game_service.dart';
 import 'package:client_leger/services/user_service.dart';
 import 'package:client_leger/services/websocket_service.dart';
+import 'package:client_leger/utils/dialog_helper.dart';
 import 'package:client_leger/widgets/board_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -139,6 +140,10 @@ class GameController extends GetxController {
   bool isTileInBoard(Tile tile) {
     List<Tile> tilesPlaced = lettersPlaced.map((tile) => tile.tile).toList();
     return tilesPlaced.contains(tile);
+  }
+
+  void showGameOverDialog(String winnerId) {
+    DialogHelper.showGameOverDialog(winnerId);
   }
 
   Widget getEaselChildToDisplay(Tile tile, int index) {
