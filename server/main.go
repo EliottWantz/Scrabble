@@ -19,6 +19,8 @@ func main() {
 		slog.Error("main error", err)
 		os.Exit(1)
 	}
+	// t := game.NewTournament("1", []string{"2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"})
+	// t.Setup()
 }
 
 func run() error {

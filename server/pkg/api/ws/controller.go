@@ -1,8 +1,9 @@
 package ws
 
 import (
-	"scrabble/pkg/api/user"
 	"strconv"
+
+	"scrabble/pkg/api/user"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -61,7 +62,7 @@ func (m *Manager) ProtectGame(c *fiber.Ctx) error {
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
-	m.UpdateJoinableGames()
+	m.BroadcastJoinableGames()
 	return c.SendStatus(fiber.StatusOK)
 }
 
@@ -72,7 +73,7 @@ func (m *Manager) UnprotectGame(c *fiber.Ctx) error {
 	}
 
 	m.GameSvc.UnprotectGame(gameID)
-	m.UpdateJoinableGames()
+	m.BroadcastJoinableGames()
 	return c.SendStatus(fiber.StatusOK)
 }
 
@@ -93,7 +94,7 @@ func (m *Manager) SendFriendRequest(c *fiber.Ctx) error {
 	if err != nil {
 		m.logger.Error("failed to create friend request packet", err)
 	}
-	client, _ := m.GetClient(friendId)
+	client, _ := m.GetClientByWsID(friendId)
 	client.send(p)
 	return c.SendStatus(fiber.StatusOK)
 }
@@ -115,7 +116,7 @@ func (m *Manager) AcceptFriendRequest(c *fiber.Ctx) error {
 	if err != nil {
 		m.logger.Error("failed to create friend request packet", err)
 	}
-	client, _ := m.GetClient(friendId)
+	client, _ := m.GetClientByWsID(friendId)
 	client.send(p)
 	return c.SendStatus(fiber.StatusOK)
 }
@@ -137,7 +138,7 @@ func (m *Manager) RejectFriendRequest(c *fiber.Ctx) error {
 	if err != nil {
 		m.logger.Error("failed to create friend request packet", err)
 	}
-	client, _ := m.GetClient(friendId)
+	client, _ := m.GetClientByWsID(friendId)
 	client.send(p)
 	return c.SendStatus(fiber.StatusOK)
 }
@@ -189,7 +190,6 @@ type GetFriendRequestsResponse struct {
 }
 
 func (m *Manager) GetPendingFriendRequests(c *fiber.Ctx) error {
-
 	id := c.Params("id")
 	friendRequests, err := m.GetPendingFriendlistRequests(id)
 	if err != nil {
