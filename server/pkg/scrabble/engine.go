@@ -75,14 +75,14 @@ func (hs *HighScore) PickMove(state *GameState, moves []Move) Move {
 	return NewPassMove()
 }
 
-// PickBestTileMoves picks the best 3 moves from the current game state
+// PickBestTileMoves picks the best 5 moves from the current game state
 func (e *Engine) PickBestTileMoves(state *GameState, moves []Move) []Move {
 	if len(moves) > 0 {
 		// Sort by score
 		sort.Sort(byScore{state, moves})
-		// Cut the list down to 3, if it is longer than that
-		if len(moves) > 3 {
-			moves = moves[:3]
+		// Cut the list down to 5, if it is longer than that
+		if len(moves) > 5 {
+			moves = moves[:5]
 		}
 		return moves
 	}
