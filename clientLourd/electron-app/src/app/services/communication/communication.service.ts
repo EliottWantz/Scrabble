@@ -119,6 +119,18 @@ export class CommunicationService {
         return this.http.patch<void>(`${this.baseUrl}/user/${id}/config`, {theme: theme, language: language}).pipe(catchError(this.handleError));
     }
 
+    getCustomAvatar(gender: string, skinColor: string, hairType: string, hairColor: string, accessories: string, eyebrows: string, facialHair: string, eyes: string, facialHairColor: string, mouth: string, backgroundColor: string): Observable<any> {
+        if (facialHair == "none" && accessories == "none") {
+            return this.http.get<any>(`https://api.dicebear.com/6.x/avataaars/png?seed=${gender == "Male" ? "Baby" : "Annie"}&skinColor=${skinColor.substring(1)}&top=${hairType}&mouth=${mouth}&hairColor=${hairColor.substring(1)}&eyes=${eyes}&eyebrows=${eyebrows}&facialHairProbability=0&facialHairColor=${facialHairColor.substring(1)}&backgroundColor=${backgroundColor.substring(1)}&accessoriesProbability=0`);
+        } else if (facialHair == "none") {
+            return this.http.get<any>(`https://api.dicebear.com/6.x/avataaars/png?seed=${gender == "Male" ? "Baby" : "Annie"}&skinColor=${skinColor.substring(1)}&top=${hairType}&mouth=${mouth}&hairColor=${hairColor.substring(1)}&eyes=${eyes}&eyebrows=${eyebrows}&facialHairProbability=0&facialHairColor=${facialHairColor.substring(1)}&backgroundColor=${backgroundColor.substring(1)}&accessories=${accessories}&accessoriesProbability=100`);
+        } else if (accessories == "none") {
+            return this.http.get<any>(`https://api.dicebear.com/6.x/avataaars/png?seed=${gender == "Male" ? "Baby" : "Annie"}&skinColor=${skinColor.substring(1)}&top=${hairType}&mouth=${mouth}&hairColor=${hairColor.substring(1)}&eyes=${eyes}&eyebrows=${eyebrows}&facialHair=${facialHair}&facialHairProbability=100&facialHairColor=${facialHairColor.substring(1)}&backgroundColor=${backgroundColor.substring(1)}&accessoriesProbability=0`);
+        } else {
+            return this.http.get<any>(`https://api.dicebear.com/6.x/avataaars/png?seed=${gender == "Male" ? "Baby" : "Annie"}&skinColor=${skinColor.substring(1)}&top=${hairType}&mouth=${mouth}&hairColor=${hairColor.substring(1)}&eyes=${eyes}&eyebrows=${eyebrows}&facialHair=${facialHair}&facialHairProbability=100&facialHairColor=${facialHairColor.substring(1)}&backgroundColor=${backgroundColor.substring(1)}&accessories=${accessories}&accessoriesProbability=100`);
+        }
+    }
+
     private handleError(error: HttpErrorResponse) {
         if (error.status === 0) {
           // A client-side or network error occurred. Handle it accordingly.
