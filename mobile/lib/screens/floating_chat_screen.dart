@@ -43,6 +43,9 @@ class FloatingChatScreen extends GetView<ChatController> {
                   onPressed: () =>
                       {_selectedChatRoom.value = !_selectedChatRoom.value},
                   child: const Text('Go back'),
+                    style: ButtonStyle(
+                        foregroundColor: MaterialStatePropertyAll<Color>(Colors.black),
+                    )
                 ),
               ),
             ),

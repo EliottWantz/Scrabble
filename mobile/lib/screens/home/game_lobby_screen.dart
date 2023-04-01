@@ -110,13 +110,17 @@ class GameLobbyScreen extends StatelessWidget {
       return Column(
         children: [
           Container(
-            height: 100,
+            color: Color.fromARGB(255,98,0,238),
+            height: 60,
             width: double.infinity,
             child: const DrawerHeader(
-              decoration: BoxDecoration(
-                color: Colors.blue,
+              child: Text(
+                'Chats',
+                style: TextStyle(
+                    fontSize: 20,
+                    color: Colors.white
+                ),
               ),
-              child: Text('Drawer Header'),
             ),
           ),
           Expanded(
