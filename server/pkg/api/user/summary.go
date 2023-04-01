@@ -11,9 +11,9 @@ type NetworkLog struct {
 	EventTime int64  `bson:"eventTime" json:"eventTime,omitempty"`
 }
 type GameStats struct {
-	EventStartTime int64 `bson:"eventStartTime" json:"eventStartTime,omitempty"`
-	EventEndTime   int64 `bson:"eventEndTime" json:"eventEndTime,omitempty"`
-	GameWon        bool  `bson:"gameWon" json:"gameWon,omitempty"`
+	GameStartTime int64 `bson:"gameStartTime" json:"gameStartTime,omitempty"`
+	GameEndTime   int64 `bson:"gameEndTime" json:"gameEndTime,omitempty"`
+	GameWon       bool  `bson:"gameWon" json:"gameWon,omitempty"`
 }
 
 type UserStats struct {
@@ -35,9 +35,9 @@ func (s *Service) AddNetworkingLog(u *User, eventType string, eventTime int64) {
 func (s *Service) AddGameStats(u *User, eventStartTime, eventEndTime int64, gameWon bool) {
 	gamesStats := &u.Summary.GamesStats
 	*gamesStats = append(*gamesStats, GameStats{
-		EventStartTime: eventStartTime,
-		EventEndTime:   eventEndTime,
-		GameWon:        gameWon,
+		GameStartTime: eventStartTime,
+		GameEndTime:   eventEndTime,
+		GameWon:       gameWon,
 	})
 	s.Repo.Update(u)
 
