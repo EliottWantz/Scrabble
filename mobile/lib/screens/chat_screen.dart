@@ -11,7 +11,7 @@ import '../models/chat_message_payload.dart';
 class ChatScreen extends GetView<ChatController> {
   ChatScreen({
     Key? key,
-  }): super(key: key);
+  }) : super(key: key);
 
   // final List<String> messages = [
   //   'message1',
@@ -50,80 +50,140 @@ class ChatScreen extends GetView<ChatController> {
       scrollDown();
     });
 
-    return Obx(() => Column(
-      children: [
-        Expanded(
-          child: Center(
-            child: ListView.builder(
-              controller: scrollController,
-              itemCount: controller.roomService.currentRoomMessages.value!.length,
-              padding: const EdgeInsets.all(8),
-              itemBuilder: (context, index) {
-                return Container(
-                  margin: EdgeInsets.only(bottom: 10),
-                  padding: EdgeInsets.all(10),
-                  // height: 50,
-                  // color: Colors.amber[600],
-                  // child: Center(child: Text(controller.roomService.currentRoomMessages.value![index].message)),
-                  child: Align(
-                    alignment: (controller.isCurrentUser(controller
-                        .roomService
-                        .currentRoomMessages
-                        .value![index]
-                        .fromId)
-                        ? Alignment.topRight
-                        : Alignment.topLeft),
-                    child: Container(
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
-                          color: (controller.isCurrentUser(controller
-                              .roomService
-                              .currentRoomMessages
-                              .value![index]
-                              .fromId)
-                              ? Colors.amber[600]
-                              : Colors.grey.shade200)
-                      ),
-                      padding: EdgeInsets.all(16),
-                      child: Column(
-                        children: [
-                          Text(
-                            controller.roomService.currentRoomMessages.value![index].from
-                          ),
-                          Text(
-                              controller.roomService.currentRoomMessages.value![index].message,
-                              style: TextStyle(fontSize: 15),
-                          ),
-                        //   Text("implement timestamp function")
-                        ],
-                      ),
-                  )),
-                );
-              }
-            )
+    return Obx(() => Column(children: [
+          Expanded(
+              child: Center(
+                  child: ListView.builder(
+                      controller: scrollController,
+                      itemCount: controller
+                          .roomService.currentRoomMessages.value!.length,
+                      padding: const EdgeInsets.all(8),
+                      itemBuilder: (context, index) {
+                        return Container(
+                          margin: EdgeInsets.only(bottom: 10),
+                          padding: EdgeInsets.all(10),
+                          // height: 50,
+                          // color: Colors.amber[600],
+                          // child: Center(child: Text(controller.roomService.currentRoomMessages.value![index].message)),
+                          child: Align(
+                              alignment: (controller.isCurrentUser(controller
+                                      .roomService
+                                      .currentRoomMessages
+                                      .value![index]
+                                      .fromId)
+                                  ? Alignment.topRight
+                                  : Alignment.topLeft),
+                              child: Row(
+                                  textDirection: controller.isCurrentUser(
+                                  controller
+                                      .roomService
+                                      .currentRoomMessages
+                                      .value![index]
+                                      .fromId)
+                                  ? TextDirection.rtl
+                                  : TextDirection.ltr,
+                                  // mainAxisAlignment: controller.isCurrentUser(
+                                  //         controller
+                                  //             .roomService
+                                  //             .currentRoomMessages
+                                  //             .value![index]
+                                  //             .fromId)
+                                  //     ? MainAxisAlignment.end
+                                  //     : MainAxisAlignment.start,
+                                  // crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    circularImageWithBorder(controller
+                                        .usersService
+                                        .getUserById(controller
+                                        .roomService
+                                        .currentRoomMessages
+                                        .value![index]
+                                        .fromId)!
+                                        .avatar
+                                        .url),
+                                    Column(
+                                      // crossAxisAlignment:
+                                      //     controller.isCurrentUser(controller
+                                      //             .roomService
+                                      //             .currentRoomMessages
+                                      //             .value![index]
+                                      //             .fromId)
+                                      //         ? CrossAxisAlignment.end
+                                      //         : CrossAxisAlignment.start,
+                                      children: [
+                                        Text(controller
+                                            .roomService
+                                            .currentRoomMessages
+                                            .value![index]
+                                            .from),
+                                        Container(
+                                          decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                              color: (controller.isCurrentUser(
+                                                      controller
+                                                          .roomService
+                                                          .currentRoomMessages
+                                                          .value![index]
+                                                          .fromId)
+                                                  ? Colors.amber[600]
+                                                  : Colors.grey.shade200)),
+                                          padding: EdgeInsets.all(16),
+                                          child: Column(
+                                            children: [
+                                              // Text(
+                                              //   controller.roomService.currentRoomMessages.value![index].from
+                                              // ),
+                                              Text(
+                                                controller
+                                                    .roomService
+                                                    .currentRoomMessages
+                                                    .value![index]
+                                                    .message,
+                                                style: TextStyle(fontSize: 15),
+                                              ),
+                                              //   Text("implement timestamp function")
+                                            ],
+                                          ),
+                                        )
+                                      ],
+                                    )
+                                  ])),
+                        );
+                      }))),
+          Container(
+            margin: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(8),
+            // color: Colors.amber,
+            // child: const Center(child: Text('Your super cool Footer')),
+            child: TextField(
+              controller: controller.messageController,
+              keyboardType: TextInputType.text,
+              focusNode: messageInputFocusNode,
+              onSubmitted: (_) {
+                controller.sendMessage();
+                messageInputFocusNode.requestFocus();
+              },
+              decoration: const InputDecoration(
+                  hintText: "Entrez un message...",
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(8)))),
+            ),
           )
-        ),
-        Container(
-          margin: const EdgeInsets.all(8),
-          padding: const EdgeInsets.all(8),
-          // color: Colors.amber,
-          // child: const Center(child: Text('Your super cool Footer')),
-          child: TextField(
-            controller: controller.messageController,
-            keyboardType: TextInputType.text,
-            focusNode: messageInputFocusNode,
-            onSubmitted: (_) {
-              controller.sendMessage();
-              messageInputFocusNode.requestFocus();
-            },
-            decoration: const InputDecoration(
-                hintText: "Entrez un message...",
-                border: OutlineInputBorder(
-                    borderRadius:
-                    BorderRadius.all(Radius.circular(8)))),
+        ]));
+  }
+
+  Widget circularImageWithBorder(String imgPath) {
+    return Container(
+      width: 50.0,
+      height: 50.0,
+      decoration: BoxDecoration(
+          color: const Color(0xff7c94b6),
+          image: DecorationImage(
+            image: NetworkImage(imgPath),
+            fit: BoxFit.cover,
           ),
-        )
-      ]
-    ));
+          borderRadius: const BorderRadius.all(Radius.circular(25.0))),
+    );
   }
 }

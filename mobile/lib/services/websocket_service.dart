@@ -472,6 +472,11 @@ class WebsocketService extends GetxService {
   }
 
   void leaveGame(String gameId) {
+    gameService.currentGame.value = null;
+    gameService.currentGameId = '';
+    gameService.currentGameTimer.value = null;
+    gameService.currentGameInfo = null;
+    gameService.currentGameRoomUserIds.value = [];
     final leaveGamePayload = StartGamePayload(gameId: gameId);
     final leaveGameRequest = StartGameRequest(
         event: ClientEventLeaveGame,

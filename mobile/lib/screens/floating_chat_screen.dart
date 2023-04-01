@@ -61,30 +61,56 @@ class FloatingChatScreen extends GetView<ChatController> {
                         .fromId)
                         ? Alignment.topRight
                         : Alignment.topLeft),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        color: (controller.isCurrentUser(controller
+                    child: Row(
+                        textDirection: controller.isCurrentUser(
+                            controller
+                                .roomService
+                                .currentRoomMessages
+                                .value![index]
+                                .fromId)
+                            ? TextDirection.rtl
+                            : TextDirection.ltr,
+                      children: [
+                        circularImageWithBorder(controller
+                            .usersService
+                            .getUserById(controller
                             .roomService
-                            .currentFloatingRoomMessages
+                            .currentRoomMessages
                             .value![index]
-                            .fromId)
-                            ? Colors.amber[600]
-                            : Colors.grey.shade200)
+                            .fromId)!
+                            .avatar
+                            .url),
+                        Column(
+                          children: [
+                        Text(
+                        controller.roomService.currentFloatingRoomMessages.value![index].from
                         ),
-                      padding: EdgeInsets.all(16),
-                      child: Column(
-                        children: [
-                          Text(
-                            controller.roomService.currentFloatingRoomMessages.value![index].from
+                            Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            color: (controller.isCurrentUser(controller
+                                .roomService
+                                .currentFloatingRoomMessages
+                                .value![index]
+                                .fromId)
+                                ? Colors.amber[600]
+                                : Colors.grey.shade200)
+                            ),
+                          padding: EdgeInsets.all(16),
+                          child: Column(
+                            children: [
+                              // Text(
+                              //   controller.roomService.currentFloatingRoomMessages.value![index].from
+                              // ),
+                              Text(
+                                controller.roomService.currentFloatingRoomMessages.value![index].message,
+                                style: TextStyle(fontSize: 15),
+                              )
+                            ],
                           ),
-                          Text(
-                            controller.roomService.currentFloatingRoomMessages.value![index].message,
-                            style: TextStyle(fontSize: 15),
-                          )
-                        ],
                       ),
-                    )),
+                        ]),
+                    ])),
                 );
               },
             ),
@@ -116,5 +142,19 @@ class FloatingChatScreen extends GetView<ChatController> {
         )
       ],
     ));
+  }
+
+  Widget circularImageWithBorder(String imgPath) {
+    return Container(
+      width: 50.0,
+      height: 50.0,
+      decoration: BoxDecoration(
+          color: const Color(0xff7c94b6),
+          image: DecorationImage(
+            image: NetworkImage(imgPath),
+            fit: BoxFit.cover,
+          ),
+          borderRadius: const BorderRadius.all(Radius.circular(25.0))),
+    );
   }
 }

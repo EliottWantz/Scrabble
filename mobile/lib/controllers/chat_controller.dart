@@ -1,5 +1,6 @@
 import 'package:client_leger/services/game_service.dart';
 import 'package:client_leger/services/user_service.dart';
+import 'package:client_leger/services/users_service.dart';
 import 'package:client_leger/services/websocket_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
@@ -10,6 +11,7 @@ import '../services/room_service.dart';
 class ChatController extends GetxController {
   final RoomService roomService = Get.find();
   final UserService userService = Get.find();
+  final UsersService usersService = Get.find();
   final WebsocketService websocketService = Get.find();
   final GameService gameService = Get.find();
 
