@@ -94,7 +94,7 @@ func (m *Manager) SendFriendRequest(c *fiber.Ctx) error {
 	if err != nil {
 		m.logger.Error("failed to create friend request packet", err)
 	}
-	client, _ := m.GetClient(friendId)
+	client, _ := m.GetClientByWsID(friendId)
 	client.send(p)
 	return c.SendStatus(fiber.StatusOK)
 }
@@ -116,7 +116,7 @@ func (m *Manager) AcceptFriendRequest(c *fiber.Ctx) error {
 	if err != nil {
 		m.logger.Error("failed to create friend request packet", err)
 	}
-	client, _ := m.GetClient(friendId)
+	client, _ := m.GetClientByWsID(friendId)
 	client.send(p)
 	return c.SendStatus(fiber.StatusOK)
 }
@@ -138,7 +138,7 @@ func (m *Manager) RejectFriendRequest(c *fiber.Ctx) error {
 	if err != nil {
 		m.logger.Error("failed to create friend request packet", err)
 	}
-	client, _ := m.GetClient(friendId)
+	client, _ := m.GetClientByWsID(friendId)
 	client.send(p)
 	return c.SendStatus(fiber.StatusOK)
 }
