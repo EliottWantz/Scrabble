@@ -117,6 +117,7 @@ class ChatScreen extends GetView<ChatController> {
                                             .value![index]
                                             .from),
                                         Container(
+                                          constraints: BoxConstraints(maxWidth: 810),
                                           decoration: BoxDecoration(
                                               borderRadius:
                                                   BorderRadius.circular(20),
