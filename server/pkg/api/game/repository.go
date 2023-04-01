@@ -69,6 +69,22 @@ func (r *Repository) FindAllJoinableGames() ([]*Game, error) {
 	return joinable, nil
 }
 
+func (r *Repository) FindAllObservableGames() ([]*Game, error) {
+	games, err := r.FindAllGames()
+	if err != nil {
+		return nil, err
+	}
+
+	observable := make([]*Game, 0)
+	for _, g := range games {
+		if !g.IsPrivateGame {
+			observable = append(observable, g)
+		}
+	}
+
+	return observable, nil
+}
+
 func (r *Repository) InsertGame(g *Game) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -135,6 +151,22 @@ func (r *Repository) FindAllJoinableTournaments() ([]*Tournament, error) {
 	}
 
 	return joinable, nil
+}
+
+func (r *Repository) FindAllObservableTournaments() ([]*Tournament, error) {
+	tournaments, err := r.FindAllTournaments()
+	if err != nil {
+		return nil, err
+	}
+
+	observable := make([]*Tournament, 0)
+	for _, t := range tournaments {
+		if !t.IsPrivate {
+			observable = append(observable, t)
+		}
+	}
+
+	return observable, nil
 }
 
 func (r *Repository) InsertTournament(t *Tournament) error {

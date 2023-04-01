@@ -249,6 +249,40 @@ func NewJoinableTournamentsPacket(payload ListJoinableTournamentsPayload) (*Pack
 	return NewPacket(ServerEventJoinableTournaments, payload)
 }
 
+type ObservableGamesPayload struct {
+	Games []*GamePayload `json:"games"`
+}
+
+func makeObservableGamesPayload(games []*game.Game) []*GamePayload {
+	payloads := make([]*GamePayload, 0, len(games))
+	for _, game := range games {
+		payloads = append(payloads, makeGamePayload(game))
+	}
+
+	return payloads
+}
+
+func NewObservableGamesPacket(payload ObservableGamesPayload) (*Packet, error) {
+	return NewPacket(ServerEventObservableGames, payload)
+}
+
+type ObservableTournamentsPayload struct {
+	Tournaments []*TournamentPayload `json:"tournaments"`
+}
+
+func makeObservableTournamentsPayload(tournaments []*game.Tournament) []*TournamentPayload {
+	payloads := make([]*TournamentPayload, 0, len(tournaments))
+	for _, tournament := range tournaments {
+		payloads = append(payloads, makeTournamentPayload(tournament))
+	}
+
+	return payloads
+}
+
+func NewObservableTournamentsPacket(payload ObservableTournamentsPayload) (*Packet, error) {
+	return NewPacket(ServerEventObservableTournaments, payload)
+}
+
 type JoinedGamePayload struct {
 	Game *game.Game `json:"game"`
 }

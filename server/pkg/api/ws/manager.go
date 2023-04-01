@@ -114,7 +114,35 @@ func (m *Manager) Accept(cID string) fiber.Handler {
 				Tournaments: makeJoinableTournamentsPayload(tournaments),
 			})
 			if err != nil {
-				m.logger.Error("list joinable games", err)
+				m.logger.Error("create joinable games", err)
+			}
+			c.send(p)
+		}
+		{
+			// List all observable games
+			games, err := m.GameSvc.Repo.FindAllObservableGames()
+			if err != nil {
+				m.logger.Error("list observable games", err)
+			}
+			p, err := NewObservableGamesPacket(ObservableGamesPayload{
+				Games: makeObservableGamesPayload(games),
+			})
+			if err != nil {
+				m.logger.Error("create observable games packet", err)
+			}
+			c.send(p)
+		}
+		{
+			// List all observable tournaments
+			tournaments, err := m.GameSvc.Repo.FindAllObservableTournaments()
+			if err != nil {
+				m.logger.Error("list observable tournaments", err)
+			}
+			p, err := NewObservableTournamentsPacket(ObservableTournamentsPayload{
+				Tournaments: makeObservableTournamentsPayload(tournaments),
+			})
+			if err != nil {
+				m.logger.Error("create observable tournaments packet", err)
 			}
 			c.send(p)
 		}
@@ -241,8 +269,8 @@ func (m *Manager) getClientsByUserID(cUserID string) []*Client {
 		return true
 	})
 	return clients
-
 }
+
 func (m *Manager) getClientUserID(cID string) (string, error) {
 	c, err := m.GetClientByWsID(cID)
 	if err != nil {
@@ -250,6 +278,7 @@ func (m *Manager) getClientUserID(cID string) (string, error) {
 	}
 	return c.UserId, nil
 }
+
 func (m *Manager) RemoveClient(c *Client) error {
 	defer close(c.receiveCh)
 	defer close(c.sendCh)

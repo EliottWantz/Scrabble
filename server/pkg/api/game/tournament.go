@@ -14,6 +14,7 @@ type Tournament struct {
 	HasStarted     bool     `json:"hasStarted"`
 	IsOver         bool     `json:"isOver"`
 	WinnerID       string   `json:"winnerId"`
+	IsPrivate      bool     `json:"isPrivate"`
 }
 
 type TournamentGameInfo struct {
