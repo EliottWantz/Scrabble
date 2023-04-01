@@ -63,12 +63,23 @@ func (m *Manager) Accept(cID string) fiber.Handler {
 			m.logger.Error("add client", err)
 			return
 		}
-
 		{
 			// List all users registered in the application
 			p, err := NewListUsersPacket(
 				ListUsersPayload{
 					Users: m.ListUsers(),
+				},
+			)
+			if err != nil {
+				m.logger.Error("list users", err)
+			}
+			c.send(p)
+		}
+		{
+			// List all users online
+			p, err := NewListOnlineUsersPacket(
+				ListOnlineUsersPayload{
+					Users: m.ListOnlineUsers(),
 				},
 			)
 			if err != nil {
@@ -179,6 +190,22 @@ func (m *Manager) ListUsers() []user.User {
 	}
 
 	return users
+}
+
+func (m *Manager) ListOnlineUsers() []user.User {
+	online := make([]user.User, 0)
+	users, err := m.UserSvc.Repo.FindAll()
+	if err != nil {
+		return online
+	}
+
+	for _, u := range users {
+		if _, err := m.getClientByUserID(u.ID); err == nil {
+			online = append(online, u)
+		}
+	}
+
+	return online
 }
 
 func (m *Manager) AddClient(c *Client) error {
@@ -361,6 +388,20 @@ func (m *Manager) RemoveClient(c *Client) error {
 		slog.Error("close connection", err)
 	}
 	m.Clients.Del(c.ID)
+
+	{
+		// List all users online
+		p, err := NewListOnlineUsersPacket(
+			ListOnlineUsersPayload{
+				Users: m.ListOnlineUsers(),
+			},
+		)
+		if err != nil {
+			m.logger.Error("list users", err)
+		}
+		m.Broadcast(p)
+	}
+
 	return nil
 }
 

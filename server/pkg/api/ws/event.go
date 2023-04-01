@@ -39,6 +39,7 @@ var (
 	ServerEventUserJoinedDMRoom      = "userJoinedDMRoom"
 	ServerEventUserLeftDMRoom        = "userLeftDMRoom"
 	ServerEventListUsers             = "listUsers"
+	ServerEventListOnlineUsers       = "listOnlineUsers"
 	ServerEventNewUser               = "newUser"
 	ServerEventListChatRooms         = "listChatRooms"
 	ServerEventJoinableGames         = "joinableGames"

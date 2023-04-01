@@ -213,6 +213,14 @@ func NewListUsersPacket(payload ListUsersPayload) (*Packet, error) {
 	return NewPacket(ServerEventListUsers, payload)
 }
 
+type ListOnlineUsersPayload struct {
+	Users []user.User `json:"users"`
+}
+
+func NewListOnlineUsersPacket(payload ListOnlineUsersPayload) (*Packet, error) {
+	return NewPacket(ServerEventListOnlineUsers, payload)
+}
+
 type NewUserPayload struct {
 	User *user.User `json:"user"`
 }
