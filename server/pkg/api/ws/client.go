@@ -195,7 +195,6 @@ func (c *Client) HandleCreateRoomRequest(p *Packet) error {
 		payload.RoomName,
 		c.UserId,
 	)
-
 	if err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, "failed to create new room: "+err.Error())
 	}
@@ -391,7 +390,7 @@ func (c *Client) HandleCreateGameRequest(p *Packet) error {
 		}
 	}
 
-	return nil
+	return c.Manager.BroadcastObservableGames()
 }
 
 func (c *Client) HandleJoinGameRequest(p *Packet) error {
@@ -711,7 +710,7 @@ func (c *Client) HandleCreateTournamentRequest(p *Packet) error {
 		r.BroadcastJoinTournamentPackets(client, t)
 	}
 
-	return nil
+	return c.Manager.BroadcastObservableTournaments()
 }
 
 func (c *Client) HandleJoinTournamentRequest(p *Packet) error {

@@ -404,7 +404,7 @@ func (m *Manager) RemoveClientFromGame(c *Client, gID string) error {
 					continue
 				}
 			}
-			return nil
+			return m.BroadcastObservableGames()
 		} else {
 			// Remove the user from the game
 			if _, err := c.Manager.GameSvc.RemoveUserFromGame(gID, c.UserId); err != nil {
@@ -492,7 +492,7 @@ func (m *Manager) RemoveClientFromTournament(c *Client, gID string) error {
 					continue
 				}
 			}
-			return nil
+			return m.BroadcastObservableTournaments()
 		} else {
 			// Remove the user from the Tournament
 			if _, err := c.Manager.GameSvc.RemoveUserFromTournament(gID, c.UserId); err != nil {
@@ -639,6 +639,39 @@ func (m *Manager) BroadcastJoinableTournaments() error {
 		return err
 	}
 	m.Broadcast(joinableTournamentsPacket)
+
+	return nil
+}
+
+func (m *Manager) BroadcastObservableGames() error {
+	games, err := m.GameSvc.Repo.FindAllObservableGames()
+	if err != nil {
+		return err
+	}
+
+	ObservableGamesPacket, err := NewObservableGamesPacket(ObservableGamesPayload{
+		Games: makeObservableGamesPayload(games),
+	})
+	if err != nil {
+		return err
+	}
+	m.Broadcast(ObservableGamesPacket)
+
+	return nil
+}
+
+func (m *Manager) BroadcastObservableTournaments() error {
+	tournaments, err := m.GameSvc.Repo.FindAllObservableTournaments()
+	if err != nil {
+		return err
+	}
+	ObservableTournamentsPacket, err := NewObservableTournamentsPacket(ObservableTournamentsPayload{
+		Tournaments: makeObservableTournamentsPayload(tournaments),
+	})
+	if err != nil {
+		return err
+	}
+	m.Broadcast(ObservableTournamentsPacket)
 
 	return nil
 }
@@ -887,7 +920,7 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 		return err
 	}
 
-	return nil
+	return m.BroadcastObservableGames()
 }
 
 func (m *Manager) ListNewUser() {
