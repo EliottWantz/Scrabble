@@ -25,8 +25,8 @@
                 </form>
             </div>
             <div class="users">
-                <div *ngFor="let user of listFriendsDisplay" class="user">
-                    <div *ngIf="checkIfOnline(user.id)">
+                <div *ngFor="let user of listFriendsOnlineDisplay" class="user">
+                    <div>
                         <img src="{{user.avatar.url}}" class="avatar">
                         <h3>{{user.username}}</h3>
                     </div>

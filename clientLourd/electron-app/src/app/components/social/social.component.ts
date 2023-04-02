@@ -165,8 +165,4 @@ export class SocialComponent implements AfterViewInit, OnInit {
     }
     this.userService.subjectUser.next({...this.userService.currentUserValue, pendingRequests: pendingRequests});
   }
-
-  checkIfOnline(id: string): boolean {
-    return this.roomService.listJoinedChatRooms.value[0].userIds.includes(id);
-  }
 }
