@@ -8,17 +8,18 @@ import { Game } from "@app/utils/interfaces/game/game";
 import { JoinGamePayload } from "@app/utils/interfaces/packet";
 import { BehaviorSubject } from "rxjs";
 import  {MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { Router } from "@angular/router";
 
 @Component({
-    selector: "app-join-private-game",
-    templateUrl: "./join-private-game.component.html",
-    styleUrls: ["./join-private-game.component.scss"],
+    selector: "app-join-protected-game",
+    templateUrl: "./join-protected-game.component.html",
+    styleUrls: ["./join-protected-game.component.scss"],
 })
-export class JoinPrivateGameComponent {
+export class JoinProtectedGameComponent {
     password = "";
     errorMessage = "";
-    constructor(public dialogRef: MatDialogRef<JoinPrivateGameComponent>, @Inject(MAT_DIALOG_DATA) public data: {game: Game, isObserver: boolean},
-        private webSocketService: WebSocketService, private storageService: StorageService, private gameService: GameService
+    constructor(public dialogRef: MatDialogRef<JoinProtectedGameComponent>, @Inject(MAT_DIALOG_DATA) public data: {game: Game, isObserver: boolean},
+        private webSocketService: WebSocketService, private storageService: StorageService, private gameService: GameService, private router: Router
     ) {
         this.webSocketService.error.subscribe(() => {
             if (this.webSocketService.error.value === "password mismatch") {
@@ -45,10 +46,11 @@ export class JoinPrivateGameComponent {
                 gameId: this.data.game.id,
                 password: ""
             }
-            const event : ClientEvent = "join-as-observateur";
+            const event : ClientEvent = "join-game-as-observateur";
             this.webSocketService.send(event, payload);
             // if password is correct
             this.gameService.isObserving = true;
+            this.router.navigate(["/gameObserve"]);
             this.close();
         }  else {
             console.log(this.password);
