@@ -858,6 +858,14 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 			if err := m.GameSvc.Repo.DeleteTournament(t.ID); err != nil {
 				return err
 			}
+			winner, err := m.UserSvc.GetUser(t.WinnerID)
+			if err != nil {
+				return err
+			}
+			winner.Summary.UserStats.NbTournamentsWon++
+			if err := m.UserSvc.Repo.Update(winner); err != nil {
+				return err
+			}
 		} else {
 			if t.Finale != nil {
 				// Join the finale
