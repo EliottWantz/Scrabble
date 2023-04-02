@@ -100,7 +100,7 @@ type StartGamePayload struct {
 }
 
 type CreateTournamentPayload struct {
-	Password    string   `json:"password,omitempty"`
+	IsPrivate   bool     `json:"isPrivate"`
 	WithUserIDs []string `json:"withUserIds"`
 }
 
@@ -263,16 +263,7 @@ func NewJoinableTournamentsPacket(payload ListJoinableTournamentsPayload) (*Pack
 }
 
 type ObservableGamesPayload struct {
-	Games []*GamePayload `json:"games"`
-}
-
-func makeObservableGamesPayload(games []*game.Game) []*GamePayload {
-	payloads := make([]*GamePayload, 0, len(games))
-	for _, game := range games {
-		payloads = append(payloads, makeGamePayload(game))
-	}
-
-	return payloads
+	Games []*game.Game `json:"games"`
 }
 
 func NewObservableGamesPacket(payload ObservableGamesPayload) (*Packet, error) {

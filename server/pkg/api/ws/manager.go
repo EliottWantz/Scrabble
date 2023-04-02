@@ -136,7 +136,7 @@ func (m *Manager) Accept(cID string) fiber.Handler {
 				m.logger.Error("list observable games", err)
 			}
 			p, err := NewObservableGamesPacket(ObservableGamesPayload{
-				Games: makeObservableGamesPayload(games),
+				Games: games,
 			})
 			if err != nil {
 				m.logger.Error("create observable games packet", err)
@@ -856,6 +856,14 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 			}
 			tournamentRoom.Broadcast(p)
 			if err := m.GameSvc.Repo.DeleteTournament(t.ID); err != nil {
+				return err
+			}
+			winner, err := m.UserSvc.GetUser(t.WinnerID)
+			if err != nil {
+				return err
+			}
+			winner.Summary.UserStats.NbTournamentsWon++
+			if err := m.UserSvc.Repo.Update(winner); err != nil {
 				return err
 			}
 		} else {
