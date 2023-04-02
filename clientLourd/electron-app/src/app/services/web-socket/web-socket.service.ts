@@ -311,6 +311,12 @@ export class WebSocketService {
         break;
       }
 
+      case 'listOnlineUsers': {
+        const payloadListOnlineUsers = packet.payload as ListUsersPayload;
+        this.storageService.listOnlineUsers.next(payloadListOnlineUsers.users);
+        break;
+      }
+
       case 'error': {
         console.log(packet);
         const errorPayload = packet.payload as ErrorPayload;
