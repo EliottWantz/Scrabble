@@ -19,6 +19,7 @@ import {
   LeftRoomPayload,
   ListChatRoomsPayload,
   ListJoinableGamesPayload,
+  ListObservableGamesPayload,
   ListUsersPayload,
   NewUserPayload,
   Packet,
@@ -219,7 +220,7 @@ export class WebSocketService {
           this.gameService.removeUser(userLeftGamePayload.gameId, userLeftGamePayload.userId);
           break;
       }
-      
+
       case "gameUpdate": {
           const payloadUpdateGame = packet.payload as GameUpdatePayload;
           this.gameService.updateGame(payloadUpdateGame.game);
@@ -275,6 +276,12 @@ export class WebSocketService {
           };
           this.roomService.addMessage(message);
           break;
+      }
+
+      case "observableGames": {
+        const payload = packet.payload as ListObservableGamesPayload;
+        this.gameService.observableGames.next(payload.games);
+        break;
       }
 
       case "error": {

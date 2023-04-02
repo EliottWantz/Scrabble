@@ -15,6 +15,7 @@ export class GameService {
     timer!: BehaviorSubject<number>;
     moves!: BehaviorSubject<MoveInfo[]>;
     joinableGames!: BehaviorSubject<Game[]>;
+    observableGames!: BehaviorSubject<Game[]>;
     isObserving = false;
     constructor(private router: Router) {
         this.scrabbleGame = new BehaviorSubject<ScrabbleGame | undefined>({
@@ -35,6 +36,7 @@ export class GameService {
         this.joinableGames = new BehaviorSubject<Game[]>([]);
         this.timer = new BehaviorSubject<number>(0);
         this.moves = new BehaviorSubject<MoveInfo[]>([]);
+        this.observableGames = new BehaviorSubject<Game[]>([]);
     }
 
     updateGame(game: ScrabbleGame): void {
