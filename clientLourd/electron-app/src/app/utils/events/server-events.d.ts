@@ -23,4 +23,6 @@ export type ServerEvent = "joinedRoom"
 | "indice"
 | "error"
 | "chat-message"
-| "listOnlineUsers";
+| "listOnlineUsers"
+| "observableGames"
+| "observableTournaments";

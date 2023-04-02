@@ -105,7 +105,8 @@ export type ServerPayload = JoinedRoomPayload
 | FriendRequestPayload
 | ServerIndicePayload
 | ErrorPayload
-| ListUsersOnlinePayload;
+| ListUsersOnlinePayload
+| ListObservableGamesPayload;
 
 export interface JoinedRoomPayload {
     roomId: string;
@@ -210,4 +211,8 @@ export interface ErrorPayload {
 
 export interface ListUsersOnlinePayload {
     users: User[];
+}
+
+export interface ListObservableGamesPayload {
+    games: Game[];
 }
