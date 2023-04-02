@@ -22,4 +22,5 @@ export type ServerEvent = "joinedRoom"
 | "declineFriendRequest"
 | "indice"
 | "error"
-| "chat-message";
+| "chat-message"
+| "listOnlineUsers";

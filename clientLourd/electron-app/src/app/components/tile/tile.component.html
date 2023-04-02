@@ -1,4 +1,4 @@
-<div #elem id="ship-box" (click)="clicked()" class="tile">
+<div #elem id="ship-box" (click)="clicked()" class="tile" [attr.data-letter]="tile.letter" [attr.data-value]="tile.value" cdkDrag>
     <div class="letter">
         {{getASCII()}}
     </div>

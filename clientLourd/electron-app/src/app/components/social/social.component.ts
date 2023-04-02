@@ -1,4 +1,4 @@
-import { AfterViewInit, Component } from "@angular/core";
+import { AfterViewInit, Component, OnInit } from "@angular/core";
 import { CommunicationService } from "@app/services/communication/communication.service";
 import { RoomService } from "@app/services/room/room.service";
 import { SocialService } from "@app/services/social/social.service";
@@ -13,7 +13,7 @@ import { BehaviorSubject } from "rxjs";
     templateUrl: "./social.component.html",
     styleUrls: ["./social.component.scss"],
 })
-export class SocialComponent implements AfterViewInit {
+export class SocialComponent implements AfterViewInit, OnInit {
   onlineFriendUserNameSearch = "";
   addFriendUserName = "";
   allFriendUserNameSearch = "";
@@ -22,6 +22,8 @@ export class SocialComponent implements AfterViewInit {
   listUsers: BehaviorSubject<User[]>;
   listFriends: User[];
   listFriendsDisplay: User[];
+  listFriendsOnline: User[];
+  listFriendsOnlineDisplay: User[];
   usernameInput: any;
 
   constructor(private userService: UserService, private websocketService: WebSocketService, private communicationService: CommunicationService,
@@ -32,6 +34,20 @@ export class SocialComponent implements AfterViewInit {
     this.listUserDisplay = [];
     this.listFriendsDisplay = [];
     this.listFriends = [];
+    this.listFriendsOnline = [];
+    this.listFriendsOnlineDisplay = [];
+    
+
+    /*for (let i = 0; i < navButtons.length; i++) {
+      if (i != index) {
+        navButtons[i].setAttribute("style", "");
+      } else {
+        navButtons[i].setAttribute("style", "background-color: #424260; outline-color: #66678e; outline-width: 1px; outline-style: solid;");
+      }
+    }*/
+  }
+
+  ngOnInit(): void {
     this.storageService.listUsers.subscribe((users) => {
       const usersWithoutSelf = [];
       const friendsWithoutSelf = [];
@@ -49,13 +65,14 @@ export class SocialComponent implements AfterViewInit {
       this.listFriends = friendsWithoutSelf;
     });
 
-    /*for (let i = 0; i < navButtons.length; i++) {
-      if (i != index) {
-        navButtons[i].setAttribute("style", "");
-      } else {
-        navButtons[i].setAttribute("style", "background-color: #424260; outline-color: #66678e; outline-width: 1px; outline-style: solid;");
+    this.storageService.listOnlineUsers.subscribe((users) => {
+      for (const user of users) {
+        if (user.id != this.user.value.id && this.user.value.friends.includes(user.id)) {
+          this.listFriendsOnline.push(user);
+          this.listFriendsOnlineDisplay.push(user);
+        }
       }
-    }*/
+    });
   }
 
   ngAfterViewInit(): void {
@@ -147,9 +164,5 @@ export class SocialComponent implements AfterViewInit {
       pendingRequests.splice(index, 1);
     }
     this.userService.subjectUser.next({...this.userService.currentUserValue, pendingRequests: pendingRequests});
-  }
-
-  checkIfOnline(id: string): boolean {
-    return this.roomService.listJoinedChatRooms.value[0].userIds.includes(id);
   }
 }

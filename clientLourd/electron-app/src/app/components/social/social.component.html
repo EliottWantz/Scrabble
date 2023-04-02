@@ -1,16 +1,16 @@
 <div id="container">
     <div class="nav">
         <div class="nav-text" (click)="selectNavButton(0)">
-            En ligne
+            {{'social-component.online' | translate}}
         </div>
         <div class="nav-text" (click)="selectNavButton(1)">
-            Tous
+            {{'social-component.all' | translate}}
         </div>
         <div class="nav-text" (click)="selectNavButton(2)">
-            En attente
+            {{'social-component.waiting' | translate}}
         </div>
         <div class="nav-text" (click)="selectNavButton(3)">
-            Ajouter un ami
+            {{'social-component.add' | translate}}
         </div>
     </div>
     <div class="content">
@@ -19,14 +19,14 @@
             <div class="form">
                 <form>
                     <mat-form-field appearance="fill">
-                      <mat-label for="username">Rechercher un ami</mat-label>
-                      <input #usernameInput matInput placeholder="Rechercher un ami" name="username" [(ngModel)]="onlineFriendUserNameSearch" (input)="onSearchChange(usernameInput.value)">
+                      <mat-label for="username">{{'social-component.search-friend' | translate}}</mat-label>
+                      <input #usernameInput matInput placeholder="{{'social-component.search-friend' | translate}}" name="username" [(ngModel)]="onlineFriendUserNameSearch" (input)="onSearchChange(usernameInput.value)">
                     </mat-form-field>
                 </form>
             </div>
             <div class="users">
-                <div *ngFor="let user of listFriendsDisplay" class="user">
-                    <div *ngIf="checkIfOnline(user.id)">
+                <div *ngFor="let user of listFriendsOnlineDisplay" class="user">
+                    <div>
                         <img src="{{user.avatar.url}}" class="avatar">
                         <h3>{{user.username}}</h3>
                     </div>
@@ -38,8 +38,8 @@
             <div class="form">
                 <form>
                     <mat-form-field appearance="fill">
-                      <mat-label for="username">Rechercher un ami</mat-label>
-                      <input #usernameInput matInput placeholder="Rechercher un ami" name="username" [(ngModel)]="allFriendUserNameSearch">
+                      <mat-label for="username">{{'social-component.search-friend' | translate}}</mat-label>
+                      <input #usernameInput matInput placeholder="{{'social-component.search-friend' | translate}}" name="username" [(ngModel)]="allFriendUserNameSearch">
                     </mat-form-field>
                 </form>
             </div>
@@ -55,8 +55,8 @@
             <div class="form">
                 <form>
                     <mat-form-field appearance="fill">
-                      <mat-label for="username">Rechercher un ami</mat-label>
-                      <input #usernameInput matInput placeholder="Rechercher un ami" name="username" [(ngModel)]="addFriendUserName" type="text" (input)="onSearchChange(usernameInput.value)">
+                      <mat-label for="username">{{'social-component.search-user' | translate}}</mat-label>
+                      <input #usernameInput matInput placeholder="{{'social-component.search-user' | translate}}" name="username" [(ngModel)]="addFriendUserName" type="text" (input)="onSearchChange(usernameInput.value)">
                     </mat-form-field>
                 </form>
             </div>

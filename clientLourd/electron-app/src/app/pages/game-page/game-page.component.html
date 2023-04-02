@@ -2,7 +2,7 @@
   <div class="left">
     <button mat-flat-button color="primary" (click)="leaveGame()">
       <mat-icon>input</mat-icon>
-      Quitter la partie
+      {{'game-page.leave' | translate}}
     </button>
 
     <div *ngFor="let player of game.value?.players" class="player" [class.isTurn]="game.value?.turn === player.id">
@@ -31,10 +31,21 @@
     <app-rack *ngIf="!isObserver()" class="rack"></app-rack>
   </div>
   <div class="right">
+    <div class="config">
+      <div class="language">
+        <div class="language-icon">
+            <mat-icon (click)="switchLanguage()" inline="true">language</mat-icon>
+        </div>
+        <div>{{language.value}}</div>
+      </div>
+      <div>
+        <mat-icon (click)="doToggleLightDark()">{{lightDarkToggleIcon}}</mat-icon>
+      </div>
+    </div>
     <app-timer id="timer"></app-timer>
 
     <div id="reserve">
-      <h3>Lettres en réserve</h3>
+      <h3>{{'game-page.reserve' | translate}}</h3>
       <h3>80</h3>
     </div>
 

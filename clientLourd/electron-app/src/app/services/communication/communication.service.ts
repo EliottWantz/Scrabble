@@ -18,8 +18,8 @@ export class CommunicationService {
         return res;
     }
 
-    async register(username: string, password: string, email: string, avatar: {url: string, fileId: string} | FormData): Promise<{user: User, token: string}> {
-        const res: any = (await lastValueFrom(this.requestRegister(username, password, email, avatar)));
+    async register(data: FormData): Promise<{user: User, token: string}> {
+        const res: any = (await lastValueFrom(this.requestRegister(data)));
         return res;
     }
 
@@ -27,16 +27,8 @@ export class CommunicationService {
         return this.http.post<{user: User}>(`${this.baseUrl}/login`, { username, password }).pipe(catchError(this.handleError));
     }
 
-    private requestRegister(username: string, password: string, email: string, avatar: {url: string, fileId: string} | FormData): Observable<{user: User}> {
-        if (avatar instanceof FormData) {
-            console.log("custom image");
-            return this.http.post<{user: User}>(`${this.baseUrl}/signup`, { username, password, email, avatar }).pipe(catchError(this.handleError));
-        }
-
-        const avatarUrl = avatar.url;
-        const avatarId = avatar.fileId;
-
-        return this.http.post<{user: User}>(`${this.baseUrl}/signup`, { username, password, email, avatarUrl, avatarId }).pipe(catchError(this.handleError));
+    private requestRegister(data: FormData): Observable<{user: User}> {
+        return this.http.post<{user: User}>(`${this.baseUrl}/signup`, data).pipe(catchError(this.handleError));
     }
 
     async uploadAvatar(file: File, user: User): Promise<{url: string, fileId: string}> {
@@ -115,6 +107,28 @@ export class CommunicationService {
 
     private requestDeclineFriendRequest(id: string, friendId: string): Observable<string> {
         return this.http.delete<string>(`${this.baseUrl}/user/friends/accept/${id}/${friendId}`).pipe(catchError(this.handleError));
+    }
+
+    async updateTheme(theme: string, language: string, id: string): Promise<void> {
+        const res: any = (await lastValueFrom(this.requestUpdateTheme(theme, language, id)));
+        return res;
+    }
+
+    public requestUpdateTheme(theme: string, language: string, id: string): Observable<void> {
+        console.log("update theme");
+        return this.http.patch<void>(`${this.baseUrl}/user/${id}/config`, {theme: theme, language: language}).pipe(catchError(this.handleError));
+    }
+
+    getCustomAvatar(gender: string, skinColor: string, hairType: string, hairColor: string, accessories: string, eyebrows: string, facialHair: string, eyes: string, facialHairColor: string, mouth: string, backgroundColor: string): Observable<any> {
+        if (facialHair == "none" && accessories == "none") {
+            return this.http.get<any>(`https://api.dicebear.com/6.x/avataaars/png?seed=${gender == "Male" ? "Baby" : "Annie"}&skinColor=${skinColor.substring(1)}&top=${hairType}&mouth=${mouth}&hairColor=${hairColor.substring(1)}&eyes=${eyes}&eyebrows=${eyebrows}&facialHairProbability=0&facialHairColor=${facialHairColor.substring(1)}&backgroundColor=${backgroundColor.substring(1)}&accessoriesProbability=0`);
+        } else if (facialHair == "none") {
+            return this.http.get<any>(`https://api.dicebear.com/6.x/avataaars/png?seed=${gender == "Male" ? "Baby" : "Annie"}&skinColor=${skinColor.substring(1)}&top=${hairType}&mouth=${mouth}&hairColor=${hairColor.substring(1)}&eyes=${eyes}&eyebrows=${eyebrows}&facialHairProbability=0&facialHairColor=${facialHairColor.substring(1)}&backgroundColor=${backgroundColor.substring(1)}&accessories=${accessories}&accessoriesProbability=100`);
+        } else if (accessories == "none") {
+            return this.http.get<any>(`https://api.dicebear.com/6.x/avataaars/png?seed=${gender == "Male" ? "Baby" : "Annie"}&skinColor=${skinColor.substring(1)}&top=${hairType}&mouth=${mouth}&hairColor=${hairColor.substring(1)}&eyes=${eyes}&eyebrows=${eyebrows}&facialHair=${facialHair}&facialHairProbability=100&facialHairColor=${facialHairColor.substring(1)}&backgroundColor=${backgroundColor.substring(1)}&accessoriesProbability=0`);
+        } else {
+            return this.http.get<any>(`https://api.dicebear.com/6.x/avataaars/png?seed=${gender == "Male" ? "Baby" : "Annie"}&skinColor=${skinColor.substring(1)}&top=${hairType}&mouth=${mouth}&hairColor=${hairColor.substring(1)}&eyes=${eyes}&eyebrows=${eyebrows}&facialHair=${facialHair}&facialHairProbability=100&facialHairColor=${facialHairColor.substring(1)}&backgroundColor=${backgroundColor.substring(1)}&accessories=${accessories}&accessoriesProbability=100`);
+        }
     }
 
     private handleError(error: HttpErrorResponse) {

@@ -30,3 +30,11 @@
   bottom: 1px;
   font-size: 1.2ch;
 }
+
+.cdk-drag-preview {
+  @extend #ship-box;
+}
+
+.cdk-drag-placeholder {
+  opacity: 0;
+}

@@ -9,6 +9,7 @@ import { StorageService } from "@app/services/storage/storage.service";
 import { LeaveGamePayload } from "@app/utils/interfaces/packet";
 import { WebSocketService } from "@app/services/web-socket/web-socket.service";
 import { Router } from "@angular/router";
+import { ThemeService } from "@app/services/theme/theme.service";
 
 @Component({
     selector: "app-game-page",
@@ -18,12 +19,27 @@ import { Router } from "@angular/router";
 export class GamePageComponent implements OnInit {
     game!: BehaviorSubject<ScrabbleGame | undefined>;
     moves!: BehaviorSubject<MoveInfo[]>
-    constructor(private gameService: GameService, private userService: UserService, private moveService: MoveService, private storageService: StorageService, private socketService: WebSocketService, private router: Router) { }
+    private darkThemeIcon = 'wb_sunny';
+    private lightThemeIcon = 'nightlight_round';
+    public lightDarkToggleIcon = this.lightThemeIcon;
+    language: BehaviorSubject<string>;
+    
+    constructor(private gameService: GameService, private userService: UserService, private moveService: MoveService, private storageService: StorageService,
+        private socketService: WebSocketService, private router: Router, private themeService: ThemeService) {
+            this.language = this.themeService.language;
+        }
 
     ngOnInit(): void {
         this.game = this.gameService.scrabbleGame;
         this.game.subscribe();
         this.moves = this.gameService.moves;
+        this.themeService.theme.subscribe((theme) => {
+            if (theme == 'dark') {
+              this.lightDarkToggleIcon = this.darkThemeIcon;
+            } else {
+              this.lightDarkToggleIcon = this.lightThemeIcon;
+            }
+        });
     }
 
     isTurn(): boolean {
@@ -74,6 +90,14 @@ export class GamePageComponent implements OnInit {
             this.router.navigate(["/home"]);
         }
     }
+
+    public doToggleLightDark() {
+        this.themeService.switchTheme();
+      }
+    
+      switchLanguage() {
+        this.themeService.switchLanguage();
+      }
 
     /*getIndice(): string[] {
         const strings = [];

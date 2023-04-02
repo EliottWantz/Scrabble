@@ -26,7 +26,7 @@ export class UserService {
             username: "",
             email:"0@0.0",
             avatar:{url:"a", fileId:"a"},
-            preferences:{theme:"a"},
+            preferences:{theme:"light", language:"fr"},
             joinedChatRooms: [],
             joinedDMRooms: [],
             joinedGame: "",
@@ -37,11 +37,13 @@ export class UserService {
     }
 
     public setUser(user: User): void {
+        console.log(user);
         this.subjectUser.next(user);
 
     }
 
     public deleteUser(): void {
+        const pref = this.subjectUser.value.preferences;
         const userStats: UserStats = {
             nbGamesPlayed: 0,
             nbGamesWon: 0,
@@ -58,7 +60,7 @@ export class UserService {
             username: "",
             email:"0@0.0",
             avatar:{url:"a", fileId:"a"},
-            preferences:{theme:"a"},
+            preferences: pref,
             joinedChatRooms: [],
             joinedDMRooms: [],
             joinedGame: "",

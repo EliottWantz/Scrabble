@@ -3,8 +3,8 @@ import { BrowserModule } from '@angular/platform-browser';
 import { AppRoutingModule } from './modules/app-routing.module';
 import { AppComponent } from './pages/app/app.component';
 import { LoginComponent } from '@app/components/login/login.component';
-import { FormsModule } from "@angular/forms";
-import { HttpClientModule } from "@angular/common/http";
+import { FormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
@@ -15,13 +15,12 @@ import { RulesSliderPageComponent } from './pages/rules-slider-page/rules-slider
 import { ChatBoxComponent } from './components/chat-box/chat-box.component';
 import { ParametersComponent } from './components/parameters/parameters.component';
 import { MatCardModule } from '@angular/material/card';
-import { AppMaterialModule } from "@app/modules/material.module";
-import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
+import { AppMaterialModule } from '@app/modules/material.module';
 import { RegisterComponent } from '@app/components/register/register.component';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
-import { AuthInterceptor } from '@app/services/auth-interceptor/auth-interceptor.service'
+import { AuthInterceptor } from '@app/services/auth-interceptor/auth-interceptor.service';
 import { GamePageComponent } from '@app/pages/game-page/game-page.component';
 import { BoardComponent } from '@app/components/board/board.component';
 import { TileComponent } from '@app/components/tile/tile.component';
@@ -46,6 +45,13 @@ import { MatGridListModule } from '@angular/material/grid-list';
 import { JoinGameComponent } from '@app/components/join-game/join-game.component';
 import { CreateGameComponent } from '@app/components/create-game/create-game.component';
 import { JoinPrivateGameComponent } from '@app/components/join-private-game/join-private-game.component';
+import { CustomizeAvatarComponent } from '@app/components/customize-avatar/customize-avatar.component';
+import { MatStepperModule } from '@angular/material/stepper';
+import { ColorPickerModule } from 'ngx-color-picker';
+
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateHttpLoader } from '@ngx-translate/http-loader';
+import { HttpClient } from '@angular/common/http';
 
 @NgModule({
   declarations: [
@@ -74,19 +80,19 @@ import { JoinPrivateGameComponent } from '@app/components/join-private-game/join
     FindGamePageComponent,
     JoinGameComponent,
     CreateGameComponent,
-    JoinPrivateGameComponent
+    JoinPrivateGameComponent,
+    CustomizeAvatarComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     FormsModule,
     HttpClientModule,
-    FormsModule, 
+    FormsModule,
     MatFormFieldModule,
     MatInputModule,
     MatCardModule,
     AppMaterialModule,
-    BrowserAnimationsModule,
     MatIconModule,
     MatDividerModule,
     DragDropModule,
@@ -94,18 +100,32 @@ import { JoinPrivateGameComponent } from '@app/components/join-private-game/join
     MatSlideToggleModule,
     MatDialogModule,
     MatButtonModule,
-    BrowserAnimationsModule,
     MatProgressSpinnerModule,
     MatSelectModule,
-    MatGridListModule
+    MatGridListModule,
+    HttpClientModule,
+    MatStepperModule,
+    ColorPickerModule,
+    TranslateModule.forRoot({
+      loader: {
+        provide: TranslateLoader,
+        useFactory: HttpLoaderFactory,
+        deps: [HttpClient],
+      },
+      defaultLanguage: 'fr',
+    }),
   ],
   providers: [
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,
-      multi: true
-    }
+      multi: true,
+    },
   ],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}
+
+export function HttpLoaderFactory(http: HttpClient): TranslateHttpLoader {
+  return new TranslateHttpLoader(http);
+}

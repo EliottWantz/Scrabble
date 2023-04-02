@@ -1,0 +1,181 @@
+<mat-dialog-content id="container">
+    <mat-stepper orientation="vertical" linear #stepper>
+        <mat-step-header>
+            {{'customize-avatar-component.title' | translate}}
+        </mat-step-header>
+
+        <mat-step [stepControl]="firstFormGroup">
+            <form [formGroup]="firstFormGroup">
+                <div>
+                    <ng-template matStepLabel>{{'customize-avatar-component.gender' | translate}}</ng-template>
+                </div>
+                <mat-form-field id="form">
+                    <mat-label>{{'customize-avatar-component.gender' | translate}}</mat-label>
+                    <mat-select [(value)]="gender" required matInput [ngModel] formControlName="firstCtrl">
+                        <mat-select-trigger *ngIf="gender === 'Male'">{{'customize-avatar-component.male' | translate}}</mat-select-trigger>
+                        <mat-select-trigger *ngIf="gender === 'Female'">{{'customize-avatar-component.female' | translate}}</mat-select-trigger>
+                        <mat-option value="Male">{{'customize-avatar-component.male' | translate}}</mat-option>
+                        <mat-option value="Female">{{'customize-avatar-component.female' | translate}}</mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <div>
+                    <button mat-raised-button matStepperNext>{{'customize-avatar-component.next' | translate}}</button>
+                </div>
+            </form>
+        </mat-step>
+
+        <mat-step>
+            <ng-template matStepLabel>{{'customize-avatar-component.skin-color' | translate}}</ng-template>
+            <div class="skin-colors">
+                <div class="skin-color" *ngFor="let color of skinColors; let i = index" (click)="chooseSkinColor(i)" [style.background-color]="color">
+                    <mat-icon *ngIf="i === selectedSkinColor">check</mat-icon>
+                </div>
+            </div>
+            <div>
+                <button mat-raised-button matStepperPrevious>{{'customize-avatar-component.back' | translate}}</button>
+                <button mat-raised-button matStepperNext>{{'customize-avatar-component.next' | translate}}</button>
+            </div>
+        </mat-step>
+
+        <mat-step [stepControl]="secondFormGroup">
+            <form [formGroup]="secondFormGroup">
+                <div>
+                    <ng-template matStepLabel>{{'customize-avatar-component.hair-type' | translate}}</ng-template>
+                </div>
+                <mat-form-field id="form">
+                    <mat-label>{{'customize-avatar-component.hair-type' | translate}}</mat-label>
+                    <mat-select [(value)]="hairType" required matInput [ngModel] formControlName="secondCtrl">
+                        <mat-select-trigger>{{'customize-avatar-component.hair-types.' + hairType | translate}}</mat-select-trigger>
+                        <mat-option *ngFor="let hair of hairTypes" [value]="hair">{{"customize-avatar-component.hair-types." + hair | translate}}</mat-option> 
+                    </mat-select>
+                </mat-form-field>
+                <div>
+                    <button mat-raised-button matStepperPrevious>{{'customize-avatar-component.back' | translate}}</button>
+                    <button mat-raised-button matStepperNext>{{'customize-avatar-component.next' | translate}}</button>
+                </div>
+            </form>
+        </mat-step>
+
+        <mat-step [stepControl]="thirdFormGroup">
+            <form [formGroup]="thirdFormGroup">
+                <ng-template matStepLabel>{{'customize-avatar-component.hair-color' | translate}}</ng-template>
+                <input required matInput [ngModel] formControlName="thirdCtrl" (colorPickerChange)="thirdFormGroup.get('thirdCtrl')?.setValue($event)" [(colorPicker)]="hairColor" [style.background]="hairColor"/>
+                <div>
+                    <button mat-raised-button matStepperPrevious>{{'customize-avatar-component.back' | translate}}</button>
+                    <button mat-raised-button matStepperNext>{{'customize-avatar-component.next' | translate}}</button>
+                </div>
+            </form>
+        </mat-step>
+
+        <mat-step [stepControl]="fourthFormGroup">
+            <form [formGroup]="fourthFormGroup">
+                <ng-template matStepLabel>{{'customize-avatar-component.eyes' | translate}}</ng-template>
+                <mat-form-field id="form">
+                    <mat-label>{{'customize-avatar-component.eyes' | translate}}</mat-label>
+                    <mat-select [(value)]="eyes" required matInput [ngModel] formControlName="fourthCtrl">
+                        <mat-select-trigger>{{'customize-avatar-component.eye-types.' + eyes | translate}}</mat-select-trigger>
+                        <mat-option *ngFor="let eye of eyeTypes" [value]="eye">{{"customize-avatar-component.eye-types." + eye | translate}}</mat-option> 
+                    </mat-select>
+                </mat-form-field>
+                <div>
+                    <button mat-raised-button matStepperPrevious>{{'customize-avatar-component.back' | translate}}</button>
+                    <button mat-raised-button matStepperNext>{{'customize-avatar-component.next' | translate}}</button>
+                </div>
+            </form>
+        </mat-step>
+
+        <mat-step [stepControl]="fifthFormGroup">
+            <form [formGroup]="fifthFormGroup">
+                <ng-template matStepLabel>{{'customize-avatar-component.eyebrows' | translate}}</ng-template>
+                <mat-form-field id="form">
+                    <mat-label>{{'customize-avatar-component.eyebrows' | translate}}</mat-label>
+                    <mat-select [(value)]="eyebrows" required matInput [ngModel] formControlName="fifthCtrl">
+                        <mat-select-trigger>{{'customize-avatar-component.eyebrows-types.' + eyebrows | translate}}</mat-select-trigger>
+                        <mat-option *ngFor="let eyebrow of eyebrowsTypes" [value]="eyebrow">{{"customize-avatar-component.eyebrows-types." + eyebrow | translate}}</mat-option> 
+                    </mat-select>
+                </mat-form-field>
+                <div>
+                    <button mat-raised-button matStepperPrevious>{{'customize-avatar-component.back' | translate}}</button>
+                    <button mat-raised-button matStepperNext>{{'customize-avatar-component.next' | translate}}</button>
+                </div>
+            </form>
+        </mat-step>
+
+        <mat-step [stepControl]="sixthFormGroup">
+            <form [formGroup]="sixthFormGroup">
+                <ng-template matStepLabel>{{'customize-avatar-component.facialHair' | translate}}</ng-template>
+                <mat-form-field id="form">
+                    <mat-label>{{'customize-avatar-component.facialHair'  | translate}}</mat-label>
+                    <mat-select [(value)]="facialHair" required matInput [ngModel] formControlName="sixthCtrl">
+                        <mat-select-trigger>{{'customize-avatar-component.facialHair-types.' + facialHair | translate}}</mat-select-trigger>
+                        <mat-option *ngFor="let facial of facialHairTypes" [value]="facial">{{'customize-avatar-component.facialHair-types.' + facial | translate}}</mat-option> 
+                    </mat-select>
+                </mat-form-field>
+                <div>
+                    <button mat-raised-button matStepperPrevious>{{'customize-avatar-component.back' | translate}}</button>
+                    <button mat-raised-button matStepperNext>{{'customize-avatar-component.next' | translate}}</button>
+                </div>
+            </form>
+        </mat-step>
+
+        <mat-step [stepControl]="seventhFormGroup">
+            <form [formGroup]="seventhFormGroup">
+                <ng-template matStepLabel>{{'customize-avatar-component.facialHair.color' | translate}}</ng-template>
+                <input required matInput [ngModel] formControlName="seventhCtrl" (colorPickerChange)="seventhFormGroup.get('seventhCtrl')?.setValue($event)" [(colorPicker)]="facialHairColor" [style.background]="facialHairColor"/>
+                <div>
+                    <button mat-raised-button matStepperPrevious>{{'customize-avatar-component.back' | translate}}</button>
+                    <button mat-raised-button matStepperNext>{{'customize-avatar-component.next' | translate}}</button>
+                </div>
+            </form>
+        </mat-step>
+
+        <mat-step [stepControl]="eightFormGroup">
+            <form [formGroup]="eightFormGroup">
+                <ng-template matStepLabel>{{'customize-avatar-component.mouth' | translate}}</ng-template>
+                <mat-form-field id="form">
+                    <mat-label>{{'customize-avatar-component.mouth'  | translate}}</mat-label>
+                    <mat-select [(value)]="mouth" required matInput [ngModel] formControlName="eightCtrl">
+                        <mat-select-trigger>{{'customize-avatar-component.mouth-types.' + mouth | translate}}</mat-select-trigger>
+                        <mat-option *ngFor="let thisMouth of mouthTypes" [value]="thisMouth">{{'customize-avatar-component.mouth-types.' + thisMouth | translate}}</mat-option> 
+                    </mat-select>
+                </mat-form-field>
+                <div>
+                    <button mat-raised-button matStepperPrevious>{{'customize-avatar-component.back' | translate}}</button>
+                    <button mat-raised-button matStepperNext>{{'customize-avatar-component.next' | translate}}</button>
+                </div>
+            </form>
+        </mat-step>
+
+        <mat-step [stepControl]="ninthFormGroup">
+            <form [formGroup]="ninthFormGroup">
+                <ng-template matStepLabel>{{'customize-avatar-component.accessories' | translate}}</ng-template>
+                <mat-form-field id="form">
+                    <mat-label>{{'customize-avatar-component.accessories' | translate}}</mat-label>
+                    <mat-select [(value)]="accessories" required matInput [ngModel] formControlName="ninthCtrl">
+                        <mat-select-trigger>{{'customize-avatar-component.accessories-types.' + accessories | translate}}</mat-select-trigger>
+                        <mat-option *ngFor="let accessorie of accessoriesTypes" [value]="accessorie">{{"customize-avatar-component.accessories-types." + accessorie | translate}}</mat-option> 
+                    </mat-select>
+                </mat-form-field>
+                <div>
+                    <button mat-raised-button matStepperPrevious>{{'customize-avatar-component.back' | translate}}</button>
+                    <button mat-raised-button matStepperNext>{{'customize-avatar-component.next' | translate}}</button>
+                </div>
+            </form>
+        </mat-step>
+
+        <mat-step>
+            <ng-template matStepLabel>{{'customize-avatar-component.background-color' | translate}}</ng-template>
+            <div class="skin-colors">
+                <div class="skin-color" *ngFor="let color of backgroundColors; let i = index" (click)="chooseBackGroundColor(i)" [style.background-color]="color">
+                    <mat-icon *ngIf="i === selectedBackgroundColor">check</mat-icon>
+                </div>
+            </div>
+            <div>
+                <button mat-raised-button matStepperPrevious>{{'customize-avatar-component.back' | translate}}</button>
+                <button mat-raised-button (click)="submitAvatar()">{{'customize-avatar-component.generate' | translate}}</button>
+            </div>
+        </mat-step>
+    </mat-stepper>
+    <strong *ngIf="error" style="color: red; width: 100%; text-align: center;">{{'customize-avatar-component.error' | translate}}</strong>
+    <button mat-raised-button (click)="close()" class="back-button">{{"default-avatar-selection-component.cancel" | translate}}</button>
+</mat-dialog-content>

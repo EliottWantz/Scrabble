@@ -23,7 +23,7 @@ export class TileComponent {
                 this.mouseService.remove(this.tile);
                 const index = this.mouseService.tileElems.indexOf(this.element.nativeElement, 0);
                 if (index > -1) {
-                    this.mouseService.tileElems.splice(index, 1);
+                    this.mouseService.tileElems.splice(index, 1); 
                 }
             }
             else {

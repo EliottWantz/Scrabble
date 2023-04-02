@@ -1,5 +1,5 @@
 <mat-drawer-container *ngIf="!isInGame()">
-    <mat-drawer opened="true" disableClose="true" mode="side">
+    <mat-drawer #drawer opened="true" disableClose="false" mode="side">
         <div class="box">
             <mat-icon *ngIf="user.value.id === '0'">account_circle</mat-icon>
             <img *ngIf="user.value.id !== '0'" src="{{user.value.avatar.url}}" class="avatar">
@@ -13,7 +13,7 @@
                         <div class="mat-icon-button">
                             <mat-icon inline="true" >home</mat-icon>
                         </div>
-                        <div class="text">{{currentRoute}}</div>
+                        <div class="text">{{currentRoute | translate}}</div>
                     </div> 
                 </div>
 
@@ -22,7 +22,7 @@
                         <div class="mat-icon-button">
                             <mat-icon inline="true" >person</mat-icon>
                         </div>
-                        <div class="text">Profil</div>
+                        <div class="text">{{'sidebar-component.profile' | translate}}</div>
                     </div> 
                 </div>
 
@@ -31,7 +31,7 @@
                         <div class="mat-icon-button">
                             <mat-icon inline="true" >people</mat-icon>
                         </div>
-                        <div class="text">Social</div>
+                        <div class="text">{{'sidebar-component.social' | translate}}</div>
                     </div> 
                 </div>
             </div>
@@ -41,7 +41,15 @@
                     <hr>
                 </div>
                 
-                <mat-icon (click)="doToggleLightDark()">{{lightDarkToggleIcon}}</mat-icon>
+                <div>
+                    <mat-icon (click)="doToggleLightDark()">{{lightDarkToggleIcon}}</mat-icon>
+                </div>
+                <div class="language">
+                    <div class="language-icon">
+                        <mat-icon (click)="switchLanguage()" inline="true">language</mat-icon>
+                    </div>
+                    <div>{{language.value}}</div>
+                </div>
                 <mat-icon *ngIf="currentRoute !== 'PolyScrabble'" (click)="return()">arrow_back</mat-icon>
                 <mat-icon *ngIf="isConnected()" (click)="logout()">logout</mat-icon>
             </div>

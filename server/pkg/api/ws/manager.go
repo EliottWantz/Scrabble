@@ -12,6 +12,7 @@ import (
 	"github.com/alphadose/haxmap"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
+	"golang.org/x/exp/slices"
 	"golang.org/x/exp/slog"
 )
 
@@ -51,18 +52,34 @@ func NewManager(messageRepo *MessageRepository, roomSvc *room.Service, userSvc *
 
 func (m *Manager) Accept(cID string) fiber.Handler {
 	return websocket.New(func(conn *websocket.Conn) {
-		c := NewClient(conn, cID, m)
+		clients := m.getClientsByUserID(cID)
+		wsID := cID + "#1"
+		if len(clients) > 0 {
+			wsID = cID + "#" + fmt.Sprint(len(clients)+1)
+		}
+		c := NewClient(conn, wsID, cID, m)
 		err := m.AddClient(c)
 		if err != nil {
 			m.logger.Error("add client", err)
 			return
 		}
-
 		{
 			// List all users registered in the application
 			p, err := NewListUsersPacket(
 				ListUsersPayload{
 					Users: m.ListUsers(),
+				},
+			)
+			if err != nil {
+				m.logger.Error("list users", err)
+			}
+			c.send(p)
+		}
+		{
+			// List all users online
+			p, err := NewListOnlineUsersPacket(
+				ListOnlineUsersPayload{
+					Users: m.ListOnlineUsers(),
 				},
 			)
 			if err != nil {
@@ -85,8 +102,8 @@ func (m *Manager) Accept(cID string) fiber.Handler {
 			c.send(p)
 		}
 		{
-			// List available games
-			games, err := m.GameSvc.Repo.FindAll()
+			// List joinailable games
+			games, err := m.GameSvc.Repo.FindAllJoinableGames()
 			if err != nil {
 				m.logger.Error("list joinable games", err)
 			}
@@ -95,6 +112,48 @@ func (m *Manager) Accept(cID string) fiber.Handler {
 			})
 			if err != nil {
 				m.logger.Error("list joinable games", err)
+			}
+			c.send(p)
+		}
+		{
+			// List joinailable tournaments
+			tournaments, err := m.GameSvc.Repo.FindAllJoinableTournaments()
+			if err != nil {
+				m.logger.Error("list joinable games", err)
+			}
+			p, err := NewJoinableTournamentsPacket(ListJoinableTournamentsPayload{
+				Tournaments: makeJoinableTournamentsPayload(tournaments),
+			})
+			if err != nil {
+				m.logger.Error("create joinable games", err)
+			}
+			c.send(p)
+		}
+		{
+			// List all observable games
+			games, err := m.GameSvc.Repo.FindAllObservableGames()
+			if err != nil {
+				m.logger.Error("list observable games", err)
+			}
+			p, err := NewObservableGamesPacket(ObservableGamesPayload{
+				Games: makeObservableGamesPayload(games),
+			})
+			if err != nil {
+				m.logger.Error("create observable games packet", err)
+			}
+			c.send(p)
+		}
+		{
+			// List all observable tournaments
+			tournaments, err := m.GameSvc.Repo.FindAllObservableTournaments()
+			if err != nil {
+				m.logger.Error("list observable tournaments", err)
+			}
+			p, err := NewObservableTournamentsPacket(ObservableTournamentsPayload{
+				Tournaments: makeObservableTournamentsPayload(tournaments),
+			})
+			if err != nil {
+				m.logger.Error("create observable tournaments packet", err)
 			}
 			c.send(p)
 		}
@@ -133,8 +192,24 @@ func (m *Manager) ListUsers() []user.User {
 	return users
 }
 
+func (m *Manager) ListOnlineUsers() []user.User {
+	online := make([]user.User, 0)
+	users, err := m.UserSvc.Repo.FindAll()
+	if err != nil {
+		return online
+	}
+
+	for _, u := range users {
+		if _, err := m.getClientByUserID(u.ID); err == nil {
+			online = append(online, u)
+		}
+	}
+
+	return online
+}
+
 func (m *Manager) AddClient(c *Client) error {
-	user, err := m.UserSvc.Repo.Find(c.ID)
+	user, err := m.UserSvc.Repo.Find(c.UserId)
 	if err != nil {
 		return err
 	}
@@ -183,13 +258,14 @@ func (m *Manager) AddClient(c *Client) error {
 
 	m.logger.Info(
 		"client registered",
-		"client_id", c.ID,
+		"ws_id", c.ID,
+		"user_id", c.UserId,
 	)
 
 	return nil
 }
 
-func (m *Manager) GetClient(cID string) (*Client, error) {
+func (m *Manager) GetClientByWsID(cID string) (*Client, error) {
 	c, ok := m.Clients.Get(cID)
 	if !ok {
 		return nil, fmt.Errorf("client with id %s not registered", cID)
@@ -197,8 +273,43 @@ func (m *Manager) GetClient(cID string) (*Client, error) {
 	return c, nil
 }
 
+func (m *Manager) getClientByUserID(userID string) (*Client, error) {
+	clients := m.getClientsByUserID(userID)
+	if len(clients) == 0 {
+		return nil, fmt.Errorf("client with user id %s not registered", userID)
+	}
+
+	for _, client := range clients {
+		if strings.Contains(client.ID, "#1") {
+			return client, nil
+		}
+	}
+	return clients[0], nil
+}
+
+func (m *Manager) getClientsByUserID(cUserID string) []*Client {
+	clients := []*Client{}
+	m.Clients.ForEach(func(key string, value *Client) bool {
+		if value.UserId == cUserID {
+			clients = append(clients, value)
+		}
+		return true
+	})
+	return clients
+}
+
+func (m *Manager) getClientUserID(cID string) (string, error) {
+	c, err := m.GetClientByWsID(cID)
+	if err != nil {
+		return "", err
+	}
+	return c.UserId, nil
+}
+
 func (m *Manager) RemoveClient(c *Client) error {
-	user, err := m.UserSvc.GetUser(c.ID)
+	defer close(c.receiveCh)
+	defer close(c.sendCh)
+	user, err := m.UserSvc.GetUser(c.UserId)
 	if err != nil {
 		return fmt.Errorf("removeClient: %w", err)
 	}
@@ -206,7 +317,8 @@ func (m *Manager) RemoveClient(c *Client) error {
 	m.UserSvc.AddNetworkingLog(user, "Logout", time.Now().UnixMilli())
 	m.logger.Info(
 		"client disconnected",
-		"client_id", c.ID,
+		"ws_id", c.ID,
+		"user_id", c.UserId,
 		"total_rooms", m.Rooms.Len(),
 	)
 
@@ -220,10 +332,14 @@ func (m *Manager) RemoveClient(c *Client) error {
 			slog.Error("removeClient from room", err)
 			continue
 		}
-		if err := r.BroadcastLeaveRoomPackets(c); err != nil {
-			slog.Error("removeClient broadcast packets", err)
-			continue
+		userLeftRoomPacket, err := NewUserLeftRoomPacket(UserLeftRoomPayload{
+			RoomID: r.ID,
+			UserID: c.UserId,
+		})
+		if err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, "failed to create packet: "+err.Error())
 		}
+		r.BroadcastSkipSelf(userLeftRoomPacket, c.ID)
 	}
 	for _, DMRoomID := range user.JoinedDMRooms {
 		r, err := m.GetRoom(DMRoomID)
@@ -235,20 +351,36 @@ func (m *Manager) RemoveClient(c *Client) error {
 			slog.Error("removeClient from room", err)
 			continue
 		}
-		if err := r.BroadcastLeaveDMRoomPackets(c); err != nil {
-			slog.Error("removeClient broadcast packets", err)
-			continue
+		userLeftDMRoomPacket, err := NewUserLeftDMRoomPacket(UserLeftDMRoomPayload{
+			RoomID: r.ID,
+			UserID: c.UserId,
+		})
+		if err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, "failed to create packet: "+err.Error())
 		}
+		r.BroadcastSkipSelf(userLeftDMRoomPacket, c.ID)
 	}
 	if err := m.GlobalRoom.RemoveClient(c.ID); err != nil {
 		slog.Error("removeClient from global room", err)
 	}
-	if err := m.GlobalRoom.BroadcastLeaveRoomPackets(c); err != nil {
-		slog.Error("removeClient broadcast packets", err)
+	{
+		userLeftGLobalRoomPacket, err := NewUserLeftRoomPacket(UserLeftRoomPayload{
+			RoomID: m.GlobalRoom.ID,
+			UserID: c.UserId,
+		})
+		if err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, "failed to create packet: "+err.Error())
+		}
+		m.GlobalRoom.BroadcastSkipSelf(userLeftGLobalRoomPacket, c.ID)
 	}
 	if user.JoinedGame != "" {
 		if err := m.RemoveClientFromGame(c, user.JoinedGame); err != nil {
 			slog.Error("removeClient from game", err)
+		}
+	}
+	if user.JoinedTournament != "" {
+		if err := m.RemoveClientFromTournament(c, user.JoinedTournament); err != nil {
+			slog.Error("removeClient from tournament", err)
 		}
 	}
 
@@ -256,6 +388,20 @@ func (m *Manager) RemoveClient(c *Client) error {
 		slog.Error("close connection", err)
 	}
 	m.Clients.Del(c.ID)
+
+	{
+		// List all users online
+		p, err := NewListOnlineUsersPacket(
+			ListOnlineUsersPayload{
+				Users: m.ListOnlineUsers(),
+			},
+		)
+		if err != nil {
+			m.logger.Error("list users", err)
+		}
+		m.Broadcast(p)
+	}
+
 	return nil
 }
 
@@ -264,7 +410,7 @@ func (m *Manager) RemoveClientFromGame(c *Client, gID string) error {
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
-	g, err := c.Manager.GameSvc.Repo.Find(gID)
+	g, err := c.Manager.GameSvc.Repo.FindGame(gID)
 	if err != nil {
 		return fiber.NewError(fiber.StatusNotFound, err.Error())
 	}
@@ -272,28 +418,25 @@ func (m *Manager) RemoveClientFromGame(c *Client, gID string) error {
 	if err := r.RemoveClient(c.ID); err != nil {
 		slog.Error("remove client from ws room", err)
 	}
-	if err := r.BroadcastLeaveGamePackets(c, g.ID); err != nil {
-		slog.Error("broadcast leave game packets", err)
-	}
 
 	if g.ScrabbleGame == nil {
 		// Game has not started yet
-		if c.ID == g.CreatorID {
+		if c.UserId == g.CreatorID {
 			// Delete the game and remove all users
-			if err := c.Manager.GameSvc.Repo.Delete(g.ID); err != nil {
+			if err := c.Manager.GameSvc.Repo.DeleteGame(g.ID); err != nil {
 				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 			}
 			for _, uID := range g.UserIDs {
-				if err := r.RemoveClient(uID); err != nil {
-					slog.Error("remove user from game room", err)
-					continue
-				}
 				if err := c.Manager.UserSvc.Repo.UnSetJoinedGame(uID); err != nil {
 					slog.Error("remove user from game room", err)
 					continue
 				}
-				client, err := c.Manager.GetClient(uID)
+				client, err := c.Manager.getClientByUserID(uID)
 				if err != nil {
+					slog.Error("remove user from game room", err)
+					continue
+				}
+				if err := r.RemoveClient(client.ID); err != nil { // TODO check again
 					slog.Error("remove user from game room", err)
 					continue
 				}
@@ -302,32 +445,145 @@ func (m *Manager) RemoveClientFromGame(c *Client, gID string) error {
 					continue
 				}
 			}
-			return nil
+			return m.BroadcastObservableGames()
 		} else {
 			// Remove the user from the game
-			if _, err := c.Manager.GameSvc.RemoveUser(gID, c.ID); err != nil {
+			if _, err := c.Manager.GameSvc.RemoveUserFromGame(gID, c.UserId); err != nil {
 				slog.Error("remove user from game room", err)
 			}
-			if err := c.Manager.UserSvc.Repo.UnSetJoinedGame(c.ID); err != nil {
+			if err := c.Manager.UserSvc.Repo.UnSetJoinedGame(c.UserId); err != nil {
 				slog.Error("remove user from game room", err)
 			}
 		}
 	} else {
 		// if Game has started and is a spectator
-		if strings.Contains(strings.Join(g.ObservateurIDs, ""), c.ID) {
+		if slices.Contains(g.ObservateurIDs, c.UserId) {
 			if err := r.RemoveClient(c.ID); err != nil {
 				slog.Error("remove spectator from game room", err)
+			}
+			{
+				p, err := NewLeftGamePacket(LeftGamePayload{
+					GameID: g.ID,
+				})
+				if err != nil {
+					slog.Error("create left game packet", err)
+					return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+				}
+				c.send(p)
 			}
 			return nil
 		}
 		// Game has started, replace player with a bot
-		if err := c.Manager.ReplacePlayerWithBot(g.ID, c.ID); err != nil {
+		if err := c.Manager.ReplacePlayerWithBot(g.ID, c.UserId); err != nil {
 			slog.Error("replace player with bot", err)
 		}
-		if err := c.Manager.UserSvc.Repo.UnSetJoinedGame(c.ID); err != nil {
+		if err := c.Manager.UserSvc.Repo.UnSetJoinedGame(c.UserId); err != nil {
 			slog.Error("remove user from game room", err)
 		}
 	}
+	if err := r.BroadcastLeaveGamePackets(c, g.ID); err != nil {
+		slog.Error("broadcast leave game packets", err)
+	}
+
+	return nil
+}
+
+func (m *Manager) RemoveClientFromTournament(c *Client, gID string) error {
+	r, err := c.Manager.GetRoom(gID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	t, err := c.Manager.GameSvc.Repo.FindTournament(gID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusNotFound, err.Error())
+	}
+
+	if err := r.RemoveClient(c.ID); err != nil {
+		slog.Error("remove client from ws room", err)
+	}
+
+	if !t.HasStarted {
+		// Tournament has not started yet
+		if c.UserId == t.CreatorID {
+			// Delete the Tournament and remove all users
+			if err := c.Manager.GameSvc.Repo.DeleteTournament(t.ID); err != nil {
+				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+			}
+			for _, uID := range t.UserIDs {
+				if err := r.RemoveClient(uID); err != nil {
+					slog.Error("remove user from tournament room", err)
+					continue
+				}
+				if err := c.Manager.UserSvc.Repo.UnSetJoinedTournament(uID); err != nil {
+					slog.Error("remove user from tournament room", err)
+					continue
+				}
+				client, err := c.Manager.getClientByUserID(uID)
+				if err != nil {
+					slog.Error("remove user from tournament room", err)
+					continue
+				}
+
+				if err := r.RemoveClient(client.ID); err != nil {
+					slog.Error("remove user from tournament room", err)
+					continue
+				}
+				if err := r.BroadcastLeaveTournamentPackets(client, t.ID); err != nil {
+					slog.Error("broadcast leave tournament packets", err)
+					continue
+				}
+			}
+			return m.BroadcastObservableTournaments()
+		} else {
+			// Remove the user from the Tournament
+			if _, err := c.Manager.GameSvc.RemoveUserFromTournament(gID, c.UserId); err != nil {
+				slog.Error("remove user from Tournament room", err)
+			}
+			if err := c.Manager.UserSvc.Repo.UnSetJoinedTournament(c.UserId); err != nil {
+				slog.Error("remove user from Tournament room", err)
+			}
+		}
+	} else {
+		// if Tournament has started and is a spectator
+		if slices.Contains(t.ObservateurIDs, c.ID) {
+			if err := r.RemoveClient(c.ID); err != nil {
+				slog.Error("remove spectator from Tournament room", err)
+			}
+			{
+				p, err := NewLeftTournamentPacket(LeftTournamentPayload{
+					TournamentID: t.ID,
+				})
+				if err != nil {
+					slog.Error("create left tournament packet", err)
+					return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+				}
+				c.send(p)
+			}
+			return nil
+		}
+		// Tournament has started, make opponent win his game
+		g, err := m.GameSvc.Repo.FindGame(gID)
+		if err != nil {
+			return err
+		}
+
+		var winnerID string
+		if c.ID == g.UserIDs[0] {
+			winnerID = g.UserIDs[1]
+		} else {
+			winnerID = g.UserIDs[0]
+		}
+		g.WinnerID = winnerID
+		err = m.HandleGameOver(g)
+		if err != nil {
+			return err
+		}
+	}
+
+	if err := r.BroadcastLeaveTournamentPackets(c, t.ID); err != nil {
+		slog.Error("broadcast leave tournament packets", err)
+	}
+
 	return nil
 }
 
@@ -395,18 +651,68 @@ func (m *Manager) UpdateChatRooms() error {
 	return nil
 }
 
-func (m *Manager) UpdateJoinableGames() error {
-	joinableGames, err := m.GameSvc.Repo.FindAll()
+func (m *Manager) BroadcastJoinableGames() error {
+	games, err := m.GameSvc.Repo.FindAllJoinableGames()
 	if err != nil {
 		return err
 	}
+
 	joinableGamesPacket, err := NewJoinableGamesPacket(ListJoinableGamesPayload{
-		Games: joinableGames,
+		Games: games,
 	})
 	if err != nil {
 		return err
 	}
 	m.Broadcast(joinableGamesPacket)
+
+	return nil
+}
+
+func (m *Manager) BroadcastJoinableTournaments() error {
+	tournaments, err := m.GameSvc.Repo.FindAllJoinableTournaments()
+	if err != nil {
+		return err
+	}
+	joinableTournamentsPacket, err := NewJoinableTournamentsPacket(ListJoinableTournamentsPayload{
+		Tournaments: makeJoinableTournamentsPayload(tournaments),
+	})
+	if err != nil {
+		return err
+	}
+	m.Broadcast(joinableTournamentsPacket)
+
+	return nil
+}
+
+func (m *Manager) BroadcastObservableGames() error {
+	games, err := m.GameSvc.Repo.FindAllObservableGames()
+	if err != nil {
+		return err
+	}
+
+	ObservableGamesPacket, err := NewObservableGamesPacket(ObservableGamesPayload{
+		Games: makeObservableGamesPayload(games),
+	})
+	if err != nil {
+		return err
+	}
+	m.Broadcast(ObservableGamesPacket)
+
+	return nil
+}
+
+func (m *Manager) BroadcastObservableTournaments() error {
+	tournaments, err := m.GameSvc.Repo.FindAllObservableTournaments()
+	if err != nil {
+		return err
+	}
+	ObservableTournamentsPacket, err := NewObservableTournamentsPacket(ObservableTournamentsPayload{
+		Tournaments: makeObservableTournamentsPayload(tournaments),
+	})
+	if err != nil {
+		return err
+	}
+	m.Broadcast(ObservableTournamentsPacket)
 
 	return nil
 }
@@ -467,12 +773,23 @@ func (m *Manager) ReplacePlayerWithBot(gID, pID string) error {
 }
 
 func (m *Manager) HandleGameOver(g *game.Game) error {
-	r, err := m.GetRoom(g.ID)
+	g.ScrabbleGame.Timer.Stop()
+	gameRoom, err := m.GetRoom(g.ID)
 	if err != nil {
 		return err
 	}
 
 	winnerID := g.ScrabbleGame.Winner().ID
+	g.WinnerID = winnerID
+
+	gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
+		Game: makeGamePayload(g),
+	})
+	if err != nil {
+		return err
+	}
+	gameRoom.Broadcast(gamePacket)
+
 	gameOverPacket, err := NewGameOverPacket(GameOverPayload{
 		WinnerID: winnerID,
 	})
@@ -480,19 +797,171 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 		return err
 	}
 
-	r.Broadcast(gameOverPacket)
-	g.ScrabbleGame.Timer.Stop()
+	gameRoom.Broadcast(gameOverPacket)
 
 	for _, p := range g.ScrabbleGame.Players {
 		u, err := m.UserSvc.GetUser(p.ID)
 		if err != nil {
 			continue
 		}
-		m.UserSvc.AddGameStats(u, time.Now().UnixMilli(), winnerID == p.ID)
-		m.UserSvc.UpdateUserStats(u, winnerID == p.ID, p.Score, time.Now().UnixMilli())
+		m.UserSvc.AddGameStats(u, g.StartTime, time.Now().UnixMilli(), winnerID == p.ID)
+		m.UserSvc.UpdateUserStats(u, winnerID == p.ID, p.Score, time.Now().UnixMilli()-g.StartTime)
 	}
 
-	return nil
+	if g.IsTournamentGame() {
+		t, err := m.GameSvc.UpdateTournamentGameOver(g.ID)
+		if err != nil {
+			return err
+		}
+
+		tournamentRoom, err := m.GetRoom(t.ID)
+		if err != nil {
+			return err
+		}
+		{
+			p, err := NewTournamentUpdatePacket(TournamentUpdatePayload{
+				Tournament: makeTournamentPayload(t),
+			})
+			if err != nil {
+				return err
+			}
+			tournamentRoom.Broadcast(p)
+		}
+
+		// Leave old game
+		for _, playerID := range g.UserIDs {
+			client, err := m.getClientByUserID(playerID)
+			if err != nil {
+				slog.Error("get client", err)
+				continue
+			}
+			if err := gameRoom.RemoveClient(client.ID); err != nil {
+				slog.Error("remove client from ws room", err)
+			}
+			if err := gameRoom.BroadcastLeaveGamePackets(client, g.ID); err != nil {
+				slog.Error("broadcast leave game packets", err)
+			}
+			if err := m.UserSvc.Repo.UnSetJoinedGame(client.UserId); err != nil {
+				slog.Error("remove user from game room", err)
+			}
+		}
+
+		if t.IsOver {
+			p, err := NewTournamentOverPacket(TournamentOverPayload{
+				TournamentID: t.ID,
+				WinnerID:     t.WinnerID,
+			})
+			if err != nil {
+				return err
+			}
+			tournamentRoom.Broadcast(p)
+			if err := m.GameSvc.Repo.DeleteTournament(t.ID); err != nil {
+				return err
+			}
+		} else {
+			if t.Finale != nil {
+				// Join the finale
+				finaleRoom := m.AddRoom(t.Finale.ID, "")
+				for _, playerID := range t.Finale.UserIDs {
+					player, err := m.getClientByUserID(playerID)
+					if err != nil {
+						slog.Error("get client", err)
+						continue
+					}
+
+					if err := finaleRoom.AddClient(player.ID); err != nil {
+						slog.Error("add client to room", err)
+						continue
+					}
+					if err := m.UserSvc.Repo.SetJoinedGame(t.Finale.ID, playerID); err != nil {
+						slog.Error("set joined game", err)
+						continue
+					}
+					if err := finaleRoom.BroadcastJoinGamePackets(player, t.Finale); err != nil {
+						slog.Error("broadcast join game packets", err)
+						continue
+					}
+				}
+
+				// Start game timer
+				t.Finale.ScrabbleGame.Timer.OnTick(func() {
+					timerPacket, err := NewTimerUpdatePacket(TimerUpdatePayload{
+						Timer: t.Finale.ScrabbleGame.Timer.TimeRemaining(),
+					})
+					if err != nil {
+						slog.Error("failed to create timer update packet:", err)
+						return
+					}
+					finaleRoom.Broadcast(timerPacket)
+				})
+				t.Finale.ScrabbleGame.Timer.OnDone(func() {
+					t.Finale.ScrabbleGame.SkipTurn()
+					GamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
+						Game: makeGamePayload(t.Finale),
+					})
+					if err != nil {
+						slog.Error("failed to create Game update packet:", err)
+						return
+					}
+					finaleRoom.Broadcast(GamePacket)
+
+					// Make bots move if applicable
+					go m.MakeBotMoves(t.Finale.ID)
+				})
+				t.Finale.ScrabbleGame.Timer.Start()
+
+				gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
+					Game: makeGamePayload(t.Finale),
+				})
+				if err != nil {
+					return err
+				}
+
+				finaleRoom.Broadcast(gamePacket)
+			} else {
+				// We are wainting for next winner to finish his previous game
+				// make the winner an observer of the other game
+				var otherGame *game.Game
+				if t.PoolGames[0] == g {
+					otherGame = t.PoolGames[1]
+				} else {
+					otherGame = t.PoolGames[0]
+				}
+
+				g, err := m.GameSvc.AddObserverToGame(otherGame.ID, g.WinnerID)
+				if err != nil {
+					return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+				}
+
+				otherGameRoom, err := m.GetRoom(otherGame.ID)
+				if err != nil {
+					return fiber.NewError(fiber.StatusBadRequest, err.Error())
+				}
+				if err := otherGameRoom.AddClient(g.WinnerID); err != nil {
+					return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+				}
+				winnerClient, err := m.getClientByUserID(g.WinnerID)
+				if err != nil {
+					return fiber.NewError(fiber.StatusBadRequest, err.Error())
+				}
+				gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
+					Game: makeGamePayload(g),
+				})
+				if err != nil {
+					return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+				}
+				winnerClient.send(gamePacket)
+				return otherGameRoom.BroadcastObserverJoinGamePacket(winnerClient, g)
+
+			}
+		}
+	}
+
+	if err := m.GameSvc.Repo.DeleteGame(g.ID); err != nil {
+		return err
+	}
+
+	return m.BroadcastObservableGames()
 }
 
 func (m *Manager) ListNewUser() {
