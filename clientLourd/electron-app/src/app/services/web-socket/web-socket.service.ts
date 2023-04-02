@@ -41,6 +41,7 @@ import { RackService } from '@app/services/game/rack.service';
 import { StorageService } from '@app/services/storage/storage.service';
 import { ScrabbleGame } from '@app/utils/interfaces/game/game';
 import { Router } from '@angular/router';
+import { Room } from '@app/utils/interfaces/room';
 
 @Injectable({
   providedIn: 'root',
@@ -197,6 +198,14 @@ export class WebSocketService {
       case "joinedGame": {
           const joinedGamePayload = packet.payload as JoinedGamePayload;
           this.gameService.game.next(joinedGamePayload.game);
+          const newRoom: Room = {
+            id: joinedGamePayload.game.id,
+            name: "Game",
+            userIds: joinedGamePayload.game.userIds,
+            messages: [],
+          } 
+          this.roomService.addRoom(newRoom);
+          //this.roomService.currentRoomChat.next(newRoom);
           this.router.navigate(["/waitingRoom"]);
           break;
       }
