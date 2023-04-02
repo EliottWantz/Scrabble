@@ -14,7 +14,7 @@ export class FindGamePageComponent {
     openDialogJoinGame(): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = true;
-        this.dialog.open(JoinGameComponent, {width: '75%',
+        this.dialog.open(JoinGameComponent, {width: '80%',
         minHeight: '70vh',
         height : '50vh',
         data: {isObserver: false}});
@@ -31,7 +31,7 @@ export class FindGamePageComponent {
     openDialogJoinAsObserver(): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = true;
-        this.dialog.open(JoinGameComponent, {width: '75%',
+        this.dialog.open(JoinGameComponent, {width: '80%',
         minHeight: '70vh',
         height : '50vh',
         data: {isObserver: true}});
