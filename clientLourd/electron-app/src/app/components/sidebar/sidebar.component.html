@@ -3,6 +3,7 @@
         <div class="box">
             <mat-icon *ngIf="user.value.id === '0'">account_circle</mat-icon>
             <img *ngIf="user.value.id !== '0'" src="{{user.value.avatar.url}}" class="avatar">
+            <p class="username" *ngIf="user.value.id !== '0'">{{user.value.username}}</p>
             <div id="break">
                 <hr>
             </div>

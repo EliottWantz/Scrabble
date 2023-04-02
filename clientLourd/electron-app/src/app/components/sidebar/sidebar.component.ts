@@ -110,7 +110,7 @@ export class SidebarComponent implements OnInit {
   }
 
   isInGame(): boolean {
-    return this.gameService.scrabbleGame.value?.id != "";
+    return this.gameService.scrabbleGame.value != undefined;
   }
 
   isInGameLobby(): boolean {
