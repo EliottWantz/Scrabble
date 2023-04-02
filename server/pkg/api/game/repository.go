@@ -77,7 +77,7 @@ func (r *Repository) FindAllObservableGames() ([]*Game, error) {
 
 	observable := make([]*Game, 0)
 	for _, g := range games {
-		if !g.IsPrivateGame {
+		if !g.IsPrivateGame && g.ScrabbleGame != nil {
 			observable = append(observable, g)
 		}
 	}
@@ -161,7 +161,7 @@ func (r *Repository) FindAllObservableTournaments() ([]*Tournament, error) {
 
 	observable := make([]*Tournament, 0)
 	for _, t := range tournaments {
-		if !t.IsPrivate {
+		if !t.IsPrivate && t.HasStarted {
 			observable = append(observable, t)
 		}
 	}
