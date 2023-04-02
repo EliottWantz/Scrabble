@@ -517,7 +517,7 @@ func (c *Client) HandleStartGameRequest(p *Packet) error {
 	g.ScrabbleGame.Timer.OnDone(func() {
 		g.ScrabbleGame.SkipTurn()
 		gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
-			Game: makeGamePayload(g),
+			Game: makeGameUpdatePayload(g),
 		})
 		if err != nil {
 			slog.Error("failed to create game update packet:", err)
@@ -531,7 +531,7 @@ func (c *Client) HandleStartGameRequest(p *Packet) error {
 	g.ScrabbleGame.Timer.Start()
 	g.StartTime = time.Now().UnixMilli()
 	gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
-		Game: makeGamePayload(g),
+		Game: makeGameUpdatePayload(g),
 	})
 	if err != nil {
 		return err
@@ -556,7 +556,7 @@ func (c *Client) HandlePlayMoveRequest(p *Packet) error {
 	}
 
 	gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
-		Game: makeGamePayload(g),
+		Game: makeGameUpdatePayload(g),
 	})
 	if err != nil {
 		return err
@@ -612,7 +612,7 @@ func (c *Client) HandleClientEventReplaceBotByObserverRequest(p *Packet) error {
 	}
 
 	gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
-		Game: makeGamePayload(g),
+		Game: makeGameUpdatePayload(g),
 	})
 	if err != nil {
 		return err
@@ -648,7 +648,7 @@ func (c *Client) HandleGamePrivateRequest(p *Packet) error {
 	}
 	g.ObservateurIDs = []string{}
 	gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
-		Game: makeGamePayload(g),
+		Game: makeGameUpdatePayload(g),
 	})
 	if err != nil {
 		return err
@@ -674,7 +674,7 @@ func (c *Client) HandleGamePublicRequest(p *Packet) error {
 		slog.Error("get room", err)
 	}
 	gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
-		Game: makeGamePayload(g),
+		Game: makeGameUpdatePayload(g),
 	})
 	if err != nil {
 		return err
@@ -775,7 +775,7 @@ func (c *Client) HandleStartTournamentRequest(p *Packet) error {
 
 	// Broadcast start tournament packets
 	tournamentPacket, err := NewTournamentUpdatePacket(TournamentUpdatePayload{
-		Tournament: makeTournamentPayload(t),
+		Tournament: t,
 	})
 	if err != nil {
 		return err
@@ -831,7 +831,7 @@ func (c *Client) HandleStartTournamentRequest(p *Packet) error {
 				slog.Info("timer done:", "gameID", g.ID)
 				g.ScrabbleGame.SkipTurn()
 				gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
-					Game: makeGamePayload(g),
+					Game: makeGameUpdatePayload(g),
 				})
 				if err != nil {
 					slog.Error("failed to create Game update packet:", err)
@@ -845,7 +845,7 @@ func (c *Client) HandleStartTournamentRequest(p *Packet) error {
 
 			g.ScrabbleGame.Timer.Start()
 			gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
-				Game: makeGamePayload(g),
+				Game: makeGameUpdatePayload(g),
 			})
 			if err != nil {
 				slog.Error("failed to create Game update packet:", err)
@@ -879,7 +879,7 @@ func (c *Client) HandleJoinTournamentAsObserverRequest(p *Packet) error {
 	}
 	{
 		p, err := NewJoinedTournamentPacket(JoinedTournamentPayload{
-			Tournament: makeTournamentPayload(t),
+			Tournament: t,
 		})
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
