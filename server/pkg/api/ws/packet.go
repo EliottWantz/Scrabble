@@ -100,7 +100,7 @@ type StartGamePayload struct {
 }
 
 type CreateTournamentPayload struct {
-	Password    string   `json:"password,omitempty"`
+	IsPrivate   bool     `json:"isPrivate"`
 	WithUserIDs []string `json:"withUserIds"`
 }
 
@@ -241,58 +241,31 @@ type ListJoinableGamesPayload struct {
 	Games []*game.Game `json:"games"`
 }
 
-func NewJoinableGamesPacket(payload ListJoinableGamesPayload) (*Packet, error) {
+func NewListJoinableGamesPacket(payload ListJoinableGamesPayload) (*Packet, error) {
 	return NewPacket(ServerEventJoinableGames, payload)
 }
 
 type ListJoinableTournamentsPayload struct {
-	Tournaments []*TournamentPayload `json:"tournaments"`
+	Tournaments []*game.Tournament `json:"tournaments"`
 }
 
-func makeJoinableTournamentsPayload(tournaments []*game.Tournament) []*TournamentPayload {
-	payloads := make([]*TournamentPayload, 0, len(tournaments))
-	for _, tournament := range tournaments {
-		payloads = append(payloads, makeTournamentPayload(tournament))
-	}
-
-	return payloads
-}
-
-func NewJoinableTournamentsPacket(payload ListJoinableTournamentsPayload) (*Packet, error) {
+func NewListJoinableTournamentsPacket(payload ListJoinableTournamentsPayload) (*Packet, error) {
 	return NewPacket(ServerEventJoinableTournaments, payload)
 }
 
-type ObservableGamesPayload struct {
-	Games []*GamePayload `json:"games"`
+type ListObservableGamesPayload struct {
+	Games []*game.Game `json:"games"`
 }
 
-func makeObservableGamesPayload(games []*game.Game) []*GamePayload {
-	payloads := make([]*GamePayload, 0, len(games))
-	for _, game := range games {
-		payloads = append(payloads, makeGamePayload(game))
-	}
-
-	return payloads
-}
-
-func NewObservableGamesPacket(payload ObservableGamesPayload) (*Packet, error) {
+func NewListObservableGamesPacket(payload ListObservableGamesPayload) (*Packet, error) {
 	return NewPacket(ServerEventObservableGames, payload)
 }
 
-type ObservableTournamentsPayload struct {
-	Tournaments []*TournamentPayload `json:"tournaments"`
+type ListObservableTournamentsPayload struct {
+	Tournaments []*game.Tournament `json:"tournaments"`
 }
 
-func makeObservableTournamentsPayload(tournaments []*game.Tournament) []*TournamentPayload {
-	payloads := make([]*TournamentPayload, 0, len(tournaments))
-	for _, tournament := range tournaments {
-		payloads = append(payloads, makeTournamentPayload(tournament))
-	}
-
-	return payloads
-}
-
-func NewObservableTournamentsPacket(payload ObservableTournamentsPayload) (*Packet, error) {
+func NewListObservableTournamentsPacket(payload ListObservableTournamentsPayload) (*Packet, error) {
 	return NewPacket(ServerEventObservableTournaments, payload)
 }
 
@@ -330,7 +303,11 @@ func NewUserLeftGamePacket(payload UserLeftGamePayload) (*Packet, error) {
 	return NewPacket(ServerEventUserLeftGame, payload)
 }
 
-type GamePayload struct {
+type GameUpdatePayload struct {
+	Game *gameUpdatePayload `json:"game"`
+}
+
+type gameUpdatePayload struct {
 	ID           string                  `json:"id"`
 	Players      []*scrabble.Player      `json:"players,omitempty"`
 	Board        [15][15]scrabble.Square `json:"board,omitempty"`
@@ -341,16 +318,16 @@ type GamePayload struct {
 	WinnerID     string                  `json:"winnerId,omitempty"`
 }
 
-func makeGamePayload(g *game.Game) *GamePayload {
+func makeGameUpdatePayload(g *game.Game) *gameUpdatePayload {
 	if g == nil {
 		return nil
 	}
 	if g.ScrabbleGame == nil {
-		return &GamePayload{
+		return &gameUpdatePayload{
 			ID: g.ID,
 		}
 	}
-	return &GamePayload{
+	return &gameUpdatePayload{
 		ID:           g.ID,
 		Players:      g.ScrabbleGame.Players,
 		Board:        g.ScrabbleGame.Board.Squares,
@@ -360,10 +337,6 @@ func makeGamePayload(g *game.Game) *GamePayload {
 		Timer:        g.ScrabbleGame.Timer.TimeRemaining(),
 		WinnerID:     g.WinnerID,
 	}
-}
-
-type GameUpdatePayload struct {
-	Game *GamePayload `json:"game"`
 }
 
 func NewGameUpdatePacket(payload GameUpdatePayload) (*Packet, error) {
@@ -412,7 +385,7 @@ func NewServerIndicePacket(payload ServerIndicePayload) (*Packet, error) {
 }
 
 type JoinedTournamentPayload struct {
-	Tournament *TournamentPayload `json:"tournament"`
+	Tournament *game.Tournament `json:"tournament"`
 }
 
 func NewJoinedTournamentPacket(payload JoinedTournamentPayload) (*Packet, error) {
@@ -445,42 +418,8 @@ func NewUserLeftTournamentPacket(payload UserLeftTournamentPayload) (*Packet, er
 	return NewPacket(ServerEventUserLeftTournament, payload)
 }
 
-type TournamentPayload struct {
-	ID         string         `json:"id"`
-	CreatorID  string         `json:"creatorId"`
-	UserIDs    []string       `json:"userIds"`
-	PoolGames  []*GamePayload `json:"poolGames"`
-	Finale     *GamePayload   `json:"finale"`
-	HasStarted bool           `json:"hasStarted"`
-	IsOver     bool           `json:"isOver"`
-	WinnerID   string         `json:"winnerId"`
-}
-
-func makeTournamentPayload(t *game.Tournament) *TournamentPayload {
-	games := make([]*GamePayload, 0, len(t.PoolGames))
-	for _, g := range t.PoolGames {
-		if g.ScrabbleGame == nil {
-			continue
-		}
-		games = append(games, makeGamePayload(g))
-	}
-
-	payload := &TournamentPayload{
-		ID:         t.ID,
-		CreatorID:  t.CreatorID,
-		UserIDs:    t.UserIDs,
-		PoolGames:  games,
-		Finale:     makeGamePayload(t.Finale),
-		HasStarted: t.HasStarted,
-		IsOver:     t.IsOver,
-		WinnerID:   t.WinnerID,
-	}
-
-	return payload
-}
-
 type TournamentUpdatePayload struct {
-	Tournament *TournamentPayload `json:"tournament"`
+	Tournament *game.Tournament `json:"tournament"`
 }
 
 func NewTournamentUpdatePacket(payload TournamentUpdatePayload) (*Packet, error) {

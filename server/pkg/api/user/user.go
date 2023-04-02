@@ -15,9 +15,3 @@ type User struct {
 	PendingRequests  []string    `bson:"pendingRequests" json:"pendingRequests"`
 	Summary          Summary     `bson:"summary" json:"summary,omitempty"`
 }
-
-// type PublicUser struct {
-// 	ID       string `bson:"_id,omitempty" json:"id,omitempty"`
-// 	Username string `bson:"username" json:"username,omitempty"`
-// 	Avatar   Avatar `bson:"avatar" json:"avatar,omitempty"`
-// }

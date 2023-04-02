@@ -249,6 +249,16 @@ func (r *Room) BroadcastJoinGamePackets(c *Client, g *game.Game) error {
 
 func (r *Room) BroadcastObserverJoinGamePacket(c *Client, g *game.Game) error {
 	{
+		p, err := NewJoinedGamePacket(JoinedGamePayload{
+			Game: g,
+		})
+		if err != nil {
+			return err
+		}
+		c.send(p)
+	}
+	{
+
 		p, err := NewUserJoinedGamePacket(UserJoinedGamePayload{
 			GameID: g.ID,
 			UserID: c.UserId,
@@ -304,7 +314,7 @@ func (r *Room) BroadcastObserverLeaveGamePacket(c *Client, gID string) error {
 func (r *Room) BroadcastJoinTournamentPackets(c *Client, t *game.Tournament) error {
 	{
 		p, err := NewJoinedTournamentPacket(JoinedTournamentPayload{
-			Tournament: makeTournamentPayload(t),
+			Tournament: t,
 		})
 		if err != nil {
 			return err
