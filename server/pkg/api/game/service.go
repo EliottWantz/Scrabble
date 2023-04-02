@@ -455,8 +455,8 @@ func (s *Service) MakeGamePublic(gID string) (*Game, error) {
 	return g, nil
 }
 
-func (s *Service) NewTournament(creatorID string, withUserIDs []string) (*Tournament, error) {
-	t := NewTournament(creatorID, withUserIDs)
+func (s *Service) NewTournament(creatorID string, withUserIDs []string, isPrivate bool) (*Tournament, error) {
+	t := NewTournament(creatorID, withUserIDs, isPrivate)
 	err := s.Repo.InsertTournament(t)
 
 	return t, err

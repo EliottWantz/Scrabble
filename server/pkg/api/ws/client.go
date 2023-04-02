@@ -692,7 +692,7 @@ func (c *Client) HandleCreateTournamentRequest(p *Packet) error {
 	if err := json.Unmarshal(p.Payload, &payload); err != nil {
 		return err
 	}
-	t, err := c.Manager.GameSvc.NewTournament(c.UserId, payload.WithUserIDs)
+	t, err := c.Manager.GameSvc.NewTournament(c.UserId, payload.WithUserIDs, payload.IsPrivate)
 	if err != nil {
 		return err
 	}

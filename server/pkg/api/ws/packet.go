@@ -100,7 +100,7 @@ type StartGamePayload struct {
 }
 
 type CreateTournamentPayload struct {
-	Password    string   `json:"password,omitempty"`
+	IsPrivate   bool     `json:"isPrivate"`
 	WithUserIDs []string `json:"withUserIds"`
 }
 
