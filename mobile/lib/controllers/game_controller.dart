@@ -31,6 +31,8 @@ class GameController extends GetxController {
   RxBool placeIndiceIsCalled = false.obs;
   RxMap<int, String> lettersToExchange = <int, String>{}.obs;
   RxString currentSpecialLetter = 'A'.obs;
+  RxnString currentObservedPlayerId = RxnString();
+  Rxn<MoveInfo> currentIndiceToPlay = Rxn<MoveInfo>();
 
   final dropdownFormKey = GlobalKey<FormState>();
 
@@ -146,16 +148,16 @@ class GameController extends GetxController {
     DialogHelper.showGameOverDialog(winnerId);
   }
 
-  Widget getEaselChildToDisplay(Tile tile, int index) {
-    // if (!isClientTurn()) {
-    //   return SizedBox(
-    //       height: 70,
-    //       width: 70,
-    //       child: LetterTile(
-    //         isEasel: true,
-    //         tile: tile,
-    //       ));
-    // }
+  Widget getEaselChildToDisplay(Tile tile, int index, bool isObserving) {
+    if (!isClientTurn() || isObserving == true) {
+      return SizedBox(
+          height: 70,
+          width: 70,
+          child: LetterTile(
+            isEasel: true,
+            tile: tile,
+          ));
+    }
     if (isTileInBoard(tile)) {
       return SizedBox(
           height: 70,

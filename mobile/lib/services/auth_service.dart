@@ -39,6 +39,8 @@ class AuthService extends GetxService {
     Get.changeTheme(res.user.preferences.theme == 'light'
         ? ThemeConfig.lightTheme
         : ThemeConfig.darkTheme);
+    settingsService.currentThemeIcon.value =
+        Get.isDarkMode ? Icons.wb_sunny : Icons.brightness_2;
     settingsService.currentLangValue.value = res.user.preferences.language;
     Locale changedLocale = res.user.preferences.language == 'fr'
         ? const Locale('fr', 'FR')

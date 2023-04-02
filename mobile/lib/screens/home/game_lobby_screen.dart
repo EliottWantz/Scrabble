@@ -1,3 +1,4 @@
+import 'package:client_leger/services/settings_service.dart';
 import 'package:client_leger/services/websocket_service.dart';
 import 'package:client_leger/widgets/app_sidebar.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +16,7 @@ class GameLobbyScreen extends StatelessWidget {
 
   final GameService _gameService = Get.find();
   final WebsocketService _websocketService = Get.find();
+  final SettingsService _settingsService = Get.find();
 
   @override
   Widget build(BuildContext context) {
@@ -44,8 +46,8 @@ class GameLobbyScreen extends StatelessWidget {
               width: 600,
               child: Column(
                 children: [
-                  const Image(
-                    image: AssetImage('assets/images/scrabble.png'),
+                  Image(
+                    image: _settingsService.getLogo(),
                   ),
                   const Gap(20),
                   Obx(() => _buildStartButton(context)),

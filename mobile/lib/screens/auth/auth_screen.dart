@@ -39,8 +39,8 @@ class AuthScreen extends GetView<AuthController> {
                 width: 700,
                 child: Column(
                   children: [
-                    const Image(
-                      image: AssetImage('assets/images/scrabble.png'),
+                    Image(
+                      image: controller.settingsService.getLogo(),
                     ),
                     const Gap(20.0),
                     Text('authWelcome'.tr,style: Theme.of(context).textTheme.headline6,),
