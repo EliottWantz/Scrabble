@@ -136,7 +136,7 @@ func (m *Manager) Accept(cID string) fiber.Handler {
 				m.logger.Error("list observable games", err)
 			}
 			p, err := NewObservableGamesPacket(ObservableGamesPayload{
-				Games: makeObservableGamesPayload(games),
+				Games: games,
 			})
 			if err != nil {
 				m.logger.Error("create observable games packet", err)
