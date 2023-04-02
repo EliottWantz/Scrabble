@@ -7,7 +7,7 @@ import { ClientEvent } from "@app/utils/events/client-events";
 import { Game } from "@app/utils/interfaces/game/game";
 import { JoinGameAsObserverPayload, JoinGamePayload } from "@app/utils/interfaces/packet";
 import { BehaviorSubject } from "rxjs";
-import { JoinPrivateGameComponent } from "@app/components/join-private-game/join-private-game.component";
+import { JoinProtectedGameComponent } from "@app/components/join-protected-game/join-protected-game.component";
 import { Router } from "@angular/router";
 
 @Component({
@@ -74,10 +74,18 @@ export class JoinGameComponent implements OnInit {
         return names;
     }
 
+    getCreatorName(game: Game): string {
+        const creator = this.storageService.getUserFromId(game.creatorId);
+        if (creator) {
+            return creator.username;
+        }
+        return "";
+    }
+
     openDialogJoinPrivateGame(game: Game): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = true;
-        this.dialog.open(JoinPrivateGameComponent, {width: '75%',
+        this.dialog.open(JoinProtectedGameComponent, {width: '75%',
             minHeight: '70vh',
             height : '50vh',
             data: {game: game, isObserver: this.data.isObserver}
@@ -95,11 +103,11 @@ export class JoinGameComponent implements OnInit {
                     gameId: game.id,
                     password: ""
                 }
-                const event : ClientEvent = "join-as-observateur";
+                const event : ClientEvent = "join-game-as-observateur";
                 this.webSocketService.send(event, payload);
                 this.gameService.isObserving = true;
                 this.close();
-                this.router.navigate(["/game"]);
+                this.router.navigate(["/gameObserve"]);
             } else {
                 const payload: JoinGamePayload = {
                     gameId: game.id,

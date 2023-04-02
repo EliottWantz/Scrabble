@@ -29,13 +29,23 @@ mat-divider {
 #close-button {
   margin-top: auto;
   position: sticky;
-}
-
-button {
   width: 51%;
   border-radius: 20px;
   background-color: #dcdcdc;
   border-width: 0;
   padding-top: 1%;
   padding-bottom: 1%;
+}
+
+.join-button {
+  width: 100%;
+  border-radius: 20px;
+  background-color: #dcdcdc;
+  border-width: 0;
+  padding-top: 1%;
+  padding-bottom: 1%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
 }
