@@ -10,7 +10,8 @@ export interface NetworkLog {
 }
 
 export interface GameStats {
-    eventDate: string;
+    gameStartTime: number;
+    gameEndTime: number;
     gameWon: boolean;
 }
 
