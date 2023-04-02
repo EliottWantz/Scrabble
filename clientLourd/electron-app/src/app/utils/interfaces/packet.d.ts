@@ -21,7 +21,8 @@ export type ClientPayload = ChatMessage
 | LeaveGamePayload
 | StartGamePayload
 | PlayMovePayload
-| IndicePayload;
+| IndicePayload
+| ReplaceBotByObserverPayload;
 
 export interface CreateRoomPayload {
     roomName: string;
@@ -80,6 +81,10 @@ export interface PlayMovePayload {
 }
 
 export interface IndicePayload {
+    gameId: string;
+}
+
+export interface ReplaceBotByObserverPayload {
     gameId: string;
 }
 

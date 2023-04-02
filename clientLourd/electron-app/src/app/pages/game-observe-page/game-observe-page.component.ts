@@ -6,23 +6,27 @@ import { UserService } from "@app/services/user/user.service";
 import { MoveService } from "@app/services/game/move.service";
 import { MoveInfo } from "@app/utils/interfaces/game/move";
 import { StorageService } from "@app/services/storage/storage.service";
-import { LeaveGamePayload } from "@app/utils/interfaces/packet";
+import { LeaveGamePayload, ReplaceBotByObserverPayload } from "@app/utils/interfaces/packet";
 import { WebSocketService } from "@app/services/web-socket/web-socket.service";
 import { Router } from "@angular/router";
 import { ThemeService } from "@app/services/theme/theme.service";
+import { Rack } from "@app/utils/interfaces/game/rack";
+import { Tile } from "@app/utils/interfaces/game/tile";
 
 @Component({
-    selector: "app-game-page",
-    templateUrl: "./game-page.component.html",
-    styleUrls: ["./game-page.component.scss"],
+    selector: "app-game-observe-page",
+    templateUrl: "./game-observe-page.component.html",
+    styleUrls: ["./game-observe-page.component.scss"],
 })
-export class GamePageComponent implements OnInit {
+export class GameObservePageComponent implements OnInit {
     game!: BehaviorSubject<ScrabbleGame | undefined>;
     moves!: BehaviorSubject<MoveInfo[]>
     private darkThemeIcon = 'wb_sunny';
     private lightThemeIcon = 'nightlight_round';
     public lightDarkToggleIcon = this.lightThemeIcon;
     language: BehaviorSubject<string>;
+    racks: Rack[] = [];
+    currentRack = 0;
     
     constructor(private gameService: GameService, private userService: UserService, private moveService: MoveService, private storageService: StorageService,
         private socketService: WebSocketService, private router: Router, private themeService: ThemeService) {
@@ -31,7 +35,14 @@ export class GamePageComponent implements OnInit {
 
     ngOnInit(): void {
         this.game = this.gameService.scrabbleGame;
-        this.game.subscribe();
+        this.game.subscribe((game) => {
+            if (game) {
+                this.racks = [];
+                for (const player of game.players) {
+                    this.racks.push(player.rack);
+                }
+            }
+        })
         this.moves = this.gameService.moves;
         this.themeService.theme.subscribe((theme) => {
             if (theme == 'dark') {
@@ -40,34 +51,6 @@ export class GamePageComponent implements OnInit {
               this.lightDarkToggleIcon = this.lightThemeIcon;
             }
         });
-    }
-
-    isTurn(): boolean {
-        return this.game.value?.turn == this.userService.currentUserValue.id;
-    }
-
-    hasPlacedLetters(): boolean {
-        return this.moveService.placedTiles.length != 0;
-    }
-
-    hasSelectedLetters(): boolean {
-        return this.moveService.selectedTiles.length != 0;
-    }
-
-    submit(): void {
-        this.moveService.playTiles();
-    }
-
-    pass(): void {
-        this.moveService.pass();
-    }
-
-    exchange(): void {
-        this.moveService.exchange();
-    }
-
-    indice(): void {
-        this.moveService.indice();
     }
 
     getPlayerAvatar(id: string): string {
@@ -82,7 +65,7 @@ export class GamePageComponent implements OnInit {
             const payload: LeaveGamePayload = {
                 gameId: this.game.value?.id
             };
-            this.socketService.send("leave-game", payload);
+            this.socketService.send("leave-game-as-observateur", payload);
             this.gameService.game.next(undefined);
             this.gameService.scrabbleGame.next(undefined);
             this.router.navigate(["/home"]);
@@ -96,6 +79,25 @@ export class GamePageComponent implements OnInit {
       switchLanguage() {
         this.themeService.switchLanguage();
       }
+
+      getASCII(tile: Tile): string {
+        return String.fromCharCode(tile.letter);
+    }
+
+    switchRack(index: number) {
+        this.currentRack = index;
+    }
+
+    takePlace(): void {
+        if (this.game.value) {
+            this.gameService.isObserving = false;
+            const payload: ReplaceBotByObserverPayload = {
+                gameId: this.game.value.id
+            };
+            this.socketService.send("replace-bot-by-observer", payload);
+            this.router.navigate(["/game"]);
+        }
+    }
 
     /*getIndice(): string[] {
         const strings = [];

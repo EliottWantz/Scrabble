@@ -18,21 +18,8 @@ export class GameService {
     observableGames!: BehaviorSubject<Game[]>;
     isObserving = false;
     constructor(private router: Router) {
-        this.scrabbleGame = new BehaviorSubject<ScrabbleGame | undefined>({
-            id: "",
-            players: [],
-            board: BoardHelper.createBoard(),
-            finished: false,
-            numPassMoves: 0,
-            turn: "",
-            timer: 0
-        });
-        this.game = new BehaviorSubject<Game | undefined>({
-            id: "",
-            creatorId: "",
-            userIds: [],
-            isProtected: false
-        });
+        this.scrabbleGame = new BehaviorSubject<ScrabbleGame | undefined>(undefined);
+        this.game = new BehaviorSubject<Game | undefined>(undefined);
         this.joinableGames = new BehaviorSubject<Game[]>([]);
         this.timer = new BehaviorSubject<number>(0);
         this.moves = new BehaviorSubject<MoveInfo[]>([]);
@@ -44,7 +31,11 @@ export class GameService {
         this.scrabbleGame.next(game);
         this.timer.next(game.timer / 1000000000);
         this.moves.next([]);
-        this.router.navigate(['/', 'game']);
+        if (!this.isObserving) {
+            this.router.navigate(['/', 'game']);
+        } else {
+            this.router.navigate(['/', 'gameObserve']);
+        }
     }
 
     updateTimer(timer: number): void {
