@@ -15,8 +15,6 @@ import { BehaviorSubject } from "rxjs";
 })
 export class CreateGameComponent {
     games: BehaviorSubject<Game[]>;
-    gameModes = ["Classique", "Coopératif"];
-    selectedGameMode = "Classique";
     password = "";
     isPrivate = false;
     constructor(public dialogRef: MatDialogRef<CreateGameComponent>, private gameService: GameService, private webSocketService: WebSocketService, private storageService: StorageService) {
