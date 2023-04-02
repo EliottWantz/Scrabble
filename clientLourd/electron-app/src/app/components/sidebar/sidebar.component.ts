@@ -36,6 +36,7 @@ export class SidebarComponent implements OnInit {
   currentRouteName = '/home';
   previousRouteName = ['/home'];
   language: BehaviorSubject<string>;
+  badgeContent = 0;
 
   constructor(
     private userService: UserService,
@@ -91,6 +92,9 @@ export class SidebarComponent implements OnInit {
       } else {
         this.lightDarkToggleIcon = this.lightThemeIcon;
       }
+    });
+    this.user.subscribe((user) => {
+      this.badgeContent = user.pendingRequests.length;
     });
   }
 

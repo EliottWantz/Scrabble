@@ -53,9 +53,10 @@ export class SocialComponent implements AfterViewInit, OnInit {
       const friendsWithoutSelf = [];
       for (const user of users) {
         if (user.id != this.user.value.id) {
-          usersWithoutSelf.push(user);
           if (this.user.value.friends.includes(user.id)) {
             friendsWithoutSelf.push(user);
+          } else {
+            usersWithoutSelf.push(user);
           }
         }
       }
