@@ -51,6 +51,7 @@ export interface LeaveDMRoomPayload {
 export interface CreateGamePayload {
     password: string;
     userIds: string[];
+    isPrivate: boolean;
 }
 
 export interface JoinGamePayload {

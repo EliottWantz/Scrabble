@@ -9,6 +9,7 @@ import { JoinGameAsObserverPayload, JoinGamePayload } from "@app/utils/interface
 import { BehaviorSubject } from "rxjs";
 import { JoinProtectedGameComponent } from "@app/components/join-protected-game/join-protected-game.component";
 import { Router } from "@angular/router";
+import { JoinPrivateGameComponent } from "@app/components/join-private-game/join-private-game.component";
 
 @Component({
     selector: "app-join-game",
@@ -82,7 +83,7 @@ export class JoinGameComponent implements OnInit {
         return "";
     }
 
-    openDialogJoinPrivateGame(game: Game): void {
+    openDialogJoinProtectedGame(game: Game): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = true;
         this.dialog.open(JoinProtectedGameComponent, {width: '75%',
@@ -92,9 +93,23 @@ export class JoinGameComponent implements OnInit {
         });
     }
 
+    openDialogJoinPrivateGame(game: Game): void {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.disableClose = true;
+        this.dialog.open(JoinPrivateGameComponent, {width: '75%',
+            minHeight: '70vh',
+            height : '50vh',
+            disableClose: true,
+            data: {game: game}
+        });
+    }
+
     joinGame(game: Game): void {
         //this.stepper.selectedIndex = STEPPER_PAGE_IDX.confirmationPage;
         if (game.isProtected) {
+            this.openDialogJoinProtectedGame(game);
+            this.close();
+        } else if (game.isPrivateGame) {
             this.openDialogJoinPrivateGame(game);
             this.close();
         } else {

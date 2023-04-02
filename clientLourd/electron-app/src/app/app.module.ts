@@ -49,6 +49,7 @@ import { CustomizeAvatarComponent } from '@app/components/customize-avatar/custo
 import { MatStepperModule } from '@angular/material/stepper';
 import { ColorPickerModule } from 'ngx-color-picker';
 import { GameObservePageComponent } from "@app/pages/game-observe-page/game-observe-page.component";
+import { JoinPrivateGameComponent } from '@app/components/join-private-game/join-private-game.component';
 
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
@@ -83,7 +84,8 @@ import { HttpClient } from '@angular/common/http';
     CreateGameComponent,
     JoinProtectedGameComponent,
     CustomizeAvatarComponent,
-    GameObservePageComponent
+    GameObservePageComponent,
+    JoinPrivateGameComponent
   ],
   imports: [
     BrowserModule,

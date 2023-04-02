@@ -35,7 +35,8 @@ export class CreateGameComponent {
     createGame(): void {
         const payload: CreateGamePayload = {
             password: this.password,
-            userIds: []
+            userIds: [],
+            isPrivate: this.isPrivate
         }
         const event : ClientEvent = "create-game";
         console.log(payload);
