@@ -691,7 +691,7 @@ func (m *Manager) BroadcastObservableGames() error {
 	}
 
 	ObservableGamesPacket, err := NewObservableGamesPacket(ObservableGamesPayload{
-		Games: makeObservableGamesPayload(games),
+		Games: games,
 	})
 	if err != nil {
 		return err
