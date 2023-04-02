@@ -213,6 +213,7 @@ type MoveInfo struct {
 	Type    string            `json:"type,omitempty"`
 	Letters string            `json:"letters,omitempty"`
 	Covers  map[string]string `json:"covers"`
+	Score   int               `json:"score,omitempty"`
 }
 
 const (
@@ -325,7 +326,10 @@ func (s *Service) GetIndices(gID string) ([]MoveInfo, error) {
 	moves := g.ScrabbleGame.Engine.GenerateBestTileMoves(g.ScrabbleGame.State())
 	var indices []MoveInfo
 	for _, move := range moves {
-		tileMove := move.(*scrabble.TileMove)
+		tileMove, ok := move.(*scrabble.TileMove)
+		if !ok {
+			continue
+		}
 		covers := make(map[string]string)
 		for pos, letter := range tileMove.Covers {
 			covers[stringifyPoint(pos)] = string(letter)
@@ -334,6 +338,7 @@ func (s *Service) GetIndices(gID string) ([]MoveInfo, error) {
 			Type:    MoveTypePlayTile,
 			Letters: tileMove.Word,
 			Covers:  covers,
+			Score:   *tileMove.CachedScore,
 		}
 		indices = append(indices, info)
 	}
