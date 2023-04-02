@@ -235,3 +235,29 @@ func (ctrl *Controller) GetDefaultAvatars(c *fiber.Ctx) error {
 		Avatars: ctrl.svc.DefaultAvatars,
 	})
 }
+
+type UpdateUsernameRequest struct {
+	ID       string `json:"id,omitempty"`
+	Username string `json:"username,omitempty"`
+}
+
+func (ctrl *Controller) UpdateUsername(c *fiber.Ctx) error {
+	req := UpdateUsernameRequest{}
+	if err := c.BodyParser(&req); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "decode req: "+err.Error())
+	}
+	if req.ID == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "no user id given")
+	}
+	user, err := ctrl.svc.GetUser(req.ID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "no user found")
+	}
+	if _, err := ctrl.svc.Repo.FindByUsername(req.Username); err == nil {
+		return fiber.NewError(fiber.StatusUnprocessableEntity, "username already exists")
+	}
+	user.Username = req.Username
+
+	ctrl.svc.Repo.Update(user)
+	return c.SendStatus(fiber.StatusOK)
+}

@@ -140,7 +140,7 @@ func (s *Service) Login(username, password string) (*User, error) {
 	if !auth.PasswordsMatch(password, u.HashedPassword) {
 		return nil, fiber.NewError(fiber.StatusUnauthorized, "password mismatch")
 	}
-	s.AddNetworkingLog(u, "login", time.Now().UnixMilli())
+	s.AddNetworkingLog(u, "Login", time.Now().UnixMilli())
 	return u, nil
 }
 
