@@ -141,6 +141,9 @@ func (s *Service) AddUserToTournament(tID, userID, password string) (*Tournament
 		return nil, err
 	}
 
+	if t.IsPrivate {
+		return nil, ErrPrivateTournament
+	}
 	if len(t.UserIDs) == 4 {
 		return nil, fmt.Errorf("tournament is full")
 	}

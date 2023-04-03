@@ -89,4 +89,7 @@ func (api *API) setupRoutes(cfg *config.Config) {
 
 	r.Post("game/accept/:id/:requestorId/:gameId", api.Ctrls.WebSocketManager.AcceptJoinGameRequest)
 	r.Delete("game/accept/:id/:requestorId/:gameId", api.Ctrls.WebSocketManager.RejectJoinGameRequest)
+
+	r.Post("/game/tournament/accept/:id/:requestorId/:gameId", api.Ctrls.WebSocketManager.AcceptJoinTournamentRequest)
+	r.Delete("/game/tournament/accept/:id/:requestorId/:gameId", api.Ctrls.WebSocketManager.RejectJoinTournamentRequest)
 }
