@@ -134,7 +134,13 @@ class GameStartScreen extends StatelessWidget {
                       ? SizedBox(
                           width: 230,
                           child: ElevatedButton.icon(
-                            onPressed: () {},
+                            onPressed: () {
+                              if (gameMode == 'tournoi') {
+                                _showPainter();
+                              } else {
+                                _showObservableGamesDialog(context);
+                              }
+                            },
                             icon: const Padding(
                               padding: EdgeInsets.all(8.0),
                               child: Icon(
@@ -155,19 +161,13 @@ class GameStartScreen extends StatelessWidget {
         });
   }
 
-  void _showJoinableGamesDialog(BuildContext context) {
+  void _showObservableGamesDialog(BuildContext context) {
     Get.dialog(
       Dialog(
         child: SizedBox(
           height: 500,
           width: 600,
-          child:
-              // child: Column(
-              //   children: [
-              // const Gap(10),
-              // Text('Liste des parties',
-              //     style: Theme.of(context).textTheme.headline6),
-              DefaultTabController(
+          child: DefaultTabController(
             length: 2,
             child: Scaffold(
               appBar: AppBar(
@@ -181,60 +181,106 @@ class GameStartScreen extends StatelessWidget {
                 ),
               ),
               body: TabBarView(
-                children: [_buildPublicGamesTab(), _buildPrivateGamesTab()],
+                children: [_buildObservableGamesTab(false), _buildObservableGamesTab(true)],
               ),
             ),
           ),
-          // const Gap(10),
-          // Obx(
-          //   () => Expanded(
-          //       child: SingleChildScrollView(
-          //     child: DataTable(
-          //       columns: const <DataColumn>[
-          //         DataColumn(
-          //           label: Expanded(
-          //             child: Text(
-          //               'Room Name',
-          //             ),
-          //           ),
-          //         ),
-          //         DataColumn(
-          //           label: Expanded(
-          //             child: Text(
-          //               'Users',
-          //             ),
-          //           ),
-          //         ),
-          //       ],
-          //       rows: _createJoinableGameRows(),
-          //     ),
-          //   )),
-          // ),
-          // const Gap(10),
-          // Row(
-          //   mainAxisAlignment: MainAxisAlignment.center,
-          //   children: [
-          //     TextButton(
-          //         style: TextButton.styleFrom(
-          //             shape: RoundedRectangleBorder(
-          //                 borderRadius: BorderRadius.circular(12),
-          //                 side: const BorderSide(color: Colors.black))),
-          //         onPressed: () {
-          //           DialogHelper.hideLoading();
-          //         },
-          //         child: const Text('Annuler')),
-          //   ],
-          // ),
-          // const Gap(10),
-          // ],
         ),
       ),
-      // ),
-      // barrierDismissible: false,
     );
   }
 
-  Widget _buildPublicGamesTab() {
+  void _showJoinableGamesDialog(BuildContext context) {
+    Get.dialog(
+      Dialog(
+        child: SizedBox(
+          height: 500,
+          width: 600,
+          child: DefaultTabController(
+            length: 2,
+            child: Scaffold(
+              appBar: AppBar(
+                elevation: 0,
+                toolbarHeight: 0,
+                bottom: const TabBar(
+                  tabs: [
+                    Tab(text: 'Parties publiques'),
+                    Tab(text: 'Parties privées'),
+                  ],
+                ),
+              ),
+              body: TabBarView(
+                children: [_buildJoinableGamesTab(false), _buildJoinableGamesTab(true)],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildObservableGamesTab(bool isPrivateGames) {
+    return Column(
+      children: [
+        Obx(
+              () => Expanded(
+              child: SingleChildScrollView(
+                child: DataTable(
+                  columns: const <DataColumn>[
+                    DataColumn(
+                      label: Expanded(
+                        child: Text(
+                          'Créateur',
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Expanded(
+                        child: Text(
+                          'Joueurs',
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Expanded(
+                        child: Text(
+                          'Type',
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Expanded(
+                        child: Text(
+                          'Rejoindre',
+                        ),
+                      ),
+                    ),
+                  ],
+                  rows: _createObservableGameRows(isPrivateGames),
+                ),
+              )),
+        ),
+        const Gap(10),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            TextButton(
+                style: TextButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        side: const BorderSide(color: Colors.black))),
+                onPressed: () {
+                  DialogHelper.hideLoading();
+                },
+                child: const Text('Annuler')),
+          ],
+        ),
+        const Gap(10),
+      ],
+    );
+  }
+
+  Widget _buildJoinableGamesTab(bool isPrivateGames) {
     return Column(
       children: [
         Obx(
@@ -271,7 +317,7 @@ class GameStartScreen extends StatelessWidget {
                   ),
                 ),
               ],
-              rows: _createJoinableGameRows(false),
+              rows: _createJoinableGameRows(isPrivateGames),
             ),
           )),
         ),
@@ -295,65 +341,41 @@ class GameStartScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPrivateGamesTab() {
-    return Column(
-      children: [
-        Obx(
-          () => Expanded(
-              child: SingleChildScrollView(
-            child: DataTable(
-              columns: const <DataColumn>[
-                DataColumn(
-                  label: Expanded(
-                    child: Text(
-                      'Créateur',
-                    ),
-                  ),
-                ),
-                DataColumn(
-                  label: Expanded(
-                    child: Text(
-                      'Joueurs',
-                    ),
-                  ),
-                ),
-                DataColumn(
-                  label: Expanded(
-                    child: Text(
-                      'Type',
-                    ),
-                  ),
-                ),
-                DataColumn(
-                  label: Expanded(
-                    child: Text(
-                      'Rejoindre',
-                    ),
-                  ),
-                ),
-              ],
-              rows: _createJoinableGameRows(true),
+  List<DataRow> _createObservableGameRows(bool privateGames) {
+    if (_gameService.observableGames.value != null) {
+      return _gameService.observableGames.value!
+          .expand((game) => [
+        if (game.isPrivateGame == privateGames)
+          DataRow(cells: [
+            DataCell(Text(_usersService.getUserUsername(game.creatorId))),
+            DataCell(
+                Text('${game.userIds.length} / 4')
             ),
-          )),
-        ),
-        const Gap(10),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextButton(
-                style: TextButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        side: const BorderSide(color: Colors.black))),
+            DataCell(
+                _buildTypeOfGame(game)
+            ),
+            DataCell(
+              ElevatedButton.icon(
                 onPressed: () {
-                  DialogHelper.hideLoading();
+                  _websocketService.joinGame(game.id);
+                  Get.toNamed(
+                      Routes.HOME + Routes.GAME_START + Routes.LOBBY);
                 },
-                child: const Text('Annuler')),
-          ],
-        ),
-        const Gap(10),
-      ],
-    );
+                icon: const Icon(
+                  // <-- Icon
+                  Icons.play_arrow,
+                  size: 20,
+                ),
+                label: const Text('Rejoindre'), // <-- Text
+              ),
+            ),
+          ])
+      ])
+          .toList();
+    }
+    return [
+      const DataRow(cells: [DataCell(Text('')), DataCell(Text(''))])
+    ];
   }
 
   List<DataRow> _createJoinableGameRows(bool privateGames) {
