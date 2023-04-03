@@ -244,6 +244,7 @@ func (m *Manager) AcceptJoinGameRequest(c *fiber.Ctx) error {
 
 func (m *Manager) RejectJoinGameRequest(c *fiber.Ctx) error {
 	id := c.Params("id")
+	requestorId := c.Params("requestorId")
 	gId := c.Params("gameId")
 	g, err := m.GameSvc.Repo.FindGame(gId)
 
@@ -255,7 +256,7 @@ func (m *Manager) RejectJoinGameRequest(c *fiber.Ctx) error {
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
-	client, err := m.getClientByUserID(id)
+	client, err := m.getClientByUserID(requestorId)
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}

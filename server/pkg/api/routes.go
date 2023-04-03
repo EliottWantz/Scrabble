@@ -86,4 +86,7 @@ func (api *API) setupRoutes(cfg *config.Config) {
 
 	r.Patch("/game/:id/protectGame", api.Ctrls.WebSocketManager.ProtectGame)
 	r.Patch("/game/:id/unprotectGame", api.Ctrls.WebSocketManager.UnprotectGame)
+
+	r.Post("game/accept/:id/:requestorId/:gameId", api.Ctrls.WebSocketManager.AcceptJoinGameRequest)
+	r.Delete("game/accept/:id/:requestorId/:gameId", api.Ctrls.WebSocketManager.RejectJoinGameRequest)
 }
