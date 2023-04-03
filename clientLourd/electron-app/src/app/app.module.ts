@@ -47,6 +47,7 @@ import { CreateGameComponent } from '@app/components/create-game/create-game.com
 import { CustomizeAvatarComponent } from '@app/components/customize-avatar/customize-avatar.component';
 import { MatStepperModule } from '@angular/material/stepper';
 import { ColorPickerModule } from 'ngx-color-picker';
+import { GifComponent } from '@app/components/gif/gif.component';
 
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
@@ -79,7 +80,8 @@ import { HttpClient } from '@angular/common/http';
     FindGamePageComponent,
     JoinGameComponent,
     CreateGameComponent,
-    CustomizeAvatarComponent
+    CustomizeAvatarComponent,
+    GifComponent
   ],
   imports: [
     BrowserModule,

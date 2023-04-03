@@ -119,5 +119,7 @@
 	"social-page.friends": "Amis",
 	"waiting-room-page.players": "/4 joueurs présents",
 	"waiting-room-page.start-game": "Débuter la partie",
-	"waiting-room-page.text": "En attente d'autre joueurs... Veuillez patienter"
+	"waiting-room-page.text": "En attente d'autre joueurs... Veuillez patienter",
+	"gif-component.search-gif": "Chercher un gif",
+	"gif-component.search": "Rechercher"
 }

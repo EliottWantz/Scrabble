@@ -119,5 +119,7 @@
 	"social-page.friends": "Friends",
 	"waiting-room-page.players": "/4 players present",
 	"waiting-room-page.start-game": "Start game",
-	"waiting-room-page.text": "Waiting for other players... Please wait"
+	"waiting-room-page.text": "Waiting for other players... Please wait",
+	"gif-component.search-gif": "Search for a gif",
+	"gif-component.search": "Search"
 }
