@@ -305,7 +305,7 @@ func (c *Client) HandleCreateDMRoomRequest(p *Packet) error {
 	}
 
 	r := c.Manager.AddRoom(dbRoom.ID, roomName)
-	userIds := []string{c.ID, payload.ToID}
+	userIds := []string{c.UserId, payload.ToID}
 	for _, uID := range userIds {
 		client, err := c.Manager.getClientByUserID(uID)
 		if err != nil {
