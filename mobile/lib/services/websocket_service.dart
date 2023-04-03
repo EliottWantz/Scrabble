@@ -400,6 +400,9 @@ class WebsocketService extends GetxService {
     if (gameService.currentGame.value != null &&
         gameService.isCurrentGameId(chatMessageResponse.payload!.roomId)) {
       gameService.currentRoomMessages.add(chatMessageResponse.payload!);
+      roomService.currentFloatingRoomMessages!.add(chatMessageResponse.payload!);
+      roomService.addMessagePayloadToRoom(
+          chatMessageResponse.payload!.roomId, chatMessageResponse.payload!);
       return;
     }
 
