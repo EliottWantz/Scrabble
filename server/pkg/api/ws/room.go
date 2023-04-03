@@ -248,8 +248,8 @@ func (r *Room) BroadcastJoinGamePackets(c *Client, g *game.Game) error {
 
 	return c.Manager.BroadcastJoinableGames()
 }
-func (r *Room) SendVerdictJoinGameRequest(c *Client, g *game.Game, verdict string) error {
 
+func (r *Room) SendVerdictJoinGameRequest(c *Client, g *game.Game, verdict string) error {
 	if verdict == Accepted {
 
 		p, err := NewAcceptJoinGameRequestPacket(VerdictJoinGameRequestPayload{
@@ -273,10 +273,34 @@ func (r *Room) SendVerdictJoinGameRequest(c *Client, g *game.Game, verdict strin
 	return nil
 }
 
+func (r *Room) SendVerdictJoinTournamentRequest(c *Client, t *game.Tournament, verdict string) error {
+	if verdict == Accepted {
+		p, err := NewAcceptJoinTournamentRequestPacket(VerdictJoinTournamentRequestPayload{
+			UserID:       t.CreatorID,
+			TournamentID: t.ID,
+		})
+		if err != nil {
+			return err
+		}
+		c.send(p)
+	} else if verdict == Declined {
+		p, err := NewDeclineJoinTournamentRequestPacket(VerdictJoinTournamentRequestPayload{
+			UserID:       t.CreatorID,
+			TournamentID: t.ID,
+		})
+		if err != nil {
+			return err
+		}
+		c.send(p)
+	}
+	return nil
+}
+
 func (r *Room) BroadcastObserverJoinGamePacket(c *Client, g *game.Game) error {
 	{
-		p, err := NewJoinedGamePacket(JoinedGamePayload{
-			Game: g,
+		p, err := NewJoinedGameAsObserverPacket(JoinedGameAsObserverPayload{
+			Game:       g,
+			GameUpdate: makeGameUpdatePayload(g),
 		})
 		if err != nil {
 			return err
