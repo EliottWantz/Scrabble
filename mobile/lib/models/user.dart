@@ -20,18 +20,22 @@ class NetworkLogs {
 }
 
 class GamesStats {
-  int eventDate;
+  int gameStartTime;
+  int gameEndTime;
   bool? gameWon;
 
-  GamesStats({required this.eventDate, this.gameWon});
+  GamesStats(
+      {required this.gameStartTime, required this.gameEndTime, this.gameWon});
 
   factory GamesStats.fromJson(Map<String, dynamic> json) => GamesStats(
-        eventDate: json["eventDate"],
+        gameStartTime: json["gameStartTime"],
+        gameEndTime: json["gameEndTime"],
         gameWon: json["gameWon"],
       );
 
   Map<String, dynamic> toJson() => {
-        "eventDate": eventDate,
+        "gameStartTime": gameStartTime,
+        "gameEndTime": gameEndTime,
         "gameWon": gameWon,
       };
 }
@@ -71,7 +75,7 @@ class Summary {
 
   factory Summary.fromJson(Map<String, dynamic> json) => Summary(
         userStats: UserStats.fromJson(json["userStats"]),
-    gamesStats: json["gamesStats"] != null
+        gamesStats: json["gamesStats"] != null
             ? List<GamesStats>.from((json["gamesStats"] as List)
                 .map((gameStat) => GamesStats.fromJson(gameStat)))
             : <GamesStats>[],

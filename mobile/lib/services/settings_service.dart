@@ -38,4 +38,10 @@ class SettingsService extends GetxService {
       await apiRepository.preferences();
     }
   }
+
+  AssetImage getLogo() {
+    return Get.isDarkMode
+        ? AssetImage('assets/images/scrabble-white.png')
+        : AssetImage('assets/images/scrabble.png');
+  }
 }

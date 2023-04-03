@@ -160,7 +160,7 @@ class ProfileScreen extends StatelessWidget {
                             const Icon(Icons.timelapse),
                             const Gap(5),
                             Text(
-                                'Moyenne de temps de jeu : ${user.summary.userStats!.averageTimePlayed != null ? user.summary.userStats!.averageTimePlayed! ~/ pow(10, 9) : '0'} min',
+                                'Moyenne de temps de jeu : ${user.summary.userStats!.averageTimePlayed != null ? user.summary.userStats!.averageTimePlayed! ~/ pow(10, 5) : '0'} min',
                                 style: Get.context!.textTheme.button)
                           ],
                         )
@@ -223,8 +223,7 @@ class ProfileScreen extends StatelessWidget {
   List<DataRow> _createRowsActivity(User user) {
     return [
       for (final networkLogs in user.summary.networkLogs!.reversed)
-        DataRow(cells: [
-          DataCell(Text(networkLogs.eventType.toLowerCase() == 'login'
+        DataRow(cells: [DataCell(Text(networkLogs.eventType.toLowerCase() == 'login'
               ? 'Connexion'
               : 'Déconnexion')),
           DataCell(Text(DateFormat('yyyy-MM-dd').format(tz.TZDateTime.from(
@@ -283,10 +282,10 @@ class ProfileScreen extends StatelessWidget {
           DataCell(Text(
               'Partie ${gameStats.gameWon != null ? 'gagnée' : 'perdue'}')),
           DataCell(Text(DateFormat('yyyy-MM-dd').format(tz.TZDateTime.from(
-              DateTime.fromMillisecondsSinceEpoch(gameStats.eventDate),
+              DateTime.fromMillisecondsSinceEpoch(gameStats.gameEndTime),
               montreal)))),
           DataCell(Text(DateFormat('jms').format(tz.TZDateTime.from(
-              DateTime.fromMillisecondsSinceEpoch(gameStats.eventDate),
+              DateTime.fromMillisecondsSinceEpoch(gameStats.gameEndTime),
               montreal)))),
         ]),
     ];

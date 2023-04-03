@@ -1,4 +1,5 @@
 import 'package:client_leger/models/game_room.dart';
+import 'package:client_leger/models/rack.dart';
 import 'package:client_leger/models/user.dart';
 import 'package:client_leger/services/user_service.dart';
 import 'package:get/get.dart';
@@ -18,6 +19,7 @@ class GameService extends GetxService {
   // final currentGameRoom = Rxn<Room>();
   late String currentGameId;
   final currentRoomMessages = <ChatMessagePayload>[].obs;
+
   // final currentGameRoomUsers = Rxn<List<User>>();
   final currentGameRoomUserIds = <String>[].obs;
 
@@ -31,6 +33,13 @@ class GameService extends GetxService {
   Player? getPlayer() {
     for (final player in currentGame.value!.players) {
       if (player.id == userService.user.value!.id) return player;
+    }
+    return null;
+  }
+
+  Rack? getPlayerRackById(String id) {
+    for (final player in currentGame.value!.players) {
+      if (id == player.id) return player.rack;
     }
     return null;
   }
