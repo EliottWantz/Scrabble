@@ -63,12 +63,23 @@ func (m *Manager) Accept(cID string) fiber.Handler {
 			m.logger.Error("add client", err)
 			return
 		}
-
 		{
 			// List all users registered in the application
 			p, err := NewListUsersPacket(
 				ListUsersPayload{
 					Users: m.ListUsers(),
+				},
+			)
+			if err != nil {
+				m.logger.Error("list users", err)
+			}
+			c.send(p)
+		}
+		{
+			// List all users online
+			p, err := NewListOnlineUsersPacket(
+				ListOnlineUsersPayload{
+					Users: m.ListOnlineUsers(),
 				},
 			)
 			if err != nil {
@@ -96,7 +107,7 @@ func (m *Manager) Accept(cID string) fiber.Handler {
 			if err != nil {
 				m.logger.Error("list joinable games", err)
 			}
-			p, err := NewJoinableGamesPacket(ListJoinableGamesPayload{
+			p, err := NewListJoinableGamesPacket(ListJoinableGamesPayload{
 				Games: games,
 			})
 			if err != nil {
@@ -110,11 +121,39 @@ func (m *Manager) Accept(cID string) fiber.Handler {
 			if err != nil {
 				m.logger.Error("list joinable games", err)
 			}
-			p, err := NewJoinableTournamentsPacket(ListJoinableTournamentsPayload{
-				Tournaments: makeJoinableTournamentsPayload(tournaments),
+			p, err := NewListJoinableTournamentsPacket(ListJoinableTournamentsPayload{
+				Tournaments: tournaments,
 			})
 			if err != nil {
-				m.logger.Error("list joinable games", err)
+				m.logger.Error("create joinable games", err)
+			}
+			c.send(p)
+		}
+		{
+			// List all observable games
+			games, err := m.GameSvc.Repo.FindAllObservableGames()
+			if err != nil {
+				m.logger.Error("list observable games", err)
+			}
+			p, err := NewListObservableGamesPacket(ListObservableGamesPayload{
+				Games: games,
+			})
+			if err != nil {
+				m.logger.Error("create observable games packet", err)
+			}
+			c.send(p)
+		}
+		{
+			// List all observable tournaments
+			tournaments, err := m.GameSvc.Repo.FindAllObservableTournaments()
+			if err != nil {
+				m.logger.Error("list observable tournaments", err)
+			}
+			p, err := NewListObservableTournamentsPacket(ListObservableTournamentsPayload{
+				Tournaments: tournaments,
+			})
+			if err != nil {
+				m.logger.Error("create observable tournaments packet", err)
 			}
 			c.send(p)
 		}
@@ -151,6 +190,22 @@ func (m *Manager) ListUsers() []user.User {
 	}
 
 	return users
+}
+
+func (m *Manager) ListOnlineUsers() []user.User {
+	online := make([]user.User, 0)
+	users, err := m.UserSvc.Repo.FindAll()
+	if err != nil {
+		return online
+	}
+
+	for _, u := range users {
+		if _, err := m.getClientByUserID(u.ID); err == nil {
+			online = append(online, u)
+		}
+	}
+
+	return online
 }
 
 func (m *Manager) AddClient(c *Client) error {
@@ -241,8 +296,8 @@ func (m *Manager) getClientsByUserID(cUserID string) []*Client {
 		return true
 	})
 	return clients
-
 }
+
 func (m *Manager) getClientUserID(cID string) (string, error) {
 	c, err := m.GetClientByWsID(cID)
 	if err != nil {
@@ -250,6 +305,7 @@ func (m *Manager) getClientUserID(cID string) (string, error) {
 	}
 	return c.UserId, nil
 }
+
 func (m *Manager) RemoveClient(c *Client) error {
 	defer close(c.receiveCh)
 	defer close(c.sendCh)
@@ -332,6 +388,20 @@ func (m *Manager) RemoveClient(c *Client) error {
 		slog.Error("close connection", err)
 	}
 	m.Clients.Del(c.ID)
+
+	{
+		// List all users online
+		p, err := NewListOnlineUsersPacket(
+			ListOnlineUsersPayload{
+				Users: m.ListOnlineUsers(),
+			},
+		)
+		if err != nil {
+			m.logger.Error("list users", err)
+		}
+		m.Broadcast(p)
+	}
+
 	return nil
 }
 
@@ -375,7 +445,7 @@ func (m *Manager) RemoveClientFromGame(c *Client, gID string) error {
 					continue
 				}
 			}
-			return nil
+			return m.BroadcastObservableGames()
 		} else {
 			// Remove the user from the game
 			if _, err := c.Manager.GameSvc.RemoveUserFromGame(gID, c.UserId); err != nil {
@@ -463,7 +533,7 @@ func (m *Manager) RemoveClientFromTournament(c *Client, gID string) error {
 					continue
 				}
 			}
-			return nil
+			return m.BroadcastObservableTournaments()
 		} else {
 			// Remove the user from the Tournament
 			if _, err := c.Manager.GameSvc.RemoveUserFromTournament(gID, c.UserId); err != nil {
@@ -587,7 +657,7 @@ func (m *Manager) BroadcastJoinableGames() error {
 		return err
 	}
 
-	joinableGamesPacket, err := NewJoinableGamesPacket(ListJoinableGamesPayload{
+	joinableGamesPacket, err := NewListJoinableGamesPacket(ListJoinableGamesPayload{
 		Games: games,
 	})
 	if err != nil {
@@ -603,13 +673,46 @@ func (m *Manager) BroadcastJoinableTournaments() error {
 	if err != nil {
 		return err
 	}
-	joinableTournamentsPacket, err := NewJoinableTournamentsPacket(ListJoinableTournamentsPayload{
-		Tournaments: makeJoinableTournamentsPayload(tournaments),
+	joinableTournamentsPacket, err := NewListJoinableTournamentsPacket(ListJoinableTournamentsPayload{
+		Tournaments: tournaments,
 	})
 	if err != nil {
 		return err
 	}
 	m.Broadcast(joinableTournamentsPacket)
+
+	return nil
+}
+
+func (m *Manager) BroadcastObservableGames() error {
+	games, err := m.GameSvc.Repo.FindAllObservableGames()
+	if err != nil {
+		return err
+	}
+
+	ObservableGamesPacket, err := NewListObservableGamesPacket(ListObservableGamesPayload{
+		Games: games,
+	})
+	if err != nil {
+		return err
+	}
+	m.Broadcast(ObservableGamesPacket)
+
+	return nil
+}
+
+func (m *Manager) BroadcastObservableTournaments() error {
+	tournaments, err := m.GameSvc.Repo.FindAllObservableTournaments()
+	if err != nil {
+		return err
+	}
+	ObservableTournamentsPacket, err := NewListObservableTournamentsPacket(ListObservableTournamentsPayload{
+		Tournaments: tournaments,
+	})
+	if err != nil {
+		return err
+	}
+	m.Broadcast(ObservableTournamentsPacket)
 
 	return nil
 }
@@ -621,7 +724,7 @@ func (m *Manager) MakeBotMoves(gID string) {
 			break
 		}
 		gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
-			Game: makeGamePayload(g),
+			Game: makeGameUpdatePayload(g),
 		})
 		if err != nil {
 			slog.Error("failed to create update game packet", err)
@@ -651,7 +754,7 @@ func (m *Manager) ReplacePlayerWithBot(gID, pID string) error {
 	}
 
 	gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
-		Game: makeGamePayload(g),
+		Game: makeGameUpdatePayload(g),
 	})
 	if err != nil {
 		return err
@@ -680,7 +783,7 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 	g.WinnerID = winnerID
 
 	gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
-		Game: makeGamePayload(g),
+		Game: makeGameUpdatePayload(g),
 	})
 	if err != nil {
 		return err
@@ -717,7 +820,7 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 		}
 		{
 			p, err := NewTournamentUpdatePacket(TournamentUpdatePayload{
-				Tournament: makeTournamentPayload(t),
+				Tournament: t,
 			})
 			if err != nil {
 				return err
@@ -753,6 +856,14 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 			}
 			tournamentRoom.Broadcast(p)
 			if err := m.GameSvc.Repo.DeleteTournament(t.ID); err != nil {
+				return err
+			}
+			winner, err := m.UserSvc.GetUser(t.WinnerID)
+			if err != nil {
+				return err
+			}
+			winner.Summary.UserStats.NbTournamentsWon++
+			if err := m.UserSvc.Repo.Update(winner); err != nil {
 				return err
 			}
 		} else {
@@ -794,7 +905,7 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 				t.Finale.ScrabbleGame.Timer.OnDone(func() {
 					t.Finale.ScrabbleGame.SkipTurn()
 					GamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
-						Game: makeGamePayload(t.Finale),
+						Game: makeGameUpdatePayload(t.Finale),
 					})
 					if err != nil {
 						slog.Error("failed to create Game update packet:", err)
@@ -808,7 +919,7 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 				t.Finale.ScrabbleGame.Timer.Start()
 
 				gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
-					Game: makeGamePayload(t.Finale),
+					Game: makeGameUpdatePayload(t.Finale),
 				})
 				if err != nil {
 					return err
@@ -825,7 +936,7 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 					otherGame = t.PoolGames[0]
 				}
 
-				g, err := m.GameSvc.AddObserver(otherGame.ID, g.WinnerID)
+				g, err := m.GameSvc.AddObserverToGame(otherGame.ID, g.WinnerID)
 				if err != nil {
 					return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 				}
@@ -842,7 +953,7 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 					return fiber.NewError(fiber.StatusBadRequest, err.Error())
 				}
 				gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
-					Game: makeGamePayload(g),
+					Game: makeGameUpdatePayload(g),
 				})
 				if err != nil {
 					return fiber.NewError(fiber.StatusInternalServerError, err.Error())
@@ -858,7 +969,7 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 		return err
 	}
 
-	return nil
+	return m.BroadcastObservableGames()
 }
 
 func (m *Manager) ListNewUser() {

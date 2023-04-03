@@ -19,6 +19,7 @@ type GameStats struct {
 type UserStats struct {
 	NbGamesPlayed        int   `bson:"nbGamesPlayed" json:"nbGamesPlayed,omitempty"`
 	NbGamesWon           int   `bson:"nbGamesWon" json:"nbGamesWon,omitempty"`
+	NbTournamentsWon     int   `bson:"nbTournamentsWon" json:"nbTournamentsWon,omitempty"`
 	AveragePointsPerGame int   `bson:"averagePointsPerGame" json:"averagePointsPerGame,omitempty"`
 	AverageTimePlayed    int64 `bson:"averageTimePlayed" json:"averageTimePlayed,omitempty"`
 }
@@ -40,7 +41,6 @@ func (s *Service) AddGameStats(u *User, eventStartTime, eventEndTime int64, game
 		GameWon:       gameWon,
 	})
 	s.Repo.Update(u)
-
 }
 
 func (s *Service) UpdateUserStats(u *User, gameWon bool, points int, timePlayed int64) {

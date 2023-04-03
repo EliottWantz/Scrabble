@@ -17,16 +17,19 @@ import (
 )
 
 var (
-	ErrNotPlayerTurn     = errors.New("not player's turn")
-	ErrNotBotTurn        = errors.New("not bot's turn")
-	ErrInvalidMove       = errors.New("invalid move")
-	ErrInvalidPosition   = errors.New("invalid position")
-	ErrGameNotStarted    = errors.New("game not started")
-	ErrGameOver          = errors.New("game is over")
-	ErrPrivateGame       = errors.New("game is private")
-	ErrPublicGame        = errors.New("game is public")
-	ErrGameHasNotStarted = errors.New("game has not started")
-	ErrObserverNotFound  = errors.New("observer not found")
+	ErrNotPlayerTurn        = errors.New("not player's turn")
+	ErrNotBotTurn           = errors.New("not bot's turn")
+	ErrInvalidMove          = errors.New("invalid move")
+	ErrInvalidPosition      = errors.New("invalid position")
+	ErrGameNotStarted       = errors.New("game not started")
+	ErrTournamentNotStarted = errors.New("tournament not started")
+	ErrGameOver             = errors.New("game is over")
+	ErrTournamentOver       = errors.New("tournament is over")
+	ErrPrivateGame          = errors.New("game is private")
+	ErrPrivateTournament    = errors.New("tournament is private")
+	ErrPublicGame           = errors.New("game is public")
+	ErrGameHasNotStarted    = errors.New("game has not started")
+	ErrObserverNotFound     = errors.New("observer not found")
 
 	botNames = []string{"Bot1", "Bot2", "Bot3", "Bot4"}
 )
@@ -210,6 +213,7 @@ type MoveInfo struct {
 	Type    string            `json:"type,omitempty"`
 	Letters string            `json:"letters,omitempty"`
 	Covers  map[string]string `json:"covers"`
+	Score   int               `json:"score,omitempty"`
 }
 
 const (
@@ -322,7 +326,10 @@ func (s *Service) GetIndices(gID string) ([]MoveInfo, error) {
 	moves := g.ScrabbleGame.Engine.GenerateBestTileMoves(g.ScrabbleGame.State())
 	var indices []MoveInfo
 	for _, move := range moves {
-		tileMove := move.(*scrabble.TileMove)
+		tileMove, ok := move.(*scrabble.TileMove)
+		if !ok {
+			continue
+		}
 		covers := make(map[string]string)
 		for pos, letter := range tileMove.Covers {
 			covers[stringifyPoint(pos)] = string(letter)
@@ -331,6 +338,7 @@ func (s *Service) GetIndices(gID string) ([]MoveInfo, error) {
 			Type:    MoveTypePlayTile,
 			Letters: tileMove.Word,
 			Covers:  covers,
+			Score:   *tileMove.CachedScore,
 		}
 		indices = append(indices, info)
 	}
@@ -347,7 +355,7 @@ func (s *Service) DeleteGame(gID string) error {
 	return nil
 }
 
-func (s *Service) AddObserver(gID string, oId string) (*Game, error) {
+func (s *Service) AddObserverToGame(gID string, oID string) (*Game, error) {
 	g, err := s.Repo.FindGame(gID)
 	if err != nil {
 		return nil, err
@@ -364,11 +372,11 @@ func (s *Service) AddObserver(gID string, oId string) (*Game, error) {
 	if g.ScrabbleGame.IsOver() {
 		return nil, ErrGameOver
 	}
-	g.ObservateurIDs = append(g.ObservateurIDs, oId)
+	g.ObservateurIDs = append(g.ObservateurIDs, oID)
 	return g, nil
 }
 
-func (s *Service) RemoveObserver(gID string, oId string) (*Game, error) {
+func (s *Service) RemoveObserverFromGame(gID string, oID string) (*Game, error) {
 	g, err := s.Repo.FindGame(gID)
 	if err != nil {
 		return nil, err
@@ -380,7 +388,7 @@ func (s *Service) RemoveObserver(gID string, oId string) (*Game, error) {
 		return nil, ErrGameOver
 	}
 	for i, v := range g.ObservateurIDs {
-		if v == oId {
+		if v == oID {
 			g.ObservateurIDs = append(g.ObservateurIDs[:i], g.ObservateurIDs[i+1:]...)
 			return g, nil
 		}
@@ -388,7 +396,7 @@ func (s *Service) RemoveObserver(gID string, oId string) (*Game, error) {
 	return nil, ErrObserverNotFound
 }
 
-func (s *Service) ReplaceBotByObserver(gID string, oId string) (*Game, error) {
+func (s *Service) ReplaceBotByObserver(gID string, oID string) (*Game, error) {
 	g, err := s.Repo.FindGame(gID)
 	if err != nil {
 		return nil, err
@@ -399,7 +407,7 @@ func (s *Service) ReplaceBotByObserver(gID string, oId string) (*Game, error) {
 	if g.ScrabbleGame.IsOver() {
 		return nil, ErrGameOver
 	}
-	user, err := s.UserSvc.GetUser(oId)
+	user, err := s.UserSvc.GetUser(oID)
 	if err != nil {
 		return nil, err
 	}
@@ -410,7 +418,7 @@ func (s *Service) ReplaceBotByObserver(gID string, oId string) (*Game, error) {
 			g.ScrabbleGame.Players[i].Username = user.Username
 			g.ScrabbleGame.Players[i].ID = user.ID
 			for i, v := range g.ObservateurIDs {
-				if v == oId {
+				if v == oID {
 					g.ObservateurIDs = append(g.ObservateurIDs[:i], g.ObservateurIDs[i+1:]...)
 					break
 				}
@@ -422,12 +430,12 @@ func (s *Service) ReplaceBotByObserver(gID string, oId string) (*Game, error) {
 	return nil, errors.New("no bot in that game")
 }
 
-func (s *Service) MakeGamePrivate(gId string) (*Game, error) {
-	g, err := s.Repo.FindGame(gId)
+func (s *Service) MakeGamePrivate(gID string) (*Game, error) {
+	g, err := s.Repo.FindGame(gID)
 	if err != nil {
 		return nil, err
 	}
-	if g.IsPrivateGame == true {
+	if g.IsPrivateGame {
 		return nil, ErrPrivateGame
 	}
 	if g.ScrabbleGame.IsOver() {
@@ -437,12 +445,12 @@ func (s *Service) MakeGamePrivate(gId string) (*Game, error) {
 	return g, nil
 }
 
-func (s *Service) MakeGamePublic(gId string) (*Game, error) {
-	g, err := s.Repo.FindGame(gId)
+func (s *Service) MakeGamePublic(gID string) (*Game, error) {
+	g, err := s.Repo.FindGame(gID)
 	if err != nil {
 		return nil, err
 	}
-	if g.IsPrivateGame == false {
+	if !g.IsPrivateGame {
 		return nil, ErrPublicGame
 	}
 	if g.ScrabbleGame.IsOver() {
@@ -452,8 +460,8 @@ func (s *Service) MakeGamePublic(gId string) (*Game, error) {
 	return g, nil
 }
 
-func (s *Service) NewTournament(creatorID string, withUserIDs []string) (*Tournament, error) {
-	t := NewTournament(creatorID, withUserIDs)
+func (s *Service) NewTournament(creatorID string, withUserIDs []string, isPrivate bool) (*Tournament, error) {
+	t := NewTournament(creatorID, withUserIDs, isPrivate)
 	err := s.Repo.InsertTournament(t)
 
 	return t, err
@@ -541,6 +549,47 @@ func (s *Service) UpdateTournamentGameOver(gID string) (*Tournament, error) {
 	}
 
 	return t, nil
+}
+
+func (s *Service) AddObserverToTournament(tID string, oID string) (*Tournament, error) {
+	t, err := s.Repo.FindTournament(tID)
+	if err != nil {
+		return nil, err
+	}
+
+	if !t.HasStarted {
+		return nil, ErrTournamentNotStarted
+	}
+
+	if t.IsPrivate {
+		return nil, ErrPrivateTournament
+	}
+
+	if t.IsOver {
+		return nil, ErrTournamentOver
+	}
+	t.ObservateurIDs = append(t.ObservateurIDs, oID)
+	return t, nil
+}
+
+func (s *Service) RemoveObserverFromTournament(tID string, oID string) (*Tournament, error) {
+	t, err := s.Repo.FindTournament(tID)
+	if err != nil {
+		return nil, err
+	}
+	if t.IsPrivate {
+		return nil, ErrPrivateTournament
+	}
+	if t.IsOver {
+		return nil, ErrTournamentOver
+	}
+	for i, v := range t.ObservateurIDs {
+		if v == oID {
+			t.ObservateurIDs = append(t.ObservateurIDs[:i], t.ObservateurIDs[i+1:]...)
+			return t, nil
+		}
+	}
+	return nil, ErrObserverNotFound
 }
 
 func parsePoint(str string) (scrabble.Position, error) {

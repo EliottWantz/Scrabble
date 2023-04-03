@@ -249,6 +249,16 @@ func (r *Room) BroadcastJoinGamePackets(c *Client, g *game.Game) error {
 
 func (r *Room) BroadcastObserverJoinGamePacket(c *Client, g *game.Game) error {
 	{
+		p, err := NewJoinedGamePacket(JoinedGamePayload{
+			Game: g,
+		})
+		if err != nil {
+			return err
+		}
+		c.send(p)
+	}
+	{
+
 		p, err := NewUserJoinedGamePacket(UserJoinedGamePayload{
 			GameID: g.ID,
 			UserID: c.UserId,
