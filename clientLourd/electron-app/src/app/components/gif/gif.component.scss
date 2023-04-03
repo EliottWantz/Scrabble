@@ -1,0 +1,91 @@
+.container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    flex-direction: column;
+    flex-wrap: wrap;
+}
+
+.form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    width: 100%;
+}
+
+.flexy {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    flex-direction: row;
+    width: 100%;
+}
+
+.cancel-button {
+    margin-top: 1%;
+    width: 51%;
+    border-radius: 20px;
+    background-color: #dcdcdc;
+    border-width: 0;
+    padding-top: 1%;
+    padding-bottom: 1%;
+}
+
+.submit-button {
+    margin-left: 2%;
+    width: auto;
+}
+
+mat-grid-list {
+    width: 50%;
+    height: 100%;
+}
+
+.gif {
+    border-radius: 20px;
+    outline-style: solid;
+    outline-width: 1px;
+    outline-color: black;
+}
+
+.gif:hover {
+    cursor: pointer;
+}
+
+::ng-deep .mat-mdc-form-field-infix {
+    display: flex;
+    flex-direction: column;
+    
+      min-width: 0;
+      width: 180px;
+      position: relative;
+      box-sizing: border-box;
+      min-height: 56px;
+  }
+  
+  ::ng-deep .mat-mdc-text-field-wrapper:not(.mdc-text-field--outlined) .mat-mdc-form-field-infix {
+      padding-top: 24px;
+      padding-bottom: 8px;
+  }
+  
+  ::ng-deep .mdc-text-field--filled:not(.mdc-text-field--disabled) {
+    background-color: whitesmoke;
+  }
+  
+  ::ng-deep .mdc-text-field {
+    border-top-left-radius: var(--mdc-shape-small, 4px);
+    border-top-right-radius: var(--mdc-shape-small, 4px);
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+    display: inline-flex;
+    align-items: baseline;
+    padding: 0 16px;
+    position: relative;
+    box-sizing: border-box;
+    overflow: hidden;
+    will-change: opacity, transform, color;
+  }
