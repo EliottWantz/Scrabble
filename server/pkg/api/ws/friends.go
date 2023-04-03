@@ -7,6 +7,7 @@ import (
 	"scrabble/pkg/api/user"
 
 	"github.com/gofiber/fiber/v2"
+	"golang.org/x/exp/slog"
 )
 
 func (m *Manager) sendFriendRequest(id string, friendId string) error {
@@ -55,7 +56,9 @@ func (m *Manager) acceptFriendRequest(id string, friendId string) error {
 	}
 	user.Friends = append(user.Friends, friendId)
 	friend.Friends = append(friend.Friends, id)
-	m.UserSvc.Repo.Update(friend)
+	if err := m.UserSvc.Repo.Update(friend); err != nil {
+		return err
+	}
 	return m.UserSvc.Repo.Update(user)
 }
 
@@ -71,7 +74,10 @@ func (m *Manager) rejectFriendRequest(id string, friendId string) error {
 	for i, pending_id := range user.PendingRequests {
 		if pending_id == friendId {
 			user.PendingRequests = append(user.PendingRequests[:i], user.PendingRequests[i+1:]...)
-			m.UserSvc.Repo.Update(user)
+			if err := m.UserSvc.Repo.Update(user); err != nil {
+				slog.Error("failed to update user", err)
+				continue
+			}
 		}
 	}
 

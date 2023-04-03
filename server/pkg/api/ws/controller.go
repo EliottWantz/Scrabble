@@ -62,7 +62,9 @@ func (m *Manager) ProtectGame(c *fiber.Ctx) error {
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
-	m.BroadcastJoinableGames()
+	if err := m.BroadcastJoinableGames(); err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
 	return c.SendStatus(fiber.StatusOK)
 }
 
@@ -72,8 +74,12 @@ func (m *Manager) UnprotectGame(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, "Game ID is required")
 	}
 
-	m.GameSvc.UnprotectGame(gameID)
-	m.BroadcastJoinableGames()
+	if _, err := m.GameSvc.UnprotectGame(gameID); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	if err := m.BroadcastJoinableGames(); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
 	return c.SendStatus(fiber.StatusOK)
 }
 

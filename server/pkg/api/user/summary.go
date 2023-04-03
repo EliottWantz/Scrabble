@@ -24,23 +24,23 @@ type UserStats struct {
 	AverageTimePlayed    int64 `bson:"averageTimePlayed" json:"averageTimePlayed,omitempty"`
 }
 
-func (s *Service) AddNetworkingLog(u *User, eventType string, eventTime int64) {
+func (s *Service) AddNetworkingLog(u *User, eventType string, eventTime int64) error {
 	networkLogs := &u.Summary.NetworkLogs
 	*networkLogs = append(*networkLogs, NetworkLog{
 		EventType: eventType,
 		EventTime: eventTime,
 	})
-	s.Repo.Update(u)
+	return s.Repo.Update(u)
 }
 
-func (s *Service) AddGameStats(u *User, eventStartTime, eventEndTime int64, gameWon bool) {
+func (s *Service) AddGameStats(u *User, eventStartTime, eventEndTime int64, gameWon bool) error {
 	gamesStats := &u.Summary.GamesStats
 	*gamesStats = append(*gamesStats, GameStats{
 		GameStartTime: eventStartTime,
 		GameEndTime:   eventEndTime,
 		GameWon:       gameWon,
 	})
-	s.Repo.Update(u)
+	return s.Repo.Update(u)
 }
 
 func (s *Service) UpdateUserStats(u *User, gameWon bool, points int, timePlayed int64) {
