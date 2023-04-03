@@ -14,18 +14,20 @@ type Tournament struct {
 	HasStarted     bool     `json:"hasStarted"`
 	IsOver         bool     `json:"isOver"`
 	WinnerID       string   `json:"winnerId"`
+	IsPrivate      bool     `json:"isPrivate"`
 }
 
 type TournamentGameInfo struct {
 	TournamentID string `json:"tournamentId"`
 }
 
-func NewTournament(creatorID string, withUserIDs []string) *Tournament {
+func NewTournament(creatorID string, withUserIDs []string, isPrivate bool) *Tournament {
 	t := &Tournament{
 		ID:        uuid.NewString(),
 		CreatorID: creatorID,
 		UserIDs:   []string{creatorID},
 		PoolGames: make([]*Game, 0, 2),
+		IsPrivate: isPrivate,
 	}
 	t.UserIDs = append(t.UserIDs, withUserIDs...)
 
