@@ -371,6 +371,12 @@ func (c *Client) HandleCreateGameRequest(p *Packet) error {
 	if err != nil {
 		return err
 	}
+	if payload.IsPrivate {
+		g, err = c.Manager.GameSvc.MakeGamePrivate(g.ID)
+		if err != nil {
+			return err
+		}
+	}
 
 	r := c.Manager.AddRoom(g.ID, "")
 	for _, uID := range g.UserIDs {
@@ -405,6 +411,24 @@ func (c *Client) HandleJoinGameRequest(p *Packet) error {
 
 	g, err := c.Manager.GameSvc.AddUserToGame(payload.GameID, c.UserId, payload.Password)
 	if err != nil {
+		if err == game.ErrPrivateGame {
+
+			user, err := c.Manager.UserSvc.GetUser(c.UserId)
+			p, err := NewUserRequestToJoinGamePacket(UserRequestToJoinGamePayload{
+				GameID:   g.ID,
+				UserID:   c.UserId,
+				Username: user.Username,
+			})
+			client, err := c.Manager.getClientByUserID(g.CreatorID)
+			if err != nil {
+				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+			}
+			client.send(p)
+			if err != nil {
+				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+			}
+		}
+
 		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
 

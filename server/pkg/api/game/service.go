@@ -129,7 +129,9 @@ func (s *Service) AddUserToGame(gID, userID, password string) (*Game, error) {
 	if g.IsProtected && !auth.PasswordsMatch(g.HashedPassword, password) {
 		return nil, fmt.Errorf("password mismatch")
 	}
-
+	if g.IsPrivateGame {
+		return nil, ErrPrivateGame
+	}
 	g.UserIDs = append(g.UserIDs, userID)
 
 	return g, nil
@@ -590,6 +592,9 @@ func (s *Service) RemoveObserverFromTournament(tID string, oID string) (*Tournam
 		}
 	}
 	return nil, ErrObserverNotFound
+}
+func (s *Service) GetGame(gID string) (*Game, error) {
+	return s.Repo.FindGame(gID)
 }
 
 func parsePoint(str string) (scrabble.Position, error) {

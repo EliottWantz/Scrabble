@@ -70,6 +70,7 @@ type LeaveDMRoomPayload struct {
 }
 
 type CreateGamePayload struct {
+	IsPrivate   bool     `json:"isPrivate"`
 	Password    string   `json:"password,omitempty"`
 	WithUserIDs []string `json:"withUserIds"`
 }
@@ -440,4 +441,27 @@ func NewErrorPacket(err error) (*Packet, error) {
 		Error string `json:"error"`
 	}
 	return NewPacket(ServerEventError, ErrorPayload{err.Error()})
+}
+
+type UserRequestToJoinGamePayload struct {
+	GameID   string `json:"gameId"`
+	UserID   string `json:"userId"`
+	Username string `json:"username"`
+}
+
+func NewUserRequestToJoinGamePacket(payload UserRequestToJoinGamePayload) (*Packet, error) {
+	return NewPacket(ServerEventUserRequestToJoinGame, payload)
+}
+
+type VerdictJoinGameRequestPayload struct {
+	GameID string `json:"gameId"`
+	UserID string `json:"userId"`
+}
+
+func NewAcceptJoinGameRequestPacket(payload VerdictJoinGameRequestPayload) (*Packet, error) {
+	return NewPacket(ServerEventUserRequestToJoinGameAccepted, payload)
+}
+
+func NewDeclineJoinGameRequestPacket(payload VerdictJoinGameRequestPayload) (*Packet, error) {
+	return NewPacket(ServerEventUserRequestToJoinGameDeclined, payload)
 }
