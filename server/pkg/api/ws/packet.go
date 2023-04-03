@@ -278,6 +278,15 @@ func NewJoinedGamePacket(payload JoinedGamePayload) (*Packet, error) {
 	return NewPacket(ServerEventJoinedGame, payload)
 }
 
+type JoinedGameAsObserverPayload struct {
+	Game       *game.Game         `json:"game"`
+	GameUpdate *gameUpdatePayload `json:"gameUpdate"`
+}
+
+func NewJoinedGameAsObserverPacket(payload JoinedGameAsObserverPayload) (*Packet, error) {
+	return NewPacket(ServerEventJoinedGameAsObserver, payload)
+}
+
 type UserJoinedGamePayload struct {
 	GameID string `json:"gameId"`
 	UserID string `json:"userId"`

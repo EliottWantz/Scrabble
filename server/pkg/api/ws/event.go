@@ -58,6 +58,7 @@ var (
 	ServerEventObservableTournaments = "observableTournaments"
 
 	ServerEventJoinedGame                    = "joinedGame"
+	ServerEventJoinedGameAsObserver          = "joinedGameAsObserver"
 	ServerEventLeftGame                      = "leftGame"
 	ServerEventUserJoinedGame                = "userJoinedGame"
 	ServerEventUserLeftGame                  = "userLeftGame"
