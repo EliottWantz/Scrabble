@@ -305,7 +305,7 @@ func (c *Client) HandleCreateDMRoomRequest(p *Packet) error {
 	}
 
 	r := c.Manager.AddRoom(dbRoom.ID, roomName)
-	userIds := []string{c.ID, payload.ToID}
+	userIds := []string{c.UserId, payload.ToID}
 	for _, uID := range userIds {
 		client, err := c.Manager.getClientByUserID(uID)
 		if err != nil {
@@ -371,6 +371,12 @@ func (c *Client) HandleCreateGameRequest(p *Packet) error {
 	if err != nil {
 		return err
 	}
+	if payload.IsPrivate {
+		g, err = c.Manager.GameSvc.MakeGamePrivate(g.ID)
+		if err != nil {
+			return err
+		}
+	}
 
 	r := c.Manager.AddRoom(g.ID, "")
 	for _, uID := range g.UserIDs {
@@ -394,7 +400,7 @@ func (c *Client) HandleCreateGameRequest(p *Packet) error {
 		}
 	}
 
-	return c.Manager.BroadcastObservableGames()
+	return nil
 }
 
 func (c *Client) HandleJoinGameRequest(p *Packet) error {
@@ -405,6 +411,24 @@ func (c *Client) HandleJoinGameRequest(p *Packet) error {
 
 	g, err := c.Manager.GameSvc.AddUserToGame(payload.GameID, c.UserId, payload.Password)
 	if err != nil {
+		if err == game.ErrPrivateGame {
+
+			user, err := c.Manager.UserSvc.GetUser(c.UserId)
+			p, err := NewUserRequestToJoinGamePacket(UserRequestToJoinGamePayload{
+				GameID:   g.ID,
+				UserID:   c.UserId,
+				Username: user.Username,
+			})
+			client, err := c.Manager.getClientByUserID(g.CreatorID)
+			if err != nil {
+				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+			}
+			client.send(p)
+			if err != nil {
+				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+			}
+		}
+
 		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
 
@@ -444,15 +468,6 @@ func (c *Client) HandleJoinGameAsObserverRequest(p *Packet) error {
 
 	if err := r.AddClient(c.ID); err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
-	}
-	{
-		p, err := NewJoinedGamePacket(JoinedGamePayload{
-			Game: g,
-		})
-		if err != nil {
-			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
-		}
-		c.send(p)
 	}
 	return r.BroadcastObserverJoinGamePacket(c, g)
 }
@@ -538,7 +553,13 @@ func (c *Client) HandleStartGameRequest(p *Packet) error {
 	}
 
 	r.Broadcast(gamePacket)
-	r.Manager.BroadcastJoinableGames()
+
+	if err := r.Manager.BroadcastJoinableGames(); err != nil {
+		return err
+	}
+	if err := r.Manager.BroadcastObservableGames(); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -636,6 +657,9 @@ func (c *Client) HandleGamePrivateRequest(p *Packet) error {
 		return err
 	}
 	r, err := c.Manager.GetRoom(g.ID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusNotFound, "room not found")
+	}
 	for _, observateur := range g.ObservateurIDs {
 		client, err := c.Manager.getClientByUserID(observateur)
 		if err != nil {
@@ -713,10 +737,13 @@ func (c *Client) HandleCreateTournamentRequest(p *Packet) error {
 			slog.Error("set joined tournament", err)
 			continue
 		}
-		r.BroadcastJoinTournamentPackets(client, t)
+		if err := r.BroadcastJoinTournamentPackets(client, t); err != nil {
+			slog.Error("broadcast join tournament packets", err)
+			continue
+		}
 	}
 
-	return c.Manager.BroadcastObservableTournaments()
+	return nil
 }
 
 func (c *Client) HandleJoinTournamentRequest(p *Packet) error {
@@ -727,7 +754,23 @@ func (c *Client) HandleJoinTournamentRequest(p *Packet) error {
 
 	t, err := c.Manager.GameSvc.AddUserToTournament(payload.TournamentID, c.UserId, payload.Password)
 	if err != nil {
-		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+		if err == game.ErrPrivateTournament {
+
+			user, err := c.Manager.UserSvc.GetUser(c.UserId)
+			p, err := NewUserRequestToJoinTournamentPacket(UserRequestToJoinTournamentPayload{
+				TournamentID: t.ID,
+				UserID:       c.UserId,
+				Username:     user.Username,
+			})
+			client, err := c.Manager.getClientByUserID(t.CreatorID)
+			if err != nil {
+				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+			}
+			client.send(p)
+			if err != nil {
+				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+			}
+		}
 	}
 
 	r, err := c.Manager.GetRoom(payload.TournamentID)
@@ -855,7 +898,7 @@ func (c *Client) HandleStartTournamentRequest(p *Packet) error {
 		}(ga)
 	}
 
-	return nil
+	return c.Manager.BroadcastObservableTournaments()
 }
 
 func (c *Client) HandleJoinTournamentAsObserverRequest(p *Packet) error {

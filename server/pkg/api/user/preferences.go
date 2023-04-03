@@ -5,7 +5,7 @@ type Preferences struct {
 	Language string `json:"language,omitempty"`
 }
 
-func (s *Service) UpdatePreferences(u *User, p Preferences) {
+func (s *Service) UpdatePreferences(u *User, p Preferences) error {
 	u.Preferences = p
-	s.Repo.Update(u)
+	return s.Repo.Update(u)
 }

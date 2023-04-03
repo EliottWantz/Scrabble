@@ -37,7 +37,6 @@ var (
 type Service struct {
 	Repo    *Repository
 	UserSvc *user.Service
-	Dict    *scrabble.Dictionary
 	DAWG    *scrabble.DAWG
 }
 
@@ -48,7 +47,6 @@ func NewService(repo *Repository, userSvc *user.Service) *Service {
 	s := &Service{
 		Repo:    repo,
 		UserSvc: userSvc,
-		Dict:    dict,
 		DAWG:    dawg,
 	}
 
@@ -129,7 +127,9 @@ func (s *Service) AddUserToGame(gID, userID, password string) (*Game, error) {
 	if g.IsProtected && !auth.PasswordsMatch(g.HashedPassword, password) {
 		return nil, fmt.Errorf("password mismatch")
 	}
-
+	if g.IsPrivateGame {
+		return nil, ErrPrivateGame
+	}
 	g.UserIDs = append(g.UserIDs, userID)
 
 	return g, nil
@@ -141,9 +141,9 @@ func (s *Service) AddUserToTournament(tID, userID, password string) (*Tournament
 		return nil, err
 	}
 
-	// if g.IsProtected && !auth.PasswordsMatch(g.HashedPassword, password) {
-	// 	return nil, fmt.Errorf("password mismatch")
-	// }
+	if t.IsPrivate {
+		return nil, ErrPrivateTournament
+	}
 	if len(t.UserIDs) == 4 {
 		return nil, fmt.Errorf("tournament is full")
 	}
@@ -590,6 +590,10 @@ func (s *Service) RemoveObserverFromTournament(tID string, oID string) (*Tournam
 		}
 	}
 	return nil, ErrObserverNotFound
+}
+
+func (s *Service) GetGame(gID string) (*Game, error) {
+	return s.Repo.FindGame(gID)
 }
 
 func parsePoint(str string) (scrabble.Position, error) {
