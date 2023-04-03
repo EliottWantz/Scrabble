@@ -89,11 +89,18 @@ export class WebSocketService {
         for (const id of payloadRoom.userIds) {
           userIds.push(id);
         }
+        const messages = [];
+        for (const message of payloadRoom.messages) {
+          messages.push({...message, timestamp: new Date(message.timestamp!).toLocaleTimeString(
+            undefined,
+            { hour12: false }
+          )});
+        }
         const room = {
           id: payloadRoom.roomId,
           userIds: userIds,
           name: payloadRoom.roomName,
-          messages: payloadRoom.messages,
+          messages: messages,
         };
         console.log(room);
         //this.roomService.addRoom(room);
@@ -139,11 +146,18 @@ export class WebSocketService {
         for (const id of payloadRoom.userIds) {
           userIds.push(id);
         }
+        const messages = [];
+        for (const message of payloadRoom.messages) {
+          messages.push({...message, timestamp: new Date(message.timestamp!).toLocaleTimeString(
+            undefined,
+            { hour12: false }
+          )});
+        }
         const room = {
           id: payloadRoom.roomId,
           userIds: userIds,
           name: payloadRoom.roomName,
-          messages: payloadRoom.messages,
+          messages: messages,
         };
         //this.roomService.addRoom(room);
         this.roomService.addRoom(room);
