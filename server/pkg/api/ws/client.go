@@ -394,7 +394,7 @@ func (c *Client) HandleCreateGameRequest(p *Packet) error {
 		}
 	}
 
-	return c.Manager.BroadcastObservableGames()
+	return nil
 }
 
 func (c *Client) HandleJoinGameRequest(p *Packet) error {
@@ -444,15 +444,6 @@ func (c *Client) HandleJoinGameAsObserverRequest(p *Packet) error {
 
 	if err := r.AddClient(c.ID); err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
-	}
-	{
-		p, err := NewJoinedGamePacket(JoinedGamePayload{
-			Game: g,
-		})
-		if err != nil {
-			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
-		}
-		c.send(p)
 	}
 	return r.BroadcastObserverJoinGamePacket(c, g)
 }
@@ -539,7 +530,14 @@ func (c *Client) HandleStartGameRequest(p *Packet) error {
 
 	r.Broadcast(gamePacket)
 
-	return r.Manager.BroadcastJoinableGames()
+	if err := r.Manager.BroadcastJoinableGames(); err != nil {
+		return err
+	}
+	if err := r.Manager.BroadcastObservableGames(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (c *Client) HandlePlayMoveRequest(p *Packet) error {
@@ -721,7 +719,7 @@ func (c *Client) HandleCreateTournamentRequest(p *Packet) error {
 		}
 	}
 
-	return c.Manager.BroadcastObservableTournaments()
+	return nil
 }
 
 func (c *Client) HandleJoinTournamentRequest(p *Packet) error {
@@ -860,7 +858,7 @@ func (c *Client) HandleStartTournamentRequest(p *Packet) error {
 		}(ga)
 	}
 
-	return nil
+	return c.Manager.BroadcastObservableTournaments()
 }
 
 func (c *Client) HandleJoinTournamentAsObserverRequest(p *Packet) error {
