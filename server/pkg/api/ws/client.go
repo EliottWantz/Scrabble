@@ -538,9 +538,8 @@ func (c *Client) HandleStartGameRequest(p *Packet) error {
 	}
 
 	r.Broadcast(gamePacket)
-	r.Manager.BroadcastJoinableGames()
 
-	return nil
+	return r.Manager.BroadcastJoinableGames()
 }
 
 func (c *Client) HandlePlayMoveRequest(p *Packet) error {
@@ -636,6 +635,9 @@ func (c *Client) HandleGamePrivateRequest(p *Packet) error {
 		return err
 	}
 	r, err := c.Manager.GetRoom(g.ID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusNotFound, "room not found")
+	}
 	for _, observateur := range g.ObservateurIDs {
 		client, err := c.Manager.getClientByUserID(observateur)
 		if err != nil {
@@ -713,7 +715,10 @@ func (c *Client) HandleCreateTournamentRequest(p *Packet) error {
 			slog.Error("set joined tournament", err)
 			continue
 		}
-		r.BroadcastJoinTournamentPackets(client, t)
+		if err := r.BroadcastJoinTournamentPackets(client, t); err != nil {
+			slog.Error("broadcast join tournament packets", err)
+			continue
+		}
 	}
 
 	return c.Manager.BroadcastObservableTournaments()

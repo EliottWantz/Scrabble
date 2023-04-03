@@ -298,14 +298,6 @@ func (m *Manager) getClientsByUserID(cUserID string) []*Client {
 	return clients
 }
 
-func (m *Manager) getClientUserID(cID string) (string, error) {
-	c, err := m.GetClientByWsID(cID)
-	if err != nil {
-		return "", err
-	}
-	return c.UserId, nil
-}
-
 func (m *Manager) RemoveClient(c *Client) error {
 	defer close(c.receiveCh)
 	defer close(c.sendCh)
