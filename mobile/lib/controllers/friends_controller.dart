@@ -1,6 +1,7 @@
 import 'package:client_leger/models/user.dart';
 import 'package:client_leger/screens/friend_request_screen.dart';
 import 'package:client_leger/services/room_service.dart';
+import 'package:client_leger/services/users_service.dart';
 import 'package:client_leger/services/websocket_service.dart';
 import 'package:client_leger/widgets/pending_requests_list.dart';
 import 'package:client_leger/widgets/search_bar.dart';
@@ -14,6 +15,7 @@ class FriendsController extends GetxController {
   final UserService userService = Get.find();
   final RoomService roomService = Get.find();
   final WebsocketService websocketService = Get.find();
+  final UsersService usersService = Get.find();
   List<Widget> widgetOptions = [];
 
   RxString searchInput = ''.obs;
@@ -46,7 +48,8 @@ class FriendsController extends GetxController {
       // UserList(items: filterUsersListBy(searchInput.value, userService.friends.value)),
       Column(children: [
         SearchBar(searchInput),
-        Expanded(child: UserList(inputSearch: searchInput, items: items2))
+        Expanded(child: Obx(() => UserList(inputSearch: searchInput, items: userService.friends.value)))
+        // Expanded(child: UserList(inputSearch: searchInput, items: usersService.users.value))
       ]),
       Column(children: [
         SearchBar(searchInput),

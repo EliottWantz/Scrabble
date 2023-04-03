@@ -1,3 +1,4 @@
+import 'package:client_leger/models/user.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -16,7 +17,7 @@ class UserList extends StatelessWidget {
   UserList({
     Key? key,
     required RxString inputSearch,
-    required List<String> items,
+    required List<dynamic> items,
   }) : _inputSearch = inputSearch,
         _items = items,
         super(key: key);
@@ -26,7 +27,7 @@ class UserList extends StatelessWidget {
 
   final RxString _inputSearch;
 
-  final List<String> _items; // = [
+  final List<dynamic> _items; // = [
   //   'Friend1',
   //   'Friend2',
   //   'Friend3',

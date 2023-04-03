@@ -11,6 +11,7 @@ const String ServerEventNewUser = "newUser";
 const String ServerEventUsersInRoom  = "usersInRoom";
 const String ServerEventChatMessage = "chat-message";
 const String ServerEventJoinableGames = "joinableGames";
+const String ServerEventObservableGames = "observableGames";
 const String ServerEventJoinedGame           = "joinedGame";
 const String ServerEventLeftGame = "leftGame";
 const String ServerEventUserJoinedGame       = "userJoinedGame";

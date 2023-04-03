@@ -29,6 +29,7 @@ import 'package:client_leger/models/response/joined_dm_room_response.dart';
 import 'package:client_leger/models/response/joined_game_response.dart';
 import 'package:client_leger/models/response/joined_room_response.dart';
 import 'package:client_leger/models/response/left_game_response.dart';
+import 'package:client_leger/models/response/list_observable_games_response.dart';
 import 'package:client_leger/models/response/list_users_response.dart';
 import 'package:client_leger/models/response/send_friend_response.dart';
 import 'package:client_leger/models/response/timer_response.dart';
@@ -209,6 +210,12 @@ class WebsocketService extends GetxService {
           handleServerEventJoinableGames(joinableGamesResponse);
         }
         break;
+      case ServerEventObservableGames:
+        {
+          ObservableGamesResponse observableGamesResponse = ObservableGamesResponse.fromRawJson(data);
+          handleServerEventObservableGames(observableGamesResponse);
+        }
+        break;
       case ServerEventGameUpdate:
         {
           print('received game update');
@@ -387,6 +394,10 @@ class WebsocketService extends GetxService {
     print('before first joinable game userids');
     gameService.joinableGames.value = joinableGamesResponse.payload.games;
     // print(listJoinableGamesResponse.payload.games[0].usersIds.toString());
+  }
+
+  void handleServerEventObservableGames(ObservableGamesResponse observableGamesResponse) {
+    gameService.observableGames.value = observableGamesResponse.payload.games;
   }
 
   void handleServerEventGameUpdate(GameUpdateResponse gameUpdateResponse) {

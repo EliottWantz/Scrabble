@@ -15,6 +15,7 @@ class GameService extends GetxService {
   final UserService userService = Get.find();
 
   final joinableGames = Rxn<List<Game>>();
+  final observableGames = Rxn<List<Game>>();
 
   // final currentGameRoom = Rxn<Room>();
   late String currentGameId;

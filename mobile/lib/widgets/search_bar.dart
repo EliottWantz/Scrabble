@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
 
 class SearchBar extends StatelessWidget {
@@ -30,29 +31,35 @@ class SearchBar extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.all(8),
       padding: const EdgeInsets.all(8),
-      child: TextField(
-        controller: controller,
-        keyboardType: TextInputType.text,
-        focusNode: messageInputFocusNode,
-        onChanged: (_) {
-          _input.value = controller.text;
-          messageInputFocusNode.requestFocus();
-        },
-        onSubmitted: (_) {
-          messageInputFocusNode.requestFocus();
-        },
-        decoration: InputDecoration(
-            hintText: "Recherchez",
-            suffixIcon: IconButton(
-              onPressed: () {
-                _input.value = '';
-                controller.text = '';
-              },
-              icon: Icon(Icons.clear),
-            ),
-            border: OutlineInputBorder(
-                borderRadius:
-                BorderRadius.all(Radius.circular(8)))
+      child: Obx(() => TextField(
+          controller: controller,
+          keyboardType: TextInputType.text,
+          focusNode: messageInputFocusNode,
+          onChanged: (_) {
+            _input.value = controller.text;
+            messageInputFocusNode.requestFocus();
+          },
+          onSubmitted: (_) {
+            messageInputFocusNode.requestFocus();
+          },
+          decoration: InputDecoration(
+              hintText: "Recherchez",
+              suffixIcon: _input.value == ''
+              ? IconButton(
+                  onPressed: () {},
+                  icon: Icon(Icons.search)
+                )
+              : IconButton(
+                  onPressed: () {
+                    _input.value = '';
+                    controller.text = '';
+                  },
+                  icon: Icon(Icons.clear),
+                ),
+              border: OutlineInputBorder(
+                  borderRadius:
+                  BorderRadius.all(Radius.circular(8)))
+          ),
         ),
       ),
     );
