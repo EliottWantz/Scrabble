@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 
@@ -14,14 +15,18 @@ import '../services/users_service.dart';
 class UserList extends StatelessWidget {
   UserList({
     Key? key,
-    required List<dynamic> items,
-  }) : _items = items,
+    required RxString inputSearch,
+    required List<String> items,
+  }) : _inputSearch = inputSearch,
+        _items = items,
         super(key: key);
 
   final UserService _userService = Get.find();
   final UsersService _usersService = Get.find();
 
-  final List<dynamic> _items; // = [
+  final RxString _inputSearch;
+
+  final List<String> _items; // = [
   //   'Friend1',
   //   'Friend2',
   //   'Friend3',
@@ -37,29 +42,47 @@ class UserList extends StatelessWidget {
   // ];
 
   Widget build(BuildContext context) {
-    return Scrollbar(
-        child: _buildList()
+    return Obx(() => Scrollbar(
+          child: _buildList(_inputSearch.value)
+      ),
     );
   }
 
-  Widget _buildList() {
-    return Obx(() => ListView.builder(
-      padding: const EdgeInsets.all(16.0),
-      // itemCount: _items.length,
-      itemCount: _userService.friends.value!.length,
-      itemBuilder: (context, item) {
-        // if (item.isEven) return Divider();
+  final ScrollController scrollController = ScrollController();
 
-        final index = item;
+  void scrollDown() {
+    scrollController.jumpTo(scrollController.position.minScrollExtent);
+  }
 
-        // if (index >= _randomWordPairs.length) {
-        //   _randomWordPairs.addAll(generateWordPairs().take(10));
-        // }
+  Widget _buildList(String inputSearch) {
+    SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+      scrollDown();
+    });
+    
+    List<String> filteredItems = filterUsersListBy(_inputSearch.value, _items);
 
-        // return _buildRow(_randomWordPairs[index]);
-        return _buildRow(_userService.friends.value![index]);
-      },
-    ));
+    return ListView.builder(
+        controller: scrollController,
+        padding: const EdgeInsets.all(16.0),
+        itemCount: filteredItems.length,
+        // itemCount: _userService.friends.value!.length,
+        itemBuilder: (context, item) {
+          // if (item.isEven) return Divider();
+
+          final index = item;
+
+          // if (index >= _randomWordPairs.length) {
+          //   _randomWordPairs.addAll(generateWordPairs().take(10));
+          // }
+          // if (_items[index].startsWith(_inputSearch.value)) {
+          //   return _buildRow(_items[index]);
+          // }
+          return _buildRow(filteredItems[index]);
+          // return _buildRow(_randomWordPairs[index]);
+          // return _buildRow(_userService.friends.value![index]);
+          // return _buildRow(_items[index]);
+        },
+    );
   }
 
   Widget _buildRow(dynamic username) {
@@ -87,5 +110,15 @@ class UserList extends StatelessWidget {
           //     color: alreadySaved ? Colors.red : null),
       ],
     );
+  }
+
+  List<String> filterUsersListBy(String filter, List<dynamic> list) {
+    List<String> filteredUserList = [];
+    for (final user in list) {
+      if (user.contains(filter)) {
+        filteredUserList.add(user);
+      }
+    }
+    return filteredUserList;
   }
 }

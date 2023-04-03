@@ -1,5 +1,6 @@
 import 'package:client_leger/controllers/chatbox_controller.dart';
 import 'package:client_leger/controllers/friends_controller.dart';
+import 'package:client_leger/widgets/search_bar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -12,9 +13,9 @@ class FriendsScreen extends GetView<FriendsController> {
     return Obx(() =>
         Scaffold(
         body: Center(
-          child: controller.widgetOptions.elementAt(controller.selectedIndex.value),
-          // child: controller.widgetOptions.elementAt(0),
-        ),
+                child: controller.widgetOptions.elementAt(controller.selectedIndex.value),
+                // child: controller.widgetOptions.elementAt(0),
+              ),
         bottomNavigationBar: BottomNavigationBar(
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
