@@ -754,7 +754,23 @@ func (c *Client) HandleJoinTournamentRequest(p *Packet) error {
 
 	t, err := c.Manager.GameSvc.AddUserToTournament(payload.TournamentID, c.UserId, payload.Password)
 	if err != nil {
-		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+		if err == game.ErrPrivateTournament {
+
+			user, err := c.Manager.UserSvc.GetUser(c.UserId)
+			p, err := NewUserRequestToJoinTournamentPacket(UserRequestToJoinTournamentPayload{
+				TournamentID: t.ID,
+				UserID:       c.UserId,
+				Username:     user.Username,
+			})
+			client, err := c.Manager.getClientByUserID(t.CreatorID)
+			if err != nil {
+				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+			}
+			client.send(p)
+			if err != nil {
+				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+			}
+		}
 	}
 
 	r, err := c.Manager.GetRoom(payload.TournamentID)

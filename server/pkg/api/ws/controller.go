@@ -268,3 +268,54 @@ func (m *Manager) RejectJoinGameRequest(c *fiber.Ctx) error {
 	r.SendVerdictJoinGameRequest(client, g, Declined)
 	return nil
 }
+
+func (m *Manager) AcceptJoinTournamentRequest(c *fiber.Ctx) error {
+	id := c.Params("id")
+	requestorId := c.Params("requestorId")
+	tId := c.Params("tournamentId")
+	t, err := m.GameSvc.Repo.FindTournament(tId)
+
+	if t.CreatorID == id {
+		return fiber.NewError(fiber.StatusBadRequest, "You are not the creator of the tournament")
+	}
+	r, err := m.GetRoom(tId)
+
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	client, err := m.getClientByUserID(requestorId)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+
+	if err := r.AddClient(client.ID); err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+	if err := m.UserSvc.Repo.SetJoinedTournament(t.ID, requestorId); err != nil {
+		return err
+	}
+
+	r.SendVerdictJoinTournamentRequest(client, t, Accepted)
+	return r.BroadcastJoinTournamentPackets(client, t)
+}
+
+func (m *Manager) RejectJoinTournamentRequest(c *fiber.Ctx) error {
+	id := c.Params("id")
+	tId := c.Params("tournamentId")
+	t, err := m.GameSvc.Repo.FindTournament(tId)
+
+	if t.CreatorID == id {
+		return fiber.NewError(fiber.StatusBadRequest, "You are not the creator of the tournament")
+	}
+	r, err := m.GetRoom(tId)
+
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	client, err := m.getClientByUserID(id)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	r.SendVerdictJoinTournamentRequest(client, t, Declined)
+	return nil
+}
