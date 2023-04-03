@@ -357,7 +357,7 @@ class GameStartScreen extends StatelessWidget {
             DataCell(
               ElevatedButton.icon(
                 onPressed: () {
-                  _websocketService.joinGame(game.id);
+                  _websocketService.joinGameAsObserver(game.id);
                   Get.toNamed(
                       Routes.HOME + Routes.GAME_START + Routes.LOBBY);
                 },

@@ -23,6 +23,7 @@ class GameService extends GetxService {
 
   // final currentGameRoomUsers = Rxn<List<User>>();
   final currentGameRoomUserIds = <String>[].obs;
+  final currentGameRoomObserverIds = <String>[].obs;
 
   final currentGame = Rxn<GameUpdatePayload>();
   final currentGameTimer = Rxn<int>();
