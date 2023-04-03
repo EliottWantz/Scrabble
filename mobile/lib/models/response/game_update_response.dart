@@ -13,7 +13,7 @@ class GameUpdateResponse {
 
   factory GameUpdateResponse.fromJson(Map<String, dynamic> json) => GameUpdateResponse(
       event: json["event"],
-      payload: GameUpdatePayload.fromJson(json["payload"])
+      payload: GameUpdatePayload.fromJson(json["payload"]["game"])
   );
 
   Map<String, dynamic> toJson() => {

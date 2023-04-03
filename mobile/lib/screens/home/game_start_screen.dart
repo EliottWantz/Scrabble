@@ -358,8 +358,8 @@ class GameStartScreen extends StatelessWidget {
               ElevatedButton.icon(
                 onPressed: () {
                   _websocketService.joinGameAsObserver(game.id);
-                  Get.toNamed(
-                      Routes.HOME + Routes.GAME_START + Routes.LOBBY);
+                  // Get.toNamed(
+                  //     Routes.HOME + Routes.GAME_START + Routes.LOBBY);
                 },
                 icon: const Icon(
                   // <-- Icon

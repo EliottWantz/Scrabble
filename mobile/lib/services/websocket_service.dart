@@ -33,6 +33,7 @@ import 'package:client_leger/models/response/list_observable_games_response.dart
 import 'package:client_leger/models/response/list_users_response.dart';
 import 'package:client_leger/models/response/send_friend_response.dart';
 import 'package:client_leger/models/response/timer_response.dart';
+import 'package:client_leger/models/response/joined_game_as_observer_response.dart';
 import 'package:client_leger/models/response/user_joined_game_response.dart';
 import 'package:client_leger/models/response/user_joined_response.dart';
 import 'package:client_leger/models/response/user_joined_room_response.dart';
@@ -169,6 +170,13 @@ class WebsocketService extends GetxService {
           JoinedGameResponse joinedGameRoomResponse =
               JoinedGameResponse.fromRawJson(data);
           handleEventJoinedGame(joinedGameRoomResponse);
+        }
+        break;
+      case ServerEventJoinedGameAsObserver:
+        {
+          JoinedGameAsObserverResponse joinedGameAsObserver =
+              JoinedGameAsObserverResponse.fromRawJson(data);
+          handleEventJoinedGameAsObserver(joinedGameAsObserver);
         }
         break;
       // case ServerEventUserJoined: {
@@ -343,6 +351,24 @@ class WebsocketService extends GetxService {
     }
   }
 
+  void handleEventJoinedGameAsObserver(JoinedGameAsObserverResponse joinedGameAsObserverResponse) {
+    gameService.currentGameId = joinedGameAsObserverResponse.payload.game.id;
+    gameService.currentGameInfo = joinedGameAsObserverResponse.payload.game;
+    gameService.currentGameRoomObserverIds!.add(userService.user.value!.id);
+    Room gameRoom = Room(
+        roomId: joinedGameAsObserverResponse.payload.game.id,
+        roomName: 'Game Room',
+        userIds: joinedGameAsObserverResponse.payload.game.userIds,
+        messages: <ChatMessagePayload>[]
+    );
+    roomService.addRoom(joinedGameAsObserverResponse.payload.game.id, gameRoom);
+    gameService.currentGameRoomUserIds.addAll(joinedGameAsObserverResponse!.payload.game.userIds);
+
+    gameService.currentGame.value = joinedGameAsObserverResponse.payload.gameUpdate;
+    bool isObserving = true;
+    Get.offAllNamed(Routes.GAME, arguments: isObserving);
+  }
+
   // void handleEventUserJoined(UserJoinedResponse userJoinedResponse) {
   //   // Room currentGameRoom = gameService.currentGameRoom.value!;
   //   // currentGameRoom.users.add(userJoinedResponse.payload.user);
@@ -403,7 +429,7 @@ class WebsocketService extends GetxService {
   void handleServerEventGameUpdate(GameUpdateResponse gameUpdateResponse) {
     if (gameService.currentGame.value == null) {
       gameService.currentGame.value = gameUpdateResponse.payload;
-      bool isObserving = true;
+      bool isObserving = false;
       getIndices();
       Get.offAllNamed(Routes.GAME, arguments: isObserving);
     } else if (Get.isRegistered<GameController>()) {
