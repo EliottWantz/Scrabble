@@ -212,3 +212,53 @@ func (m *Manager) GetPendingFriendRequests(c *fiber.Ctx) error {
 		FriendRequests: friendRequests,
 	})
 }
+func (m *Manager) AcceptJoinGameRequest(c *fiber.Ctx) error {
+	id := c.Params("id")
+	requestorId := c.Params("requestorId")
+	gId := c.Params("gameId")
+	g, err := m.GameSvc.Repo.FindGame(gId)
+
+	if g.CreatorID == id {
+		return fiber.NewError(fiber.StatusBadRequest, "You are not the creator of the game")
+	}
+	r, err := m.GetRoom(gId)
+
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	client, err := m.getClientByUserID(requestorId)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+
+	if err := r.AddClient(client.ID); err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+	if err := m.UserSvc.Repo.SetJoinedGame(g.ID, requestorId); err != nil {
+		return err
+	}
+
+	r.SendVerdictJoinGameRequest(client, g, Accepted)
+	return r.BroadcastJoinGamePackets(client, g)
+}
+
+func (m *Manager) RejectJoinGameRequest(c *fiber.Ctx) error {
+	id := c.Params("id")
+	gId := c.Params("gameId")
+	g, err := m.GameSvc.Repo.FindGame(gId)
+
+	if g.CreatorID == id {
+		return fiber.NewError(fiber.StatusBadRequest, "You are not the creator of the game")
+	}
+	r, err := m.GetRoom(gId)
+
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	client, err := m.getClientByUserID(id)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	r.SendVerdictJoinGameRequest(client, g, Declined)
+	return nil
+}
