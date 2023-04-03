@@ -2,30 +2,37 @@ package ws
 
 // Client events
 var (
-	ClientEventNoEvent                      = ""
-	ClientEventChatMessage                  = "chat-message"
-	ClientEventJoinGameAsObservateur        = "join-game-as-observateur"
-	ClientEventLeaveGameAsObservateur       = "leave-game-as-observateur"
-	ClientEventGamePrivate                  = "game-private"
-	ClientEventGamePublic                   = "game-public"
-	ClientEventReplaceBotByObserver         = "replace-bot-by-observer"
-	ClientEventCreateRoom                   = "create-room"
-	ClientEventJoinRoom                     = "join-room"
-	ClientEventLeaveRoom                    = "leave-room"
-	ClientEventCreateDMRoom                 = "create-dm-room"
-	ClientEventLeaveDMRoom                  = "leave-dm-room"
-	ClientEventCreateGame                   = "create-game"
-	ClientEventJoinGame                     = "join-game"
-	ClientEventLeaveGame                    = "leave-game"
-	ClientEventStartGame                    = "start-game"
+	ClientEventNoEvent     = ""
+	ClientEventChatMessage = "chat-message"
+
+	ClientEventGamePrivate = "game-private"
+	ClientEventGamePublic  = "game-public"
+
+	ClientEventReplaceBotByObserver = "replace-bot-by-observer"
+
+	ClientEventCreateRoom = "create-room"
+	ClientEventJoinRoom   = "join-room"
+	ClientEventLeaveRoom  = "leave-room"
+
+	ClientEventCreateDMRoom = "create-dm-room"
+	ClientEventLeaveDMRoom  = "leave-dm-room"
+
+	ClientEventCreateGame             = "create-game"
+	ClientEventJoinGame               = "join-game"
+	ClientEventLeaveGame              = "leave-game"
+	ClientEventStartGame              = "start-game"
+	ClientEventJoinGameAsObservateur  = "join-game-as-observateur"
+	ClientEventLeaveGameAsObservateur = "leave-game-as-observateur"
+
+	ClientEventPlayMove = "playMove"
+	ClientEventIndice   = "indice"
+
 	ClientEventCreateTournament             = "create-tournament"
 	ClientEventJoinTournament               = "join-tournament"
 	ClientEventLeaveTournament              = "leave-tournament"
 	ClientEventStartTournament              = "start-tournament"
 	ClientEventJoinTournamentAsObservateur  = "join-tournament-as-observateur"
 	ClientEventLeaveTournamentAsObservateur = "leave-tournament-as-observateur"
-	ClientEventPlayMove                     = "playMove"
-	ClientEventIndice                       = "indice"
 )
 
 // Server events
