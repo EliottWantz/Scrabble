@@ -1,5 +1,6 @@
 import 'package:client_leger/controllers/auth_controller.dart';
 import 'package:client_leger/controllers/home_controller.dart';
+import 'package:client_leger/models/game.dart';
 import 'package:client_leger/models/game_room.dart';
 import 'package:client_leger/routes/app_routes.dart';
 import 'package:client_leger/screens/floating_chat_screen.dart';
@@ -7,6 +8,7 @@ import 'package:client_leger/services/game_service.dart';
 import 'package:client_leger/services/room_service.dart';
 import 'package:client_leger/services/settings_service.dart';
 import 'package:client_leger/services/user_service.dart';
+import 'package:client_leger/services/users_service.dart';
 import 'package:client_leger/services/websocket_service.dart';
 import 'package:client_leger/utils/constants/game.dart';
 import 'package:client_leger/utils/dialog_helper.dart';
@@ -28,6 +30,7 @@ class GameStartScreen extends StatelessWidget {
   final GameService _gameService = Get.find();
   final RoomService _roomService = Get.find();
   final SettingsService _settingsService = Get.find();
+  final UsersService _usersService = Get.find();
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -172,8 +175,8 @@ class GameStartScreen extends StatelessWidget {
                 toolbarHeight: 0,
                 bottom: const TabBar(
                   tabs: [
-                    Tab(text: 'Parties privées'),
                     Tab(text: 'Parties publiques'),
+                    Tab(text: 'Parties privées'),
                   ],
                 ),
               ),
@@ -242,14 +245,28 @@ class GameStartScreen extends StatelessWidget {
                 DataColumn(
                   label: Expanded(
                     child: Text(
-                      'Room Name',
+                      'Créateur',
                     ),
                   ),
                 ),
                 DataColumn(
                   label: Expanded(
                     child: Text(
-                      'Users',
+                        'Joueurs',
+                    ),
+                  ),
+                ),
+                DataColumn(
+                  label: Expanded(
+                    child: Text(
+                      'Type',
+                    ),
+                  ),
+                ),
+                DataColumn(
+                  label: Expanded(
+                    child: Text(
+                      'Rejoindre',
                     ),
                   ),
                 ),
@@ -289,14 +306,28 @@ class GameStartScreen extends StatelessWidget {
                 DataColumn(
                   label: Expanded(
                     child: Text(
-                      'Room Name',
+                      'Créateur',
                     ),
                   ),
                 ),
                 DataColumn(
                   label: Expanded(
                     child: Text(
-                      'Users',
+                      'Joueurs',
+                    ),
+                  ),
+                ),
+                DataColumn(
+                  label: Expanded(
+                    child: Text(
+                      'Type',
+                    ),
+                  ),
+                ),
+                DataColumn(
+                  label: Expanded(
+                    child: Text(
+                      'Rejoindre',
                     ),
                   ),
                 ),
@@ -331,7 +362,13 @@ class GameStartScreen extends StatelessWidget {
           .expand((game) => [
                 if (game.isPrivateGame == privateGames)
                   DataRow(cells: [
-                    DataCell(Text(game.id)),
+                    DataCell(Text(_usersService.getUserUsername(game.creatorId))),
+                    DataCell(
+                      Text('${game.userIds.length} / 4')
+                    ),
+                    DataCell(
+                        _buildTypeOfGame(game)
+                    ),
                     DataCell(
                       ElevatedButton.icon(
                         onPressed: () {
@@ -411,6 +448,14 @@ class GameStartScreen extends StatelessWidget {
         const Divider(),
       ],
     );
+  }
+
+  Widget _buildTypeOfGame(Game game) {
+    if (game.isProtected) {
+      return Text('Protéger');
+    } else {
+      return Text('Ouverte');
+    }
   }
 
 // void _showCreateGameDialog(BuildContext context) {
