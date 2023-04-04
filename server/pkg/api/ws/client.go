@@ -412,7 +412,7 @@ func (c *Client) HandleJoinGameRequest(p *Packet) error {
 	g, err := c.Manager.GameSvc.AddUserToGame(payload.GameID, c.UserId, payload.Password)
 	if err != nil {
 		if err == game.ErrPrivateGame {
-
+			g.JoinGameRequestUserIds = append(g.JoinGameRequestUserIds, c.UserId)
 			user, err := c.Manager.UserSvc.GetUser(c.UserId)
 			p, err := NewUserRequestToJoinGamePacket(UserRequestToJoinGamePayload{
 				GameID:   g.ID,
@@ -755,7 +755,7 @@ func (c *Client) HandleJoinTournamentRequest(p *Packet) error {
 	t, err := c.Manager.GameSvc.AddUserToTournament(payload.TournamentID, c.UserId, payload.Password)
 	if err != nil {
 		if err == game.ErrPrivateTournament {
-
+			t.JoinTournamentRequestUserIds = append(t.JoinTournamentRequestUserIds, c.UserId)
 			user, err := c.Manager.UserSvc.GetUser(c.UserId)
 			p, err := NewUserRequestToJoinTournamentPacket(UserRequestToJoinTournamentPayload{
 				TournamentID: t.ID,

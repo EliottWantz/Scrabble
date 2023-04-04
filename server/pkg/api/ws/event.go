@@ -77,10 +77,13 @@ var (
 	ServerEventTournamentUpdate     = "tournamentUpdate"
 	ServerEventTournamentOver       = "tournamentOver"
 
-	ServerEventUserRequestToJoinGame               = "userRequestToJoinGame"
-	ServerEventUserRequestToJoinTournament         = "userRequestToJoinTournament"
-	ServerEventUserRequestToJoinGameAccepted       = "userRequestToJoinGameAccepted"
+	ServerEventUserRequestToJoinGame         = "userRequestToJoinGame"
+	ServerEventRevokeRequestToJoinGame       = "revokeRequestToJoinGame"
+	ServerEventUserRequestToJoinTournament   = "userRequestToJoinTournament"
+	ServerEventUserRequestToJoinGameAccepted = "userRequestToJoinGameAccepted"
+
 	ServerEventUserRequestToJoinTournamentAccepted = "userRequestToJoinTournamentAccepted"
+	ServerEventRevokeRequestToJoinTournament       = "revokeRequestToJoinTournament"
 	ServerEventUserRequestToJoinGameDeclined       = "userRequestToJoinGameDeclined"
 	ServerEventUserRequestToJoinTournamentDeclined = "userRequestToJoinTournamentDeclined"
 
