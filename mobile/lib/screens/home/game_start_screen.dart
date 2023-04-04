@@ -295,6 +295,9 @@ class GameStartScreen extends StatelessWidget {
                             onPressed: () {
                               if (_passwordFormKey.currentState!.validate()) {
                                 DialogHelper.hideLoading();
+                                _websocketService.createGameRoom(password: gamePasswordController.text);
+                                Get.toNamed(
+                                    Routes.HOME + Routes.GAME_START + Routes.LOBBY);
                               }
                             },
                             child: const Text('Confirmer')),
