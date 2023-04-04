@@ -70,6 +70,7 @@ type LeaveDMRoomPayload struct {
 }
 
 type CreateGamePayload struct {
+	IsPrivate   bool     `json:"isPrivate"`
 	Password    string   `json:"password,omitempty"`
 	WithUserIDs []string `json:"withUserIds"`
 }
@@ -277,6 +278,15 @@ func NewJoinedGamePacket(payload JoinedGamePayload) (*Packet, error) {
 	return NewPacket(ServerEventJoinedGame, payload)
 }
 
+type JoinedGameAsObserverPayload struct {
+	Game       *game.Game         `json:"game"`
+	GameUpdate *gameUpdatePayload `json:"gameUpdate"`
+}
+
+func NewJoinedGameAsObserverPacket(payload JoinedGameAsObserverPayload) (*Packet, error) {
+	return NewPacket(ServerEventJoinedGameAsObserver, payload)
+}
+
 type UserJoinedGamePayload struct {
 	GameID string `json:"gameId"`
 	UserID string `json:"userId"`
@@ -440,4 +450,68 @@ func NewErrorPacket(err error) (*Packet, error) {
 		Error string `json:"error"`
 	}
 	return NewPacket(ServerEventError, ErrorPayload{err.Error()})
+}
+
+type UserRequestToJoinGamePayload struct {
+	GameID   string `json:"gameId"`
+	UserID   string `json:"userId"`
+	Username string `json:"username"`
+}
+
+func NewUserRequestToJoinGamePacket(payload UserRequestToJoinGamePayload) (*Packet, error) {
+	return NewPacket(ServerEventUserRequestToJoinGame, payload)
+}
+
+type UserRequestToJoinTournamentPayload struct {
+	TournamentID string `json:"tournamentId"`
+	UserID       string `json:"userId"`
+	Username     string `json:"username"`
+}
+
+func NewUserRequestToJoinTournamentPacket(payload UserRequestToJoinTournamentPayload) (*Packet, error) {
+	return NewPacket(ServerEventUserRequestToJoinTournament, payload)
+}
+
+type VerdictJoinGameRequestPayload struct {
+	GameID string `json:"gameId"`
+	UserID string `json:"userId"`
+}
+
+func NewAcceptJoinGameRequestPacket(payload VerdictJoinGameRequestPayload) (*Packet, error) {
+	return NewPacket(ServerEventUserRequestToJoinGameAccepted, payload)
+}
+
+func NewDeclineJoinGameRequestPacket(payload VerdictJoinGameRequestPayload) (*Packet, error) {
+	return NewPacket(ServerEventUserRequestToJoinGameDeclined, payload)
+}
+
+type VerdictJoinTournamentRequestPayload struct {
+	TournamentID string `json:"tournamentId"`
+	UserID       string `json:"userId"`
+}
+
+func NewAcceptJoinTournamentRequestPacket(payload VerdictJoinTournamentRequestPayload) (*Packet, error) {
+	return NewPacket(ServerEventUserRequestToJoinTournamentAccepted, payload)
+}
+
+func NewDeclineJoinTournamentRequestPacket(payload VerdictJoinTournamentRequestPayload) (*Packet, error) {
+	return NewPacket(ServerEventUserRequestToJoinTournamentDeclined, payload)
+}
+
+type RevokeRequestToJoinGamePayload struct {
+	GameID string `json:"gameId"`
+	UserID string `json:"userId"`
+}
+
+func NewRevokeRequestToJoinGamePacket(payload RevokeRequestToJoinGamePayload) (*Packet, error) {
+	return NewPacket(ServerEventRevokeRequestToJoinGame, payload)
+}
+
+type RevokeRequestToJoinTournamentPayload struct {
+	TournamentID string `json:"tournamentId"`
+	UserID       string `json:"userId"`
+}
+
+func NewRevokeRequestToJoinTournamentPacket(payload RevokeRequestToJoinTournamentPayload) (*Packet, error) {
+	return NewPacket(ServerEventRevokeRequestToJoinTournament, payload)
 }

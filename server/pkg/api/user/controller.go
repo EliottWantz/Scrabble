@@ -258,6 +258,8 @@ func (ctrl *Controller) UpdateUsername(c *fiber.Ctx) error {
 	}
 	user.Username = req.Username
 
-	ctrl.svc.Repo.Update(user)
+	if err := ctrl.svc.Repo.Update(user); err != nil {
+		return err
+	}
 	return c.SendStatus(fiber.StatusOK)
 }
