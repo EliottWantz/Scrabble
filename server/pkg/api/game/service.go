@@ -128,7 +128,7 @@ func (s *Service) AddUserToGame(gID, userID, password string) (*Game, error) {
 		return nil, fmt.Errorf("password mismatch")
 	}
 	if g.IsPrivateGame {
-		return nil, ErrPrivateGame
+		return g, ErrPrivateGame
 	}
 	g.UserIDs = append(g.UserIDs, userID)
 
@@ -142,7 +142,7 @@ func (s *Service) AddUserToTournament(tID, userID, password string) (*Tournament
 	}
 
 	if t.IsPrivate {
-		return nil, ErrPrivateTournament
+		return t, ErrPrivateTournament
 	}
 	if len(t.UserIDs) == 4 {
 		return nil, fmt.Errorf("tournament is full")
