@@ -32,6 +32,7 @@ import 'package:client_leger/models/response/left_game_response.dart';
 import 'package:client_leger/models/response/list_observable_games_response.dart';
 import 'package:client_leger/models/response/list_users_response.dart';
 import 'package:client_leger/models/response/send_friend_response.dart';
+import 'package:client_leger/models/response/server_error_response.dart';
 import 'package:client_leger/models/response/timer_response.dart';
 import 'package:client_leger/models/response/joined_game_as_observer_response.dart';
 import 'package:client_leger/models/response/user_joined_game_response.dart';
@@ -42,6 +43,7 @@ import 'package:client_leger/models/user.dart';
 import 'package:client_leger/routes/app_routes.dart';
 import 'package:client_leger/services/room_service.dart';
 import 'package:client_leger/services/users_service.dart';
+import 'package:client_leger/utils/dialog_helper.dart';
 import 'package:get/get.dart';
 
 // import 'package:socket_io_client/socket_io_client.dart' as IO;
@@ -266,6 +268,12 @@ class WebsocketService extends GetxService {
           handleIndiceResponse(indiceResponse);
         }
         break;
+      case ServerEventError:
+        {
+          ErrorResponse errorResponse = ErrorResponse.fromRawJson(data);
+          handleErrorResponse(errorResponse);
+        }
+        break;
       default:
         {
           print('no event in package received');
@@ -476,6 +484,18 @@ class WebsocketService extends GetxService {
   void handleIndiceResponse(IndiceResponse indiceResponse) {
     if (indiceResponse.payload.isEmpty) return;
     gameService.indices.addAll(indiceResponse.payload);
+  }
+
+  void handleErrorResponse(ErrorResponse errorResponse) {
+    switch(errorResponse.payload.error) {
+      case JoinGamePasswordMismatch: {
+        DialogHelper.showErrorDialog(description: JoinGamePasswordMismatchMessage);
+      }
+      break;
+      default: {
+        print('error message not treated');
+      }
+    }
   }
 
   void createRoom(String roomName, {List<String> userIds = const []}) {

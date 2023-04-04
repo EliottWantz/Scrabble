@@ -665,7 +665,9 @@ class GameStartScreen extends StatelessWidget {
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                                 side: const BorderSide(color: Colors.black))),
-                        onPressed: () {},
+                        onPressed: () {
+                          _websocketService.joinGame(game.id, password: joinGamePasswordController.text);
+                        },
                         child: const Text('Confirmer')),
                     TextButton(
                         style: TextButton.styleFrom(

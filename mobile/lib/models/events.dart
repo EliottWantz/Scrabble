@@ -47,3 +47,8 @@ const String ClientEventStartGame = "start-game";
 const String ClientEventPlayMove    = "playMove";
 const String ClientEventIndice = "indice";
 
+
+// Error payloads
+const String JoinGamePasswordMismatch = "password mismatch";
+const String JoinGamePasswordMismatchMessage = "Mauvais mot de passe";
+
