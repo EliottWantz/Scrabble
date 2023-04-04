@@ -438,7 +438,7 @@ func (s *Service) MakeGamePrivate(gID string) (*Game, error) {
 	if g.IsPrivateGame {
 		return nil, ErrPrivateGame
 	}
-	if g.ScrabbleGame.IsOver() {
+	if g.ScrabbleGame != nil {
 		return nil, ErrGameOver
 	}
 	g.IsPrivateGame = true
@@ -453,7 +453,7 @@ func (s *Service) MakeGamePublic(gID string) (*Game, error) {
 	if !g.IsPrivateGame {
 		return nil, ErrPublicGame
 	}
-	if g.ScrabbleGame.IsOver() {
+	if g.ScrabbleGame != nil {
 		return nil, ErrGameOver
 	}
 	g.IsPrivateGame = false
