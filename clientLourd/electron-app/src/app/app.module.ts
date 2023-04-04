@@ -50,6 +50,7 @@ import { MatStepperModule } from '@angular/material/stepper';
 import { ColorPickerModule } from 'ngx-color-picker';
 import { GameObservePageComponent } from "@app/pages/game-observe-page/game-observe-page.component";
 import { JoinPrivateGameComponent } from '@app/components/join-private-game/join-private-game.component';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
@@ -110,6 +111,7 @@ import { HttpClient } from '@angular/common/http';
     HttpClientModule,
     MatStepperModule,
     ColorPickerModule,
+    MatButtonToggleModule,
     TranslateModule.forRoot({
       loader: {
         provide: TranslateLoader,
