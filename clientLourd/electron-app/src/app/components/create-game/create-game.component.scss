@@ -102,3 +102,54 @@ button {
   padding-top: 1%;
   padding-bottom: 1%;
 }
+
+::ng-deep .mat-button-toggle-appearance-standard .mat-button-toggle-label-content {
+  line-height: 48px;
+}
+
+::ng-deep .mat-button-toggle-standalone.mat-button-toggle-appearance-standard, .mat-button-toggle-group-appearance-standard {
+  border: solid 1px #e0e0e0;
+}
+
+::ng-deep .mat-button-toggle-standalone.mat-button-toggle-appearance-standard, .mat-button-toggle-group-appearance-standard {
+  border-radius: 4px;
+  border: solid 1px #e0e0e0
+}
+
+::ng-deep .mat-button-toggle-checked.mat-button-toggle-appearance-standard {
+  color: rgba(0, 0, 0, 0.87);
+}
+
+::ng-deep .mat-button-toggle-checked {
+  background-color: #e0e0e0;
+}
+
+::ng-deep .mat-button-toggle-appearance-standard {
+  background: white;
+}
+
+::ng-deep .mat-button-toggle-appearance-standard .mat-button-toggle-label-content {
+  padding: 0 12px;
+}
+
+::ng-deep .mat-button-toggle-checked.mat-button-toggle-appearance-standard {
+  color: rgba(0, 0, 0, 0.87);
+}
+
+::ng-deep .mat-button-toggle-appearance-standard {
+  color: rgba(0, 0, 0, 0.87);
+  background: white;
+}
+
+::ng-deep .mat-button-toggle-checked {
+  background-color: #e0e0e0;
+  color:rgba(0, 0, 0, 0.54);
+}
+
+::ng-deep .mat-button-toggle-standalone, .mat-button-toggle-group {
+  width: min-content !important;
+}
+
+::ng-deep .mat-button-toggle-group {
+  width: min-content !important;
+}

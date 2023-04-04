@@ -16,7 +16,8 @@ import { BehaviorSubject } from "rxjs";
 export class CreateGameComponent {
     games: BehaviorSubject<Game[]>;
     password = "";
-    isPrivate = false;
+    gameType = "Public";
+    gameTypes = ["Public", "Protected", "Private"];
     constructor(public dialogRef: MatDialogRef<CreateGameComponent>, private gameService: GameService, private webSocketService: WebSocketService, private storageService: StorageService) {
         this.games = this.gameService.joinableGames;
     }
@@ -34,9 +35,9 @@ export class CreateGameComponent {
 
     createGame(): void {
         const payload: CreateGamePayload = {
-            password: this.password,
+            password: this.gameType === "Protected" ? this.password : "",
             userIds: [],
-            isPrivate: this.isPrivate
+            isPrivate: this.gameType === "Public" || this.gameType === "Protected" ? false : true,
         }
         const event : ClientEvent = "create-game";
         console.log(payload);
@@ -45,14 +46,6 @@ export class CreateGameComponent {
     }
 
     close() {
-        this.dialogRef.close();
-    }
-
-    onPrivateChange(): void {
-        if (!this.isPrivate) 
-            this.password = "";
-
-        console.log(this.isPrivate);
-        console.log(this.password);
+        this.dialogRef.close(); 
     }
 }
