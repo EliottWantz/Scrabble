@@ -120,7 +120,7 @@ func (m *Manager) AcceptFriendRequest(c *fiber.Ctx) error {
 	}
 	user, _ := m.UserSvc.GetUser(friendId)
 	friendRequestPayload := FriendRequestPayload{
-		FromID:       id,
+		FromID:       friendId,
 		FromUsername: user.Username,
 	}
 	p, err := AcceptFRiendRequestPacket(friendRequestPayload)
@@ -147,7 +147,7 @@ func (m *Manager) RejectFriendRequest(c *fiber.Ctx) error {
 	}
 	user, _ := m.UserSvc.GetUser(id)
 	friendRequestPayload := FriendRequestPayload{
-		FromID:       id,
+		FromID:       friendId,
 		FromUsername: user.Username,
 	}
 	p, err := DeclineFriendRequestPacket(friendRequestPayload)
