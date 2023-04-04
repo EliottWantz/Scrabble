@@ -8,7 +8,7 @@ import { Game } from "@app/utils/interfaces/game/game";
 import { JoinGamePayload } from "@app/utils/interfaces/packet";
 import { BehaviorSubject } from "rxjs";
 import  {MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { Router } from "@angular/router";
+import { NavigationStart, Router } from "@angular/router";
 
 @Component({
     selector: "app-join-protected-game",
@@ -27,6 +27,11 @@ export class JoinProtectedGameComponent {
                 this.gameService.isObserving = false;
             }
         });
+
+        this.router.events.subscribe((e) => {
+            if (e instanceof NavigationStart) {
+                this.close();
+            }});
     }
 
     getUserNames(ids: string[]): string[] {

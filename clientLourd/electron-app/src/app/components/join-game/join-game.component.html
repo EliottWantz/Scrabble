@@ -28,8 +28,8 @@
                 </div>
             </mat-grid-tile>
             <mat-grid-tile [colspan]="1" [rowspan]="1">
-                <mat-icon *ngIf="!game.isProtected">check</mat-icon>
-                <mat-icon *ngIf="game.isProtected">clear</mat-icon>
+                <mat-icon *ngIf="!game.isPrivateGame">check</mat-icon>
+                <mat-icon *ngIf="game.isPrivateGame">clear</mat-icon>
             </mat-grid-tile>
             <mat-grid-tile [colspan]="1" [rowspan]="1">
                 <button (click)="joinGame(game)" class="join-button">

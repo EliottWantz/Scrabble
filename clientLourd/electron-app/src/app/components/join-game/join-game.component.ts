@@ -111,6 +111,12 @@ export class JoinGameComponent implements OnInit {
             this.close();
         } else if (game.isPrivateGame) {
             this.openDialogJoinPrivateGame(game);
+            const payload: JoinGamePayload = {
+                gameId: game.id,
+                password: ""
+            }
+            const event : ClientEvent = "join-game";
+            this.webSocketService.send(event, payload);
             this.close();
         } else {
             if (this.data.isObserver) {
