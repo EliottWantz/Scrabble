@@ -429,7 +429,7 @@ func (c *Client) HandleJoinGameRequest(p *Packet) error {
 			}
 		}
 
-		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+		return nil
 	}
 
 	r, err := c.Manager.GetRoom(payload.GameID)
