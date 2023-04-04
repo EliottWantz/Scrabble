@@ -112,7 +112,11 @@ export type ServerPayload = JoinedRoomPayload
 | ServerIndicePayload
 | ErrorPayload
 | ListUsersOnlinePayload
-| ListObservableGamesPayload;
+| ListObservableGamesPayload
+| UserRequestToJoinGamePayload
+| UserRequestToJoinTournamentPayload
+| VerdictJoinGameRequestPayload
+| VerdictJoinTournamentRequestPayload;
 
 export interface JoinedRoomPayload {
     roomId: string;
@@ -221,4 +225,26 @@ export interface ListUsersOnlinePayload {
 
 export interface ListObservableGamesPayload {
     games: Game[];
+}
+
+export interface UserRequestToJoinGamePayload {
+    gameId: string;
+    userId: string;
+    username: string;
+}
+
+export interface UserRequestToJoinTournamentPayload {
+    tournamentId: string;
+    userId: string;
+    username: string;
+}
+
+export interface VerdictJoinGameRequestPayload {
+    gameId: string;
+    userId: string;
+}
+
+export interface VerdictJoinTournamentRequestPayload {
+    tournamentId: string;
+    userId: string;
 }

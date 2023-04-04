@@ -25,4 +25,10 @@ export type ServerEvent = "joinedRoom"
 | "chat-message"
 | "listOnlineUsers"
 | "observableGames"
-| "observableTournaments";
+| "observableTournaments"
+| "userRequestToJoinGame"
+| "userRequestToJoinTournament"
+| "userRequestToJoinGameAccepted"
+| "userRequestToJoinTournamentAccepted"
+| "userRequestToJoinGameDeclined"
+| "userRequestToJoinTournamentDeclined";
