@@ -8,7 +8,9 @@ import { Game } from "@app/utils/interfaces/game/game";
 import { JoinGamePayload } from "@app/utils/interfaces/packet";
 import { BehaviorSubject } from "rxjs";
 import  {MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { Router } from "@angular/router";
+import { NavigationStart, Router } from "@angular/router";
+import { CommunicationService } from "@app/services/communication/communication.service";
+import { UserService } from "@app/services/user/user.service";
 
 @Component({
     selector: "app-join-private-game",
@@ -18,10 +20,16 @@ import { Router } from "@angular/router";
 export class JoinPrivateGameComponent {
     wasDeclined = false;
     constructor(public dialogRef: MatDialogRef<JoinPrivateGameComponent>, @Inject(MAT_DIALOG_DATA) public data: {game: Game}, 
-        private webSocketService: WebSocketService, private gameService: GameService, private storageService: StorageService) {
+        private webSocketService: WebSocketService, private gameService: GameService, private storageService: StorageService, private router: Router,
+        private commService: CommunicationService, private userSerive: UserService) {
         this.gameService.wasDeclined.subscribe((wasDeclined) => {
             this.wasDeclined = wasDeclined;
         });
+
+        this.router.events.subscribe((e) => {
+            if (e instanceof NavigationStart) {
+                this.close();
+            }});
     }
 
     getCreatorName(): string {
@@ -39,5 +47,14 @@ export class JoinPrivateGameComponent {
 
     cancel(): void {
         // annuler la demande
+        this.commService.revokeJoinGame(this.userSerive.currentUserValue.id, this.data.game.id).subscribe({
+            next: () => {
+              console.log("canceled");
+            },
+            error: (err) => {
+              console.log(err);
+            }
+          });
+        this.dialogRef.close();
     }
 }

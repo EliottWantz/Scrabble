@@ -8,14 +8,7 @@
   <div>
     <h4>{{getNumUsers()}}{{'waiting-room-page.players' | translate}}</h4>
   </div>
-  <div class="players">
-    <h3>Joueurs</h3>
-    <div *ngFor="let user of users" class="player">
-      <img src="{{getAvatarUrl(user.userId)}}" class="avatar">
-      <h3>{{user.username}}</h3>
-    </div>
-  </div>
-  <div class="players" *ngIf="gameRoom.value && gameRoom.value.isPrivateGame">
+  <div class="players" *ngIf="gameRoom.value && gameRoom.value.isPrivateGame && user.id === gameRoom.value.creatorId">
     <h3>Utilisateurs voulant rejoindre la partie</h3>
     <div *ngFor="let userWaiting of usersWaiting" class="player">
       <img src="{{getAvatarUrl(userWaiting.userId)}}" class="avatar">

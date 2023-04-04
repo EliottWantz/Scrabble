@@ -23,8 +23,10 @@ export class WaitRoomPageComponent {
   gameRoom!: BehaviorSubject<Game | undefined>;
   users: {userId: string, username: string}[];
   usersWaiting: {userId: string, username: string}[];
+  user: User;
   constructor(private gameService: GameService, private userService: UserService, private socketService: WebSocketService, private storageService: StorageService, private commService: CommunicationService, private roomService: RoomService) {
     this.gameRoom = this.gameService.game
+    this.user = this.userService.currentUserValue
     this.users = [];
     this.usersWaiting = [];
     this.gameService.game.subscribe((game) => {
@@ -100,6 +102,12 @@ export class WaitRoomPageComponent {
       this.commService.acceptPlayer(this.userService.currentUserValue.id, requestorId, this.gameRoom.value.id).subscribe({
         next: () => {
           console.log("accepted");
+          const newUsersWaiting = this.gameService.usersWaiting.value;
+          for (const userWaiting of newUsersWaiting) {
+            if (userWaiting.userId == requestorId)
+              newUsersWaiting.splice(newUsersWaiting.indexOf(userWaiting), 1);
+          }
+          this.gameService.usersWaiting.next(newUsersWaiting);
         },
         error: (err) => {
           console.log(err);
@@ -112,6 +120,12 @@ export class WaitRoomPageComponent {
       this.commService.denyPlayer(this.userService.currentUserValue.id, requestorId, this.gameRoom.value.id).subscribe({
         next: () => {
           console.log("denied");
+          const newUsersWaiting = this.gameService.usersWaiting.value;
+          for (const userWaiting of newUsersWaiting) {
+            if (userWaiting.userId == requestorId)
+              newUsersWaiting.splice(newUsersWaiting.indexOf(userWaiting), 1);
+          }
+          this.gameService.usersWaiting.next(newUsersWaiting);
         },
         error: (err) => {
           console.log(err);
