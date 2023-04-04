@@ -23,6 +23,7 @@ import {
   ListUsersPayload,
   NewUserPayload,
   Packet,
+  RevokeJoinGameRequestPayload,
   ServerIndicePayload,
   TimerUpdatePayload,
   UserJoinedDMRoomPayload,
@@ -309,6 +310,19 @@ export class WebSocketService {
 
       case "userRequestToJoinGameDeclined": {
         this.gameService.wasDeclined.next(true);
+        break;
+      }
+
+      case "revokeRequestToJoinGame": {
+        const payload = packet.payload as RevokeJoinGameRequestPayload;
+        if (this.gameService.game.value && this.gameService.game.value.id == payload.gameId) {
+          const newUsersWaiting = this.gameService.usersWaiting.value;
+          for (const userWaiting of newUsersWaiting) {
+            if (userWaiting.userId == payload.userId)
+              newUsersWaiting.splice(newUsersWaiting.indexOf(userWaiting), 1);
+          }
+          this.gameService.usersWaiting.next(newUsersWaiting);
+        }
         break;
       }
 

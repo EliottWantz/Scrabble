@@ -31,4 +31,5 @@ export type ServerEvent = "joinedRoom"
 | "userRequestToJoinGameAccepted"
 | "userRequestToJoinTournamentAccepted"
 | "userRequestToJoinGameDeclined"
-| "userRequestToJoinTournamentDeclined";
+| "userRequestToJoinTournamentDeclined"
+| "revokeRequestToJoinGame";

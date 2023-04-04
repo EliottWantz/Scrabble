@@ -116,7 +116,8 @@ export type ServerPayload = JoinedRoomPayload
 | UserRequestToJoinGamePayload
 | UserRequestToJoinTournamentPayload
 | VerdictJoinGameRequestPayload
-| VerdictJoinTournamentRequestPayload;
+| VerdictJoinTournamentRequestPayload
+| RevokeJoinGameRequestPayload;
 
 export interface JoinedRoomPayload {
     roomId: string;
@@ -246,5 +247,10 @@ export interface VerdictJoinGameRequestPayload {
 
 export interface VerdictJoinTournamentRequestPayload {
     tournamentId: string;
+    userId: string;
+}
+
+export interface RevokeJoinGameRequestPayload {
+    gameId: string;
     userId: string;
 }
