@@ -494,8 +494,12 @@ class WebsocketService extends GetxService {
     socket.sink.add(createRoomRequest.toRawJson());
   }
 
-  void createGameRoom({List<String> userIds = const []}) {
-    final createGameRoomPayload = CreateGameRoomPayload(userIds: userIds);
+  void createGameRoom({List<String> userIds = const [], bool isPrivate = false, String password = ''}) {
+    final createGameRoomPayload = CreateGameRoomPayload(
+        isPrivate: isPrivate,
+        password: password,
+        withUserIds: userIds
+    );
     final createGameRoomRequest = CreateGameRoomRequest(
         event: ClientEventCreateGame, payload: createGameRoomPayload);
     socket.sink.add(createGameRoomRequest.toRawJson());

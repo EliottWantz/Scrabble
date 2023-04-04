@@ -35,9 +35,16 @@ class GameStartScreen extends StatelessWidget {
   final SettingsService _settingsService = Get.find();
   final UsersService _usersService = Get.find();
 
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final RxList<RxBool> _selectedGameType = <RxBool>[true.obs, false.obs, false.obs].obs;
+  final RxBool _isProtected = false.obs;
+  final RxBool selectedChatRoom = false.obs;
 
-  RxBool selectedChatRoom = false.obs;
+  final gamePasswordController = TextEditingController();
+
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final GlobalKey<FormState> _passwordFormKey = GlobalKey<FormState>();
+
+  late bool _isPrivate = false;
 
   @override
   Widget build(BuildContext context) {
@@ -194,12 +201,7 @@ class GameStartScreen extends StatelessWidget {
     );
   }
 
-  final RxList<RxBool> _selectedGameType = <RxBool>[true.obs, false.obs, false.obs].obs;
-  late int number = 0;
-  final RxBool _isProtected = false.obs;
-  final messageController = TextEditingController();
-
-  RxList<bool> getListValues(RxList<RxBool> list) {
+  RxList<bool> _getListValues(RxList<RxBool> list) {
     return RxList.from(list.value.map((element) => element.value));
   }
   
@@ -220,13 +222,13 @@ class GameStartScreen extends StatelessWidget {
                         const Gap(20),
                         ToggleButtons(
                               onPressed: (int index) {
-                                for (int i = 0; i < getListValues(_selectedGameType).value.length; i++) {
-                                  number++;
+                                for (int i = 0; i < _getListValues(_selectedGameType).value.length; i++) {
                                   _selectedGameType.value[i].value = i == index;
                                 }
                                 _isProtected.value = _selectedGameType.value[1].value;
+                                _isPrivate = _selectedGameType.value[2].value;
                               },
-                              isSelected: getListValues(_selectedGameType).value,
+                              isSelected: _getListValues(_selectedGameType).value,
                               borderRadius: const BorderRadius.all(Radius.circular(8)),
                               selectedBorderColor: Color.fromARGB(255, 107, 12, 241),
                               selectedColor: Colors.white,
@@ -261,9 +263,6 @@ class GameStartScreen extends StatelessWidget {
       barrierDismissible: false,
     );
   }
-
-  final GlobalKey<FormState> _passwordFormKey = GlobalKey<FormState>();
-  final gamePasswordController = TextEditingController();
 
   Widget _showProtectedGamePasswordInputField() {
     if (_isProtected.value) {
@@ -329,6 +328,9 @@ class GameStartScreen extends StatelessWidget {
                         side: const BorderSide(color: Colors.black))),
                 onPressed: () {
                   DialogHelper.hideLoading();
+                  _websocketService.createGameRoom(isPrivate: _isPrivate);
+                  Get.toNamed(
+                      Routes.HOME + Routes.GAME_START + Routes.LOBBY);
                 },
                 child: const Text('Confirmer')),
             TextButton(

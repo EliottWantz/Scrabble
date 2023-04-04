@@ -1,17 +1,23 @@
 class CreateGameRoomPayload {
-  List<String> userIds;
+  bool isPrivate;
+  String password;
+  List<String> withUserIds;
 
   CreateGameRoomPayload({
-    required this.userIds
+    required this.isPrivate,
+    required this.password,
+    required this.withUserIds
   });
 
   factory CreateGameRoomPayload.fromJson(Map<String, dynamic> json) => CreateGameRoomPayload(
-      userIds: List<String>.from((json["userIds"] as List).map(
+      isPrivate: json["isPrivate"],
+      password: json["password"],
+      withUserIds: List<String>.from((json["withUserIds"] as List).map(
               (userId) => json[userId])
       )
   );
 
   Map<String, dynamic> toJson() => {
-    "userIds": userIds,
+    "userIds": withUserIds,
   };
 }
