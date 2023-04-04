@@ -18,6 +18,8 @@ class CreateGameRoomPayload {
   );
 
   Map<String, dynamic> toJson() => {
-    "userIds": withUserIds,
+    "isPrivate": isPrivate,
+    "password": password,
+    "withUserIds": withUserIds,
   };
 }
