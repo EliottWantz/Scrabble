@@ -139,6 +139,10 @@ export class CommunicationService {
         return this.http.delete<void>(`${this.baseUrl}/game/accept/${requestorId}/${userId}/${gameId}`);
     }
 
+    public revokeJoinGame(userId: string, gameId: string): Observable<void> {
+        return this.http.patch<void>(`${this.baseUrl}/game/revoke/${userId}/${gameId}`, {});
+    }
+
     private handleError(error: HttpErrorResponse) {
         if (error.status === 0) {
           // A client-side or network error occurred. Handle it accordingly.
