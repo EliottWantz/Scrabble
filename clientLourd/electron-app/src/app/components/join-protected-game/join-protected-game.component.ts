@@ -17,14 +17,13 @@ import { NavigationStart, Router } from "@angular/router";
 })
 export class JoinProtectedGameComponent {
     password = "";
-    errorMessage = "";
+    errorMessage = false;
     constructor(public dialogRef: MatDialogRef<JoinProtectedGameComponent>, @Inject(MAT_DIALOG_DATA) public data: {game: Game, isObserver: boolean},
         private webSocketService: WebSocketService, private storageService: StorageService, private gameService: GameService, private router: Router
     ) {
         this.webSocketService.error.subscribe(() => {
             if (this.webSocketService.error.value === "password mismatch") {
-                this.errorMessage = "Mot de passe incorrect";
-                this.gameService.isObserving = false;
+                this.errorMessage = true;
             }
         });
 
@@ -69,6 +68,7 @@ export class JoinProtectedGameComponent {
     }
 
     close() {
+        this.gameService.isObserving = false;
         this.dialogRef.close();
     }
 }

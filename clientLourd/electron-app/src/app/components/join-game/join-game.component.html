@@ -1,18 +1,18 @@
 <mat-dialog-content id="container">
-    <h1>Liste des parties</h1>
+    <h1>{{"join-game-component.list" | translate}}</h1>
     <mat-divider></mat-divider>
     <mat-grid-list cols="5" rowHeight="50px">
         <mat-grid-tile [colspan]="1" [rowspan]="1">
-            <h4>Nom de la partie</h4>
+            <h4>{{"join-game-component.name-game" | translate}}</h4>
         </mat-grid-tile>
         <mat-grid-tile [colspan]="1" [rowspan]="1">
-            <h4>Créateur</h4>
+            <h4>{{"join-game-component.creator" | translate}}</h4>
         </mat-grid-tile>
         <mat-grid-tile [colspan]="1" [rowspan]="1">
-            <h4>Joueurs</h4>
+            <h4>{{"join-game-component.players" | translate}}</h4>
         </mat-grid-tile>
         <mat-grid-tile [colspan]="1" [rowspan]="1">
-            <h4>Publique</h4>
+            <h4>{{"join-game-component.public" | translate}}</h4>
         </mat-grid-tile>
         <mat-grid-tile [colspan]="1" [rowspan]="1"></mat-grid-tile>
         <mat-grid-tile [colspan]="5">
@@ -34,7 +34,7 @@
             <mat-grid-tile [colspan]="1" [rowspan]="1">
                 <button (click)="joinGame(game)" class="join-button">
                     <mat-icon>play_arrow</mat-icon>
-                    Rejoindre la partie
+                    {{"join-game-component.join" | translate}}
                 </button>
             </mat-grid-tile>
             <mat-grid-tile [colspan]="5">
@@ -42,5 +42,5 @@
             </mat-grid-tile>
         </div>
     </mat-grid-list>
-    <button (click)="close()" id="close-button">Fermer</button>
+    <button (click)="close()" id="close-button">{{"join-game-component.close" | translate}}</button>
 </mat-dialog-content>

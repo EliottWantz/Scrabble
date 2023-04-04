@@ -58,8 +58,10 @@
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
+  row-gap: 50px;
   width: 100%;
-  height: 99%;
+  height: 100%;
+  flex-wrap: nowrap;
 }
 
 mat-grid-list {
@@ -82,10 +84,6 @@ mat-divider {
   width: 100%;
 }
 
-#close-button {
-  position: sticky;
-}
-
 .password {
   display: flex;
   flex-direction: column;
@@ -95,12 +93,12 @@ mat-divider {
 }
 
 button {
-  width: 51%;
   border-radius: 20px;
   background-color: #dcdcdc;
   border-width: 0;
-  padding-top: 1%;
-  padding-bottom: 1%;
+  padding-top: 1vh;
+  padding-bottom: 1vh;
+  width: 25vw;
 }
 
 ::ng-deep .mat-button-toggle-appearance-standard .mat-button-toggle-label-content {

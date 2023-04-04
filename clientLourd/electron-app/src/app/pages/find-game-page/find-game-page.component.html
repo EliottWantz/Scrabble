@@ -1,16 +1,16 @@
 <div class="container">
   <img id="scrabble-img" src="../../../assets/scrabble.png">
-  <h3>Choisissez une option de jeu</h3>
+  <h3>{{"find-game-page.option" | translate}}</h3>
   <button mat-flat-button color="primary" class="game-button" (click)="openDialogCreateGame()">
     <mat-icon>videogame_asset</mat-icon>
-    Créer une partie
+    {{"find-game-page.create" | translate}}
   </button>
   <button mat-flat-button color="primary" class="game-button" (click)="openDialogJoinGame()">
     <mat-icon>videogame_asset</mat-icon>
-    Rejoindre une partie
+    {{"find-game-page.join" | translate}}
   </button>
   <button mat-flat-button color="primary" class="game-button" (click)="openDialogJoinAsObserver()">
     <mat-icon>remove_red_eye</mat-icon>
-    Observer une partie
+    {{"find-game-page.observe" | translate}}
   </button>
 </div>

@@ -1,6 +1,6 @@
 <div id="container">
   <img id="scrabble-img" src="../../../assets/scrabble.png">
-  <h3>En attente d'autre joueurs... Veuillez patienter</h3>
+  <h3>{{"waiting-room-page.title" | translate}}</h3>
   <!--
     <mat-spinner color="primary"></mat-spinner>
   -->
@@ -9,7 +9,7 @@
     <h4>{{getNumUsers()}}{{'waiting-room-page.players' | translate}}</h4>
   </div>
   <div class="players" *ngIf="gameRoom.value && gameRoom.value.isPrivateGame && user.id === gameRoom.value.creatorId">
-    <h3>Utilisateurs voulant rejoindre la partie</h3>
+    <h3>{{"waiting-room-page.request-join" | translate}}</h3>
     <div *ngFor="let userWaiting of usersWaiting" class="player">
       <img src="{{getAvatarUrl(userWaiting.userId)}}" class="avatar">
       <h3>{{userWaiting.username}}</h3>

@@ -38,7 +38,24 @@
     outline-style: solid;
     outline-color: #999999;
     border-radius: 12px;
-    width: fit-content;
+    width: 50%;
     padding: 2%;
     margin-bottom: 2%;
+    justify-content: space-evenly;
+}
+
+.deny-button {
+  margin-left: 5%;
+}
+
+.deny-button:hover {
+  color: red;
+}
+
+.accept-button {
+  margin-left: auto;
+}
+
+.accept-button:hover {
+  color: green;
 }

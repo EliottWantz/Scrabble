@@ -2,8 +2,10 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: space-between;
   width: 100%;
-  height: 99%;
+  height: 100%;
+  flex-wrap: nowrap;
 }
 
 mat-grid-list {
@@ -28,7 +30,6 @@ mat-divider {
 
 #close-button {
   margin-top: auto;
-  position: sticky;
   width: 51%;
   border-radius: 20px;
   background-color: #dcdcdc;
@@ -42,8 +43,8 @@ mat-divider {
   border-radius: 20px;
   background-color: #dcdcdc;
   border-width: 0;
-  padding-top: 1%;
-  padding-bottom: 1%;
+  padding-top: 1vh;
+  padding-bottom: 1vh;
   display: flex;
   flex-direction: row;
   align-items: center;

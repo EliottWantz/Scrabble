@@ -23,9 +23,7 @@ export class FindGamePageComponent {
     openDialogCreateGame(): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = true;
-        this.dialog.open(CreateGameComponent, {width: '75%',
-        minHeight: '70vh',
-        height : '50vh'});
+        this.dialog.open(CreateGameComponent, {});
     }
 
     openDialogJoinAsObserver(): void {

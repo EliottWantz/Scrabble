@@ -2,8 +2,11 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: space-between;
   width: 100%;
-  height: 99%;
+  height: 100%;
+  row-gap: 50px;
+  flex-wrap: nowrap;
 }
 
 mat-grid-list {
@@ -26,22 +29,17 @@ mat-divider {
   width: 100%;
 }
 
-#close-button {
-  margin-top: auto;
-  position: sticky;
-}
-
 #form {
   width: 60%;
 }
 
 button {
-  width: 50%;
   border-radius: 20px;
   background-color: #dcdcdc;
   border-width: 0;
-  padding-top: 1%;
-  padding-bottom: 1%;
+  padding-top: 1vh;
+  padding-bottom: 1vh;
+  width: 25vw;
 }
 
 ::ng-deep .mat-mdc-form-field-infix {
@@ -72,4 +70,16 @@ button {
   border-width: 0;
   padding-top: 1%;
   padding-bottom: 1%;
+}
+
+::ng-deep .mat-mdc-progress-spinner {
+  --mdc-circular-progress-active-indicator-color: #424260;
+}
+
+::ng-deep .mat-mdc-progress-spinner .mdc-circular-progress__indeterminate-circle-graphic {
+  stroke: var(--mdc-circular-progress-active-indicator-color, transparent);
+}
+
+.mdc-circular-progress__indeterminate-circle-graphic {
+  fill: rgba(0, 0, 0, 0);
 }

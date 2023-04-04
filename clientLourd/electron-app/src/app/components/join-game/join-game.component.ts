@@ -86,9 +86,7 @@ export class JoinGameComponent implements OnInit {
     openDialogJoinProtectedGame(game: Game): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = true;
-        this.dialog.open(JoinProtectedGameComponent, {width: '75%',
-            minHeight: '70vh',
-            height : '50vh',
+        this.dialog.open(JoinProtectedGameComponent, {
             data: {game: game, isObserver: this.data.isObserver}
         });
     }
@@ -96,9 +94,7 @@ export class JoinGameComponent implements OnInit {
     openDialogJoinPrivateGame(game: Game): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = true;
-        this.dialog.open(JoinPrivateGameComponent, {width: '75%',
-            minHeight: '70vh',
-            height : '50vh',
+        this.dialog.open(JoinPrivateGameComponent, {
             disableClose: true,
             data: {game: game}
         });

@@ -1,17 +1,17 @@
 <mat-dialog-content id="container">
-    <h1>Type de la partie</h1>
+    <h1>{{"create-game-component.title" | translate}}</h1>
     <mat-button-toggle-group [(ngModel)]="gameType">
-        <mat-button-toggle *ngFor="let type of gameTypes" [value]="type">{{type}}</mat-button-toggle>
+        <mat-button-toggle *ngFor="let type of gameTypes" [value]="type">{{"create-game-component." + type | translate}}</mat-button-toggle>
     </mat-button-toggle-group>
     <form class="password"  *ngIf="gameType === 'Protected'">
-        <mat-label>Ajouter un mot de passe</mat-label>
+        <mat-label>{{"create-game-component.add-password" | translate}}</mat-label>
         <div class="form-group">
             <mat-form-field appearance="fill">
-                <mat-label for="password">Entrez le mot de passe de la partie</mat-label>
-                <input type="password" matInput placeholder="Entrez le mot de passe de la partie" name="password" [(ngModel)] ="password" required>
+                <mat-label for="password">{{"create-game-component.password" | translate}}</mat-label>
+                <input type="password" matInput placeholder="{{'create-game-component.password' | translate}}" name="password" [(ngModel)] ="password" required>
             </mat-form-field>
         </div>
     </form>
-    <button (click)="createGame()">Créer la partie</button>
-    <button (click)="close()" id="close-button">Fermer</button>
+    <button (click)="createGame()">{{"create-game-component.create" | translate}}</button>
+    <button (click)="close()" id="close-button">{{"create-game-component.close" | translate}}</button>
 </mat-dialog-content>
