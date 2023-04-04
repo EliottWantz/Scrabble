@@ -16,21 +16,28 @@ import { Router } from "@angular/router";
     styleUrls: ["./join-private-game.component.scss"],
 })
 export class JoinPrivateGameComponent {
-    password = "";
-    errorMessage = "";
+    wasDeclined = false;
     constructor(public dialogRef: MatDialogRef<JoinPrivateGameComponent>, @Inject(MAT_DIALOG_DATA) public data: {game: Game}, 
-        private webSocketService: WebSocketService, private gameService: GameService
-    ) {
-        this.webSocketService.error.subscribe(() => {
-            if (this.webSocketService.error.value === "password mismatch") {
-                this.errorMessage = "Mot de passe incorrect";
-                this.gameService.isObserving = false;
-            }
+        private webSocketService: WebSocketService, private gameService: GameService, private storageService: StorageService) {
+        this.gameService.wasDeclined.subscribe((wasDeclined) => {
+            this.wasDeclined = wasDeclined;
         });
     }
 
-    close() {
-        // annuler la demande
+    getCreatorName(): string {
+        const creator = this.storageService.getUserFromId(this.data.game.creatorId);
+        if (creator) {
+            return creator.username;
+        }
+        return "";
+    }
+
+    close(): void {
+        this.gameService.wasDeclined.next(false);
         this.dialogRef.close();
+    }
+
+    cancel(): void {
+        // annuler la demande
     }
 }
