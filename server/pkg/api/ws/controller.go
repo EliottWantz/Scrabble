@@ -224,7 +224,7 @@ func (m *Manager) AcceptJoinGameRequest(c *fiber.Ctx) error {
 	requestorId := c.Params("requestorId")
 	gId := c.Params("gameId")
 	g, err := m.GameSvc.Repo.FindGame(gId)
-
+	g.UserIDs = append(g.UserIDs, requestorId)
 	if strings.Contains(strings.Join(g.JoinGameRequestUserIds, ""), requestorId) == false {
 		return fiber.NewError(fiber.StatusBadRequest, "The user revoked is request to join the game")
 	}
@@ -307,6 +307,7 @@ func (m *Manager) AcceptJoinTournamentRequest(c *fiber.Ctx) error {
 	requestorId := c.Params("requestorId")
 	tId := c.Params("tournamentId")
 	t, err := m.GameSvc.Repo.FindTournament(tId)
+	t.UserIDs = append(t.UserIDs, requestorId)
 	if strings.Contains(strings.Join(t.JoinTournamentRequestUserIds, ""), requestorId) == false {
 		return fiber.NewError(fiber.StatusBadRequest, "The user revoked is request to join the game")
 	}
