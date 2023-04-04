@@ -26,10 +26,8 @@
             </div>
             <div class="users">
                 <div *ngFor="let user of listFriendsOnlineDisplay" class="user">
-                    <div>
-                        <img src="{{user.avatar.url}}" class="avatar">
-                        <h3>{{user.username}}</h3>
-                    </div>
+                    <img src="{{user.avatar.url}}" class="avatar">
+                    <h3>{{user.username}}</h3>
                 </div>
             </div>
         </div>

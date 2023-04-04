@@ -62,7 +62,9 @@
               received: msg.from !== user.id
             }"
           >
-            <p>{{ msg.message }}</p>
+            
+            <p>{{getGifMessage(msg.message)[0]}}</p>
+            <img *ngIf="containsGifURL(msg.message)" [src]="getGifMessage(msg.message)[1]">
           </div>
         </div>
       </div>
@@ -95,6 +97,9 @@
       (click)="send()"
     >
       <mat-icon>send</mat-icon>
+    </button>
+    <button mat-mini-fab color="primary" id="submitBtn" (click)="openGifMenu()">
+      <mat-icon>gif</mat-icon>
     </button>
   </form>
 </mat-card>

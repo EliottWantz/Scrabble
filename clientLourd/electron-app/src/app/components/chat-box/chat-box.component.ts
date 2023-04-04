@@ -19,6 +19,8 @@ import { ClientEvent } from '@app/utils/events/client-events';
 import { LeaveRoomPayload } from '@app/utils/interfaces/packet';
 import { MatSelectChange } from '@angular/material/select';
 import { Subscription } from 'rxjs';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { GifComponent } from '@app/components/gif/gif.component';
 
 const electron = (window as any).require('electron');
 
@@ -52,7 +54,8 @@ export class ChatBoxComponent implements AfterViewInit {
     private storageService: StorageService,
     private socketService: WebSocketService,
     private ngZone: NgZone,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    public dialog: MatDialog
   ) {
     this.room$ = this.roomService.currentRoomChat;
     this.currentRoomId = this.room$.value.id;
@@ -147,6 +150,33 @@ export class ChatBoxComponent implements AfterViewInit {
     console.log(this.roomService.currentRoomChat.value);
     this.socketService.send(event, payload);
     console.log(this.roomService.listJoinedChatRooms.value);
+  }
+
+  openGifMenu(): void {
+        this.dialog.open(GifComponent, {width: '75%',
+        minHeight: '75vh',
+        height : '75vh'});
+  }
+
+  containsGifURL(message: string): boolean {
+    if ((message.includes('http://') || message.includes('https://')) && message.endsWith('.gif')) {
+      return true;
+    }
+    return false
+  }
+
+  getGifMessage(message: string): string[] {
+    const words = message.split(' ');
+    let messageNoUrl = "";
+    let gif = "";
+    for (const word of words) {
+      if ((word.includes('http://') || word.includes('https://')) && message[message.length - 1] == 'f' && message[message.length - 2] == 'i' && message[message.length - 3] == 'g') {
+        gif = word;
+      } else {
+        messageNoUrl += word + " ";
+      }
+    }
+    return [messageNoUrl, gif];
   }
 
   private subscribeToRoom(): void {

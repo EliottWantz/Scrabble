@@ -90,6 +90,9 @@ export class SidebarComponent implements OnInit {
         this.lightDarkToggleIcon = this.lightThemeIcon;
       }
     });
+    /*this.user.subscribe((user) => {
+      this.badgeContent = user.pendingRequests.length;
+    });*/
   }
 
   public doToggleLightDark() {
