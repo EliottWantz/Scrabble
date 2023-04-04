@@ -1,11 +1,10 @@
 #container {
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-evenly;
   align-items: center;
   flex-wrap: wrap;
   flex-direction: column;
   height: 100vh;
-  row-gap: 10%;
 }
 
 #scrabble-img {
@@ -17,4 +16,29 @@
   height: 50%;
   width: 25%;
   margin-left: auto;
+}
+
+.avatar {
+  border-radius: 50%;
+  width: 70px;
+  margin-right: 5%;
+}
+
+.players {
+  width: 75%;
+}
+
+.player {
+  display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: nowrap;
+    background-color: #dcdcdc;
+    outline-width: 1px;
+    outline-style: solid;
+    outline-color: #999999;
+    border-radius: 12px;
+    width: fit-content;
+    padding: 2%;
+    margin-bottom: 2%;
 }

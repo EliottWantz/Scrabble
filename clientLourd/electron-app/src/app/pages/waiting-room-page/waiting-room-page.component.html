@@ -6,10 +6,28 @@
   <div>
     <h4>{{getNumUsers()}}{{'waiting-room-page.players' | translate}}</h4>
   </div>
+  <div class="players">
+    <h3>Joueurs</h3>
+    <div *ngFor="let user of users" class="player">
+      <img src="{{getAvatarUrl(user.userId)}}" class="avatar">
+      <h3>{{user.username}}</h3>
+    </div>
+  </div>
+  <div class="players" *ngIf="gameRoom.value && gameRoom.value.isPrivateGame">
+    <h3>Utilisateurs voulant rejoindre la partie</h3>
+    <div *ngFor="let userWaiting of usersWaiting" class="player">
+      <img src="{{getAvatarUrl(userWaiting.userId)}}" class="avatar">
+      <h3>{{userWaiting.username}}</h3>
+      <button mat-fab class="accept-button" (click)="acceptPlayer(userWaiting.userId)">
+        <mat-icon>check</mat-icon>
+      </button>
+      <button mat-fab class="deny-button" (click)="denyPlayer(userWaiting.userId)">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
   <div *ngIf="getNumUsers() >= 2 && checkIfCreator()">
     <button mat-flat-button color="accent" (click)="startGame()" routerLink="/game">{{'waiting-room-page.start-game' | translate}}</button>
   </div>
-  <div class="bottom">
-    <app-chat-box></app-chat-box>
-</div>
+  
 </div>
