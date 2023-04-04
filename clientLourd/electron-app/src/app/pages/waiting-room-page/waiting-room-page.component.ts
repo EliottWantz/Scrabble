@@ -97,11 +97,25 @@ export class WaitRoomPageComponent {
 
   acceptPlayer(requestorId: string): void {
     if (this.gameRoom.value)
-      this.commService.acceptPlayer(this.userService.currentUserValue.id, requestorId, this.gameRoom.value.id);
+      this.commService.acceptPlayer(this.userService.currentUserValue.id, requestorId, this.gameRoom.value.id).subscribe({
+        next: () => {
+          console.log("accepted");
+        },
+        error: (err) => {
+          console.log(err);
+        }
+      });
   }
 
   denyPlayer(requestorId: string): void {
     if (this.gameRoom.value)
-      this.commService.denyPlayer(this.userService.currentUserValue.id, requestorId, this.gameRoom.value.id);
+      this.commService.denyPlayer(this.userService.currentUserValue.id, requestorId, this.gameRoom.value.id).subscribe({
+        next: () => {
+          console.log("denied");
+        },
+        error: (err) => {
+          console.log(err);
+        }
+      });
   }
 }
