@@ -1,0 +1,7 @@
+<mat-dialog-content id="container">
+    <h1>Veuillez attendre que {{getCreatorName()}} vous accepte dans la partie</h1>
+    <mat-spinner></mat-spinner>
+    <strong *ngIf="wasDeclined" style="color: red;">Malheureusement {{getCreatorName()}} n'a pas accepté votre demande</strong>
+    <button *ngIf="!wasDeclined" (click)="cancel()" id="close-button">Annuler</button>
+    <button *ngIf="wasDeclined" (click)="close()" id="close-button">Fermer</button>
+</mat-dialog-content>

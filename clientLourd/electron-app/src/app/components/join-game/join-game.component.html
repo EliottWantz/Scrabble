@@ -1,9 +1,12 @@
-<div id="container">
+<mat-dialog-content id="container">
     <h1>Liste des parties</h1>
     <mat-divider></mat-divider>
-    <mat-grid-list cols="4" rowHeight="50px">
+    <mat-grid-list cols="5" rowHeight="50px">
         <mat-grid-tile [colspan]="1" [rowspan]="1">
             <h4>Nom de la partie</h4>
+        </mat-grid-tile>
+        <mat-grid-tile [colspan]="1" [rowspan]="1">
+            <h4>Créateur</h4>
         </mat-grid-tile>
         <mat-grid-tile [colspan]="1" [rowspan]="1">
             <h4>Joueurs</h4>
@@ -12,11 +15,12 @@
             <h4>Publique</h4>
         </mat-grid-tile>
         <mat-grid-tile [colspan]="1" [rowspan]="1"></mat-grid-tile>
-        <mat-grid-tile [colspan]="4">
+        <mat-grid-tile [colspan]="5">
             <mat-divider></mat-divider>
         </mat-grid-tile>
-        <div *ngFor="let game of games.value; let i = index">
+        <div *ngFor="let game of games; let i = index">
             <mat-grid-tile [colspan]="1" [rowspan]="1">{{game.id}}</mat-grid-tile>
+            <mat-grid-tile [colspan]="1" [rowspan]="1">{{getCreatorName(game)}}</mat-grid-tile>
             <mat-grid-tile [colspan]="1" [rowspan]="1" class="user-ids">
                 <div *ngFor="let playerId of getUserNames(game.userIds); let last = last;">
                     <div *ngIf="!last">{{playerId}}{{", "}}</div>
@@ -24,19 +28,19 @@
                 </div>
             </mat-grid-tile>
             <mat-grid-tile [colspan]="1" [rowspan]="1">
-                <mat-icon *ngIf="!game.isProtected">check</mat-icon>
-                <mat-icon *ngIf="game.isProtected">clear</mat-icon>
+                <mat-icon *ngIf="!game.isPrivateGame">check</mat-icon>
+                <mat-icon *ngIf="game.isPrivateGame">clear</mat-icon>
             </mat-grid-tile>
             <mat-grid-tile [colspan]="1" [rowspan]="1">
-                <button mat-raised-button color="primary" (click)="joinGame(game.id, ' ')">
+                <button (click)="joinGame(game)" class="join-button">
                     <mat-icon>play_arrow</mat-icon>
                     Rejoindre la partie
                 </button>
             </mat-grid-tile>
-            <mat-grid-tile [colspan]="4">
+            <mat-grid-tile [colspan]="5">
                 <mat-divider></mat-divider>
             </mat-grid-tile>
         </div>
     </mat-grid-list>
-    <button mat-raised-button color="primary" (click)="close()" id="close-button">Fermer</button>
-</div>
+    <button (click)="close()" id="close-button">Fermer</button>
+</mat-dialog-content>

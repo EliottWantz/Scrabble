@@ -29,7 +29,14 @@ mat-divider {
 #close-button {
   margin-top: auto;
   position: sticky;
-  width: 51%;
+}
+
+#form {
+  width: 60%;
+}
+
+button {
+  width: 50%;
   border-radius: 20px;
   background-color: #dcdcdc;
   border-width: 0;
@@ -37,15 +44,32 @@ mat-divider {
   padding-bottom: 1%;
 }
 
-.join-button {
-  width: 100%;
+::ng-deep .mat-mdc-form-field-infix {
+  display: flex;
+  flex-direction: column;
+  
+    min-width: 0;
+    width: 180px;
+    position: relative;
+    box-sizing: border-box;
+    min-height: 56px;
+}
+
+::ng-deep .dark-theme .mat-mdc-text-field-wrapper:not(.mdc-text-field--outlined) .mat-mdc-form-field-infix {
+    padding-top: 24px;
+    padding-bottom: 8px;
+}
+
+::ng-deep .mat-mdc-text-field-wrapper:not(.mdc-text-field--outlined) .mat-mdc-form-field-infix {
+  padding-top: 24px;
+  padding-bottom: 8px;
+}
+
+button {
+  width: 51%;
   border-radius: 20px;
   background-color: #dcdcdc;
   border-width: 0;
   padding-top: 1%;
   padding-bottom: 1%;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
 }

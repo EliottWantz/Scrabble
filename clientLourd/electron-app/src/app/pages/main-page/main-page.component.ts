@@ -24,23 +24,4 @@ export class MainPageComponent {
   isLoggedIn(): boolean {
     return this.userService.isLoggedIn;
   }
-
-  createGame(): void {
-    const payload: CreateGamePayload = {
-        password: "",
-        userIds: []
-      }
-      const event : ClientEvent = "create-game";
-      this.webSocketService.send(event, payload);
-  }
-
-  joinGame(gameId: string, password: string): void {
-    //this.stepper.selectedIndex = STEPPER_PAGE_IDX.confirmationPage;
-    const payload: JoinGamePayload = {
-        gameId: gameId,
-        password: password
-      }
-      const event : ClientEvent = "join-game";
-      this.webSocketService.send(event, payload);
-}
 }

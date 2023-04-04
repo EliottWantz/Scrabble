@@ -1,13 +1,28 @@
 <div id="container">
   <img id="scrabble-img" src="../../../assets/scrabble.png">
   <h3>En attente d'autre joueurs... Veuillez patienter</h3>
-  <mat-spinner color="primary"></mat-spinner>
+  <!--
+    <mat-spinner color="primary"></mat-spinner>
+  -->
   <h3>{{'waiting-room-page.text' | translate}}</h3>
-  <mat-spinner color="accent"></mat-spinner>
   <div>
     <h4>{{getNumUsers()}}{{'waiting-room-page.players' | translate}}</h4>
+  </div>
+  <div class="players" *ngIf="gameRoom.value && gameRoom.value.isPrivateGame && user.id === gameRoom.value.creatorId">
+    <h3>Utilisateurs voulant rejoindre la partie</h3>
+    <div *ngFor="let userWaiting of usersWaiting" class="player">
+      <img src="{{getAvatarUrl(userWaiting.userId)}}" class="avatar">
+      <h3>{{userWaiting.username}}</h3>
+      <button mat-fab class="accept-button" (click)="acceptPlayer(userWaiting.userId)">
+        <mat-icon>check</mat-icon>
+      </button>
+      <button mat-fab class="deny-button" (click)="denyPlayer(userWaiting.userId)">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
   </div>
   <div *ngIf="getNumUsers() >= 2 && checkIfCreator()">
     <button mat-flat-button color="accent" (click)="startGame()" routerLink="/game">{{'waiting-room-page.start-game' | translate}}</button>
   </div>
+  
 </div>

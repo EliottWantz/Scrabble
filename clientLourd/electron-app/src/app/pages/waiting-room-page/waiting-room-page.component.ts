@@ -21,8 +21,22 @@ import { BehaviorSubject } from "rxjs";
 })
 export class WaitRoomPageComponent {
   gameRoom!: BehaviorSubject<Game | undefined>;
-  constructor(private gameService: GameService, private userService: UserService, private socketService: WebSocketService) {
+  users: {userId: string, username: string}[];
+  usersWaiting: {userId: string, username: string}[];
+  user: User;
+  constructor(private gameService: GameService, private userService: UserService, private socketService: WebSocketService, private storageService: StorageService, private commService: CommunicationService, private roomService: RoomService) {
     this.gameRoom = this.gameService.game
+    this.user = this.userService.currentUserValue
+    this.users = [];
+    this.usersWaiting = [];
+    this.gameService.game.subscribe((game) => {
+      if (game)
+        this.getPlayers(game);
+    });
+
+    this.gameService.usersWaiting.subscribe((users) => {
+      this.usersWaiting = users;
+    });
   }
 
   /*isCreator(): boolean {
@@ -43,6 +57,15 @@ export class WaitRoomPageComponent {
       }
   }
 
+  getPlayers(game: Game): void {
+    this.users = [];
+      for (const id of game.userIds) {
+        const user = this.storageService.getUserFromId(id);
+        if (user && user.id != this.userService.currentUserValue.id)
+          this.users.push({userId: id, username: user.username});
+      }
+  }
+
   getNumUsers(): number {
     if (this.gameRoom.value)
       return this.gameRoom.value.userIds.length;
@@ -51,5 +74,62 @@ export class WaitRoomPageComponent {
 
   checkIfCreator(): boolean {
     return this.userService.currentUserValue.id == this.gameRoom.value?.creatorId;
+  }
+
+  /*getUserNamesAndAvatarUrls(game: Game): string {
+    for (const id of game.userIds) {
+      const user = this.storageService.getUserFromId(id);
+      if (user && user.id != this.userService.currentUserValue.id)
+        return user.username;
+    }
+    const requestUser = this.storageService.getUserFromId(id);
+    if (requestUser) {
+      return requestUser.avatar.url;
+    }
+    return "";
+  }*/
+
+  getAvatarUrl(id: string): string {
+    const user = this.storageService.getUserFromId(id);
+    if (user) {
+      return user.avatar.url;
+    }
+    return "";
+  }
+
+  acceptPlayer(requestorId: string): void {
+    if (this.gameRoom.value)
+      this.commService.acceptPlayer(this.userService.currentUserValue.id, requestorId, this.gameRoom.value.id).subscribe({
+        next: () => {
+          console.log("accepted");
+          const newUsersWaiting = this.gameService.usersWaiting.value;
+          for (const userWaiting of newUsersWaiting) {
+            if (userWaiting.userId == requestorId)
+              newUsersWaiting.splice(newUsersWaiting.indexOf(userWaiting), 1);
+          }
+          this.gameService.usersWaiting.next(newUsersWaiting);
+        },
+        error: (err) => {
+          console.log(err);
+        }
+      });
+  }
+
+  denyPlayer(requestorId: string): void {
+    if (this.gameRoom.value)
+      this.commService.denyPlayer(this.userService.currentUserValue.id, requestorId, this.gameRoom.value.id).subscribe({
+        next: () => {
+          console.log("denied");
+          const newUsersWaiting = this.gameService.usersWaiting.value;
+          for (const userWaiting of newUsersWaiting) {
+            if (userWaiting.userId == requestorId)
+              newUsersWaiting.splice(newUsersWaiting.indexOf(userWaiting), 1);
+          }
+          this.gameService.usersWaiting.next(newUsersWaiting);
+        },
+        error: (err) => {
+          console.log(err);
+        }
+      });
   }
 }

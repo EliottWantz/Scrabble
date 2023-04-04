@@ -16,4 +16,7 @@ export interface Game {
     creatorId: string;
     userIds: string[];
     isProtected: boolean;
+    isPrivateGame: boolean;
+    winnerId: string;
+    tournamentId: string;
 }
