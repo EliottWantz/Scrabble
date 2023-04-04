@@ -120,7 +120,7 @@ func (m *Manager) AcceptFriendRequest(c *fiber.Ctx) error {
 	}
 	user, _ := m.UserSvc.GetUser(friendId)
 	friendRequestPayload := FriendRequestPayload{
-		FromID:       id,
+		FromID:       friendId,
 		FromUsername: user.Username,
 	}
 	p, err := AcceptFRiendRequestPacket(friendRequestPayload)
@@ -147,7 +147,7 @@ func (m *Manager) RejectFriendRequest(c *fiber.Ctx) error {
 	}
 	user, _ := m.UserSvc.GetUser(id)
 	friendRequestPayload := FriendRequestPayload{
-		FromID:       id,
+		FromID:       friendId,
 		FromUsername: user.Username,
 	}
 	p, err := DeclineFriendRequestPacket(friendRequestPayload)
@@ -224,12 +224,12 @@ func (m *Manager) AcceptJoinGameRequest(c *fiber.Ctx) error {
 	requestorId := c.Params("requestorId")
 	gId := c.Params("gameId")
 	g, err := m.GameSvc.Repo.FindGame(gId)
-
+	g.UserIDs = append(g.UserIDs, requestorId)
 	if strings.Contains(strings.Join(g.JoinGameRequestUserIds, ""), requestorId) == false {
 		return fiber.NewError(fiber.StatusBadRequest, "The user revoked is request to join the game")
 	}
 
-	if g.CreatorID == id {
+	if g.CreatorID != id {
 		return fiber.NewError(fiber.StatusBadRequest, "You are not the creator of the game")
 	}
 	r, err := m.GetRoom(gId)
@@ -286,7 +286,7 @@ func (m *Manager) RejectJoinGameRequest(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, "The user revoked is request to join the game")
 	}
 
-	if g.CreatorID == id {
+	if g.CreatorID != id {
 		return fiber.NewError(fiber.StatusBadRequest, "You are not the creator of the game")
 	}
 	r, err := m.GetRoom(gId)
@@ -307,10 +307,11 @@ func (m *Manager) AcceptJoinTournamentRequest(c *fiber.Ctx) error {
 	requestorId := c.Params("requestorId")
 	tId := c.Params("tournamentId")
 	t, err := m.GameSvc.Repo.FindTournament(tId)
+	t.UserIDs = append(t.UserIDs, requestorId)
 	if strings.Contains(strings.Join(t.JoinTournamentRequestUserIds, ""), requestorId) == false {
 		return fiber.NewError(fiber.StatusBadRequest, "The user revoked is request to join the game")
 	}
-	if t.CreatorID == id {
+	if t.CreatorID != id {
 		return fiber.NewError(fiber.StatusBadRequest, "You are not the creator of the tournament")
 	}
 	r, err := m.GetRoom(tId)
@@ -365,7 +366,7 @@ func (m *Manager) RejectJoinTournamentRequest(c *fiber.Ctx) error {
 	if strings.Contains(strings.Join(t.JoinTournamentRequestUserIds, ""), id) == false {
 		return fiber.NewError(fiber.StatusBadRequest, "The user revoked is request to join the Tournament")
 	}
-	if t.CreatorID == id {
+	if t.CreatorID != id {
 		return fiber.NewError(fiber.StatusBadRequest, "You are not the creator of the tournament")
 	}
 	r, err := m.GetRoom(tId)
