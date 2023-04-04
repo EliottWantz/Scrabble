@@ -14,9 +14,12 @@ import 'package:client_leger/utils/constants/game.dart';
 import 'package:client_leger/utils/dialog_helper.dart';
 import 'package:client_leger/widgets/custom_button.dart';
 import 'package:client_leger/widgets/app_sidebar.dart';
+import 'package:client_leger/widgets/input_field.dart';
 import 'package:flutter/material.dart';
+import 'package:form_validator/form_validator.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:sidebarx/sidebarx.dart';
 
@@ -91,9 +94,10 @@ class GameStartScreen extends StatelessWidget {
                     width: 230,
                     child: ElevatedButton.icon(
                       onPressed: () {
-                        _websocketService.createGameRoom();
-                        Get.toNamed(
-                            Routes.HOME + Routes.GAME_START + Routes.LOBBY);
+                        _showCreateGameOptionsDialog();
+                        // _websocketService.createGameRoom();
+                        // Get.toNamed(
+                        //     Routes.HOME + Routes.GAME_START + Routes.LOBBY);
                       },
                       icon: const Padding(
                         padding: EdgeInsets.all(8.0),
@@ -187,6 +191,158 @@ class GameStartScreen extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  final RxList<RxBool> _selectedGameType = <RxBool>[true.obs, false.obs, false.obs].obs;
+  late int number = 0;
+  final RxBool _isProtected = false.obs;
+  final messageController = TextEditingController();
+
+  RxList<bool> getListValues(RxList<RxBool> list) {
+    return RxList.from(list.value.map((element) => element.value));
+  }
+  
+  void _showCreateGameOptionsDialog() {
+    Get.dialog(
+        Dialog(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Container(
+              // height: double.infinity,
+              width: 400,
+              child: Obx(() => Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('Type de la partie',
+                          style: Get.textTheme.headlineSmall),
+                        const Gap(20),
+                        ToggleButtons(
+                              onPressed: (int index) {
+                                for (int i = 0; i < getListValues(_selectedGameType).value.length; i++) {
+                                  number++;
+                                  _selectedGameType.value[i].value = i == index;
+                                }
+                                _isProtected.value = _selectedGameType.value[1].value;
+                              },
+                              isSelected: getListValues(_selectedGameType).value,
+                              borderRadius: const BorderRadius.all(Radius.circular(8)),
+                              selectedBorderColor: Color.fromARGB(255, 107, 12, 241),
+                              selectedColor: Colors.white,
+                              fillColor: Color.fromARGB(255, 98, 0, 238),
+                              color: Colors.black,
+                              constraints: const BoxConstraints(
+                                minHeight: 40.0,
+                                minWidth: 80.0,
+                              ),
+                              children: const <Widget>[
+                                Padding(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: Text('Publique')
+                                ),
+                                Padding(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: Text('Protégée')
+                                ),
+                                Padding(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: Text('Privée')
+                                )
+                              ]
+                            ),
+                        _showProtectedGamePasswordInputField(),
+                      ],
+                  ),
+              ),
+            ),
+          ),
+        ),
+      barrierDismissible: false,
+    );
+  }
+
+  final GlobalKey<FormState> _passwordFormKey = GlobalKey<FormState>();
+  final gamePasswordController = TextEditingController();
+
+  Widget _showProtectedGamePasswordInputField() {
+    if (_isProtected.value) {
+      return Column(
+          children: [
+            Container(
+              margin: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(8),
+              child: Form(
+                key: _passwordFormKey,
+                child: Column(
+                  children: [
+                    InputField(
+                      controller: gamePasswordController,
+                      keyboardType: TextInputType.text,
+                      placeholder: 'Entrez le mot de passe',
+                      validator: ValidationBuilder(
+                          requiredMessage:
+                          'Le champ ne peut pas être vide')
+                          .build()),
+                    Gap(20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        TextButton(
+                            style: TextButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    side: const BorderSide(color: Colors.black))),
+                            onPressed: () {
+                              if (_passwordFormKey.currentState!.validate()) {
+                                DialogHelper.hideLoading();
+                              }
+                            },
+                            child: const Text('Confirmer')),
+                        TextButton(
+                            style: TextButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    side: const BorderSide(color: Colors.black))),
+                            onPressed: () {
+                              DialogHelper.hideLoading();
+                              gamePasswordController.text = '';
+                            },
+                            child: const Text('Annuler')),
+                      ],
+                    ),
+                ]),
+              ),
+          ),
+        ]);
+    }
+    return Column(
+      children: [
+        Gap(20),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            TextButton(
+                style: TextButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        side: const BorderSide(color: Colors.black))),
+                onPressed: () {
+                  DialogHelper.hideLoading();
+                },
+                child: const Text('Confirmer')),
+            TextButton(
+                style: TextButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        side: const BorderSide(color: Colors.black))),
+                onPressed: () {
+                  DialogHelper.hideLoading();
+                },
+                child: const Text('Annuler')),
+          ],
+        ),
+      ],
     );
   }
 
