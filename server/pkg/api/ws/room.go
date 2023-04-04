@@ -295,6 +295,31 @@ func (r *Room) SendVerdictJoinTournamentRequest(c *Client, t *game.Tournament, v
 	}
 	return nil
 }
+func (r *Room) RevokeRequestToJoinGameRequest(c *Client, g *game.Game, userId string) error {
+	{
+		p, err := NewRevokeRequestToJoinGamePacket(RevokeRequestToJoinGamePayload{
+			UserID: userId,
+			GameID: g.ID,
+		})
+		if err != nil {
+			return err
+		}
+		c.send(p)
+	}
+	return nil
+}
+
+func (r *Room) RevokeRequestToJoinTournamentRequest(c *Client, t *game.Tournament, userId string) error {
+	p, err := NewRevokeRequestToJoinTournamentPacket(RevokeRequestToJoinTournamentPayload{
+		UserID:       userId,
+		TournamentID: t.ID,
+	})
+	if err != nil {
+		return err
+	}
+	c.send(p)
+	return nil
+}
 
 func (r *Room) BroadcastObserverJoinGamePacket(c *Client, g *game.Game) error {
 	{
