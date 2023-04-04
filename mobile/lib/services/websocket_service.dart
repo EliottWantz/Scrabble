@@ -349,6 +349,8 @@ class WebsocketService extends GetxService {
     if (currentGame != null) {
       gameService.currentGameRoomUserIds.addAll(currentGame!.userIds);
     }
+    Get.toNamed(
+        Routes.HOME + Routes.GAME_START + Routes.LOBBY);
   }
 
   void handleEventJoinedGameAsObserver(JoinedGameAsObserverResponse joinedGameAsObserverResponse) {
@@ -527,8 +529,8 @@ class WebsocketService extends GetxService {
   //   socket.sink.add(joinDMRequest.toRawJson());
   // }
 
-  void joinGame(String gameId) {
-    final joinGameRoomPayload = JoinRoomPayload(gameId: gameId);
+  void joinGame(String gameId, {String password = ''}) {
+    final joinGameRoomPayload = JoinRoomPayload(gameId: gameId, password: password);
     final joinGameRoomRequest = JoinRoomRequest(
         event: ClientEventJoinGame, payload: joinGameRoomPayload);
     socket.sink.add(joinGameRoomRequest.toRawJson());

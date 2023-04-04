@@ -40,9 +40,12 @@ class GameStartScreen extends StatelessWidget {
   final RxBool selectedChatRoom = false.obs;
 
   final gamePasswordController = TextEditingController();
+  final joinGamePasswordController = TextEditingController();
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final GlobalKey<FormState> _passwordFormKey = GlobalKey<FormState>();
+
+  final FocusNode joinGamePasswordInputFocusNode = FocusNode();
 
   late bool _isPrivate = false;
 
@@ -253,7 +256,7 @@ class GameStartScreen extends StatelessWidget {
                                 )
                               ]
                             ),
-                        _showProtectedGamePasswordInputField(),
+                        _showProtectedGamePassword(),
                       ],
                   ),
               ),
@@ -264,8 +267,7 @@ class GameStartScreen extends StatelessWidget {
     );
   }
 
-  Widget _showProtectedGamePasswordInputField() {
-    if (_isProtected.value) {
+  Widget _showProtectedGamePassword() {
       return Column(
           children: [
             Container(
@@ -275,14 +277,7 @@ class GameStartScreen extends StatelessWidget {
                 key: _passwordFormKey,
                 child: Column(
                   children: [
-                    InputField(
-                      controller: gamePasswordController,
-                      keyboardType: TextInputType.text,
-                      placeholder: 'Entrez le mot de passe',
-                      validator: ValidationBuilder(
-                          requiredMessage:
-                          'Le champ ne peut pas être vide')
-                          .build()),
+                    _buildPasswordInputField(),
                     Gap(20),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -293,12 +288,14 @@ class GameStartScreen extends StatelessWidget {
                                     borderRadius: BorderRadius.circular(12),
                                     side: const BorderSide(color: Colors.black))),
                             onPressed: () {
-                              if (_passwordFormKey.currentState!.validate()) {
-                                DialogHelper.hideLoading();
+                              DialogHelper.hideLoading();
+                              if (_isProtected.value && _passwordFormKey.currentState!.validate()) {
                                 _websocketService.createGameRoom(password: gamePasswordController.text);
+                              } else {
+                                _websocketService.createGameRoom(isPrivate: _isPrivate);
+                              }
                                 Get.toNamed(
                                     Routes.HOME + Routes.GAME_START + Routes.LOBBY);
-                              }
                             },
                             child: const Text('Confirmer')),
                         TextButton(
@@ -317,38 +314,21 @@ class GameStartScreen extends StatelessWidget {
               ),
           ),
         ]);
+  }
+
+  Widget _buildPasswordInputField() {
+    if (_isProtected.value) {
+      return InputField(
+          controller: gamePasswordController,
+          keyboardType: TextInputType.text,
+          placeholder: 'Entrez le mot de passe',
+          validator: ValidationBuilder(
+              requiredMessage:
+              'Le champ ne peut pas être vide')
+              .build());
+    } else {
+      return const SizedBox(height: 0, width: 0);
     }
-    return Column(
-      children: [
-        Gap(20),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            TextButton(
-                style: TextButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        side: const BorderSide(color: Colors.black))),
-                onPressed: () {
-                  DialogHelper.hideLoading();
-                  _websocketService.createGameRoom(isPrivate: _isPrivate);
-                  Get.toNamed(
-                      Routes.HOME + Routes.GAME_START + Routes.LOBBY);
-                },
-                child: const Text('Confirmer')),
-            TextButton(
-                style: TextButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        side: const BorderSide(color: Colors.black))),
-                onPressed: () {
-                  DialogHelper.hideLoading();
-                },
-                child: const Text('Annuler')),
-          ],
-        ),
-      ],
-    );
   }
 
   void _showJoinableGamesDialog(BuildContext context) {
@@ -555,9 +535,13 @@ class GameStartScreen extends StatelessWidget {
                     DataCell(
                       ElevatedButton.icon(
                         onPressed: () {
-                          _websocketService.joinGame(game.id);
-                          Get.toNamed(
-                              Routes.HOME + Routes.GAME_START + Routes.LOBBY);
+                          if (game.isProtected) {
+                            _showProtectedGamePasswordDialog(game);
+                          } else {
+                            _websocketService.joinGame(game.id);
+                            // Get.toNamed(
+                            //     Routes.HOME + Routes.GAME_START + Routes.LOBBY);
+                          }
                         },
                         icon: const Icon(
                           // <-- Icon
@@ -635,10 +619,72 @@ class GameStartScreen extends StatelessWidget {
 
   Widget _buildTypeOfGame(Game game) {
     if (game.isProtected) {
-      return Text('Protéger');
+      return Text('Protégée');
+    } else if (game.isPrivateGame) {
+      return Text('Privée');
     } else {
       return Text('Ouverte');
     }
+  }
+
+  void _showProtectedGamePasswordDialog(Game game) {
+    Get.dialog(
+      Dialog(
+        child: SizedBox(
+          height: 225,
+          width: 300,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('Cette partie est protégée',
+                  style: Get.textTheme.headlineSmall),
+                Gap(20),
+                TextField(
+                  controller: joinGamePasswordController,
+                  keyboardType: TextInputType.text,
+                  focusNode: joinGamePasswordInputFocusNode,
+                  onSubmitted: (_) {
+                    // _websocketService.sendMessage();
+                    _websocketService.joinGame(game.id, password: joinGamePasswordController.text);
+                    joinGamePasswordInputFocusNode.requestFocus();
+                  },
+                  decoration: const InputDecoration(
+                      hintText: "Entrez le mot de passe",
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(8)))),
+                ),
+                Gap(20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    TextButton(
+                        style: TextButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                side: const BorderSide(color: Colors.black))),
+                        onPressed: () {},
+                        child: const Text('Confirmer')),
+                    TextButton(
+                        style: TextButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                side: const BorderSide(color: Colors.black))),
+                        onPressed: () {
+                          DialogHelper.hideLoading();
+                          joinGamePasswordController.text = '';
+                        },
+                        child: const Text('Annuler')),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      )
+    );
   }
 
 // void _showCreateGameDialog(BuildContext context) {
