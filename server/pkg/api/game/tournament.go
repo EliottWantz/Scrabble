@@ -5,16 +5,17 @@ import (
 )
 
 type Tournament struct {
-	ID             string   `json:"id"`
-	CreatorID      string   `json:"creatorId"`
-	UserIDs        []string `json:"userIds"`
-	ObservateurIDs []string `json:"observerIds"`
-	PoolGames      []*Game  `json:"poolGames"`
-	Finale         *Game    `json:"finale"`
-	HasStarted     bool     `json:"hasStarted"`
-	IsOver         bool     `json:"isOver"`
-	WinnerID       string   `json:"winnerId"`
-	IsPrivate      bool     `json:"isPrivate"`
+	ID                           string   `json:"id"`
+	CreatorID                    string   `json:"creatorId"`
+	UserIDs                      []string `json:"userIds"`
+	ObservateurIDs               []string `json:"observerIds"`
+	PoolGames                    []*Game  `json:"poolGames"`
+	Finale                       *Game    `json:"finale"`
+	HasStarted                   bool     `json:"hasStarted"`
+	IsOver                       bool     `json:"isOver"`
+	WinnerID                     string   `json:"winnerId"`
+	IsPrivate                    bool     `json:"isPrivate"`
+	JoinTournamentRequestUserIds []string `json:"-"`
 }
 
 type TournamentGameInfo struct {

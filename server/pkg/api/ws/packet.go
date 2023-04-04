@@ -497,3 +497,21 @@ func NewAcceptJoinTournamentRequestPacket(payload VerdictJoinTournamentRequestPa
 func NewDeclineJoinTournamentRequestPacket(payload VerdictJoinTournamentRequestPayload) (*Packet, error) {
 	return NewPacket(ServerEventUserRequestToJoinTournamentDeclined, payload)
 }
+
+type RevokeRequestToJoinGamePayload struct {
+	GameID string `json:"gameId"`
+	UserID string `json:"userId"`
+}
+
+func NewRevokeRequestToJoinGamePacket(payload RevokeRequestToJoinGamePayload) (*Packet, error) {
+	return NewPacket(ServerEventRevokeRequestToJoinGame, payload)
+}
+
+type RevokeRequestToJoinTournamentPayload struct {
+	TournamentID string `json:"tournamentId"`
+	UserID       string `json:"userId"`
+}
+
+func NewRevokeRequestToJoinTournamentPacket(payload RevokeRequestToJoinTournamentPayload) (*Packet, error) {
+	return NewPacket(ServerEventRevokeRequestToJoinTournament, payload)
+}

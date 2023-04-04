@@ -5,17 +5,18 @@ import (
 )
 
 type Game struct {
-	ID             string         `json:"id"`
-	CreatorID      string         `json:"creatorId"`
-	UserIDs        []string       `json:"userIds"`
-	ObservateurIDs []string       `json:"observateurIds"`
-	IsPrivateGame  bool           `json:"isPrivateGame"`
-	IsProtected    bool           `json:"isProtected"`
-	WinnerID       string         `json:"winnerId"`
-	HashedPassword string         `json:"-"`
-	ScrabbleGame   *scrabble.Game `json:"-"`
-	StartTime      int64          `json:"-"`
-	TournamentID   string         `json:"tournamentId"`
+	ID                     string         `json:"id"`
+	CreatorID              string         `json:"creatorId"`
+	UserIDs                []string       `json:"userIds"`
+	ObservateurIDs         []string       `json:"observateurIds"`
+	IsPrivateGame          bool           `json:"isPrivateGame"`
+	IsProtected            bool           `json:"isProtected"`
+	WinnerID               string         `json:"winnerId"`
+	HashedPassword         string         `json:"-"`
+	ScrabbleGame           *scrabble.Game `json:"-"`
+	StartTime              int64          `json:"-"`
+	JoinGameRequestUserIds []string       `json:"-"`
+	TournamentID           string         `json:"tournamentId"`
 }
 
 func (g *Game) IsTournamentGame() bool {

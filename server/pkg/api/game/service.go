@@ -124,11 +124,11 @@ func (s *Service) AddUserToGame(gID, userID, password string) (*Game, error) {
 		return nil, err
 	}
 
-	if g.IsProtected && !auth.PasswordsMatch(g.HashedPassword, password) {
+	if g.IsProtected && !auth.PasswordsMatch(password, g.HashedPassword) {
 		return nil, fmt.Errorf("password mismatch")
 	}
 	if g.IsPrivateGame {
-		return nil, ErrPrivateGame
+		return g, ErrPrivateGame
 	}
 	g.UserIDs = append(g.UserIDs, userID)
 
@@ -142,7 +142,7 @@ func (s *Service) AddUserToTournament(tID, userID, password string) (*Tournament
 	}
 
 	if t.IsPrivate {
-		return nil, ErrPrivateTournament
+		return t, ErrPrivateTournament
 	}
 	if len(t.UserIDs) == 4 {
 		return nil, fmt.Errorf("tournament is full")
@@ -438,7 +438,7 @@ func (s *Service) MakeGamePrivate(gID string) (*Game, error) {
 	if g.IsPrivateGame {
 		return nil, ErrPrivateGame
 	}
-	if g.ScrabbleGame.IsOver() {
+	if g.ScrabbleGame != nil {
 		return nil, ErrGameOver
 	}
 	g.IsPrivateGame = true
@@ -453,7 +453,7 @@ func (s *Service) MakeGamePublic(gID string) (*Game, error) {
 	if !g.IsPrivateGame {
 		return nil, ErrPublicGame
 	}
-	if g.ScrabbleGame.IsOver() {
+	if g.ScrabbleGame != nil {
 		return nil, ErrGameOver
 	}
 	g.IsPrivateGame = false
