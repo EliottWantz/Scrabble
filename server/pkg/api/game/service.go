@@ -124,7 +124,7 @@ func (s *Service) AddUserToGame(gID, userID, password string) (*Game, error) {
 		return nil, err
 	}
 
-	if g.IsProtected && !auth.PasswordsMatch(g.HashedPassword, password) {
+	if g.IsProtected && !auth.PasswordsMatch(password, g.HashedPassword) {
 		return nil, fmt.Errorf("password mismatch")
 	}
 	if g.IsPrivateGame {
