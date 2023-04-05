@@ -20,7 +20,7 @@ import { Tile } from "@app/utils/interfaces/game/tile";
 })
 export class GameObservePageComponent implements OnInit {
     game!: BehaviorSubject<ScrabbleGame | undefined>;
-    moves!: BehaviorSubject<MoveInfo[]>
+    //moves!: BehaviorSubject<MoveInfo[]>
     private darkThemeIcon = 'wb_sunny';
     private lightThemeIcon = 'nightlight_round';
     public lightDarkToggleIcon = this.lightThemeIcon;
@@ -43,7 +43,7 @@ export class GameObservePageComponent implements OnInit {
                 }
             }
         })
-        this.moves = this.gameService.moves;
+        //this.moves = this.gameService.moves;
         this.themeService.theme.subscribe((theme) => {
             if (theme == 'dark') {
               this.lightDarkToggleIcon = this.darkThemeIcon;

@@ -10,6 +10,8 @@ import { LeaveGamePayload } from "@app/utils/interfaces/packet";
 import { WebSocketService } from "@app/services/web-socket/web-socket.service";
 import { Router } from "@angular/router";
 import { ThemeService } from "@app/services/theme/theme.service";
+import { MatBottomSheet } from "@angular/material/bottom-sheet";
+import { AdviceComponent } from "@app/components/advice/advice.component";
 
 @Component({
     selector: "app-game-page",
@@ -18,7 +20,7 @@ import { ThemeService } from "@app/services/theme/theme.service";
 })
 export class GamePageComponent implements OnInit {
     game!: BehaviorSubject<ScrabbleGame | undefined>;
-    moves!: BehaviorSubject<MoveInfo[]>
+    //moves!: BehaviorSubject<MoveInfo[]>
     private darkThemeIcon = 'wb_sunny';
     private lightThemeIcon = 'nightlight_round';
     public lightDarkToggleIcon = this.lightThemeIcon;
@@ -32,7 +34,7 @@ export class GamePageComponent implements OnInit {
     ngOnInit(): void {
         this.game = this.gameService.scrabbleGame;
         this.game.subscribe();
-        this.moves = this.gameService.moves;
+        //this.moves = this.gameService.moves;
         this.themeService.theme.subscribe((theme) => {
             if (theme == 'dark') {
               this.lightDarkToggleIcon = this.darkThemeIcon;

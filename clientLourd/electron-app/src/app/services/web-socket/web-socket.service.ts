@@ -284,7 +284,7 @@ export class WebSocketService {
 
       case "indice": {
           const indicePayload = packet.payload as ServerIndicePayload;
-          this.gameService.moves.next(indicePayload.moves);
+          this.gameService.indice(indicePayload.moves);
           break;
       }
   
