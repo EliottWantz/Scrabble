@@ -3,8 +3,10 @@ import { MatBottomSheet } from "@angular/material/bottom-sheet";
 import { Router } from "@angular/router";
 import { BoardHelper } from "@app/classes/board-helper";
 import { AdviceComponent } from "@app/components/advice/advice.component";
+import { ChooseLetterComponent } from "@app/components/choose-letter/choose-letter.component";
 import { Game, ScrabbleGame } from "@app/utils/interfaces/game/game";
 import { MoveInfo } from "@app/utils/interfaces/game/move";
+import { Tile } from "@app/utils/interfaces/game/tile";
 import { GameUpdatePayload } from "@app/utils/interfaces/packet";
 import { BehaviorSubject } from "rxjs";
 
@@ -21,7 +23,7 @@ export class GameService {
     isObserving = false;
     usersWaiting!: BehaviorSubject<{userId: string, username: string}[]>;
     wasDeclined!: BehaviorSubject<boolean>;
-    constructor(private router: Router, private _bottomSheet: MatBottomSheet) {
+    constructor(private router: Router, private _bottomSheet: MatBottomSheet, private _bottomSheetSpecialLetter: MatBottomSheet) {
         this.scrabbleGame = new BehaviorSubject<ScrabbleGame | undefined>(undefined);
         this.game = new BehaviorSubject<Game | undefined>(undefined);
         this.joinableGames = new BehaviorSubject<Game[]>([]);
@@ -36,8 +38,12 @@ export class GameService {
         this._bottomSheet.open(AdviceComponent, {data: {moves: moves}});
     }
 
+    specialLetter(index: number) {
+        this._bottomSheet.open(ChooseLetterComponent, {data: {indexPlacedTile: index}});
+    }
+
     updateGame(game: ScrabbleGame): void {
-        console.log(game);
+        //console.log(game);
         this.scrabbleGame.next(game);
         this.timer.next(game.timer / 1000000000);
         //this.moves.next([]);
