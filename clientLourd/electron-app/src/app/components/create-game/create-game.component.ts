@@ -40,7 +40,7 @@ export class CreateGameComponent {
             isPrivate: this.gameType === "Public" || this.gameType === "Protected" ? false : true,
         }
         const event : ClientEvent = "create-game";
-        console.log(payload);
+        //console.log(payload);
         this.webSocketService.send(event, payload);
         this.close();
     }

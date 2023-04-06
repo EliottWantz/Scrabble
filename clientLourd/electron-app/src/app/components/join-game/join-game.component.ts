@@ -59,7 +59,7 @@ export class JoinGameComponent implements OnInit {
                         this.games.push(game);
                     }
                 }
-                console.log(this.games);
+                //console.log(this.games);
             });
         }
     }

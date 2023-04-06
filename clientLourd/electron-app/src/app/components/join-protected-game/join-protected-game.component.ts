@@ -57,7 +57,7 @@ export class JoinProtectedGameComponent {
             this.router.navigate(["/gameObserve"]);
             this.close();
         }  else {
-            console.log(this.password);
+            //console.log(this.password);
             const payload: JoinGamePayload = {
                 gameId: this.data.game.id,
                 password: this.password

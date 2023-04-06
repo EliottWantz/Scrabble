@@ -43,7 +43,6 @@ export class AdviceComponent {
                 tempArray.push(key);
                 //tempArray.set(key, cover[key as keyof Cover]);
             }
-            console.log(tempArray);
             tempArray.sort((a, b) => {
                 const aVal = a.split("/");
                 const bVal = b.split("/");
