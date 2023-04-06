@@ -59,6 +59,7 @@ import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { HttpClient } from '@angular/common/http';
 import { AdviceComponent } from '@app/components/advice/advice.component';
+import { ChooseLetterComponent } from '@app/components/choose-letter/choose-letter.component';
 
 @NgModule({
   declarations: [
@@ -92,7 +93,8 @@ import { AdviceComponent } from '@app/components/advice/advice.component';
     GameObservePageComponent,
     JoinPrivateGameComponent,
     GifComponent,
-    AdviceComponent
+    AdviceComponent,
+    ChooseLetterComponent
   ],
   imports: [
     BrowserModule,
