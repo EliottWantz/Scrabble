@@ -44,6 +44,9 @@ import { StorageService } from '@app/services/storage/storage.service';
 import { ScrabbleGame } from '@app/utils/interfaces/game/game';
 import { Router } from '@angular/router';
 import { Room } from '@app/utils/interfaces/room';
+import { Square } from '@app/utils/interfaces/square';
+import { Tile } from '@app/utils/interfaces/game/tile';
+import { Player } from '@app/utils/interfaces/game/player';
 
 @Injectable({
   providedIn: 'root',
@@ -108,7 +111,7 @@ export class WebSocketService {
           name: payloadRoom.roomName,
           messages: messages,
         };
-        console.log(room);
+        //console.log(room);
         //this.roomService.addRoom(room);
         if (this.roomService.findRoom(room.id) === undefined) {
             this.roomService.addRoom(room);
@@ -249,7 +252,29 @@ export class WebSocketService {
 
       case "gameUpdate": {
           const payloadUpdateGame = packet.payload as GameUpdatePayload;
-          this.gameService.updateGame(payloadUpdateGame.game);
+          const newBoard: Square[][] = payloadUpdateGame.game.board;
+          for (let i = 0; i < payloadUpdateGame.game.board.length; i++) {
+            for (let j = 0; j < payloadUpdateGame.game.board[i].length; j++) {
+              if (payloadUpdateGame.game.board[i][j].tile) {
+                //console.log("allo");
+                console.log(payloadUpdateGame.game.board[i][j].tile);
+                newBoard[i][j].tile = {...payloadUpdateGame.game.board[i][j].tile as Tile, disabled: true};
+              } else {
+                newBoard[i][j].tile = {...payloadUpdateGame.game.board[i][j].tile as Tile, disabled: false};
+              }
+            }
+          }
+          /*const newPlayers: Player[] = [];
+          for (let i = 0; i < payloadUpdateGame.game.players.length; i++) {
+            const newPlayer = payloadUpdateGame.game.players[i];
+            const newRack: Tile[] = [];
+            for (let j = 0; i < payloadUpdateGame.game.players[i].rack.tiles.length; j++) {
+              newRack.push({...payloadUpdateGame.game.players[i].rack.tiles[j], disabled: false});
+            }
+            newPlayers.push({...newPlayer, rack: {tiles: newRack}});
+          }*/
+          const newGame: ScrabbleGame = {...payloadUpdateGame.game, board: newBoard/*, players: newPlayers*/};
+          this.gameService.updateGame(newGame);
           this.rackService.deleteRecycled();
           break;
       }
