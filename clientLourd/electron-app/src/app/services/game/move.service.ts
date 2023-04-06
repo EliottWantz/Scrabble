@@ -42,7 +42,7 @@ export class MoveService {
                 moveInfo: move
             };
             this.webSocketService.send("playMove", payload);
-            console.log("Played ");
+            //console.log("Played ");
             console.log(this.placedTiles);
             this.placedTiles = [];
             this.selectedTiles = [];
