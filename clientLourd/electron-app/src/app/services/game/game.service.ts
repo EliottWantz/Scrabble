@@ -3,7 +3,6 @@ import { Router } from "@angular/router";
 import { BoardHelper } from "@app/classes/board-helper";
 import { Game, ScrabbleGame } from "@app/utils/interfaces/game/game";
 import { MoveInfo } from "@app/utils/interfaces/game/move";
-import { GameUpdatePayload } from "@app/utils/interfaces/packet";
 import { BehaviorSubject } from "rxjs";
 
 @Injectable({
@@ -15,6 +14,7 @@ export class GameService {
     timer!: BehaviorSubject<number>;
     moves!: BehaviorSubject<MoveInfo[]>;
     joinableGames!: BehaviorSubject<Game[]>;
+    gameWinner!:BehaviorSubject<string | undefined>
     observableGames!: BehaviorSubject<Game[]>;
     isObserving = false;
     usersWaiting!: BehaviorSubject<{userId: string, username: string}[]>;
@@ -88,5 +88,17 @@ export class GameService {
                 }
             }
         }
+    }
+    gameOverPopup(winId : string){
+        let winner = "";
+        if(!this.scrabbleGame.value){
+            return
+        }
+        for(const user of this.scrabbleGame.value.players){
+            if(user.id === winId){
+                winner = user.username
+            }
+        }
+        this.gameWinner.next(winner);
     }
 }

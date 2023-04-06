@@ -340,8 +340,113 @@ export class WebSocketService {
         break;
       }
 
-      case "error": {
-        console.log("yellow");
+      case 'joinedGame': {
+        const joinedGamePayload = packet.payload as JoinedGamePayload;
+        this.gameService.game.next(joinedGamePayload.game);
+        this.router.navigate(['/waitingRoom']);
+        break;
+      }
+
+      case 'userJoinedGame': {
+        const userJoinedGamePayload = packet.payload as UserJoinedGamePayload;
+        this.gameService.addUser(
+          userJoinedGamePayload.gameId,
+          userJoinedGamePayload.userId
+        );
+        break;
+      }
+
+      case 'leftGame': {
+        const leftGamePayload = packet.payload as LeftGamePayload;
+        this.gameService.removeUser(
+          leftGamePayload.gameId,
+          this.userService.currentUserValue.id
+        );
+        break;
+      }
+
+      case 'userLeftGame': {
+        const userLeftGamePayload = packet.payload as UserLeftGamePayload;
+        this.gameService.removeUser(
+          userLeftGamePayload.gameId,
+          userLeftGamePayload.userId
+        );
+        break;
+      }
+
+      case 'gameUpdate': {
+        const payloadUpdateGame = packet.payload as GameUpdatePayload;
+        this.gameService.updateGame(payloadUpdateGame.game);
+        this.rackService.deleteRecycled();
+        break;
+      }
+
+      case 'timerUpdate': {
+        const payloadTimer = packet.payload as TimerUpdatePayload;
+        this.gameService.updateTimer(payloadTimer.timer);
+        break;
+      }
+
+      case 'gameOver': {
+        const payloadGameOver = packet.payload as GameOverPayload;
+        this.gameService.gameOverPopup(payloadGameOver.winnerId);
+        break;
+      }
+
+      case 'friendRequest': {
+        const payloadFriendRequest = packet.payload as FriendRequestPayload;
+        this.userService.addFriendRequest(payloadFriendRequest.fromId);
+        break;
+      }
+
+      case 'acceptFriendRequest': {
+        const payloadAcceptFriendRequest =
+          packet.payload as FriendRequestPayload;
+        this.userService.subjectUser.next({
+          ...this.userService.currentUserValue,
+          friends: [
+            ...this.userService.currentUserValue.friends,
+            payloadAcceptFriendRequest.fromId,
+          ],
+        });
+        break;
+      }
+
+      case 'declineFriendRequest': {
+        const payloadDeclineFriendRequest =
+          packet.payload as FriendRequestPayload;
+        break;
+      }
+
+      case 'indice': {
+        const indicePayload = packet.payload as ServerIndicePayload;
+        this.gameService.moves.next(indicePayload.moves);
+        break;
+      }
+
+      case 'chat-message': {
+        const payloadMessage = packet.payload as ChatMessage;
+        const message: ChatMessage = {
+          from: payloadMessage.from,
+          fromId: payloadMessage.fromId,
+          roomId: payloadMessage.roomId,
+          message: payloadMessage.message,
+          timestamp: new Date(payloadMessage.timestamp!).toLocaleTimeString(
+            undefined,
+            { hour12: false }
+          ),
+        };
+        this.roomService.addMessage(message);
+        break;
+      }
+
+      case 'listOnlineUsers': {
+        const payloadListOnlineUsers = packet.payload as ListUsersPayload;
+        this.storageService.listOnlineUsers.next(payloadListOnlineUsers.users);
+        break;
+      }
+
+      case 'error': {
         console.log(packet);
         const errorPayload = packet.payload as ErrorPayload;
         console.log(errorPayload);
