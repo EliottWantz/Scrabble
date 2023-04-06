@@ -14,11 +14,12 @@
                     [attr.data-y]="j"
                     #elem
                     squareHost
+                    cdkDropList (cdkDropListDropped)="drop($event)"
                 >
-                    <div *ngIf="!col.tile" #multis>
+                    <div *ngIf="!col.tile || !col.tile.letter" #multis>
                         {{getTextSquare(col.wordMultiplier, col.letterMultiplier)}}
                     </div>
-                    <app-tile *ngIf="col.tile" [tile]="col.tile" [disabled]="true"></app-tile>
+                    <app-tile *ngIf="col.tile && col.tile.letter" [tile]="col.tile" [disabled]="true"></app-tile>
                 </th>
             </tr>
         </tbody>
