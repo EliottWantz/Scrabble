@@ -275,6 +275,7 @@ export class WebSocketService {
 
       case 'gameOver': {
         const payloadGameOver = packet.payload as GameOverPayload;
+        this.gameService.gameOverPopup(payloadGameOver.winnerId);
         break;
       }
 

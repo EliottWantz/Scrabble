@@ -23,6 +23,7 @@ export class GamePageComponent implements OnInit {
     private lightThemeIcon = 'nightlight_round';
     public lightDarkToggleIcon = this.lightThemeIcon;
     language: BehaviorSubject<string>;
+    public gameWinner: string = '';
     
     constructor(private gameService: GameService, private userService: UserService, private moveService: MoveService, private storageService: StorageService,
         private socketService: WebSocketService, private router: Router, private themeService: ThemeService) {
@@ -33,6 +34,12 @@ export class GamePageComponent implements OnInit {
         this.game = this.gameService.scrabbleGame;
         this.game.subscribe();
         this.moves = this.gameService.moves;
+        this.gameService.gameWinner.subscribe((gameWinner) => {
+            if(gameWinner==""){return}
+            else{
+                this.gameWinner = String(gameWinner);
+            }
+        })
         this.themeService.theme.subscribe((theme) => {
             if (theme == 'dark') {
               this.lightDarkToggleIcon = this.darkThemeIcon;

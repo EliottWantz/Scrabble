@@ -58,6 +58,15 @@
     </div>
     <app-chat-box id="chat-box"></app-chat-box>
   </div>
+  <mat-card id="indice" *ngIf="gameWinner !=='' ">
+    <mat-card-content>
+      <p>{{gameWinner}} {{"game-page.win" | translate}}</p>
+      <button mat-flat-button color="primary" (click)="leaveGame()">
+        <mat-icon>input</mat-icon>
+        {{'game-page.leave' | translate}}
+      </button>
+    </mat-card-content>
+  </mat-card>
     <!--
       <mat-card id="indice" *ngIf="moves.value.length > 0">
       <mat-card-content>

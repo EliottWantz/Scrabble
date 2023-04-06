@@ -68,6 +68,7 @@
 	"game-page.reserve": "Letters in reserve",
 	"game-page.skip": "Skip",
 	"game-page.submit": "Submit",
+	"game-page.win": "won!",
 	"login-component.connect": "Log in",
 	"login-component.error": "The password or username is incorrect",
 	"login-component.password": "Please enter your password",
