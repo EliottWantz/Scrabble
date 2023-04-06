@@ -9,31 +9,25 @@ import { BehaviorSubject } from "rxjs";
     providedIn: 'root',
 })
 export class GameService {
-    scrabbleGame!: BehaviorSubject<ScrabbleGame>;
+    scrabbleGame!: BehaviorSubject<ScrabbleGame | undefined>;
     game!: BehaviorSubject<Game | undefined>;
     timer!: BehaviorSubject<number>;
     moves!: BehaviorSubject<MoveInfo[]>;
     joinableGames!: BehaviorSubject<Game[]>;
     gameWinner!:BehaviorSubject<string | undefined>
+    observableGames!: BehaviorSubject<Game[]>;
+    isObserving = false;
+    usersWaiting!: BehaviorSubject<{userId: string, username: string}[]>;
+    wasDeclined!: BehaviorSubject<boolean>;
     constructor(private router: Router) {
-        this.scrabbleGame = new BehaviorSubject<ScrabbleGame>({
-            id: "",
-            players: [],
-            board: BoardHelper.createBoard(),
-            finished: false,
-            numPassMoves: 0,
-            turn: "",
-            timer: 0
-        });
-        this.game = new BehaviorSubject<Game | undefined>({
-            id: "",
-            creatorId: "",
-            userIds: [],
-            isProtected: false
-        });
+        this.scrabbleGame = new BehaviorSubject<ScrabbleGame | undefined>(undefined);
+        this.game = new BehaviorSubject<Game | undefined>(undefined);
         this.joinableGames = new BehaviorSubject<Game[]>([]);
         this.timer = new BehaviorSubject<number>(0);
         this.moves = new BehaviorSubject<MoveInfo[]>([]);
+        this.observableGames = new BehaviorSubject<Game[]>([]);
+        this.usersWaiting = new BehaviorSubject<{userId: string, username: string}[]>([]);
+        this.wasDeclined = new BehaviorSubject<boolean>(false);
     }
 
     updateGame(game: ScrabbleGame): void {
@@ -41,7 +35,11 @@ export class GameService {
         this.scrabbleGame.next(game);
         this.timer.next(game.timer / 1000000000);
         this.moves.next([]);
-        this.router.navigate(['/', 'game']);
+        if (!this.isObserving) {
+            this.router.navigate(['/', 'game']);
+        } else {
+            this.router.navigate(['/', 'gameObserve']);
+        }
     }
 
     updateTimer(timer: number): void {
@@ -92,12 +90,15 @@ export class GameService {
         }
     }
     gameOverPopup(winId : string){
-        let winner:string = "";
-        for(let user of this.scrabbleGame.value.players){
+        let winner = "";
+        if(!this.scrabbleGame.value){
+            return
+        }
+        for(const user of this.scrabbleGame.value.players){
             if(user.id === winId){
                 winner = user.username
             }
-        };
+        }
         this.gameWinner.next(winner);
     }
 }

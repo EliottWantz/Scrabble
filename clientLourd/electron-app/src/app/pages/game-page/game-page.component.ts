@@ -17,7 +17,7 @@ import { ThemeService } from "@app/services/theme/theme.service";
     styleUrls: ["./game-page.component.scss"],
 })
 export class GamePageComponent implements OnInit {
-    game!: BehaviorSubject<ScrabbleGame>;
+    game!: BehaviorSubject<ScrabbleGame | undefined>;
     moves!: BehaviorSubject<MoveInfo[]>
     private darkThemeIcon = 'wb_sunny';
     private lightThemeIcon = 'nightlight_round';
@@ -50,7 +50,7 @@ export class GamePageComponent implements OnInit {
     }
 
     isTurn(): boolean {
-        return this.game.value.turn == this.userService.currentUserValue.id;
+        return this.game.value?.turn == this.userService.currentUserValue.id;
     }
 
     hasPlacedLetters(): boolean {
@@ -85,11 +85,15 @@ export class GamePageComponent implements OnInit {
     }
 
     leaveGame(): void {
-        const payload: LeaveGamePayload = {
-            gameId: this.game.value.id
-        };
-        this.socketService.send("leave-game", payload);
-        this.router.navigate(["/home"]);
+        if (this.game.value) {
+            const payload: LeaveGamePayload = {
+                gameId: this.game.value?.id
+            };
+            this.socketService.send("leave-game", payload);
+            this.gameService.game.next(undefined);
+            this.gameService.scrabbleGame.next(undefined);
+            this.router.navigate(["/home"]);
+        }
     }
 
     public doToggleLightDark() {

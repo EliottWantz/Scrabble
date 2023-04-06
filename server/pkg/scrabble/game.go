@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"sort"
 	"time"
+
+	"golang.org/x/exp/slog"
 )
 
 const (
@@ -86,7 +88,9 @@ func (g *Game) PlayerThatPlayed() *Player {
 
 func (g *Game) SkipTurn() {
 	move := NewPassMove()
-	g.ApplyValid(move)
+	if err := g.ApplyValid(move); err != nil {
+		slog.Error("failed to skip turn", err)
+	}
 }
 
 func (g *Game) GetPlayer(pID string) (*Player, error) {

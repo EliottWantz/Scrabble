@@ -9,7 +9,7 @@ export class RackService {
     replaceTilesInRack(): void {
         const rack = document.getElementById("rack");
         if (this.placedTiles.length > 0) {
-            for (let tileElem of this.placedTiles) {
+            for (const tileElem of this.placedTiles) {
                 tileElem.children[0].className = "recycled";
                 rack?.appendChild(tileElem.children[0]);
             }

@@ -1,0 +1,65 @@
+<div class="container">
+  <div class="left">
+    <button mat-flat-button color="primary" (click)="leaveGame()">
+      <mat-icon>input</mat-icon>
+      {{'game-page.leave' | translate}}
+    </button>
+
+    <div *ngFor="let player of game.value?.players; let i = index" class="player" [class.isTurn]="game.value?.turn === player.id">
+      <div class="playerInfo">
+        <img *ngIf="!player.isBot" src="{{getPlayerAvatar(player.id)}}">
+        <h3>{{player.username}}</h3>
+      </div>
+      <p>Score : {{player.score}}</p>
+      <button mat-raised-button color="primary" (click)="switchRack(i)" [disabled]="i === currentRack ? true : false"> Afficher chevalet</button>
+      <button *ngIf="player.isBot" mat-raised-button color="primary" (click)="takePlace()">Remplacer</button>
+    </div>
+  </div>
+
+  <div class="middle">
+    <div class="board">
+      <app-board></app-board>
+    </div>
+
+    <mat-card class="mat-card-rack">
+      <mat-card-content class="mat-card-content-rack">
+      <div *ngFor="let tile of racks[currentRack].tiles" #elem id="ship-box" class="tile">
+        <div class="letter">
+            {{getASCII(tile)}}
+        </div>
+        <div class="value">
+            {{tile.value}}
+        </div>
+      </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+  <div class="right">
+    <div class="config">
+      <div class="language">
+        <div class="language-icon">
+            <mat-icon (click)="switchLanguage()" inline="true">language</mat-icon>
+        </div>
+        <div>{{language.value}}</div>
+      </div>
+      <div>
+        <mat-icon (click)="doToggleLightDark()">{{lightDarkToggleIcon}}</mat-icon>
+      </div>
+    </div>
+    <app-timer id="timer"></app-timer>
+
+    <div id="reserve">
+      <h3>{{'game-page.reserve' | translate}}</h3>
+      <h3>80</h3>
+    </div>
+
+    <app-chat-box id="chat-box"></app-chat-box>
+  </div>
+    <!--
+      <mat-card id="indice" *ngIf="moves.value.length > 0">
+      <mat-card-content>
+        <p *ngFor="let move of getIndice()">{{move}}</p>
+      </mat-card-content>
+    </mat-card>
+    -->
+</div>

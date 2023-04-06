@@ -21,7 +21,8 @@ export type ClientPayload = ChatMessage
 | LeaveGamePayload
 | StartGamePayload
 | PlayMovePayload
-| IndicePayload;
+| IndicePayload
+| ReplaceBotByObserverPayload;
 
 export interface CreateRoomPayload {
     roomName: string;
@@ -50,6 +51,7 @@ export interface LeaveDMRoomPayload {
 export interface CreateGamePayload {
     password: string;
     userIds: string[];
+    isPrivate: boolean;
 }
 
 export interface JoinGamePayload {
@@ -58,6 +60,15 @@ export interface JoinGamePayload {
 }
 
 export interface LeaveGamePayload {
+    gameId: string;
+}
+
+export interface JoinGameAsObserverPayload {
+    gameId: string;
+    password: string;
+}
+
+export interface LeaveGameAsObserverPayload {
     gameId: string;
 }
 
@@ -71,6 +82,10 @@ export interface PlayMovePayload {
 }
 
 export interface IndicePayload {
+    gameId: string;
+}
+
+export interface ReplaceBotByObserverPayload {
     gameId: string;
 }
 
@@ -96,7 +111,13 @@ export type ServerPayload = JoinedRoomPayload
 | FriendRequestPayload
 | ServerIndicePayload
 | ErrorPayload
-| ListUsersOnlinePayload;
+| ListUsersOnlinePayload
+| ListObservableGamesPayload
+| UserRequestToJoinGamePayload
+| UserRequestToJoinTournamentPayload
+| VerdictJoinGameRequestPayload
+| VerdictJoinTournamentRequestPayload
+| RevokeJoinGameRequestPayload;
 
 export interface JoinedRoomPayload {
     roomId: string;
@@ -201,4 +222,35 @@ export interface ErrorPayload {
 
 export interface ListUsersOnlinePayload {
     users: User[];
+}
+
+export interface ListObservableGamesPayload {
+    games: Game[];
+}
+
+export interface UserRequestToJoinGamePayload {
+    gameId: string;
+    userId: string;
+    username: string;
+}
+
+export interface UserRequestToJoinTournamentPayload {
+    tournamentId: string;
+    userId: string;
+    username: string;
+}
+
+export interface VerdictJoinGameRequestPayload {
+    gameId: string;
+    userId: string;
+}
+
+export interface VerdictJoinTournamentRequestPayload {
+    tournamentId: string;
+    userId: string;
+}
+
+export interface RevokeJoinGameRequestPayload {
+    gameId: string;
+    userId: string;
 }

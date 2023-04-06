@@ -153,9 +153,7 @@ export class ChatBoxComponent implements AfterViewInit {
   }
 
   openGifMenu(): void {
-        this.dialog.open(GifComponent, {width: '75%',
-        minHeight: '75vh',
-        height : '75vh'});
+        this.dialog.open(GifComponent, {});
   }
 
   containsGifURL(message: string): boolean {

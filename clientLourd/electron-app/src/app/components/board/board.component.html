@@ -1,7 +1,7 @@
 <div id="board">
     <table>
         <tbody>
-            <tr *ngFor="let row of game.value.board; let i = index">
+            <tr *ngFor="let row of game.value?.board; let i = index">
                 <th *ngFor="let col of row, let j = index"
                     class="square-multiplier"
                     [class.word3]="col.wordMultiplier === 3"

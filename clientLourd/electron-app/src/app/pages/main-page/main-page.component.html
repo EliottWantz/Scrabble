@@ -4,15 +4,8 @@
     <p>{{'main-page.text2' | translate}}</p>
 <button *ngIf="!isLoggedIn()" mat-flat-button color="accent" routerLink="/login">{{'main-page.login' | translate}}</button>
     <button *ngIf="!isLoggedIn()" mat-flat-button color="accent" routerLink="/register">{{'main-page.register' | translate}}</button>
-    <button *ngIf="isLoggedIn()" mat-flat-button color="accent" routerLink="/waitingRoom" (click)="createGame()">{{'main-page.play' | translate}}</button>
-    <button mat-flat-button color="accent" routerLink="/game">Game</button>
+    <button *ngIf="isLoggedIn()" mat-flat-button color="accent" routerLink="/find-game">{{'main-page.play' | translate}}</button>
 
-    <div *ngIf="isLoggedIn()">
-        <div class="list-games" *ngFor="let game of joinableGames.value; let i = index">
-            <h4>{{game.id}}     {{game.userIds.length}}/4</h4>
-        <button mat-flat-button color="accent" (click)="joinGame(game.id, ' ')">Rejoindre la partie</button>
-        </div>
-    </div>
     <!--
         <button *ngIf="isLoggedIn()" mat-flat-button color="accent" routerLink="/waitingRoom" (click)="createGame()">Créer une partie</button>
         <button mat-flat-button color="accent" routerLink="/game">Game</button>

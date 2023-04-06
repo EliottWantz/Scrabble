@@ -131,6 +131,18 @@ export class CommunicationService {
         }
     }
 
+    public acceptPlayer(userId: string, requestorId: string, gameId: string): Observable<void> {
+        return this.http.post<void>(`${this.baseUrl}/game/accept/${userId}/${requestorId}/${gameId}`, {});
+    }
+
+    public denyPlayer(userId: string, requestorId: string, gameId: string): Observable<void> {
+        return this.http.delete<void>(`${this.baseUrl}/game/accept/${requestorId}/${userId}/${gameId}`);
+    }
+
+    public revokeJoinGame(userId: string, gameId: string): Observable<void> {
+        return this.http.patch<void>(`${this.baseUrl}/game/revoke/${userId}/${gameId}`, {});
+    }
+
     private handleError(error: HttpErrorResponse) {
         if (error.status === 0) {
           // A client-side or network error occurred. Handle it accordingly.

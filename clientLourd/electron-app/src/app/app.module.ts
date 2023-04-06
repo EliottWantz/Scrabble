@@ -44,9 +44,13 @@ import { FindGamePageComponent } from '@app/pages/find-game-page/find-game-page.
 import { MatGridListModule } from '@angular/material/grid-list';
 import { JoinGameComponent } from '@app/components/join-game/join-game.component';
 import { CreateGameComponent } from '@app/components/create-game/create-game.component';
+import { JoinProtectedGameComponent } from '@app/components/join-protected-game/join-protected-game.component';
 import { CustomizeAvatarComponent } from '@app/components/customize-avatar/customize-avatar.component';
 import { MatStepperModule } from '@angular/material/stepper';
 import { ColorPickerModule } from 'ngx-color-picker';
+import { GameObservePageComponent } from "@app/pages/game-observe-page/game-observe-page.component";
+import { JoinPrivateGameComponent } from '@app/components/join-private-game/join-private-game.component';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { GifComponent } from '@app/components/gif/gif.component';
 
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
@@ -80,7 +84,10 @@ import { HttpClient } from '@angular/common/http';
     FindGamePageComponent,
     JoinGameComponent,
     CreateGameComponent,
+    JoinProtectedGameComponent,
     CustomizeAvatarComponent,
+    GameObservePageComponent,
+    JoinPrivateGameComponent,
     GifComponent
   ],
   imports: [
@@ -106,6 +113,7 @@ import { HttpClient } from '@angular/common/http';
     HttpClientModule,
     MatStepperModule,
     ColorPickerModule,
+    MatButtonToggleModule,
     TranslateModule.forRoot({
       loader: {
         provide: TranslateLoader,
