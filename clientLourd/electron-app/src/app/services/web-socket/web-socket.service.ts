@@ -39,7 +39,6 @@ import { ChatMessage } from '@app/utils/interfaces/chat-message';
 import { ClientEvent } from '@app/utils/events/client-events';
 import { ServerEvent } from '@app/utils/events/server-events';
 import { GameService } from '@app/services/game/game.service';
-import { RackService } from '@app/services/game/rack.service';
 import { StorageService } from '@app/services/storage/storage.service';
 import { ScrabbleGame } from '@app/utils/interfaces/game/game';
 import { Router } from '@angular/router';
@@ -61,7 +60,6 @@ export class WebSocketService {
     private userService: UserService,
     private roomService: RoomService,
     private gameService: GameService,
-    private rackService: RackService,
     private storageService: StorageService,
     private router: Router
   ) {
@@ -278,7 +276,6 @@ export class WebSocketService {
           const newGame: ScrabbleGame = {...payloadUpdateGame.game, board: newBoard/*, players: newPlayers*/};
           this.oldGame = JSON.parse(JSON.stringify(newGame));
           this.gameService.updateGame(newGame);
-          this.rackService.deleteRecycled();
           break;
       }
 
@@ -379,7 +376,6 @@ export class WebSocketService {
           console.log("move");
             this.gameService.scrabbleGame.next(this.oldGame);
             this.gameService.resetSelectedAndPlaced();
-            this.rackService.replaceTilesInRack();
           //this.gameService.game.next(this.gameService.game.value);
         } else {
           this.error.next(errorPayload.error);

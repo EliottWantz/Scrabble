@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Tile } from '@app/utils/interfaces/game/tile';
 import { MoveService } from '@app/services/game/move.service';
-import { RackService } from '@app/services/game/rack.service';
 import { GameService } from '@app/services/game/game.service';
 import { Player } from '@app/utils/interfaces/game/player';
 import { UserService } from '@app/services/user/user.service';
@@ -12,19 +11,16 @@ import { UserService } from '@app/services/user/user.service';
 export class MouseService {
   tileElems: HTMLElement[] = [];
   constructor(
-    private moveService: MoveService,
-    private rackService: RackService,
     private gameService: GameService,
     private userService: UserService
   ) {}
 
-  place(element: HTMLElement, row: number, col: number): void {
+  place(row: number, col: number): void {
     if (
       this.tileElems.length == 1 &&
       this.gameService.selectedTiles.length == 1
     ) {
       //element.appendChild(this.tileElems[0]);
-      this.rackService.placedTiles.push(element);
       this.tileElems[0].style.outlineColor = '#e6d9b7';
       this.tileElems = [];
 

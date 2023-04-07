@@ -40,11 +40,12 @@ export class BoardComponent implements OnInit {
     const currentElem = this.elements.toArray()[row * 15 + col];
     const multiElem = this.multis.toArray()[row * 15 + col];
     console.log(this.gameService.scrabbleGame.value?.board);
+    console.log(currentElem);
     if (
-      currentElem.nativeElement.children.length == 1 &&
+      //currentElem.nativeElement.children.length == 1 &&
       this.gameService.selectedTiles.length == 1 && !this.gameService.scrabbleGame.value?.board[row][col].tile?.letter
     ) {
-      this.mouseService.place(currentElem.nativeElement, row, col);
+      this.mouseService.place( row, col);
       //multiElem.nativeElement.remove();
     }
   }
