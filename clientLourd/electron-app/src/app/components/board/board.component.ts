@@ -12,6 +12,8 @@ import { MouseService } from '@app/services/mouse/mouse.service';
 import { MoveService } from '@app/services/game/move.service';
 import {CdkDragDrop} from '@angular/cdk/drag-drop';
 import { Tile } from '@app/utils/interfaces/game/tile';
+import { UserService } from '@app/services/user/user.service';
+import { Player } from '@app/utils/interfaces/game/player';
 
 @Component({
   selector: 'app-board',
@@ -20,7 +22,8 @@ import { Tile } from '@app/utils/interfaces/game/tile';
 })
 export class BoardComponent implements OnInit {
     game!: BehaviorSubject<ScrabbleGame | undefined>;
-    constructor(private gameService: GameService, private mouseService: MouseService, private moveService: MoveService) {
+    constructor(private gameService: GameService, private mouseService: MouseService, private moveService: MoveService,
+      private userService: UserService) {
         this.game = this.gameService.scrabbleGame;
     }
 
@@ -35,9 +38,10 @@ export class BoardComponent implements OnInit {
   clicked(row: number, col: number): void {
     const currentElem = this.elements.toArray()[row * 15 + col];
     const multiElem = this.multis.toArray()[row * 15 + col];
+    console.log(this.gameService.scrabbleGame.value?.board);
     if (
       currentElem.nativeElement.children.length == 1 &&
-      this.moveService.selectedTiles.length == 1
+      this.gameService.selectedTiles.length == 1 && !this.gameService.scrabbleGame.value?.board[row][col].tile?.letter
     ) {
       this.mouseService.place(currentElem.nativeElement, row, col);
       //multiElem.nativeElement.remove();
@@ -62,8 +66,10 @@ export class BoardComponent implements OnInit {
     console.log(event.dropPoint);
     console.log(document.elementFromPoint(event.dropPoint.x,event.dropPoint.y));
     console.log(event.previousContainer);
+    this.gameService.selectedTiles = [];
+    this.mouseService.resetColor();
     let bruh = document.elementFromPoint(event.dropPoint.x, event.dropPoint.y);
-    if (document.getElementById("board")?.contains(bruh) == false) {
+    if (document.getElementById("board")?.contains(bruh) == false && document.getElementById("rack")?.contains(bruh) == false) {
         return;
     }
     if (bruh && bruh?.tagName === "DIV") {
@@ -73,12 +79,46 @@ export class BoardComponent implements OnInit {
     const y = Number(bruh?.getAttribute("data-y"));
     const elem = event.item.element.nativeElement;
     const tile : Tile = {letter: Number(elem.getAttribute("data-letter")), value: Number(elem.getAttribute("data-value"))};
-    if (this.gameService.scrabbleGame.value && event.previousContainer.element.nativeElement.dataset['x'] && event.previousContainer.element.nativeElement.dataset['y']) {
+    if (document.getElementById("board")?.contains(bruh) == true) {
+      this.mouseService.place_drag_drop(elem, x, y, tile);
+    }
+    const oldX = event.previousContainer.element.nativeElement.dataset['x'];
+    const oldY = event.previousContainer.element.nativeElement.dataset['y'];
+    if (this.gameService.scrabbleGame.value && oldX && oldY) {
       const newBoard = this.gameService.scrabbleGame.value.board;
+      /*if (this.gameService.scrabbleGame.value.board[parseInt(oldX)][parseInt(oldY)].tile) {
+        console.log(this.gameService.scrabbleGame.value.board[parseInt(oldX)][parseInt(oldY)].tile);
+        console.log(this.gameService.placedTiles);
+        let deleted = false;
+        for (let i = 0; i < this.gameService.placedTiles.length; i++) {
+          if (!deleted && (this.gameService.placedTiles[i] == this.gameService.scrabbleGame.value.board[parseInt(oldX)][parseInt(oldY)].tile ||
+            (this.gameService.placedTiles[i].letter == this.gameService.scrabbleGame.value.board[parseInt(oldX)][parseInt(oldY)].tile?.letter &&
+            this.gameService.placedTiles[i].value == this.gameService.scrabbleGame.value.board[parseInt(oldX)][parseInt(oldY)].tile?.value && 
+            this.gameService.placedTiles[i].x == this.gameService.scrabbleGame.value.board[parseInt(oldX)][parseInt(oldY)].tile?.x &&
+            this.gameService.placedTiles[i].y == this.gameService.scrabbleGame.value.board[parseInt(oldX)][parseInt(oldY)].tile?.y))) {
+              console.log("deleting placed");
+              console.log(this.gameService.placedTiles);
+            const newplaced = this.gameService.placedTiles.splice(i, 1);
+            this.gameService.placedTiles = newplaced;
+            console.log(newplaced);
+            console.log(this.gameService.placedTiles);
+            deleted = true;
+          }
+        }
+      }*/
       console.log("deleting");
-      newBoard[parseInt(event.previousContainer.element.nativeElement.dataset['x'])][parseInt(event.previousContainer.element.nativeElement.dataset['y'])].tile = undefined;
+      newBoard[parseInt(oldX)][parseInt(oldY)].tile = undefined;
       this.gameService.scrabbleGame.next({...this.gameService.scrabbleGame.value, board: newBoard});
     }
-    this.mouseService.place_drag_drop(elem, x, y, tile);
+    if (document.getElementById("rack")?.contains(bruh) == true && this.gameService.scrabbleGame.value) {
+      if (this.gameService.scrabbleGame.value) {
+        const players: Player[] = this.gameService.scrabbleGame.value.players;
+        for (let i = 0; i < players.length; i++) {
+          if (players[i].id == this.userService.currentUserValue.id) {
+            players[i].rack.tiles.push({letter: tile.letter, value: tile.value, disabled: false});
+          }
+        }
+      }
+    }
   }
 }

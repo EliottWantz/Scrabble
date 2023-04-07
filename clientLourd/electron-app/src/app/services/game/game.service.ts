@@ -23,6 +23,8 @@ export class GameService {
     isObserving = false;
     usersWaiting!: BehaviorSubject<{userId: string, username: string}[]>;
     wasDeclined!: BehaviorSubject<boolean>;
+    selectedTiles: Tile[] = [];
+    placedTiles = 0;
     constructor(private router: Router, private _bottomSheet: MatBottomSheet, private _bottomSheetSpecialLetter: MatBottomSheet) {
         this.scrabbleGame = new BehaviorSubject<ScrabbleGame | undefined>(undefined);
         this.game = new BehaviorSubject<Game | undefined>(undefined);
@@ -38,8 +40,13 @@ export class GameService {
         this._bottomSheet.open(AdviceComponent, {data: {moves: moves}});
     }
 
-    specialLetter(index: number) {
-        this._bottomSheet.open(ChooseLetterComponent, {data: {indexPlacedTile: index}});
+    specialLetter( x: number, y: number) {
+        this._bottomSheet.open(ChooseLetterComponent, {data: { x: x, y: y}});
+    }
+
+    resetSelectedAndPlaced(): void {
+        this.placedTiles = 0;
+        this.selectedTiles = [];
     }
 
     updateGame(game: ScrabbleGame): void {

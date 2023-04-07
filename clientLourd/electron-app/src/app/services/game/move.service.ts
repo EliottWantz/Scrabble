@@ -11,24 +11,28 @@ import { GameService } from "@app/services/game/game.service";
     providedIn: 'root',
 })
 export class MoveService {
-    selectedTiles: Tile[] = [];
-    placedTiles: Tile[] = [];
     game!: BehaviorSubject<ScrabbleGame | undefined>;
     constructor(private webSocketService: WebSocketService, private gameService: GameService) {
         this.game = this.gameService.scrabbleGame;
-        this.game.subscribe(() => {
-            this.selectedTiles = [];
-            this.placedTiles = [];
-        });
     }
 
     async playTiles(): Promise<void> {
         let letters = "";
         const covers: Cover = {};
-        this.placedTiles.forEach(tile => {
-            letters += String.fromCharCode(tile.letter);
-            covers[tile.y?.toString() + "/" + tile.x?.toString()] = String.fromCharCode(tile.letter);
-        });
+        if (this.gameService.scrabbleGame.value) {
+            for (let i = 0; i < this.gameService.scrabbleGame.value.board.length; i++) {
+                for (let j = 0; j < this.gameService.scrabbleGame.value.board[i].length; j++) {
+                    if (this.gameService.scrabbleGame.value.board[i][j].tile 
+                        && !this.gameService.scrabbleGame.value.board[i][j].tile?.disabled 
+                        && this.gameService.scrabbleGame.value.board[i][j].tile?.y 
+                        && this.gameService.scrabbleGame.value.board[i][j].tile?.x
+                        && this.gameService.scrabbleGame.value.board[i][j].tile?.letter) {
+                        letters += String.fromCharCode((this.gameService.scrabbleGame.value.board[i][j].tile as Tile).letter);
+                        covers[((this.gameService.scrabbleGame.value.board[i][j].tile as Tile).y as number).toString() + "/" + ((this.gameService.scrabbleGame.value.board[i][j].tile as Tile).x as number)?.toString()] = String.fromCharCode(((this.gameService.scrabbleGame.value.board[i][j].tile as Tile).letter));
+                    }
+                }
+            }
+        }
 
         const move: MoveInfo = {
             type: "playTile",
@@ -43,15 +47,14 @@ export class MoveService {
             };
             this.webSocketService.send("playMove", payload);
             //console.log("Played ");
-            console.log(this.placedTiles);
-            this.placedTiles = [];
-            this.selectedTiles = [];
+            console.log(this.gameService.placedTiles);
+            this.gameService.resetSelectedAndPlaced();
         }
     }
 
     exchange(): void {
         let letters = "";
-        this.selectedTiles.forEach(tile => {
+        this.gameService.selectedTiles.forEach(tile => {
             letters += String.fromCharCode(tile.letter);
         });
 
@@ -68,9 +71,8 @@ export class MoveService {
     
             this.webSocketService.send("playMove", payload);
             console.log("Exchanged ");
-            console.log(this.selectedTiles);
-            this.selectedTiles = [];
-            this.placedTiles = [];
+            console.log(this.gameService.selectedTiles);
+            this.gameService.resetSelectedAndPlaced();
         }
     }
 
@@ -86,8 +88,7 @@ export class MoveService {
             };
     
             this.webSocketService.send("playMove", payload)
-            this.selectedTiles = [];
-            this.placedTiles = [];
+            this.gameService.resetSelectedAndPlaced();
         }
     }
 

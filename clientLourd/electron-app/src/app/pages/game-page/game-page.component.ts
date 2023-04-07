@@ -49,11 +49,11 @@ export class GamePageComponent implements OnInit {
     }
 
     hasPlacedLetters(): boolean {
-        return this.moveService.placedTiles.length != 0;
+        return this.gameService.placedTiles > 0;
     }
 
     hasSelectedLetters(): boolean {
-        return this.moveService.selectedTiles.length != 0;
+        return this.gameService.selectedTiles.length != 0;
     }
 
     submit(): void {

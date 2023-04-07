@@ -72,6 +72,8 @@ export class RackComponent implements OnInit {
         const elem = event.item.element.nativeElement;
         const tile : Tile = {letter: Number(elem.getAttribute("data-letter")), value: Number(elem.getAttribute("data-value"))};
         console.log(tile);
+        this.gameService.selectedTiles = [];
+        this.mouseService.resetColor();
         let deleted = false;
         for (let i = 0; i < this.rack.length; i++) {
             if (this.rack[i].letter == tile.letter && !deleted) {

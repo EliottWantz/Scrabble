@@ -29,16 +29,17 @@ export class TileComponent {
                     this.mouseService.tileElems.splice(index, 1); 
                 }
 
-                const indexMove = this.moveService.selectedTiles.indexOf(this.tile, 0);
+                const indexMove = this.gameService.selectedTiles.indexOf(this.tile, 0);
                 if (indexMove > -1) {
-                    this.moveService.selectedTiles.splice(indexMove, 1);
+                    this.gameService.selectedTiles.splice(indexMove, 1);
                 }
             }
             else {
                 this.renderer.setStyle(this.element.nativeElement, "outline-color", "red");
                 this.alreadyClicked = true;
                 this.mouseService.tileElems.push(this.element.nativeElement);
-                this.moveService.selectedTiles.push(this.tile);
+                this.gameService.selectedTiles.push(this.tile);
+                console.log(this.gameService.selectedTiles);
             }
         }
     }

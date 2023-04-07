@@ -55,6 +55,7 @@ export class WebSocketService {
     socket!: WebSocket;
     user: BehaviorSubject<User>;
     error: BehaviorSubject<string> = new BehaviorSubject<string>("");
+    oldGame!: ScrabbleGame;
 
   constructor(
     private userService: UserService,
@@ -264,6 +265,7 @@ export class WebSocketService {
               }
             }
           }
+          this.gameService.resetSelectedAndPlaced();
           /*const newPlayers: Player[] = [];
           for (let i = 0; i < payloadUpdateGame.game.players.length; i++) {
             const newPlayer = payloadUpdateGame.game.players[i];
@@ -274,6 +276,7 @@ export class WebSocketService {
             newPlayers.push({...newPlayer, rack: {tiles: newRack}});
           }*/
           const newGame: ScrabbleGame = {...payloadUpdateGame.game, board: newBoard/*, players: newPlayers*/};
+          this.oldGame = newGame;
           this.gameService.updateGame(newGame);
           this.rackService.deleteRecycled();
           break;
@@ -371,6 +374,8 @@ export class WebSocketService {
         const errorPayload = packet.payload as ErrorPayload;
         console.log(errorPayload);
         if (errorPayload.error == "invalid move") {
+          console.log("move");
+          this.gameService.scrabbleGame.next(this.oldGame);
           this.rackService.replaceTilesInRack();
           //this.gameService.game.next(this.gameService.game.value);
         } else {
