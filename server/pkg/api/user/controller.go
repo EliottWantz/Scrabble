@@ -223,7 +223,9 @@ func (ctrl *Controller) UpdatePreferences(c *fiber.Ctx) error {
 		}
 	}
 
-	ctrl.svc.UpdatePreferences(user, preference)
+	if err := ctrl.svc.UpdatePreferences(user, preference); err != nil {
+		return err
+	}
 	return c.SendStatus(fiber.StatusOK)
 }
 

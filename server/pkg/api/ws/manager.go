@@ -309,7 +309,9 @@ func (m *Manager) RemoveClient(c *Client) error {
 		return fmt.Errorf("removeClient: %w", err)
 	}
 
-	m.UserSvc.AddNetworkingLog(user, "Logout", time.Now().UnixMilli())
+	if err := m.UserSvc.AddNetworkingLog(user, "Logout", time.Now().UnixMilli()); err != nil {
+		slog.Error("failed to add networking log", err)
+	}
 	m.logger.Info(
 		"client disconnected",
 		"ws_id", c.ID,
@@ -733,7 +735,10 @@ func (m *Manager) MakeBotMoves(gID string) {
 		}
 
 		if g.ScrabbleGame.IsOver() {
-			m.HandleGameOver(g)
+			if err := m.HandleGameOver(g); err != nil {
+				slog.Error("failed to handle game over", err)
+			}
+			break
 		}
 	}
 }
@@ -799,8 +804,12 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 		if err != nil {
 			continue
 		}
-		m.UserSvc.AddGameStats(u, g.StartTime, time.Now().UnixMilli(), winnerID == p.ID)
-		m.UserSvc.UpdateUserStats(u, winnerID == p.ID, p.Score, time.Now().UnixMilli()-g.StartTime)
+		if err := m.UserSvc.AddGameStats(u, g.StartTime, time.Now().UnixMilli(), winnerID == p.ID); err != nil {
+			slog.Error("failed to update user stats", err)
+		}
+		if err := m.UserSvc.UpdateUserStats(u, winnerID == p.ID, p.Score, time.Now().UnixMilli()-g.StartTime); err != nil {
+			slog.Error("failed to update user stats", err)
+		}
 	}
 
 	if g.IsTournamentGame() {
