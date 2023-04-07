@@ -64,11 +64,20 @@ export class RackComponent implements OnInit {
         if (document.getElementById("board")?.contains(bruh) == false) {
             return;
         }
-        if (bruh && bruh?.tagName === "DIV") {
+        
+        console.log(bruh);
+        while (bruh && bruh?.tagName !== "MAT-GRID-TILE") {
             bruh = bruh.parentElement;
         }
+        if (bruh?.classList.contains("bad")) {
+            console.log("bad");
+            return;
+        }
+        console.log(bruh);
         const x = Number(bruh?.getAttribute("data-x"));
         const y = Number(bruh?.getAttribute("data-y"));
+        console.log(x);
+        console.log(y);
         if (this.gameService.scrabbleGame.value?.board[x][y].tile?.letter) {
             return;
           }

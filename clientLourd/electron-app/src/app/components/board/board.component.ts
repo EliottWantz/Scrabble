@@ -22,6 +22,7 @@ import { Player } from '@app/utils/interfaces/game/player';
 })
 export class BoardComponent implements OnInit {
     game!: BehaviorSubject<ScrabbleGame | undefined>;
+    letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O"];
     constructor(private gameService: GameService, private mouseService: MouseService, private moveService: MoveService,
       private userService: UserService) {
         this.game = this.gameService.scrabbleGame;
@@ -72,8 +73,12 @@ export class BoardComponent implements OnInit {
     if (document.getElementById("board")?.contains(bruh) == false && document.getElementById("rack")?.contains(bruh) == false) {
         return;
     }
-    if (bruh && bruh?.tagName === "DIV") {
-        bruh = bruh.parentElement;
+    while (bruh && bruh?.tagName !== "MAT-GRID-TILE") {
+      bruh = bruh.parentElement;
+    }
+    if (bruh?.classList.contains("bad")) {
+      console.log("bad");
+      return;
     }
     const x = Number(bruh?.getAttribute("data-x"));
     const y = Number(bruh?.getAttribute("data-y"));
