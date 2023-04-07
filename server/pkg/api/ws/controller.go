@@ -1,7 +1,6 @@
 package ws
 
 import (
-	"strconv"
 	"strings"
 
 	"scrabble/pkg/api/user"
@@ -10,8 +9,6 @@ import (
 )
 
 type GetMessagesResponse struct {
-	NextSkip int           `json:"nextSkip,omitempty"`
-	HasMore  bool          `json:"hasMore"`
 	Messages []ChatMessage `json:"messages,omitempty"`
 }
 
@@ -20,26 +17,13 @@ func (m *Manager) GetMessages(c *fiber.Ctx) error {
 	if roomID == "" {
 		return fiber.NewError(fiber.StatusBadRequest, "Room ID is required")
 	}
-	skip, err := strconv.Atoi(c.Query("skip", "0"))
+
+	msgs, err := m.MessageRepo.LatestMessage(roomID)
 	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, "Invalid bucket skip value")
+		return fiber.NewError(fiber.StatusInternalServerError, "Failed to get messages: "+err.Error())
 	}
 
-	hasMore := true
-	msgs, err := m.MessageRepo.LatestMessage(roomID, skip)
-	if err != nil {
-		skip--
-		hasMore = false
-		msgs, err = m.MessageRepo.LatestMessage(roomID, skip)
-		if err != nil {
-			return fiber.NewError(fiber.StatusInternalServerError, "Failed to get messages: "+err.Error())
-		}
-	}
-
-	skip++
 	return c.Status(fiber.StatusOK).JSON(GetMessagesResponse{
-		NextSkip: skip,
-		HasMore:  hasMore,
 		Messages: msgs,
 	})
 }
@@ -219,6 +203,7 @@ func (m *Manager) GetPendingFriendRequests(c *fiber.Ctx) error {
 		FriendRequests: friendRequests,
 	})
 }
+
 func (m *Manager) AcceptJoinGameRequest(c *fiber.Ctx) error {
 	id := c.Params("id")
 	requestorId := c.Params("requestorId")
@@ -233,7 +218,6 @@ func (m *Manager) AcceptJoinGameRequest(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, "You are not the creator of the game")
 	}
 	r, err := m.GetRoom(gId)
-
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
@@ -264,7 +248,6 @@ func (m *Manager) RevokeRequestToJoinGame(c *fiber.Ctx) error {
 	}
 
 	r, err := m.GetRoom(gId)
-
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
@@ -290,7 +273,6 @@ func (m *Manager) RejectJoinGameRequest(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, "You are not the creator of the game")
 	}
 	r, err := m.GetRoom(gId)
-
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
@@ -315,7 +297,6 @@ func (m *Manager) AcceptJoinTournamentRequest(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, "You are not the creator of the tournament")
 	}
 	r, err := m.GetRoom(tId)
-
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
@@ -334,6 +315,7 @@ func (m *Manager) AcceptJoinTournamentRequest(c *fiber.Ctx) error {
 	r.SendVerdictJoinTournamentRequest(client, t, Accepted)
 	return r.BroadcastJoinTournamentPackets(client, t)
 }
+
 func (m *Manager) RevokeRequestToJoinTournament(c *fiber.Ctx) error {
 	id := c.Params("id")
 	tId := c.Params("tournamentId")
@@ -346,7 +328,6 @@ func (m *Manager) RevokeRequestToJoinTournament(c *fiber.Ctx) error {
 	}
 
 	r, err := m.GetRoom(tId)
-
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
@@ -370,7 +351,6 @@ func (m *Manager) RejectJoinTournamentRequest(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, "You are not the creator of the tournament")
 	}
 	r, err := m.GetRoom(tId)
-
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
