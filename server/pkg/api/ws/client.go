@@ -414,11 +414,17 @@ func (c *Client) HandleJoinGameRequest(p *Packet) error {
 		if err == game.ErrPrivateGame {
 			g.JoinGameRequestUserIds = append(g.JoinGameRequestUserIds, c.UserId)
 			user, err := c.Manager.UserSvc.GetUser(c.UserId)
+			if err != nil {
+				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+			}
 			p, err := NewUserRequestToJoinGamePacket(UserRequestToJoinGamePayload{
 				GameID:   g.ID,
 				UserID:   c.UserId,
 				Username: user.Username,
 			})
+			if err != nil {
+				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+			}
 			client, err := c.Manager.getClientByUserID(g.CreatorID)
 			if err != nil {
 				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
@@ -758,11 +764,17 @@ func (c *Client) HandleJoinTournamentRequest(p *Packet) error {
 		if err == game.ErrPrivateTournament {
 			t.JoinTournamentRequestUserIds = append(t.JoinTournamentRequestUserIds, c.UserId)
 			user, err := c.Manager.UserSvc.GetUser(c.UserId)
+			if err != nil {
+				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+			}
 			p, err := NewUserRequestToJoinTournamentPacket(UserRequestToJoinTournamentPayload{
 				TournamentID: t.ID,
 				UserID:       c.UserId,
 				Username:     user.Username,
 			})
+			if err != nil {
+				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+			}
 			client, err := c.Manager.getClientByUserID(t.CreatorID)
 			if err != nil {
 				return fiber.NewError(fiber.StatusInternalServerError, err.Error())

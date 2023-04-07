@@ -1,8 +1,6 @@
 package ws
 
 import (
-	"strings"
-
 	"scrabble/pkg/api/user"
 
 	"github.com/gofiber/fiber/v2"
@@ -210,8 +208,11 @@ func (m *Manager) AcceptJoinGameRequest(c *fiber.Ctx) error {
 	requestorId := c.Params("requestorId")
 	gId := c.Params("gameId")
 	g, err := m.GameSvc.Repo.FindGame(gId)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
 	g.UserIDs = append(g.UserIDs, requestorId)
-	if strings.Contains(strings.Join(g.JoinGameRequestUserIds, ""), requestorId) == false {
+	if !slices.Contains(g.JoinGameRequestUserIds, requestorId) {
 		return fiber.NewError(fiber.StatusBadRequest, "The user revoked is request to join the game")
 	}
 
@@ -244,6 +245,9 @@ func (m *Manager) RevokeRequestToJoinGame(c *fiber.Ctx) error {
 	id := c.Params("id")
 	gId := c.Params("gameId")
 	g, err := m.GameSvc.Repo.FindGame(gId)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
 	for i, pendingJoinGameRequestId := range g.JoinGameRequestUserIds {
 		if pendingJoinGameRequestId == id {
 			g.JoinGameRequestUserIds = append(g.JoinGameRequestUserIds[:i], g.JoinGameRequestUserIds[i+1:]...)
@@ -285,8 +289,7 @@ func (m *Manager) RejectJoinGameRequest(c *fiber.Ctx) error {
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
-	r.SendVerdictJoinGameRequest(client, g, Declined)
-	return nil
+	return r.SendVerdictJoinGameRequest(client, g, Declined)
 }
 
 func (m *Manager) AcceptJoinTournamentRequest(c *fiber.Ctx) error {
