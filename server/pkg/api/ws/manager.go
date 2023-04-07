@@ -237,6 +237,9 @@ func (m *Manager) AddClient(c *Client) error {
 		if err := r.AddClient(c.ID); err != nil {
 			return err
 		}
+		if err := r.BroadcastJoinRoomPackets(c); err != nil {
+			slog.Error("failed to broadcast join room packets", err)
+		}
 	}
 	// Add the client to all his joined dm rooms
 	for _, roomID := range user.JoinedDMRooms {
