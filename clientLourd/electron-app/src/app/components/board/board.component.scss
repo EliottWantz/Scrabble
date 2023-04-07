@@ -58,3 +58,13 @@ mat-grid-list {
 mat-grid-tile {
     height: 6.67%;
 }
+
+app-tile {
+    width: 75%;
+}
+
+/*app-tile:after {
+    content: "";
+    display: block;
+    padding-bottom: 6.67%;
+}*/

@@ -99,6 +99,23 @@ export class GamePageComponent implements OnInit {
         this.themeService.switchLanguage();
       }
 
+    isDarkTheme(): boolean {
+        return this.themeService.theme.value == "dark";
+    }
+
+    getCurrentPlayerColor(): string {
+        if (this.themeService.theme.value == "light") {
+            return "#424260";
+        } else {
+            return "#3c6d7a";
+        }
+    }
+    
+    getTileCount(): number {
+        if (this.game.value)
+            return this.game.value.tileCount;
+        return 0;
+    }
     /*getIndice(): string[] {
         const strings = [];
         for (const move of this.moves.value) {
