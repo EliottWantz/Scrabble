@@ -69,6 +69,9 @@ export class RackComponent implements OnInit {
         }
         const x = Number(bruh?.getAttribute("data-x"));
         const y = Number(bruh?.getAttribute("data-y"));
+        if (this.gameService.scrabbleGame.value?.board[x][y].tile?.letter) {
+            return;
+          }
         const elem = event.item.element.nativeElement;
         const tile : Tile = {letter: Number(elem.getAttribute("data-letter")), value: Number(elem.getAttribute("data-value"))};
         console.log(tile);

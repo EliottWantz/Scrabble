@@ -276,7 +276,7 @@ export class WebSocketService {
             newPlayers.push({...newPlayer, rack: {tiles: newRack}});
           }*/
           const newGame: ScrabbleGame = {...payloadUpdateGame.game, board: newBoard/*, players: newPlayers*/};
-          this.oldGame = newGame;
+          this.oldGame = JSON.parse(JSON.stringify(newGame));
           this.gameService.updateGame(newGame);
           this.rackService.deleteRecycled();
           break;
@@ -374,9 +374,12 @@ export class WebSocketService {
         const errorPayload = packet.payload as ErrorPayload;
         console.log(errorPayload);
         if (errorPayload.error == "invalid move") {
+         
+          console.log(this.oldGame);
           console.log("move");
-          this.gameService.scrabbleGame.next(this.oldGame);
-          this.rackService.replaceTilesInRack();
+            this.gameService.scrabbleGame.next(this.oldGame);
+            this.gameService.resetSelectedAndPlaced();
+            this.rackService.replaceTilesInRack();
           //this.gameService.game.next(this.gameService.game.value);
         } else {
           this.error.next(errorPayload.error);
