@@ -15,12 +15,12 @@
 
     <button mat-raised-button color="primary" (click)="submit()" id="play-button" [disabled]="!hasPlacedLetters() || !isTurn()">
       <mat-icon>done</mat-icon>
-      Envoyer
+      {{'game-page.submit' | translate}}
     </button>
 
     <button mat-raised-button color="primary" (click)="exchange()" id="exchange-button" [disabled]="!hasSelectedLetters() || !isTurn()">
       <mat-icon>swap_horiz</mat-icon>
-      Échanger
+      {{'game-page.exchange' | translate}}
     </button>
   </div>
   <div class="middle">
@@ -32,9 +32,9 @@
   </div>
   <div class="right">
     <div class="config">
-      <div class="language">
+      <div class="language" (click)="switchLanguage()">
         <div class="language-icon">
-            <mat-icon (click)="switchLanguage()" inline="true">language</mat-icon>
+            <mat-icon inline="true">language</mat-icon>
         </div>
         <div>{{language.value}}</div>
       </div>
@@ -51,12 +51,12 @@
 
     <button mat-raised-button color="primary" (click)="indice()" id="indice-button" [disabled]="!isTurn()">
       <mat-icon>lightbulb</mat-icon>
-      Indice
+      {{"game-page.advice" | translate}}
     </button>
 
     <button mat-raised-button color="primary" (click)="pass()" id="pass-button" [disabled]="!isTurn()">
       <mat-icon>fast_forward</mat-icon>
-      Passer
+      {{"game-page.skip" | translate}}
     </button>
 
     <app-chat-box id="chat-box"></app-chat-box>
