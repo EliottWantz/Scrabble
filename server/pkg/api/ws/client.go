@@ -438,6 +438,7 @@ func (c *Client) HandleJoinGameRequest(p *Packet) error {
 			if err != nil {
 				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 			}
+			return nil
 
 		} else {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
