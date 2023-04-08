@@ -254,4 +254,35 @@ class DialogHelper {
       barrierDismissible: false,
     );
   }
+
+  static void showJoinGameRequestRejected(String winnerId) {
+    Get.dialog(
+      Dialog(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text("Le créateur a rejeté votre demande de rejoindre la partie",
+                style: Get.textTheme.headline4,
+              ),
+              const Gap(20),
+              Text(
+                "Le gagnant est ${DialogHelper()._usersService.getUserUsername(winnerId)}",
+                style: Get.textTheme.headline6,
+              ),
+              const Gap(20),
+              ElevatedButton(
+                onPressed: () {
+                  DialogHelper.hideLoading();
+                },
+                child: const Text('Fermer'),
+              ),
+            ],
+          ),
+        ),
+      ),
+      barrierDismissible: false,
+    );
+  }
 }

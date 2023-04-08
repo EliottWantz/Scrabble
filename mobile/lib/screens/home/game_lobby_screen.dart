@@ -79,7 +79,7 @@ class GameLobbyScreen extends StatelessWidget {
                   const Gap(20),
                   Obx(() => _buildStartButton(context)),
                   Gap(Get.height / 5),
-                  _buildPendingJoinGameRequests(),
+                  Obx(() => _buildPendingJoinGameRequests()),
                   Gap(200),
                   Obx(() => Text('${_gameService.currentGameRoomUserIds.value!.length}/4 joueurs présents',
                       style: Theme.of(context).textTheme.headline6)),
@@ -118,12 +118,14 @@ class GameLobbyScreen extends StatelessWidget {
       return const CircularProgressIndicator();
     }
     else {
-      return ListView.builder(
-          itemCount: _gameService.pendingJoinGameRequestUserIds.value!.length,
-          itemBuilder: (context, item) {
-            final index = item;
-            return _buildPendingRequest(_gameService.pendingJoinGameRequestUserIds.value![index]);
-          }
+      return Expanded(
+        child: ListView.builder(
+            itemCount: _gameService.pendingJoinGameRequestUserIds.value!.length,
+            itemBuilder: (context, item) {
+              final index = item;
+              return _buildPendingRequest(_gameService.pendingJoinGameRequestUserIds.value![index]);
+            }
+        ),
       );
     }
   }
@@ -135,30 +137,35 @@ class GameLobbyScreen extends StatelessWidget {
         ListTile(
             title: Text(_usersService.getUserUsername(userId), style: TextStyle(fontSize: 18.0)),
             trailing:
-                Row(
-                  children: [
-                    ElevatedButton.icon(
-                      onPressed: () async {
-                        final res = await _gameService.acceptJoinGameRequest(userId);
+                SizedBox(
+                  height: 100,
+                  width: 250,
+                  child: Row(
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: () async {
+                          final res = await _gameService.acceptJoinGameRequest(userId);
 
-                      },
-                      icon: const Icon(
-                        Icons.check,
-                        size: 20,
+                        },
+                        icon: const Icon(
+                          Icons.check,
+                          size: 20,
+                        ),
+                        label: const Text('Accepter'),
                       ),
-                      label: const Text('Accepter'),
-                    ),
-                    ElevatedButton.icon(
-                      onPressed: () async {
-                        final res = await _gameService.declineJoinGameRequest(userId);
-                      },
-                      icon: const Icon(
-                        Icons.close,
-                        size: 20,
-                      ),
-                      label: const Text('Refuser'),
-                    )
-                  ]
+                      Gap(16),
+                      ElevatedButton.icon(
+                        onPressed: () async {
+                          final res = await _gameService.declineJoinGameRequest(userId);
+                        },
+                        icon: const Icon(
+                          Icons.close,
+                          size: 20,
+                        ),
+                        label: const Text('Refuser'),
+                      )
+                    ]
+                  ),
                 )
         ),
         // trailing: Icon(alreadySaved ? Icons.favorite : Icons.favorite_border,
