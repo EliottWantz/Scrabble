@@ -255,7 +255,7 @@ class DialogHelper {
     );
   }
 
-  static void showJoinGameRequestRejected(String winnerId) {
+  static void showJoinGameRequestRejected() {
     Get.dialog(
       Dialog(
         child: Padding(
@@ -265,11 +265,6 @@ class DialogHelper {
             children: [
               Text("Le créateur a rejeté votre demande de rejoindre la partie",
                 style: Get.textTheme.headline4,
-              ),
-              const Gap(20),
-              Text(
-                "Le gagnant est ${DialogHelper()._usersService.getUserUsername(winnerId)}",
-                style: Get.textTheme.headline6,
               ),
               const Gap(20),
               ElevatedButton(

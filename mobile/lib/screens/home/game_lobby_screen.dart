@@ -4,6 +4,7 @@ import 'package:client_leger/services/settings_service.dart';
 import 'package:client_leger/services/user_service.dart';
 import 'package:client_leger/services/users_service.dart';
 import 'package:client_leger/services/websocket_service.dart';
+import 'package:client_leger/utils/dialog_helper.dart';
 import 'package:client_leger/widgets/app_sidebar.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -157,6 +158,14 @@ class GameLobbyScreen extends StatelessWidget {
                       ElevatedButton.icon(
                         onPressed: () async {
                           final res = await _gameService.declineJoinGameRequest(userId);
+                          if (res == true) {
+                            _gameService.pendingJoinGameRequestUserIds.remove(userId);
+                          } else {
+                            DialogHelper.showErrorDialog(
+                              title: "Erreur dans la demande",
+                              description: "La demande de refus du joueur n'a pas été accomplie."
+                            );
+                          }
                         },
                         icon: const Icon(
                           Icons.close,

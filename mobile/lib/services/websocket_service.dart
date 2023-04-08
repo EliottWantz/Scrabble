@@ -543,7 +543,7 @@ class WebsocketService extends GetxService {
 
   void handleUserRequestToJoinGameDeclined(UserRequestToJoinGameAcceptedResponse userRequestToJoinGameAcceptedResponse) {
     DialogHelper.hideLoading();
-
+    DialogHelper.showJoinGameRequestRejected();
   }
 
   void handleIndiceResponse(IndiceResponse indiceResponse) {

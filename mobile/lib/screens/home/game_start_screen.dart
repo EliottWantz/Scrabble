@@ -539,7 +539,7 @@ class GameStartScreen extends StatelessWidget {
                             _showProtectedGamePasswordDialog(game);
                           } else if (game.isPrivateGame) {
                             _websocketService.joinGame(game.id);
-                            _showWaitingForCreatorApprovalDialog();
+                            _showWaitingForCreatorApprovalDialog(game.id);
                           }
                             else {
                             _websocketService.joinGame(game.id);
@@ -631,7 +631,7 @@ class GameStartScreen extends StatelessWidget {
     }
   }
 
-  void _showWaitingForCreatorApprovalDialog() {
+  void _showWaitingForCreatorApprovalDialog(String gameId) {
     Get.dialog(
       Dialog(
         child: SizedBox(
@@ -657,7 +657,7 @@ class GameStartScreen extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(12),
                                 side: const BorderSide(color: Colors.black))),
                         onPressed: () async {
-                          final res = await _gameService.revokeJoinGameRequest();
+                          final res = await _gameService.revokeJoinGameRequest(gameId);
                         },
                         child: const Text('Annuler')),
                   ],

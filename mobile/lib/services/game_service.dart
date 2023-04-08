@@ -102,8 +102,8 @@ class GameService extends GetxService {
     return null;
   }
 
-  Future<bool?> revokeJoinGameRequest() async {
-    final request = AcceptJoinGameRequest(userId: userService.user.value!.id, gameId: currentGameId);
+  Future<bool?> revokeJoinGameRequest(String gameId) async {
+    final request = AcceptJoinGameRequest(userId: userService.user.value!.id, gameId: gameId);
     final res = await apiRepository.revokeJoinGameRequest(request);
     if (res == true) {
       return true;
