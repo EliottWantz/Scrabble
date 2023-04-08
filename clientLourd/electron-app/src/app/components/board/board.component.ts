@@ -4,6 +4,9 @@ import {
   OnInit,
   ViewChildren,
   QueryList,
+  ViewContainerRef,
+  ComponentRef,
+  HostListener
 } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { Game, ScrabbleGame } from '@app/utils/interfaces/game/game';
@@ -14,6 +17,7 @@ import {CdkDragDrop} from '@angular/cdk/drag-drop';
 import { Tile } from '@app/utils/interfaces/game/tile';
 import { UserService } from '@app/services/user/user.service';
 import { Player } from '@app/utils/interfaces/game/player';
+import { DirectionComponent } from '@app/components/direction/direction.component';
 
 @Component({
   selector: 'app-board',
@@ -23,9 +27,14 @@ import { Player } from '@app/utils/interfaces/game/player';
 export class BoardComponent implements OnInit {
     game!: BehaviorSubject<ScrabbleGame | undefined>;
     letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O"];
+    direction: ComponentRef<DirectionComponent> | undefined;
     constructor(private gameService: GameService, private mouseService: MouseService, private moveService: MoveService,
-      private userService: UserService) {
+      private userService: UserService, private viewContainerRef: ViewContainerRef, private eRef: ElementRef) {
         this.game = this.gameService.scrabbleGame;
+        this.gameService.dragging.subscribe((val) => {
+          if (val && this.direction)
+            this.direction.destroy();
+        });
     }
 
   ngOnInit(): void {
@@ -34,19 +43,151 @@ export class BoardComponent implements OnInit {
     });
   }
 
-  @ViewChildren('elem') elements!: QueryList<ElementRef>;
+  @ViewChildren('elem', {read: ViewContainerRef}) elements!: QueryList<ViewContainerRef>;
   @ViewChildren('multis') multis!: QueryList<ElementRef>;
   clicked(row: number, col: number): void {
-    const currentElem = this.elements.toArray()[row * 15 + col];
-    const multiElem = this.multis.toArray()[row * 15 + col];
-    console.log(this.gameService.scrabbleGame.value?.board);
-    console.log(currentElem);
-    if (
-      //currentElem.nativeElement.children.length == 1 &&
-      this.gameService.selectedTiles.length == 1 && !this.gameService.scrabbleGame.value?.board[row][col].tile?.letter
-    ) {
-      this.mouseService.place( row, col);
-      //multiElem.nativeElement.remove();
+    if (this.gameService.dragging.value === true) {
+      console.log("????");
+      this.gameService.resetSelectedAndPlaced();
+      console.log(this.gameService.scrabbleGame.value);
+      console.log(this.gameService.oldGame);
+    }
+    if (!this.gameService.scrabbleGame.value?.board[row][col].tile?.letter && this.userService.currentUserValue.id == this.gameService.scrabbleGame.value?.turn) {
+      this.gameService.dragging.next(false);
+      console.log(this.elements.toArray()[row * 15 + col].element.nativeElement.children);
+      let clicked = this.elements.toArray()[row * 15 + col].element.nativeElement;
+      while (clicked && clicked?.tagName !== "MAT-GRID-TILE") {
+        clicked = clicked.parentElement;
+      }
+      console.log(clicked);
+      if (clicked.tagName === "MAT-GRID-TILE") {
+        if (!this.direction || this.direction.instance.x !== col || this.direction.instance.y !== row) {
+          if (this.direction) {
+            this.direction.destroy();
+            this.gameService.resetSelectedAndPlaced();
+          }
+          console.log("created direction");
+          this.direction = this.elements.toArray()[row * 15 + col].createComponent(DirectionComponent);
+          this.direction.instance.x = col;
+          this.direction.instance.y = row;
+          this.direction.instance.initialY = row;
+          this.direction.instance.initialX = col;
+          clicked.appendChild(this.direction.location.nativeElement);
+          /*const multiElem = this.multis.toArray()[row * 15 + col];
+          multiElem.nativeElement.remove();*/
+        } else {
+          console.log("switching");
+          this.direction.instance.clicked();
+        }
+      }
+    }
+  }
+
+  @HostListener("document:click", ['$event'])
+  clickout(event: any) {
+    console.log(event);
+    const elem = document.elementFromPoint(event.x,event.y);
+    console.log(elem);
+    if (!document.getElementById("board")?.contains(elem) && this.direction) {
+      this.direction.destroy();
+      this.gameService.resetSelectedAndPlaced();
+    }
+  }
+
+  @HostListener("document:keyup", ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) {
+    if (this.direction) {
+      if (event.key === "Backspace") {
+        this.removeLastLetter();
+      } else if (event.key === "Enter") {
+        this.moveService.playTiles();
+      } else {
+        const key = event.key.charCodeAt(0);
+        this.checkKey(key < 97, key);
+      }
+    }
+  }
+
+  private removeLastLetter(): void {
+    if (this.gameService.scrabbleGame.value) {
+      if (this.direction) {
+        if (this.direction && this.direction.instance.horizontal) {
+          this.direction.instance.x--;
+          while (this.direction.instance.x > this.direction.instance.initialX && this.gameService.scrabbleGame.value.board[this.direction.instance.y][this.direction.instance.x].tile && this.gameService.scrabbleGame.value.board[this.direction.instance.y][this.direction.instance.x].tile?.disabled)
+            this.direction.instance.x--;
+        } else {
+          this.direction.instance.y--;
+          while (this.direction.instance.y > this.direction.instance.initialY && this.gameService.scrabbleGame.value.board[this.direction.instance.y][this.direction.instance.x].tile && this.gameService.scrabbleGame.value.board[this.direction.instance.y][this.direction.instance.x].tile?.disabled)
+            this.direction.instance.y--;
+        }
+        this.removeLetter(this.direction.instance.x, this.direction.instance.y);
+      }
+    }
+  }
+
+  private removeLetter(x: number, y: number): void {
+    if (this.gameService.scrabbleGame.value) {
+      const newBoard = this.gameService.scrabbleGame.value.board;
+      const newPlayers = this.gameService.scrabbleGame.value.players;
+      for (let i = 0; i < newPlayers.length; i++) {
+        if (newPlayers[i].id == this.userService.currentUserValue.id) {
+          if (newBoard[y][x].tile) {
+            console.log(newBoard[y][x])
+            const oldTile = newBoard[y][x].tile as Tile;
+            console.log(oldTile);
+            console.log(newBoard);
+            console.log(this.gameService.scrabbleGame.value.board);
+            if (oldTile.letter >= 97) {
+              newPlayers[i].rack.tiles.push({letter: oldTile.letter, value: oldTile.value, disabled: false});
+            } else {
+              newPlayers[i].rack.tiles.push({letter: 42, value: 0, disabled: false});
+            }
+          }
+          newBoard[y][x].tile = undefined;
+          this.gameService.scrabbleGame.next({...this.gameService.scrabbleGame.value, board: newBoard, players: newPlayers});
+          this.gameService.placedTiles--;
+          return;
+        }
+      }
+    }
+  }
+
+  private checkKey(isSpecial: boolean, key: number): void {
+    let tempKey = key;
+    if (isSpecial) {
+      tempKey = 42;
+    }
+    if (this.direction) {
+      this.placeLetter(tempKey, this.direction.instance.x, this.direction.instance.y, key);
+      if (this.gameService.scrabbleGame.value) {
+        if (this.direction.instance.horizontal) {
+          while (this.direction.instance.x < 15 && this.gameService.scrabbleGame.value.board[this.direction.instance.y][this.direction.instance.x].tile && this.gameService.scrabbleGame.value.board[this.direction.instance.y][this.direction.instance.x].tile?.letter)
+            this.direction.instance.x++;
+        } else {
+          while (this.direction.instance.y < 15 && this.gameService.scrabbleGame.value.board[this.direction.instance.y][this.direction.instance.x].tile && this.gameService.scrabbleGame.value.board[this.direction.instance.y][this.direction.instance.x].tile?.letter)
+            this.direction.instance.y++;
+        }
+      }
+    }
+  }
+
+  private placeLetter(letterToSearch: number, x: number, y: number, letterToAdd: number): void {
+    if (this.gameService.scrabbleGame.value) {
+      const newBoard = this.gameService.scrabbleGame.value.board;
+      const newPlayers = this.gameService.scrabbleGame.value.players;
+      for (let i = 0; i < newPlayers.length; i++) {
+        if (newPlayers[i].id == this.userService.currentUserValue.id) {
+          for (let j = 0; j < newPlayers[i].rack.tiles.length; j++) {
+            if (newPlayers[i].rack.tiles[j].letter === letterToSearch) {
+              newBoard[y][x].tile = {value: newPlayers[i].rack.tiles[j].value, letter: letterToAdd, x: x, y: y, disabled: false};
+              newPlayers[i].rack.tiles.splice(j, 1);
+              this.gameService.scrabbleGame.next({...this.gameService.scrabbleGame.value, board: newBoard, players: newPlayers});
+              this.gameService.placedTiles++;
+              return;
+            }
+          }
+        }
+      }
     }
   }
 

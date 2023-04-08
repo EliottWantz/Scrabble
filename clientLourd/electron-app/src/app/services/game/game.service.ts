@@ -25,6 +25,8 @@ export class GameService {
     wasDeclined!: BehaviorSubject<boolean>;
     selectedTiles: Tile[] = [];
     placedTiles = 0;
+    oldGame!: ScrabbleGame;
+    dragging = new BehaviorSubject<boolean>(false);
     constructor(private router: Router, private _bottomSheet: MatBottomSheet, private _bottomSheetSpecialLetter: MatBottomSheet) {
         this.scrabbleGame = new BehaviorSubject<ScrabbleGame | undefined>(undefined);
         this.game = new BehaviorSubject<Game | undefined>(undefined);
@@ -45,12 +47,17 @@ export class GameService {
     }
 
     resetSelectedAndPlaced(): void {
+        if (this.scrabbleGame.value) {
+            this.scrabbleGame.next({...this.oldGame, id: this.scrabbleGame.value.id, finished: this.scrabbleGame.value.finished, numPassMoves: this.scrabbleGame.value.numPassMoves, turn: this.scrabbleGame.value.turn, timer: this.scrabbleGame.value.timer, tileCount: this.scrabbleGame.value.tileCount});
+        }
         this.placedTiles = 0;
         this.selectedTiles = [];
     }
 
     updateGame(game: ScrabbleGame): void {
         //console.log(game);
+        this.dragging.next(false);
+        this.oldGame = JSON.parse(JSON.stringify(game));
         this.scrabbleGame.next(game);
         this.timer.next(game.timer / 1000000000);
         //this.moves.next([]);

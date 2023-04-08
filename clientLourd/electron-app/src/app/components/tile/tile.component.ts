@@ -51,4 +51,10 @@ export class TileComponent {
     getASCII(): string {
         return String.fromCharCode(this.tile.letter);
     }
+
+    dragStart() {
+        if (this.gameService.dragging.value === false)
+            this.gameService.resetSelectedAndPlaced();
+        this.gameService.dragging.next(true);
+    }
 }

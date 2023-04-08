@@ -54,7 +54,6 @@ export class WebSocketService {
     socket!: WebSocket;
     user: BehaviorSubject<User>;
     error: BehaviorSubject<string> = new BehaviorSubject<string>("");
-    oldGame!: ScrabbleGame;
 
   constructor(
     private userService: UserService,
@@ -274,7 +273,6 @@ export class WebSocketService {
             newPlayers.push({...newPlayer, rack: {tiles: newRack}});
           }*/
           const newGame: ScrabbleGame = {...payloadUpdateGame.game, board: newBoard/*, players: newPlayers*/};
-          this.oldGame = JSON.parse(JSON.stringify(newGame));
           this.gameService.updateGame(newGame);
           break;
       }
@@ -372,9 +370,8 @@ export class WebSocketService {
         console.log(errorPayload);
         if (errorPayload.error == "invalid move") {
          
-          console.log(this.oldGame);
           console.log("move");
-            this.gameService.scrabbleGame.next(this.oldGame);
+            this.gameService.resetSelectedAndPlaced();
             this.gameService.resetSelectedAndPlaced();
           //this.gameService.game.next(this.gameService.game.value);
         } else {
