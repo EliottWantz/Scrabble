@@ -1,5 +1,7 @@
+import 'package:client_leger/api/api_repository.dart';
 import 'package:client_leger/models/game_room.dart';
 import 'package:client_leger/models/rack.dart';
+import 'package:client_leger/models/requests/accept_join_game_request.dart';
 import 'package:client_leger/models/user.dart';
 import 'package:client_leger/services/user_service.dart';
 import 'package:get/get.dart';
@@ -13,17 +15,19 @@ import '../models/room.dart';
 
 class GameService extends GetxService {
   final UserService userService = Get.find();
+  final ApiRepository apiRepository = Get.find();
 
   final joinableGames = Rxn<List<Game>>();
   final observableGames = Rxn<List<Game>>();
 
-  // final currentGameRoom = Rxn<Room>();
   late String currentGameId;
   final currentRoomMessages = <ChatMessagePayload>[].obs;
 
-  // final currentGameRoomUsers = Rxn<List<User>>();
   final currentGameRoomUserIds = <String>[].obs;
   final currentGameRoomObserverIds = <String>[].obs;
+
+  //Private game
+  final pendingJoinGameRequestUserIds = <String>[].obs;
 
   final currentGame = Rxn<GameUpdatePayload>();
   final currentGameTimer = Rxn<int>();
@@ -76,6 +80,33 @@ class GameService extends GetxService {
       if (game.id == id) {
         return game;
       }
+    }
+    return null;
+  }
+
+  Future<bool?> acceptJoinGameRequest(String userId) async {
+    final request = AcceptJoinGameRequest(userId: userId, gameId: currentGameId);
+    final res = await apiRepository.acceptJoinGameRequest(request);
+    if (res == true) {
+      return true;
+    }
+    return null;
+  }
+
+  Future<bool?> declineJoinGameRequest(String userId) async {
+    final request = AcceptJoinGameRequest(userId: userId, gameId: currentGameId);
+    final res = await apiRepository.declineJoinGameRequest(request);
+    if (res == true) {
+      return true;
+    }
+    return null;
+  }
+
+  Future<bool?> revokeJoinGameRequest() async {
+    final request = AcceptJoinGameRequest(userId: userService.user.value!.id, gameId: currentGameId);
+    final res = await apiRepository.revokeJoinGameRequest(request);
+    if (res == true) {
+      return true;
     }
     return null;
   }

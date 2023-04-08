@@ -294,8 +294,8 @@ class GameStartScreen extends StatelessWidget {
                               } else {
                                 _websocketService.createGameRoom(isPrivate: _isPrivate);
                               }
-                                Get.toNamed(
-                                    Routes.HOME + Routes.GAME_START + Routes.LOBBY);
+                                // Get.toNamed(
+                                //     Routes.HOME + Routes.GAME_START + Routes.LOBBY);
                             },
                             child: const Text('Confirmer')),
                         TextButton(
@@ -537,7 +537,11 @@ class GameStartScreen extends StatelessWidget {
                         onPressed: () {
                           if (game.isProtected) {
                             _showProtectedGamePasswordDialog(game);
-                          } else {
+                          } else if (game.isPrivateGame) {
+                            _websocketService.joinGame(game.id);
+                            _showWaitingForCreatorApprovalDialog();
+                          }
+                            else {
                             _websocketService.joinGame(game.id);
                             // Get.toNamed(
                             //     Routes.HOME + Routes.GAME_START + Routes.LOBBY);
@@ -625,6 +629,45 @@ class GameStartScreen extends StatelessWidget {
     } else {
       return Text('Ouverte');
     }
+  }
+
+  void _showWaitingForCreatorApprovalDialog() {
+    Get.dialog(
+      Dialog(
+        child: SizedBox(
+          height: 225,
+          width: 300,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('En attente de la réponse du créateur de la partie',
+                    style: Get.textTheme.headlineSmall),
+                Gap(20),
+                const CircularProgressIndicator(),
+                Gap(20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    TextButton(
+                        style: TextButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                side: const BorderSide(color: Colors.black))),
+                        onPressed: () async {
+                          final res = await _gameService.revokeJoinGameRequest();
+                        },
+                        child: const Text('Annuler')),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      )
+    );
   }
 
   void _showProtectedGamePasswordDialog(Game game) {

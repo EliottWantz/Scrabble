@@ -38,6 +38,8 @@ import 'package:client_leger/models/response/joined_game_as_observer_response.da
 import 'package:client_leger/models/response/user_joined_game_response.dart';
 import 'package:client_leger/models/response/user_joined_response.dart';
 import 'package:client_leger/models/response/user_joined_room_response.dart';
+import 'package:client_leger/models/response/user_request_to_join_game_accepted_response.dart';
+import 'package:client_leger/models/response/user_request_to_join_game_response.dart';
 import 'package:client_leger/models/start_game_payload.dart';
 import 'package:client_leger/models/user.dart';
 import 'package:client_leger/routes/app_routes.dart';
@@ -262,6 +264,34 @@ class WebsocketService extends GetxService {
           handleAcceptFriendRequest(acceptFriendRequest);
         }
         break;
+      case ServerEventUserRequestToJoinGame:
+        {
+          UserRequestToJoinGameResponse userRequestToJoinGameResponse =
+              UserRequestToJoinGameResponse.fromRawJson(data);
+          handleUserRequestToJoinGame(userRequestToJoinGameResponse);
+        }
+        break;
+      case ServerEventUserRequestToJoinGameAccepted:
+        {
+          UserRequestToJoinGameAcceptedResponse userRequestToJoinGameAccepted =
+              UserRequestToJoinGameAcceptedResponse.fromRawJson(data);
+          handleUserRequestToJoinGameAccepted(userRequestToJoinGameAccepted);
+        }
+        break;
+      case ServerEventRevokeRequestToJoinGame:
+        {
+          UserRequestToJoinGameAcceptedResponse userRequestToJoinGameAccepted =
+          UserRequestToJoinGameAcceptedResponse.fromRawJson(data);
+          handleRevokeRequestToJoinGame(userRequestToJoinGameAccepted);
+        }
+        break;
+      case ServerEventUserRequestToJoinGameDeclined:
+        {
+          UserRequestToJoinGameAcceptedResponse userRequestToJoinGameAccepted =
+          UserRequestToJoinGameAcceptedResponse.fromRawJson(data);
+          handleUserRequestToJoinGameDeclined(userRequestToJoinGameAccepted);
+        }
+        break;
       case ServerEventIndice:
         {
           IndiceResponse indiceResponse = IndiceResponse.fromRawJson(data);
@@ -396,7 +426,13 @@ class WebsocketService extends GetxService {
       UserJoinedGameResponse userJoinedGameResponse) {
     gameService.currentGameRoomUserIds!
         .add(userJoinedGameResponse.payload.userId);
-    print(gameService.currentGameRoomUserIds!.length);
+
+    if (gameService.currentGameInfo!.isPrivateGame) {
+      if (gameService.currentGameInfo!.creatorId != userService.user.value!.id) {
+        return;
+      }
+      gameService.pendingJoinGameRequestUserIds.remove(userJoinedGameResponse.payload.userId);
+    }
   }
 
   void handleServerEventChatMessage(ChatMessageResponse chatMessageResponse) {
@@ -479,6 +515,34 @@ class WebsocketService extends GetxService {
     userService.user.value!.friends.add(acceptFriendRequest.payload!.fromId);
     userService.friends.add(acceptFriendRequest.payload!.fromUsername);
     // createDMRoom(acceptFriendRequest.payload!.fromId, acceptFriendRequest.payload!.fromUsername);
+  }
+
+  void handleUserRequestToJoinGame(UserRequestToJoinGameResponse userRequestToJoinGameResponse) {
+    if (userService.user.value!.id != gameService.currentGameInfo!.creatorId) {
+      return;
+    }
+    if (!gameService.currentGameInfo!.isPrivateGame) {
+      return;
+    }
+    gameService.pendingJoinGameRequestUserIds.add(userRequestToJoinGameResponse.payload.userId);
+  }
+
+  void handleUserRequestToJoinGameAccepted(UserRequestToJoinGameAcceptedResponse userRequestToJoinGameAcceptedResponse) {
+    DialogHelper.hideLoading();
+  }
+
+  void handleRevokeRequestToJoinGame(UserRequestToJoinGameAcceptedResponse userRequestToJoinGameAcceptedResponse) {
+    if (userService.user.value!.id != gameService.currentGameInfo!.creatorId) {
+      return;
+    }
+    if (!gameService.currentGameInfo!.isPrivateGame) {
+      return;
+    }
+    gameService.pendingJoinGameRequestUserIds.remove(userRequestToJoinGameAcceptedResponse.payload.userId);
+  }
+
+  void handleUserRequestToJoinGameDeclined(UserRequestToJoinGameAcceptedResponse userRequestToJoinGameAcceptedResponse) {
+
   }
 
   void handleIndiceResponse(IndiceResponse indiceResponse) {

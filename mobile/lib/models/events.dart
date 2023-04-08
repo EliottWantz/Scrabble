@@ -19,9 +19,16 @@ const String ServerEventUserJoinedGame       = "userJoinedGame";
 const String ServerEventGameUpdate = "gameUpdate";
 const String ServerEventTimerUpdate = "timerUpdate";
 const String ServerEventGameOver = "gameOver";
+
 const String ServerEventFriendRequest = "friendRequest";
 const String ServerEventAcceptFriendRequest = "acceptFriendRequest";
 const String ServerEventDeclineFriendRequest = "declineFriendRequest";
+
+const String ServerEventUserRequestToJoinGame = "userRequestToJoinGame";
+const String ServerEventRevokeRequestToJoinGame = "revokeRequestToJoinGame";
+const String ServerEventUserRequestToJoinGameAccepted = "userRequestToJoinGameAccepted";
+const String ServerEventUserRequestToJoinGameDeclined = "userRequestToJoinGameDeclined";
+
 const String ServerEventIndice = "indice";
 
 const String ServerEventError   = "error";

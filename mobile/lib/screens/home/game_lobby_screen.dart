@@ -1,6 +1,8 @@
 import 'package:client_leger/screens/floating_chat_screen.dart';
 import 'package:client_leger/services/room_service.dart';
 import 'package:client_leger/services/settings_service.dart';
+import 'package:client_leger/services/user_service.dart';
+import 'package:client_leger/services/users_service.dart';
 import 'package:client_leger/services/websocket_service.dart';
 import 'package:client_leger/widgets/app_sidebar.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +23,8 @@ class GameLobbyScreen extends StatelessWidget {
   final GameService _gameService = Get.find();
   final WebsocketService _websocketService = Get.find();
   final RoomService _roomService = Get.find();
+  final UserService _userService = Get.find();
+  final UsersService _usersService = Get.find();
 
   RxBool selectedChatRoom = false.obs;
   final SettingsService _settingsService = Get.find();
@@ -75,7 +79,7 @@ class GameLobbyScreen extends StatelessWidget {
                   const Gap(20),
                   Obx(() => _buildStartButton(context)),
                   Gap(Get.height / 5),
-                  const CircularProgressIndicator(),
+                  _buildPendingJoinGameRequests(),
                   Gap(200),
                   Obx(() => Text('${_gameService.currentGameRoomUserIds.value!.length}/4 joueurs présents',
                       style: Theme.of(context).textTheme.headline6)),
@@ -103,6 +107,64 @@ class GameLobbyScreen extends StatelessWidget {
         label: const Text('Démarrer la partie'), // <-- Text
       );
     }
+  }
+
+  Widget _buildPendingJoinGameRequests() {
+    if (!_gameService.currentGameInfo!.isPrivateGame) {
+      return const CircularProgressIndicator();
+    } else if (_gameService.currentGameInfo!.creatorId != _userService.user.value!.id) {
+      return const CircularProgressIndicator();
+    } else if (_gameService.pendingJoinGameRequestUserIds.value!.length == 0) {
+      return const CircularProgressIndicator();
+    }
+    else {
+      return ListView.builder(
+          itemCount: _gameService.pendingJoinGameRequestUserIds.value!.length,
+          itemBuilder: (context, item) {
+            final index = item;
+            return _buildPendingRequest(_gameService.pendingJoinGameRequestUserIds.value![index]);
+          }
+      );
+    }
+  }
+
+  Widget _buildPendingRequest(String userId) {
+    return Column(
+      children: [
+        const Divider(),
+        ListTile(
+            title: Text(_usersService.getUserUsername(userId), style: TextStyle(fontSize: 18.0)),
+            trailing:
+                Row(
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: () async {
+                        final res = await _gameService.acceptJoinGameRequest(userId);
+
+                      },
+                      icon: const Icon(
+                        Icons.check,
+                        size: 20,
+                      ),
+                      label: const Text('Accepter'),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: () async {
+                        final res = await _gameService.declineJoinGameRequest(userId);
+                      },
+                      icon: const Icon(
+                        Icons.close,
+                        size: 20,
+                      ),
+                      label: const Text('Refuser'),
+                    )
+                  ]
+                )
+        ),
+        // trailing: Icon(alreadySaved ? Icons.favorite : Icons.favorite_border,
+        //     color: alreadySaved ? Colors.red : null),
+      ],
+    );
   }
 
   Widget _buildChatRoomsList() {

@@ -47,4 +47,16 @@ class ApiProvider extends BaseProvider {
   Future<Response> deleteFriend(String path) {
     return delete(path);
   }
+
+  Future<Response> acceptJoinGameRequest(String path) {
+    return post(path, {});
+  }
+
+  Future<Response> declineJoinGameRequest(String path) {
+    return delete(path);
+  }
+
+  Future<Response> revokeJoinGameRequest(String path) {
+    return patch(path, {});
+  }
 }

@@ -3,11 +3,13 @@ import 'dart:io';
 
 import 'package:client_leger/models/avatar.dart';
 import 'package:client_leger/models/requests/accept_friend_request.dart';
+import 'package:client_leger/models/requests/accept_join_game_request.dart';
 import 'package:client_leger/models/requests/login_request.dart';
 import 'package:client_leger/models/requests/register_request.dart';
 import 'package:client_leger/models/response/login_response.dart';
 import 'package:client_leger/models/response/register_response.dart';
 import 'package:client_leger/models/user.dart';
+import 'package:client_leger/services/game_service.dart';
 import 'package:client_leger/services/storage_service.dart';
 import 'package:client_leger/services/user_service.dart';
 import 'package:get/get.dart';
@@ -133,6 +135,39 @@ class ApiRepository {
   Future<bool?> deleteFriend(DeleteFriendRequest requestData) async {
     final res = await apiProvider.deleteFriend(
       '/user/friends/${userService.user.value!.id}/${requestData.friendId}',
+      // headers
+    );
+    if (res.statusCode == 200) {
+      return true;
+    }
+    return null;
+  }
+
+  Future<bool?> acceptJoinGameRequest(AcceptJoinGameRequest requestData) async {
+    final res = await apiProvider.acceptJoinGameRequest(
+      '/game/accept/${userService.user.value!.id}/${requestData.userId}/${requestData.gameId}',
+      // headers
+    );
+    if (res.statusCode == 200) {
+      return true;
+    }
+    return null;
+  }
+
+  Future<bool?> declineJoinGameRequest(AcceptJoinGameRequest requestData) async {
+    final res = await apiProvider.declineJoinGameRequest(
+      '/game/accept/${userService.user.value!.id}/${requestData.userId}/${requestData.gameId}',
+      // headers
+    );
+    if (res.statusCode == 200) {
+      return true;
+    }
+    return null;
+  }
+
+  Future<bool?> revokeJoinGameRequest(AcceptJoinGameRequest requestData) async {
+    final res = await apiProvider.revokeJoinGameRequest(
+      '/game/revoke/${userService.user.value!.id}/${requestData.gameId}',
       // headers
     );
     if (res.statusCode == 200) {
