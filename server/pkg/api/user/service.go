@@ -73,12 +73,12 @@ func NewService(cfg *config.Config, repo *Repository, roomSvc *room.Service) (*S
 				FileID: "ed62dd60-3d8c-4d3d-8e55-54005ecbdf20",
 			},
 			{
-				URL:    "https://ucarecdn.com/9e66c3af-eb22-4402-96e6-0c4590382222/",
-				FileID: "9e66c3af-eb22-4402-96e6-0c4590382222",
+				URL:    "https://ucarecdn.com/4341937c-287d-44bb-bde0-6d4e504fa0ad/",
+				FileID: "4341937c-287d-44bb-bde0-6d4e504fa0ad",
 			},
 			{
-				URL:    "https://ucarecdn.com/a349a000-1ae5-4504-af91-c59674387663/",
-				FileID: "a349a000-1ae5-4504-af91-c59674387663",
+				URL:    "https://ucarecdn.com/17e31591-4705-4293-b659-0c5114cf5d60/",
+				FileID: "17e31591-4705-4293-b659-0c5114cf5d60",
 			},
 		},
 	}, nil
