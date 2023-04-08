@@ -18,10 +18,9 @@ func NewRepository(db *mongo.Database) *MessageRepository {
 	}
 }
 
-type Bucket struct {
-	RoomID  string        `bson:"roomId"`
-	Count   int           `bson:"count"`
-	History []ChatMessage `bson:"history"`
+type messageHistory struct {
+	RoomID   string        `bson:"_id"`
+	Messages []ChatMessage `bson:"messages"`
 }
 
 // Insert the stored message into the bucket of id roomID. Each bucket holds
@@ -30,17 +29,11 @@ func (r *MessageRepository) InsertOne(roomID string, msg *ChatMessage) error {
 	_, err := r.coll.UpdateOne(
 		context.Background(),
 		bson.M{
-			"roomId": roomID,
-			"count": bson.M{
-				"$lt": 20,
-			},
+			"_id": roomID,
 		},
 		bson.M{
 			"$push": bson.M{
-				"history": msg,
-			},
-			"$inc": bson.M{
-				"count": 1,
+				"messages": msg,
 			},
 		},
 		options.Update().SetUpsert(true),
@@ -49,18 +42,18 @@ func (r *MessageRepository) InsertOne(roomID string, msg *ChatMessage) error {
 	return err
 }
 
-func (r *MessageRepository) LatestMessage(roomID string, skip int) ([]ChatMessage, error) {
-	var b Bucket
-	if err := r.coll.FindOne(
+func (r *MessageRepository) LatestMessage(roomID string) ([]ChatMessage, error) {
+	roomMessage := &messageHistory{}
+	res := r.coll.FindOne(
 		context.Background(),
-		bson.M{
-			"roomId": roomID,
-		},
-		options.FindOne().SetSort(
-			bson.D{{Key: "_id", Value: -1}},
-		).SetSkip(int64(skip)),
-	).Decode(&b); err != nil {
+		bson.M{"_id": roomID},
+	)
+	if err := res.Err(); err != nil {
 		return nil, err
 	}
-	return b.History, nil
+	if err := res.Decode(roomMessage); err != nil {
+		return nil, err
+	}
+
+	return roomMessage.Messages, nil
 }
