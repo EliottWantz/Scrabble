@@ -57,6 +57,8 @@
   //margin-top: 2%;
   position: relative;
   width: 100%;
+  max-width: 85vh;
+  max-height: 85vh;
   //margin-bottom: 2%;
 }
 
@@ -76,7 +78,7 @@
 
 .player {
   width: 90%;
-  height: 10%;
+  height: 12%;
   border-radius: 25px;
   //text-align: center;
   display: flex;
@@ -90,7 +92,7 @@
 .playerInfo {
   text-align: center;
   position: relative;
-  top: -22%;
+  top: -23%;
   margin-top: auto;
 }
 
@@ -104,6 +106,14 @@
   outline-color: black;
 }
 
+.player.light {
+  outline-color: black;
+}
+
+.player.dark {
+  outline-color: #539373;
+}
+
 img {
   border-radius: 50%;
   height: 50%;
@@ -111,7 +121,7 @@ img {
   outline-style: solid;
   outline-color: black;
   position: relative;
-  top: -20%;
+  top: -22%;
   background-color: white;
 }
 
@@ -143,6 +153,10 @@ img {
 .language {
   display: flex;
   flex-direction: row;
+}
+
+.language:hover {
+  cursor: pointer;
 }
 
 mat-icon:hover {

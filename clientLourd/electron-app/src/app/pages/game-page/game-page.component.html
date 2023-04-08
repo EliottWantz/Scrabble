@@ -5,7 +5,7 @@
       {{'game-page.leave' | translate}}
     </button>
 
-    <div *ngFor="let player of game.value?.players" class="player" [class.isTurnLight]="game.value?.turn === player.id && !isDarkTheme()" [class.isTurnDark]="game.value?.turn === player.id && isDarkTheme()">
+    <div *ngFor="let player of game.value?.players" class="player" [class.light]="game.value?.turn !== player.id && !isDarkTheme()" [class.dark]="game.value?.turn !== player.id && isDarkTheme()" [class.isTurnLight]="game.value?.turn === player.id && !isDarkTheme()" [class.isTurnDark]="game.value?.turn === player.id && isDarkTheme()">
       <img *ngIf="!player.isBot" src="{{getPlayerAvatar(player.id)}}">
       <img *ngIf="player.isBot" src="https://ucarecdn.com/43074331-00a7-4096-8d7a-7a2d5a5d85db/">
       <div class="playerInfo">
