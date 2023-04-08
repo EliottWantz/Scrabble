@@ -12,6 +12,7 @@ import {
   GameOverPayload,
   GameUpdatePayload,
   JoinedDMRoomPayload,
+  JoinedGameAsObserverPayload,
   JoinedGamePayload,
   JoinedRoomPayload,
   LeftDMRoomPayload,
@@ -264,17 +265,7 @@ export class WebSocketService {
           }
           this.gameService.placedTiles = 0;
           this.gameService.selectedTiles = [];
-          
-          /*const newPlayers: Player[] = [];
-          for (let i = 0; i < payloadUpdateGame.game.players.length; i++) {
-            const newPlayer = payloadUpdateGame.game.players[i];
-            const newRack: Tile[] = [];
-            for (let j = 0; i < payloadUpdateGame.game.players[i].rack.tiles.length; j++) {
-              newRack.push({...payloadUpdateGame.game.players[i].rack.tiles[j], disabled: false});
-            }
-            newPlayers.push({...newPlayer, rack: {tiles: newRack}});
-          }*/
-          const newGame: ScrabbleGame = {...payloadUpdateGame.game, board: newBoard/*, players: newPlayers*/};
+          const newGame: ScrabbleGame = {...payloadUpdateGame.game, board: newBoard};
           this.gameService.updateGame(newGame);
           break;
       }
@@ -362,6 +353,13 @@ export class WebSocketService {
           }
           this.gameService.usersWaiting.next(newUsersWaiting);
         }
+        break;
+      }
+
+      case "joinedGameAsObserver": {
+        const payload = packet.payload as JoinedGameAsObserverPayload;
+        this.gameService.game.next(payload.game);
+        this.gameService.scrabbleGame.next(payload.gameUpdate);
         break;
       }
 
