@@ -70,6 +70,7 @@ func (api *API) setupRoutes(cfg *config.Config) {
 	r.Get("/user/:id", api.Ctrls.UserCtrl.GetUser)
 
 	r.Get("/user/friends/:id", api.Ctrls.WebSocketManager.GetFriends)
+	r.Get("/user/friends/online/:id", api.Ctrls.WebSocketManager.GetOnlineFriends)
 	r.Get("/user/friends/:id/:friendId", api.Ctrls.WebSocketManager.GetFriendById)
 	r.Delete("/user/friends/:id/:friendId", api.Ctrls.WebSocketManager.RemoveFriend)
 

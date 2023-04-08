@@ -161,6 +161,26 @@ func (m *Manager) GetFriends(c *fiber.Ctx) error {
 	})
 }
 
+func (m *Manager) GetOnlineFriends(c *fiber.Ctx) error {
+	id := c.Params("id")
+	friends, err := m.GetFriendsList(id)
+	if err != nil {
+		return err
+	}
+	online := m.ListOnlineUsers()
+	res := make([]*user.User, 0)
+	for _, u := range online {
+		for _, f := range friends {
+			if f.ID == u.ID {
+				res = append(res, f)
+			}
+		}
+	}
+	return c.JSON(GetFriendsResponse{
+		Friends: res,
+	})
+}
+
 type GetUserResponse struct {
 	User *user.User `json:"user,omitempty"`
 }
