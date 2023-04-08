@@ -16,7 +16,7 @@ export class MoveService {
         this.game = this.gameService.scrabbleGame;
     }
 
-    async playTiles(): Promise<void> {
+    playTiles(): void {
         let letters = "";
         const covers: Cover = {};
         if (this.gameService.scrabbleGame.value) {
@@ -47,7 +47,6 @@ export class MoveService {
             };
             this.webSocketService.send("playMove", payload);
             //console.log("Played ");
-            console.log(this.gameService.placedTiles);
             this.gameService.resetSelectedAndPlaced();
         }
     }
