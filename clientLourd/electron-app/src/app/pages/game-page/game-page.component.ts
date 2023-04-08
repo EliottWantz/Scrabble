@@ -116,11 +116,4 @@ export class GamePageComponent implements OnInit {
             return this.game.value.tileCount;
         return 0;
     }
-    /*getIndice(): string[] {
-        const strings = [];
-        for (const move of this.moves.value) {
-            strings.push(JSON.stringify(move));
-        }
-        return strings;
-    }*/
 }

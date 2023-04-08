@@ -9,7 +9,7 @@ import {
   HostListener
 } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { Game, ScrabbleGame } from '@app/utils/interfaces/game/game';
+import { ScrabbleGame } from '@app/utils/interfaces/game/game';
 import { GameService } from '@app/services/game/game.service';
 import { MouseService } from '@app/services/mouse/mouse.service';
 import { MoveService } from '@app/services/game/move.service';
@@ -29,19 +29,16 @@ export class BoardComponent implements OnInit {
     letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O"];
     direction: ComponentRef<DirectionComponent> | undefined;
     constructor(private gameService: GameService, private mouseService: MouseService, private moveService: MoveService,
-      private userService: UserService, private viewContainerRef: ViewContainerRef, private eRef: ElementRef) {
+      private userService: UserService) {
         this.game = this.gameService.scrabbleGame;
-        this.gameService.dragging.subscribe((val) => {
-          if (val && this.direction) {
-            this.direction.destroy();
-            this.direction = undefined;
-          }
-        });
     }
 
   ngOnInit(): void {
-    this.game.subscribe(() => {
-      //console.log('game updated');
+    this.gameService.dragging.subscribe((val) => {
+      if (val && this.direction) {
+        this.direction.destroy();
+        this.direction = undefined;
+      }
     });
   }
 
@@ -65,9 +62,7 @@ export class BoardComponent implements OnInit {
   clicked(row: number, col: number): void {
     if (!this.gameService.scrabbleGame.value?.board[row][col].tile?.letter && this.userService.currentUserValue.id == this.gameService.scrabbleGame.value?.turn) {
       if (this.gameService.dragging.value === true) {
-        //this.gameService.resetSelectedAndPlaced();
         this.gameService.resetSelectedAndPlaced();
-        //if (newGame) this.gameService.scrabbleGame.next(newGame);
       }
       this.gameService.dragging.next(false);
       if (this.direction) {
@@ -75,7 +70,6 @@ export class BoardComponent implements OnInit {
           this.direction.destroy();
           this.direction = undefined;
           this.gameService.resetSelectedAndPlaced();
-          //if (newGame) this.gameService.scrabbleGame.next(newGame);
         } else {
           this.direction.instance.clicked();
           return;
@@ -83,17 +77,17 @@ export class BoardComponent implements OnInit {
       }
       setTimeout(() => {
         let clicked = this.elements.toArray()[row * 15 + col].element.nativeElement;
-      while (clicked && clicked?.tagName !== "MAT-GRID-TILE") {
-        clicked = clicked.parentElement;
-      }
-      if (clicked.tagName === "MAT-GRID-TILE") {
+        while (clicked && clicked?.tagName !== "MAT-GRID-TILE") {
+          clicked = clicked.parentElement;
+        }
+        if (clicked.tagName === "MAT-GRID-TILE") {
           this.direction = this.elements.toArray()[row * 15 + col].createComponent(DirectionComponent);
           this.direction.instance.x = col;
           this.direction.instance.y = row;
           this.direction.instance.initialY = row;
           this.direction.instance.initialX = col;
           clicked.appendChild(this.direction.location.nativeElement);
-      }
+        }
       }, 100);
     }
   }
@@ -230,53 +224,52 @@ export class BoardComponent implements OnInit {
     }
     if (this.gameService.dragging.value === false) {
       this.gameService.resetSelectedAndPlaced();
-      //if (newGame) this.gameService.scrabbleGame.next(newGame);
     }
     setTimeout(() => {
       this.gameService.dragging.next(true);
-    if (bruh?.classList.contains("bad")) {
-      return;
-    }
-    const elem = event.item.element.nativeElement;
-    console.log(bruh);
-    const tile : Tile = {letter: Number(elem.getAttribute("data-letter")), value: Number(elem.getAttribute("data-value"))};
-    const oldX = event.previousContainer.element.nativeElement.dataset['x'];
-    const oldY = event.previousContainer.element.nativeElement.dataset['y'];
-    if (document.getElementById("board")?.contains(bruh) == true) {
-      while (bruh && bruh?.tagName !== "MAT-GRID-TILE") {
-        bruh = bruh.parentElement;
-      }
-      const x = Number(bruh?.getAttribute("data-x"));
-      const y = Number(bruh?.getAttribute("data-y"));
-      console.log(bruh);
-      if (this.gameService.scrabbleGame.value?.board[x][y].tile?.letter) {
-        console.log("has letter");
+      if (bruh?.classList.contains("bad")) {
         return;
       }
-      if (this.gameService.scrabbleGame.value && oldX && oldY) {
-        const newBoard = this.gameService.scrabbleGame.value.board;
-        newBoard[parseInt(oldX)][parseInt(oldY)].tile = undefined;
-        this.gameService.placedTiles--;
-      }
-      this.mouseService.place_drag_drop(elem, x, y, tile);
-    } else if (document.getElementById("rack")?.contains(bruh) == true && this.gameService.scrabbleGame.value  && oldX && oldY) {
-      console.log("rack");
-      if (this.gameService.scrabbleGame.value) {
-        const players: Player[] = this.gameService.scrabbleGame.value.players;
-        for (let i = 0; i < players.length; i++) {
-          if (players[i].id == this.userService.currentUserValue.id) {
-            if (this.gameService.scrabbleGame.value.board[parseInt(oldX)][parseInt(oldY)].tile) {
-              players[i].rack.tiles.push(this.gameService.scrabbleGame.value.board[parseInt(oldX)][parseInt(oldY)].tile as Tile);
-              const newBoard = this.gameService.scrabbleGame.value.board;
-              newBoard[parseInt(oldX)][parseInt(oldY)].tile = undefined;
-              this.gameService.placedTiles--;
-              this.gameService.scrabbleGame.next({...this.gameService.scrabbleGame.value, board: newBoard, players: players});
-              return;
+      const elem = event.item.element.nativeElement;
+      console.log(bruh);
+      const tile : Tile = {letter: Number(elem.getAttribute("data-letter")), value: Number(elem.getAttribute("data-value"))};
+      const oldX = event.previousContainer.element.nativeElement.dataset['x'];
+      const oldY = event.previousContainer.element.nativeElement.dataset['y'];
+      if (document.getElementById("board")?.contains(bruh) == true) {
+        while (bruh && bruh?.tagName !== "MAT-GRID-TILE") {
+          bruh = bruh.parentElement;
+        }
+        const x = Number(bruh?.getAttribute("data-x"));
+        const y = Number(bruh?.getAttribute("data-y"));
+        console.log(bruh);
+        if (this.gameService.scrabbleGame.value?.board[x][y].tile?.letter) {
+          console.log("has letter");
+          return;
+        }
+        if (this.gameService.scrabbleGame.value && oldX && oldY) {
+          const newBoard = this.gameService.scrabbleGame.value.board;
+          newBoard[parseInt(oldX)][parseInt(oldY)].tile = undefined;
+          this.gameService.placedTiles--;
+        }
+        this.mouseService.place_drag_drop(x, y, tile);
+        } else if (document.getElementById("rack")?.contains(bruh) == true && this.gameService.scrabbleGame.value  && oldX && oldY) {
+          console.log("rack");
+          if (this.gameService.scrabbleGame.value) {
+            const players: Player[] = this.gameService.scrabbleGame.value.players;
+            for (let i = 0; i < players.length; i++) {
+              if (players[i].id == this.userService.currentUserValue.id) {
+                if (this.gameService.scrabbleGame.value.board[parseInt(oldX)][parseInt(oldY)].tile) {
+                  players[i].rack.tiles.push(this.gameService.scrabbleGame.value.board[parseInt(oldX)][parseInt(oldY)].tile as Tile);
+                  const newBoard = this.gameService.scrabbleGame.value.board;
+                  newBoard[parseInt(oldX)][parseInt(oldY)].tile = undefined;
+                  this.gameService.placedTiles--;
+                  this.gameService.scrabbleGame.next({...this.gameService.scrabbleGame.value, board: newBoard, players: players});
+                  return;
+                }
+              }
             }
           }
         }
-      }
-    }
     }, 100);
     
   }
