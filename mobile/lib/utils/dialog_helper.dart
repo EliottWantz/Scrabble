@@ -119,9 +119,9 @@ class DialogHelper {
                     ElevatedButton(
                       onPressed: () {
                         if (Get.isDialogOpen!) {
-                          // DialogHelper()._websocketService.leaveGame(
-                          //     DialogHelper()._gameService.currentGameId
-                          // );
+                          DialogHelper()._websocketService.leaveGame(
+                              DialogHelper()._gameService.currentGameId
+                          );
                           Get.back();
                           Get.back();
                         }
