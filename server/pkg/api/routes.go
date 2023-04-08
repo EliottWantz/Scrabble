@@ -80,6 +80,10 @@ func (api *API) setupRoutes(cfg *config.Config) {
 	r.Patch("/user/friends/accept/:id/:friendId", api.Ctrls.WebSocketManager.AcceptFriendRequest)
 	r.Delete("/user/friends/accept/:id/:friendId", api.Ctrls.WebSocketManager.RejectFriendRequest)
 
+	r.Post("/user/friends/game/invite", api.Ctrls.WebSocketManager.InviteFriendToGame)
+	r.Post("/user/friends/game/accept-invite", api.Ctrls.WebSocketManager.AcceptFriendInvitationToGame)
+	r.Post("/user/friends/game/reject-invite", api.Ctrls.WebSocketManager.RejectFriendInvitationToGame)
+
 	r.Post("/user/avatar", api.Ctrls.UserCtrl.UploadAvatar)
 	r.Patch("/user/updateUsername", api.Ctrls.UserCtrl.UpdateUsername)
 

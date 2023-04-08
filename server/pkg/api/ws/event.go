@@ -89,5 +89,9 @@ var (
 	ServerEventUserRequestToJoinGameDeclined       = "userRequestToJoinGameDeclined"
 	ServerEventUserRequestToJoinTournamentDeclined = "userRequestToJoinTournamentDeclined"
 
+	ServerEventInvitedToGame        = "invitedToGame"
+	ServerEventAcceptedInviteToGame = "acceptedInviteToGame"
+	ServerEventRejectInviteToGame   = "rejectInviteToGame"
+
 	ServerEventError = "error"
 )
