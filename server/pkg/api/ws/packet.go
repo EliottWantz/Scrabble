@@ -131,6 +131,11 @@ type IndicePayload struct {
 	GameID string `json:"gameId"`
 }
 
+type FirstSquarePayload struct {
+	GameID      string            `json:"gameId"`
+	Coordinates scrabble.Position `json:"coordinates"`
+}
+
 // Server events payloads
 type JoinedRoomPayload struct {
 	RoomID   string        `json:"roomId"`
@@ -321,6 +326,7 @@ type gameUpdatePayload struct {
 	ID           string                  `json:"id"`
 	Players      []*scrabble.Player      `json:"players,omitempty"`
 	Board        [15][15]scrabble.Square `json:"board,omitempty"`
+	TileCount    int                     `json:"tileCount,omitempty"`
 	Finished     bool                    `json:"finished,omitempty"`
 	NumPassMoves int                     `json:"numPassMoves,omitempty"`
 	Turn         string                  `json:"turn,omitempty"`
@@ -341,6 +347,7 @@ func makeGameUpdatePayload(g *game.Game) *gameUpdatePayload {
 		ID:           g.ID,
 		Players:      g.ScrabbleGame.Players,
 		Board:        g.ScrabbleGame.Board.Squares,
+		TileCount:    g.ScrabbleGame.Bag.TileCount(),
 		Finished:     g.ScrabbleGame.Finished,
 		NumPassMoves: g.ScrabbleGame.NumPassMoves,
 		Turn:         g.ScrabbleGame.Turn,

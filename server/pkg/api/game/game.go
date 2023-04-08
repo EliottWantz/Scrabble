@@ -8,6 +8,7 @@ type Game struct {
 	ID                     string         `json:"id"`
 	CreatorID              string         `json:"creatorId"`
 	UserIDs                []string       `json:"userIds"`
+	BotNames               []string       `json:"botNames"`
 	ObservateurIDs         []string       `json:"observateurIds"`
 	IsPrivateGame          bool           `json:"isPrivateGame"`
 	IsProtected            bool           `json:"isProtected"`
