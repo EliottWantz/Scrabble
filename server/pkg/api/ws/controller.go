@@ -1,11 +1,10 @@
 package ws
 
 import (
-	"strings"
-
 	"scrabble/pkg/api/user"
 
 	"github.com/gofiber/fiber/v2"
+	"golang.org/x/exp/slices"
 )
 
 type GetMessagesResponse struct {
@@ -162,6 +161,26 @@ func (m *Manager) GetFriends(c *fiber.Ctx) error {
 	})
 }
 
+func (m *Manager) GetOnlineFriends(c *fiber.Ctx) error {
+	id := c.Params("id")
+	friends, err := m.GetFriendsList(id)
+	if err != nil {
+		return err
+	}
+	online := m.ListOnlineUsers()
+	res := make([]*user.User, 0)
+	for _, u := range online {
+		for _, f := range friends {
+			if f.ID == u.ID {
+				res = append(res, f)
+			}
+		}
+	}
+	return c.JSON(GetFriendsResponse{
+		Friends: res,
+	})
+}
+
 type GetUserResponse struct {
 	User *user.User `json:"user,omitempty"`
 }
@@ -209,8 +228,11 @@ func (m *Manager) AcceptJoinGameRequest(c *fiber.Ctx) error {
 	requestorId := c.Params("requestorId")
 	gId := c.Params("gameId")
 	g, err := m.GameSvc.Repo.FindGame(gId)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
 	g.UserIDs = append(g.UserIDs, requestorId)
-	if strings.Contains(strings.Join(g.JoinGameRequestUserIds, ""), requestorId) == false {
+	if !slices.Contains(g.JoinGameRequestUserIds, requestorId) {
 		return fiber.NewError(fiber.StatusBadRequest, "The user revoked is request to join the game")
 	}
 
@@ -233,7 +255,9 @@ func (m *Manager) AcceptJoinGameRequest(c *fiber.Ctx) error {
 		return err
 	}
 
-	r.SendVerdictJoinGameRequest(client, g, Accepted)
+	if err := r.SendVerdictJoinGameRequest(client, g, Accepted); err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
 	return r.BroadcastJoinGamePackets(client, g)
 }
 
@@ -241,6 +265,9 @@ func (m *Manager) RevokeRequestToJoinGame(c *fiber.Ctx) error {
 	id := c.Params("id")
 	gId := c.Params("gameId")
 	g, err := m.GameSvc.Repo.FindGame(gId)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
 	for i, pendingJoinGameRequestId := range g.JoinGameRequestUserIds {
 		if pendingJoinGameRequestId == id {
 			g.JoinGameRequestUserIds = append(g.JoinGameRequestUserIds[:i], g.JoinGameRequestUserIds[i+1:]...)
@@ -255,8 +282,7 @@ func (m *Manager) RevokeRequestToJoinGame(c *fiber.Ctx) error {
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
-	r.RevokeRequestToJoinGameRequest(client, g, id)
-	return nil
+	return r.RevokeRequestToJoinGameRequest(client, g, id)
 }
 
 func (m *Manager) RejectJoinGameRequest(c *fiber.Ctx) error {
@@ -264,8 +290,11 @@ func (m *Manager) RejectJoinGameRequest(c *fiber.Ctx) error {
 	requestorId := c.Params("requestorId")
 	gId := c.Params("gameId")
 	g, err := m.GameSvc.Repo.FindGame(gId)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
 
-	if strings.Contains(strings.Join(g.JoinGameRequestUserIds, ""), requestorId) == false {
+	if !slices.Contains(g.JoinGameRequestUserIds, requestorId) {
 		return fiber.NewError(fiber.StatusBadRequest, "The user revoked is request to join the game")
 	}
 
@@ -280,8 +309,7 @@ func (m *Manager) RejectJoinGameRequest(c *fiber.Ctx) error {
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
-	r.SendVerdictJoinGameRequest(client, g, Declined)
-	return nil
+	return r.SendVerdictJoinGameRequest(client, g, Declined)
 }
 
 func (m *Manager) AcceptJoinTournamentRequest(c *fiber.Ctx) error {
@@ -289,8 +317,11 @@ func (m *Manager) AcceptJoinTournamentRequest(c *fiber.Ctx) error {
 	requestorId := c.Params("requestorId")
 	tId := c.Params("tournamentId")
 	t, err := m.GameSvc.Repo.FindTournament(tId)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
 	t.UserIDs = append(t.UserIDs, requestorId)
-	if strings.Contains(strings.Join(t.JoinTournamentRequestUserIds, ""), requestorId) == false {
+	if !slices.Contains(t.JoinTournamentRequestUserIds, requestorId) {
 		return fiber.NewError(fiber.StatusBadRequest, "The user revoked is request to join the game")
 	}
 	if t.CreatorID != id {
@@ -312,7 +343,9 @@ func (m *Manager) AcceptJoinTournamentRequest(c *fiber.Ctx) error {
 		return err
 	}
 
-	r.SendVerdictJoinTournamentRequest(client, t, Accepted)
+	if err := r.SendVerdictJoinTournamentRequest(client, t, Accepted); err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
 	return r.BroadcastJoinTournamentPackets(client, t)
 }
 
@@ -320,6 +353,9 @@ func (m *Manager) RevokeRequestToJoinTournament(c *fiber.Ctx) error {
 	id := c.Params("id")
 	tId := c.Params("tournamentId")
 	t, err := m.GameSvc.Repo.FindTournament(tId)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
 
 	for i, pendingJoinTournamentRequestId := range t.JoinTournamentRequestUserIds {
 		if pendingJoinTournamentRequestId == id {
@@ -335,8 +371,7 @@ func (m *Manager) RevokeRequestToJoinTournament(c *fiber.Ctx) error {
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
-	r.RevokeRequestToJoinTournamentRequest(client, t, id)
-	return nil
+	return r.RevokeRequestToJoinTournamentRequest(client, t, id)
 }
 
 func (m *Manager) RejectJoinTournamentRequest(c *fiber.Ctx) error {
@@ -344,7 +379,10 @@ func (m *Manager) RejectJoinTournamentRequest(c *fiber.Ctx) error {
 	tId := c.Params("tournamentId")
 	requestorId := c.Params("requestorId")
 	t, err := m.GameSvc.Repo.FindTournament(tId)
-	if strings.Contains(strings.Join(t.JoinTournamentRequestUserIds, ""), id) == false {
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	if !slices.Contains(t.JoinTournamentRequestUserIds, id) {
 		return fiber.NewError(fiber.StatusBadRequest, "The user revoked is request to join the Tournament")
 	}
 	if t.CreatorID != id {
@@ -358,6 +396,97 @@ func (m *Manager) RejectJoinTournamentRequest(c *fiber.Ctx) error {
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
-	r.SendVerdictJoinTournamentRequest(client, t, Declined)
-	return nil
+	return r.SendVerdictJoinTournamentRequest(client, t, Declined)
+}
+
+type InviteFriendToGameRequest struct {
+	InvitedID string `json:"invitedId"`
+	InviterID string `json:"inviterId"`
+	GameID    string `json:"gameId"`
+}
+
+func (m *Manager) InviteFriendToGame(c *fiber.Ctx) error {
+	req := &InviteFriendToGameRequest{}
+	if err := c.BodyParser(req); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	g, err := m.GameSvc.Repo.FindGame(req.GameID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	invitedClient, err := m.getClientByUserID(req.InvitedID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+
+	p, err := NewInvitedToGamePacket(InvitedToGamePayload{
+		Game:      g,
+		InviterID: req.InviterID,
+	})
+	if err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+	invitedClient.send(p)
+
+	return c.SendStatus(fiber.StatusOK)
+}
+
+type FriendInvitationToGameRequest struct {
+	InviterID string `json:"inviterId"`
+	InvitedID string `json:"invitedId"`
+	GameID    string `json:"gameId"`
+}
+
+func (m *Manager) AcceptFriendInvitationToGame(c *fiber.Ctx) error {
+	req := &FriendInvitationToGameRequest{}
+	if err := c.BodyParser(req); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	_, err := m.GameSvc.Repo.FindGame(req.GameID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	inviterClient, err := m.getClientByUserID(req.InviterID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	{
+		p, err := NewAcceptedInviteToGamePacket(InviteToGamePayload{
+			GameID:    req.GameID,
+			InvitedID: req.InvitedID,
+		})
+		if err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+		}
+		inviterClient.send(p)
+	}
+
+	return c.SendStatus(fiber.StatusOK)
+}
+
+func (m *Manager) RejectFriendInvitationToGame(c *fiber.Ctx) error {
+	req := &FriendInvitationToGameRequest{}
+	if err := c.BodyParser(req); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	_, err := m.GameSvc.Repo.FindGame(req.GameID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	inviterClient, err := m.getClientByUserID(req.InviterID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	{
+		p, err := NewRejectInviteToGamePacket(InviteToGamePayload{
+			GameID:    req.GameID,
+			InvitedID: req.InvitedID,
+		})
+		if err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+		}
+		inviterClient.send(p)
+	}
+
+	return c.SendStatus(fiber.StatusOK)
 }

@@ -84,13 +84,19 @@ func (m *Manager) rejectFriendRequest(id string, friendId string) error {
 	for i, pending_id := range friend.PendingRequests {
 		if pending_id == id {
 			friend.PendingRequests = append(friend.PendingRequests[:i], friend.PendingRequests[i+1:]...)
-			m.UserSvc.Repo.Update(friend)
+			if err := m.UserSvc.Repo.Update(friend); err != nil {
+				slog.Error("failed to update user", err)
+				continue
+			}
 		}
 	}
 	for i, pending_id := range friend.Friends {
 		if pending_id == id {
 			friend.Friends = append(friend.Friends[:i], friend.Friends[i+1:]...)
-			m.UserSvc.Repo.Update(friend)
+			if err := m.UserSvc.Repo.Update(friend); err != nil {
+				slog.Error("failed to update user", err)
+				continue
+			}
 		}
 	}
 
@@ -138,7 +144,10 @@ func (m *Manager) RemoveFriendFromList(id string, friendId string) error {
 	for i, id := range user.Friends {
 		if id == friendId {
 			user.Friends = append(user.Friends[:i], user.Friends[i+1:]...)
-			m.UserSvc.Repo.Update(user)
+			if err := m.UserSvc.Repo.Update(user); err != nil {
+				slog.Error("failed to update user", err)
+				continue
+			}
 		}
 	}
 	friend, err := m.UserSvc.GetUser(friendId)
@@ -148,7 +157,10 @@ func (m *Manager) RemoveFriendFromList(id string, friendId string) error {
 	for i, id := range friend.Friends {
 		if friendId == id {
 			friend.Friends = append(friend.Friends[:i], friend.Friends[i+1:]...)
-			m.UserSvc.Repo.Update(friend)
+			if err := m.UserSvc.Repo.Update(friend); err != nil {
+				slog.Error("failed to update user", err)
+				continue
+			}
 		}
 	}
 	return nil

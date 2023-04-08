@@ -131,6 +131,11 @@ type IndicePayload struct {
 	GameID string `json:"gameId"`
 }
 
+type FirstSquarePayload struct {
+	GameID      string            `json:"gameId"`
+	Coordinates scrabble.Position `json:"coordinates"`
+}
+
 // Server events payloads
 type JoinedRoomPayload struct {
 	RoomID   string        `json:"roomId"`
@@ -516,4 +521,26 @@ type RevokeRequestToJoinTournamentPayload struct {
 
 func NewRevokeRequestToJoinTournamentPacket(payload RevokeRequestToJoinTournamentPayload) (*Packet, error) {
 	return NewPacket(ServerEventRevokeRequestToJoinTournament, payload)
+}
+
+type InvitedToGamePayload struct {
+	Game      *game.Game `json:"game"`
+	InviterID string     `json:"inviterId"`
+}
+
+func NewInvitedToGamePacket(payload InvitedToGamePayload) (*Packet, error) {
+	return NewPacket(ServerEventInvitedToGame, payload)
+}
+
+type InviteToGamePayload struct {
+	GameID    string `json:"gameId"`
+	InvitedID string `json:"invitedId"`
+}
+
+func NewAcceptedInviteToGamePacket(payload InviteToGamePayload) (*Packet, error) {
+	return NewPacket(ServerEventAcceptedInviteToGame, payload)
+}
+
+func NewRejectInviteToGamePacket(payload InviteToGamePayload) (*Packet, error) {
+	return NewPacket(ServerEventRejectInviteToGame, payload)
 }

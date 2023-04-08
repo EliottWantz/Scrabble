@@ -33,6 +33,8 @@ var (
 	ClientEventStartTournament              = "start-tournament"
 	ClientEventJoinTournamentAsObservateur  = "join-tournament-as-observateur"
 	ClientEventLeaveTournamentAsObservateur = "leave-tournament-as-observateur"
+
+	ClientEventFirstSquare = "first-square"
 )
 
 // Server events
@@ -86,6 +88,10 @@ var (
 	ServerEventRevokeRequestToJoinTournament       = "revokeRequestToJoinTournament"
 	ServerEventUserRequestToJoinGameDeclined       = "userRequestToJoinGameDeclined"
 	ServerEventUserRequestToJoinTournamentDeclined = "userRequestToJoinTournamentDeclined"
+
+	ServerEventInvitedToGame        = "invitedToGame"
+	ServerEventAcceptedInviteToGame = "acceptedInviteToGame"
+	ServerEventRejectInviteToGame   = "rejectInviteToGame"
 
 	ServerEventError = "error"
 )
