@@ -414,6 +414,10 @@ func (c *Client) HandleJoinGameRequest(p *Packet) error {
 		return err
 	}
 
+	return c.JoinGame(payload)
+}
+
+func (c *Client) JoinGame(payload JoinGamePayload) error {
 	g, err := c.Manager.GameSvc.AddUserToGame(payload.GameID, c.UserId, payload.Password)
 	if err != nil {
 		if err == game.ErrPrivateGame {
