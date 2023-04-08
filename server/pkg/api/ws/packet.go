@@ -131,6 +131,11 @@ type IndicePayload struct {
 	GameID string `json:"gameId"`
 }
 
+type FirstSquarePayload struct {
+	GameID      string            `json:"gameId"`
+	Coordinates scrabble.Position `json:"coordinates"`
+}
+
 // Server events payloads
 type JoinedRoomPayload struct {
 	RoomID   string        `json:"roomId"`

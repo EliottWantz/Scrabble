@@ -145,6 +145,8 @@ func (c *Client) handlePacket(p *Packet) error {
 		return c.HandleJoinTournamentAsObserverRequest(p)
 	case ClientEventLeaveTournamentAsObservateur:
 		return c.HandleLeaveTournamentAsObservateurRequest(p)
+	case ClientEventFirstSquare:
+		return c.HandleFirstSquareRequest(p)
 	}
 
 	return nil
@@ -972,5 +974,21 @@ func (c *Client) HandleLeaveTournamentAsObservateurRequest(p *Packet) error {
 		}
 		c.send(p)
 	}
+	return nil
+}
+
+func (c *Client) HandleFirstSquareRequest(p *Packet) error {
+	payload := FirstSquarePayload{}
+	if err := json.Unmarshal(p.Payload, &payload); err != nil {
+		return err
+	}
+
+	r, err := c.Manager.GetRoom(payload.GameID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+
+	r.BroadcastSkipSelf(p, c.ID)
+
 	return nil
 }
