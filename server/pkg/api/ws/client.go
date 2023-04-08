@@ -295,6 +295,9 @@ func (c *Client) HandleCreateDMRoomRequest(p *Packet) error {
 	if err := json.Unmarshal(p.Payload, &payload); err != nil {
 		return err
 	}
+	if payload.ToID == c.ID {
+		return fiber.NewError(fiber.StatusBadRequest, "You cannot create a DM room to yourself")
+	}
 
 	roomName := fmt.Sprintf("%s/%s", payload.Username, payload.ToUsername)
 	dbRoom, err := c.Manager.RoomSvc.CreateRoom(
