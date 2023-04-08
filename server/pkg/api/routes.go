@@ -79,7 +79,7 @@ func (api *API) setupRoutes(cfg *config.Config) {
 	r.Patch("/user/friends/accept/:id/:friendId", api.Ctrls.WebSocketManager.AcceptFriendRequest)
 	r.Delete("/user/friends/accept/:id/:friendId", api.Ctrls.WebSocketManager.RejectFriendRequest)
 
-	r.Post("/avatar", api.Ctrls.UserCtrl.UploadAvatar)
+	r.Post("/user/avatar", api.Ctrls.UserCtrl.UploadAvatar)
 	r.Patch("/user/updateUsername", api.Ctrls.UserCtrl.UpdateUsername)
 
 	r.Get("/room/:id/messages", api.Ctrls.WebSocketManager.GetMessages)
