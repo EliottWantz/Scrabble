@@ -47,11 +47,13 @@ export class GameService {
     }
 
     resetSelectedAndPlaced(): void {
-        if (this.scrabbleGame.value) {
-            this.scrabbleGame.next({...this.oldGame, id: this.scrabbleGame.value.id, finished: this.scrabbleGame.value.finished, numPassMoves: this.scrabbleGame.value.numPassMoves, turn: this.scrabbleGame.value.turn, timer: this.scrabbleGame.value.timer, tileCount: this.scrabbleGame.value.tileCount});
-        }
         this.placedTiles = 0;
         this.selectedTiles = [];
+        if (this.scrabbleGame.value) {
+            const newBoard = JSON.stringify(this.oldGame.board);
+            const newPlayers = JSON.stringify(this.oldGame.players);
+            this.scrabbleGame.next({...this.scrabbleGame.value, board: JSON.parse(newBoard), players: JSON.parse(newPlayers)});
+        }
     }
 
     updateGame(game: ScrabbleGame): void {
