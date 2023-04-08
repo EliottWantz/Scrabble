@@ -10,8 +10,7 @@ import (
 )
 
 const (
-	MaxPassMoves                 int = 6
-	MaxHumanConsecutivePassMoves int = 2
+	MaxConsecutiveSkip int = 2
 )
 
 var ErrPlayerNotFound = errors.New("player not found")
@@ -191,20 +190,19 @@ func (g *Game) IsOver() bool {
 		// No moves yet: cannot be over
 		return false
 	}
-	// TODO: Check for resignation
-	if g.NumPassMoves == MaxPassMoves {
-		return true
-	}
 
 	lastPlayer := g.PlayerThatPlayed()
-	if lastPlayer.ConsecutiveExchanges >= MaxHumanConsecutivePassMoves {
-		return true
-	}
 	if lastPlayer.Rack.IsEmpty() {
 		return true
 	}
 
-	return false
+	for _, p := range g.Players {
+		if !p.IsBot && p.ConsecutiveSkip < MaxConsecutiveSkip {
+			return false
+		}
+	}
+	// Every human player has 2 consecutive skip
+	return true
 }
 
 func (g *Game) Winner() *Player {

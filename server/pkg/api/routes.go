@@ -70,6 +70,7 @@ func (api *API) setupRoutes(cfg *config.Config) {
 	r.Get("/user/:id", api.Ctrls.UserCtrl.GetUser)
 
 	r.Get("/user/friends/:id", api.Ctrls.WebSocketManager.GetFriends)
+	r.Get("/user/friends/online/:id", api.Ctrls.WebSocketManager.GetOnlineFriends)
 	r.Get("/user/friends/:id/:friendId", api.Ctrls.WebSocketManager.GetFriendById)
 	r.Delete("/user/friends/:id/:friendId", api.Ctrls.WebSocketManager.RemoveFriend)
 
@@ -79,7 +80,11 @@ func (api *API) setupRoutes(cfg *config.Config) {
 	r.Patch("/user/friends/accept/:id/:friendId", api.Ctrls.WebSocketManager.AcceptFriendRequest)
 	r.Delete("/user/friends/accept/:id/:friendId", api.Ctrls.WebSocketManager.RejectFriendRequest)
 
-	r.Post("/avatar", api.Ctrls.UserCtrl.UploadAvatar)
+	r.Post("/user/friends/game/invite", api.Ctrls.WebSocketManager.InviteFriendToGame)
+	r.Post("/user/friends/game/accept-invite", api.Ctrls.WebSocketManager.AcceptFriendInvitationToGame)
+	r.Post("/user/friends/game/reject-invite", api.Ctrls.WebSocketManager.RejectFriendInvitationToGame)
+
+	r.Post("/user/avatar", api.Ctrls.UserCtrl.UploadAvatar)
 	r.Patch("/user/updateUsername", api.Ctrls.UserCtrl.UpdateUsername)
 
 	r.Get("/room/:id/messages", api.Ctrls.WebSocketManager.GetMessages)

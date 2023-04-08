@@ -43,7 +43,7 @@ func (s *Service) AddGameStats(u *User, eventStartTime, eventEndTime int64, game
 	return s.Repo.Update(u)
 }
 
-func (s *Service) UpdateUserStats(u *User, gameWon bool, points int, timePlayed int64) {
+func (s *Service) UpdateUserStats(u *User, gameWon bool, points int, timePlayed int64) error {
 	userStats := &u.Summary.UserStats
 	userStats.NbGamesPlayed++
 	if gameWon {
@@ -51,5 +51,5 @@ func (s *Service) UpdateUserStats(u *User, gameWon bool, points int, timePlayed 
 	}
 	userStats.AveragePointsPerGame = (userStats.AveragePointsPerGame + points) / userStats.NbGamesPlayed
 	userStats.AverageTimePlayed = (userStats.AverageTimePlayed + timePlayed) / int64(userStats.NbGamesPlayed)
-	s.Repo.Update(u)
+	return s.Repo.Update(u)
 }

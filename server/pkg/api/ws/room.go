@@ -112,7 +112,7 @@ func (r *Room) BroadcastJoinRoomPackets(c *Client) error {
 			RoomName: r.Name,
 			UserIDs:  r.ListUsers(),
 		}
-		msgs, err := r.Manager.MessageRepo.LatestMessage(r.ID, 0)
+		msgs, err := r.Manager.MessageRepo.LatestMessage(r.ID)
 		if err != nil || len(msgs) == 0 {
 			msgs = make([]ChatMessage, 0)
 		}
@@ -172,7 +172,7 @@ func (r *Room) BroadcastJoinDMRoomPackets(c *Client) error {
 			RoomName: r.Name,
 			UserIDs:  r.ListUsers(),
 		}
-		msgs, err := r.Manager.MessageRepo.LatestMessage(r.ID, 0)
+		msgs, err := r.Manager.MessageRepo.LatestMessage(r.ID)
 		if err != nil || len(msgs) == 0 {
 			msgs = make([]ChatMessage, 0)
 		}
@@ -295,6 +295,7 @@ func (r *Room) SendVerdictJoinTournamentRequest(c *Client, t *game.Tournament, v
 	}
 	return nil
 }
+
 func (r *Room) RevokeRequestToJoinGameRequest(c *Client, g *game.Game, userId string) error {
 	{
 		p, err := NewRevokeRequestToJoinGamePacket(RevokeRequestToJoinGamePayload{

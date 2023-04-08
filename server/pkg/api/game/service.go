@@ -58,8 +58,14 @@ func (s *Service) NewGame(creatorID string, withUserIds []string) (*Game, error)
 		ID:        uuid.NewString(),
 		CreatorID: creatorID,
 		UserIDs:   []string{creatorID},
+		BotNames:  make([]string, 0),
 	}
 	g.UserIDs = append(g.UserIDs, withUserIds...)
+
+	numBots := 4 - len(g.UserIDs)
+	for i := 0; i < numBots; i++ {
+		g.BotNames = append(g.BotNames, botNames[i])
+	}
 
 	err := s.Repo.InsertGame(g)
 	if err != nil {
@@ -130,7 +136,14 @@ func (s *Service) AddUserToGame(gID, userID, password string) (*Game, error) {
 	if g.IsPrivateGame {
 		return g, ErrPrivateGame
 	}
+	if len(g.UserIDs) == 4 {
+		return nil, fmt.Errorf("game is full")
+	}
 	g.UserIDs = append(g.UserIDs, userID)
+	// Remove one bot from the game
+	if len(g.BotNames) > 0 {
+		g.BotNames = append(g.BotNames[:1], g.BotNames[2:]...)
+	}
 
 	return g, nil
 }
@@ -165,6 +178,8 @@ func (s *Service) RemoveUserFromGame(gID, userID string) (*Game, error) {
 	}
 
 	g.UserIDs = append(g.UserIDs[:idx], g.UserIDs[idx+1:]...)
+	// Add bot to the game
+	g.BotNames = append(g.BotNames, botNames[idx])
 
 	return g, nil
 }
@@ -190,8 +205,7 @@ func (s *Service) StartGame(g *Game) error {
 	if humanPlayers < 2 {
 		return errors.New("must have at least 2 players")
 	}
-	botPlayers := 4 - humanPlayers
-	slog.Info("Starting game", "ID", g.ID, "human", humanPlayers, "ai", botPlayers)
+	slog.Info("Starting game", "ID", g.ID, "human", humanPlayers, "ai", len(g.BotNames))
 
 	g.ScrabbleGame = scrabble.NewGame(s.DAWG, &scrabble.HighScore{})
 	for _, uID := range g.UserIDs {
@@ -201,8 +215,8 @@ func (s *Service) StartGame(g *Game) error {
 		}
 		g.ScrabbleGame.AddPlayer(scrabble.NewPlayer(u.ID, u.Username, g.ScrabbleGame.Bag))
 	}
-	for i := 0; i < botPlayers; i++ {
-		g.ScrabbleGame.AddPlayer(scrabble.NewBot(uuid.NewString(), botNames[i], g.ScrabbleGame.Bag))
+	for _, botName := range g.BotNames {
+		g.ScrabbleGame.AddPlayer(scrabble.NewBot(uuid.NewString(), botName, g.ScrabbleGame.Bag))
 	}
 	g.ScrabbleGame.Turn = g.ScrabbleGame.PlayerToMove().ID
 
@@ -365,7 +379,7 @@ func (s *Service) AddObserverToGame(gID string, oID string) (*Game, error) {
 		return nil, ErrGameNotStarted
 	}
 
-	if g.IsPrivateGame == true {
+	if g.IsPrivateGame {
 		return nil, ErrPrivateGame
 	}
 
@@ -381,7 +395,7 @@ func (s *Service) RemoveObserverFromGame(gID string, oID string) (*Game, error) 
 	if err != nil {
 		return nil, err
 	}
-	if g.IsPrivateGame == true {
+	if g.IsPrivateGame {
 		return nil, ErrPrivateGame
 	}
 	if g.ScrabbleGame.IsOver() {
@@ -401,7 +415,7 @@ func (s *Service) ReplaceBotByObserver(gID string, oID string) (*Game, error) {
 	if err != nil {
 		return nil, err
 	}
-	if g.IsPrivateGame == true {
+	if g.IsPrivateGame {
 		return nil, ErrPrivateGame
 	}
 	if g.ScrabbleGame.IsOver() {
@@ -413,7 +427,7 @@ func (s *Service) ReplaceBotByObserver(gID string, oID string) (*Game, error) {
 	}
 
 	for i, p := range g.ScrabbleGame.Players {
-		if p.IsBot == true {
+		if p.IsBot {
 			g.ScrabbleGame.Players[i].IsBot = false
 			g.ScrabbleGame.Players[i].Username = user.Username
 			g.ScrabbleGame.Players[i].ID = user.ID
