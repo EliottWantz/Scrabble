@@ -27,6 +27,11 @@
     background: #1375b0;
 }
 
+.square-multiplier.newTile {
+    background-image: linear-gradient(45deg, #000 25%, transparent 25%, transparent 50%, #000 50%, #000 75%, transparent 75%, #fff);
+    background-size: 40% 40%;
+}
+
 #board {
     position: relative;
     width: 100%;

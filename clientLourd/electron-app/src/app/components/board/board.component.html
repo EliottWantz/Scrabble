@@ -10,6 +10,7 @@
                 [class.word2]="col.wordMultiplier === 2"
                 [class.letter2]="col.letterMultiplier === 2"
                 [class.letter3]="col.letterMultiplier === 3"
+                [class.newTile]="checkIfNewTile(col.tile)"
                 id="square"
                 (click)="clicked(i, j)"
                 [attr.data-x]="i"
