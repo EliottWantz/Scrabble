@@ -398,3 +398,95 @@ func (m *Manager) RejectJoinTournamentRequest(c *fiber.Ctx) error {
 	}
 	return r.SendVerdictJoinTournamentRequest(client, t, Declined)
 }
+
+type InviteFriendToGameRequest struct {
+	InvitedID string `json:"invitedId"`
+	InviterID string `json:"inviterId"`
+	GameID    string `json:"gameId"`
+}
+
+func (m *Manager) InviteFriendToGame(c *fiber.Ctx) error {
+	req := &InviteFriendToGameRequest{}
+	if err := c.BodyParser(req); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	g, err := m.GameSvc.Repo.FindGame(req.GameID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	invitedClient, err := m.getClientByUserID(req.InvitedID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+
+	p, err := NewInvitedToGamePacket(InvitedToGamePayload{
+		Game:      g,
+		InviterID: req.InviterID,
+	})
+	if err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+	invitedClient.send(p)
+
+	return c.SendStatus(fiber.StatusOK)
+}
+
+type FriendInvitationToGameRequest struct {
+	InviterID string `json:"inviterId"`
+	InvitedID string `json:"invitedId"`
+	GameID    string `json:"gameId"`
+}
+
+func (m *Manager) AcceptFriendInvitationToGame(c *fiber.Ctx) error {
+	req := &FriendInvitationToGameRequest{}
+	if err := c.BodyParser(req); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	_, err := m.GameSvc.Repo.FindGame(req.GameID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	inviterClient, err := m.getClientByUserID(req.InviterID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	{
+		p, err := NewAcceptedInviteToGamePacket(InviteToGamePayload{
+			GameID:    req.GameID,
+			InvitedID: req.InvitedID,
+		})
+		if err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+		}
+		inviterClient.send(p)
+	}
+
+	return c.SendStatus(fiber.StatusOK)
+}
+
+func (m *Manager) RejectFriendInvitationToGame(c *fiber.Ctx) error {
+	req := &FriendInvitationToGameRequest{}
+	if err := c.BodyParser(req); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	_, err := m.GameSvc.Repo.FindGame(req.GameID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	inviterClient, err := m.getClientByUserID(req.InviterID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	{
+		p, err := NewRejectInviteToGamePacket(InviteToGamePayload{
+			GameID:    req.GameID,
+			InvitedID: req.InvitedID,
+		})
+		if err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+		}
+		inviterClient.send(p)
+	}
+
+	return c.SendStatus(fiber.StatusOK)
+}
