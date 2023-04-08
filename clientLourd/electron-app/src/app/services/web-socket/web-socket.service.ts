@@ -262,7 +262,9 @@ export class WebSocketService {
               }
             }
           }
-          this.gameService.resetSelectedAndPlaced();
+          this.gameService.placedTiles = 0;
+          this.gameService.selectedTiles = [];
+          
           /*const newPlayers: Player[] = [];
           for (let i = 0; i < payloadUpdateGame.game.players.length; i++) {
             const newPlayer = payloadUpdateGame.game.players[i];
@@ -371,8 +373,8 @@ export class WebSocketService {
         if (errorPayload.error == "invalid move") {
          
           console.log("move");
-            this.gameService.resetSelectedAndPlaced();
-            this.gameService.resetSelectedAndPlaced();
+          this.gameService.resetSelectedAndPlaced();
+          //if (newGame) this.gameService.scrabbleGame.next(newGame);
           //this.gameService.game.next(this.gameService.game.value);
         } else {
           this.error.next(errorPayload.error);
