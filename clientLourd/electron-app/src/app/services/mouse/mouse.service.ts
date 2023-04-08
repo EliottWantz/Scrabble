@@ -101,7 +101,6 @@ export class MouseService {
       //}
       
       //this.gameService.placedTiles.push({ ...tile, x: col, y: row });
-      console.log(this.gameService.placedTiles);
         if (tile.letter < 97) {
           this.gameService.specialLetter( col, row);
         } 
@@ -109,7 +108,7 @@ export class MouseService {
           const newBoard = this.gameService.scrabbleGame.value?.board;
           //console.log(row);
           //console.log(col);
-          newBoard[row][col].tile = {letter: tile.letter, value: tile.value, x: col, y: row};
+          newBoard[row][col].tile = {letter: tile.letter, value: tile.value, x: col, y: row, disabled: false};
           this.gameService.scrabbleGame.next({...this.gameService.scrabbleGame.value, board: newBoard});
           this.gameService.placedTiles++;
         }
