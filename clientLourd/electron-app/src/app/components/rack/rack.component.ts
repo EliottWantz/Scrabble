@@ -48,8 +48,8 @@ export class RackComponent implements OnInit {
     }
 
     drop(event: CdkDragDrop<string[]>) {
-        let bruh = document.elementFromPoint(event.dropPoint.x, event.dropPoint.y);
-        if (document.getElementById("board")?.contains(bruh) == false) {
+        let clickedElem = document.elementFromPoint(event.dropPoint.x, event.dropPoint.y);
+        if (document.getElementById("board")?.contains(clickedElem) == false) {
             return;
         }
         if (this.gameService.dragging.value === false) {
@@ -57,14 +57,14 @@ export class RackComponent implements OnInit {
         }
         setTimeout(() => {
             this.gameService.dragging.next(true);
-            while (bruh && bruh?.tagName !== "MAT-GRID-TILE") {
-                bruh = bruh.parentElement;
+            while (clickedElem && clickedElem?.tagName !== "MAT-GRID-TILE") {
+                clickedElem = clickedElem.parentElement;
             }
-            if (bruh?.classList.contains("bad")) {
+            if (clickedElem?.classList.contains("bad")) {
                 return;
             }
-            const x = Number(bruh?.getAttribute("data-x"));
-            const y = Number(bruh?.getAttribute("data-y"));
+            const x = Number(clickedElem?.getAttribute("data-x"));
+            const y = Number(clickedElem?.getAttribute("data-y"));
             if (this.gameService.scrabbleGame.value?.board[x][y].tile?.letter) {
                 return;
             }

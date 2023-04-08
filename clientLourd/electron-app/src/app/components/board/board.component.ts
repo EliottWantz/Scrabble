@@ -218,8 +218,8 @@ export class BoardComponent implements OnInit {
   drop(event: CdkDragDrop<string[]>) {
     this.gameService.selectedTiles = [];
     this.mouseService.resetColor();
-    let bruh = document.elementFromPoint(event.dropPoint.x, event.dropPoint.y);
-    if (document.getElementById("board")?.contains(bruh) == false && document.getElementById("rack")?.contains(bruh) == false) {
+    let clickedElem = document.elementFromPoint(event.dropPoint.x, event.dropPoint.y);
+    if (document.getElementById("board")?.contains(clickedElem) == false && document.getElementById("rack")?.contains(clickedElem) == false) {
         return;
     }
     if (this.gameService.dragging.value === false) {
@@ -227,21 +227,20 @@ export class BoardComponent implements OnInit {
     }
     setTimeout(() => {
       this.gameService.dragging.next(true);
-      if (bruh?.classList.contains("bad")) {
+      if (clickedElem?.classList.contains("bad")) {
         return;
       }
       const elem = event.item.element.nativeElement;
-      console.log(bruh);
       const tile : Tile = {letter: Number(elem.getAttribute("data-letter")), value: Number(elem.getAttribute("data-value"))};
       const oldX = event.previousContainer.element.nativeElement.dataset['x'];
       const oldY = event.previousContainer.element.nativeElement.dataset['y'];
-      if (document.getElementById("board")?.contains(bruh) == true) {
-        while (bruh && bruh?.tagName !== "MAT-GRID-TILE") {
-          bruh = bruh.parentElement;
+      if (document.getElementById("board")?.contains(clickedElem) == true) {
+        while (clickedElem && clickedElem?.tagName !== "MAT-GRID-TILE") {
+          clickedElem = clickedElem.parentElement;
         }
-        const x = Number(bruh?.getAttribute("data-x"));
-        const y = Number(bruh?.getAttribute("data-y"));
-        console.log(bruh);
+        const x = Number(clickedElem?.getAttribute("data-x"));
+        const y = Number(clickedElem?.getAttribute("data-y"));
+
         if (this.gameService.scrabbleGame.value?.board[x][y].tile?.letter) {
           console.log("has letter");
           return;
@@ -252,7 +251,7 @@ export class BoardComponent implements OnInit {
           this.gameService.placedTiles--;
         }
         this.mouseService.place_drag_drop(x, y, tile);
-        } else if (document.getElementById("rack")?.contains(bruh) == true && this.gameService.scrabbleGame.value  && oldX && oldY) {
+        } else if (document.getElementById("rack")?.contains(clickedElem) == true && this.gameService.scrabbleGame.value  && oldX && oldY) {
           console.log("rack");
           if (this.gameService.scrabbleGame.value) {
             const players: Player[] = this.gameService.scrabbleGame.value.players;
