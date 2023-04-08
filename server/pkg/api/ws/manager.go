@@ -85,7 +85,7 @@ func (m *Manager) Accept(cID string) fiber.Handler {
 			if err != nil {
 				m.logger.Error("list users", err)
 			}
-			c.send(p)
+			m.Broadcast(p)
 		}
 		{
 			// List available chat rooms
