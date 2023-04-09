@@ -52,10 +52,15 @@ import { GameObservePageComponent } from "@app/pages/game-observe-page/game-obse
 import { JoinPrivateGameComponent } from '@app/components/join-private-game/join-private-game.component';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { GifComponent } from '@app/components/gif/gif.component';
+import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
+import { MatListModule } from '@angular/material/list';
 
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { HttpClient } from '@angular/common/http';
+import { AdviceComponent } from '@app/components/advice/advice.component';
+import { ChooseLetterComponent } from '@app/components/choose-letter/choose-letter.component';
+import { DirectionComponent } from '@app/components/direction/direction.component';
 
 @NgModule({
   declarations: [
@@ -88,7 +93,10 @@ import { HttpClient } from '@angular/common/http';
     CustomizeAvatarComponent,
     GameObservePageComponent,
     JoinPrivateGameComponent,
-    GifComponent
+    GifComponent,
+    AdviceComponent,
+    ChooseLetterComponent,
+    DirectionComponent
   ],
   imports: [
     BrowserModule,
@@ -114,6 +122,8 @@ import { HttpClient } from '@angular/common/http';
     MatStepperModule,
     ColorPickerModule,
     MatButtonToggleModule,
+    MatBottomSheetModule,
+    MatListModule,
     TranslateModule.forRoot({
       loader: {
         provide: TranslateLoader,

@@ -8,10 +8,12 @@ import { environment } from 'src/environments/environment';
 import {
   ClientPayload,
   ErrorPayload,
+  FirstMovePayload,
   FriendRequestPayload,
   GameOverPayload,
   GameUpdatePayload,
   JoinedDMRoomPayload,
+  JoinedGameAsObserverPayload,
   JoinedGamePayload,
   JoinedRoomPayload,
   LeftDMRoomPayload,
@@ -39,11 +41,13 @@ import { ChatMessage } from '@app/utils/interfaces/chat-message';
 import { ClientEvent } from '@app/utils/events/client-events';
 import { ServerEvent } from '@app/utils/events/server-events';
 import { GameService } from '@app/services/game/game.service';
-import { RackService } from '@app/services/game/rack.service';
 import { StorageService } from '@app/services/storage/storage.service';
 import { ScrabbleGame } from '@app/utils/interfaces/game/game';
 import { Router } from '@angular/router';
 import { Room } from '@app/utils/interfaces/room';
+import { Square } from '@app/utils/interfaces/square';
+import { Tile } from '@app/utils/interfaces/game/tile';
+import { Player } from '@app/utils/interfaces/game/player';
 
 @Injectable({
   providedIn: 'root',
@@ -57,7 +61,6 @@ export class WebSocketService {
     private userService: UserService,
     private roomService: RoomService,
     private gameService: GameService,
-    private rackService: RackService,
     private storageService: StorageService,
     private router: Router
   ) {
@@ -108,7 +111,7 @@ export class WebSocketService {
           name: payloadRoom.roomName,
           messages: messages,
         };
-        console.log(room);
+        //console.log(room);
         //this.roomService.addRoom(room);
         if (this.roomService.findRoom(room.id) === undefined) {
             this.roomService.addRoom(room);
@@ -249,8 +252,22 @@ export class WebSocketService {
 
       case "gameUpdate": {
           const payloadUpdateGame = packet.payload as GameUpdatePayload;
-          this.gameService.updateGame(payloadUpdateGame.game);
-          this.rackService.deleteRecycled();
+          const newBoard: Square[][] = payloadUpdateGame.game.board;
+          for (let i = 0; i < payloadUpdateGame.game.board.length; i++) {
+            for (let j = 0; j < payloadUpdateGame.game.board[i].length; j++) {
+              if (payloadUpdateGame.game.board[i][j].tile) {
+                //console.log("allo");
+                console.log(payloadUpdateGame.game.board[i][j].tile);
+                newBoard[i][j].tile = {...payloadUpdateGame.game.board[i][j].tile as Tile, disabled: true};
+              } else {
+                newBoard[i][j].tile = {...payloadUpdateGame.game.board[i][j].tile as Tile, disabled: false};
+              }
+            }
+          }
+          this.gameService.placedTiles = 0;
+          this.gameService.selectedTiles = [];
+          const newGame: ScrabbleGame = {...payloadUpdateGame.game, board: newBoard};
+          this.gameService.updateGame(newGame);
           break;
       }
 
@@ -261,8 +278,9 @@ export class WebSocketService {
       }
 
       case "gameOver": {
-          const payloadGameOver = packet.payload as GameOverPayload;
-          break;
+        const payloadGameOver = packet.payload as GameOverPayload;
+        this.gameService.gameOverPopup(payloadGameOver.winnerId);
+        break;
       }
 
       case "friendRequest": {
@@ -272,8 +290,15 @@ export class WebSocketService {
       }
 
       case "acceptFriendRequest": {
-          const payloadAcceptFriendRequest = packet.payload as FriendRequestPayload;
-          this.userService.subjectUser.next({...this.userService.currentUserValue, friends: [...this.userService.currentUserValue.friends, payloadAcceptFriendRequest.fromId]});
+          const payloadAcceptFriendRequest =
+            packet.payload as FriendRequestPayload;
+          this.userService.subjectUser.next({
+            ...this.userService.currentUserValue,
+            friends: [
+              ...this.userService.currentUserValue.friends,
+              payloadAcceptFriendRequest.fromId,
+            ],
+          });
           break;
       }
 
@@ -284,7 +309,7 @@ export class WebSocketService {
 
       case "indice": {
           const indicePayload = packet.payload as ServerIndicePayload;
-          this.gameService.moves.next(indicePayload.moves);
+          this.gameService.indice(indicePayload.moves);
           break;
       }
   
@@ -340,118 +365,40 @@ export class WebSocketService {
         break;
       }
 
-      case 'joinedGame': {
-        const joinedGamePayload = packet.payload as JoinedGamePayload;
-        this.gameService.game.next(joinedGamePayload.game);
-        this.router.navigate(['/waitingRoom']);
-        break;
-      }
-
-      case 'userJoinedGame': {
-        const userJoinedGamePayload = packet.payload as UserJoinedGamePayload;
-        this.gameService.addUser(
-          userJoinedGamePayload.gameId,
-          userJoinedGamePayload.userId
-        );
-        break;
-      }
-
-      case 'leftGame': {
-        const leftGamePayload = packet.payload as LeftGamePayload;
-        this.gameService.removeUser(
-          leftGamePayload.gameId,
-          this.userService.currentUserValue.id
-        );
-        break;
-      }
-
-      case 'userLeftGame': {
-        const userLeftGamePayload = packet.payload as UserLeftGamePayload;
-        this.gameService.removeUser(
-          userLeftGamePayload.gameId,
-          userLeftGamePayload.userId
-        );
-        break;
-      }
-
-      case 'gameUpdate': {
-        const payloadUpdateGame = packet.payload as GameUpdatePayload;
-        this.gameService.updateGame(payloadUpdateGame.game);
-        this.rackService.deleteRecycled();
-        break;
-      }
-
-      case 'timerUpdate': {
-        const payloadTimer = packet.payload as TimerUpdatePayload;
-        this.gameService.updateTimer(payloadTimer.timer);
-        break;
-      }
-
-      case 'gameOver': {
-        const payloadGameOver = packet.payload as GameOverPayload;
-        this.gameService.gameOverPopup(payloadGameOver.winnerId);
-        break;
-      }
-
-      case 'friendRequest': {
-        const payloadFriendRequest = packet.payload as FriendRequestPayload;
-        this.userService.addFriendRequest(payloadFriendRequest.fromId);
-        break;
-      }
-
-      case 'acceptFriendRequest': {
-        const payloadAcceptFriendRequest =
-          packet.payload as FriendRequestPayload;
-        this.userService.subjectUser.next({
-          ...this.userService.currentUserValue,
-          friends: [
-            ...this.userService.currentUserValue.friends,
-            payloadAcceptFriendRequest.fromId,
-          ],
-        });
-        break;
-      }
-
-      case 'declineFriendRequest': {
-        const payloadDeclineFriendRequest =
-          packet.payload as FriendRequestPayload;
-        break;
-      }
-
-      case 'indice': {
-        const indicePayload = packet.payload as ServerIndicePayload;
-        this.gameService.moves.next(indicePayload.moves);
-        break;
-      }
-
-      case 'chat-message': {
-        const payloadMessage = packet.payload as ChatMessage;
-        const message: ChatMessage = {
-          from: payloadMessage.from,
-          fromId: payloadMessage.fromId,
-          roomId: payloadMessage.roomId,
-          message: payloadMessage.message,
-          timestamp: new Date(payloadMessage.timestamp!).toLocaleTimeString(
-            undefined,
-            { hour12: false }
-          ),
-        };
-        this.roomService.addMessage(message);
-        break;
-      }
-
       case 'listOnlineUsers': {
         const payloadListOnlineUsers = packet.payload as ListUsersPayload;
         this.storageService.listOnlineUsers.next(payloadListOnlineUsers.users);
         break;
       }
 
-      case 'error': {
+      case "joinedGameAsObserver": {
+        const payload = packet.payload as JoinedGameAsObserverPayload;
+        this.gameService.game.next(payload.game);
+        this.gameService.scrabbleGame.next(payload.gameUpdate);
+        break;
+      }
+
+      case "first-square": {
+        const payload = packet.payload as FirstMovePayload;
+        if (this.gameService.scrabbleGame.value && this.gameService.scrabbleGame.value.id === payload.gameId) {
+          const newBoard = this.gameService.scrabbleGame.value.board;
+          newBoard[payload.coordinates.row][payload.coordinates.col].tile = {disabled: false, letter: 128, value: -1} as Tile;
+          console.log(newBoard[payload.coordinates.row][payload.coordinates.col]);
+          this.gameService.scrabbleGame.next({...this.gameService.scrabbleGame.value, board: newBoard});
+        }
+        break;
+      }
+
+      case "error": {
+        console.log("yellow");
         console.log(packet);
         const errorPayload = packet.payload as ErrorPayload;
         console.log(errorPayload);
         if (errorPayload.error == "invalid move") {
-          this.rackService.replaceTilesInRack();
+         
+          console.log("move");
+          this.gameService.resetSelectedAndPlaced();
+          //if (newGame) this.gameService.scrabbleGame.next(newGame);
           //this.gameService.game.next(this.gameService.game.value);
         } else {
           this.error.next(errorPayload.error);

@@ -84,7 +84,7 @@ export class GifComponent {
         // test search term
         const search_term = "excited";
 
-        console.log(this.searchText);
+        //console.log(this.searchText);
         // using default locale of en_US
         const search_url = "https://tenor.googleapis.com/v2/search?q=" + this.searchText + "&key=" + apikey +"&client_key=" + clientkey +  "&limit=" + lmt;
         //const share_url = "https://tenor.googleapis.com/v2/registershare?id=" + this.shared_gifs_id + "&key=" + apikey + "&client_key=" + clientkey + "&q=" + search_term;

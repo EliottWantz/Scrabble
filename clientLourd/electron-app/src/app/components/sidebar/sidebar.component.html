@@ -45,9 +45,9 @@
                 <div>
                     <mat-icon (click)="doToggleLightDark()">{{lightDarkToggleIcon}}</mat-icon>
                 </div>
-                <div class="language">
+                <div class="language" (click)="switchLanguage()">
                     <div class="language-icon">
-                        <mat-icon (click)="switchLanguage()" inline="true">language</mat-icon>
+                        <mat-icon inline="true">language</mat-icon>
                     </div>
                     <div>{{language.value}}</div>
                 </div>

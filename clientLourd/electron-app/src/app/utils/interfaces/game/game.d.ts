@@ -9,6 +9,7 @@ export interface ScrabbleGame {
     numPassMoves: number;
     turn: string;
     timer: number;
+    tileCount: number;
 }
 
 export interface Game {

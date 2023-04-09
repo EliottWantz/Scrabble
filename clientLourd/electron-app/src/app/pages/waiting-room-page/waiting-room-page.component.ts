@@ -44,7 +44,7 @@ export class WaitRoomPageComponent {
   }*/
 
   startGame(): void {
-      console.log(this.gameRoom.value);
+      //console.log(this.gameRoom.value);
       if (this.gameRoom.value) {
         if(this.gameRoom.value.userIds.length < 2){
           return;
@@ -101,7 +101,7 @@ export class WaitRoomPageComponent {
     if (this.gameRoom.value)
       this.commService.acceptPlayer(this.userService.currentUserValue.id, requestorId, this.gameRoom.value.id).subscribe({
         next: () => {
-          console.log("accepted");
+          //console.log("accepted");
           const newUsersWaiting = this.gameService.usersWaiting.value;
           for (const userWaiting of newUsersWaiting) {
             if (userWaiting.userId == requestorId)
@@ -110,7 +110,7 @@ export class WaitRoomPageComponent {
           this.gameService.usersWaiting.next(newUsersWaiting);
         },
         error: (err) => {
-          console.log(err);
+          //console.log(err);
         }
       });
   }
@@ -119,7 +119,7 @@ export class WaitRoomPageComponent {
     if (this.gameRoom.value)
       this.commService.denyPlayer(this.userService.currentUserValue.id, requestorId, this.gameRoom.value.id).subscribe({
         next: () => {
-          console.log("denied");
+          //console.log("denied");
           const newUsersWaiting = this.gameService.usersWaiting.value;
           for (const userWaiting of newUsersWaiting) {
             if (userWaiting.userId == requestorId)
@@ -128,7 +128,7 @@ export class WaitRoomPageComponent {
           this.gameService.usersWaiting.next(newUsersWaiting);
         },
         error: (err) => {
-          console.log(err);
+          //console.log(err);
         }
       });
   }

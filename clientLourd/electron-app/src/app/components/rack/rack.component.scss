@@ -9,3 +9,13 @@ mat-card-content {
     justify-content: space-between;
     flex-wrap: wrap;
 }
+
+app-tile {
+    width: 8%;
+}
+
+/*app-tile:after {
+    content: "";
+    display: block;
+    padding-bottom: 14%;
+}*/

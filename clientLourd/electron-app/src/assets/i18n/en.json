@@ -150,6 +150,7 @@
 	"find-game-page.create": "Create a game",
 	"find-game-page.join": "Join a game",
 	"find-game-page.observe": "Spectate a game",
-	"waiting-room-page.title": "Waiting for other players... Please wait",
-	"waiting-room-page.request-join": "Users wanting to join the game"
+	"waiting-room-page.request-join": "Users wanting to join the game",
+	"game-observe-page.show": "Show easel",
+	"game-observe-page.replace": "Replace"
 }

@@ -38,28 +38,28 @@ export class JoinGameComponent implements OnInit {
         } else {
             const oberIds = [];
             for (const game of this.gameService.observableGames.value) {
-                oberIds.push(game.id);
+                this.games.push(game);
             }
 
-            for (const game of this.gameService.joinableGames.value) {
+            /*for (const game of this.gameService.joinableGames.value) {
                 if (oberIds.includes(game.id)) {
                     this.games.push(game);
                 }
-            }
+            }*/
 
             this.gameService.observableGames.subscribe(() => {
                 this.games = [];
                 const oberIds = [];
                 for (const game of this.gameService.observableGames.value) {
-                    oberIds.push(game.id);
+                    this.games.push(game);
                 }
     
-                for (const game of this.gameService.joinableGames.value) {
+                /*for (const game of this.gameService.joinableGames.value) {
                     if (oberIds.includes(game.id)) {
                         this.games.push(game);
                     }
-                }
-                console.log(this.games);
+                }*/
+                //console.log(this.games);
             });
         }
     }

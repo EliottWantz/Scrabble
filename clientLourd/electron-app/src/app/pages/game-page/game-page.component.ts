@@ -10,6 +10,8 @@ import { LeaveGamePayload } from "@app/utils/interfaces/packet";
 import { WebSocketService } from "@app/services/web-socket/web-socket.service";
 import { Router } from "@angular/router";
 import { ThemeService } from "@app/services/theme/theme.service";
+import { MatBottomSheet } from "@angular/material/bottom-sheet";
+import { AdviceComponent } from "@app/components/advice/advice.component";
 
 @Component({
     selector: "app-game-page",
@@ -18,7 +20,7 @@ import { ThemeService } from "@app/services/theme/theme.service";
 })
 export class GamePageComponent implements OnInit {
     game!: BehaviorSubject<ScrabbleGame | undefined>;
-    moves!: BehaviorSubject<MoveInfo[]>
+    //moves!: BehaviorSubject<MoveInfo[]>
     private darkThemeIcon = 'wb_sunny';
     private lightThemeIcon = 'nightlight_round';
     public lightDarkToggleIcon = this.lightThemeIcon;
@@ -54,11 +56,11 @@ export class GamePageComponent implements OnInit {
     }
 
     hasPlacedLetters(): boolean {
-        return this.moveService.placedTiles.length != 0;
+        return this.gameService.placedTiles > 0;
     }
 
     hasSelectedLetters(): boolean {
-        return this.moveService.selectedTiles.length != 0;
+        return this.gameService.selectedTiles.length != 0;
     }
 
     submit(): void {
@@ -104,11 +106,21 @@ export class GamePageComponent implements OnInit {
         this.themeService.switchLanguage();
       }
 
-    /*getIndice(): string[] {
-        const strings = [];
-        for (const move of this.moves.value) {
-            strings.push(JSON.stringify(move));
+    isDarkTheme(): boolean {
+        return this.themeService.theme.value == "dark";
+    }
+
+    getCurrentPlayerColor(): string {
+        if (this.themeService.theme.value == "light") {
+            return "#424260";
+        } else {
+            return "#3c6d7a";
         }
-        return strings;
-    }*/
+    }
+    
+    getTileCount(): number {
+        if (this.game.value)
+            return this.game.value.tileCount;
+        return 0;
+    }
 }

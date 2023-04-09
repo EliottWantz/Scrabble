@@ -1,26 +1,28 @@
 <div id="board">
-    <table>
-        <tbody>
-            <tr *ngFor="let row of game.value?.board; let i = index">
-                <th *ngFor="let col of row, let j = index"
-                    class="square-multiplier"
-                    [class.word3]="col.wordMultiplier === 3"
-                    [class.word2]="col.wordMultiplier === 2"
-                    [class.letter2]="col.letterMultiplier === 2"
-                    [class.letter3]="col.letterMultiplier === 3"
-                    id="square"
-                    (click)="clicked(i, j)"
-                    [attr.data-x]="i"
-                    [attr.data-y]="j"
-                    #elem
-                    squareHost
-                >
-                    <div *ngIf="!col.tile" #multis>
+    <mat-grid-list [cols]="16" rowHeight="fit">
+        <mat-grid-tile class="bad"></mat-grid-tile>
+        <mat-grid-tile *ngFor="let letter of letters" class="bad">{{letter}}</mat-grid-tile>
+        <div *ngFor="let row of game.value?.board; let i = index">
+            <mat-grid-tile class="bad">{{i + 1}}</mat-grid-tile>
+            <mat-grid-tile *ngFor="let col of row, let j = index"
+                class="square-multiplier"
+                [class.word3]="col.wordMultiplier === 3"
+                [class.word2]="col.wordMultiplier === 2"
+                [class.letter2]="col.letterMultiplier === 2"
+                [class.letter3]="col.letterMultiplier === 3"
+                [class.newTile]="checkIfNewTile(col.tile)"
+                id="square"
+                (click)="clicked(i, j)"
+                [attr.data-x]="i"
+                [attr.data-y]="j"
+                #elem
+                squareHost
+                cdkDropList (cdkDropListDropped)="drop($event)">
+                    <div *ngIf="!col.tile || !col.tile.letter" #multis>
                         {{getTextSquare(col.wordMultiplier, col.letterMultiplier)}}
                     </div>
-                    <app-tile *ngIf="col.tile" [tile]="col.tile" [disabled]="true"></app-tile>
-                </th>
-            </tr>
-        </tbody>
-    </table>
+                    <app-tile *ngIf="col.tile && col.tile.letter && col.tile.value !== -1" [tile]="col.tile" [disabled]="true"></app-tile>
+            </mat-grid-tile>
+        </div>
+    </mat-grid-list>
 </div>

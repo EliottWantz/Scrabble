@@ -1,8 +1,13 @@
 import { Injectable } from "@angular/core";
+import { MatBottomSheet } from "@angular/material/bottom-sheet";
 import { Router } from "@angular/router";
 import { BoardHelper } from "@app/classes/board-helper";
+import { AdviceComponent } from "@app/components/advice/advice.component";
+import { ChooseLetterComponent } from "@app/components/choose-letter/choose-letter.component";
 import { Game, ScrabbleGame } from "@app/utils/interfaces/game/game";
 import { MoveInfo } from "@app/utils/interfaces/game/move";
+import { Tile } from "@app/utils/interfaces/game/tile";
+import { GameUpdatePayload } from "@app/utils/interfaces/packet";
 import { BehaviorSubject } from "rxjs";
 
 @Injectable({
@@ -12,34 +17,59 @@ export class GameService {
     scrabbleGame!: BehaviorSubject<ScrabbleGame | undefined>;
     game!: BehaviorSubject<Game | undefined>;
     timer!: BehaviorSubject<number>;
-    moves!: BehaviorSubject<MoveInfo[]>;
+    //moves!: BehaviorSubject<MoveInfo[]>;
     joinableGames!: BehaviorSubject<Game[]>;
     gameWinner!:BehaviorSubject<string | undefined>
     observableGames!: BehaviorSubject<Game[]>;
     isObserving = false;
     usersWaiting!: BehaviorSubject<{userId: string, username: string}[]>;
     wasDeclined!: BehaviorSubject<boolean>;
-    constructor(private router: Router) {
+    selectedTiles: Tile[] = [];
+    placedTiles = 0;
+    oldGame!: ScrabbleGame;
+    dragging = new BehaviorSubject<boolean>(false);
+    constructor(private router: Router, private _bottomSheet: MatBottomSheet, private _bottomSheetSpecialLetter: MatBottomSheet) {
         this.scrabbleGame = new BehaviorSubject<ScrabbleGame | undefined>(undefined);
         this.game = new BehaviorSubject<Game | undefined>(undefined);
         this.joinableGames = new BehaviorSubject<Game[]>([]);
         this.timer = new BehaviorSubject<number>(0);
-        this.moves = new BehaviorSubject<MoveInfo[]>([]);
+        //this.moves = new BehaviorSubject<MoveInfo[]>([]);
         this.observableGames = new BehaviorSubject<Game[]>([]);
         this.usersWaiting = new BehaviorSubject<{userId: string, username: string}[]>([]);
         this.wasDeclined = new BehaviorSubject<boolean>(false);
     }
 
+    indice(moves: MoveInfo[]): void {
+        this._bottomSheet.open(AdviceComponent, {data: {moves: moves}});
+    }
+
+    specialLetter( x: number, y: number) {
+        this._bottomSheet.open(ChooseLetterComponent, {data: { x: x, y: y}});
+    }
+
+    resetSelectedAndPlaced(): void {
+        this.placedTiles = 0;
+        this.selectedTiles = [];
+        if (this.scrabbleGame.value) {
+            const newBoard = JSON.stringify(this.oldGame.board);
+            const newPlayers = JSON.stringify(this.oldGame.players);
+            this.scrabbleGame.next({...this.scrabbleGame.value, board: JSON.parse(newBoard), players: JSON.parse(newPlayers)});
+        }
+    }
+
     updateGame(game: ScrabbleGame): void {
-        console.log(game);
+        //console.log(game);
+        this.dragging.next(false);
+        this.oldGame = JSON.parse(JSON.stringify(game));
         this.scrabbleGame.next(game);
         this.timer.next(game.timer / 1000000000);
-        this.moves.next([]);
+        //this.moves.next([]);
         if (!this.isObserving) {
             this.router.navigate(['/', 'game']);
         } else {
             this.router.navigate(['/', 'gameObserve']);
         }
+        this._bottomSheet.dismiss();
     }
 
     updateTimer(timer: number): void {

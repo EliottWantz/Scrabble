@@ -80,7 +80,7 @@ export class CustomizeAvatarComponent {
             error: (err) => {
                 if (err.status == 200) {
                     this.error = false;
-                    console.log(err);
+                    //console.log(err);
                     const formData = this.authService.tempUserLogin.value;
                     if (formData.has("avatar"))
                         formData.delete("avatar");

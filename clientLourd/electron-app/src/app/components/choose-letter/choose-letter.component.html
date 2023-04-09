@@ -1,0 +1,8 @@
+<mat-grid-list class="advice-list" [cols]="1" rowHeight="25px">
+    <div *ngFor="let letter of letters; let last = last">
+        <mat-grid-tile (click)="chooseLetter(letter)" class="list-item">
+            {{letter}}
+        </mat-grid-tile>
+        <mat-grid-tile><mat-divider></mat-divider></mat-grid-tile> 
+    </div>
+</mat-grid-list>

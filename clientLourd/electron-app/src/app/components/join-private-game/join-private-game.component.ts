@@ -49,10 +49,10 @@ export class JoinPrivateGameComponent {
         // annuler la demande
         this.commService.revokeJoinGame(this.userSerive.currentUserValue.id, this.data.game.id).subscribe({
             next: () => {
-              console.log("canceled");
+              //console.log("canceled");
             },
             error: (err) => {
-              console.log(err);
+              //console.log(err);
             }
           });
         this.dialogRef.close();

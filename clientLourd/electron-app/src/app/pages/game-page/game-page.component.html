@@ -5,22 +5,23 @@
       {{'game-page.leave' | translate}}
     </button>
 
-    <div *ngFor="let player of game.value?.players" class="player" [class.isTurn]="game.value?.turn === player.id">
+    <div *ngFor="let player of game.value?.players" class="player" [class.light]="game.value?.turn !== player.id && !isDarkTheme()" [class.dark]="game.value?.turn !== player.id && isDarkTheme()" [class.isTurnLight]="game.value?.turn === player.id && !isDarkTheme()" [class.isTurnDark]="game.value?.turn === player.id && isDarkTheme()">
+      <img *ngIf="!player.isBot" src="{{getPlayerAvatar(player.id)}}">
+      <img *ngIf="player.isBot" src="https://ucarecdn.com/43074331-00a7-4096-8d7a-7a2d5a5d85db/">
       <div class="playerInfo">
-        <img *ngIf="!player.isBot" src="{{getPlayerAvatar(player.id)}}">
         <h3>{{player.username}}</h3>
+        <p>Score : {{player.score}}</p>
       </div>
-      <p>Score : {{player.score}}</p>
     </div>
 
     <button mat-raised-button color="primary" (click)="submit()" id="play-button" [disabled]="!hasPlacedLetters() || !isTurn()">
       <mat-icon>done</mat-icon>
-      Envoyer
+      {{'game-page.submit' | translate}}
     </button>
 
     <button mat-raised-button color="primary" (click)="exchange()" id="exchange-button" [disabled]="!hasSelectedLetters() || !isTurn()">
       <mat-icon>swap_horiz</mat-icon>
-      Échanger
+      {{'game-page.exchange' | translate}}
     </button>
   </div>
   <div class="middle">
@@ -32,9 +33,9 @@
   </div>
   <div class="right">
     <div class="config">
-      <div class="language">
+      <div class="language" (click)="switchLanguage()">
         <div class="language-icon">
-            <mat-icon (click)="switchLanguage()" inline="true">language</mat-icon>
+            <mat-icon inline="true">language</mat-icon>
         </div>
         <div>{{language.value}}</div>
       </div>
@@ -44,22 +45,20 @@
     </div>
     <app-timer id="timer"></app-timer>
 
-    <div id="reserve">
+    <div class="reserve" [class.dark]="isDarkTheme()" [class.light]="!isDarkTheme()">
       <h3>{{'game-page.reserve' | translate}}</h3>
-      <h3>80</h3>
+      <h3>{{getTileCount()}}</h3>
     </div>
 
     <button mat-raised-button color="primary" (click)="indice()" id="indice-button" [disabled]="!isTurn()">
       <mat-icon>lightbulb</mat-icon>
-      Indice
+      {{"game-page.advice" | translate}}
     </button>
 
     <button mat-raised-button color="primary" (click)="pass()" id="pass-button" [disabled]="!isTurn()">
       <mat-icon>fast_forward</mat-icon>
-      Passer
+      {{"game-page.skip" | translate}}
     </button>
-
-    <app-chat-box id="chat-box"></app-chat-box>
   </div>
   <mat-card id="indice" *ngIf="gameWinner !=='' ">
     <mat-card-content>

@@ -94,7 +94,7 @@ export class ChatBoxComponent implements AfterViewInit {
   }
 
   send(): void {
-    console.log(document.getElementById('selectionElem'));
+    //console.log(document.getElementById('selectionElem'));
     if (!this.message || !this.message.replace(/\s/g, '')) return;
 
     this.chatService.send(this.message, this.roomService.currentRoomChat.value);
@@ -121,8 +121,8 @@ export class ChatBoxComponent implements AfterViewInit {
   }
 
   changeRoom(event: MatSelectChange): void {
-    console.log(this.getRoomName(this.currentRoomId));
-    console.log(event.value.id);
+    //console.log(this.getRoomName(this.currentRoomId));
+    //console.log(event.value.id);
     this.roomService.changeRoom(this.currentRoomId);
   }
 
@@ -147,9 +147,9 @@ export class ChatBoxComponent implements AfterViewInit {
     this.roomService.currentRoomChat.next(
       this.roomService.listJoinedChatRooms.value[0]
     );
-    console.log(this.roomService.currentRoomChat.value);
+    //console.log(this.roomService.currentRoomChat.value);
     this.socketService.send(event, payload);
-    console.log(this.roomService.listJoinedChatRooms.value);
+    //console.log(this.roomService.listJoinedChatRooms.value);
   }
 
   openGifMenu(): void {

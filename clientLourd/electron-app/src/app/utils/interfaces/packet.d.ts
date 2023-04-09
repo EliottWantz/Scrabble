@@ -1,5 +1,5 @@
 import { Event } from "@app/utils/events/events";
-import { MoveInfo } from "@app/utils/interfaces/game/move"
+import { MoveInfo, Position } from "@app/utils/interfaces/game/move"
 import { ChatMessage } from "@app/utils/interfaces/chat-message";
 import { Room } from "@app/utils/interfaces/room";
 import { Game, ScrabbleGame } from "@app/utils/interfaces/game/game";
@@ -8,6 +8,11 @@ import { User } from "@app/utils/interfaces/user";
 export interface Packet {
     event: Event;
     payload: ClientPayload | ServerPayload;
+}
+
+export interface FirstMovePayload {
+    gameId: string;
+    coordinates: Position;
 }
 
 export type ClientPayload = ChatMessage
@@ -22,7 +27,8 @@ export type ClientPayload = ChatMessage
 | StartGamePayload
 | PlayMovePayload
 | IndicePayload
-| ReplaceBotByObserverPayload;
+| ReplaceBotByObserverPayload
+| FirstMovePayload;
 
 export interface CreateRoomPayload {
     roomName: string;
@@ -117,7 +123,9 @@ export type ServerPayload = JoinedRoomPayload
 | UserRequestToJoinTournamentPayload
 | VerdictJoinGameRequestPayload
 | VerdictJoinTournamentRequestPayload
-| RevokeJoinGameRequestPayload;
+| RevokeJoinGameRequestPayload
+| JoinedGameAsObserverPayload
+| FirstMovePayload;
 
 export interface JoinedRoomPayload {
     roomId: string;
@@ -253,4 +261,9 @@ export interface VerdictJoinTournamentRequestPayload {
 export interface RevokeJoinGameRequestPayload {
     gameId: string;
     userId: string;
+}
+
+export interface JoinedGameAsObserverPayload {
+    game: Game;
+    gameUpdate: ScrabbleGame;
 }
