@@ -23,5 +23,5 @@
   <div *ngIf="getNumUsers() >= 2 && checkIfCreator()">
     <button mat-flat-button color="accent" (click)="startGame()" routerLink="/game">{{'waiting-room-page.start-game' | translate}}</button>
   </div>
-  
+  <app-chat-box *ngIf="isLoggedIn()"></app-chat-box>
 </div>

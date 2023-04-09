@@ -1,4 +1,7 @@
-<mat-card *ngIf="!fenetrer" id="chatBox">
+<button *ngIf="!opened" mat-fab color="primary" class="placement" (click)="toggleChat()" type="button">
+  <mat-icon>chat</mat-icon>
+</button>
+<mat-card *ngIf="!fenetrer && opened" id="chatBox" class="placement">
   <div class="header">
     <div class="header-content">
       <form class="room-form">
@@ -38,11 +41,17 @@
       </form>
       <button
         color="primary"
-        class="open-new-button"
+        mat-mini-fab
         *ngIf="showbutton"
         (click)="this.chatService.openChat()"
+        [ngStyle]="{transform: 'scale(0.8)'}"
+        class="close-pop"
+        type="button"
       >
-        <span class="material-icons">open_in_new</span>
+        <mat-icon>open_in_new</mat-icon>
+      </button>
+      <button mat-mini-fab color="primary" (click)="toggleChat()" [ngStyle]="{transform: 'scale(0.8)'}" class="close-pop" type="button">
+        <mat-icon>close</mat-icon>
       </button>
     </div>
   </div>
@@ -71,7 +80,7 @@
     </div>
   </div>
 
-  <form #chatForm id="chatBoxForm">
+  <form #chatForm id="chatBoxForm" (ngSubmit)="send($event)">
     <mat-form-field appearance="fill">
       <mat-label for="message">{{
         "chat-box-component.enter-message" | translate
@@ -94,11 +103,11 @@
       [disabled]="false"
       id="submitBtn"
       type="submit"
-      (click)="send()"
+      (click)="send($event)"
     >
       <mat-icon>send</mat-icon>
     </button>
-    <button mat-mini-fab color="primary" id="submitBtn" (click)="openGifMenu()">
+    <button mat-mini-fab color="primary" id="submitBtn" (click)="openGifMenu()" type="button">
       <mat-icon>gif</mat-icon>
     </button>
   </form>
