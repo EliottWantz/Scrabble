@@ -280,4 +280,42 @@ class DialogHelper {
       barrierDismissible: false,
     );
   }
+
+  static void showInvitedToGameDialog(String userId, String gameId) {
+    Get.dialog(
+      Dialog(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text("${DialogHelper()._usersService.getUserUsername(userId)} vous invite à rejoindre une partie.",
+                style: Get.textTheme.headline4,
+              ),
+              const Gap(20),
+              Row(
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+
+                      DialogHelper.hideLoading();
+                    },
+                    child: const Text('Accepter'),
+                  ),
+                  Spacer(),
+                  ElevatedButton(
+                    onPressed: () {
+                      DialogHelper.hideLoading();
+                    },
+                    child: const Text('Rejeter'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+      barrierDismissible: false,
+    );
+  }
 }

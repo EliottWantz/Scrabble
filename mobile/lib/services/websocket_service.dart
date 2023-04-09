@@ -25,6 +25,7 @@ import 'package:client_leger/models/response/friend_request_response.dart';
 import 'package:client_leger/models/response/game_over_response.dart';
 import 'package:client_leger/models/response/game_update_response.dart';
 import 'package:client_leger/models/response/indice_response.dart';
+import 'package:client_leger/models/response/invited_to_game_response.dart';
 import 'package:client_leger/models/response/joined_dm_room_response.dart';
 import 'package:client_leger/models/response/joined_game_response.dart';
 import 'package:client_leger/models/response/joined_room_response.dart';
@@ -43,6 +44,7 @@ import 'package:client_leger/models/response/user_request_to_join_game_response.
 import 'package:client_leger/models/start_game_payload.dart';
 import 'package:client_leger/models/user.dart';
 import 'package:client_leger/routes/app_routes.dart';
+import 'package:client_leger/services/notification_service.dart';
 import 'package:client_leger/services/room_service.dart';
 import 'package:client_leger/services/users_service.dart';
 import 'package:client_leger/utils/dialog_helper.dart';
@@ -72,6 +74,7 @@ class WebsocketService extends GetxService {
   final UsersService usersService;
   final RoomService roomService;
   final GameService gameService = Get.find();
+  final NotificationService notificationService = Get.find();
 
   WebsocketService(
       {required this.userService,
@@ -303,6 +306,12 @@ class WebsocketService extends GetxService {
         {
           IndiceResponse indiceResponse = IndiceResponse.fromRawJson(data);
           handleIndiceResponse(indiceResponse);
+        }
+        break;
+      case ServerEventInvitedToGame:
+        {
+          InvitedToGameResponse invitedToGameResponse = InvitedToGameResponse.fromRawJson(data);
+          handleInvitedToGameResponse(invitedToGameResponse);
         }
         break;
       case ServerEventError:
@@ -561,6 +570,11 @@ class WebsocketService extends GetxService {
   void handleIndiceResponse(IndiceResponse indiceResponse) {
     if (indiceResponse.payload.isEmpty) return;
     gameService.indices.addAll(indiceResponse.payload);
+  }
+
+  void handleInvitedToGameResponse(InvitedToGameResponse invitedToGameResponse) {
+    notificationService.gameInviteNotifications.add(invitedToGameResponse.payload!);
+    DialogHelper.showInvitedToGameDialog(invitedToGameResponse.payload.inviterId, invitedToGameResponse.payload.game.id);
   }
 
   void handleErrorResponse(ErrorResponse errorResponse) {

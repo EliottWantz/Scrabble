@@ -32,6 +32,10 @@ const String ServerEventUserRequestToJoinGameDeclined = "userRequestToJoinGameDe
 
 const String ServerEventIndice = "indice";
 
+const String ServerEventInvitedToGame = "invitedToGame";
+const String ServerEventAcceptedInviteToGame = "acceptedInviteToGame";
+const String ServerEventRejectInviteToGame = "rejectInviteToGame";
+
 const String ServerEventError   = "error";
 
 
