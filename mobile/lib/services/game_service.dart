@@ -48,6 +48,7 @@ class GameService extends GetxService {
   }
 
   Rack? getPlayerRackById(String id) {
+    if (currentGame.value == null) return null;
     for (final player in currentGame.value!.players) {
       if (id == player.id) return player.rack;
     }

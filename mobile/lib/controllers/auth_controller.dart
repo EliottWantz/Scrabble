@@ -68,13 +68,13 @@ class AuthController extends GetxController {
     }
   }
 
-  Future<void> onRegister({String? avatarCustomizedUrl}) async {
+  Future<void> onRegister(List<Avatar> avatars,{String? avatarCustomizedUrl}) async {
     final request = RegisterRequest(
         email: registerEmailController.text,
         username: registerUsernameController.text,
         password: registerPasswordController.text,
         avatar: (avatarService.isAvatar.value && avatarCustomizedUrl == null)
-            ? avatarService.avatars[avatarService.currentAvatarIndex.value]
+            ? avatars[avatarService.currentAvatarIndex.value]
             : Avatar(url: avatarCustomizedUrl!, fileId: ''));
     await DialogHelper.showLoading('Connexion au serveur');
     await authService.register(request,

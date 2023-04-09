@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:client_leger/models/move_info.dart';
 import 'package:client_leger/models/move_types.dart';
+import 'package:client_leger/models/position.dart';
 import 'package:client_leger/models/square.dart';
 import 'package:client_leger/models/tile.dart';
 import 'package:client_leger/models/tile_info.dart';
@@ -32,6 +33,7 @@ class GameController extends GetxController {
   RxMap<int, String> lettersToExchange = <int, String>{}.obs;
   RxString currentSpecialLetter = 'A'.obs;
   RxnString currentObservedPlayerId = RxnString();
+  Rxn<Position> currentFirstLetter = Rxn<Position>();
   Rxn<MoveInfo> currentIndiceToPlay = Rxn<MoveInfo>();
 
   final dropdownFormKey = GlobalKey<FormState>();
@@ -167,7 +169,8 @@ class GameController extends GetxController {
           ));
     }
     if (tile.letter == 42) tile.isSpecial = true;
-    return DragTarget<Tile>(builder: (
+    return DragTarget<Tile>(
+        builder: (
       BuildContext context,
       List<dynamic> accepted,
       List<dynamic> rejected,

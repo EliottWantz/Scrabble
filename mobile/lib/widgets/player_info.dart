@@ -39,7 +39,7 @@ class PlayerInfo extends GetView<GameController> {
           ),
           child: Card(
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(12)),
+                borderRadius: const BorderRadius.all(Radius.circular(12)),
                 side: BorderSide(
                   color: Get.isDarkMode ? Colors.greenAccent : Colors.black,
                 ),
@@ -62,7 +62,7 @@ class PlayerInfo extends GetView<GameController> {
                           playerName,
                         ),
                         Text(
-                          'score : ${score}',
+                          'score : $score',
                         ),
                         Obx(() => ElevatedButton.icon(
                             onPressed: playerId ==
@@ -72,8 +72,8 @@ class PlayerInfo extends GetView<GameController> {
                                     controller.currentObservedPlayerId.value =
                                         playerId;
                                   },
-                            icon: Icon(Icons.remove_red_eye_outlined),
-                            label: Text('Observer')))
+                            icon: const Icon(Icons.remove_red_eye_outlined),
+                            label: const Text('Observer')))
                       ],
                     ),
                   )
@@ -81,7 +81,7 @@ class PlayerInfo extends GetView<GameController> {
               )),
         ),
         circularImageWithBorder(isBot
-            ? 'https://api.dicebear.com/6.x/bottts/png?seed=Felix&scale=70'
+            ? 'https://ucarecdn.com/43074331-00a7-4096-8d7a-7a2d5a5d85db/'
             : usersService.getUserById(playerId)!.avatar.url),
       ],
     );
@@ -99,7 +99,7 @@ class PlayerInfo extends GetView<GameController> {
           ),
           child: Card(
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(12)),
+                borderRadius: const BorderRadius.all(Radius.circular(12)),
                 side: BorderSide(
                   color: Get.isDarkMode ? Colors.greenAccent : Colors.black,
                 ),
@@ -120,7 +120,7 @@ class PlayerInfo extends GetView<GameController> {
                           playerName,
                         ),
                         Text(
-                          'score : ${score}',
+                          'score : $score',
                         ),
                       ],
                     ),

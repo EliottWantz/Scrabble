@@ -14,6 +14,7 @@ const orangeSquareBackground = Color(0xfffd8e73);
 const magentaSquareBackground = Color(0xfff01c7a);
 const lightBlueSquareBackground = Color(0xff8ecafc);
 const darkBlueSquareBackground = Color(0xff1375b0);
+const yellowOrange = Color(0xffFFAA33);
 
 class LetterTileDark extends StatelessWidget {
   const LetterTileDark({Key? key, required this.tile}) : super(key: key);
@@ -244,6 +245,11 @@ class TripleWordSquare extends Square {
             position: position);
 }
 
+class FirstSquare extends Square {
+  const FirstSquare({Key? key, required Position position})
+      : super(key: key, label: '', color: yellowOrange, position: position);
+}
+
 class StandardSquare extends Square {
   const StandardSquare({Key? key, required Position position})
       : super(key: key, color: const Color(0xffe7eaef), position: position);
@@ -284,16 +290,19 @@ class Square extends GetView<GameController> {
                     child: DropdownButtonFormField<String>(
                       menuMaxHeight: 150,
                       alignment: AlignmentDirectional.bottomCenter,
-                      hint: Text('Choisissez une lettre',style: Get.textTheme.button,),
+                      hint: Text(
+                        'Choisissez une lettre',
+                        style: Get.textTheme.button,
+                      ),
                       decoration: InputDecoration(
                         enabledBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                              color: Colors.blue, width: 2),
+                          borderSide:
+                              const BorderSide(color: Colors.blue, width: 2),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         border: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                              color: Colors.blue, width: 2),
+                          borderSide:
+                              const BorderSide(color: Colors.blue, width: 2),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         filled: true,
@@ -307,13 +316,17 @@ class Square extends GetView<GameController> {
                         data.letter = ascii
                             .encode(controller.currentSpecialLetter.value)
                             .first;
-                        controller.lettersPlaced.add(
-                            TileInfo(tile: data, position: position));
+                        controller.lettersPlaced
+                            .add(TileInfo(tile: data, position: position));
+                        if (controller.lettersPlaced.length == 1) {
+                          controller.websocketService.placeFirstSquare(
+                              controller.gameService.currentGameId, position);
+                        }
                       },
-                      items: List<String>.generate(26,
-                              (index) => String.fromCharCode(index + 65))
-                          .map((e) =>
-                              DropdownMenuItem(value: e, child: Text(e)))
+                      items: List<String>.generate(
+                              26, (index) => String.fromCharCode(index + 65))
+                          .map(
+                              (e) => DropdownMenuItem(value: e, child: Text(e)))
                           .toList(),
                     ),
                   ),
@@ -335,6 +348,10 @@ class Square extends GetView<GameController> {
       } else {
         final tileInfo = TileInfo(tile: data, position: position);
         controller.lettersPlaced.add(tileInfo);
+        if (controller.lettersPlaced.length == 1) {
+          controller.websocketService.placeFirstSquare(
+              controller.gameService.currentGameId, tileInfo.position);
+        }
       }
     }, builder: (
       BuildContext context,

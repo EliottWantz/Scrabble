@@ -10,6 +10,7 @@ import 'package:client_leger/screens/auth/avatar_selection_screen.dart';
 import 'package:client_leger/screens/home/home_screen.dart';
 import 'package:client_leger/screens/auth/login_screen.dart';
 import 'package:client_leger/screens/auth/register_screen.dart';
+import 'package:client_leger/screens/profile_edit_screen.dart';
 import 'package:get/get.dart';
 import 'package:client_leger/bindings/chatbox_binding.dart';
 import '../screens/floating_chat_screen.dart';
@@ -42,6 +43,10 @@ class AppPages {
       binding: ChatBoxBinding(),
       children: [
         GetPage(
+            name: Routes.PROFILE_EDIT,
+            binding: AvatarSelectionBinding(),
+            page: () => ProfileEditScreen()),
+        GetPage(
           name: Routes.GAME_START,
           page: () => GameStartScreen(),
           children: [
@@ -53,7 +58,8 @@ class AppPages {
         ),
       ],
     ),
-    GetPage(name: Routes.GAME, page: () => GameScreen(), binding: GameBinding()),
+    GetPage(
+        name: Routes.GAME, page: () => GameScreen(), binding: GameBinding()),
     // GetPage(name: Routes.CHAT, page: () => ChatScreen(), binding: ChatBoxBinding())
     // GetPage(name: Routes.CHAT, page: () => FloatingChatScreen())
   ];

@@ -6,7 +6,7 @@ class GameUpdatePayload {
   List<Player> players;
   List<List<Square>> board;
   bool? finished;
-  int? numPassMoves;
+  int? tileCount;
   String turn;
   // duration;
 
@@ -15,7 +15,7 @@ class GameUpdatePayload {
     required this.players,
     required this.board,
     required this.finished,
-    required this.numPassMoves,
+    this.tileCount,
     required this.turn});
 
   factory GameUpdatePayload.fromJson(Map<String, dynamic> json) {
@@ -29,7 +29,7 @@ class GameUpdatePayload {
         ),
         // board: json["game"]["board"],
         finished: json["finished"],
-        numPassMoves: json["numPassMoves"],
+        tileCount: json["tileCount"],
         turn: json["turn"]
     );
   }
@@ -39,7 +39,7 @@ class GameUpdatePayload {
     "players": players.map((player) => player.toJson()).toList(),
     "board": board.map((row) => (row.map((square) => square.toJson()).toList())).toList(),
     "finished": finished,
-    "numPassMoves": numPassMoves,
+    "tileCount": tileCount,
     "turn": turn
   };
 }
