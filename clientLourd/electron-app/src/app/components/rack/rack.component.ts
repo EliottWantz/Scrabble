@@ -70,7 +70,9 @@ export class RackComponent implements OnInit {
                 return;
             }
             if (this.gameService.placedTiles === 0) {
-                this.moveService.placedFirstTile(x, y);
+                this.moveService.firstX = y;
+                this.moveService.firstY = x;
+                this.moveService.placedFirstTile();
             }
             const elem = event.item.element.nativeElement;
             const tile : Tile = {letter: Number(elem.getAttribute("data-letter")), value: Number(elem.getAttribute("data-value"))};

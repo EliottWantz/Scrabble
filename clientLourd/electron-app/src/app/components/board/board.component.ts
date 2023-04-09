@@ -36,6 +36,9 @@ export class BoardComponent implements OnInit {
   ngOnInit(): void {
     this.gameService.dragging.subscribe((val) => {
       if (val && this.direction) {
+        if (this.moveService.firstX !== -1 && this.moveService.firstY !== -1) {
+          this.moveService.removedFirstTile();
+        }
         this.direction.destroy();
         this.direction = undefined;
       }
@@ -62,11 +65,16 @@ export class BoardComponent implements OnInit {
   clicked(row: number, col: number): void {
     if (!this.gameService.scrabbleGame.value?.board[row][col].tile?.letter && this.userService.currentUserValue.id == this.gameService.scrabbleGame.value?.turn) {
       if (this.gameService.dragging.value === true) {
+        if (this.moveService.firstX !== -1 && this.moveService.firstY !== -1) {
+          this.moveService.removedFirstTile();
+        }
         this.gameService.resetSelectedAndPlaced();
-      }
-      this.gameService.dragging.next(false);
-      if (this.direction) {
+        this.gameService.dragging.next(false);
+      } else if (this.direction) {
         if (this.direction.instance.initialX !== col || this.direction.instance.initialY !== row) {
+          if (this.moveService.firstX !== -1 && this.moveService.firstY !== -1) {
+            this.moveService.removedFirstTile();
+          }
           this.direction.destroy();
           this.direction = undefined;
           this.gameService.resetSelectedAndPlaced();
@@ -77,7 +85,9 @@ export class BoardComponent implements OnInit {
       }
       setTimeout(() => {
         if (this.gameService.placedTiles === 0) {
-          this.moveService.placedFirstTile(row, col);
+          this.moveService.firstX = col;
+          this.moveService.firstY = row;
+          this.moveService.placedFirstTile();
         }
         let clicked = this.elements.toArray()[row * 15 + col].element.nativeElement;
         while (clicked && clicked?.tagName !== "MAT-GRID-TILE") {
@@ -99,6 +109,9 @@ export class BoardComponent implements OnInit {
   clickout(event: any) {
     const elem = document.elementFromPoint(event.x,event.y);
     if (!document.getElementById("board")?.contains(elem) && this.direction) {
+      if (this.moveService.firstX !== -1 && this.moveService.firstY !== -1) {
+        this.moveService.removedFirstTile();
+      }
       this.direction.destroy();
       this.direction = undefined;
       this.gameService.resetSelectedAndPlaced();
@@ -226,6 +239,9 @@ export class BoardComponent implements OnInit {
         return;
     }
     if (this.gameService.dragging.value === false) {
+      if (this.moveService.firstX !== -1 && this.moveService.firstY !== -1) {
+        this.moveService.removedFirstTile();
+      }
       this.gameService.resetSelectedAndPlaced();
     }
     setTimeout(() => {
@@ -249,12 +265,17 @@ export class BoardComponent implements OnInit {
           return;
         }
         if (this.gameService.scrabbleGame.value && oldX && oldY) {
+          if (this.moveService.firstX !== -1 && this.moveService.firstY !== -1 && this.gameService.placedTiles === 1) {
+            this.moveService.removedFirstTile();
+          }
           const newBoard = this.gameService.scrabbleGame.value.board;
           newBoard[parseInt(oldX)][parseInt(oldY)].tile = undefined;
           this.gameService.placedTiles--;
         }
         if (this.gameService.placedTiles === 0) {
-          this.moveService.placedFirstTile(x, y);
+          this.moveService.firstX = y;
+          this.moveService.firstY = x;
+          this.moveService.placedFirstTile();
         }
         this.mouseService.place_drag_drop(x, y, tile);
       } else if (document.getElementById("rack")?.contains(clickedElem) == true && this.gameService.scrabbleGame.value  && oldX && oldY) {
@@ -264,6 +285,9 @@ export class BoardComponent implements OnInit {
             for (let i = 0; i < players.length; i++) {
               if (players[i].id == this.userService.currentUserValue.id) {
                 if (this.gameService.scrabbleGame.value.board[parseInt(oldX)][parseInt(oldY)].tile) {
+                  if (this.moveService.firstX !== -1 && this.moveService.firstY !== -1 && this.gameService.placedTiles === 1) {
+                    this.moveService.removedFirstTile();
+                  }
                   players[i].rack.tiles.push(this.gameService.scrabbleGame.value.board[parseInt(oldX)][parseInt(oldY)].tile as Tile);
                   const newBoard = this.gameService.scrabbleGame.value.board;
                   newBoard[parseInt(oldX)][parseInt(oldY)].tile = undefined;
