@@ -48,6 +48,7 @@ import { Room } from '@app/utils/interfaces/room';
 import { Square } from '@app/utils/interfaces/square';
 import { Tile } from '@app/utils/interfaces/game/tile';
 import { Player } from '@app/utils/interfaces/game/player';
+import { SocialService } from '../social/social.service';
 
 @Injectable({
   providedIn: 'root',
@@ -62,7 +63,8 @@ export class WebSocketService {
     private roomService: RoomService,
     private gameService: GameService,
     private storageService: StorageService,
-    private router: Router
+    private router: Router,
+    private socialService: SocialService
   ) {
     this.user = this.userService.subjectUser;
   }
@@ -289,22 +291,25 @@ export class WebSocketService {
           break;
       }
 
-      case "acceptFriendRequest": {
-          const payloadAcceptFriendRequest =
-            packet.payload as FriendRequestPayload;
-          this.userService.subjectUser.next({
-            ...this.userService.currentUserValue,
-            friends: [
-              ...this.userService.currentUserValue.friends,
-              payloadAcceptFriendRequest.fromId,
-            ],
-          });
-          break;
+      case 'acceptFriendRequest': {
+        const payloadAcceptFriendRequest =
+          packet.payload as FriendRequestPayload;
+        this.userService.subjectUser.next({
+          ...this.userService.currentUserValue,
+          friends: [
+            ...this.userService.currentUserValue.friends,
+            payloadAcceptFriendRequest.fromId,
+          ],
+        });
+        this.socialService.updatedOnlineFriends();
+        break;
       }
 
-      case "declineFriendRequest": {
-          const payloadDeclineFriendRequest = packet.payload as FriendRequestPayload;
-          break;
+      case 'declineFriendRequest': {
+        const payloadDeclineFriendRequest =
+          packet.payload as FriendRequestPayload;
+        this.socialService.updatedOnlineFriends();
+        break;
       }
 
       case "indice": {
@@ -368,6 +373,7 @@ export class WebSocketService {
       case 'listOnlineUsers': {
         const payloadListOnlineUsers = packet.payload as ListUsersPayload;
         this.storageService.listOnlineUsers.next(payloadListOnlineUsers.users);
+        this.socialService.updatedOnlineFriends();
         break;
       }
 

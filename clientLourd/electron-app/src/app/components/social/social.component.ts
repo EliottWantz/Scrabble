@@ -134,7 +134,7 @@ export class SocialComponent implements AfterViewInit, OnInit {
   }
 
   async acceptFriendRequest(id: string): Promise<void> {
-    await this.communicationService.acceptFriendRequest(this.userService.currentUserValue.id, id).then((res) => {
+    this.communicationService.acceptFriendRequest(this.userService.currentUserValue.id, id).then((res) => {
       console.log(res);
       const pendingRequests = this.userService.currentUserValue.pendingRequests;
       const index = pendingRequests.indexOf(id);
@@ -143,6 +143,7 @@ export class SocialComponent implements AfterViewInit, OnInit {
       }
       this.userService.subjectUser.next({...this.userService.currentUserValue, pendingRequests: pendingRequests});
       this.userService.subjectUser.next({...this.userService.currentUserValue, friends: [...this.userService.currentUserValue.friends, id]});
+      this.socialService.updatedOnlineFriends();
     })
     .catch((err) => {
       console.log(err);
@@ -158,7 +159,9 @@ export class SocialComponent implements AfterViewInit, OnInit {
   }
 
   denyFriendRequest(id: string): void {
-    this.communicationService.declineFriendRequest(this.userService.currentUserValue.id, id);
+    this.communicationService.declineFriendRequest(this.userService.currentUserValue.id, id).then((res) => {
+        this.socialService.updatedOnlineFriends(); })
+      .catch((err) => { console.log(err) });
     const pendingRequests = this.userService.currentUserValue.pendingRequests;
     const index = pendingRequests.indexOf(id);
     if (index > -1) {

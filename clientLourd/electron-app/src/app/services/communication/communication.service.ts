@@ -139,9 +139,20 @@ export class CommunicationService {
         return this.http.delete<void>(`${this.baseUrl}/game/accept/${requestorId}/${userId}/${gameId}`);
     }
 
-    public revokeJoinGame(userId: string, gameId: string): Observable<void> {
-        return this.http.patch<void>(`${this.baseUrl}/game/revoke/${userId}/${gameId}`, {});
-    }
+  public revokeJoinGame(userId: string, gameId: string): Observable<void> {
+    return this.http.patch<void>(
+      `${this.baseUrl}/game/revoke/${userId}/${gameId}`,
+      {}
+    );
+  }
+
+  public getOnlineFriends(userId: string): Promise<{ friends: User[] }> {
+    return lastValueFrom(
+      this.http.get<{ friends: User[] }>(
+        `${this.baseUrl}/user/friends/online/${userId}`
+      )
+    );
+  }
 
     private handleError(error: HttpErrorResponse) {
         if (error.status === 0) {
