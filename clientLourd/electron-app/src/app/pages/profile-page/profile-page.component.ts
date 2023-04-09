@@ -39,6 +39,10 @@ export class ProfilePageComponent implements OnInit {
     
   }
 
+  isLoggedIn(): boolean {
+    return this.userService.isLoggedIn;
+  }
+
   getDate(time: number) {
     return new Date(time).toLocaleDateString();
   }

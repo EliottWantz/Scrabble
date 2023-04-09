@@ -98,7 +98,7 @@ export class SocialComponent implements AfterViewInit, OnInit {
       if (i != index) {
         navButtons[i].setAttribute("style", "");
       } else {
-        navButtons[i].setAttribute("style", "background-color: #424260; outline-color: #66678e; outline-width: 1px; outline-style: solid;");
+        navButtons[i].setAttribute("style", "background-color: #424260; outline-color: #66678e; outline-width: 1px; outline-style: solid; max-height: 30px");
       }
     }
     this.listUserDisplay = this.listUsers.value;

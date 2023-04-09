@@ -5,6 +5,7 @@ import {
   ViewChild,
   NgZone,
   ChangeDetectorRef,
+  HostListener,
 } from '@angular/core';
 import * as forms from '@angular/forms';
 import { ChatService } from '@app/services/chat/chat.service';
@@ -45,6 +46,7 @@ export class ChatBoxComponent implements AfterViewInit {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private scrollTimeoutId: any;
   private roomSubscription!: Subscription;
+  opened = false;
 
   constructor(
     private fb: forms.FormBuilder,
@@ -82,18 +84,36 @@ export class ChatBoxComponent implements AfterViewInit {
     });
   }
 
+  @HostListener("document:click", ['$event'])
+  clickout(event: any) {
+    if (event.target.id === "submitBtn")
+      return;
+    const elem = document.elementFromPoint(event.x,event.y);
+    if (!document.getElementById("chatBox")?.contains(elem)) {
+      this.opened = false;
+    }
+  }
+
   async ngAfterViewInit(): Promise<void> {
-    setTimeout(() => {
-      this.chatBoxInput.nativeElement.focus();
-      this.scrollToBottom();
-    });
+    if (this.opened) {
+      setTimeout(() => {
+        this.chatBoxInput.nativeElement.focus();
+        this.scrollToBottom();
+      });
+    }
 
     this.room$.subscribe(() => {
       this.scrollToBottom();
     });
   }
 
-  send(): void {
+  toggleChat() {
+    this.opened = !this.opened;
+        this.scrollToBottom();
+  }
+
+  send(event: Event): void {
+    event.preventDefault();
     //console.log(document.getElementById('selectionElem'));
     if (!this.message || !this.message.replace(/\s/g, '')) return;
 

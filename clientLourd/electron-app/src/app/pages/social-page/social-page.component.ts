@@ -106,6 +106,11 @@ export class SocialPageComponent {
     return "";
   }
 
+  
+  isLoggedIn(): boolean {
+    return this.userService.isLoggedIn;
+  }
+
   selectNavButton(index: number): void {
     this.chatFriend = false;
     this.socialService.activeScreen = this.socialService.screens[index];

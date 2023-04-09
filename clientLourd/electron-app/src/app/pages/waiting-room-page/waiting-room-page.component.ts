@@ -132,4 +132,8 @@ export class WaitRoomPageComponent {
         }
       });
   }
+
+  isLoggedIn(): boolean {
+    return this.userService.isLoggedIn;
+  }
 }
