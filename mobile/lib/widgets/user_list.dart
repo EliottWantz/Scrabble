@@ -1,4 +1,7 @@
+import 'package:client_leger/api/api_repository.dart';
+import 'package:client_leger/models/requests/game_invite_request.dart';
 import 'package:client_leger/models/user.dart';
+import 'package:client_leger/services/game_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -26,6 +29,8 @@ class UserList extends StatelessWidget {
 
   final UserService _userService = Get.find();
   final UsersService _usersService = Get.find();
+  final GameService _gameService = Get.find();
+  final ApiRepository _apiRepository = Get.find();
 
   final RxString _inputSearch;
 
@@ -97,7 +102,7 @@ class UserList extends StatelessWidget {
         ListTile(
           title: Text(username, style: TextStyle(fontSize: 18.0)),
           trailing:
-                _buildTrailingIcon(username),
+            _buildTrailingButton(username),
           onTap: () {
 
           }
@@ -118,17 +123,22 @@ class UserList extends StatelessWidget {
     return filteredUserList;
   }
 
-  Widget _buildTrailingIcon(dynamic username) {
+  Widget _buildTrailingButton(dynamic username) {
     if (_mode == 'gameInvite') {
       return IconButton(
-          onPressed: () async {
-            final res = await _usersService.deleteFriend(username);
-            if (res == true) {
-              _userService.user.value!.friends.remove(username);
-              _userService.friends.remove(username);
-            }
-          },
-          icon: const Icon(Icons.send)
+            onPressed: () async {
+              if (!_gameService.sentGameInvitesUsernames.contains(username)) {
+                GameInviteRequest gameInviteRequest = GameInviteRequest(
+                    invitedId: _usersService.getUserId(username),
+                    inviterId: _userService.user.value!.id,
+                    gameId: _gameService.currentGameId);
+                final res = await _apiRepository.gameInvite(gameInviteRequest);
+                if (res == true) {
+                  _gameService.sentGameInvitesUsernames.add(username);
+                }
+              }
+            },
+            icon: Obx(() => _buildTrailingIcon(username))
       );
     } else if (_mode == 'friendList') {
       return IconButton(
@@ -152,6 +162,14 @@ class UserList extends StatelessWidget {
           },
           icon: const Icon(Icons.close)
       );
+    }
+  }
+
+  Widget _buildTrailingIcon(String username) {
+    if (_gameService.sentGameInvitesUsernames.contains(username)) {
+      return const Icon(Icons.check, color: Colors.green);
+    } else {
+      return const Icon(Icons.send);
     }
   }
 }

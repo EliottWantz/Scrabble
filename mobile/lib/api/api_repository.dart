@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:client_leger/models/avatar.dart';
 import 'package:client_leger/models/requests/accept_friend_request.dart';
 import 'package:client_leger/models/requests/accept_join_game_request.dart';
+import 'package:client_leger/models/requests/game_invite_request.dart';
 import 'package:client_leger/models/requests/login_request.dart';
 import 'package:client_leger/models/requests/register_request.dart';
 import 'package:client_leger/models/response/login_response.dart';
@@ -181,6 +182,14 @@ class ApiRepository {
     if (res.statusCode == 200) {
       return List<User>.from(
           (res.body['friends'] as List).map((user) => User.fromJson(user)));
+    }
+    return null;
+  }
+
+  Future<bool?> gameInvite(GameInviteRequest data) async {
+    final res = await apiProvider.gameInvite('/user/friends/game/invite', data);
+    if (res.statusCode == 200) {
+      return true;
     }
     return null;
   }

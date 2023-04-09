@@ -29,12 +29,16 @@ class GameService extends GetxService {
   //Private game
   final pendingJoinGameRequestUserIds = <String>[].obs;
 
+  final sentGameInvitesUsernames = <String>[].obs;
+
   final currentGame = Rxn<GameUpdatePayload>();
   final currentGameTimer = Rxn<int>();
   late Game? currentGameInfo;
 
   RxList<MoveInfo> indices = <MoveInfo>[].obs;
   bool getIndicesHasBeenCalled = false;
+
+  final RxBool gameInviteSent = false.obs;
 
   Player? getPlayer() {
     for (final player in currentGame.value!.players) {

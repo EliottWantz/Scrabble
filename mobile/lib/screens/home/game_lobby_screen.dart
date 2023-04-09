@@ -46,8 +46,8 @@ class GameLobbyScreen extends StatelessWidget {
             children: [
               FloatingActionButton.extended(
                 heroTag: null,
-                onPressed: () async {
-                  await _buildInviteFriendDialog();
+                onPressed: () {
+                  _buildInviteFriendDialog();
                 },
                 backgroundColor: Color.fromARGB(255, 98, 0, 238),
                 foregroundColor: Colors.white,
@@ -215,26 +215,41 @@ class GameLobbyScreen extends StatelessWidget {
 
   Future _buildInviteFriendDialog() {
     return Get.dialog(
-      Dialog(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Déconnexion',
-                style: Get.textTheme.bodyMedium,
-              ),
-              _buildOnlineFriendsList()
-            ],
+        Dialog(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Déconnexion',
+                  style: Get.textTheme.bodyMedium,
+                ),
+                _buildOnlineFriendsList(),
+                ElevatedButton(
+                  onPressed: () {
+                    if (Get.isDialogOpen!) Get.back();
+                  },
+                  child: const Text('Fermer'),
+                ),
+              ],
+            ),
           ),
-        ),
-      )
+      ),
+      barrierDismissible: false
     );
   }
 
   Widget _buildOnlineFriendsList() {
-    return Expanded(child: UserList(mode: 'gameInvite', inputSearch: ''.obs, items: _usersService.getOnlineFriendUsernames()));
+    return SizedBox(
+      width: 500,
+      height: 500,
+      child: UserList(
+              mode: 'gameInvite',
+              inputSearch: ''.obs,
+              items: _usersService.getOnlineFriendUsernames()
+          )
+    );
   }
 
   // Widget _buildOnlineFriendsList() {

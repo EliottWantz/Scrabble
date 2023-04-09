@@ -1,3 +1,4 @@
+import 'package:client_leger/models/requests/game_invite_request.dart';
 import 'package:client_leger/models/requests/login_request.dart';
 import 'package:client_leger/models/requests/logout_request.dart';
 import 'package:client_leger/models/user.dart';
@@ -62,5 +63,9 @@ class ApiProvider extends BaseProvider {
 
   Future<Response> onlineFriends(String path) {
     return get(path);
+  }
+
+  Future<Response> gameInvite(String path, GameInviteRequest data) {
+    return post(path, data.toJson());
   }
 }
