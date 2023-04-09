@@ -147,6 +147,8 @@ func (c *Client) handlePacket(p *Packet) error {
 		return c.HandleLeaveTournamentAsObservateurRequest(p)
 	case ClientEventFirstSquare:
 		return c.HandleFirstSquareRequest(p)
+	case ClientEventRemoveFirstSquare:
+		return c.HandleRemoveFirstSquareRequest(p)
 	}
 
 	return nil
@@ -208,21 +210,22 @@ func (c *Client) HandleCreateRoomRequest(p *Packet) error {
 	r := c.Manager.AddRoom(dbRoom.ID, dbRoom.Name)
 	userIds := append([]string{c.UserId}, payload.UserIDs...)
 	for _, uID := range userIds {
+		if err := c.Manager.RoomSvc.Repo.AddUser(r.ID, uID); err != nil {
+			slog.Error("add user to room", err)
+		}
+		if err := c.Manager.UserSvc.Repo.AddJoinedRoom(r.ID, uID); err != nil {
+			slog.Error("add user to room", err)
+		}
+
 		client, err := c.Manager.getClientByUserID(uID)
 		if err != nil {
 			slog.Error("failed to get client by user id", err)
-		}
-
-		if err := c.Manager.RoomSvc.Repo.AddUser(r.ID, client.UserId); err != nil {
-			slog.Error("add user to room", err)
-		}
-		if err := c.Manager.UserSvc.Repo.AddJoinedRoom(r.ID, client.UserId); err != nil {
-			slog.Error("add user to room", err)
+			continue
 		}
 		if err := r.AddClient(client.ID); err != nil {
 			slog.Error("add client to ws room", err)
+			continue
 		}
-
 		if err := r.BroadcastJoinRoomPackets(client); err != nil {
 			slog.Error("broadcast join room packets", err)
 		}
@@ -312,21 +315,22 @@ func (c *Client) HandleCreateDMRoomRequest(p *Packet) error {
 	r := c.Manager.AddRoom(dbRoom.ID, roomName)
 	userIds := []string{c.UserId, payload.ToID}
 	for _, uID := range userIds {
+		if err := c.Manager.RoomSvc.Repo.AddUser(r.ID, uID); err != nil {
+			slog.Error("add user to room", err)
+		}
+		if err := c.Manager.UserSvc.Repo.AddJoinedDMRoom(r.ID, uID); err != nil {
+			slog.Error("add user to room", err)
+		}
+
 		client, err := c.Manager.getClientByUserID(uID)
 		if err != nil {
 			slog.Error("failed to get client by user id", err)
-		}
-
-		if err := c.Manager.RoomSvc.Repo.AddUser(r.ID, client.UserId); err != nil {
-			slog.Error("add user to room", err)
-		}
-		if err := c.Manager.UserSvc.Repo.AddJoinedDMRoom(r.ID, client.UserId); err != nil {
-			slog.Error("add user to room", err)
+			continue
 		}
 		if err := r.AddClient(client.ID); err != nil {
 			slog.Error("add client to ws room", err)
+			continue
 		}
-
 		if err := r.BroadcastJoinDMRoomPackets(client); err != nil {
 			slog.Error("broadcast join room packets", err)
 		}
@@ -414,6 +418,10 @@ func (c *Client) HandleJoinGameRequest(p *Packet) error {
 		return err
 	}
 
+	return c.JoinGame(payload)
+}
+
+func (c *Client) JoinGame(payload JoinGamePayload) error {
 	g, err := c.Manager.GameSvc.AddUserToGame(payload.GameID, c.UserId, payload.Password)
 	if err != nil {
 		if err == game.ErrPrivateGame {
@@ -676,10 +684,12 @@ func (c *Client) HandleGamePrivateRequest(p *Packet) error {
 	for _, observateur := range g.ObservateurIDs {
 		client, err := c.Manager.getClientByUserID(observateur)
 		if err != nil {
-			slog.Error("get room", err)
+			slog.Error("get client by userID", err)
+			continue
 		}
 		if err := r.RemoveClient(client.ID); err != nil {
 			slog.Error("remove spectator from game room", err)
+			continue
 		}
 
 	}
@@ -706,9 +716,6 @@ func (c *Client) HandleGamePublicRequest(p *Packet) error {
 	g, err := c.Manager.GameSvc.MakeGamePublic(payload.GameID)
 	if err != nil {
 		return err
-	}
-	if err != nil {
-		slog.Error("get room", err)
 	}
 	gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
 		Game: makeGameUpdatePayload(g),
@@ -911,6 +918,7 @@ func (c *Client) HandleStartTournamentRequest(p *Packet) error {
 			})
 			if err != nil {
 				slog.Error("failed to create Game update packet:", err)
+				return
 			}
 
 			gameRoom.Broadcast(gamePacket)
@@ -995,4 +1003,8 @@ func (c *Client) HandleFirstSquareRequest(p *Packet) error {
 	r.BroadcastSkipSelf(p, c.ID)
 
 	return nil
+}
+
+func (c *Client) HandleRemoveFirstSquareRequest(p *Packet) error {
+	return c.HandleFirstSquareRequest(p)
 }

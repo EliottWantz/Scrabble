@@ -432,9 +432,10 @@ func (m *Manager) InviteFriendToGame(c *fiber.Ctx) error {
 }
 
 type FriendInvitationToGameRequest struct {
-	InviterID string `json:"inviterId"`
-	InvitedID string `json:"invitedId"`
-	GameID    string `json:"gameId"`
+	InviterID    string `json:"inviterId"`
+	InvitedID    string `json:"invitedId"`
+	GameID       string `json:"gameId"`
+	GamePassword string `json:"gamePassword"`
 }
 
 func (m *Manager) AcceptFriendInvitationToGame(c *fiber.Ctx) error {
@@ -459,6 +460,12 @@ func (m *Manager) AcceptFriendInvitationToGame(c *fiber.Ctx) error {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 		inviterClient.send(p)
+	}
+	if err := inviterClient.JoinGame(JoinGamePayload{
+		GameID:   req.GameID,
+		Password: req.GamePassword,
+	}); err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
 
 	return c.SendStatus(fiber.StatusOK)
