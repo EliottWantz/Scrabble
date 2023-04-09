@@ -278,8 +278,9 @@ export class WebSocketService {
       }
 
       case "gameOver": {
-          const payloadGameOver = packet.payload as GameOverPayload;
-          break;
+        const payloadGameOver = packet.payload as GameOverPayload;
+        this.gameService.gameOverPopup(payloadGameOver.winnerId);
+        break;
       }
 
       case "friendRequest": {
@@ -289,8 +290,15 @@ export class WebSocketService {
       }
 
       case "acceptFriendRequest": {
-          const payloadAcceptFriendRequest = packet.payload as FriendRequestPayload;
-          this.userService.subjectUser.next({...this.userService.currentUserValue, friends: [...this.userService.currentUserValue.friends, payloadAcceptFriendRequest.fromId]});
+          const payloadAcceptFriendRequest =
+            packet.payload as FriendRequestPayload;
+          this.userService.subjectUser.next({
+            ...this.userService.currentUserValue,
+            friends: [
+              ...this.userService.currentUserValue.friends,
+              payloadAcceptFriendRequest.fromId,
+            ],
+          });
           break;
       }
 
@@ -354,6 +362,12 @@ export class WebSocketService {
           }
           this.gameService.usersWaiting.next(newUsersWaiting);
         }
+        break;
+      }
+
+      case 'listOnlineUsers': {
+        const payloadListOnlineUsers = packet.payload as ListUsersPayload;
+        this.storageService.listOnlineUsers.next(payloadListOnlineUsers.users);
         break;
       }
 

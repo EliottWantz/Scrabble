@@ -414,6 +414,10 @@ func (c *Client) HandleJoinGameRequest(p *Packet) error {
 		return err
 	}
 
+	return c.JoinGame(payload)
+}
+
+func (c *Client) JoinGame(payload JoinGamePayload) error {
 	g, err := c.Manager.GameSvc.AddUserToGame(payload.GameID, c.UserId, payload.Password)
 	if err != nil {
 		if err == game.ErrPrivateGame {
@@ -438,6 +442,7 @@ func (c *Client) HandleJoinGameRequest(p *Packet) error {
 			if err != nil {
 				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 			}
+			return nil
 
 		} else {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())

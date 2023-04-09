@@ -110,6 +110,9 @@ export class SidebarComponent implements OnInit {
   logout(): void {
     this.router.navigate(['/home']);
     this.authService.logout();
+    setTimeout(()=>{
+      window.location.reload();
+    }, 100);
   }
 
   isInGame(): boolean {
