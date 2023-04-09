@@ -59,6 +59,13 @@ const String ClientEventStartGame = "start-game";
 const String ClientEventPlayMove    = "playMove";
 const String ClientEventIndice = "indice";
 
+const String ClientEventCreateTournament = "create-tournament";
+const String ClientEventJoinTournament = "join-tournament";
+const String ClientEventLeaveTournament = "leave-tournament";
+const String ClientEventStartTournament = "start-tournament";
+const String ClientEventJoinTournamentAsObservateur = "join-tournament-as-observateur";
+const String ClientEventLeaveTournamentAsObservateur = "leave-tournament-as-observateur";
+
 
 // Error payloads
 const String JoinGamePasswordMismatch = "password mismatch";

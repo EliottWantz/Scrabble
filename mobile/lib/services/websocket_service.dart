@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:client_leger/controllers/game_controller.dart';
 import 'package:client_leger/models/chat_message_payload.dart';
 import 'package:client_leger/models/create_room_payload.dart';
+import 'package:client_leger/models/create_tournament_payload.dart';
 import 'package:client_leger/models/events.dart';
 import 'package:client_leger/models/game.dart';
 import 'package:client_leger/models/join_dm_payload.dart';
@@ -14,6 +15,7 @@ import 'package:client_leger/models/requests/accept_friend_request.dart';
 import 'package:client_leger/models/requests/chat_message_request.dart';
 import 'package:client_leger/models/requests/create_dm_room_request.dart';
 import 'package:client_leger/models/requests/create_game_room_request.dart';
+import 'package:client_leger/models/requests/create_tournament_request.dart';
 import 'package:client_leger/models/requests/indice_request.dart';
 import 'package:client_leger/models/requests/join_dm_request.dart';
 import 'package:client_leger/models/requests/join_game_as_observer_request.dart';
@@ -616,6 +618,16 @@ class WebsocketService extends GetxService {
     final createGameRoomRequest = CreateGameRoomRequest(
         event: ClientEventCreateGame, payload: createGameRoomPayload);
     socket.sink.add(createGameRoomRequest.toRawJson());
+  }
+
+  void createTournament({List<String> userIds = const [], bool isPrivate = false}) {
+    final createTournamentPayload = CreateTournamentPayload(
+      isPrivate: isPrivate,
+      withUserIds: userIds
+    );
+    final createTournamentRequest = CreateTournamentRequest(
+      event: ClientEventCreateTournament, payload: createTournamentPayload);
+    socket.sink.add(createTournamentRequest.toRawJson());
   }
 
   // void joinRoom(String roomId) {

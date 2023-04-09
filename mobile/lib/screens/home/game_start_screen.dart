@@ -290,9 +290,13 @@ class GameStartScreen extends StatelessWidget {
                             onPressed: () {
                               DialogHelper.hideLoading();
                               if (_isProtected.value && _passwordFormKey.currentState!.validate()) {
-                                _websocketService.createGameRoom(password: gamePasswordController.text);
+                                gameMode == 'tournoi'
+                                    ? _websocketService.createTournament()
+                                    : _websocketService.createGameRoom(password: gamePasswordController.text);
                               } else {
-                                _websocketService.createGameRoom(isPrivate: _isPrivate);
+                                gameMode == 'tournoi'
+                                    ? _websocketService.createTournament(isPrivate: _isPrivate)
+                                    : _websocketService.createGameRoom(isPrivate: _isPrivate);
                               }
                                 // Get.toNamed(
                                 //     Routes.HOME + Routes.GAME_START + Routes.LOBBY);
