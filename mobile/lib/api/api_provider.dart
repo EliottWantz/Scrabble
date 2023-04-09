@@ -68,4 +68,8 @@ class ApiProvider extends BaseProvider {
   Future<Response> gameInvite(String path, GameInviteRequest data) {
     return post(path, data.toJson());
   }
+
+  Future<Response> acceptGameInvite(String path, GameInviteRequest data) {
+    return post(path, data.toJson());
+  }
 }

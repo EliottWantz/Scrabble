@@ -1,5 +1,8 @@
+import 'package:client_leger/api/api_repository.dart';
+import 'package:client_leger/models/requests/game_invite_request.dart';
 import 'package:client_leger/routes/app_routes.dart';
 import 'package:client_leger/services/game_service.dart';
+import 'package:client_leger/services/user_service.dart';
 import 'package:client_leger/services/users_service.dart';
 import 'package:client_leger/services/websocket_service.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +13,8 @@ class DialogHelper {
   final WebsocketService _websocketService = Get.find();
   final GameService _gameService = Get.find();
   final UsersService _usersService = Get.find();
+  final ApiRepository _apiRepository = Get.find();
+  final UserService _userService = Get.find();
 
   static void showErrorDialog(
       {String title = 'Error', String? description = 'Something went wrong'}) {
@@ -296,8 +301,12 @@ class DialogHelper {
               Row(
                 children: [
                   ElevatedButton(
-                    onPressed: () {
-
+                    onPressed: () async {
+                      GameInviteRequest gameInviteAccepted = GameInviteRequest(
+                          invitedId: DialogHelper()._userService.user.value!.id,
+                          inviterId: userId,
+                          gameId: DialogHelper()._gameService.currentGameId);
+                      DialogHelper()._apiRepository.acceptGameInvite(gameInviteAccepted);
                       DialogHelper.hideLoading();
                     },
                     child: const Text('Accepter'),

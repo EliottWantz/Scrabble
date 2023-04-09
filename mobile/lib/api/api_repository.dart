@@ -193,4 +193,12 @@ class ApiRepository {
     }
     return null;
   }
+
+  Future<bool?> acceptGameInvite(GameInviteRequest data) async {
+    final res = await apiProvider.acceptGameInvite('/user/friends/game/accept-invite', data);
+    if (res.statusCode == 200) {
+      return true;
+    }
+    return null;
+  }
 }

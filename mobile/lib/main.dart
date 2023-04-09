@@ -8,6 +8,7 @@ import 'package:client_leger/routes/app_routes.dart';
 import 'package:client_leger/services/auth_service.dart';
 import 'package:client_leger/services/avatar_service.dart';
 import 'package:client_leger/services/game_service.dart';
+import 'package:client_leger/services/notification_service.dart';
 import 'package:client_leger/services/room_service.dart';
 import 'package:client_leger/services/settings_service.dart';
 import 'package:client_leger/services/storage_service.dart';
@@ -58,6 +59,7 @@ class MyApp extends StatelessWidget {
 
 Future<void> initGlobalServices() async {
   await Get.putAsync(() => StorageService().init());
+  Get.put(NotificationService());
   Get.put(UserService());
   Get.put(ApiProvider(), permanent: true);
   Get.put(ApiRepository(apiProvider: Get.find()), permanent: true);
