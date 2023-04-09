@@ -135,6 +135,7 @@ type FirstSquarePayload struct {
 	GameID      string            `json:"gameId"`
 	Coordinates scrabble.Position `json:"coordinates"`
 }
+type RemoveFirstSquarePayload = FirstSquarePayload
 
 // Server events payloads
 type JoinedRoomPayload struct {
