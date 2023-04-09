@@ -34,7 +34,8 @@ var (
 	ClientEventJoinTournamentAsObservateur  = "join-tournament-as-observateur"
 	ClientEventLeaveTournamentAsObservateur = "leave-tournament-as-observateur"
 
-	ClientEventFirstSquare = "first-square"
+	ClientEventFirstSquare       = "first-square"
+	ClientEventRemoveFirstSquare = "remove-first-square"
 )
 
 // Server events
