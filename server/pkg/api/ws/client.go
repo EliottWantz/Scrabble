@@ -147,6 +147,8 @@ func (c *Client) handlePacket(p *Packet) error {
 		return c.HandleLeaveTournamentAsObservateurRequest(p)
 	case ClientEventFirstSquare:
 		return c.HandleFirstSquareRequest(p)
+	case ClientEventRemoveFirstSquare:
+		return c.HandleRemoveFirstSquareRequest(p)
 	}
 
 	return nil
@@ -999,4 +1001,8 @@ func (c *Client) HandleFirstSquareRequest(p *Packet) error {
 	r.BroadcastSkipSelf(p, c.ID)
 
 	return nil
+}
+
+func (c *Client) HandleRemoveFirstSquareRequest(p *Packet) error {
+	return c.HandleFirstSquareRequest(p)
 }
