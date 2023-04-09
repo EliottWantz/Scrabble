@@ -317,6 +317,7 @@ func (c *Client) HandleCreateDMRoomRequest(p *Packet) error {
 		client, err := c.Manager.getClientByUserID(uID)
 		if err != nil {
 			slog.Error("failed to get client by user id", err)
+			continue
 		}
 
 		if err := c.Manager.RoomSvc.Repo.AddUser(r.ID, client.UserId); err != nil {
