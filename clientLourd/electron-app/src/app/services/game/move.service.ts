@@ -12,17 +12,31 @@ import { GameService } from "@app/services/game/game.service";
 })
 export class MoveService {
     game!: BehaviorSubject<ScrabbleGame | undefined>;
+    firstX = -1;
+    firstY = -1;
     constructor(private webSocketService: WebSocketService, private gameService: GameService) {
         this.game = this.gameService.scrabbleGame;
     }
 
-    placedFirstTile(row: number, col: number): void {
+    placedFirstTile(): void {
         if (this.gameService.scrabbleGame.value) {
             const move: FirstMovePayload = {
                 gameId: this.gameService.scrabbleGame.value?.id,
-                coordinates: {row: row, col: col}
+                coordinates: {row: this.firstY, col: this.firstX}
             };
             this.webSocketService.send("first-square", move);
+        }
+    }
+
+    removedFirstTile(): void {
+        if (this.gameService.scrabbleGame.value) {
+            const move: FirstMovePayload = {
+                gameId: this.gameService.scrabbleGame.value?.id,
+                coordinates: {row: this.firstY, col: this.firstX}
+            };
+            this.webSocketService.send("remove-first-square", move);
+            this.firstX = -1;
+            this.firstY = -1;
         }
     }
 
