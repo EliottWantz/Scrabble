@@ -467,6 +467,24 @@ export class WebSocketService {
         break;
       }
 
+      case "remove-first-square": {
+        const payload = packet.payload as FirstMovePayload;
+        if (
+          this.gameService.scrabbleGame.value &&
+          this.gameService.scrabbleGame.value.id === payload.gameId
+        ) {
+          const newBoard = this.gameService.scrabbleGame.value.board;
+          newBoard[payload.coordinates.row][payload.coordinates.col].tile = {
+            disabled: false,
+          } as Tile;
+          this.gameService.scrabbleGame.next({
+            ...this.gameService.scrabbleGame.value,
+            board: newBoard,
+          });
+        }
+        break;
+      }
+
       case 'error': {
         console.log('yellow');
         console.log(packet);
