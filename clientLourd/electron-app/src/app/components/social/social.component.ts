@@ -23,11 +23,10 @@ export class SocialComponent implements AfterViewInit, OnInit {
   listFriends: User[];
   listFriendsDisplay: User[];
   listFriendsOnline: User[];
-  listFriendsOnlineDisplay: User[];
   usernameInput: any;
 
   constructor(private userService: UserService, private websocketService: WebSocketService, private communicationService: CommunicationService,
-      private storageService: StorageService, private socialService: SocialService, private roomService: RoomService) {
+      private storageService: StorageService, public socialService: SocialService, private roomService: RoomService) {
     this.user = this.userService.subjectUser;
     //this.listUsers = this.storageService.listUsers;
     this.listUsers = new BehaviorSubject<User[]>([]);
@@ -35,16 +34,7 @@ export class SocialComponent implements AfterViewInit, OnInit {
     this.listFriendsDisplay = [];
     this.listFriends = [];
     this.listFriendsOnline = [];
-    this.listFriendsOnlineDisplay = [];
     
-
-    /*for (let i = 0; i < navButtons.length; i++) {
-      if (i != index) {
-        navButtons[i].setAttribute("style", "");
-      } else {
-        navButtons[i].setAttribute("style", "background-color: #424260; outline-color: #66678e; outline-width: 1px; outline-style: solid;");
-      }
-    }*/
   }
 
   ngOnInit(): void {
@@ -66,14 +56,6 @@ export class SocialComponent implements AfterViewInit, OnInit {
       this.listFriends = friendsWithoutSelf;
     });
 
-    this.storageService.listOnlineUsers.subscribe((users) => {
-      for (const user of users) {
-        if (user.id != this.user.value.id && this.user.value.friends.includes(user.id)) {
-          this.listFriendsOnline.push(user);
-          this.listFriendsOnlineDisplay.push(user);
-        }
-      }
-    });
   }
 
   ngAfterViewInit(): void {
@@ -134,7 +116,7 @@ export class SocialComponent implements AfterViewInit, OnInit {
   }
 
   async acceptFriendRequest(id: string): Promise<void> {
-    this.communicationService.acceptFriendRequest(this.userService.currentUserValue.id, id).then((res) => {
+    this.communicationService.acceptFriendRequest(this.userService.currentUserValue.id, id).then(async (res) => {
       console.log(res);
       const pendingRequests = this.userService.currentUserValue.pendingRequests;
       const index = pendingRequests.indexOf(id);
@@ -143,11 +125,12 @@ export class SocialComponent implements AfterViewInit, OnInit {
       }
       this.userService.subjectUser.next({...this.userService.currentUserValue, pendingRequests: pendingRequests});
       this.userService.subjectUser.next({...this.userService.currentUserValue, friends: [...this.userService.currentUserValue.friends, id]});
-      this.socialService.updatedOnlineFriends();
     })
     .catch((err) => {
       console.log(err);
     });
+
+    this.socialService.updatedOnlineFriends().catch((err) => { console.log("updateOnlineFriendErrir",err) });
 
     const pendingRequests = this.userService.currentUserValue.pendingRequests;
       const index = pendingRequests.indexOf(id);
@@ -159,8 +142,8 @@ export class SocialComponent implements AfterViewInit, OnInit {
   }
 
   denyFriendRequest(id: string): void {
-    this.communicationService.declineFriendRequest(this.userService.currentUserValue.id, id).then((res) => {
-        this.socialService.updatedOnlineFriends(); })
+    this.communicationService.declineFriendRequest(this.userService.currentUserValue.id, id).then(async(res) => {
+        await this.socialService.updatedOnlineFriends(); })
       .catch((err) => { console.log(err) });
     const pendingRequests = this.userService.currentUserValue.pendingRequests;
     const index = pendingRequests.indexOf(id);
