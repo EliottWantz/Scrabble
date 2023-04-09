@@ -14,4 +14,5 @@ export type ClientEvent = ""
 | "start-game"
 | "playMove"
 | "indice"
-| "first-square";
+| "first-square"
+| "remove-first-square";
