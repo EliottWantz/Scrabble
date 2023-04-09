@@ -7,6 +7,7 @@ import { Tile } from "@app/utils/interfaces/game/tile";
 import {CdkDragDrop} from '@angular/cdk/drag-drop';
 import { MouseService } from "@app/services/mouse/mouse.service";
 import { Player } from "@app/utils/interfaces/game/player";
+import { MoveService } from "@app/services/game/move.service";
 
 @Component({
     selector: "app-rack",
@@ -16,7 +17,7 @@ import { Player } from "@app/utils/interfaces/game/player";
 export class RackComponent implements OnInit {
     game!: BehaviorSubject<ScrabbleGame | undefined>;
     rack: Tile[] = [];
-    constructor(private gameService: GameService, private userService: UserService, private mouseService:MouseService) {
+    constructor(private gameService: GameService, private userService: UserService, private mouseService:MouseService, private moveService: MoveService) {
         this.game = this.gameService.scrabbleGame;
         const currentRack = this.getPlayerRack();
         if (currentRack)    
@@ -67,6 +68,9 @@ export class RackComponent implements OnInit {
             const y = Number(clickedElem?.getAttribute("data-y"));
             if (this.gameService.scrabbleGame.value?.board[x][y].tile?.letter) {
                 return;
+            }
+            if (this.gameService.placedTiles === 0) {
+                this.moveService.placedFirstTile(x, y);
             }
             const elem = event.item.element.nativeElement;
             const tile : Tile = {letter: Number(elem.getAttribute("data-letter")), value: Number(elem.getAttribute("data-value"))};

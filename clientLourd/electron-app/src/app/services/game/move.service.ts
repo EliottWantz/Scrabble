@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { Game, ScrabbleGame } from "@app/utils/interfaces/game/game";
 import { BehaviorSubject } from "rxjs";
 import { WebSocketService } from "@app/services/web-socket/web-socket.service";
-import { PlayMovePayload } from "@app/utils/interfaces/packet";
+import { FirstMovePayload, PlayMovePayload } from "@app/utils/interfaces/packet";
 import { Tile } from "@app/utils/interfaces/game/tile";
 import { Cover, MoveInfo } from "@app/utils/interfaces/game/move";
 import { GameService } from "@app/services/game/game.service";
@@ -14,6 +14,16 @@ export class MoveService {
     game!: BehaviorSubject<ScrabbleGame | undefined>;
     constructor(private webSocketService: WebSocketService, private gameService: GameService) {
         this.game = this.gameService.scrabbleGame;
+    }
+
+    placedFirstTile(row: number, col: number): void {
+        if (this.gameService.scrabbleGame.value) {
+            const move: FirstMovePayload = {
+                gameId: this.gameService.scrabbleGame.value?.id,
+                coordinates: {row: row, col: col}
+            };
+            this.webSocketService.send("first-square", move);
+        }
     }
 
     playTiles(): void {

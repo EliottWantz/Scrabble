@@ -76,6 +76,9 @@ export class BoardComponent implements OnInit {
         }
       }
       setTimeout(() => {
+        if (this.gameService.placedTiles === 0) {
+          this.moveService.placedFirstTile(row, col);
+        }
         let clicked = this.elements.toArray()[row * 15 + col].element.nativeElement;
         while (clicked && clicked?.tagName !== "MAT-GRID-TILE") {
           clicked = clicked.parentElement;
@@ -250,8 +253,11 @@ export class BoardComponent implements OnInit {
           newBoard[parseInt(oldX)][parseInt(oldY)].tile = undefined;
           this.gameService.placedTiles--;
         }
+        if (this.gameService.placedTiles === 0) {
+          this.moveService.placedFirstTile(x, y);
+        }
         this.mouseService.place_drag_drop(x, y, tile);
-        } else if (document.getElementById("rack")?.contains(clickedElem) == true && this.gameService.scrabbleGame.value  && oldX && oldY) {
+      } else if (document.getElementById("rack")?.contains(clickedElem) == true && this.gameService.scrabbleGame.value  && oldX && oldY) {
           console.log("rack");
           if (this.gameService.scrabbleGame.value) {
             const players: Player[] = this.gameService.scrabbleGame.value.players;
