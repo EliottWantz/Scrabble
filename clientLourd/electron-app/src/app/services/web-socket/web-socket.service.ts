@@ -8,6 +8,7 @@ import { environment } from 'src/environments/environment';
 import {
   ClientPayload,
   ErrorPayload,
+  FirstMovePayload,
   FriendRequestPayload,
   GameOverPayload,
   GameUpdatePayload,
@@ -360,6 +361,17 @@ export class WebSocketService {
         const payload = packet.payload as JoinedGameAsObserverPayload;
         this.gameService.game.next(payload.game);
         this.gameService.scrabbleGame.next(payload.gameUpdate);
+        break;
+      }
+
+      case "first-square": {
+        const payload = packet.payload as FirstMovePayload;
+        if (this.gameService.scrabbleGame.value && this.gameService.scrabbleGame.value.id === payload.gameId) {
+          const newBoard = this.gameService.scrabbleGame.value.board;
+          newBoard[payload.coordinates.row][payload.coordinates.col].tile = {disabled: false, letter: 128, value: -1} as Tile;
+          console.log(newBoard[payload.coordinates.row][payload.coordinates.col]);
+          this.gameService.scrabbleGame.next({...this.gameService.scrabbleGame.value, board: newBoard});
+        }
         break;
       }
 

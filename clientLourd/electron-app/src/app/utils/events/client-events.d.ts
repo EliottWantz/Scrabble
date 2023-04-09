@@ -13,4 +13,5 @@ export type ClientEvent = ""
 | "replace-bot-by-observer"
 | "start-game"
 | "playMove"
-| "indice";
+| "indice"
+| "first-square";

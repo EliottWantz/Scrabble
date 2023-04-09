@@ -6,3 +6,8 @@ export interface MoveInfo {
 }
 
 export type Cover = Record<string, string>;
+
+export interface Position {
+    row: number;
+    col: number;
+}
