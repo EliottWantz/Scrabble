@@ -48,12 +48,12 @@ class FriendsController extends GetxController {
       // UserList(items: filterUsersListBy(searchInput.value, userService.friends.value)),
       Column(children: [
         SearchBar(searchInput),
-        Expanded(child: Obx(() => UserList(inputSearch: searchInput, items: userService.friends.value)))
+        Expanded(child: Obx(() => UserList(mode: 'friendList', inputSearch: searchInput, items: userService.friends.value)))
         // Expanded(child: UserList(inputSearch: searchInput, items: usersService.users.value))
       ]),
       Column(children: [
         SearchBar(searchInput),
-        Expanded(child: UserList(inputSearch: searchInput, items: items2))
+        Expanded(child: UserList(mode: 'friendList', inputSearch: searchInput, items: items2))
       ]),
       // UserList(items: userService.friends.value),
       // UserList(items: items2),

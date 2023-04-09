@@ -59,4 +59,8 @@ class ApiProvider extends BaseProvider {
   Future<Response> revokeJoinGameRequest(String path) {
     return patch(path, {});
   }
+
+  Future<Response> onlineFriends(String path) {
+    return get(path);
+  }
 }

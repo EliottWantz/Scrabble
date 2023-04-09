@@ -16,9 +16,11 @@ import '../services/users_service.dart';
 class UserList extends StatelessWidget {
   UserList({
     Key? key,
+    required String mode,
     required RxString inputSearch,
     required List<dynamic> items,
-  }) : _inputSearch = inputSearch,
+  }) : _mode = mode,
+        _inputSearch = inputSearch,
         _items = items,
         super(key: key);
 
@@ -26,6 +28,8 @@ class UserList extends StatelessWidget {
   final UsersService _usersService = Get.find();
 
   final RxString _inputSearch;
+
+  final String _mode;
 
   final List<dynamic> _items; // = [
   //   'Friend1',
@@ -93,16 +97,7 @@ class UserList extends StatelessWidget {
         ListTile(
           title: Text(username, style: TextStyle(fontSize: 18.0)),
           trailing:
-                IconButton(
-                    onPressed: () async {
-                      final res = await _usersService.deleteFriend(username);
-                      if (res == true) {
-                        _userService.user.value!.friends.remove(username);
-                        _userService.friends.remove(username);
-                      }
-                    },
-                    icon: const Icon(Icons.close)
-                ),
+                _buildTrailingIcon(username),
           onTap: () {
 
           }
@@ -121,5 +116,42 @@ class UserList extends StatelessWidget {
       }
     }
     return filteredUserList;
+  }
+
+  Widget _buildTrailingIcon(dynamic username) {
+    if (_mode == 'gameInvite') {
+      return IconButton(
+          onPressed: () async {
+            final res = await _usersService.deleteFriend(username);
+            if (res == true) {
+              _userService.user.value!.friends.remove(username);
+              _userService.friends.remove(username);
+            }
+          },
+          icon: const Icon(Icons.send)
+      );
+    } else if (_mode == 'friendList') {
+      return IconButton(
+          onPressed: () async {
+            final res = await _usersService.deleteFriend(username);
+            if (res == true) {
+              _userService.user.value!.friends.remove(username);
+              _userService.friends.remove(username);
+            }
+          },
+          icon: const Icon(Icons.close)
+      );
+    } else {
+      return IconButton(
+          onPressed: () async {
+            final res = await _usersService.deleteFriend(username);
+            if (res == true) {
+              _userService.user.value!.friends.remove(username);
+              _userService.friends.remove(username);
+            }
+          },
+          icon: const Icon(Icons.close)
+      );
+    }
   }
 }

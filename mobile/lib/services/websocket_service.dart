@@ -118,6 +118,13 @@ class WebsocketService extends GetxService {
           handleEventListUsers(listUsersResponse);
         }
         break;
+      case ServerEventListOnlineUsers:
+        {
+          ListUsersResponse listUsersResponse =
+            ListUsersResponse.fromRawJson(data);
+          handleEventListOnlineUsers(listUsersResponse);
+        }
+        break;
       case ServerEventNewUser:
         {
           NewUserResponse newUserResponse = NewUserResponse.fromRawJson(data);
@@ -314,6 +321,11 @@ class WebsocketService extends GetxService {
 
   void handleEventListUsers(ListUsersResponse listUsersResponse) {
     usersService.users.addAll(listUsersResponse.payload.users);
+  }
+
+  void handleEventListOnlineUsers(ListUsersResponse listUsersResponse) {
+    usersService.onlineUsers.value.clear();
+    usersService.onlineUsers.addAll(listUsersResponse.payload.users);
   }
 
   void handleEventNewUser(NewUserResponse newUserResponse) {

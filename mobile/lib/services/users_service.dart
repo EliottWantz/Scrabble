@@ -2,6 +2,7 @@ import 'package:client_leger/models/requests/accept_friend_request.dart';
 import 'package:client_leger/models/user.dart';
 import 'package:client_leger/services/user_service.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 
 import '../api/api_repository.dart';
 import '../models/requests/delete_friend_request.dart';
@@ -9,6 +10,7 @@ import '../models/requests/send_friend_request.dart';
 
 class UsersService extends GetxService {
   final users = <User>[].obs;
+  final onlineUsers = <User>[].obs;
 
   final ApiRepository apiRepository = Get.find();
   final UserService userService = Get.find();
@@ -38,6 +40,41 @@ class UsersService extends GetxService {
       }
     }
     return '';
+  }
+
+  List<String> getOnlineFriendUsernames() {
+    List<String> onlineFriendUsernames = [];
+    List<String> onlineUserUsernames = getOnlineUserUsernames();
+    for (final friendUsername in userService.friends.value) {
+      if (onlineUserUsernames.contains(friendUsername)) {
+        onlineFriendUsernames.add(friendUsername);
+      }
+    }
+    return onlineFriendUsernames;
+  }
+
+  List<String> getOnlineUserUsernames() {
+    List<String> onlineUserUsernames = [];
+    for (User user in onlineUsers.value) {
+      onlineUserUsernames.add(user.username);
+    }
+    return onlineUserUsernames;
+  }
+
+  List<String> getOnlineUserIds() {
+    List<String> onlineUserIds = [];
+    for (User user in onlineUsers.value) {
+      onlineUserIds.add(user.id);
+    }
+    return onlineUserIds;
+  }
+
+  List<String> getUserIdsFromUserList(List<User> users) {
+    List<String> userIds = [];
+    for (User user in users) {
+      userIds.add(user.id);
+    }
+    return userIds;
   }
 
   Future<void> sendFriendRequest(String friendUsername) async {

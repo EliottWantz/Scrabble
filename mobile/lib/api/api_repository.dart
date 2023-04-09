@@ -175,4 +175,13 @@ class ApiRepository {
     }
     return null;
   }
+
+  Future<List<User>?> onlineFriends() async {
+    final res = await apiProvider.onlineFriends('/user/friends/online/${userService.user.value!.id}');
+    if (res.statusCode == 200) {
+      return List<User>.from(
+          (res.body['friends'] as List).map((user) => User.fromJson(user)));
+    }
+    return null;
+  }
 }

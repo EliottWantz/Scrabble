@@ -1,3 +1,5 @@
+import 'package:client_leger/api/api_repository.dart';
+import 'package:client_leger/models/user.dart';
 import 'package:client_leger/screens/floating_chat_screen.dart';
 import 'package:client_leger/services/room_service.dart';
 import 'package:client_leger/services/settings_service.dart';
@@ -6,6 +8,7 @@ import 'package:client_leger/services/users_service.dart';
 import 'package:client_leger/services/websocket_service.dart';
 import 'package:client_leger/utils/dialog_helper.dart';
 import 'package:client_leger/widgets/app_sidebar.dart';
+import 'package:client_leger/widgets/user_list.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
@@ -26,6 +29,7 @@ class GameLobbyScreen extends StatelessWidget {
   final RoomService _roomService = Get.find();
   final UserService _userService = Get.find();
   final UsersService _usersService = Get.find();
+  final ApiRepository _apiRepository = Get.find();
 
   RxBool selectedChatRoom = false.obs;
   final SettingsService _settingsService = Get.find();
@@ -36,17 +40,42 @@ class GameLobbyScreen extends StatelessWidget {
         builder: (BuildContext context) => Scaffold(
           resizeToAvoidBottomInset: true,
           drawerScrimColor: Colors.transparent,
-          floatingActionButton: FloatingActionButton(
-            onPressed: () {
-              _scaffoldKey.currentState?.openEndDrawer();
-            },
-            backgroundColor: Color.fromARGB(255,98,0,238),
-            foregroundColor: Colors.white,
-            autofocus: true,
-            focusElevation: 5,
-            child: const Icon(
-              Icons.question_answer_rounded,
-            ),
+          floatingActionButton: Wrap(
+            // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            spacing: 800,
+            children: [
+              FloatingActionButton.extended(
+                heroTag: null,
+                onPressed: () async {
+                  await _buildInviteFriendDialog();
+                },
+                backgroundColor: Color.fromARGB(255, 98, 0, 238),
+                foregroundColor: Colors.white,
+                autofocus: true,
+                focusElevation: 5,
+                label: Row(
+                    children: const [
+                      Icon(
+                        Icons.people_alt,
+                      ),
+                      Text("Inviter un ami")
+                    ]
+                ),
+              ),
+              FloatingActionButton(
+                heroTag: null,
+                onPressed: () {
+                  _scaffoldKey.currentState?.openEndDrawer();
+                },
+                backgroundColor: Color.fromARGB(255,98,0,238),
+                foregroundColor: Colors.white,
+                autofocus: true,
+                focusElevation: 5,
+                child: const Icon(
+                  Icons.question_answer_rounded,
+                ),
+              ),
+            ]
           ),
           key: _scaffoldKey,
           endDrawer: Drawer(child: Obx(() => _buildChatRoomsList())),
@@ -80,7 +109,7 @@ class GameLobbyScreen extends StatelessWidget {
                   const Gap(20),
                   Obx(() => _buildStartButton(context)),
                   Gap(Get.height / 5),
-                  Obx(() => _buildPendingJoinGameRequests()),
+                  _buildPendingJoinGameRequests(),
                   Gap(200),
                   Obx(() => Text('${_gameService.currentGameRoomUserIds.value!.length}/4 joueurs présents',
                       style: Theme.of(context).textTheme.headline6)),
@@ -119,13 +148,14 @@ class GameLobbyScreen extends StatelessWidget {
       return const CircularProgressIndicator();
     }
     else {
-      return Expanded(
-        child: ListView.builder(
-            itemCount: _gameService.pendingJoinGameRequestUserIds.value!.length,
-            itemBuilder: (context, item) {
-              final index = item;
-              return _buildPendingRequest(_gameService.pendingJoinGameRequestUserIds.value![index]);
-            }
+      return Obx(() => Expanded(
+          child: ListView.builder(
+              itemCount: _gameService.pendingJoinGameRequestUserIds.value!.length,
+              itemBuilder: (context, item) {
+                final index = item;
+                return _buildPendingRequest(_gameService.pendingJoinGameRequestUserIds.value![index]);
+              }
+          ),
         ),
       );
     }
@@ -182,6 +212,55 @@ class GameLobbyScreen extends StatelessWidget {
       ],
     );
   }
+
+  Future _buildInviteFriendDialog() {
+    return Get.dialog(
+      Dialog(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Déconnexion',
+                style: Get.textTheme.bodyMedium,
+              ),
+              _buildOnlineFriendsList()
+            ],
+          ),
+        ),
+      )
+    );
+  }
+
+  Widget _buildOnlineFriendsList() {
+    return Expanded(child: UserList(mode: 'gameInvite', inputSearch: ''.obs, items: _usersService.getOnlineFriendUsernames()));
+  }
+
+  // Widget _buildOnlineFriendsList() {
+  //   return FutureBuilder(
+  //     future: _apiRepository.onlineFriends(),
+  //     builder: (BuildContext context, AsyncSnapshot<List<User>?> snapshot) {
+  //       if (snapshot.connectionState == ConnectionState.none
+  //         || snapshot.connectionState == ConnectionState.waiting
+  //         || snapshot.hasData == null) {
+  //         return Center(
+  //           child: Column(
+  //             mainAxisSize: MainAxisSize.min,
+  //             children: const [
+  //               CircularProgressIndicator(),
+  //               Gap(8),
+  //               Text('Collecte des données'),
+  //             ],
+  //           ),
+  //         );
+  //       }
+  //       return Expanded(
+  //           child: UserList(inputSearch: ''.obs, items: _usersService.getUserIdsFromUserList(snapshot.data!))
+  //       );
+  //     }
+  //   );
+  // }
 
   Widget _buildChatRoomsList() {
     if (!selectedChatRoom.value) {

@@ -56,17 +56,17 @@ class GameStartScreen extends StatelessWidget {
               resizeToAvoidBottomInset: true,
               drawerScrimColor: Colors.transparent,
               floatingActionButton: FloatingActionButton(
-                onPressed: () {
-                  _scaffoldKey.currentState?.openEndDrawer();
-                },
-                backgroundColor: Color.fromARGB(255, 98, 0, 238),
-                foregroundColor: Colors.white,
-                autofocus: true,
-                focusElevation: 5,
-                child: const Icon(
-                  Icons.question_answer_rounded,
-                ),
-              ),
+                    onPressed: () {
+                      _scaffoldKey.currentState?.openEndDrawer();
+                    },
+                    backgroundColor: Color.fromARGB(255, 98, 0, 238),
+                    foregroundColor: Colors.white,
+                    autofocus: true,
+                    focusElevation: 5,
+                    child: const Icon(
+                      Icons.question_answer_rounded,
+                    ),
+                  ),
               key: _scaffoldKey,
               endDrawer: Drawer(child: Obx(() => _buildChatRoomsList())),
               body: Row(

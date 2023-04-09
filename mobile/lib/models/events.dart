@@ -7,6 +7,7 @@ const String ServerEventLeftDMRoom = "leftDMRoom";
 const String ServerEventUserJoinedDMRoom = "userJoinedDMRoom";
 const String ServerEventUserLeftDMRoom = "userLeftDMRoom";
 const String ServerEventListUsers    = "listUsers";
+const String ServerEventListOnlineUsers = "listOnlineUsers";
 const String ServerEventNewUser = "newUser";
 const String ServerEventUsersInRoom  = "usersInRoom";
 const String ServerEventChatMessage = "chat-message";
