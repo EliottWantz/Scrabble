@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:client_leger/screens/floating_chat_screen.dart';
 import 'package:client_leger/services/room_service.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:client_leger/api/api_repository.dart';
 import 'package:client_leger/models/avatar.dart';
@@ -35,7 +36,7 @@ class ProfileScreen extends StatelessWidget {
         onPressed: () {
           _scaffoldKey.currentState?.openEndDrawer();
         },
-        backgroundColor: Color.fromARGB(255,98,0,238),
+        backgroundColor: const Color.fromARGB(255, 98, 0, 238),
         foregroundColor: Colors.white,
         autofocus: true,
         focusElevation: 5,
@@ -94,79 +95,95 @@ class ProfileScreen extends StatelessWidget {
                 return Text('Error: ${snapshot.error}');
               } else {
                 final user = snapshot.data!;
-                return Column(
-                  children: [
-                    const Gap(20),
-                    Obx(() => CircleAvatar(
-                          maxRadius: 100,
-                          backgroundColor: Colors.transparent,
-                          backgroundImage:
-                              NetworkImage(userService.user.value!.avatar.url),
-                        )),
-                    const Gap(20),
-                    Center(
-                      child: Text(
-                        userService.user.value!.username,
-                        style: Get.context!.textTheme.headline6,
+                return SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      const Gap(20),
+                      Obx(() => CircleAvatar(
+                            maxRadius: 100,
+                            backgroundColor: Colors.transparent,
+                            backgroundImage: NetworkImage(
+                                userService.user.value!.avatar.url),
+                          )),
+                      const Gap(20),
+                      Obx(() => Center(
+                            child: Text(
+                              userService.user.value!.username,
+                              style: Get.context!.textTheme.headline6,
+                            ),
+                          )),
+                      const Gap(10),
+                      Center(
+                        child: Text(
+                          userService.user.value!.email,
+                          style: Get.context!.textTheme.headline5,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Center(
-                      child: Text(
-                        userService.user.value!.email,
-                        style: Get.context!.textTheme.headline5,
+                      const Gap(50),
+                      Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.format_list_numbered),
+                              const Gap(5),
+                              Text(
+                                'Nombre de parties jouées : ${user.summary.userStats?.nbGamesPlayed ?? '--'}',
+                                style: Get.context!.textTheme.button,
+                              )
+                            ],
+                          ),
+                          const Gap(20),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.check_circle_sharp),
+                              const Gap(5),
+                              Text(
+                                  'Nombre de parties gagnées : ${user.summary.userStats?.nbGamesWon ?? '--'}',
+                                  style: Get.context!.textTheme.button)
+                            ],
+                          ),
+                          const Gap(20),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.scoreboard_sharp),
+                              const Gap(5),
+                              Text(
+                                  'Moyenne de points par partie : ${user.summary.userStats?.averagePointsPerGame ?? '--'}',
+                                  style: Get.context!.textTheme.button)
+                            ],
+                          ),
+                          const Gap(20),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.timelapse),
+                              const Gap(5),
+                              Text(
+                                  'Moyenne de temps de jeu : ${user.summary.userStats!.averageTimePlayed != null ? user.summary.userStats!.averageTimePlayed! ~/ pow(10, 5) : '0'} min',
+                                  style: Get.context!.textTheme.button)
+                            ],
+                          )
+                        ],
                       ),
-                    ),
-                    const Gap(50),
-                    Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.format_list_numbered),
-                            const Gap(5),
-                            Text(
-                              'Nombre de parties jouées : ${user.summary.userStats?.nbGamesPlayed ?? '--'}',
-                              style: Get.context!.textTheme.button,
-                            )
-                          ],
+                      const Gap(100),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          Get.toNamed(Routes.HOME + Routes.PROFILE_EDIT);
+                        },
+                        icon: const Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Icon(
+                            MdiIcons.accountWrench,
+                            size: 40,
+                          ),
                         ),
-                        const Gap(20),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.check_circle_sharp),
-                            const Gap(5),
-                            Text(
-                                'Nombre de parties gagnées : ${user.summary.userStats?.nbGamesWon ?? '--'}',
-                                style: Get.context!.textTheme.button)
-                          ],
-                        ),
-                        const Gap(20),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.scoreboard_sharp),
-                            const Gap(5),
-                            Text(
-                                'Moyenne de points par partie : ${user.summary.userStats?.averagePointsPerGame ?? '--'}',
-                                style: Get.context!.textTheme.button)
-                          ],
-                        ),
-                        const Gap(20),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.timelapse),
-                            const Gap(5),
-                            Text(
-                                'Moyenne de temps de jeu : ${user.summary.userStats!.averageTimePlayed != null ? user.summary.userStats!.averageTimePlayed! ~/ pow(10, 5) : '0'} min',
-                                style: Get.context!.textTheme.button)
-                          ],
-                        )
-                      ],
-                    )
-                  ],
+                        label: const Text('Modifier mon profil'),
+                      ),
+                    ],
+                  ),
                 );
               }
           }
@@ -223,7 +240,8 @@ class ProfileScreen extends StatelessWidget {
   List<DataRow> _createRowsActivity(User user) {
     return [
       for (final networkLogs in user.summary.networkLogs!.reversed)
-        DataRow(cells: [DataCell(Text(networkLogs.eventType.toLowerCase() == 'login'
+        DataRow(cells: [
+          DataCell(Text(networkLogs.eventType.toLowerCase() == 'login'
               ? 'Connexion'
               : 'Déconnexion')),
           DataCell(Text(DateFormat('yyyy-MM-dd').format(tz.TZDateTime.from(
@@ -298,30 +316,27 @@ class ProfileScreen extends StatelessWidget {
       return Column(
         children: [
           Container(
-            color: Color.fromARGB(255,98,0,238),
+            color: const Color.fromARGB(255, 98, 0, 238),
             height: 60,
             width: double.infinity,
             child: const DrawerHeader(
               child: Text(
                 'Chats',
-                style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.white
-                ),
+                style: TextStyle(fontSize: 20, color: Colors.white),
               ),
             ),
           ),
           Expanded(
               child: ListView.builder(
-                // padding: const EdgeInsets.all(16.0),
-                padding: EdgeInsets.zero,
-                itemCount: _roomService.getRooms().length,
-                itemBuilder: (context, item) {
-                  final index = item;
-                  return _buildChatRoomRow(_roomService.getRooms()[index].roomName,
-                      _roomService.getRooms()[index].roomId);
-                },
-              ))
+            // padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.zero,
+            itemCount: _roomService.getRooms().length,
+            itemBuilder: (context, item) {
+              final index = item;
+              return _buildChatRoomRow(_roomService.getRooms()[index].roomName,
+                  _roomService.getRooms()[index].roomId);
+            },
+          ))
         ],
       );
     } else {

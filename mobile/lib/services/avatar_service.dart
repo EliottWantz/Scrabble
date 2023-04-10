@@ -6,17 +6,10 @@ import 'package:image_picker/image_picker.dart';
 class AvatarService extends GetxService {
   final ApiRepository apiRepository = Get.find();
   final image = Rxn<XFile>();
-  late List<Avatar> avatars;
   RxInt currentAvatarIndex = 0.obs;
   RxBool isAvatar = true.obs;
 
   final ImagePicker _picker = ImagePicker();
-
-  @override
-  Future<void> onReady() async {
-    avatars = (await apiRepository.avatars())!;
-    super.onReady();
-  }
 
   Future<void> takePicture() async {
     try {

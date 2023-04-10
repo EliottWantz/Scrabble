@@ -7,6 +7,8 @@ import 'package:client_leger/models/requests/accept_join_game_request.dart';
 import 'package:client_leger/models/requests/game_invite_request.dart';
 import 'package:client_leger/models/requests/login_request.dart';
 import 'package:client_leger/models/requests/register_request.dart';
+import 'package:client_leger/models/requests/update_username_request.dart';
+import 'package:client_leger/models/requests/upload_avatar_request.dart';
 import 'package:client_leger/models/response/login_response.dart';
 import 'package:client_leger/models/response/register_response.dart';
 import 'package:client_leger/models/user.dart';
@@ -47,6 +49,18 @@ class ApiRepository {
     return;
   }
 
+  Future<void> username(UpdateUsernameRequest data) async {
+    final res =
+        await apiProvider.username('/user/updateUsername', data.toJson());
+    if (res.statusCode == 200) {
+      final newUser = await user();
+      if (newUser != null) {
+        userService.user.value = newUser;
+      }
+    }
+    return;
+  }
+
   Future<RegisterResponse?> signup(RegisterRequest data,
       {File? imagePath}) async {
     FormData formData;
@@ -84,18 +98,32 @@ class ApiRepository {
     return null;
   }
 
-  Future<Avatar?> upload(File imagePath) async {
-    final userId = userService.user.value!.id;
-    final FormData formData = FormData({
-      'avatar': MultipartFile(imagePath,
-          filename: imagePath.path.split('/').last,
-          contentType: 'multipart/form-data'),
-    });
-    final res = await apiProvider.upload('/avatar/$userId', formData);
-    if (res.statusCode == 201) {
-      return Avatar.fromJson(res.body);
+  Future<void> upload(UploadAvatarRequest data, {File? imagePath}) async {
+    FormData formData;
+    if (imagePath != null) {
+      formData = FormData({
+        'id': data.id,
+        'avatarUrl': data.avatarUrl,
+        'fileId': data.fileId,
+        'avatar': MultipartFile(imagePath,
+            filename: imagePath.path.split('/').last,
+            contentType: 'multipart/form-data'),
+      });
+    } else {
+      formData = FormData({
+        'id': data.id,
+        'avatarUrl': data.avatarUrl,
+        'fileId': data.fileId,
+      });
     }
-    return null;
+    final res = await apiProvider.upload('/user/avatar', formData);
+    if (res.statusCode == 201) {
+      final newUser = await user();
+      if (newUser != null) {
+        userService.user.value = newUser;
+      }
+    }
+    return;
   }
 
   Future<void> sendFriendRequest(SendFriendRequest requestData) async {
@@ -103,8 +131,8 @@ class ApiRepository {
     //   "Authorization": "Bearer ${storageService.read("token")}"
     // };
     await apiProvider.sendFriendRequest(
-        '/user/friends/request/${userService.user.value!.id}/${requestData.friendId}',
-        // headers
+      '/user/friends/request/${userService.user.value!.id}/${requestData.friendId}',
+      // headers
     );
     // if (res.statusCode == 200) {
     //   return FriendRequestResponse.fromJson(res.body);

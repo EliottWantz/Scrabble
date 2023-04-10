@@ -66,6 +66,8 @@ const String ClientEventLeaveGame = "leave-game";
 const String ClientEventStartGame = "start-game";
 const String ClientEventPlayMove    = "playMove";
 const String ClientEventIndice = "indice";
+const String ClientEventFirstSquare = "first-square";
+const String ClientEventRemoveFirstSquare = 'remove-first-square';
 
 const String ClientEventCreateTournament = "create-tournament";
 const String ClientEventJoinTournament = "join-tournament";

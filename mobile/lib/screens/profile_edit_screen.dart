@@ -1,27 +1,21 @@
-import 'dart:io';
-
-import 'package:client_leger/controllers/auth_controller.dart';
+import 'package:client_leger/api/api_repository.dart';
 import 'package:client_leger/controllers/avatar_controller.dart';
 import 'package:client_leger/models/avatar.dart';
-import 'package:client_leger/routes/app_routes.dart';
-import 'package:client_leger/services/auth_service.dart';
-import 'package:client_leger/services/settings_service.dart';
-import 'package:client_leger/services/storage_service.dart';
 import 'package:client_leger/utils/dialog_helper.dart';
 import 'package:client_leger/widgets/app_sidebar.dart';
-import 'package:client_leger/widgets/custom_button.dart';
+import 'package:client_leger/widgets/input_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:form_validator/form_validator.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
-import 'package:im_stepper/stepper.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:sidebarx/sidebarx.dart';
 
-class AvatarSelectionScreen extends GetView<AvatarController> {
-  AvatarSelectionScreen({Key? key}) : super(key: key);
-  final StorageService storageService = Get.find();
-  final AuthController authController = Get.arguments;
+class ProfileEditScreen extends GetView<AvatarController> {
+  ProfileEditScreen({Key? key}) : super(key: key);
+  final sideBarController =
+      SidebarXController(selectedIndex: 0, extended: true);
+  final ApiRepository _apiRepository = Get.find();
 
   @override
   Widget build(BuildContext context) {
@@ -29,12 +23,12 @@ class AvatarSelectionScreen extends GetView<AvatarController> {
         builder: (BuildContext context) => Scaffold(
               body: Row(
                 children: [
-                  AppSideBar(
-                    controller: controller.sideBarController,
-                  ),
+                  AppSideBar(controller: sideBarController),
                   Expanded(
-                    child: _buildItems(
-                      context,
+                    child: Center(
+                      child: _buildItems(
+                        context,
+                      ),
                     ),
                   ),
                 ],
@@ -44,7 +38,7 @@ class AvatarSelectionScreen extends GetView<AvatarController> {
 
   Widget _buildItems(BuildContext context) {
     return FutureBuilder<List<Avatar>?>(
-        future: controller.apiRepository.avatars(),
+        future: _apiRepository.avatars(),
         builder: (BuildContext context, AsyncSnapshot<List<Avatar>?> snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.waiting:
@@ -62,91 +56,67 @@ class AvatarSelectionScreen extends GetView<AvatarController> {
               if (snapshot.hasError) {
                 return Text('Error: ${snapshot.error}');
               } else {
-                if (snapshot.data == null) return SizedBox();
+                if (snapshot.data == null) return const SizedBox();
                 final avatars = snapshot.data!;
-                return SafeArea(
-                  minimum: const EdgeInsets.symmetric(horizontal: 40.0),
-                  child: Center(
-                    child: SizedBox(
-                      width: 400,
+                return SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 50.0),
+                    child: Center(
+                        child: SizedBox(
+                      height: 800,
+                      width: 900,
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('Choisisez un avatar qui vous correspond',
-                              style: Theme.of(context).textTheme.headline6),
-                          const Gap(8),
-                          Text(
-                            'Les photos rendent votre profil plus attrayant',
-                            style: Theme.of(context).textTheme.bodyMedium,
-                          ),
-                          const Gap(50),
-                          Obx(() => CircleAvatar(
-                                maxRadius: 60,
-                                backgroundColor: Colors.transparent,
-                                backgroundImage:
-                                    controller.getAvatarToDisplay(avatars),
-                              )),
-                          const Gap(50),
-                          ElevatedButton.icon(
-                            onPressed: () {
-                              _showAvatarOptionsDialog(context, avatars);
-                            },
-                            icon: const Icon(
-                              Icons.perm_identity_sharp,
-                              size: 50,
+                          Form(
+                            key: controller.profileEditFormKey,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'Modifier votre pseudonyme',
+                                  style: Theme.of(context).textTheme.headline6,
+                                ),
+                                const Gap(20.0),
+                                SizedBox(
+                                  height: 150,
+                                  width: 300,
+                                  child: Center(
+                                    child: Obx(() => InputField(
+                                        controller:
+                                            controller.usernameEditController,
+                                        keyboardType: TextInputType.text,
+                                        labelText: controller
+                                            .userService.user.value!.username,
+                                        placeholder:
+                                            'Veuillez entrer votre nouveau pseudonyme',
+                                        validator: ValidationBuilder(
+                                                requiredMessage:
+                                                    'Le champ ne peut pas être vide')
+                                            .build())),
+                                  ),
+                                ),
+                                ElevatedButton.icon(
+                                  onPressed: () async {
+                                    await controller.onProfileChange(context);
+                                  },
+                                  icon: const Icon(
+                                    Icons.change_circle,
+                                    size: 20,
+                                  ),
+                                  label: const Text('Modifier mon pseudonyme'),
+                                ),
+                              ],
                             ),
-                            label: const Text('Choisir un avatar'),
                           ),
                           const Gap(20),
-                          Text(
-                            'Ou',
-                            style: Theme.of(context).textTheme.headline6,
+                          const Divider(
+                            thickness: 2,
                           ),
                           const Gap(20),
-                          ElevatedButton.icon(
-                            onPressed: () async {
-                              await controller.onTakePicture();
-                            },
-                            icon: const Icon(
-                              Icons.camera_alt,
-                              size: 50,
-                            ),
-                            label: const Text('Prenez votre avatar en photo'),
-                          ),
-                          const Gap(20),
-                          Text(
-                            'Ou',
-                            style: Theme.of(context).textTheme.headline6,
-                          ),
-                          const Gap(20),
-                          ElevatedButton.icon(
-                            onPressed: () {
-                              _showAvatarStepper();
-                            },
-                            icon: const Icon(
-                              Icons.dashboard_customize,
-                              size: 50,
-                            ),
-                            label: const Text('Personaliser votre avatar'),
-                          ),
-                          const Gap(80),
-                          ElevatedButton.icon(
-                            onPressed: () async {
-                              await authController.onRegister(avatars,
-                                  avatarCustomizedUrl:
-                                      controller.isAvatarCustomizable.value
-                                          ? controller.onGenerateAvatar()
-                                          : null);
-                            },
-                            icon: const Icon(
-                              Icons.app_registration,
-                              size: 50,
-                            ),
-                            label: Text('authRegisterBtn'.tr),
-                          ),
+                          _buildAvatarEditer(avatars, context),
                         ],
                       ),
-                    ),
+                    )),
                   ),
                 );
               }
@@ -154,63 +124,79 @@ class AvatarSelectionScreen extends GetView<AvatarController> {
         });
   }
 
-  void _showAvatarStepper() {
-    Get.dialog(
-        Dialog(
-          child: SizedBox(
-              height: 600,
-              width: 600,
-              child: Obx(() => Stepper(
-                    type: StepperType.vertical,
-                    currentStep: controller.currentStep.value,
-                    physics: const ScrollPhysics(),
-                    onStepContinue: () {
-                      controller.currentStep.value < _steps().length
-                          ? controller.currentStep.value += 1
-                          : null;
-                    },
-                    onStepCancel: () {
-                      controller.currentStep.value > 0
-                          ? controller.currentStep.value -= 1
-                          : null;
-                    },
-                    controlsBuilder:
-                        (BuildContext context, ControlsDetails controls) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16.0),
-                        child: Row(
-                          children: [
-                            controller.currentStep.value == _steps().length - 1
-                                ? ElevatedButton(
-                                    onPressed: () {
-                                      DialogHelper.hideLoading();
-                                      authController
-                                          .avatarService.isAvatar.value = true;
-                                      controller.isAvatarCustomizable.value =
-                                          true;
-                                    },
-                                    child: const Text('Générer mon avatar'),
-                                  )
-                                : ElevatedButton(
-                                    onPressed: controls.onStepContinue,
-                                    child: const Text('Continuer'),
-                                  ),
-                            if (controller.currentStep != 0)
-                              TextButton(
-                                onPressed: controls.onStepCancel,
-                                child: const Text(
-                                  'Revenir',
-                                  style: TextStyle(color: Colors.grey),
-                                ),
-                              ),
-                          ],
-                        ),
-                      );
-                    },
-                    steps: _steps(),
-                  ))),
+  Widget _buildAvatarEditer(List<Avatar> avatars, BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text('Modifier votre avatar',
+            style: Theme.of(context).textTheme.headline6),
+        const Gap(50),
+        Obx(() => CircleAvatar(
+              radius: 60,
+              backgroundColor: Colors.transparent,
+              backgroundImage: controller.getAvatarToDisplay(avatars),
+            )),
+        const Gap(50),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton.icon(
+              onPressed: () {
+                _showAvatarOptionsDialog(context, avatars);
+              },
+              icon: const Icon(
+                Icons.perm_identity_sharp,
+                size: 50,
+              ),
+              label: const Text('Choisir un avatar'),
+            ),
+            const Gap(20),
+            Text(
+              'Ou',
+              style: Theme.of(context).textTheme.headline6,
+            ),
+            const Gap(20),
+            ElevatedButton.icon(
+              onPressed: () async {
+                await controller.onTakePicture();
+              },
+              icon: const Icon(
+                Icons.camera_alt,
+                size: 50,
+              ),
+              label: const Text('Prenez votre avatar en photo'),
+            ),
+            const Gap(20),
+            Text(
+              'Ou',
+              style: Theme.of(context).textTheme.headline6,
+            ),
+            const Gap(20),
+            ElevatedButton.icon(
+              onPressed: () {
+                _showAvatarStepper();
+              },
+              icon: const Icon(
+                Icons.dashboard_customize,
+                size: 50,
+              ),
+              label: const Text('Personaliser votre avatar'),
+            ),
+          ],
         ),
-        barrierDismissible: false);
+        const Gap(80),
+        ElevatedButton.icon(
+          onPressed: () async {
+            await controller.onAvatarChange(avatars);
+          },
+          icon: const Icon(
+            Icons.change_circle,
+            size: 20,
+          ),
+          label: const Text('Modifier mon avatar'),
+        ),
+      ],
+    );
   }
 
   void _showAvatarOptionsDialog(BuildContext context, List<Avatar> avatars) {
@@ -304,6 +290,7 @@ class AvatarSelectionScreen extends GetView<AvatarController> {
                 children: [
                   ElevatedButton.icon(
                     onPressed: () {
+                      controller.isFirst.value = false;
                       DialogHelper.hideLoading();
                       controller.avatarService.isAvatar.value = true;
                       controller.isAvatarCustomizable.value = false;
@@ -320,6 +307,66 @@ class AvatarSelectionScreen extends GetView<AvatarController> {
       ),
       barrierDismissible: false,
     );
+  }
+
+  void _showAvatarStepper() {
+    Get.dialog(
+        Dialog(
+          child: SizedBox(
+              height: 600,
+              width: 600,
+              child: Obx(() => Stepper(
+                    type: StepperType.vertical,
+                    currentStep: controller.currentStep.value,
+                    physics: const ScrollPhysics(),
+                    onStepContinue: () {
+                      controller.currentStep.value < _steps().length
+                          ? controller.currentStep.value += 1
+                          : null;
+                    },
+                    onStepCancel: () {
+                      controller.currentStep.value > 0
+                          ? controller.currentStep.value -= 1
+                          : null;
+                    },
+                    controlsBuilder:
+                        (BuildContext context, ControlsDetails controls) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16.0),
+                        child: Row(
+                          children: [
+                            controller.currentStep.value == _steps().length - 1
+                                ? ElevatedButton(
+                                    onPressed: () {
+                                      controller.isFirst.value = false;
+                                      DialogHelper.hideLoading();
+                                      controller.avatarService.isAvatar.value =
+                                          true;
+                                      controller.isAvatarCustomizable.value =
+                                          true;
+                                    },
+                                    child: const Text('Générer mon avatar'),
+                                  )
+                                : ElevatedButton(
+                                    onPressed: controls.onStepContinue,
+                                    child: const Text('Continuer'),
+                                  ),
+                            if (controller.currentStep != 0)
+                              TextButton(
+                                onPressed: controls.onStepCancel,
+                                child: const Text(
+                                  'Revenir',
+                                  style: TextStyle(color: Colors.grey),
+                                ),
+                              ),
+                          ],
+                        ),
+                      );
+                    },
+                    steps: _steps(),
+                  ))),
+        ),
+        barrierDismissible: false);
   }
 
   List<Step> _steps() => [

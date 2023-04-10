@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:client_leger/controllers/game_controller.dart';
+import 'package:client_leger/models/player.dart';
 import 'package:client_leger/models/tile.dart';
 import 'package:client_leger/models/tile_info.dart';
 import 'package:client_leger/screens/floating_chat_screen.dart';
@@ -51,7 +52,7 @@ class GameScreen extends GetView<GameController> {
           onPressed: () {
             _scaffoldKey.currentState?.openEndDrawer();
           },
-          backgroundColor: Color.fromARGB(255, 98, 0, 238),
+          backgroundColor: const Color.fromARGB(255, 98, 0, 238),
           foregroundColor: Colors.white,
           autofocus: true,
           focusElevation: 5,
@@ -61,10 +62,12 @@ class GameScreen extends GetView<GameController> {
         ),
         key: _scaffoldKey,
         endDrawer: Drawer(child: Obx(() => _buildChatRoomsList())),
-        body: SingleChildScrollView(
-            child: isObserving == false
-                ? _buildLayoutForPlayer(context)
-                : _buildLayoutForObserver(context)),
+        body: _gameService.currentGame.value == null
+            ? const SizedBox()
+            : SingleChildScrollView(
+                child: isObserving == false
+                    ? _buildLayoutForPlayer(context)
+                    : _buildLayoutForObserver(context)),
       ),
     );
   }
@@ -107,7 +110,7 @@ class GameScreen extends GetView<GameController> {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               Obx(() => DropdownButton<String>(
-                    underline: SizedBox(),
+                    underline: const SizedBox(),
                     value: _settingsService.currentLangValue.value,
                     style: Theme.of(context).textTheme.button,
                     items: const [
@@ -125,7 +128,7 @@ class GameScreen extends GetView<GameController> {
                       Icons.language,
                     ),
                   )),
-              Gap(20),
+              const Gap(20),
               InkWell(
                   onTap: () {
                     _settingsService.switchTheme();
@@ -136,7 +139,7 @@ class GameScreen extends GetView<GameController> {
                       size: 30,
                     ),
                   )),
-              Gap(10),
+              const Gap(10),
             ],
           ),
         ).inGridArea('settings'),
@@ -150,7 +153,7 @@ class GameScreen extends GetView<GameController> {
               const Gap(100),
               Card(
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(12)),
+                  borderRadius: const BorderRadius.all(Radius.circular(12)),
                   side: BorderSide(
                     color: Get.isDarkMode ? Colors.greenAccent : Colors.black,
                   ),
@@ -158,11 +161,11 @@ class GameScreen extends GetView<GameController> {
                 elevation: 10,
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    'Lettres en réserve \n 80',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headline6,
-                  ),
+                  child: Obx(() => Text(
+                        'Lettres en réserve \n ${controller.gameService.currentGame.value!.tileCount ?? 0}',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.headline6,
+                      )),
                 ),
               ),
               const Gap(100),
@@ -176,15 +179,17 @@ class GameScreen extends GetView<GameController> {
               )),
         ).inGridArea('nav'),
         ScrabbleBoard().inGridArea('content'),
-        Obx(() => SizedBox(
-              height: 80,
-              child: Align(
-                alignment: Alignment.bottomCenter,
-                child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: _buildEaselForObserver()),
-              ),
-            )).inGridArea('easel'),
+        Obx(() => _gameService.currentGame.value == null
+            ? const SizedBox()
+            : SizedBox(
+                height: 80,
+                child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: _buildEaselForObserver()),
+                ),
+              )).inGridArea('easel'),
       ],
     );
   }
@@ -227,7 +232,7 @@ class GameScreen extends GetView<GameController> {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               Obx(() => DropdownButton<String>(
-                    underline: SizedBox(),
+                    underline: const SizedBox(),
                     value: _settingsService.currentLangValue.value,
                     style: Theme.of(context).textTheme.button,
                     items: const [
@@ -245,7 +250,7 @@ class GameScreen extends GetView<GameController> {
                       Icons.language,
                     ),
                   )),
-              Gap(20),
+              const Gap(20),
               InkWell(
                   onTap: () {
                     _settingsService.switchTheme();
@@ -256,7 +261,7 @@ class GameScreen extends GetView<GameController> {
                       size: 30,
                     ),
                   )),
-              Gap(10),
+              const Gap(10),
             ],
           ),
         ).inGridArea('settings'),
@@ -270,7 +275,7 @@ class GameScreen extends GetView<GameController> {
               const Gap(100),
               Card(
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(12)),
+                  borderRadius: const BorderRadius.all(Radius.circular(12)),
                   side: BorderSide(
                     color: Get.isDarkMode ? Colors.greenAccent : Colors.black,
                   ),
@@ -278,11 +283,11 @@ class GameScreen extends GetView<GameController> {
                 elevation: 10,
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    'Lettres en réserve \n 80',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headline6,
-                  ),
+                  child: Obx(() => Text(
+                        'Lettres en réserve \n ${controller.gameService.currentGame.value!.tileCount ?? 0}',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.headline6,
+                      )),
                 ),
               ),
               const Gap(100),
@@ -294,7 +299,7 @@ class GameScreen extends GetView<GameController> {
                                 ? Get.bottomSheet(
                                     SizedBox(
                                       height: 65,
-                                      width: 500,
+                                      width: 300,
                                       child: Form(
                                         key: controller.dropdownFormKey,
                                         child: Row(
@@ -303,7 +308,7 @@ class GameScreen extends GetView<GameController> {
                                           children: [
                                             SizedBox(
                                               height: 65,
-                                              width: 500,
+                                              width: 300,
                                               child: DropdownButtonFormField<
                                                   MoveInfo>(
                                                 menuMaxHeight: 200,
@@ -347,12 +352,13 @@ class GameScreen extends GetView<GameController> {
                                                   controller.currentIndiceToPlay
                                                       .value = value;
                                                 },
+                                                isExpanded: true,
                                                 items: _gameService.indices
                                                     .map((moveInfo) =>
                                                         DropdownMenuItem(
                                                             value: moveInfo,
                                                             child: Text(
-                                                                "${moveInfo.letters} ${moveInfo.covers}")))
+                                                                "${moveInfo.letters} ${moveInfo.covers} ${moveInfo.score} points")))
                                                     .toList(),
                                               ),
                                             ),
@@ -378,11 +384,11 @@ class GameScreen extends GetView<GameController> {
                                 : Get.snackbar(
                                     "Pas d'indices disponible pour l'instant!",
                                     "Veuillez échanger vos lettres ou passer votre tour!",
-                                    icon: Icon(Icons.warning),
+                                    icon: const Icon(Icons.warning),
                                     shouldIconPulse: true,
                                     barBlur: 20,
                                     isDismissible: true,
-                                    duration: Duration(seconds: 3),
+                                    duration: const Duration(seconds: 3),
                                   );
                           }
                         : null,
@@ -479,7 +485,7 @@ class GameScreen extends GetView<GameController> {
         ))
       ];
     } else if (_gameService
-        .getPlayerRackById(controller.currentObservedPlayerId.value as String)!
+        .getPlayerRackById(controller.currentObservedPlayerId.value!)!
         .tiles
         .isEmpty) {
       return [
@@ -505,6 +511,7 @@ class GameScreen extends GetView<GameController> {
 
   List<Widget> _buildPlayersInfo() {
     List<Widget> playerInfoPanels = [];
+    if (_gameService.currentGame.value == null) return playerInfoPanels;
     for (final player in _gameService.currentGame.value!.players) {
       playerInfoPanels.add(const Gap(20));
       playerInfoPanels.add(PlayerInfo(
@@ -558,16 +565,13 @@ class GameScreen extends GetView<GameController> {
       return Column(
         children: [
           Container(
-            color: Color.fromARGB(255,98,0,238),
+            color: const Color.fromARGB(255, 98, 0, 238),
             height: 60,
             width: double.infinity,
             child: const DrawerHeader(
               child: Text(
                 'Chats',
-                style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.white
-                ),
+                style: TextStyle(fontSize: 20, color: Colors.white),
               ),
             ),
           ),

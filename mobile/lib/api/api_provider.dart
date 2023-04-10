@@ -1,6 +1,7 @@
 import 'package:client_leger/models/requests/game_invite_request.dart';
 import 'package:client_leger/models/requests/login_request.dart';
 import 'package:client_leger/models/requests/logout_request.dart';
+import 'package:client_leger/models/requests/update_username_request.dart';
 import 'package:client_leger/models/user.dart';
 import 'package:get/get.dart';
 import 'base_provider.dart';
@@ -23,6 +24,10 @@ class ApiProvider extends BaseProvider {
   }
 
   Future<Response> preferences(String path, Map<String, dynamic> data) {
+    return patch(path,data);
+  }
+
+  Future<Response> username(String path, Map<String, dynamic> data) {
     return patch(path,data);
   }
 
