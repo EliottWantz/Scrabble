@@ -450,11 +450,17 @@ func (m *Manager) AcceptFriendInvitationToGame(c *fiber.Ctx) error {
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
+	// Inviter that sent the invite
+	inviterClient, err := m.getClientByUserID(req.InviterID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	// Invited user that received the invite
 	invitedUser, err := m.UserSvc.Repo.Find(req.InvitedID)
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
-	inviterClient, err := m.getClientByUserID(req.InviterID)
+	invitedClient, err := m.getClientByUserID(req.InvitedID)
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
@@ -469,7 +475,7 @@ func (m *Manager) AcceptFriendInvitationToGame(c *fiber.Ctx) error {
 		if err != nil {
 			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
-		if err := r.BroadcastLeaveGamePackets(inviterClient, invitedUser.JoinedGame); err != nil {
+		if err := r.BroadcastLeaveGamePackets(invitedClient, invitedUser.JoinedGame); err != nil {
 			m.logger.Error("broadcast leave game packets", err)
 		}
 	}
@@ -486,10 +492,6 @@ func (m *Manager) AcceptFriendInvitationToGame(c *fiber.Ctx) error {
 	}
 
 	// Make the player that accepted the invitation join the game
-	invitedClient, err := m.getClientByUserID(req.InvitedID)
-	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, err.Error())
-	}
 	if err := invitedClient.JoinGame(JoinGamePayload{
 		GameID:   req.GameID,
 		Password: req.GamePassword,
