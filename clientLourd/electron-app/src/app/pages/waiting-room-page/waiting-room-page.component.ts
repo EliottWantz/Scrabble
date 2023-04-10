@@ -1,8 +1,9 @@
-import { Component } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { FormBuilder } from "@angular/forms";
 import { CommunicationService } from "@app/services/communication/communication.service";
 import { GameService } from "@app/services/game/game.service";
 import { RoomService } from "@app/services/room/room.service";
+import { SocialService } from "@app/services/social/social.service";
 import { StorageService } from "@app/services/storage/storage.service";
 // import { MessageErrorStateMatcher } from "@app/classes/form-error/error-state-form";
 import { UserService } from "@app/services/user/user.service";
@@ -19,16 +20,19 @@ import { BehaviorSubject } from "rxjs";
   templateUrl: "./waiting-room-page.component.html",
   styleUrls: ["./waiting-room-page.component.scss"],
 })
-export class WaitRoomPageComponent {
+export class WaitRoomPageComponent implements OnInit {
   gameRoom!: BehaviorSubject<Game | undefined>;
   users: {userId: string, username: string}[];
   usersWaiting: {userId: string, username: string}[];
   user: User;
-  constructor(private gameService: GameService, private userService: UserService, private socketService: WebSocketService, private storageService: StorageService, private commService: CommunicationService, private roomService: RoomService) {
+  onlineFriends: User[];
+  constructor(private gameService: GameService, private userService: UserService, private socketService: WebSocketService, private storageService: StorageService,
+    private commService: CommunicationService, private socialService: SocialService) {
     this.gameRoom = this.gameService.game
     this.user = this.userService.currentUserValue
     this.users = [];
     this.usersWaiting = [];
+    this.onlineFriends = [];
     this.gameService.game.subscribe((game) => {
       if (game)
         this.getPlayers(game);
@@ -37,7 +41,17 @@ export class WaitRoomPageComponent {
     this.gameService.usersWaiting.subscribe((users) => {
       this.usersWaiting = users;
     });
+
+    
   }
+
+  ngOnInit(): void {
+    //this.socialService.updatedOnlineFriends();
+    this.socialService.onlineFriends$.subscribe((users) => {
+      this.onlineFriends = users;
+    });
+  }
+
 
   /*isCreator(): boolean {
     return this.userService.currentUserValue.id == this.gameRoom.value.creatorId;
@@ -76,19 +90,6 @@ export class WaitRoomPageComponent {
     return this.userService.currentUserValue.id == this.gameRoom.value?.creatorId;
   }
 
-  /*getUserNamesAndAvatarUrls(game: Game): string {
-    for (const id of game.userIds) {
-      const user = this.storageService.getUserFromId(id);
-      if (user && user.id != this.userService.currentUserValue.id)
-        return user.username;
-    }
-    const requestUser = this.storageService.getUserFromId(id);
-    if (requestUser) {
-      return requestUser.avatar.url;
-    }
-    return "";
-  }*/
-
   getAvatarUrl(id: string): string {
     const user = this.storageService.getUserFromId(id);
     if (user) {
@@ -99,39 +100,71 @@ export class WaitRoomPageComponent {
 
   acceptPlayer(requestorId: string): void {
     if (this.gameRoom.value)
-      this.commService.acceptPlayer(this.userService.currentUserValue.id, requestorId, this.gameRoom.value.id).subscribe({
-        next: () => {
+      this.commService.acceptPlayer(this.userService.currentUserValue.id, requestorId, this.gameRoom.value.id).then(() => {
+        //console.log("accepted");
+        const newUsersWaiting = this.gameService.usersWaiting.value;
+        for (const userWaiting of newUsersWaiting) {
+          if (userWaiting.userId == requestorId)
+            newUsersWaiting.splice(newUsersWaiting.indexOf(userWaiting), 1);
+        }
+        this.gameService.usersWaiting.next(newUsersWaiting);
+      }).catch((err) => {
+        console.log(err);
+      });
+  }
+
+  denyPlayer(requestorId: string): void {
+    if (this.gameRoom.value)
+      this.commService.denyPlayer(this.userService.currentUserValue.id, requestorId, this.gameRoom.value.id).then(() => {
+        /*const newUsersWaiting = this.gameService.usersWaiting.value;
+          for (const userWaiting of newUsersWaiting) {
+            if (userWaiting.userId == requestorId)
+              newUsersWaiting.splice(newUsersWaiting.indexOf(userWaiting), 1);
+          }
+          this.gameService.usersWaiting.next(newUsersWaiting);*/
+      }).catch((err) => {
+        if (err.error.message === "The user has revoked the request to join the game") {
           const newUsersWaiting = this.gameService.usersWaiting.value;
           for (const userWaiting of newUsersWaiting) {
             if (userWaiting.userId == requestorId)
               newUsersWaiting.splice(newUsersWaiting.indexOf(userWaiting), 1);
           }
           this.gameService.usersWaiting.next(newUsersWaiting);
-        },
-        error: (err) => {
-          //console.log(err);
         }
-      });
-  }
-
-  denyPlayer(requestorId: string): void {
-    if (this.gameRoom.value)
-      this.commService.denyPlayer(this.userService.currentUserValue.id, requestorId, this.gameRoom.value.id).subscribe({
-        next: () => {
-           const newUsersWaiting = this.gameService.usersWaiting.value;
-          for (const userWaiting of newUsersWaiting) {
-            if (userWaiting.userId == requestorId)
-              newUsersWaiting.splice(newUsersWaiting.indexOf(userWaiting), 1);
-          }
-          this.gameService.usersWaiting.next(newUsersWaiting);
-        },
-        error: (err) => {
-          //console.log(err);
-        }
+        console.log(err);
       });
   }
 
   isLoggedIn(): boolean {
     return this.userService.isLoggedIn;
+  }
+  
+  onOpenPanel(): void {
+    this.socialService.updatedOnlineFriends();
+  }
+
+  getFriends(): User[] {
+    const friends: User[] = [];
+
+    if (this.onlineFriends == undefined){
+      return friends
+    }
+
+    for (const friend of this.onlineFriends) {
+      if (!this.gameRoom.value?.userIds.includes(friend.id)) {
+        friends.push(friend);
+      }
+    }
+    return friends;
+  }
+
+  inviteFriend(id: string): void {
+    if (this.gameRoom.value) {
+      this.commService.inviteFriendToGame(id, this.userService.currentUserValue.id, this.gameRoom.value.id).then(() => {
+        console.log("invited");
+      }).catch((err) => {
+        console.log(err);
+      });
+    }
   }
 }
