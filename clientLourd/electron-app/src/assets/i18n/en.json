@@ -155,7 +155,7 @@
 	"game-observe-page.replace": "Replace",
 	"invite-component.title": " has invited you to a game",
 	"invite-component.accept": "Accept",
-	"invite-component.decline": "Decline",
+	"invite-component.deny": "Decline",
 	"invite-component.password-required": "Please enter a password",
 	"invite-component.password-mismatch": "The password is incorrect",
 	"invite-component.game-not-found": "The game does not exist anymore",
