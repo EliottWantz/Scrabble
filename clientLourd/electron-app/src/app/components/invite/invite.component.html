@@ -12,7 +12,7 @@
                     <input matInput placeholder="Enter the password" [(ngModel)]="invite.password" name="password" required type="password">
                 </mat-form-field>
             </form>
-            <strong *ngIf="invite.error.length > 0" style="color: red;">{{invite.error[i]}}</strong>
+            <strong *ngIf="invite.error.length > 0" style="color: red;">{{invite.error}}</strong>
             <div class="info">
                 <button mat-raised-button class="accept-button" color="primary" (click)="acceptInvite(i)" [ngStyle]="{transform: 'scale(0.8)'}" type="submit">
                     <mat-icon>check</mat-icon>
