@@ -278,10 +278,14 @@ export class WebSocketService {
 
       case 'leftGame': {
         const leftGamePayload = packet.payload as LeftGamePayload;
+        this.roomService.removeRoom(leftGamePayload.gameId);
         //this.gameService.removeUser(leftGamePayload.gameId, this.userService.currentUserValue.id);
         this.gameService.scrabbleGame.next(undefined);
         this.gameService.game.next(undefined);
         this.gameService.isObserving = false;
+
+        // check if tournament
+        this.router.navigate(['/home']);
         break;
       }
 
