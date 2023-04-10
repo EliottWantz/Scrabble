@@ -52,7 +52,8 @@ export class SocialPageComponent {
       }
     }
 
-    const friend = this.socialService.onlineFriends[index];
+    const friend = this.socialService.onlineFriends$.value[index];
+    console.log('friend', friend)
     if (friend) {
       this.friendUsername = friend.username;
       const payload: CreateDMRoomPayload = {
@@ -66,7 +67,7 @@ export class SocialPageComponent {
   }
 
   getUsernameFriend(index: number): string {
-    return this.socialService.onlineFriends[index].username;
+    return this.socialService.onlineFriends$.value[index].username;
   }
 
   

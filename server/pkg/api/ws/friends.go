@@ -181,3 +181,32 @@ func (m *Manager) GetPendingFriendlistRequests(id string) ([]*user.User, error) 
 	}
 	return friends, nil
 }
+
+type GetAddFriendListResponse struct {
+	Users []user.User `json:"users"`
+}
+
+func (m *Manager) GetAddFriendList(c *fiber.Ctx) error {
+	id := c.Params("id")
+	usr, err := m.UserSvc.GetUser(id)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "no user found")
+	}
+	allUser := m.ListUsers()
+	addList := make([]user.User, 0)
+	for _, u := range allUser {
+		if !contains(usr.Friends, u.ID) && !contains(usr.PendingRequests, u.ID) && !contains(u.PendingRequests, usr.ID) && u.ID != usr.ID {
+			addList = append(addList, u)
+		}
+	}
+	return c.JSON(GetAddFriendListResponse{Users: addList})
+}
+
+func contains(slice []string, val string) bool {
+	for _, s := range slice {
+		if s == val {
+			return true
+		}
+	}
+	return false
+}

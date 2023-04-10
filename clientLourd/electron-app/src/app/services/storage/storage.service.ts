@@ -8,7 +8,6 @@ import { BehaviorSubject } from 'rxjs';
 export class StorageService {
     listUsers: BehaviorSubject<User[]> = new BehaviorSubject<User[]>([]);
     avatars: BehaviorSubject<Map<string, string>> = new BehaviorSubject<Map<string, string>>(new Map<string, string>());
-    listOnlineUsers: BehaviorSubject<User[]> = new BehaviorSubject<User[]>([]);
 
     addAvatar(id: string, url: string): void {
         const map = this.avatars.value;

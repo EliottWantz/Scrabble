@@ -25,13 +25,13 @@ export class ThemeService {
             this.theme.next("light");
             if (this.userService.isLoggedIn) {
                 this.userService.subjectUser.next({...this.userService.subjectUser.value, preferences: {theme: "light", language: this.language.value}});
-                this.commService.updateTheme("light", this.language.value, this.userService.subjectUser.value.id);
+                this.commService.requestUpdateTheme("light", this.language.value, this.userService.subjectUser.value.id).subscribe();
             }
         } else {
             this.theme.next("dark");
             if (this.userService.isLoggedIn) {
                 this.userService.subjectUser.next({...this.userService.subjectUser.value, preferences: {theme: "dark", language: this.language.value}});
-                this.commService.updateTheme("dark", this.language.value, this.userService.subjectUser.value.id);
+                this.commService.requestUpdateTheme("dark", this.language.value, this.userService.subjectUser.value.id).subscribe();
             }
         }
     }
@@ -41,13 +41,13 @@ export class ThemeService {
             this.language.next("en");
             if (this.userService.isLoggedIn) {
                 this.userService.subjectUser.next({...this.userService.subjectUser.value, preferences: {theme: this.theme.value, language: "en"}});
-                this.commService.updateTheme(this.theme.value, "en", this.userService.subjectUser.value.id);
+                this.commService.requestUpdateTheme(this.theme.value, "en", this.userService.subjectUser.value.id).subscribe();
             } 
         } else {
             this.language.next("fr");
             if (this.userService.isLoggedIn) {
                 this.userService.subjectUser.next({...this.userService.subjectUser.value, preferences: {theme: this.theme.value, language: "fr"}});
-                this.commService.updateTheme(this.theme.value, "fr", this.userService.subjectUser.value.id);
+                this.commService.requestUpdateTheme(this.theme.value, "fr", this.userService.subjectUser.value.id).subscribe();
             }
         }
     }
