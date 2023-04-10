@@ -450,15 +450,14 @@ func (m *Manager) AcceptFriendInvitationToGame(c *fiber.Ctx) error {
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
-	inviterClient, err := m.getClientByUserID(req.InviterID)
-	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, err.Error())
-	}
 	invitedUser, err := m.UserSvc.Repo.Find(req.InvitedID)
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
-
+	inviterClient, err := m.getClientByUserID(req.InviterID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
 	if invitedUser.JoinedGame != "" { // leave old game
 		// Before leaving old game, check if password is correct
 		if gameToJoin.IsProtected && !auth.PasswordsMatch(req.GamePassword, gameToJoin.HashedPassword) {
@@ -485,7 +484,13 @@ func (m *Manager) AcceptFriendInvitationToGame(c *fiber.Ctx) error {
 		}
 		inviterClient.send(p)
 	}
-	if err := inviterClient.JoinGame(JoinGamePayload{
+
+	// Make the player that accepted the invitation join the game
+	invitedClient, err := m.getClientByUserID(req.InvitedID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	if err := invitedClient.JoinGame(JoinGamePayload{
 		GameID:   req.GameID,
 		Password: req.GamePassword,
 	}); err != nil {
