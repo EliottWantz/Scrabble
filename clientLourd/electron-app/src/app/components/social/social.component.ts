@@ -69,7 +69,7 @@ export class SocialComponent implements AfterViewInit, OnInit {
   }*/
 
   sendFriendRequest(id: string): void {
-    this.communicationService.sendFriendRequest(this.userService.currentUserValue.id, id);
+    this.communicationService.requestSendFriendRequest(this.userService.currentUserValue.id, id).subscribe();
     //this.websocketService.send()
   }
 
@@ -116,21 +116,9 @@ export class SocialComponent implements AfterViewInit, OnInit {
   }
 
   async acceptFriendRequest(id: string): Promise<void> {
-    this.communicationService.acceptFriendRequest(this.userService.currentUserValue.id, id).then(async (res) => {
-      console.log(res);
-      const pendingRequests = this.userService.currentUserValue.pendingRequests;
-      const index = pendingRequests.indexOf(id);
-      if (index > -1) {
-        pendingRequests.splice(index, 1);
-      }
-      this.userService.subjectUser.next({...this.userService.currentUserValue, pendingRequests: pendingRequests});
-      this.userService.subjectUser.next({...this.userService.currentUserValue, friends: [...this.userService.currentUserValue.friends, id]});
-    })
-    .catch((err) => {
-      console.log(err);
+    this.communicationService.requestAcceptFriendRequest(this.userService.currentUserValue.id, id).subscribe(()=>{
+      this.socialService.updatedOnlineFriends();
     });
-
-    this.socialService.updatedOnlineFriends().catch((err) => { console.log("updateOnlineFriendErrir",err) });
 
     const pendingRequests = this.userService.currentUserValue.pendingRequests;
       const index = pendingRequests.indexOf(id);
@@ -142,9 +130,9 @@ export class SocialComponent implements AfterViewInit, OnInit {
   }
 
   denyFriendRequest(id: string): void {
-    this.communicationService.declineFriendRequest(this.userService.currentUserValue.id, id).then(async(res) => {
-        await this.socialService.updatedOnlineFriends(); })
-      .catch((err) => { console.log(err) });
+    this.communicationService.requestDeclineFriendRequest(this.userService.currentUserValue.id, id).subscribe(()=>{
+      this.socialService.updatedOnlineFriends();
+    });
     const pendingRequests = this.userService.currentUserValue.pendingRequests;
     const index = pendingRequests.indexOf(id);
     if (index > -1) {

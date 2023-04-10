@@ -16,18 +16,16 @@ export class SocialService {
     private comSvc: CommunicationService,
     private userSvc: UserService
   ) {
-    this.comSvc
-      .getOnlineFriends(this.userSvc.currentUserValue.id)
-      .then((online) => {
-        this.onlineFriends$.next(online.friends);
-      });
+    if (this.userSvc.currentUserValue.id !=  "0") {
+      this.comSvc.getOnlineFriends(this.userSvc.currentUserValue.id).subscribe((users) => {
+        this.onlineFriends$.next(users.friends);
+        }); 
+    }
   }
 
   public async updatedOnlineFriends() {
-    this.comSvc
-      .getOnlineFriends(this.userSvc.currentUserValue.id)
-      .then((online) => {
-        this.onlineFriends$.next(online.friends);
-      });
+    this.comSvc.getOnlineFriends(this.userSvc.currentUserValue.id).subscribe((users) => {
+      this.onlineFriends$.next(users.friends);
+    });
   }
 }
