@@ -52,7 +52,7 @@ export class InviteComponent {
         if (currentPassword === undefined) {
             currentPassword = "";
         }
-        this.commService.acceptGameInvite(this.userService.currentUserValue.id, this.invites[index].inviterId, this.invites[index].game.id, currentPassword).then((res) => {
+        this.commService.acceptGameInvite(this.invites[index].inviterId, this.userService.currentUserValue.id, this.invites[index].game.id, currentPassword).then((res) => {
             console.log(res);
         }).catch((err) => {
             if (err.error.message == "password mismatch") {
