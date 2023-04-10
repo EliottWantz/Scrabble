@@ -9,11 +9,13 @@
     <div *ngFor="let userWaiting of usersWaiting" class="player">
       <img src="{{getAvatarUrl(userWaiting.userId)}}" class="avatar">
       <h3>{{userWaiting.username}}</h3>
-      <button mat-fab class="accept-button" (click)="acceptPlayer(userWaiting.userId)">
+      <button mat-raised-button color="primary" class="accept-button" (click)="acceptPlayer(userWaiting.userId)">
         <mat-icon>check</mat-icon>
+        {{"invite-component.accept" | translate}}
       </button>
-      <button mat-fab class="deny-button" (click)="denyPlayer(userWaiting.userId)">
+      <button mat-raised-button color="primary" (click)="denyPlayer(userWaiting.userId)">
         <mat-icon>close</mat-icon>
+        {{"invite-component.deny" | translate}}
       </button>
     </div>
   </div>
@@ -23,7 +25,7 @@
   <mat-expansion-panel id="friend-list" (opened)="onOpenPanel()">
     <mat-expansion-panel-header>
       <mat-panel-title>
-        Friends
+        {{"waiting-room-page.friends" | translate}}
       </mat-panel-title>
     </mat-expansion-panel-header>
     <div class="friend" *ngFor="let friend of getFriends()">
