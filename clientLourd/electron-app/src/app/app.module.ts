@@ -61,6 +61,8 @@ import { HttpClient } from '@angular/common/http';
 import { AdviceComponent } from '@app/components/advice/advice.component';
 import { ChooseLetterComponent } from '@app/components/choose-letter/choose-letter.component';
 import { DirectionComponent } from '@app/components/direction/direction.component';
+import { InviteComponent } from '@app/components/invite/invite.component';
+import { MatExpansionModule } from '@angular/material/expansion';
 
 @NgModule({
   declarations: [
@@ -96,7 +98,8 @@ import { DirectionComponent } from '@app/components/direction/direction.componen
     GifComponent,
     AdviceComponent,
     ChooseLetterComponent,
-    DirectionComponent
+    DirectionComponent,
+    InviteComponent
   ],
   imports: [
     BrowserModule,
@@ -124,6 +127,7 @@ import { DirectionComponent } from '@app/components/direction/direction.componen
     MatButtonToggleModule,
     MatBottomSheetModule,
     MatListModule,
+    MatExpansionModule,
     TranslateModule.forRoot({
       loader: {
         provide: TranslateLoader,

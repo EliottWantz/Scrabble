@@ -41,6 +41,8 @@ export class SocialService {
 
   public updatedOnlineFriends() {
     this.comSvc.getOnlineFriends(this.userSvc.currentUserValue.id).subscribe((users) => {
+      console.log("updatedOnlineFriends");
+      console.log(users);
       this.onlineFriends$.next(users.friends);
     });
   }

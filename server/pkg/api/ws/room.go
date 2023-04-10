@@ -333,17 +333,6 @@ func (r *Room) BroadcastObserverJoinGamePacket(c *Client, g *game.Game) error {
 		}
 		c.send(p)
 	}
-	{
-
-		p, err := NewUserJoinedGamePacket(UserJoinedGamePayload{
-			GameID: g.ID,
-			UserID: c.UserId,
-		})
-		if err != nil {
-			return err
-		}
-		r.BroadcastSkipSelf(p, c.ID)
-	}
 
 	return nil
 }
