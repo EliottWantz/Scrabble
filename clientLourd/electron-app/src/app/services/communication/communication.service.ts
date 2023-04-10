@@ -108,12 +108,12 @@ export class CommunicationService {
         }
     }
 
-    public acceptPlayer(userId: string, requestorId: string, gameId: string): Observable<void> {
-        return this.http.post<void>(`${this.baseUrl}/game/accept/${userId}/${requestorId}/${gameId}`, {});
+    public acceptPlayer(userId: string, requestorId: string, gameId: string): Promise<void> {
+        return lastValueFrom(this.http.post<void>(`${this.baseUrl}/game/accept/${userId}/${requestorId}/${gameId}`, {}));
     }
 
-    public denyPlayer(userId: string, requestorId: string, gameId: string): Observable<void> {
-        return this.http.delete<void>(`${this.baseUrl}/game/accept/${requestorId}/${userId}/${gameId}`);
+    public denyPlayer(userId: string, requestorId: string, gameId: string): Promise<void> {
+        return lastValueFrom(this.http.delete<void>(`${this.baseUrl}/game/accept/${requestorId}/${userId}/${gameId}`));
     }
 
   public revokeJoinGame(userId: string, gameId: string): Observable<void> {
@@ -138,7 +138,7 @@ export class CommunicationService {
     public inviteFriendToGame(invitedId: string, inviterId: string, gameId: string): Promise<void> {
         return lastValueFrom(this.http.post<void>(`${this.baseUrl}/user/friends/game/invite`, {invitedId: invitedId, inviterId: inviterId, gameId: gameId}));
     }
-    
+
   public getAddList(userId: string): Observable<{ users : User[] }> {
     return this.http.get<{ users: User[] }>(`${this.baseUrl}/user/friends/addList/${userId}`).pipe(catchError(this.handleError<{ users: User[] }>("getAddList")));
     }

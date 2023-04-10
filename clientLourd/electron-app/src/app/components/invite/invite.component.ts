@@ -1,4 +1,5 @@
 import { Component, ElementRef, QueryList, ViewChildren } from "@angular/core";
+import { MatDialog, MatDialogConfig } from "@angular/material/dialog";
 import { Router } from "@angular/router";
 import { CommunicationService } from "@app/services/communication/communication.service";
 import { GameService } from "@app/services/game/game.service";
@@ -8,6 +9,7 @@ import { UserService } from "@app/services/user/user.service";
 import { WebSocketService } from "@app/services/web-socket/web-socket.service";
 import { Game } from "@app/utils/interfaces/game/game";
 import { LeaveGamePayload } from "@app/utils/interfaces/packet";
+import { JoinPrivateGameComponent } from "@app/components/join-private-game/join-private-game.component";
 
 @Component({
     selector: "app-invite",
@@ -17,7 +19,7 @@ import { LeaveGamePayload } from "@app/utils/interfaces/packet";
 export class InviteComponent {
     invites: {inviterId: string, game: Game, error: string, password: string | undefined}[] = [];
     constructor(private storageService: StorageService, private commService: CommunicationService, private userService: UserService, private inviteService: InviteService,
-        private gameService: GameService, private webSocketService: WebSocketService, private router: Router) {
+        private gameService: GameService, private webSocketService: WebSocketService, private router: Router, public dialog: MatDialog) {
         this.inviteService.invites.subscribe((invites) => {
             this.invites = invites;
         });
@@ -37,7 +39,18 @@ export class InviteComponent {
         return '';
     }
 
+    openDialogJoinPrivateGame(game: Game): void {
+        this.dialog.open(JoinPrivateGameComponent, {
+            disableClose: true,
+            data: {game: game}
+        });
+    }
+
     acceptInvite(index: number): void {
+        if (this.invites[index].game.isProtected && this.invites[index].password === "") {
+            this.invites[index].error = "password required";
+            return;
+        }
         if (this.gameService.game.value !== undefined) {
             const payload: LeaveGamePayload = {
                 gameId: this.gameService.game.value.id
@@ -57,6 +70,9 @@ export class InviteComponent {
             if (err.error.message == "password mismatch") {
                 this.invites[index].error = "password missmatch";
             } else {
+                if (this.invites[index].game.isPrivateGame) {
+                    this.openDialogJoinPrivateGame(this.invites[index].game);
+                }
                 this.invites.splice(index, 1);
             }
             console.log(err);
