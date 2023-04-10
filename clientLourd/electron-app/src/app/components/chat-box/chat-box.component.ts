@@ -5,6 +5,7 @@ import {
   ViewChild,
   NgZone,
   ChangeDetectorRef,
+  HostListener,
 } from '@angular/core';
 import * as forms from '@angular/forms';
 import { ChatService } from '@app/services/chat/chat.service';
@@ -19,6 +20,8 @@ import { ClientEvent } from '@app/utils/events/client-events';
 import { LeaveRoomPayload } from '@app/utils/interfaces/packet';
 import { MatSelectChange } from '@angular/material/select';
 import { Subscription } from 'rxjs';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { GifComponent } from '@app/components/gif/gif.component';
 
 const electron = (window as any).require('electron');
 
@@ -43,6 +46,7 @@ export class ChatBoxComponent implements AfterViewInit {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private scrollTimeoutId: any;
   private roomSubscription!: Subscription;
+  opened = false;
 
   constructor(
     private fb: forms.FormBuilder,
@@ -52,7 +56,8 @@ export class ChatBoxComponent implements AfterViewInit {
     private storageService: StorageService,
     private socketService: WebSocketService,
     private ngZone: NgZone,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    public dialog: MatDialog
   ) {
     this.room$ = this.roomService.currentRoomChat;
     this.currentRoomId = this.room$.value.id;
@@ -79,19 +84,37 @@ export class ChatBoxComponent implements AfterViewInit {
     });
   }
 
+  @HostListener("document:click", ['$event'])
+  clickout(event: any) {
+    if (event.target.id === "submitBtn")
+      return;
+    const elem = document.elementFromPoint(event.x,event.y);
+    if (!document.getElementById("chatBox")?.contains(elem)) {
+      this.opened = false;
+    }
+  }
+
   async ngAfterViewInit(): Promise<void> {
-    setTimeout(() => {
-      this.chatBoxInput.nativeElement.focus();
-      this.scrollToBottom();
-    });
+    if (this.opened) {
+      setTimeout(() => {
+        this.chatBoxInput.nativeElement.focus();
+        this.scrollToBottom();
+      });
+    }
 
     this.room$.subscribe(() => {
       this.scrollToBottom();
     });
   }
 
-  send(): void {
-    console.log(document.getElementById('selectionElem'));
+  toggleChat() {
+    this.opened = !this.opened;
+        this.scrollToBottom();
+  }
+
+  send(event: Event): void {
+    event.preventDefault();
+    //console.log(document.getElementById('selectionElem'));
     if (!this.message || !this.message.replace(/\s/g, '')) return;
 
     this.chatService.send(this.message, this.roomService.currentRoomChat.value);
@@ -118,8 +141,8 @@ export class ChatBoxComponent implements AfterViewInit {
   }
 
   changeRoom(event: MatSelectChange): void {
-    console.log(this.getRoomName(this.currentRoomId));
-    console.log(event.value.id);
+    //console.log(this.getRoomName(this.currentRoomId));
+    //console.log(event.value.id);
     this.roomService.changeRoom(this.currentRoomId);
   }
 
@@ -144,9 +167,34 @@ export class ChatBoxComponent implements AfterViewInit {
     this.roomService.currentRoomChat.next(
       this.roomService.listJoinedChatRooms.value[0]
     );
-    console.log(this.roomService.currentRoomChat.value);
+    //console.log(this.roomService.currentRoomChat.value);
     this.socketService.send(event, payload);
-    console.log(this.roomService.listJoinedChatRooms.value);
+    //console.log(this.roomService.listJoinedChatRooms.value);
+  }
+
+  openGifMenu(): void {
+        this.dialog.open(GifComponent, {});
+  }
+
+  containsGifURL(message: string): boolean {
+    if ((message.includes('http://') || message.includes('https://')) && message.endsWith('.gif')) {
+      return true;
+    }
+    return false
+  }
+
+  getGifMessage(message: string): string[] {
+    const words = message.split(' ');
+    let messageNoUrl = "";
+    let gif = "";
+    for (const word of words) {
+      if ((word.includes('http://') || word.includes('https://')) && message[message.length - 1] == 'f' && message[message.length - 2] == 'i' && message[message.length - 3] == 'g') {
+        gif = word;
+      } else {
+        messageNoUrl += word + " ";
+      }
+    }
+    return [messageNoUrl, gif];
   }
 
   private subscribeToRoom(): void {

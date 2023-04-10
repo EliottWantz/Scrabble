@@ -16,7 +16,7 @@ export class ProfilePageComponent implements OnInit {
   hasError = false;
   user!: BehaviorSubject<User>;
   screen = "Modifier mon profil";
-  screens = ["Modifier mon profil", "Statistiques", "Historique"];
+  screens = ["Modifier mon profil", "Historique", "Activité"];
   constructor(private communicationService: CommunicationService, private userService: UserService) {
     this.user = this.userService.subjectUser;
   }
@@ -39,9 +39,21 @@ export class ProfilePageComponent implements OnInit {
     
   }
 
-  getDate(time: number) {
-    return new Date(time).toLocaleString()
+  isLoggedIn(): boolean {
+    return this.userService.isLoggedIn;
   }
+
+  getDate(time: number) {
+    return new Date(time).toLocaleDateString();
+  }
+
+  getTime(time: number) {
+    return new Date(time).toLocaleTimeString();
+  }
+
+  getWonOrLost(gameWon: boolean): string {
+    return gameWon ? "Partie gagné" : "Partie perdu";
+  } 
 
   selectNavButton(index: number): void {
     this.screen = this.screens[index];

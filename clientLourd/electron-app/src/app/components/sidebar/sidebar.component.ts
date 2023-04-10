@@ -1,19 +1,18 @@
-import {
-  Component,
-  EventEmitter,
-  Input,
-  OnInit,
-  Output,
-  ViewChild,
-} from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from "@angular/core";
+import { FormControl } from "@angular/forms";
+import { MatSlideToggle } from "@angular/material/slide-toggle";
+import { NavigationStart, Router } from "@angular/router";
+import { AuthenticationService } from "@app/services/authentication/authentication.service";
+import { GameService } from "@app/services/game/game.service";
+import { RoomService } from "@app/services/room/room.service";
+import { ThemeService } from "@app/services/theme/theme.service";
+import { UserService } from "@app/services/user/user.service";
+import { WebSocketService } from "@app/services/web-socket/web-socket.service";
+import { LeaveGamePayload } from "@app/utils/interfaces/packet";
+import { User } from "@app/utils/interfaces/user";
+import { BehaviorSubject } from "rxjs";
+//import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { MatDrawer, MatSidenav } from '@angular/material/sidenav';
-import { NavigationStart, Router } from '@angular/router';
-import { AuthenticationService } from '@app/services/authentication/authentication.service';
-import { GameService } from '@app/services/game/game.service';
-import { ThemeService } from '@app/services/theme/theme.service';
-import { UserService } from '@app/services/user/user.service';
-import { User } from '@app/utils/interfaces/user';
-import { BehaviorSubject } from 'rxjs';
 
 //import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 const electron = (window as any).require('electron');
@@ -32,18 +31,14 @@ export class SidebarComponent implements OnInit {
   readonly title: string = 'Scrabble';
   isJoining = false;
   public user: BehaviorSubject<User>;
-  currentRoute = 'PolyScrabble';
-  currentRouteName = '/home';
-  previousRouteName = ['/home'];
   language: BehaviorSubject<string>;
+  currentRoute = "PolyScrabble";
+  currentRouteName = "/home";
+  previousRouteName: string[] = ["/home"];
+  routeIndex = 0;
 
-  constructor(
-    private userService: UserService,
-    private authService: AuthenticationService,
-    private gameService: GameService,
-    private themeService: ThemeService,
-    private router: Router
-  ) {
+  constructor(private userService: UserService, private authService: AuthenticationService, private gameService: GameService, private themeService: ThemeService, private router: Router,
+    private webSocketService: WebSocketService) {
     this.user = this.userService.subjectUser;
     document
       .getElementById('avatar')
@@ -55,11 +50,14 @@ export class SidebarComponent implements OnInit {
     this.router.events.subscribe((e) => {
       if (e instanceof NavigationStart) {
         this.previousRouteName.push(this.currentRouteName);
+        this.routeIndex++;
         this.currentRouteName = e.url;
         switch (e.url) {
-          case '/home':
-            this.currentRoute = 'PolyScrabble';
+          case "/home":
+            this.currentRoute = "PolyScrabble";
             this.selectNav(0);
+            this.previousRouteName = ['/home'];
+            this.routeIndex = 0;
             break;
 
           case '/login':
@@ -92,6 +90,9 @@ export class SidebarComponent implements OnInit {
         this.lightDarkToggleIcon = this.lightThemeIcon;
       }
     });
+    /*this.user.subscribe((user) => {
+      this.badgeContent = user.pendingRequests.length;
+    });*/
   }
 
   public doToggleLightDark() {
@@ -109,19 +110,33 @@ export class SidebarComponent implements OnInit {
   logout(): void {
     this.router.navigate(['/home']);
     this.authService.logout();
+    setTimeout(()=>{
+      window.location.reload();
+    }, 100);
   }
 
   isInGame(): boolean {
-    return this.gameService.scrabbleGame.value.id != '';
+    return this.gameService.scrabbleGame.value != undefined;
+  }
+
+  isInGameLobby(): boolean {
+    return this.gameService.game.value != undefined;
   }
 
   return(): void {
+    if (this.isInGameLobby() && this.gameService.game.value) {
+      const payload: LeaveGamePayload = {
+        gameId: this.gameService.game.value.id
+      } 
+      this.webSocketService.send("leave-game", payload);
+      this.gameService.game.next(undefined);
+    }
     if (this.previousRouteName[this.previousRouteName.length - 1] == '/home') {
       this.previousRouteName = ['/home'];
       this.router.navigate(['/home']);
     } else {
-      const routeToGo = this.previousRouteName.pop();
-      this.router.navigate([routeToGo]);
+      this.routeIndex--;
+      this.router.navigate([this.previousRouteName[this.routeIndex]]);
     }
   }
 

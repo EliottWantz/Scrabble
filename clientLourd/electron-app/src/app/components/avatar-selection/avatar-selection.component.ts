@@ -4,6 +4,7 @@ import { Router } from "@angular/router"
 import { MatDialog, MatDialogConfig } from "@angular/material/dialog";
 import { DefaultAvatarSelectionComponent } from "@app/components/default-avatar-selection/default-avatar-selection.component";
 import { BehaviorSubject } from "rxjs";
+import { CustomizeAvatarComponent } from "@app/components/customize-avatar/customize-avatar.component";
 
 @Component({
     selector: "app-avatar-selection",
@@ -12,32 +13,51 @@ import { BehaviorSubject } from "rxjs";
 })
 export class AvatarSelectionComponent {
     selectedFile: any = null;
-    currentImageChosen: BehaviorSubject<{url: string, fileId: string} | FormData>;
     isRegisterFailed = false;
     errorImage = false;
-    imagePreview: BehaviorSubject<string> = new BehaviorSubject<string>("");
+    imagePreview = "";
+    errorImageType = false;
 
     constructor(public dialog: MatDialog, private authService: AuthenticationService, private router: Router) {
-        this.authService.tempUserLogin.avatar.next({url: "", fileId: ""})
-        this.currentImageChosen = this.authService.tempUserLogin.avatar;
-        this.currentImageChosen.subscribe(() => {
-            if (!(this.currentImageChosen.value instanceof FormData))
-                this.selectedFile = null;
+        const formData = this.authService.tempUserLogin.value;
+        this.authService.tempUserLogin.next(formData);
 
-            this.setImagePreview();
+        this.authService.tempUserLogin.subscribe(() => {
+            this.errorImage = false;
+            const customAvatar = this.authService.tempUserLogin.value.get("avatar");
+            const defaultAvatar = this.authService.tempUserLogin.value.get("avatarUrl");
+            if (customAvatar) {
+                this.setImagePreview(customAvatar);
+            } else if (defaultAvatar) {
+                this.setImagePreview(defaultAvatar);
+            }
         });
     }
 
     onFileSelected(event: any): void {
         this.selectedFile = event.target.files[0] ?? null;
         if (this.selectedFile) {
-            const formData = new FormData();
-            formData.append("avatar", this.selectedFile);
-            this.authService.tempUserLogin.avatar.next(formData);
+            const formData = this.authService.tempUserLogin.value;
+            if (formData.has("avatarUrl"))
+                formData.delete("avatarUrl");
+            if (formData.has("fileId"))
+                formData.delete("fileId");
+
+            if (this.selectedFile['type'] != "image/png" && this.selectedFile['type'] != "image/jpeg" && this.selectedFile['type'] != "image/jpg") {
+                console.log("wrong type");
+                this.errorImageType = true;
+                this.errorImage = false;
+                this.selectedFile = null;
+                this.authService.tempUserLogin.next(formData);
+            } else {
+                this.errorImageType = false;
+                formData.set("avatar", this.selectedFile);
+                this.authService.tempUserLogin.next(formData);
+            }
         }
     }
 
-    openDialog(): void {
+    openDialogDefaultAvatars(): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = true;
         this.dialog.open(DefaultAvatarSelectionComponent, {width: '75%',
@@ -45,38 +65,51 @@ export class AvatarSelectionComponent {
         height : '50vh'});
     }
 
-    checkIfImage(): boolean {
+    openDialogPersonalizedAvatar(): void {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.disableClose = true;
+        this.dialog.open(CustomizeAvatarComponent, {width: '75%',
+        minHeight: '75vh',
+        height : '75vh'});
+    }
+
+    /*checkIfImage(): boolean {
         if (!(this.currentImageChosen.value instanceof FormData) && this.currentImageChosen.value.url == "") {
             return false;
         } else {
             return true;
 
         }
-    }
+    }*/
 
-    setImagePreview(): void {
-        if (this.currentImageChosen.value instanceof FormData) {
+    setImagePreview(avatar: FormDataEntryValue): void {
+        if (avatar instanceof File) {
             if (this.selectedFile) {
                 const reader = new FileReader();
 
                 reader.onload = (e: any) => {
-                    this.imagePreview.next(e.target.result);
+                    this.imagePreview = e.target.result;
                 };
                 reader.readAsDataURL(this.selectedFile);
             }
         } else {
-            this.imagePreview.next(this.currentImageChosen.value.url);
+            this.imagePreview = avatar;
         }
     }
 
     async submit(): Promise<void> {
-        if (!(this.authService.tempUserLogin.avatar.value instanceof FormData)) {
-            if (this.authService.tempUserLogin.avatar.value.url == "") {
-                this.errorImage = true;
-                return;
-            }
+        const avatar = this.authService.tempUserLogin.value.get("avatar");
+        const avatarUrl = this.authService.tempUserLogin.value.get("avatarUrl");
+        if (!avatar && !avatarUrl) {
+            this.errorImage = true;
+            return;
+        } else if (avatarUrl && avatarUrl == "") {
+            this.errorImage = true;
+            return;
         }
-        const isLoggedIn = await this.authService.register(this.authService.tempUserLogin.username, this.authService.tempUserLogin.password, this.authService.tempUserLogin.email, this.authService.tempUserLogin.avatar.value);
+        this.errorImageType = false;
+        this.errorImage = false;
+        const isLoggedIn = await this.authService.register();
         if (isLoggedIn) {
             this.errorImage = false;
             this.router.navigate(['/home']);

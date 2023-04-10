@@ -20,16 +20,14 @@
                 <form>
                     <mat-form-field appearance="fill">
                       <mat-label for="username">{{'social-component.search-friend' | translate}}</mat-label>
-                      <input #usernameInput matInput placeholder="{{'social-component.search-friend' | translate}}" name="username" [(ngModel)]="onlineFriendUserNameSearch" (input)="onSearchChange(usernameInput.value)">
+                      <input #usernameInput matInput placeholder="{{'social-component.search-friend' | translate}}" name="username" [(ngModel)]="onlineFriendUserNameSearch" (input)="onSeachChangeOnlineFriend(usernameInput.value)">
                     </mat-form-field>
                 </form>
             </div>
             <div class="users">
-                <div *ngFor="let user of listFriendsDisplay" class="user">
-                    <div *ngIf="checkIfOnline(user.id)">
-                        <img src="{{user.avatar.url}}" class="avatar">
-                        <h3>{{user.username}}</h3>
-                    </div>
+                <div *ngFor="let user of this.listOnlineFriendsDisplay" class="user">
+                    <img src="{{user.avatar.url}}" class="avatar">
+                    <h3>{{user.username}}</h3>
                 </div>
             </div>
         </div>
@@ -39,7 +37,7 @@
                 <form>
                     <mat-form-field appearance="fill">
                       <mat-label for="username">{{'social-component.search-friend' | translate}}</mat-label>
-                      <input #usernameInput matInput placeholder="{{'social-component.search-friend' | translate}}" name="username" [(ngModel)]="allFriendUserNameSearch">
+                      <input #usernameInput matInput placeholder="{{'social-component.search-friend' | translate}}" name="username" [(ngModel)]="allFriendUserNameSearch" (input)="onSearChangeFriend(usernameInput.value)">
                     </mat-form-field>
                 </form>
             </div>
@@ -73,13 +71,13 @@
 
         <div *ngIf="getScreen() === 'En attente'" class="screen">
             <div class="users">
-                <div *ngFor="let user of user.value.pendingRequests" class="user">
-                    <img src="{{getUserAvatarUrl(user)}}" class="avatar">
-                    <h3>{{getUserUsername(user)}}</h3>
-                    <button mat-fab class="accept-button" (click)="acceptFriendRequest(user)">
+                <div *ngFor="let user of this.socialService.pendingFriendRequest$.value" class="user">
+                    <img src="{{getUserAvatarUrl(user.id)}}" class="avatar">
+                    <h3>{{getUserUsername(user.id)}}</h3>
+                    <button mat-fab class="accept-button" (click)="acceptFriendRequest(user.id)">
                         <mat-icon>check</mat-icon>
                     </button>
-                    <button mat-fab class="deny-button" (click)="denyFriendRequest(user)">
+                    <button mat-fab class="deny-button" (click)="denyFriendRequest(user.id)">
                         <mat-icon>close</mat-icon>
                     </button>
                 </div>

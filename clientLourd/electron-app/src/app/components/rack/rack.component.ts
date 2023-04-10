@@ -1,12 +1,13 @@
 import { Component, OnInit } from "@angular/core";
 import { BehaviorSubject } from "rxjs";
-import { Game, ScrabbleGame } from "@app/utils/interfaces/game/game";
+import { ScrabbleGame } from "@app/utils/interfaces/game/game";
 import { GameService } from "@app/services/game/game.service";
 import { UserService } from "@app/services/user/user.service";
 import { Tile } from "@app/utils/interfaces/game/tile";
-import {CdkDragDrop} from '@angular/cdk/drag-drop'
+import {CdkDragDrop} from '@angular/cdk/drag-drop';
 import { MouseService } from "@app/services/mouse/mouse.service";
-import { TileComponent } from "../tile/tile.component";
+import { Player } from "@app/utils/interfaces/game/player";
+import { MoveService } from "@app/services/game/move.service";
 
 @Component({
     selector: "app-rack",
@@ -14,33 +15,31 @@ import { TileComponent } from "../tile/tile.component";
     styleUrls: ["./rack.component.scss"],
 })
 export class RackComponent implements OnInit {
-    game!: BehaviorSubject<ScrabbleGame>;
+    game!: BehaviorSubject<ScrabbleGame | undefined>;
     rack: Tile[] = [];
-    constructor(private gameService: GameService, private userService: UserService, private mouseService:MouseService) {
+    constructor(private gameService: GameService, private userService: UserService, private mouseService:MouseService, private moveService: MoveService) {
         this.game = this.gameService.scrabbleGame;
         const currentRack = this.getPlayerRack();
         if (currentRack)    
             this.rack = currentRack;
-        console.log(this.rack);
-        console.log(this.userService.subjectUser.value.id);
     }
 
     ngOnInit(): void {
         this.game.subscribe(() => {
-            console.log("game updated");
             const currentRack = this.getPlayerRack();
             if (currentRack)    
                 this.rack = currentRack;
         });
     }
 
+    checkIfTurn(): boolean {
+        return this.game.value?.turn === this.userService.currentUserValue.id;
+    }
+
     private getPlayerRack(): Tile[] | undefined {
-        console.log(this.game.value);
-        console.log(this.game.value.players);
-        if (this.game.value.players) {
+        if (this.game.value?.players) {
             for (let i = 0; i < this.game.value.players.length; i++) {
                 if (this.game.value.players[i].id == this.userService.subjectUser.value.id) {
-                    console.log(this.game.value.players[i].rack);
                     return this.game.value.players[i].rack.tiles;
                 }   
             }
@@ -50,21 +49,50 @@ export class RackComponent implements OnInit {
     }
 
     drop(event: CdkDragDrop<string[]>) {
-        console.log(event);
-        console.log(event.dropPoint);
-        console.log(document.elementFromPoint(event.dropPoint.x,event.dropPoint.y));
-        let bruh = document.elementFromPoint(event.dropPoint.x, event.dropPoint.y);
-        if (document.getElementById("board")?.contains(bruh) == false) {
+        let clickedElem = document.elementFromPoint(event.dropPoint.x, event.dropPoint.y);
+        if (document.getElementById("board")?.contains(clickedElem) == false) {
             return;
         }
-        if (bruh && bruh?.tagName === "DIV") {
-            bruh = bruh.parentElement;
+        if (this.gameService.dragging.value === false) {
+            this.gameService.resetSelectedAndPlaced();
         }
-        const x = Number(bruh?.getAttribute("data-x"));
-        const y = Number(bruh?.getAttribute("data-y"));
-        const elem = event.item.element.nativeElement;
-        const tile : Tile = {letter: Number(elem.getAttribute("data-letter")), value: Number(elem.getAttribute("data-value"))};
-        console.log(tile);
-        this.mouseService.place_drag_drop(elem, x, y, tile);
+        setTimeout(() => {
+            this.gameService.dragging.next(true);
+            while (clickedElem && clickedElem?.tagName !== "MAT-GRID-TILE") {
+                clickedElem = clickedElem.parentElement;
+            }
+            if (clickedElem?.classList.contains("bad")) {
+                return;
+            }
+            const x = Number(clickedElem?.getAttribute("data-x"));
+            const y = Number(clickedElem?.getAttribute("data-y"));
+            if (this.gameService.scrabbleGame.value?.board[x][y].tile?.letter) {
+                return;
+            }
+            if (this.gameService.placedTiles === 0) {
+                this.moveService.firstX = y;
+                this.moveService.firstY = x;
+                this.moveService.placedFirstTile();
+            }
+            const elem = event.item.element.nativeElement;
+            const tile : Tile = {letter: Number(elem.getAttribute("data-letter")), value: Number(elem.getAttribute("data-value"))};
+            this.gameService.selectedTiles = [];
+            this.mouseService.resetColor();
+            if (this.gameService.scrabbleGame.value) {
+                const newPlayers: Player[] = this.gameService.scrabbleGame.value.players;
+                for (let i = 0; i < newPlayers.length; i++) {
+                    if (this.userService.currentUserValue.id === newPlayers[i].id) {
+                        for (let j = 0; j < newPlayers[i].rack.tiles.length; j++) {
+                            if (newPlayers[i].rack.tiles[j].letter == tile.letter) {
+                                newPlayers[i].rack.tiles.splice(j, 1);
+                                this.gameService.scrabbleGame.next({...this.gameService.scrabbleGame.value, players: newPlayers});
+                                this.mouseService.place_drag_drop(x, y, tile);
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+        }, 100); 
       }
 }

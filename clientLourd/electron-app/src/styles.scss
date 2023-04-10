@@ -165,3 +165,36 @@ button:hover {
     background: #dcdcdc;
     height: auto !important;
 }
+
+.dark-theme .mat-stepper-vertical-line::before {
+    top: -16px;
+    bottom: -16px;
+}
+
+.dark-theme .mat-vertical-stepper-header {
+    padding: 24px 24px;
+}
+
+.dark-theme .mat-step-header .mat-step-icon-selected {
+    background-color: #d2d5f2;
+    color: black;
+}
+
+.dark-theme .mat-step-header .mat-step-label.mat-step-label-active {
+    color: white;
+  }
+
+  .mat-vertical-stepper-header .mat-step-icon {
+    margin-right: 12px;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.54);
+  }
+
+  .mat-step-icon-state-done {
+    background-color: #424260;
+    color: white;
+  }
+
+  .mat-button-toggle-checked {
+    background-color: #e0e0e0;
+  }

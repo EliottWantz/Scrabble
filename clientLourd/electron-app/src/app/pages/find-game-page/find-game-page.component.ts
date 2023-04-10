@@ -14,16 +14,24 @@ export class FindGamePageComponent {
     openDialogJoinGame(): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = true;
-        this.dialog.open(JoinGameComponent, {width: '75%',
+        this.dialog.open(JoinGameComponent, {width: '80%',
         minHeight: '70vh',
-        height : '50vh'});
+        height : '50vh',
+        data: {isObserver: false}});
     }
 
     openDialogCreateGame(): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = true;
-        this.dialog.open(CreateGameComponent, {width: '75%',
+        this.dialog.open(CreateGameComponent, {});
+    }
+
+    openDialogJoinAsObserver(): void {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.disableClose = true;
+        this.dialog.open(JoinGameComponent, {width: '80%',
         minHeight: '70vh',
-        height : '50vh'});
+        height : '50vh',
+        data: {isObserver: true}});
     }
 }

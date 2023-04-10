@@ -1,13 +1,16 @@
 <div class="content">
   <div class="nav">
     <div class="nav-text" (click)="selectNavButton(0)" style="background-color: #424260; outline-color: #66678e; outline-width: 1px; outline-style: solid;">
+      <mat-icon>person</mat-icon>
       {{'profile-page.modify-profile' | translate}}
     </div>
     <div class="nav-text" (click)="selectNavButton(1)">
-      {{'profile-page.stats' | translate}}
+      <mat-icon>list_alt</mat-icon>
+      {{'profile-page.history' | translate}}
     </div>
     <div class="nav-text" (click)="selectNavButton(2)">
-      {{'profile-page.history' | translate}}
+      <mat-icon>access_time</mat-icon>
+      {{'profile-page.activity' | translate}}
     </div>
   </div>
 
@@ -15,14 +18,14 @@
     <div *ngIf="screen === 'Modifier mon profil'">
       <h2>{{'profile-page.avatar' | translate}}</h2>
       <div>
-        <img id="avatar" width="50%" src="{{user.value.avatar.url}}">
+        <img id="avatar" width="30%" src="{{user.value.avatar.url}}">
         <button id="upload-button" type="button" mat-raised-button (click)="fileInput.click()">{{'profile-page.modify-avatar' | translate}}</button>
             <input hidden (change)="onFileSelected($event)" #fileInput type="file">
             <span class="file-name">{{selectedFile.name}}</span>
             <button mat-raised-button type="submit">{{'profile-page.submit' | translate}}</button>
       </div>
+
       <h2>{{'profile-page.modify-info' | translate}}</h2>
-      <div>
         <div>
           <h4>{{'profile-page.modify-username' | translate}}</h4>
           <div class="">{{'profile-page.username' | translate}}{{user.value.username}}</div>
@@ -35,113 +38,55 @@
           </div>
         </div>
 
-        <div>
-          <h4>{{'profile-page.modify-email' | translate}}</h4>
-          <div class="">{{'profile-page.email' | translate}} : {{user.value.email}}</div>
-          <div class="form">
-            <mat-form-field appearance="fill">
-              <mat-label class="labels">{{'register-component.email' | translate}}</mat-label>
-              <input matInput type="email" class="form-control" value="" placeholder="{{'register-component.email' | translate}}">
-            </mat-form-field>
-            <button mat-raised-button type="submit">{{'profile-page.submit' | translate}}</button>
+        <div class="stats">
+          <div class="stat">
+            <mat-icon>format_list_numbered</mat-icon>
+            {{'profile-page.games-played' | translate}}{{user.value.summary.userStats.nbGamesPlayed}}
+          </div>
+          <div class="stat">
+            <mat-icon>check_circle</mat-icon>
+            {{'profile-page.games-won' | translate}}{{user.value.summary.userStats.nbGamesWon}}
+          </div>
+          <div class="stat">
+            <mat-icon>scoreboard</mat-icon>
+            {{'profile-page.average-points' | translate}}{{user.value.summary.userStats.averagePointsPerGame}}
+          </div>
+          <div class="stat">
+            <mat-icon>timelapse</mat-icon>
+            {{'profile-page.average-time' | translate}}{{user.value.summary.userStats.averageTimePlayed / 1000}} {{'profile-page.seconds' | translate}}
           </div>
         </div>
-      </div>
     </div>
 
-    <div *ngIf="screen === 'Statistiques'">
-      <div>{{'profile-page.games-played' | translate}}{{user.value.summary.userStats.nbGamesPlayed}}</div>
-          <div>{{'profile-page.games-won' | translate}}{{user.value.summary.userStats.nbGamesWon}}</div>
-          <div>{{'profile-page.average-points' | translate}}{{user.value.summary.userStats.averagePointsPerGame}}</div>
-          <div>{{'profile-page.average-time' | translate}}{{user.value.summary.userStats.averageTimePlayed}}</div>
+    <div *ngIf="screen === 'Historique'" class="history">
+      <mat-grid-list cols="3" rowHeight="20px" class="grid">
+        <mat-grid-tile><h3>{{"profile-page.type-event" | translate}}</h3></mat-grid-tile>
+        <mat-grid-tile><h3>{{"profile-page.startDate" | translate}}</h3></mat-grid-tile>
+        <mat-grid-tile><h3>{{"profile-page.endDate" | translate}}</h3></mat-grid-tile>
+        <mat-grid-tile [colspan]="3"><mat-divider></mat-divider></mat-grid-tile>
+        <div *ngFor="let game of user.value.summary.gamesStats; let last = last">
+          <mat-grid-tile>{{getWonOrLost(game.gameWon)}}</mat-grid-tile>
+          <mat-grid-tile>{{getDate(game.gameStartTime) + " "}} {{getTime(game.gameStartTime)}}</mat-grid-tile>
+          <mat-grid-tile>{{getDate(game.gameEndTime) + " "}} {{getTime(game.gameEndTime)}}</mat-grid-tile>
+          <mat-grid-tile *ngIf="!last" [colspan]="3"><mat-divider></mat-divider></mat-grid-tile>
+        </div>
+      </mat-grid-list>
     </div>
 
-    <div *ngIf="screen === 'Historique'">
-      <div *ngFor="let networkLog of user.value.summary.networkLogs">{{networkLog.eventType}}: {{getDate(networkLog.eventTime)}}</div>
-          <mat-divider></mat-divider>
-          <div *ngFor="let gameStat of user.value.summary.gamesStats">{{gameStat.gameWon}}: {{gameStat.eventDate}}</div>
-    </div>
-  </div>
-</div>
-
-
-  <!--
-    <button mat-fab color="accent" class="home-button" routerLink="/home" routerLinkActive="router-link-active">
-    <mat-icon>home</mat-icon>
-  </button>
-  <div class="row">
-    <div class="column">
-      <mat-card class="card">
-        <mat-card-header class="">
-          <mat-card-title>
-            Modifier le profil
-          </mat-card-title>
-        </mat-card-header>
-        <mat-divider></mat-divider>
-        <mat-card-content>
-          <img id="avatar" width="50%" src="{{user.value.avatar.url}}">
-          <div class="">{{user.value.username}}</div>
-          <div class="form">
-            <mat-form-field appearance="fill">
-              <mat-label>Nom d'utilisateur</mat-label>
-              <input matInput placeholder="Entrez votre nom d'utilisateur" name="usename" [(ngModel)] ="username">
-            </mat-form-field>
-          </div>
-          
-          <div style="margin-top: 1%;">{{user.value.email}}</div>
-          <div class="form">
-            <mat-form-field appearance="fill">
-              <mat-label class="labels">Email </mat-label>
-              <input matInput type="email" class="form-control" value="" placeholder="Email">
-            </mat-form-field>
-          </div>
-
-          <div class="form">
-            <button id="upload-button" type="button" mat-raised-button (click)="fileInput.click()">Choose File</button>
-            <input hidden (change)="onFileSelected($event)" #fileInput type="file">
-            <span class="file-name">{{selectedFile.name}}</span>
-          </div>
-          <button mat-raised-button color="accent" type="button" (click)="submit()">Enregistrer</button>
-          
-        </mat-card-content>
-      </mat-card>
-    </div>
-  
-    <div class="column">
-      <mat-card class="card">
-        <mat-card-header>
-          <mat-card-title>
-            Statistiques
-          </mat-card-title>
-        </mat-card-header>
-        <mat-divider></mat-divider>
-        <mat-card-content>
-          <div *ngFor="let networkLog of user.value.summary.networkLogs">{{networkLog.eventType}}: {{getDate(networkLog.evenTime)}}</div>
-          <mat-divider></mat-divider>
-          <div *ngFor="let gameStat of user.value.summary.gamesStats">{{gameStat.gameWon}}: {{gameStat.eventDate}}</div>
-        </mat-card-content>
-      </mat-card>
-    </div>
-  
-    <div class="column">
-      <mat-card class="card">
-        <mat-card-header>
-          <mat-card-title>
-            Activité de l'utilisateur
-          </mat-card-title>
-        </mat-card-header>
-        <mat-divider></mat-divider>
-        <mat-card-content>
-          <div>Nombre de parties jouées: {{user.value.summary.userStats.nbGamesPlayed}}</div>
-          <div>Nombre de parties gagnées: {{user.value.summary.userStats.nbGamesWon}}</div>
-          <div>Moyenne de points par partie: {{user.value.summary.userStats.averagePointsPerGame}}</div>
-          <div>Moyenne de temps joué: {{user.value.summary.userStats.averageTimePlayed}}</div>
-        </mat-card-content>
-      </mat-card>
+    <div *ngIf="screen === 'Activité'" class="history">
+      <mat-grid-list cols="3" rowHeight="20px">
+        <mat-grid-tile><h3>{{"profile-page.type-event" | translate}}</h3></mat-grid-tile>
+        <mat-grid-tile><h3>{{"profile-page.date" | translate}}</h3></mat-grid-tile>
+        <mat-grid-tile><h3>{{"profile-page.hour" | translate}}</h3></mat-grid-tile>
+        <mat-grid-tile [colspan]="3"><mat-divider></mat-divider></mat-grid-tile>
+        <div *ngFor="let activity of user.value.summary.networkLogs; let last = last">
+          <mat-grid-tile>{{activity.eventType}}</mat-grid-tile>
+          <mat-grid-tile>{{getDate(activity.eventTime)}}</mat-grid-tile>
+          <mat-grid-tile>{{getTime(activity.eventTime)}}</mat-grid-tile>
+          <mat-grid-tile *ngIf="!last" [colspan]="3"><mat-divider></mat-divider></mat-grid-tile>
+        </div>
+      </mat-grid-list>
     </div>
   </div>
+  <app-chat-box *ngIf="isLoggedIn()"></app-chat-box>
 </div>
-
-
-  -->
-  

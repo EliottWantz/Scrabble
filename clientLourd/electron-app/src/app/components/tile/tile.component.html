@@ -1,8 +1,10 @@
-<div #elem id="ship-box" (click)="clicked()" class="tile" [attr.data-letter]="tile.letter" [attr.data-value]="tile.value" cdkDrag>
-    <div class="letter">
-        {{getASCII()}}
-    </div>
-    <div class="value">
-        {{tile.value}}
+<div *ngIf="tile.letter" #elem id="ship-box" (click)="clicked()" class="tile" [class.tilesTurn]="!tile.disabled" [attr.data-x]="tile.x" [attr.data-y]="tile.y" [attr.data-letter]="tile.letter" [attr.data-value]="tile.value" cdkDrag [cdkDragDisabled]="tile.disabled === true || !checkIfTurn()">
+    <div class="content">
+        <div class="letter">
+            {{getASCII()}}
+        </div>
+        <div class="value">
+            {{tile.value}}
+        </div>
     </div>
 </div>

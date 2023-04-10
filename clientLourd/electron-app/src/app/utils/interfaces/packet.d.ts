@@ -1,5 +1,5 @@
 import { Event } from "@app/utils/events/events";
-import { MoveInfo } from "@app/utils/interfaces/game/move"
+import { MoveInfo, Position } from "@app/utils/interfaces/game/move"
 import { ChatMessage } from "@app/utils/interfaces/chat-message";
 import { Room } from "@app/utils/interfaces/room";
 import { Game, ScrabbleGame } from "@app/utils/interfaces/game/game";
@@ -8,6 +8,11 @@ import { User } from "@app/utils/interfaces/user";
 export interface Packet {
     event: Event;
     payload: ClientPayload | ServerPayload;
+}
+
+export interface FirstMovePayload {
+    gameId: string;
+    coordinates: Position;
 }
 
 export type ClientPayload = ChatMessage
@@ -21,7 +26,9 @@ export type ClientPayload = ChatMessage
 | LeaveGamePayload
 | StartGamePayload
 | PlayMovePayload
-| IndicePayload;
+| IndicePayload
+| ReplaceBotByObserverPayload
+| FirstMovePayload;
 
 export interface CreateRoomPayload {
     roomName: string;
@@ -50,6 +57,7 @@ export interface LeaveDMRoomPayload {
 export interface CreateGamePayload {
     password: string;
     userIds: string[];
+    isPrivate: boolean;
 }
 
 export interface JoinGamePayload {
@@ -58,6 +66,15 @@ export interface JoinGamePayload {
 }
 
 export interface LeaveGamePayload {
+    gameId: string;
+}
+
+export interface JoinGameAsObserverPayload {
+    gameId: string;
+    password: string;
+}
+
+export interface LeaveGameAsObserverPayload {
     gameId: string;
 }
 
@@ -71,6 +88,10 @@ export interface PlayMovePayload {
 }
 
 export interface IndicePayload {
+    gameId: string;
+}
+
+export interface ReplaceBotByObserverPayload {
     gameId: string;
 }
 
@@ -95,7 +116,16 @@ export type ServerPayload = JoinedRoomPayload
 | GameOverPayload
 | FriendRequestPayload
 | ServerIndicePayload
-| ErrorPayload;
+| ErrorPayload
+| ListUsersOnlinePayload
+| ListObservableGamesPayload
+| UserRequestToJoinGamePayload
+| UserRequestToJoinTournamentPayload
+| VerdictJoinGameRequestPayload
+| VerdictJoinTournamentRequestPayload
+| RevokeJoinGameRequestPayload
+| JoinedGameAsObserverPayload
+| FirstMovePayload;
 
 export interface JoinedRoomPayload {
     roomId: string;
@@ -196,4 +226,44 @@ export interface ServerIndicePayload {
 
 export interface ErrorPayload {
     error: string;
+}
+
+export interface ListUsersOnlinePayload {
+    users: User[];
+}
+
+export interface ListObservableGamesPayload {
+    games: Game[];
+}
+
+export interface UserRequestToJoinGamePayload {
+    gameId: string;
+    userId: string;
+    username: string;
+}
+
+export interface UserRequestToJoinTournamentPayload {
+    tournamentId: string;
+    userId: string;
+    username: string;
+}
+
+export interface VerdictJoinGameRequestPayload {
+    gameId: string;
+    userId: string;
+}
+
+export interface VerdictJoinTournamentRequestPayload {
+    tournamentId: string;
+    userId: string;
+}
+
+export interface RevokeJoinGameRequestPayload {
+    gameId: string;
+    userId: string;
+}
+
+export interface JoinedGameAsObserverPayload {
+    game: Game;
+    gameUpdate: ScrabbleGame;
 }

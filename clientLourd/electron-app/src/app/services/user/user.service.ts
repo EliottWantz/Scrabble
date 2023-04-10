@@ -37,7 +37,7 @@ export class UserService {
     }
 
     public setUser(user: User): void {
-        console.log(user);
+        //console.log(user);
         this.subjectUser.next(user);
 
     }

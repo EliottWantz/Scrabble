@@ -20,9 +20,6 @@ export class RegisterComponent implements OnInit {
     
     constructor(private authService: AuthenticationService, private router: Router, private commService: CommunicationService) { 
         this.defaultAvatars = [];
-        this.authService.tempUserLogin.username = "";
-        this.authService.tempUserLogin.password = "";
-        this.authService.tempUserLogin.email = "";
     }
     
     ngOnInit(): void {
@@ -37,9 +34,11 @@ export class RegisterComponent implements OnInit {
         if (this.username == "" || this.password == "" || this.email =="")
             return;
 
-        this.authService.tempUserLogin.username = this.username;
-        this.authService.tempUserLogin.password = this.password;
-        this.authService.tempUserLogin.email = this.email;
+        const formData = new FormData();
+        formData.append("username", this.username);
+        formData.append("password", this.password);
+        formData.append("email", this.email);
+        this.authService.tempUserLogin.next(formData);
         this.router.navigate(['/avatar']);
         //const isLoggedIn = await this.authService.register(this.username, this.password, this.email, this.avatar.url, this.avatar.fileId);
 

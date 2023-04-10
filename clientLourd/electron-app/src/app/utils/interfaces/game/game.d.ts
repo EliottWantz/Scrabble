@@ -9,6 +9,7 @@ export interface ScrabbleGame {
     numPassMoves: number;
     turn: string;
     timer: number;
+    tileCount: number;
 }
 
 export interface Game {
@@ -16,4 +17,7 @@ export interface Game {
     creatorId: string;
     userIds: string[];
     isProtected: boolean;
+    isPrivateGame: boolean;
+    winnerId: string;
+    tournamentId: string;
 }

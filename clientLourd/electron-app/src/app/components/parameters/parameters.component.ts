@@ -89,14 +89,14 @@ export class ParametersComponent implements OnInit {
     }
 
     async createGame(): Promise<void> {
-        const payload: CreateGamePayload = {
+        /*const payload: CreateGamePayload = {
             password: "",
             userIds: []
           }
           const event : ClientEvent = "create-game";
           this.webSocketService.send(event, payload);
           this.waiting = true;
-        this.created = true;
+        this.created = true;*/
     }
     // listOfGame(): void {
     //     if (!this.name.errors) {

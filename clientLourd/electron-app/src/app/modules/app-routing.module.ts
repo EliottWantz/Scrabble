@@ -11,6 +11,7 @@ import { AvatarSelectionPageComponent } from '@app/pages/avatar-selection-page/a
 import { WaitRoomPageComponent } from '@app/pages/waiting-room-page/waiting-room-page.component';
 import { FindGamePageComponent } from '@app/pages/find-game-page/find-game-page.component';
 import { ChatBoxComponent } from '@app/components/chat-box/chat-box.component';
+import { GameObservePageComponent } from '@app/pages/game-observe-page/game-observe-page.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' },
@@ -21,6 +22,7 @@ const routes: Routes = [
   { path: 'register', component: RegisterPageComponent },
   { path: 'avatar', component: AvatarSelectionPageComponent },
   { path: 'game', component: GamePageComponent },
+  { path: 'gameObserve', component: GameObservePageComponent },
   { path: 'social', component: SocialPageComponent },
   { path: 'waitingRoom', component: WaitRoomPageComponent },
   { path: 'find-game', component: FindGamePageComponent },
