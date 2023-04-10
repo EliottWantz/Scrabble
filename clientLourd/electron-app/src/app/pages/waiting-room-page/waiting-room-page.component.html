@@ -1,8 +1,5 @@
 <div id="container">
   <img id="scrabble-img" src="../../../assets/scrabble.png">
-  <!--
-    <mat-spinner color="primary"></mat-spinner>
-  -->
   <h3>{{'waiting-room-page.text' | translate}}</h3>
   <div>
     <h4>{{getNumUsers()}}{{'waiting-room-page.players' | translate}}</h4>
@@ -23,7 +20,7 @@
   <div *ngIf="getNumUsers() >= 2 && checkIfCreator()">
     <button mat-flat-button color="accent" (click)="startGame()" routerLink="/game">{{'waiting-room-page.start-game' | translate}}</button>
   </div>
-  <mat-expansion-panel id="friend-list">
+  <mat-expansion-panel id="friend-list" (opened)="onOpenPanel()">
     <mat-expansion-panel-header>
       <mat-panel-title>
         Friends

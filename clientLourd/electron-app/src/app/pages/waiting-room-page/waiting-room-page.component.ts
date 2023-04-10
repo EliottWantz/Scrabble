@@ -48,7 +48,7 @@ export class WaitRoomPageComponent implements OnInit {
   ngOnInit(): void {
     this.socialService.updatedOnlineFriends();
     this.socialService.onlineFriends$.subscribe((users) => {
-      this.onlineFriends = this.socialService.onlineFriends$.value;
+      this.onlineFriends = users;
     });
   }
 
@@ -89,19 +89,6 @@ export class WaitRoomPageComponent implements OnInit {
   checkIfCreator(): boolean {
     return this.userService.currentUserValue.id == this.gameRoom.value?.creatorId;
   }
-
-  /*getUserNamesAndAvatarUrls(game: Game): string {
-    for (const id of game.userIds) {
-      const user = this.storageService.getUserFromId(id);
-      if (user && user.id != this.userService.currentUserValue.id)
-        return user.username;
-    }
-    const requestUser = this.storageService.getUserFromId(id);
-    if (requestUser) {
-      return requestUser.avatar.url;
-    }
-    return "";
-  }*/
 
   getAvatarUrl(id: string): string {
     const user = this.storageService.getUserFromId(id);
@@ -150,11 +137,18 @@ export class WaitRoomPageComponent implements OnInit {
   isLoggedIn(): boolean {
     return this.userService.isLoggedIn;
   }
+  
+  onOpenPanel(): void {
+    this.socialService.updatedOnlineFriends();
+  }
 
   getFriends(): User[] {
-    const friends = [];
-    console.log("RÉSISTANCE");
-    console.log(this.onlineFriends);
+    const friends: User[] = [];
+
+    if (this.onlineFriends == undefined){
+      return friends
+    }
+
     for (const friend of this.onlineFriends) {
       if (!this.gameRoom.value?.userIds.includes(friend.id)) {
         friends.push(friend);
