@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { FormBuilder } from "@angular/forms";
 import { CommunicationService } from "@app/services/communication/communication.service";
 import { GameService } from "@app/services/game/game.service";
@@ -20,18 +20,19 @@ import { BehaviorSubject } from "rxjs";
   templateUrl: "./waiting-room-page.component.html",
   styleUrls: ["./waiting-room-page.component.scss"],
 })
-export class WaitRoomPageComponent {
+export class WaitRoomPageComponent implements OnInit {
   gameRoom!: BehaviorSubject<Game | undefined>;
   users: {userId: string, username: string}[];
   usersWaiting: {userId: string, username: string}[];
   user: User;
-  onlineFriends: User[] = [];
+  onlineFriends: User[];
   constructor(private gameService: GameService, private userService: UserService, private socketService: WebSocketService, private storageService: StorageService,
     private commService: CommunicationService, private socialService: SocialService) {
     this.gameRoom = this.gameService.game
     this.user = this.userService.currentUserValue
     this.users = [];
     this.usersWaiting = [];
+    this.onlineFriends = [];
     this.gameService.game.subscribe((game) => {
       if (game)
         this.getPlayers(game);
@@ -41,11 +42,16 @@ export class WaitRoomPageComponent {
       this.usersWaiting = users;
     });
 
-    this.socialService.updatedOnlineFriends().then(() => {
-      console.log("updated friends");
-    });
-    this.onlineFriends = this.socialService.onlineFriends;
+    
   }
+
+  ngOnInit(): void {
+    this.socialService.updatedOnlineFriends();
+    this.socialService.onlineFriends$.subscribe((users) => {
+      this.onlineFriends = this.socialService.onlineFriends$.value;
+    });
+  }
+
 
   /*isCreator(): boolean {
     return this.userService.currentUserValue.id == this.gameRoom.value.creatorId;
@@ -147,7 +153,9 @@ export class WaitRoomPageComponent {
 
   getFriends(): User[] {
     const friends = [];
-    for (const friend of this.socialService.onlineFriends) {
+    console.log("RÉSISTANCE");
+    console.log(this.onlineFriends);
+    for (const friend of this.onlineFriends) {
       if (!this.gameRoom.value?.userIds.includes(friend.id)) {
         friends.push(friend);
       }
