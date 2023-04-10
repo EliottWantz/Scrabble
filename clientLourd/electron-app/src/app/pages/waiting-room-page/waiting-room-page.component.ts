@@ -46,9 +46,9 @@ export class WaitRoomPageComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.socialService.updatedOnlineFriends();
+    //this.socialService.updatedOnlineFriends();
     this.socialService.onlineFriends$.subscribe((users) => {
-      this.onlineFriends = this.socialService.onlineFriends$.value;
+      this.onlineFriends = users;
     });
   }
 
@@ -113,37 +113,38 @@ export class WaitRoomPageComponent implements OnInit {
 
   acceptPlayer(requestorId: string): void {
     if (this.gameRoom.value)
-      this.commService.acceptPlayer(this.userService.currentUserValue.id, requestorId, this.gameRoom.value.id).subscribe({
-        next: () => {
-          //console.log("accepted");
-          const newUsersWaiting = this.gameService.usersWaiting.value;
-          for (const userWaiting of newUsersWaiting) {
-            if (userWaiting.userId == requestorId)
-              newUsersWaiting.splice(newUsersWaiting.indexOf(userWaiting), 1);
-          }
-          this.gameService.usersWaiting.next(newUsersWaiting);
-        },
-        error: (err) => {
-          //console.log(err);
+      this.commService.acceptPlayer(this.userService.currentUserValue.id, requestorId, this.gameRoom.value.id).then(() => {
+        //console.log("accepted");
+        const newUsersWaiting = this.gameService.usersWaiting.value;
+        for (const userWaiting of newUsersWaiting) {
+          if (userWaiting.userId == requestorId)
+            newUsersWaiting.splice(newUsersWaiting.indexOf(userWaiting), 1);
         }
+        this.gameService.usersWaiting.next(newUsersWaiting);
+      }).catch((err) => {
+        console.log(err);
       });
   }
 
   denyPlayer(requestorId: string): void {
     if (this.gameRoom.value)
-      this.commService.denyPlayer(this.userService.currentUserValue.id, requestorId, this.gameRoom.value.id).subscribe({
-        next: () => {
-          //console.log("denied");
+      this.commService.denyPlayer(this.userService.currentUserValue.id, requestorId, this.gameRoom.value.id).then(() => {
+        /*const newUsersWaiting = this.gameService.usersWaiting.value;
+          for (const userWaiting of newUsersWaiting) {
+            if (userWaiting.userId == requestorId)
+              newUsersWaiting.splice(newUsersWaiting.indexOf(userWaiting), 1);
+          }
+          this.gameService.usersWaiting.next(newUsersWaiting);*/
+      }).catch((err) => {
+        if (err.error.message === "The user has revoked the request to join the game") {
           const newUsersWaiting = this.gameService.usersWaiting.value;
           for (const userWaiting of newUsersWaiting) {
             if (userWaiting.userId == requestorId)
               newUsersWaiting.splice(newUsersWaiting.indexOf(userWaiting), 1);
           }
           this.gameService.usersWaiting.next(newUsersWaiting);
-        },
-        error: (err) => {
-          //console.log(err);
         }
+        console.log(err);
       });
   }
 
