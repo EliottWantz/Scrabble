@@ -1,0 +1,20 @@
+<div class="content" *ngIf="invites.length > 0">
+    <div *ngFor="let invite of invites; let i = index" class="invite">
+        <div class="info">
+            <img class="avatar" [src]="getAvatarInvite(i)">
+            {{getInviterName(i)}}
+            <form *ngIf="invite.game.isProtected">
+                <mat-form-field>
+                    <input matInput placeholder="Enter the password" [(ngModel)]="passwords[i]" name="password">
+                </mat-form-field>
+            </form>
+            <button mat-mini-fab class="accept-button" (click)="acceptInvite(i)" [ngStyle]="{transform: 'scale(0.8)'}" type="submit">
+                <mat-icon>check</mat-icon>
+            </button>
+            <button mat-mini-fab class="deny-button" (click)="denyInvite(i)" [ngStyle]="{transform: 'scale(0.8)'}" type="button">
+                <mat-icon>close</mat-icon>
+            </button>
+        </div>
+        <strong style="color: red;">{{error}}</strong>
+    </div>
+</div>
