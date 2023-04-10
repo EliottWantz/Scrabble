@@ -451,6 +451,22 @@ func (m *Manager) AcceptFriendInvitationToGame(c *fiber.Ctx) error {
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
+	invitedUser, err := m.UserSvc.Repo.Find(req.InvitedID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+
+	if invitedUser.JoinedGame != "" { // leave old game
+		m.GameSvc.RemoveUserFromGame(invitedUser.JoinedGame, invitedUser.ID)
+		r, err := m.GetRoom(invitedUser.JoinedGame)
+		if err != nil {
+			return fiber.NewError(fiber.StatusBadRequest, err.Error())
+		}
+		if err := r.BroadcastLeaveGamePackets(inviterClient, invitedUser.JoinedGame); err != nil {
+			m.logger.Error("broadcast leave game packets", err)
+		}
+	}
+
 	{
 		p, err := NewAcceptedInviteToGamePacket(InviteToGamePayload{
 			GameID:    req.GameID,

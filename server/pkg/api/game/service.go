@@ -348,6 +348,9 @@ func (s *Service) GetIndices(gID string) ([]MoveInfo, error) {
 		for pos, letter := range tileMove.Covers {
 			covers[stringifyPoint(pos)] = string(letter)
 		}
+		if tileMove.CachedScore == nil {
+			tileMove.Score(g.ScrabbleGame.State())
+		}
 		info := MoveInfo{
 			Type:    MoveTypePlayTile,
 			Letters: tileMove.Word,
