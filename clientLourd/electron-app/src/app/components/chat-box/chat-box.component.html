@@ -23,9 +23,12 @@
                 *ngFor="let room of getRooms(); let last = last; let i = index"
               >
                 <div class="item">
-                  <mat-option [value]="room.id">
+                  <mat-option [value]="room.id" *ngIf="room$.value.name !== 'Global Room'">
                     {{ room.name }}
                   </mat-option>
+                  <mat-option [value]="room.id" *ngIf="room$.value.name === 'Global Room'">{{
+                    "chat-box-component.global" | translate
+                  }}</mat-option>
                   <mat-icon
                     class="close-icon"
                     (click)="leaveRoom(i)"
