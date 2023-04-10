@@ -40,7 +40,7 @@ class Tournament {
                 (userId) => json["observateurIds"][observateurIdsIndex++]
         )),
         poolGames: List<Game>.from((json["poolGames"] as List).map(
-            (poolGame) => json["poolGames"][poolGamesIndex++]
+            (poolGame) => Game.fromJson(json["poolGames"][poolGamesIndex++])
         )),
         finale: json["finale"],
         isOver: json["isOver"],

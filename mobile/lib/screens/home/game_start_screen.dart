@@ -264,10 +264,10 @@ class GameStartScreen extends StatelessWidget {
       _selectedType.value[i].value = i == index;
     }
     if (gameMode == 'tournoi') {
+      _isPrivate = _selectedType.value[1].value;
+    } else {
       _isProtected.value = _selectedType.value[1].value;
       _isPrivate = _selectedType.value[2].value;
-    } else {
-      _isPrivate = _selectedType.value[1].value;
     }
   }
 
@@ -576,11 +576,11 @@ class GameStartScreen extends StatelessWidget {
                 ElevatedButton.icon(
                   onPressed: () {
                     if (tournament.isPrivate) {
-                      _websocketService.joinGame(tournament.id);
+                      _websocketService.joinTournament(tournament.id);
                       _showWaitingForCreatorApprovalDialog(tournament.id);
                     }
                     else {
-                      _websocketService.joinGame(tournament.id);
+                      _websocketService.joinTournament(tournament.id);
                       // Get.toNamed(
                       //     Routes.HOME + Routes.GAME_START + Routes.LOBBY);
                     }

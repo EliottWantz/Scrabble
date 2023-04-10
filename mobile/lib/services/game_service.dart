@@ -30,8 +30,11 @@ class GameService extends GetxService {
   final currentGameRoomUserIds = <String>[].obs;
   final currentGameRoomObserverIds = <String>[].obs;
 
+  final currentTournamentUserIds = <String>[].obs;
+
   //Private game
   final pendingJoinGameRequestUserIds = <String>[].obs;
+  final pendingJoinTournamentRequestUserIds = <String>[].obs;
 
   final sentGameInvitesUsernames = <String>[].obs;
 

@@ -10,6 +10,7 @@ import 'package:client_leger/models/game.dart';
 import 'package:client_leger/models/join_dm_payload.dart';
 import 'package:client_leger/models/join_game_payload.dart';
 import 'package:client_leger/models/join_room_payload.dart';
+import 'package:client_leger/models/join_tournament_payload.dart';
 import 'package:client_leger/models/play_move_payload.dart';
 import 'package:client_leger/models/requests/accept_friend_request.dart';
 import 'package:client_leger/models/requests/chat_message_request.dart';
@@ -20,7 +21,9 @@ import 'package:client_leger/models/requests/indice_request.dart';
 import 'package:client_leger/models/requests/join_dm_request.dart';
 import 'package:client_leger/models/requests/join_game_as_observer_request.dart';
 import 'package:client_leger/models/requests/join_room_request.dart';
+import 'package:client_leger/models/requests/join_tournament_request.dart';
 import 'package:client_leger/models/requests/play_move_request.dart';
+import 'package:client_leger/models/requests/start_tournament_request.dart';
 import 'package:client_leger/models/response/accept_friend_response.dart';
 import 'package:client_leger/models/response/chat_message_response.dart';
 import 'package:client_leger/models/response/friend_request_response.dart';
@@ -40,12 +43,15 @@ import 'package:client_leger/models/response/send_friend_response.dart';
 import 'package:client_leger/models/response/server_error_response.dart';
 import 'package:client_leger/models/response/timer_response.dart';
 import 'package:client_leger/models/response/joined_game_as_observer_response.dart';
+import 'package:client_leger/models/response/tournament_update_response.dart';
 import 'package:client_leger/models/response/user_joined_game_response.dart';
 import 'package:client_leger/models/response/user_joined_response.dart';
 import 'package:client_leger/models/response/user_joined_room_response.dart';
+import 'package:client_leger/models/response/user_joined_tournament_response.dart';
 import 'package:client_leger/models/response/user_request_to_join_game_accepted_response.dart';
 import 'package:client_leger/models/response/user_request_to_join_game_response.dart';
 import 'package:client_leger/models/start_game_payload.dart';
+import 'package:client_leger/models/start_tournament_payload.dart';
 import 'package:client_leger/models/user.dart';
 import 'package:client_leger/routes/app_routes.dart';
 import 'package:client_leger/services/notification_service.dart';
@@ -216,6 +222,13 @@ class WebsocketService extends GetxService {
           handleEventJoinedTournament(joinedTournamentResponse);
         }
         break;
+      case ServerEventUserJoinedTournament:
+        {
+          UserJoinedTournamentResponse userJoinedTournamentResponse =
+          UserJoinedTournamentResponse.fromRawJson(data);
+          handleEventUserJoinedTournament(userJoinedTournamentResponse);
+        }
+        break;
       case ServerEventChatMessage:
         {
           // roomId = data.payload!.roomId;
@@ -263,6 +276,13 @@ class WebsocketService extends GetxService {
               GameUpdateResponse.fromRawJson(data);
           print(gameUpdateResponse.toString());
           handleServerEventGameUpdate(gameUpdateResponse);
+        }
+        break;
+      case ServerEventTournamentUpdate:
+        {
+          TournamentUpdateResponse tournamentUpdateResponse =
+            TournamentUpdateResponse.fromRawJson(data);
+          handleServerEventTournamentUpdate(tournamentUpdateResponse);
         }
         break;
       case ServerEventTimerUpdate:
@@ -427,7 +447,8 @@ class WebsocketService extends GetxService {
       gameService.currentGameRoomUserIds.addAll(currentGame!.userIds);
     }
     Get.toNamed(
-        Routes.HOME + Routes.GAME_START + Routes.LOBBY);
+        Routes.HOME + Routes.GAME_START + Routes.LOBBY,
+        arguments: '');
   }
 
   void handleEventJoinedGameAsObserver(JoinedGameAsObserverResponse joinedGameAsObserverResponse) {
@@ -477,20 +498,33 @@ class WebsocketService extends GetxService {
   void handleEventJoinedTournament(JoinedTournamentResponse joinedTournamentResponse) {
     gameService.currentTournamentId = joinedTournamentResponse.payload.id;
     gameService.currentTournamentInfo = joinedTournamentResponse.payload;
-    gameService.currentGameRoomUserIds!.add(userService.user.value!.id);
-    Room gameRoom = Room(
+    gameService.currentTournamentUserIds!.add(userService.user.value!.id);
+    Room tournamentRoom = Room(
         roomId: joinedTournamentResponse.payload.id,
         roomName: 'Tournament Room',
         userIds: joinedTournamentResponse.payload.userIds,
         messages: <ChatMessagePayload>[]
     );
-    roomService.addRoom(joinedTournamentResponse.payload.id, gameRoom);
+    roomService.addRoom(joinedTournamentResponse.payload.id, tournamentRoom);
     final currentTournament = gameService.getJoinableTournamentById(gameService.currentTournamentId);
     if (currentTournament != null) {
-      gameService.currentGameRoomUserIds.addAll(currentTournament!.userIds);
+      gameService.currentTournamentUserIds.addAll(currentTournament!.userIds);
     }
     Get.toNamed(
-        Routes.HOME + Routes.GAME_START + Routes.LOBBY);
+        Routes.HOME + Routes.GAME_START + Routes.LOBBY,
+        arguments: 'tournoi');
+  }
+
+  void handleEventUserJoinedTournament(UserJoinedTournamentResponse userJoinedTournamentResponse) {
+    gameService.currentTournamentUserIds!
+        .add(userJoinedTournamentResponse.payload.userId);
+
+    if (gameService.currentTournamentInfo!.isPrivate) {
+      if (gameService.currentTournamentInfo!.creatorId != userService.user.value!.id) {
+        return;
+      }
+      gameService.pendingJoinTournamentRequestUserIds.remove(userJoinedTournamentResponse.payload.userId);
+    }
   }
 
   void handleServerEventChatMessage(ChatMessageResponse chatMessageResponse) {
@@ -555,6 +589,8 @@ class WebsocketService extends GetxService {
       gameController.getIndices();
     }
   }
+
+  void handleServerEventTournamentUpdate(TournamentUpdateResponse tournamentUpdateResponse) {}
 
   void handleServerEventTimerUpdate(TimerResponse timerResponse) {
     gameService.currentGameTimer.value = timerResponse.payload.timer;
@@ -625,7 +661,8 @@ class WebsocketService extends GetxService {
       }
       break;
       default: {
-        print('error message not treated');
+        print('error treated by default case');
+        DialogHelper.showErrorDialog(description: errorResponse.payload.error);
       }
     }
   }
@@ -698,6 +735,13 @@ class WebsocketService extends GetxService {
     socket.sink.add(joinGameRoomRequest.toRawJson());
   }
 
+  void joinTournament(String tournamentId, {String password = ''}) {
+    final joinTournamentPayload = JoinTournamentPayload(tournamentId: tournamentId, password: password);
+    final joinTournamentRequest = JoinTournamentRequest(
+      event: ClientEventJoinTournament, payload: joinTournamentPayload);
+    socket.sink.add(joinTournamentRequest.toRawJson());
+  }
+
   void sendMessage(String roomId, String message) {
     final chatMessagePayload = ChatMessagePayload(
         roomId: roomId,
@@ -735,6 +779,13 @@ class WebsocketService extends GetxService {
     final leaveGameRequest = StartGameRequest(
         event: ClientEventLeaveGame, payload: leaveGamePayload);
     socket.sink.add(leaveGameRequest.toRawJson());
+  }
+
+  void startTournament(String tournamentId) {
+    final startTournamentPayload = StartTournamentPayload(tournamentId: tournamentId);
+    final startTournamentRequest = StartTournamentRequest(
+        event: ClientEventStartTournament, payload: startTournamentPayload);
+    socket.sink.add(startTournamentRequest.toRawJson());
   }
 
   void playMove(MoveInfo moveInfo) {

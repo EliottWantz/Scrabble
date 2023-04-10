@@ -24,6 +24,7 @@ class GameLobbyScreen extends StatelessWidget {
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
+  final String gameMode = Get.arguments;
   final GameService _gameService = Get.find();
   final WebsocketService _websocketService = Get.find();
   final RoomService _roomService = Get.find();
@@ -111,8 +112,12 @@ class GameLobbyScreen extends StatelessWidget {
                   Gap(Get.height / 5),
                   _buildPendingJoinGameRequests(),
                   Gap(200),
-                  Obx(() => Text('${_gameService.currentGameRoomUserIds.value!.length}/4 joueurs présents',
-                      style: Theme.of(context).textTheme.headline6)),
+                  Obx(() => Text(
+                      gameMode == 'tournoi'
+                          ? '${_gameService.currentTournamentUserIds.value!.length}/4 joueurs présents'
+                          : '${_gameService.currentGameRoomUserIds.value!.length}/4 joueurs présents',
+                      style: Theme.of(context).textTheme.headline6
+                  )),
                 ],
               )),
             ),
@@ -121,34 +126,65 @@ class GameLobbyScreen extends StatelessWidget {
   }
 
   Widget _buildStartButton(BuildContext context) {
-    if (_gameService.currentGameRoomUserIds.value!.length < 2) {
+    if (gameMode != 'tournoi' && _gameService.currentGameRoomUserIds.value!.length < 2) {
       return Text('En attente d\'autre joueurs... Veuillez patientez',
           style: Theme.of(context).textTheme.headline6);
-    } else {
+    } else if (gameMode == 'tournoi' && _gameService.currentTournamentUserIds.value!.length < 4) {
+      return Text('En attente d\'autre joueurs... Veuillez patientez',
+          style: Theme.of(context).textTheme.headline6);
+    }
+    else {
       return ElevatedButton.icon(
         onPressed: () {
-          _websocketService.startGame(_gameService.currentGameId);
+          gameMode == 'tournoi'
+              ? _websocketService.startTournament(_gameService.currentTournamentId)
+              : _websocketService.startGame(_gameService.currentGameId);
         },
         icon: const Icon(
           // <-- Icon
           Icons.play_arrow,
           size: 20,
         ),
-        label: const Text('Démarrer la partie'), // <-- Text
+        label: Text(
+            gameMode == 'tournoi'
+                ? 'Démarrer le tournoi'
+                : 'Démarrer la partie'
+        ), // <-- Text
       );
     }
   }
 
   Widget _buildPendingJoinGameRequests() {
-    if (!_gameService.currentGameInfo!.isPrivateGame) {
-      return const CircularProgressIndicator();
-    } else if (_gameService.currentGameInfo!.creatorId != _userService.user.value!.id) {
-      return const CircularProgressIndicator();
-    } else if (_gameService.pendingJoinGameRequestUserIds.value!.length == 0) {
-      return const CircularProgressIndicator();
-    }
-    else {
-      return Obx(() => Expanded(
+    if (gameMode == 'tournoi') {
+      if (!_gameService.currentTournamentInfo!.isPrivate) {
+        return const CircularProgressIndicator();
+      } else if (_gameService.currentTournamentInfo!.creatorId != _userService.user.value!.id) {
+        return const CircularProgressIndicator();
+      } else if (_gameService.pendingJoinTournamentRequestUserIds.value!.isEmpty) {
+        return const CircularProgressIndicator();
+      }
+      else {
+        return Obx(() => Expanded(
+          child: ListView.builder(
+              itemCount: _gameService.pendingJoinTournamentRequestUserIds.value!.length,
+              itemBuilder: (context, item) {
+                final index = item;
+                return _buildPendingRequest(_gameService.pendingJoinTournamentRequestUserIds.value![index]);
+              }
+          ),
+        ),
+        );
+      }
+    } else {
+      if (!_gameService.currentGameInfo!.isPrivateGame) {
+        return const CircularProgressIndicator();
+      } else if (_gameService.currentGameInfo!.creatorId != _userService.user.value!.id) {
+        return const CircularProgressIndicator();
+      } else if (_gameService.pendingJoinGameRequestUserIds.value!.isEmpty) {
+        return const CircularProgressIndicator();
+      }
+      else {
+        return Obx(() => Expanded(
           child: ListView.builder(
               itemCount: _gameService.pendingJoinGameRequestUserIds.value!.length,
               itemBuilder: (context, item) {
@@ -157,7 +193,8 @@ class GameLobbyScreen extends StatelessWidget {
               }
           ),
         ),
-      );
+        );
+      }
     }
   }
 
