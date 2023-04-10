@@ -152,5 +152,12 @@
 	"find-game-page.observe": "Spectate a game",
 	"waiting-room-page.request-join": "Users wanting to join the game",
 	"game-observe-page.show": "Show easel",
-	"game-observe-page.replace": "Replace"
+	"game-observe-page.replace": "Replace",
+	"invite-component.title": " has invited you to a game",
+	"invite-component.accept": "Accept",
+	"invite-component.decline": "Decline",
+	"invite-component.password-required": "Please enter a password",
+	"invite-component.password-mismatch": "The password is incorrect",
+	"invite-component.game-not-found": "The game does not exist anymore",
+	"waiting-room-page.friends": "Friends"
 }
