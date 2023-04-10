@@ -951,13 +951,6 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 				if err != nil {
 					return fiber.NewError(fiber.StatusBadRequest, err.Error())
 				}
-				gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
-					Game: makeGameUpdatePayload(g),
-				})
-				if err != nil {
-					return fiber.NewError(fiber.StatusInternalServerError, err.Error())
-				}
-				winnerClient.send(gamePacket)
 				return otherGameRoom.BroadcastObserverJoinGamePacket(winnerClient, g)
 
 			}
