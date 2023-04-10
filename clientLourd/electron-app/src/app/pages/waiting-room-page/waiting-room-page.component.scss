@@ -42,6 +42,7 @@
     padding: 2%;
     margin-bottom: 2%;
     justify-content: space-evenly;
+    color: black;
 }
 
 .deny-button {
@@ -58,4 +59,35 @@
 
 .accept-button:hover {
   color: green;
+}
+
+#friend-list {
+  width: 20vw;
+  position: absolute;
+  right: 1%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.send-request {
+  margin-left: auto;
+}
+
+.friend {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: nowrap;
+  background-color: #dcdcdc;
+  outline-width: 1px;
+  outline-style: solid;
+  outline-color: black;
+  border-radius: 12px;
+  width: 100%;
+  padding: 2%;
+  margin-bottom: 2%;
+  color: black;
+  //height: 100%;
 }

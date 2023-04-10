@@ -23,5 +23,19 @@
   <div *ngIf="getNumUsers() >= 2 && checkIfCreator()">
     <button mat-flat-button color="accent" (click)="startGame()" routerLink="/game">{{'waiting-room-page.start-game' | translate}}</button>
   </div>
+  <mat-expansion-panel id="friend-list">
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        Friends
+      </mat-panel-title>
+    </mat-expansion-panel-header>
+    <div class="friend" *ngFor="let friend of getFriends()">
+      <img class="avatar" [src]="getAvatarUrl(friend.id)">
+      {{friend.username}}
+      <button mat-mini-fab class="send-request" (click)="inviteFriend(friend.id)">
+        <mat-icon>send</mat-icon>
+      </button>
+    </div>
+  </mat-expansion-panel>
   <app-chat-box *ngIf="isLoggedIn()"></app-chat-box>
 </div>

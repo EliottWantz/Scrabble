@@ -3,6 +3,7 @@ import { FormBuilder } from "@angular/forms";
 import { CommunicationService } from "@app/services/communication/communication.service";
 import { GameService } from "@app/services/game/game.service";
 import { RoomService } from "@app/services/room/room.service";
+import { SocialService } from "@app/services/social/social.service";
 import { StorageService } from "@app/services/storage/storage.service";
 // import { MessageErrorStateMatcher } from "@app/classes/form-error/error-state-form";
 import { UserService } from "@app/services/user/user.service";
@@ -24,7 +25,9 @@ export class WaitRoomPageComponent {
   users: {userId: string, username: string}[];
   usersWaiting: {userId: string, username: string}[];
   user: User;
-  constructor(private gameService: GameService, private userService: UserService, private socketService: WebSocketService, private storageService: StorageService, private commService: CommunicationService, private roomService: RoomService) {
+  onlineFriends: User[] = [];
+  constructor(private gameService: GameService, private userService: UserService, private socketService: WebSocketService, private storageService: StorageService,
+    private commService: CommunicationService, private socialService: SocialService) {
     this.gameRoom = this.gameService.game
     this.user = this.userService.currentUserValue
     this.users = [];
@@ -37,6 +40,11 @@ export class WaitRoomPageComponent {
     this.gameService.usersWaiting.subscribe((users) => {
       this.usersWaiting = users;
     });
+
+    this.socialService.updatedOnlineFriends().then(() => {
+      console.log("updated friends");
+    });
+    this.onlineFriends = this.socialService.onlineFriends;
   }
 
   /*isCreator(): boolean {
@@ -135,5 +143,25 @@ export class WaitRoomPageComponent {
 
   isLoggedIn(): boolean {
     return this.userService.isLoggedIn;
+  }
+
+  getFriends(): User[] {
+    const friends = [];
+    for (const friend of this.socialService.onlineFriends) {
+      if (!this.gameRoom.value?.userIds.includes(friend.id)) {
+        friends.push(friend);
+      }
+    }
+    return friends;
+  }
+
+  inviteFriend(id: string): void {
+    if (this.gameRoom.value) {
+      this.commService.inviteFriendToGame(id, this.userService.currentUserValue.id, this.gameRoom.value.id).then(() => {
+        console.log("invited");
+      }).catch((err) => {
+        console.log(err);
+      });
+    }
   }
 }
