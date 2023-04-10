@@ -101,7 +101,6 @@ export class WaitRoomPageComponent {
     if (this.gameRoom.value)
       this.commService.acceptPlayer(this.userService.currentUserValue.id, requestorId, this.gameRoom.value.id).subscribe({
         next: () => {
-          //console.log("accepted");
           const newUsersWaiting = this.gameService.usersWaiting.value;
           for (const userWaiting of newUsersWaiting) {
             if (userWaiting.userId == requestorId)
@@ -119,8 +118,7 @@ export class WaitRoomPageComponent {
     if (this.gameRoom.value)
       this.commService.denyPlayer(this.userService.currentUserValue.id, requestorId, this.gameRoom.value.id).subscribe({
         next: () => {
-          //console.log("denied");
-          const newUsersWaiting = this.gameService.usersWaiting.value;
+           const newUsersWaiting = this.gameService.usersWaiting.value;
           for (const userWaiting of newUsersWaiting) {
             if (userWaiting.userId == requestorId)
               newUsersWaiting.splice(newUsersWaiting.indexOf(userWaiting), 1);

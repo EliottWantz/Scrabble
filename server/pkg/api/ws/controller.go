@@ -236,7 +236,7 @@ func (m *Manager) AcceptJoinGameRequest(c *fiber.Ctx) error {
 	}
 	g.UserIDs = append(g.UserIDs, requestorId)
 	if !slices.Contains(g.JoinGameRequestUserIds, requestorId) {
-		return fiber.NewError(fiber.StatusBadRequest, "The user revoked is request to join the game")
+		return fiber.NewError(fiber.StatusBadRequest, "The user has revoked the request to join the game")
 	}
 
 	if g.CreatorID != id {
@@ -298,7 +298,7 @@ func (m *Manager) RejectJoinGameRequest(c *fiber.Ctx) error {
 	}
 
 	if !slices.Contains(g.JoinGameRequestUserIds, requestorId) {
-		return fiber.NewError(fiber.StatusBadRequest, "The user revoked is request to join the game")
+		return fiber.NewError(fiber.StatusBadRequest, "The user has revoked the request to join the game")
 	}
 
 	if g.CreatorID != id {
@@ -325,7 +325,7 @@ func (m *Manager) AcceptJoinTournamentRequest(c *fiber.Ctx) error {
 	}
 	t.UserIDs = append(t.UserIDs, requestorId)
 	if !slices.Contains(t.JoinTournamentRequestUserIds, requestorId) {
-		return fiber.NewError(fiber.StatusBadRequest, "The user revoked is request to join the game")
+		return fiber.NewError(fiber.StatusBadRequest, "The user has revoked the request to join the game")
 	}
 	if t.CreatorID != id {
 		return fiber.NewError(fiber.StatusBadRequest, "You are not the creator of the tournament")
