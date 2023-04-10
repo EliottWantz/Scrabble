@@ -80,7 +80,7 @@ export class WebSocketService {
           this.handleSocket(e);
         };
       };
-      
+
       this.socket.onclose = () => {
         this.userService.deleteUser();
         this.router.navigate(['/home']);
@@ -431,9 +431,8 @@ export class WebSocketService {
       }
 
       case 'listOnlineUsers': {
-        const payloadListOnlineUsers = packet.payload as ListUsersPayload;
-        this.storageService.listOnlineUsers.next(payloadListOnlineUsers.users);
         this.socialService.updatedOnlineFriends();
+        console.log('listOnlineUsers' + this.socialService.onlineFriends$.value);
         break;
       }
 

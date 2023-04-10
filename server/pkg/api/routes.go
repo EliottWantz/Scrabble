@@ -71,13 +71,14 @@ func (api *API) setupRoutes(cfg *config.Config) {
 
 	r.Get("/user/friends/:id", api.Ctrls.WebSocketManager.GetFriends)
 	r.Get("/user/friends/online/:id", api.Ctrls.WebSocketManager.GetOnlineFriends)
+	r.Get("/user/friends/addList/:id", api.Ctrls.WebSocketManager.GetAddFriendList)
+	r.Get("/user/friends/requests/:id", api.Ctrls.WebSocketManager.GetPendingFriendRequests)
 	r.Get("/user/friends/:id/:friendId", api.Ctrls.WebSocketManager.GetFriendById)
 	r.Delete("/user/friends/:id/:friendId", api.Ctrls.WebSocketManager.RemoveFriend)
 
-	r.Get("/user/friends/requests/:id", api.Ctrls.WebSocketManager.GetPendingFriendRequests)
 
 	r.Post("/user/friends/request/:id/:friendId", api.Ctrls.WebSocketManager.SendFriendRequest)
-	r.Patch("/user/friends/accept/:id/:friendId", api.Ctrls.WebSocketManager.AcceptFriendRequest)
+	r.Post("/user/friends/accept/:id/:friendId", api.Ctrls.WebSocketManager.AcceptFriendRequest)
 	r.Delete("/user/friends/accept/:id/:friendId", api.Ctrls.WebSocketManager.RejectFriendRequest)
 
 	r.Post("/user/friends/game/invite", api.Ctrls.WebSocketManager.InviteFriendToGame)
