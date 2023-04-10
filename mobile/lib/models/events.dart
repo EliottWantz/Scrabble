@@ -12,6 +12,7 @@ const String ServerEventNewUser = "newUser";
 const String ServerEventUsersInRoom  = "usersInRoom";
 const String ServerEventChatMessage = "chat-message";
 const String ServerEventJoinableGames = "joinableGames";
+const String ServerEventJoinableTournaments = "joinableTournaments";
 const String ServerEventObservableGames = "observableGames";
 const String ServerEventJoinedGame           = "joinedGame";
 const String ServerEventJoinedGameAsObserver = "joinedGameAsObserver";
@@ -29,6 +30,13 @@ const String ServerEventUserRequestToJoinGame = "userRequestToJoinGame";
 const String ServerEventRevokeRequestToJoinGame = "revokeRequestToJoinGame";
 const String ServerEventUserRequestToJoinGameAccepted = "userRequestToJoinGameAccepted";
 const String ServerEventUserRequestToJoinGameDeclined = "userRequestToJoinGameDeclined";
+
+const String ServerEventJoinedTournament = "joinedTournament";
+const String ServerEventLeftTournament = "leftTournament";
+const String ServerEventUserJoinedTournament = "userJoinedTournament";
+const String ServerEventUserLeftTournament = "userLeftTournament";
+const String ServerEventTournamentUpdate = "tournamentUpdate";
+const String ServerEventTournamentOver = "tournamentOver";
 
 const String ServerEventIndice = "indice";
 

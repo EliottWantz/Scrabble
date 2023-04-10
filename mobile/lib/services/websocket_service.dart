@@ -31,7 +31,9 @@ import 'package:client_leger/models/response/invited_to_game_response.dart';
 import 'package:client_leger/models/response/joined_dm_room_response.dart';
 import 'package:client_leger/models/response/joined_game_response.dart';
 import 'package:client_leger/models/response/joined_room_response.dart';
+import 'package:client_leger/models/response/joined_tournament_response.dart';
 import 'package:client_leger/models/response/left_game_response.dart';
+import 'package:client_leger/models/response/list_joinable_tournaments_response.dart';
 import 'package:client_leger/models/response/list_observable_games_response.dart';
 import 'package:client_leger/models/response/list_users_response.dart';
 import 'package:client_leger/models/response/send_friend_response.dart';
@@ -207,6 +209,13 @@ class WebsocketService extends GetxService {
           handleEventUserJoinedGame(userJoinedGameResponse);
         }
         break;
+      case ServerEventJoinedTournament:
+        {
+          JoinedTournamentResponse joinedTournamentResponse =
+          JoinedTournamentResponse.fromRawJson(data);
+          handleEventJoinedTournament(joinedTournamentResponse);
+        }
+        break;
       case ServerEventChatMessage:
         {
           // roomId = data.payload!.roomId;
@@ -232,6 +241,13 @@ class WebsocketService extends GetxService {
               JoinableGamesResponse.fromRawJson(data);
           // print(listJoinableGamesResponse.payload.games[0].usersIds.toString());
           handleServerEventJoinableGames(joinableGamesResponse);
+        }
+        break;
+      case ServerEventJoinableTournaments:
+        {
+          JoinableTournamentsResponse joinableTournamentsResponse =
+              JoinableTournamentsResponse.fromRawJson(data);
+          handleServerEventJoinableTournaments(joinableTournamentsResponse);
         }
         break;
       case ServerEventObservableGames:
@@ -458,6 +474,25 @@ class WebsocketService extends GetxService {
     }
   }
 
+  void handleEventJoinedTournament(JoinedTournamentResponse joinedTournamentResponse) {
+    gameService.currentTournamentId = joinedTournamentResponse.payload.id;
+    gameService.currentTournamentInfo = joinedTournamentResponse.payload;
+    gameService.currentGameRoomUserIds!.add(userService.user.value!.id);
+    Room gameRoom = Room(
+        roomId: joinedTournamentResponse.payload.id,
+        roomName: 'Tournament Room',
+        userIds: joinedTournamentResponse.payload.userIds,
+        messages: <ChatMessagePayload>[]
+    );
+    roomService.addRoom(joinedTournamentResponse.payload.id, gameRoom);
+    final currentTournament = gameService.getJoinableTournamentById(gameService.currentTournamentId);
+    if (currentTournament != null) {
+      gameService.currentGameRoomUserIds.addAll(currentTournament!.userIds);
+    }
+    Get.toNamed(
+        Routes.HOME + Routes.GAME_START + Routes.LOBBY);
+  }
+
   void handleServerEventChatMessage(ChatMessageResponse chatMessageResponse) {
     // if (gameService.currentGameRoom.value != null) {
     //   if (chatMessageResponse.payload!.roomId ==
@@ -492,6 +527,10 @@ class WebsocketService extends GetxService {
     print('before first joinable game userids');
     gameService.joinableGames.value = joinableGamesResponse.payload.games;
     // print(listJoinableGamesResponse.payload.games[0].usersIds.toString());
+  }
+
+  void handleServerEventJoinableTournaments(JoinableTournamentsResponse joinableTournamentsResponse) {
+    gameService.joinableTournaments.value = joinableTournamentsResponse.payload.tournaments;
   }
 
   void handleServerEventObservableGames(ObservableGamesResponse observableGamesResponse) {

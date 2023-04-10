@@ -2,6 +2,7 @@ import 'package:client_leger/api/api_repository.dart';
 import 'package:client_leger/models/game_room.dart';
 import 'package:client_leger/models/rack.dart';
 import 'package:client_leger/models/requests/accept_join_game_request.dart';
+import 'package:client_leger/models/tournament.dart';
 import 'package:client_leger/models/user.dart';
 import 'package:client_leger/services/user_service.dart';
 import 'package:get/get.dart';
@@ -20,7 +21,10 @@ class GameService extends GetxService {
   final joinableGames = Rxn<List<Game>>();
   final observableGames = Rxn<List<Game>>();
 
+  final joinableTournaments = Rxn<List<Tournament>>();
+
   late String currentGameId;
+  late String currentTournamentId;
   final currentRoomMessages = <ChatMessagePayload>[].obs;
 
   final currentGameRoomUserIds = <String>[].obs;
@@ -34,6 +38,7 @@ class GameService extends GetxService {
   final currentGame = Rxn<GameUpdatePayload>();
   final currentGameTimer = Rxn<int>();
   late Game? currentGameInfo;
+  late Tournament? currentTournamentInfo;
 
   RxList<MoveInfo> indices = <MoveInfo>[].obs;
   bool getIndicesHasBeenCalled = false;
@@ -79,13 +84,21 @@ class GameService extends GetxService {
     return creatorId == userService.user.value!.id;
   }
 
-  Game? getJoinableGameById(String id) {
+  Game? getJoinableGameById(String gameId) {
     for (final game in joinableGames.value!) {
-      if (game.id == id) {
+      if (game.id == gameId) {
         return game;
       }
     }
     return null;
+  }
+
+  Tournament? getJoinableTournamentById(String tournamentId) {
+    for (final tournament in joinableTournaments.value!) {
+      if (tournament.id == tournamentId) {
+        return tournament;
+      }
+    }
   }
 
   Future<bool?> acceptJoinGameRequest(String userId) async {

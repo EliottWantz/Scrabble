@@ -2,6 +2,7 @@ import 'package:client_leger/controllers/auth_controller.dart';
 import 'package:client_leger/controllers/home_controller.dart';
 import 'package:client_leger/models/game.dart';
 import 'package:client_leger/models/game_room.dart';
+import 'package:client_leger/models/tournament.dart';
 import 'package:client_leger/routes/app_routes.dart';
 import 'package:client_leger/screens/floating_chat_screen.dart';
 import 'package:client_leger/services/game_service.dart';
@@ -36,6 +37,7 @@ class GameStartScreen extends StatelessWidget {
   final UsersService _usersService = Get.find();
 
   final RxList<RxBool> _selectedGameType = <RxBool>[true.obs, false.obs, false.obs].obs;
+  final RxList<RxBool> _selectedTournamentType = <RxBool>[true.obs, false.obs].obs;
   final RxBool _isProtected = false.obs;
   final RxBool selectedChatRoom = false.obs;
 
@@ -126,9 +128,10 @@ class GameStartScreen extends StatelessWidget {
                     child: ElevatedButton.icon(
                       onPressed: () {
                         if (gameMode == 'tournoi') {
-                          _showPainter();
+                          // _showPainter();
+                          _showJoinableGamesDialog(context, true);
                         } else {
-                          _showJoinableGamesDialog(context);
+                          _showJoinableGamesDialog(context, false);
                         }
                       },
                       icon: const Padding(
@@ -204,8 +207,12 @@ class GameStartScreen extends StatelessWidget {
     );
   }
 
-  RxList<bool> _getListValues(RxList<RxBool> list) {
-    return RxList.from(list.value.map((element) => element.value));
+  RxList<bool> _getListValues(bool isTournament) {
+    if (isTournament) {
+      return RxList.from(_selectedTournamentType.value.map((e) => e.value));
+    } else {
+      return RxList.from(_selectedGameType.value.map((e) => e.value));
+    }
   }
   
   void _showCreateGameOptionsDialog() {
@@ -225,13 +232,11 @@ class GameStartScreen extends StatelessWidget {
                         const Gap(20),
                         ToggleButtons(
                               onPressed: (int index) {
-                                for (int i = 0; i < _getListValues(_selectedGameType).value.length; i++) {
-                                  _selectedGameType.value[i].value = i == index;
-                                }
-                                _isProtected.value = _selectedGameType.value[1].value;
-                                _isPrivate = _selectedGameType.value[2].value;
+                                gameMode == 'tournoi'
+                                  ? _handleToggleButtonOnPress(_selectedTournamentType, index)
+                                  : _handleToggleButtonOnPress(_selectedGameType, index);
                               },
-                              isSelected: _getListValues(_selectedGameType).value,
+                              isSelected: _getListValues(gameMode == 'tournoi').value,
                               borderRadius: const BorderRadius.all(Radius.circular(8)),
                               selectedBorderColor: Color.fromARGB(255, 107, 12, 241),
                               selectedColor: Colors.white,
@@ -241,20 +246,7 @@ class GameStartScreen extends StatelessWidget {
                                 minHeight: 40.0,
                                 minWidth: 80.0,
                               ),
-                              children: const <Widget>[
-                                Padding(
-                                    padding: const EdgeInsets.all(16.0),
-                                    child: Text('Publique')
-                                ),
-                                Padding(
-                                    padding: const EdgeInsets.all(16.0),
-                                    child: Text('Protégée')
-                                ),
-                                Padding(
-                                    padding: const EdgeInsets.all(16.0),
-                                    child: Text('Privée')
-                                )
-                              ]
+                              children: _buildGameTypeToggleButtons()
                             ),
                         _showProtectedGamePassword(),
                       ],
@@ -265,6 +257,48 @@ class GameStartScreen extends StatelessWidget {
         ),
       barrierDismissible: false,
     );
+  }
+
+  void _handleToggleButtonOnPress(RxList<RxBool> _selectedType, int index) {
+    for (int i = 0; i < _getListValues(gameMode == 'tournoi').value.length; i++) {
+      _selectedType.value[i].value = i == index;
+    }
+    if (gameMode == 'tournoi') {
+      _isProtected.value = _selectedType.value[1].value;
+      _isPrivate = _selectedType.value[2].value;
+    } else {
+      _isPrivate = _selectedType.value[1].value;
+    }
+  }
+
+  List<Widget> _buildGameTypeToggleButtons() {
+    if (gameMode == 'tournoi') {
+      return const [
+        Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Text('Publique')
+        ),
+        Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text('Privée')
+        )
+      ];
+    } else {
+      return const [
+        Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Text('Publique')
+        ),
+        Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text('Protégée')
+        ),
+        Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text('Privée')
+        )
+      ];
+    }
   }
 
   Widget _showProtectedGamePassword() {
@@ -321,7 +355,7 @@ class GameStartScreen extends StatelessWidget {
   }
 
   Widget _buildPasswordInputField() {
-    if (_isProtected.value) {
+    if (_isProtected.value && gameMode != 'tournoi') {
       return InputField(
           controller: gamePasswordController,
           keyboardType: TextInputType.text,
@@ -335,7 +369,7 @@ class GameStartScreen extends StatelessWidget {
     }
   }
 
-  void _showJoinableGamesDialog(BuildContext context) {
+  void _showJoinableGamesDialog(BuildContext context, bool isTournament) {
     Get.dialog(
       Dialog(
         child: SizedBox(
@@ -347,15 +381,15 @@ class GameStartScreen extends StatelessWidget {
               appBar: AppBar(
                 elevation: 0,
                 toolbarHeight: 0,
-                bottom: const TabBar(
+                bottom: TabBar(
                   tabs: [
-                    Tab(text: 'Parties publiques'),
-                    Tab(text: 'Parties privées'),
+                    Tab(text: isTournament ? 'Tournois publiques' : 'Parties publiques'),
+                    Tab(text: isTournament ? 'Tournois privés' : 'Parties publiques'),
                   ],
                 ),
               ),
               body: TabBarView(
-                children: [_buildJoinableGamesTab(false), _buildJoinableGamesTab(true)],
+                children: [_buildJoinableGamesTab(false, isTournament), _buildJoinableGamesTab(true, isTournament)],
               ),
             ),
           ),
@@ -425,7 +459,7 @@ class GameStartScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildJoinableGamesTab(bool isPrivateGames) {
+  Widget _buildJoinableGamesTab(bool isPrivateGames, bool isTournament) {
     return Column(
       children: [
         Obx(
@@ -462,7 +496,7 @@ class GameStartScreen extends StatelessWidget {
                   ),
                 ),
               ],
-              rows: _createJoinableGameRows(isPrivateGames),
+              rows: _createJoinableGameRows(isPrivateGames, isTournament),
             ),
           )),
         ),
@@ -523,49 +557,94 @@ class GameStartScreen extends StatelessWidget {
     ];
   }
 
-  List<DataRow> _createJoinableGameRows(bool privateGames) {
-    if (_gameService.joinableGames.value != null) {
-      return _gameService.joinableGames.value!
-          .expand((game) => [
-                if (game.isPrivateGame == privateGames)
-                  DataRow(cells: [
-                    DataCell(Text(_usersService.getUserUsername(game.creatorId))),
-                    DataCell(
-                      Text('${game.userIds.length} / 4')
-                    ),
-                    DataCell(
-                        _buildTypeOfGame(game)
-                    ),
-                    DataCell(
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          if (game.isProtected) {
-                            _showProtectedGamePasswordDialog(game);
-                          } else if (game.isPrivateGame) {
-                            _websocketService.joinGame(game.id);
-                            _showWaitingForCreatorApprovalDialog(game.id);
-                          }
-                            else {
-                            _websocketService.joinGame(game.id);
-                            // Get.toNamed(
-                            //     Routes.HOME + Routes.GAME_START + Routes.LOBBY);
-                          }
-                        },
-                        icon: const Icon(
-                          // <-- Icon
-                          Icons.play_arrow,
-                          size: 20,
-                        ),
-                        label: const Text('Rejoindre'), // <-- Text
-                      ),
-                    ),
-                  ])
-              ])
-          .toList();
+  List<DataRow> _createJoinableGameRows(bool privateGames, bool isTournament) {
+    if (isTournament) {
+      if (_gameService.joinableTournaments.value != null) {
+        return _gameService.joinableTournaments.value!
+            .expand((tournament) =>
+        [
+          if (tournament.isPrivate == privateGames)
+            DataRow(cells: [
+              DataCell(Text(_usersService.getUserUsername(tournament.creatorId))),
+              DataCell(
+                  Text('${tournament.userIds.length} / 4')
+              ),
+              DataCell(
+                  _buildTypeOfTournament(tournament)
+              ),
+              DataCell(
+                ElevatedButton.icon(
+                  onPressed: () {
+                    if (tournament.isPrivate) {
+                      _websocketService.joinGame(tournament.id);
+                      _showWaitingForCreatorApprovalDialog(tournament.id);
+                    }
+                    else {
+                      _websocketService.joinGame(tournament.id);
+                      // Get.toNamed(
+                      //     Routes.HOME + Routes.GAME_START + Routes.LOBBY);
+                    }
+                  },
+                  icon: const Icon(
+                    // <-- Icon
+                    Icons.play_arrow,
+                    size: 20,
+                  ),
+                  label: const Text('Rejoindre'), // <-- Text
+                ),
+              ),
+            ])
+        ])
+            .toList();
+      }
+      return [
+        const DataRow(cells: [DataCell(Text('')), DataCell(Text(''))])
+      ];
+    } else {
+      if (_gameService.joinableGames.value != null) {
+        return _gameService.joinableGames.value!
+            .expand((game) =>
+        [
+          if (game.isPrivateGame == privateGames)
+            DataRow(cells: [
+              DataCell(Text(_usersService.getUserUsername(game.creatorId))),
+              DataCell(
+                  Text('${game.userIds.length} / 4')
+              ),
+              DataCell(
+                  _buildTypeOfGame(game)
+              ),
+              DataCell(
+                ElevatedButton.icon(
+                  onPressed: () {
+                    if (game.isProtected) {
+                      _showProtectedGamePasswordDialog(game);
+                    } else if (game.isPrivateGame) {
+                      _websocketService.joinGame(game.id);
+                      _showWaitingForCreatorApprovalDialog(game.id);
+                    }
+                    else {
+                      _websocketService.joinGame(game.id);
+                      // Get.toNamed(
+                      //     Routes.HOME + Routes.GAME_START + Routes.LOBBY);
+                    }
+                  },
+                  icon: const Icon(
+                    // <-- Icon
+                    Icons.play_arrow,
+                    size: 20,
+                  ),
+                  label: const Text('Rejoindre'), // <-- Text
+                ),
+              ),
+            ])
+        ])
+            .toList();
+      }
+      return [
+        const DataRow(cells: [DataCell(Text('')), DataCell(Text(''))])
+      ];
     }
-    return [
-      const DataRow(cells: [DataCell(Text('')), DataCell(Text(''))])
-    ];
   }
 
   Widget _buildChatRoomsList() {
@@ -623,6 +702,14 @@ class GameStartScreen extends StatelessWidget {
         const Divider(),
       ],
     );
+  }
+
+  Widget _buildTypeOfTournament(Tournament tournament) {
+    if (tournament.isPrivate) {
+      return Text('Privée');
+    } else {
+      return Text('Ouverte');
+    }
   }
 
   Widget _buildTypeOfGame(Game game) {
