@@ -1,6 +1,9 @@
 package ws
 
 import (
+	"fmt"
+
+	"scrabble/pkg/api/auth"
 	"scrabble/pkg/api/user"
 
 	"github.com/gofiber/fiber/v2"
@@ -443,7 +446,7 @@ func (m *Manager) AcceptFriendInvitationToGame(c *fiber.Ctx) error {
 	if err := c.BodyParser(req); err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
-	_, err := m.GameSvc.Repo.FindGame(req.GameID)
+	gameToJoin, err := m.GameSvc.Repo.FindGame(req.GameID)
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
@@ -457,6 +460,11 @@ func (m *Manager) AcceptFriendInvitationToGame(c *fiber.Ctx) error {
 	}
 
 	if invitedUser.JoinedGame != "" { // leave old game
+		// Before leaving old game, check if password is correct
+		if gameToJoin.IsProtected && !auth.PasswordsMatch(req.GamePassword, gameToJoin.HashedPassword) {
+			return fmt.Errorf("password mismatch")
+		}
+
 		m.GameSvc.RemoveUserFromGame(invitedUser.JoinedGame, invitedUser.ID)
 		r, err := m.GetRoom(invitedUser.JoinedGame)
 		if err != nil {
