@@ -60,18 +60,18 @@ export class CommunicationService {
         return this.http.post<{game: Game}>(`${this.baseUrl}/game`, roomId).pipe(catchError(this.handleError<{game: Game}>("createGame")));
     }
 
-    private requestGetFriendsList(userId: string): Observable<{friends: [{friendId: string}]}>{
-        return this.http.get<{friends: [{friendId: string}]}>(`${this.baseUrl}/user/friends/${userId}`).pipe(catchError(this.handleError<{friends: [{friendId: string}]}>('requestGetFriendsList')));
+    getFriendsList(userId: string): Observable<{ friends: User[] }>{
+        return this.http.get<{ friends: User[] }>(`${this.baseUrl}/user/friends/${userId}`).pipe(catchError(this.handleError<{ friends: User[] }>('requestGetFriendsList')));
+    }
+
+    getFriendRequests(userId: string): Observable<{ friendRequests: User[] }>{
+        return this.http.get<{ friendRequests: User[] }>(`${this.baseUrl}/user/friends/requests/${userId}`).pipe(catchError(this.handleError<{ friendRequests: User[] }>('requestGetFriendRequests')));
     }
 
     private requestGetFriendByID(userId:string, friendId:string): Observable<{friend: User}> {
         return this.http.get<{friend: User}>(`${this.baseUrl}/user/friends/${userId}/${friendId}`).pipe(catchError(this.handleError<{friend: User}>('requestGetFriendByID')));
     }
 
-    async getFriendsList(userId: string): Promise<{friends: [{friendId: string}]}>{
-        const res:any = (await lastValueFrom(this.requestGetFriendsList(userId)));
-        return res;
-    }
 
     async getFriendByID(userId:string, friendId:string): Promise<{friend: User}> {
         const res:any = (await lastValueFrom(this.requestGetFriendByID(userId, friendId)));
@@ -126,6 +126,10 @@ export class CommunicationService {
   public getOnlineFriends(userId: string): Observable<{ friends: User[] }> {
     return this.http.get<{ friends: User[] }>(`${this.baseUrl}/user/friends/online/${userId}`).pipe(catchError(this.handleError<{ friends: User[] }>("getOnlineFriends")));
   }
+
+  public getAddList(userId: string): Observable<{ users : User[] }> {
+    return this.http.get<{ users: User[] }>(`${this.baseUrl}/user/friends/addList/${userId}`).pipe(catchError(this.handleError<{ users: User[] }>("getAddList")));
+    }
 
   private handleError<T>(request: string, result?: T): (error: Error) => Observable<T> {
     return (err: Error) => {
