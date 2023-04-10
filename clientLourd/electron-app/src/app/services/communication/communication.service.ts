@@ -154,6 +154,18 @@ export class CommunicationService {
     );
   }
 
+    public acceptGameInvite(inviterId: string, invitedId: string, gameId: string, password: string): Promise<void> {
+        return lastValueFrom(this.http.post<void>(`${this.baseUrl}/user/friends/game/accept-invite`, {inviterId: inviterId, invitedId: invitedId, gameId: gameId, gamePassword: password}));
+    }
+
+    public declineGameInvite(inviterId: string, invitedId: string, gameId: string, password: string): Promise<void> {
+        return lastValueFrom(this.http.post<void>(`${this.baseUrl}/user/friends/game/reject-invite`, {inviterId: inviterId, invitedId: invitedId, gameId: gameId, gamePassword: password}));
+    }
+
+    public inviteFriendToGame(invitedId: string, inviterId: string, gameId: string): Promise<void> {
+        return lastValueFrom(this.http.post<void>(`${this.baseUrl}/user/friends/game/invite`, {invitedId: invitedId, inviterId: inviterId, gameId: gameId}));
+    }
+
     private handleError(error: HttpErrorResponse) {
         if (error.status === 0) {
           // A client-side or network error occurred. Handle it accordingly.
