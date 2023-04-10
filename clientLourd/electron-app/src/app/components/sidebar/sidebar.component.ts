@@ -144,6 +144,11 @@ export class SidebarComponent implements OnInit {
     return this.user.value.friends;
   }
 
+  navigateHome(): void {
+    if (this.router.url !== '/waitingRoom')
+      this.router.navigate(['/home']);
+  }
+
   selectNav(index: number): void {
     const navButtons = document.getElementsByClassName('nav-button');
     for (let i = 0; i < navButtons.length; i++) {
