@@ -349,14 +349,14 @@ export class WebSocketService {
             payloadAcceptFriendRequest.fromId,
           ],
         });
-        await this.socialService.updatedOnlineFriends();
+        this.socialService.updatedOnlineFriends();
         break;
       }
 
       case 'declineFriendRequest': {
         const payloadDeclineFriendRequest =
           packet.payload as FriendRequestPayload;
-        await this.socialService.updatedOnlineFriends();
+        this.socialService.updatedOnlineFriends();
         break;
       }
 
@@ -431,7 +431,7 @@ export class WebSocketService {
       }
 
       case 'listOnlineUsers': {
-        await this.socialService.updatedOnlineFriends();
+        this.socialService.updatedOnlineFriends();
         console.log('listOnlineUsers' + this.socialService.onlineFriends$.value);
         break;
       }
