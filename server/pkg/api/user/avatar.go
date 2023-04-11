@@ -16,8 +16,8 @@ type Avatar struct {
 	FileID string `json:"fileId,omitempty"`
 }
 
-func (s *Service) UploadAvatar(req UploadAvatarResquest, strategy UploadAvatarStrategy) (*Avatar, error) {
-	user, err := s.Repo.Find(req.ID)
+func (s *Service) UploadAvatar(ID string, req UploadAvatarResquest, strategy UploadAvatarStrategy) (*Avatar, error) {
+	user, err := s.Repo.Find(ID)
 	if err != nil {
 		return nil, fiber.NewError(fiber.StatusNotFound, "user not found")
 	}
