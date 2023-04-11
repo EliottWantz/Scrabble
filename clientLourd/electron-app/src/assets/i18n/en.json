@@ -130,6 +130,8 @@
 	"create-game-component.add-password": "Add a password",
 	"create-game-component.password": "Enter a password",
 	"create-game-component.create": "Create game",
+	"find-game-page.createTournament": "Create tournament",
+	"find-tournament-page.join": "Join tournament",
 	"create-game-component.close": "Close",
 	"join-game-component.list": "List of games",
 	"join-game-component.name-game": "Name of the game",

@@ -7,6 +7,7 @@ import { ChooseLetterComponent } from "@app/components/choose-letter/choose-lett
 import { Game, ScrabbleGame } from "@app/utils/interfaces/game/game";
 import { MoveInfo } from "@app/utils/interfaces/game/move";
 import { Tile } from "@app/utils/interfaces/game/tile";
+import { Tournament } from "@app/utils/interfaces/game/tournament";
 import { GameUpdatePayload } from "@app/utils/interfaces/packet";
 import { BehaviorSubject } from "rxjs";
 
@@ -16,11 +17,14 @@ import { BehaviorSubject } from "rxjs";
 export class GameService {
     scrabbleGame!: BehaviorSubject<ScrabbleGame | undefined>;
     game!: BehaviorSubject<Game | undefined>;
+    tournament!: BehaviorSubject<Tournament | undefined>;
     timer!: BehaviorSubject<number>;
     //moves!: BehaviorSubject<MoveInfo[]>;
     joinableGames!: BehaviorSubject<Game[]>;
+    joinableTournaments!: BehaviorSubject<Tournament[]>;
     gameWinner!:BehaviorSubject<string | undefined>
     observableGames!: BehaviorSubject<Game[]>;
+    observableTournaments!: BehaviorSubject<Tournament[]>;
     isObserving = false;
     usersWaiting!: BehaviorSubject<{userId: string, username: string}[]>;
     wasDeclined!: BehaviorSubject<boolean>;
@@ -31,12 +35,16 @@ export class GameService {
     constructor(private router: Router, private _bottomSheet: MatBottomSheet, private _bottomSheetSpecialLetter: MatBottomSheet) {
         this.scrabbleGame = new BehaviorSubject<ScrabbleGame | undefined>(undefined);
         this.game = new BehaviorSubject<Game | undefined>(undefined);
+        this.tournament = new BehaviorSubject<Tournament | undefined>(undefined);
         this.joinableGames = new BehaviorSubject<Game[]>([]);
+        this.joinableTournaments = new BehaviorSubject<Tournament[]>([]);
         this.timer = new BehaviorSubject<number>(0);
         //this.moves = new BehaviorSubject<MoveInfo[]>([]);
         this.observableGames = new BehaviorSubject<Game[]>([]);
+        this.observableTournaments = new BehaviorSubject<Tournament[]>([]);
         this.usersWaiting = new BehaviorSubject<{userId: string, username: string}[]>([]);
         this.wasDeclined = new BehaviorSubject<boolean>(false);
+        this.gameWinner = new BehaviorSubject<string | undefined>(undefined);
     }
 
     indice(moves: MoveInfo[]): void {
@@ -92,6 +100,22 @@ export class GameService {
         }
     }
 
+    addUserTournament(tournamentId: string, userId: string): void {
+        if (this.tournament.value && this.tournament.value.id == tournamentId) {
+            const users = this.tournament.value.userIds;
+            users.push(userId);
+            this.tournament.next({...this.tournament.value, userIds: users});
+        } else {
+            for (let i = 0; i < this.joinableTournaments.value.length; i++) {
+                if (this.joinableTournaments.value[i].id == tournamentId) {
+                    const tournaments = this.joinableTournaments.value;
+                    tournaments[i].userIds.push(userId);
+                    this.joinableTournaments.next(tournaments);
+                }
+            }
+        }
+    }
+
     removeUser(gameId: string, userId: string): void {
         if (this.game.value && this.game.value.id == gameId) {
             const users = this.game.value.userIds;
@@ -120,7 +144,7 @@ export class GameService {
         }
     }
     gameOverPopup(winId : string){
-        let winner = "";
+        let winner = undefined;
         if(!this.scrabbleGame.value){
             return
         }

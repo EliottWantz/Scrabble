@@ -63,6 +63,9 @@ import { ChooseLetterComponent } from '@app/components/choose-letter/choose-lett
 import { DirectionComponent } from '@app/components/direction/direction.component';
 import { InviteComponent } from '@app/components/invite/invite.component';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { CreateTournamentComponent } from './components/create-tournament/create-tournament.component';
+import { JoinTournamentComponent } from './components/join-tournament/join-tournament.component';
+import { JoinPrivateTournamentComponent } from './components/join-private-tournament/join-private-tournament.component';
 
 @NgModule({
   declarations: [
@@ -90,11 +93,14 @@ import { MatExpansionModule } from '@angular/material/expansion';
     WaitRoomPageComponent,
     FindGamePageComponent,
     JoinGameComponent,
+    JoinTournamentComponent,
     CreateGameComponent,
+    CreateTournamentComponent,
     JoinProtectedGameComponent,
     CustomizeAvatarComponent,
     GameObservePageComponent,
     JoinPrivateGameComponent,
+    JoinPrivateTournamentComponent,
     GifComponent,
     AdviceComponent,
     ChooseLetterComponent,

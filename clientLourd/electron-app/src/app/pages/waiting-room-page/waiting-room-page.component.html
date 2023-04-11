@@ -37,4 +37,8 @@
     </div>
   </mat-expansion-panel>
   <app-chat-box *ngIf="isLoggedIn()"></app-chat-box>
+  <div *ngIf="getNumUsers() >= 4 && checkIfCreatorTournament()">
+    <button mat-flat-button color="accent" (click)="startTournament()" routerLink="/game">{{'waiting-room-page.start-game' | translate}}</button>
+  </div>
+  
 </div>

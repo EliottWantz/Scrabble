@@ -1,0 +1,7 @@
+<mat-dialog-content id="container">
+    <h1>{{"join-private-game-component.title1" | translate}} {{getCreatorName()}} {{"join-private-game-component.title2" | translate}}</h1>
+    <mat-spinner></mat-spinner>
+    <strong *ngIf="wasDeclined" style="color: red;">{{"join-private-game-component.denied1" | translate}} {{getCreatorName()}} {{"join-private-game-component.denied2" | translate}}</strong>
+    <button *ngIf="!wasDeclined" (click)="cancel()" id="close-button">{{"join-private-game-component.cancel" | translate}}</button>
+    <button *ngIf="wasDeclined" (click)="close()" id="close-button">{{"join-game-component.close" | translate}}</button>
+</mat-dialog-content>

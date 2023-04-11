@@ -5,9 +5,17 @@
     <mat-icon>videogame_asset</mat-icon>
     {{"find-game-page.create" | translate}}
   </button>
+  <button mat-flat-button color="primary" class="game-button" (click)="openDialogCreateTournament()">
+    <mat-icon>videogame_asset</mat-icon>
+    {{"find-game-page.createTournament" | translate}}
+  </button>
   <button mat-flat-button color="primary" class="game-button" (click)="openDialogJoinGame()">
     <mat-icon>videogame_asset</mat-icon>
     {{"find-game-page.join" | translate}}
+  </button>
+  <button mat-flat-button color="primary" class="game-button" (click)="openDialogJoinTournament()">
+    <mat-icon>videogame_asset</mat-icon>
+    {{"find-tournament-page.join" | translate}}
   </button>
   <button mat-flat-button color="primary" class="game-button" (click)="openDialogJoinAsObserver()">
     <mat-icon>remove_red_eye</mat-icon>

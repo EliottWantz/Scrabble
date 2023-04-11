@@ -15,4 +15,8 @@ export type ClientEvent = ""
 | "playMove"
 | "indice"
 | "first-square"
-| "remove-first-square";
+| "remove-first-square"
+| "create-tournament"
+| "join-tournament"
+| "start-tournament"
+| "join-tournament-as-observateur";

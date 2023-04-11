@@ -38,4 +38,7 @@ export type ServerEvent = "joinedRoom"
 | "remove-first-square"
 | "invitedToGame"
 | "acceptedInviteToGame"
-| "rejectInviteToGame";
+| "rejectInviteToGame"
+| "joinedTournament"
+| "joinableTournaments"
+| "userJoinedTournament";

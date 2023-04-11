@@ -36,7 +36,7 @@ export class GamePageComponent implements OnInit {
         this.game = this.gameService.scrabbleGame;
         this.game.subscribe();
         this.gameService.gameWinner.subscribe((gameWinner) => {
-            if(gameWinner==""){return}
+            if(gameWinner==undefined){return}
             else{
                 this.gameWinner = String(gameWinner);
             }

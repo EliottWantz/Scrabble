@@ -1,0 +1,46 @@
+<mat-dialog-content id="container">
+    <h1>{{"join-game-component.list" | translate}}</h1>
+    <mat-divider></mat-divider>
+    <mat-grid-list cols="5" rowHeight="50px">
+        <mat-grid-tile [colspan]="1" [rowspan]="1">
+            <h4>{{"join-game-component.name-game" | translate}}</h4>
+        </mat-grid-tile>
+        <mat-grid-tile [colspan]="1" [rowspan]="1">
+            <h4>{{"join-game-component.creator" | translate}}</h4>
+        </mat-grid-tile>
+        <mat-grid-tile [colspan]="1" [rowspan]="1">
+            <h4>{{"join-game-component.players" | translate}}</h4>
+        </mat-grid-tile>
+        <mat-grid-tile [colspan]="1" [rowspan]="1">
+            <h4>{{"join-game-component.public" | translate}}</h4>
+        </mat-grid-tile>
+        <mat-grid-tile [colspan]="1" [rowspan]="1"></mat-grid-tile>
+        <mat-grid-tile [colspan]="5">
+            <mat-divider></mat-divider>
+        </mat-grid-tile>
+        <div *ngFor="let tournament of tournaments; let i = index">
+            <mat-grid-tile [colspan]="1" [rowspan]="1">{{tournament.id}}</mat-grid-tile>
+            <mat-grid-tile [colspan]="1" [rowspan]="1">{{getCreatorName(tournament)}}</mat-grid-tile>
+            <mat-grid-tile [colspan]="1" [rowspan]="1" class="user-ids">
+                <div *ngFor="let playerId of getUserNames(tournament.userIds); let last = last;">
+                    <div *ngIf="!last">{{playerId}}{{", "}}</div>
+                    <div *ngIf="last">{{playerId}}</div>
+                </div>
+            </mat-grid-tile>
+            <mat-grid-tile [colspan]="1" [rowspan]="1">
+                <mat-icon *ngIf="!tournament.isPrivateGame">check</mat-icon>
+                <mat-icon *ngIf="tournament.isPrivateGame">clear</mat-icon>
+            </mat-grid-tile>
+            <mat-grid-tile [colspan]="1" [rowspan]="1">
+                <button (click)="joinGame(tournament)" class="join-button">
+                    <mat-icon>play_arrow</mat-icon>
+                    {{"join-game-component.join" | translate}}
+                </button>
+            </mat-grid-tile>
+            <mat-grid-tile [colspan]="5">
+                <mat-divider></mat-divider>
+            </mat-grid-tile>
+        </div>
+    </mat-grid-list>
+    <button (click)="close()" id="close-button">{{"join-game-component.close" | translate}}</button>
+</mat-dialog-content>
