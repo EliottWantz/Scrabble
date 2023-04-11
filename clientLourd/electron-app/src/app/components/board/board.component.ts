@@ -108,7 +108,7 @@ export class BoardComponent implements OnInit {
   @HostListener("document:click", ['$event'])
   clickout(event: any) {
     const elem = document.elementFromPoint(event.x,event.y);
-    if (!document.getElementById("board")?.contains(elem) && this.direction) {
+    if (!document.getElementById("board")?.contains(elem) && this.direction && this.gameService.scrabbleGame.value?.turn === this.userService.currentUserValue.id) {
       if (this.moveService.firstX !== -1 && this.moveService.firstY !== -1) {
         this.moveService.removedFirstTile();
       }
