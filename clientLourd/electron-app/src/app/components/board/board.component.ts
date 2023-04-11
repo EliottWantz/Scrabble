@@ -205,7 +205,7 @@ export class BoardComponent implements OnInit {
       for (let i = 0; i < newPlayers.length; i++) {
         if (newPlayers[i].id == this.userService.currentUserValue.id) {
           for (let j = 0; j < newPlayers[i].rack.tiles.length; j++) {
-            if (newPlayers[i].rack.tiles[j].letter === letterToSearch) {
+            if (newBoard[y][x] && newPlayers[i].rack.tiles[j].letter === letterToSearch) {
               newBoard[y][x].tile = {value: newPlayers[i].rack.tiles[j].value, letter: letterToAdd, x: x, y: y, disabled: false};
               newPlayers[i].rack.tiles.splice(j, 1);
               this.gameService.scrabbleGame.next({...this.gameService.scrabbleGame.value, board: newBoard, players: newPlayers});
