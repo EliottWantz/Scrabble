@@ -73,7 +73,13 @@ class PlayerInfo extends GetView<GameController> {
                                         playerId;
                                   },
                             icon: const Icon(Icons.remove_red_eye_outlined),
-                            label: const Text('Observer')))
+                            label: const Text('Observer'))),
+                        isBot
+                            ? ElevatedButton.icon(
+                                onPressed: () {},
+                                icon: const Icon(Icons.find_replace),
+                                label: const Text('Remplacer'))
+                            : SizedBox(),
                       ],
                     ),
                   )
