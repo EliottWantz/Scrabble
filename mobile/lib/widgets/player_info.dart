@@ -25,7 +25,7 @@ class PlayerInfo extends GetView<GameController> {
 
   @override
   Widget build(BuildContext context) {
-    return isObserving == false ? _buildForPlayer() : _buildForObserver();
+    return (isObserving == true && controller.isObserverSwitched.isFalse) ? _buildForObserver() : _buildForPlayer();
   }
 
   Widget _buildForObserver() {
