@@ -35,6 +35,8 @@ class GameController extends GetxController {
   RxnString currentObservedPlayerId = RxnString();
   Rxn<Position> currentFirstLetter = Rxn<Position>();
   Rxn<MoveInfo> currentIndiceToPlay = Rxn<MoveInfo>();
+  RxBool isObserverSwitched = false.obs;
+
 
   final dropdownFormKey = GlobalKey<FormState>();
 

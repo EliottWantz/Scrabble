@@ -64,12 +64,16 @@ class GameScreen extends GetView<GameController> {
         endDrawer: Drawer(child: Obx(() => _buildChatRoomsList())),
         body: _gameService.currentGame.value == null
             ? const SizedBox()
-            : SingleChildScrollView(
-                child: isObserving == false
-                    ? _buildLayoutForPlayer(context)
-                    : _buildLayoutForObserver(context)),
+            : Obx(() => SingleChildScrollView(child: _chooseLayout(context))),
       ),
     );
+  }
+
+  Widget _chooseLayout(BuildContext context) {
+    if (isObserving == true && controller.isObserverSwitched.isFalse) {
+      return _buildLayoutForObserver(context);
+    }
+    return _buildLayoutForPlayer(context);
   }
 
   Widget _buildLayoutForObserver(BuildContext context) {
