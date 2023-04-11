@@ -69,6 +69,8 @@ const String ClientEventIndice = "indice";
 const String ClientEventFirstSquare = "first-square";
 const String ClientEventRemoveFirstSquare = 'remove-first-square';
 
+const String ClientEventReplaceBotByObserver = "replace-bot-by-observer";
+
 const String ClientEventCreateTournament = "create-tournament";
 const String ClientEventJoinTournament = "join-tournament";
 const String ClientEventLeaveTournament = "leave-tournament";
