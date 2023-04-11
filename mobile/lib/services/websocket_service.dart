@@ -615,6 +615,9 @@ class WebsocketService extends GetxService {
       gameService.indices.value = [];
       gameService.getIndicesHasBeenCalled = false;
       gameController.getIndices();
+      if (gameController.isObserverSwitchedConfirmation) {
+        gameController.isObserverSwitched.value = true;
+      }
       if (Get.isBottomSheetOpen ?? false) {
         Get.back();
         Get.isBottomSheetOpen == true ? Get.back() : null;

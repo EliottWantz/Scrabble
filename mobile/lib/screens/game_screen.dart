@@ -70,7 +70,7 @@ class GameScreen extends GetView<GameController> {
   }
 
   Widget _chooseLayout(BuildContext context) {
-    if (isObserving == true && controller.isObserverSwitched.isFalse) {
+    if (controller.isObserverSwitched.value == false && isObserving) {
       return _buildLayoutForObserver(context);
     }
     return _buildLayoutForPlayer(context);

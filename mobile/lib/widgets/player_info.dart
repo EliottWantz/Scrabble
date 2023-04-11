@@ -83,6 +83,7 @@ class PlayerInfo extends GetView<GameController> {
                                 ? ElevatedButton.icon(
                                     onPressed: () {
                                       controller.websocketService.replaceBotByObserver(controller.gameService.currentGameId);
+                                      controller.isObserverSwitchedConfirmation = true;
                                     },
                                     icon: const Icon(Icons.change_circle),
                                     label: const Text('Remplacer'))
