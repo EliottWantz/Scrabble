@@ -1,4 +1,5 @@
 import { Component } from "@angular/core";
+import { ThemeService } from "@app/services/theme/theme.service";
 
 
 @Component({
@@ -7,18 +8,26 @@ import { Component } from "@angular/core";
   styleUrls: ["./rules-slider-page.component.scss"],
 })
 export class RulesSliderPageComponent {
-  page = 0;
-  nextPage(): void {
-    this.page++;
-    this.page = this.mod(this.page,3);
-    console.log(this.page);
-  }
-  previousPage(): void {
-    this.page--;
-    this.page = this.mod(this.page,3);
-    console.log(this.page);
-  }
-  mod(n:number, m:number):number {
-    return ((n % m) + m) % m;
+  frenchImages = [
+    "../../../assets/BasicFR.png",
+    "../../../assets/ClickFR.png",
+    "../../../assets/PlayFR.png",
+    "../../../assets/MultiplierFR.png",
+    "../../../assets/ExchangeFR.png",
+    "../../../assets/HintFR.png"
+  ];
+  englishImages = [
+    "../../../assets/BasicEN.png",
+    "../../../assets/ClickEN.png",
+    "../../../assets/PlayEN.png",
+    "../../../assets/MultiplierEN.png",
+    "../../../assets/ExchangeEN.png",
+    "../../../assets/HintEN.png"
+  ];
+  titles = ["basic", "click", "move", "multiplier", "exchange", "hint"];
+  constructor(private themeService: ThemeService) {}
+
+  isFrench(): boolean {
+    return this.themeService.language.value === "fr";
   }
 }
