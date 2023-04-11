@@ -944,16 +944,17 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 					return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 				}
 
+				winnerClient, err := m.getClientByUserID(g.WinnerID)
+				if err != nil {
+					return fiber.NewError(fiber.StatusBadRequest, err.Error())
+				}
+
 				otherGameRoom, err := m.GetRoom(otherGame.ID)
 				if err != nil {
 					return fiber.NewError(fiber.StatusBadRequest, err.Error())
 				}
-				if err := otherGameRoom.AddClient(g.WinnerID); err != nil {
+				if err := otherGameRoom.AddClient(winnerClient.ID); err != nil {
 					return fiber.NewError(fiber.StatusInternalServerError, err.Error())
-				}
-				winnerClient, err := m.getClientByUserID(g.WinnerID)
-				if err != nil {
-					return fiber.NewError(fiber.StatusBadRequest, err.Error())
 				}
 				return otherGameRoom.BroadcastObserverJoinGamePacket(winnerClient, g)
 
