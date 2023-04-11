@@ -1,0 +1,42 @@
+<div  class="profile-container">
+    <div>
+        <p class="header">
+            {{'profile-page.activity' | translate}}
+        </p>
+    </div>
+    <div class="profile-header">
+      <img class="avatar" src="{{user.value.avatar.url}}">
+      <div class="profile-info">
+        <p class="username">{{user.value.username}}</p>
+        <p class="email">{{user.value.email}}</p>
+      </div>
+    </div>
+  
+    <div class="stats-container">
+      <div class="stat">
+        <mat-icon>format_list_numbered</mat-icon>
+        <span>{{'profile-page.games-played' | translate}}</span>
+        <span>{{ user.value.summary.userStats.nbGamesPlayed ? user.value.summary.userStats.nbGamesPlayed : '--' }}</span>
+      </div>
+  
+      <div class="stat">
+        <mat-icon>check_circle</mat-icon>
+        <span>{{'profile-page.games-won' | translate}}</span>
+        <span>{{user.value.summary.userStats.nbGamesWon ? user.value.summary.userStats.nbGamesWon : '--'}}</span>
+      </div>
+  
+      <div class="stat">
+        <mat-icon>scoreboard</mat-icon>
+        <span>{{'profile-page.average-points' | translate}}</span>
+        <span>{{user.value.summary.userStats.averagePointsPerGame ? user.value.summary.userStats.averagePointsPerGame : '--'}}</span>
+      </div>
+  
+      <div class="stat">
+        <mat-icon>timelapse</mat-icon>
+        <span>{{'profile-page.average-time' | translate}} </span>
+        <span>{{(user.value.summary.userStats.averageTimePlayed / 1000) ? (user.value.summary.userStats.averageTimePlayed / 1000) : 0}}{{'profile-page.minutes' | translate}}</span>
+      </div>
+    </div>
+  
+  </div>
+  
