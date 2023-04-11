@@ -63,6 +63,7 @@ import { ChooseLetterComponent } from '@app/components/choose-letter/choose-lett
 import { DirectionComponent } from '@app/components/direction/direction.component';
 import { InviteComponent } from '@app/components/invite/invite.component';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { ChatBoxButtonComponent } from '@app/components/chat-box-button/chat-box-button.component';
 
 @NgModule({
   declarations: [
@@ -99,7 +100,8 @@ import { MatExpansionModule } from '@angular/material/expansion';
     AdviceComponent,
     ChooseLetterComponent,
     DirectionComponent,
-    InviteComponent
+    InviteComponent,
+    ChatBoxButtonComponent
   ],
   imports: [
     BrowserModule,
