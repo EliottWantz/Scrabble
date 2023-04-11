@@ -1,11 +1,33 @@
-<div>
-    <h4>{{'profile-page.modify-username' | translate}}</h4>
-    <!-- <div class="">{{'profile-page.username' | translate}}{{user.value.username}}</div> -->
+<div class="container">
+  <div class="form-container">
+    <h4>{{ "profile-page.modify-username" | translate }}</h4>
     <div class="form">
-      <mat-form-field appearance="fill">
-        <mat-label>{{'login-component.username' | translate}}</mat-label>
-        <!-- <input matInput placeholder="{{'login-component.username' | translate}}" name="usename" [(ngModel)] ="username"> -->
+      <div class="">{{'profile-page.username' | translate}}{{user.value.username}}</div>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ "login-component.username" | translate }}</mat-label>
+        <input matInput placeholder="{{ 'login-component.username' | translate }}" name="usename" [(ngModel)]="username" />
       </mat-form-field>
-      <button mat-raised-button type="submit">{{'profile-page.submit' | translate}}</button>
+      <button mat-raised-button type="submit" (click)="submitUsername()">
+        {{ "profile-page.submit" | translate }}
+      </button>
+    </div>
+
+    <hr class="hr-line">
+
+    <div class="avatar-container">
+      <h4>{{"profile-page.modify-avatar" | translate}}</h4>
+      <div class="avatar-options">
+        <button id="upload-button" type="button" mat-raised-button
+          (click)="fileInput.click()">{{'profile-page.modify-avatar' | translate}}
+        </button>
+        <input hidden (change)="onFileSelected($event)" #fileInput type="file">
+        <button mat-flat-button type="button" (click)="openDialogPersonalizedAvatar()">{{'avatar-selection-component.bouton-personalize' | translate}}</button>
+      </div>
+      <div class="avatar-preview">
+        <img id="avatar" width="200" src="{{user.value.avatar.url}}">
+      </div>
+      <button (click)="submitAvatar()" class="avatar-button">{{'profile-page.avatar' |translate}}</button>
     </div>
   </div>
+
+</div>

@@ -26,20 +26,6 @@ export class ProfilePageComponent implements OnInit {
     this.user.subscribe();
   }
 
-  onFileSelected(event: any): void {
-    this.selectedFile = event.target.files[0] ?? null;
-  }
-
-  async submit(): Promise<void> {
-    if (this.selectedFile.name != "") {
-      await this.communicationService.uploadAvatar(this.selectedFile, this.userService.currentUserValue).then((res) => {
-        this.userService.subjectUser.next({...this.userService.subjectUser.value, avatar: res})
-        document.getElementById("avatar")?.setAttribute("src", res.url);
-      });
-    }
-    
-  }
-
   isLoggedIn(): boolean {
     return this.userService.isLoggedIn;
   }
@@ -54,7 +40,7 @@ export class ProfilePageComponent implements OnInit {
 
   getWonOrLost(gameWon: boolean): string {
     return gameWon ? "Partie gagné" : "Partie perdu";
-  } 
+  }
 
   selectNavButton(index: number): void {
     this.screen = this.screens[index];
