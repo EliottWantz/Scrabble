@@ -76,7 +76,6 @@ func (api *API) setupRoutes(cfg *config.Config) {
 	r.Get("/user/friends/:id/:friendId", api.Ctrls.WebSocketManager.GetFriendById)
 	r.Delete("/user/friends/:id/:friendId", api.Ctrls.WebSocketManager.RemoveFriend)
 
-
 	r.Post("/user/friends/request/:id/:friendId", api.Ctrls.WebSocketManager.SendFriendRequest)
 	r.Post("/user/friends/accept/:id/:friendId", api.Ctrls.WebSocketManager.AcceptFriendRequest)
 	r.Delete("/user/friends/accept/:id/:friendId", api.Ctrls.WebSocketManager.RejectFriendRequest)
@@ -85,7 +84,7 @@ func (api *API) setupRoutes(cfg *config.Config) {
 	r.Post("/user/friends/game/accept-invite", api.Ctrls.WebSocketManager.AcceptFriendInvitationToGame)
 	r.Post("/user/friends/game/reject-invite", api.Ctrls.WebSocketManager.RejectFriendInvitationToGame)
 
-	r.Post("/user/avatar", api.Ctrls.UserCtrl.UploadAvatar)
+	r.Post("/user/avatar/:id", api.Ctrls.UserCtrl.UploadAvatar)
 	r.Patch("/user/updateUsername", api.Ctrls.UserCtrl.UpdateUsername)
 
 	r.Get("/room/:id/messages", api.Ctrls.WebSocketManager.GetMessages)
