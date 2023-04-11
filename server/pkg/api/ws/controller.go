@@ -240,8 +240,17 @@ func (m *Manager) GetPendingFriendRequests(c *fiber.Ctx) error {
 
 func (m *Manager) AcceptJoinGameRequest(c *fiber.Ctx) error {
 	id := c.Params("id")
+	if id == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "id is required")
+	}
 	requestorId := c.Params("requestorId")
+	if requestorId == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "requestorId is required")
+	}
 	gId := c.Params("gameId")
+	if gId == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "gameId is required")
+	}
 	g, err := m.GameSvc.Repo.FindGame(gId)
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
@@ -278,7 +287,13 @@ func (m *Manager) AcceptJoinGameRequest(c *fiber.Ctx) error {
 
 func (m *Manager) RevokeRequestToJoinGame(c *fiber.Ctx) error {
 	id := c.Params("id")
+	if id == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "id is required")
+	}
 	gId := c.Params("gameId")
+	if gId == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "gameId is required")
+	}
 	g, err := m.GameSvc.Repo.FindGame(gId)
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
@@ -302,8 +317,17 @@ func (m *Manager) RevokeRequestToJoinGame(c *fiber.Ctx) error {
 
 func (m *Manager) RejectJoinGameRequest(c *fiber.Ctx) error {
 	id := c.Params("id")
+	if id == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "id is required")
+	}
 	requestorId := c.Params("requestorId")
+	if requestorId == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "requestorId is required")
+	}
 	gId := c.Params("gameId")
+	if gId == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "gameId is required")
+	}
 	g, err := m.GameSvc.Repo.FindGame(gId)
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
@@ -329,8 +353,17 @@ func (m *Manager) RejectJoinGameRequest(c *fiber.Ctx) error {
 
 func (m *Manager) AcceptJoinTournamentRequest(c *fiber.Ctx) error {
 	id := c.Params("id")
+	if id == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "id is required")
+	}
 	requestorId := c.Params("requestorId")
-	tId := c.Params("tournamentId")
+	if requestorId == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "requestorId is required")
+	}
+	tId := c.Params("tID")
+	if tId == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "tID is required")
+	}
 	t, err := m.GameSvc.Repo.FindTournament(tId)
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
@@ -366,7 +399,13 @@ func (m *Manager) AcceptJoinTournamentRequest(c *fiber.Ctx) error {
 
 func (m *Manager) RevokeRequestToJoinTournament(c *fiber.Ctx) error {
 	id := c.Params("id")
-	tId := c.Params("tournamentId")
+	if id == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "id is required")
+	}
+	tId := c.Params("tID")
+	if tId == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "tID is required")
+	}
 	t, err := m.GameSvc.Repo.FindTournament(tId)
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
@@ -391,8 +430,17 @@ func (m *Manager) RevokeRequestToJoinTournament(c *fiber.Ctx) error {
 
 func (m *Manager) RejectJoinTournamentRequest(c *fiber.Ctx) error {
 	id := c.Params("id")
-	tId := c.Params("tournamentId")
+	if id == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "id is required")
+	}
+	tId := c.Params("tID")
+	if tId == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "tID is required")
+	}
 	requestorId := c.Params("requestorId")
+	if requestorId == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "requestorId is required")
+	}
 	t, err := m.GameSvc.Repo.FindTournament(tId)
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
