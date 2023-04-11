@@ -26,11 +26,11 @@ import { GifComponent } from '@app/components/gif/gif.component';
 const electron = (window as any).require('electron');
 
 @Component({
-  selector: 'app-chat-box',
-  templateUrl: './chat-box.component.html',
-  styleUrls: ['./chat-box.component.scss'],
+  selector: 'app-chat-box-button',
+  templateUrl: './chat-box-button.component.html',
+  styleUrls: ['./chat-box-button.component.scss'],
 })
-export class ChatBoxComponent implements AfterViewInit {
+export class ChatBoxButtonComponent implements AfterViewInit {
   @ViewChild('chatBoxBody')
   chatBoxMessagesContainer!: ElementRef;
   fenetrer = false;
@@ -46,6 +46,7 @@ export class ChatBoxComponent implements AfterViewInit {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private scrollTimeoutId: any;
   private roomSubscription!: Subscription;
+  opened = false;
 
   constructor(
     private fb: forms.FormBuilder,
@@ -83,15 +84,33 @@ export class ChatBoxComponent implements AfterViewInit {
     });
   }
 
+  @HostListener("document:click", ['$event'])
+  clickout(event: any) {
+    console.log(event);
+    if (event.target.id === "submitBtn" || event.target.id === "close-icon" || document.getElementById("chatBox")?.contains(event.target))
+      return;
+    const elem = document.elementFromPoint(event.x,event.y);
+    if (!document.getElementById("chatBox")?.contains(elem)) {
+      this.opened = false;
+    }
+  }
+
   async ngAfterViewInit(): Promise<void> {
+    if (this.opened) {
       setTimeout(() => {
         this.chatBoxInput.nativeElement.focus();
         this.scrollToBottom();
       });
+    }
 
     this.room$.subscribe(() => {
       this.scrollToBottom();
     });
+  }
+
+  toggleChat() {
+    this.opened = !this.opened;
+        this.scrollToBottom();
   }
 
   send(event: Event): void {

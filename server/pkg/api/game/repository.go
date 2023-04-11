@@ -145,7 +145,7 @@ func (r *Repository) FindAllJoinableTournaments() ([]*Tournament, error) {
 
 	joinable := make([]*Tournament, 0)
 	for _, t := range tournaments {
-		if !t.HasStarted {
+		if !t.HasStarted && len(t.UserIDs) < 4 {
 			joinable = append(joinable, t)
 		}
 	}

@@ -8,7 +8,7 @@
     <div *ngFor="let player of game.value?.players; let i = index" class="player" [class.light]="game.value?.turn !== player.id && !isDarkTheme()" [class.dark]="game.value?.turn !== player.id && isDarkTheme()" [class.isTurnLight]="game.value?.turn === player.id && !isDarkTheme()" [class.isTurnDark]="game.value?.turn === player.id && isDarkTheme()">
       <div class="playerInfo">
         <img *ngIf="!player.isBot" src="{{getPlayerAvatar(player.id)}}">
-        <img *ngIf="player.isBot" src="https://ucarecdn.com/43074331-00a7-4096-8d7a-7a2d5a5d85db/">
+        <img *ngIf="player.isBot" src="https://ucarecdn.com/455a7a35-8cc9-4163-815a-5f9e56dc0273/">
         <h3>{{player.username}}</h3>
         <p>Score : {{player.score}}</p>
         <button mat-raised-button color="primary" style="margin-bottom: 1%; margin-right: 1%;" (click)="switchRack(i)" [disabled]="i === currentRack ? true : false">{{"game-observe-page.show" | translate}}</button>
@@ -56,5 +56,5 @@
       <h3>{{getTileCount()}}</h3>
     </div>
   </div>
-  <app-chat-box></app-chat-box>
+  <app-chat-box-button></app-chat-box-button>
 </div>

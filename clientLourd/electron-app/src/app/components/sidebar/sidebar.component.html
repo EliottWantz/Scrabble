@@ -9,7 +9,7 @@
             </div>
      
             <div class="nav">
-                <div class="nav-button" (click)="selectNav(0)" routerLink="/home">
+                <div class="nav-button" (click)="selectNav(0)" (click)="navigateHome()">
                     <div class="nav-button-div">
                         <div class="mat-icon-button">
                             <mat-icon inline="true" >home</mat-icon>
@@ -57,9 +57,11 @@
         </div>
     </mat-drawer>
     <mat-drawer-content>
+        <app-invite></app-invite>
         <router-outlet></router-outlet>
     </mat-drawer-content>
 </mat-drawer-container>
 <div *ngIf="isInGame()">
-    <router-outlet></router-outlet>
+    <router-outlet>
+    </router-outlet>
 </div>

@@ -152,5 +152,12 @@
 	"find-game-page.observe": "Observer une partie",
 	"waiting-room-page.request-join": "Utilisateurs voulant rejoindre la partie",
 	"game-observe-page.show": "Afficher chevalet",
-	"game-observe-page.replace": "Remplacer"
+	"game-observe-page.replace": "Remplacer",
+	"invite-component.title": " vous a invité dans une partie",
+	"invite-component.accept": "Accepter",
+	"invite-component.deny": "Refuser",
+	"invite-component.password-required": "Veuillez entrer un mot de passe",
+	"invite-component.password-mismatch": "Mot de passe incorrect",
+	"invite-component.game-not-found": "La partie n'existe plus",
+	"waiting-room-page.friends": "Amis"
 }

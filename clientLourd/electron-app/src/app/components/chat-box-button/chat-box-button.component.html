@@ -1,4 +1,7 @@
-<mat-card *ngIf="!fenetrer" id="chatBox">
+<button *ngIf="!opened" mat-fab color="primary" class="placement" (click)="toggleChat()" type="button" id="chatBoxButton">
+  <mat-icon>chat</mat-icon>
+</button>
+<mat-card *ngIf="!fenetrer && opened" id="chatBox" class="placement">
   <div class="header">
     <div class="header-content">
       <form class="room-form">
@@ -28,6 +31,7 @@
                   }}</mat-option>
                   <mat-icon
                     class="close-icon"
+                    id="close-icon"
                     (click)="leaveRoom(i)"
                     *ngIf="room.id !== 'global'"
                     >close</mat-icon
@@ -49,6 +53,9 @@
         type="button"
       >
         <mat-icon>open_in_new</mat-icon>
+      </button>
+      <button mat-mini-fab color="primary" (click)="toggleChat()" [ngStyle]="{transform: 'scale(0.8)'}" class="close-pop" type="button">
+        <mat-icon>close</mat-icon>
       </button>
     </div>
   </div>

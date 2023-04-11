@@ -1,0 +1,54 @@
+.content {
+    position: absolute;
+    width: 20vw;
+    //height: 100vh;
+    row-gap: 2%;
+    right: 1%;
+    top: 1%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    z-index: 3;
+    //background-color: whitesmoke;
+}
+
+.avatar {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+}
+
+.invite {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    //background-color: #ebebeb;
+    outline-style: solid;
+    outline-width: 1px;
+    outline-color: black;
+    border-radius: 12px;
+    width: 100%;
+}
+
+.info {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-evenly;
+    flex-wrap: nowrap;
+    width: 100%;
+}
+
+form {
+    width: 90%;
+}
+
+input {
+    width: 100%;
+}
+
+mat-card-header {
+    width: 100%;
+}
