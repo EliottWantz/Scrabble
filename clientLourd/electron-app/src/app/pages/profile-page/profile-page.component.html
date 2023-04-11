@@ -56,6 +56,12 @@
             {{'profile-page.average-time' | translate}}{{user.value.summary.userStats.averageTimePlayed / 1000}} {{'profile-page.seconds' | translate}}
           </div>
         </div>
+        <div>
+          <button (click)="modifyProfile()">
+            <mat-icon></mat-icon>
+            {{'Modifier mon profil'}}
+          </button>
+        </div>
     </div>
 
     <div *ngIf="screen === 'Historique'" class="history">

@@ -1,4 +1,5 @@
 import { Component, OnInit } from "@angular/core";
+import { Route, Router } from "@angular/router";
 import { CommunicationService } from "@app/services/communication/communication.service";
 import { UserService } from "@app/services/user/user.service";
 import { User } from "@app/utils/interfaces/user";
@@ -17,7 +18,7 @@ export class ProfilePageComponent implements OnInit {
   user!: BehaviorSubject<User>;
   screen = "Modifier mon profil";
   screens = ["Modifier mon profil", "Historique", "Activité"];
-  constructor(private communicationService: CommunicationService, private userService: UserService) {
+  constructor(private communicationService: CommunicationService, private userService: UserService, private router: Router) {
     this.user = this.userService.subjectUser;
   }
 
@@ -65,5 +66,8 @@ export class ProfilePageComponent implements OnInit {
         navButtons[i].setAttribute("style", "background-color: #424260; outline-color: #66678e; outline-width: 1px; outline-style: solid;");
       }
     }
+  }
+  modifyProfile(): void {
+    this.router.navigate(["profilModification"]);
   }
 }

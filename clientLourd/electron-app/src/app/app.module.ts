@@ -61,6 +61,7 @@ import { HttpClient } from '@angular/common/http';
 import { AdviceComponent } from '@app/components/advice/advice.component';
 import { ChooseLetterComponent } from '@app/components/choose-letter/choose-letter.component';
 import { DirectionComponent } from '@app/components/direction/direction.component';
+import { ProfilModificationComponent } from './components/profil-modification/profil-modification.component';
 
 @NgModule({
   declarations: [
@@ -96,7 +97,8 @@ import { DirectionComponent } from '@app/components/direction/direction.componen
     GifComponent,
     AdviceComponent,
     ChooseLetterComponent,
-    DirectionComponent
+    DirectionComponent,
+    ProfilModificationComponent
   ],
   imports: [
     BrowserModule,
