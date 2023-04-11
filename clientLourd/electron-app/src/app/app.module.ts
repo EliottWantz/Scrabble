@@ -65,6 +65,7 @@ import { ProfilModificationComponent } from './components/profil-modification/pr
 import { InviteComponent } from '@app/components/invite/invite.component';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { ChatBoxButtonComponent } from '@app/components/chat-box-button/chat-box-button.component';
+import { FriendStatsComponent } from './components/friend-stats/friend-stats.component';
 
 @NgModule({
   declarations: [
@@ -104,6 +105,7 @@ import { ChatBoxButtonComponent } from '@app/components/chat-box-button/chat-box
     ProfilModificationComponent,
     InviteComponent,
     ChatBoxButtonComponent,
+    FriendStatsComponent,
   ],
   imports: [
     BrowserModule,

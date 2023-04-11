@@ -1,4 +1,5 @@
 import { AfterViewInit, Component, OnInit } from "@angular/core";
+import { Router } from "@angular/router";
 import { CommunicationService } from "@app/services/communication/communication.service";
 import { RoomService } from "@app/services/room/room.service";
 import { SocialService } from "@app/services/social/social.service";
@@ -9,9 +10,9 @@ import { User } from "@app/utils/interfaces/user";
 import { BehaviorSubject } from "rxjs";
 
 @Component({
-    selector: "app-social",
-    templateUrl: "./social.component.html",
-    styleUrls: ["./social.component.scss"],
+  selector: "app-social",
+  templateUrl: "./social.component.html",
+  styleUrls: ["./social.component.scss"],
 })
 export class SocialComponent implements AfterViewInit, OnInit {
   onlineFriendUserNameSearch = "";
@@ -24,18 +25,18 @@ export class SocialComponent implements AfterViewInit, OnInit {
   usernameInput: any;
 
   constructor(private userService: UserService, private websocketService: WebSocketService, private communicationService: CommunicationService,
-      private storageService: StorageService, public socialService: SocialService, private roomService: RoomService) {
+    private storageService: StorageService, public socialService: SocialService, private router: Router) {
     this.user = this.userService.subjectUser;
     this.listUserDisplay = [];
     this.listFriendsDisplay = [];
     this.listOnlineFriendsDisplay = [];
-    
+
   }
 
   ngOnInit(): void {
-      this.listUserDisplay = this.socialService.addFriendList$.value;
-      this.listFriendsDisplay = this.socialService.friendsList$.value;
-      this.listOnlineFriendsDisplay = this.socialService.onlineFriends$.value;
+    this.listUserDisplay = this.socialService.addFriendList$.value;
+    this.listFriendsDisplay = this.socialService.friendsList$.value;
+    this.listOnlineFriendsDisplay = this.socialService.onlineFriends$.value;
 
   }
 
@@ -46,7 +47,7 @@ export class SocialComponent implements AfterViewInit, OnInit {
   }
 
   sendFriendRequest(id: string): void {
-    this.communicationService.requestSendFriendRequest(this.userService.currentUserValue.id, id).subscribe(()=>{
+    this.communicationService.requestSendFriendRequest(this.userService.currentUserValue.id, id).subscribe(() => {
       this.socialService.updatedAddList();
     });
   }
@@ -110,28 +111,33 @@ export class SocialComponent implements AfterViewInit, OnInit {
 
 
   onSearchChange(input: string): void {
-    this.listUserDisplay = this.socialService.addFriendList$.value.filter((user) => { return user.username.toLowerCase().includes(input.toLowerCase())});
+    this.listUserDisplay = this.socialService.addFriendList$.value.filter((user) => { return user.username.toLowerCase().includes(input.toLowerCase()) });
   }
-  
+
   onSeachChangeOnlineFriend(input: string): void {
-    this.listOnlineFriendsDisplay = this.socialService.onlineFriends$.value.filter((user) => { return user.username.toLowerCase().includes(input.toLowerCase())})
+    this.listOnlineFriendsDisplay = this.socialService.onlineFriends$.value.filter((user) => { return user.username.toLowerCase().includes(input.toLowerCase()) })
   }
 
   onSearChangeFriend(input: string): void {
-    this.listFriendsDisplay = this.socialService.friendsList$.value.filter((user) => { return user.username.toLowerCase().includes(input.toLowerCase())})
+    this.listFriendsDisplay = this.socialService.friendsList$.value.filter((user) => { return user.username.toLowerCase().includes(input.toLowerCase()) })
   }
 
   async acceptFriendRequest(id: string): Promise<void> {
-    this.communicationService.requestAcceptFriendRequest(this.userService.currentUserValue.id, id).subscribe(()=>{
+    this.communicationService.requestAcceptFriendRequest(this.userService.currentUserValue.id, id).subscribe(() => {
       this.socialService.updatedOnlineFriends();
       this.socialService.updatedPendingFriendRequest();
     });
   }
 
   denyFriendRequest(id: string): void {
-    this.communicationService.requestDeclineFriendRequest(this.userService.currentUserValue.id, id).subscribe(()=>{
+    this.communicationService.requestDeclineFriendRequest(this.userService.currentUserValue.id, id).subscribe(() => {
       this.socialService.updatedOnlineFriends();
       this.socialService.updatedPendingFriendRequest();
     });
+  }
+
+  goToFriendStats(user: User): void {
+    console.log("main user", user);
+    this.router.navigate(["/friendStats"], { queryParams: { data: JSON.stringify(user) } });
   }
 }

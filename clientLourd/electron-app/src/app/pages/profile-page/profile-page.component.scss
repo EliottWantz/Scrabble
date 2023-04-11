@@ -29,21 +29,18 @@
   cursor: pointer;
 }
 
+
 .content {
-  //margin-left: 5%;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: flex-start;
-    width: 100%;
-    height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
 }
 
 .context {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
   width: 100%;
   height: 98%;
   margin-top: 2%;
@@ -63,31 +60,13 @@ mat-divider {
   width: 100%;
 }
 
-.stat {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-}
-
-.stats {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-evenly;
-  width: 100%;
-  height: 100%;
-}
-
 
 
 .profile-container {
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
-  margin: 2% 5%;
+  align-items: center;
 }
 
 .profile-header {
@@ -119,26 +98,22 @@ mat-divider {
   font-size: 2vh;
   font-weight: lighter;
 }
-
-.stats-container {
+.stat {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  margin: 4% 0;
-}
-
-.stat {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  font-size: 2.2vh;
-  margin-bottom: 3vh;
+  background-color: #ffffff;
+  padding: 1vh;
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px #888888;
+  width: 35vw;
+  margin-bottom: 1vh;
 }
 
 .stat mat-icon {
-  margin-right: 1vw;
+  font-size: 3vh;
+  padding: 1vh;
+  color: #888888;
 }
 
 .edit-profile {
