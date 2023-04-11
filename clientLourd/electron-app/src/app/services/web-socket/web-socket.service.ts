@@ -12,6 +12,7 @@ import {
   FriendRequestPayload,
   GameOverPayload,
   GameUpdatePayload,
+  InvitedToGamePayload,
   JoinedDMRoomPayload,
   JoinedGameAsObserverPayload,
   JoinedGamePayload,
@@ -48,7 +49,8 @@ import { Room } from '@app/utils/interfaces/room';
 import { Square } from '@app/utils/interfaces/square';
 import { Tile } from '@app/utils/interfaces/game/tile';
 import { Player } from '@app/utils/interfaces/game/player';
-import { SocialService } from '../social/social.service';
+import { SocialService } from '@app/services/social/social.service';
+import { InviteService } from '@app/services/invite/invite.service';
 
 @Injectable({
   providedIn: 'root',
@@ -64,7 +66,8 @@ export class WebSocketService {
     private gameService: GameService,
     private storageService: StorageService,
     private router: Router,
-    private socialService: SocialService
+    private socialService: SocialService,
+    private inviteService: InviteService
   ) {
     this.user = this.userService.subjectUser;
   }
@@ -275,10 +278,14 @@ export class WebSocketService {
 
       case 'leftGame': {
         const leftGamePayload = packet.payload as LeftGamePayload;
+        this.roomService.removeRoom(leftGamePayload.gameId);
         //this.gameService.removeUser(leftGamePayload.gameId, this.userService.currentUserValue.id);
         this.gameService.scrabbleGame.next(undefined);
         this.gameService.game.next(undefined);
         this.gameService.isObserving = false;
+
+        // check if tournament
+        this.router.navigate(['/home']);
         break;
       }
 
@@ -481,6 +488,12 @@ export class WebSocketService {
             board: newBoard,
           });
         }
+        break;
+      }
+
+      case "invitedToGame": {
+        const payload = packet.payload as InvitedToGamePayload;
+        this.inviteService.createInvite(payload.inviterId, payload.game);
         break;
       }
 

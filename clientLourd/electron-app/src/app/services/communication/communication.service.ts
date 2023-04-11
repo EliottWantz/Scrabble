@@ -108,12 +108,12 @@ export class CommunicationService {
         }
     }
 
-    public acceptPlayer(userId: string, requestorId: string, gameId: string): Observable<void> {
-        return this.http.post<void>(`${this.baseUrl}/game/accept/${userId}/${requestorId}/${gameId}`, {});
+    public acceptPlayer(userId: string, requestorId: string, gameId: string): Promise<void> {
+        return lastValueFrom(this.http.post<void>(`${this.baseUrl}/game/accept/${userId}/${requestorId}/${gameId}`, {}));
     }
 
-    public denyPlayer(userId: string, requestorId: string, gameId: string): Observable<void> {
-        return this.http.delete<void>(`${this.baseUrl}/game/accept/${requestorId}/${userId}/${gameId}`);
+    public denyPlayer(userId: string, requestorId: string, gameId: string): Promise<void> {
+        return lastValueFrom(this.http.delete<void>(`${this.baseUrl}/game/accept/${requestorId}/${userId}/${gameId}`));
     }
 
   public revokeJoinGame(userId: string, gameId: string): Observable<void> {
@@ -126,6 +126,18 @@ export class CommunicationService {
   public getOnlineFriends(userId: string): Observable<{ friends: User[] }> {
     return this.http.get<{ friends: User[] }>(`${this.baseUrl}/user/friends/online/${userId}`).pipe(catchError(this.handleError<{ friends: User[] }>("getOnlineFriends")));
   }
+
+    public acceptGameInvite(inviterId: string, invitedId: string, gameId: string, password: string): Promise<void> {
+        return lastValueFrom(this.http.post<void>(`${this.baseUrl}/user/friends/game/accept-invite`, {inviterId: inviterId, invitedId: invitedId, gameId: gameId, gamePassword: password}));
+    }
+
+    public declineGameInvite(inviterId: string, invitedId: string, gameId: string, password: string): Promise<void> {
+        return lastValueFrom(this.http.post<void>(`${this.baseUrl}/user/friends/game/reject-invite`, {inviterId: inviterId, invitedId: invitedId, gameId: gameId, gamePassword: password}));
+    }
+
+    public inviteFriendToGame(invitedId: string, inviterId: string, gameId: string): Promise<void> {
+        return lastValueFrom(this.http.post<void>(`${this.baseUrl}/user/friends/game/invite`, {invitedId: invitedId, inviterId: inviterId, gameId: gameId}));
+    }
 
   public getAddList(userId: string): Observable<{ users : User[] }> {
     return this.http.get<{ users: User[] }>(`${this.baseUrl}/user/friends/addList/${userId}`).pipe(catchError(this.handleError<{ users: User[] }>("getAddList")));

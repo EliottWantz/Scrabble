@@ -48,7 +48,7 @@ import { JoinProtectedGameComponent } from '@app/components/join-protected-game/
 import { CustomizeAvatarComponent } from '@app/components/customize-avatar/customize-avatar.component';
 import { MatStepperModule } from '@angular/material/stepper';
 import { ColorPickerModule } from 'ngx-color-picker';
-import { GameObservePageComponent } from "@app/pages/game-observe-page/game-observe-page.component";
+import { GameObservePageComponent } from '@app/pages/game-observe-page/game-observe-page.component';
 import { JoinPrivateGameComponent } from '@app/components/join-private-game/join-private-game.component';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { GifComponent } from '@app/components/gif/gif.component';
@@ -62,6 +62,9 @@ import { AdviceComponent } from '@app/components/advice/advice.component';
 import { ChooseLetterComponent } from '@app/components/choose-letter/choose-letter.component';
 import { DirectionComponent } from '@app/components/direction/direction.component';
 import { ProfilModificationComponent } from './components/profil-modification/profil-modification.component';
+import { InviteComponent } from '@app/components/invite/invite.component';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { ChatBoxButtonComponent } from '@app/components/chat-box-button/chat-box-button.component';
 
 @NgModule({
   declarations: [
@@ -98,7 +101,9 @@ import { ProfilModificationComponent } from './components/profil-modification/pr
     AdviceComponent,
     ChooseLetterComponent,
     DirectionComponent,
-    ProfilModificationComponent
+    ProfilModificationComponent,
+    InviteComponent,
+    ChatBoxButtonComponent,
   ],
   imports: [
     BrowserModule,
@@ -126,6 +131,7 @@ import { ProfilModificationComponent } from './components/profil-modification/pr
     MatButtonToggleModule,
     MatBottomSheetModule,
     MatListModule,
+    MatExpansionModule,
     TranslateModule.forRoot({
       loader: {
         provide: TranslateLoader,
