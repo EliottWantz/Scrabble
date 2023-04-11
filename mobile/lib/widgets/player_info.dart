@@ -2,6 +2,7 @@ import 'package:client_leger/controllers/game_controller.dart';
 import 'package:client_leger/services/users_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 
 class PlayerInfo extends GetView<GameController> {
@@ -33,7 +34,7 @@ class PlayerInfo extends GetView<GameController> {
       children: <Widget>[
         Container(
           height: 130,
-          width: 200,
+          width: isBot ? 280 : 200,
           margin: const EdgeInsets.only(
             top: 20,
           ),
@@ -64,22 +65,34 @@ class PlayerInfo extends GetView<GameController> {
                         Text(
                           'score : $score',
                         ),
-                        Obx(() => ElevatedButton.icon(
-                            onPressed: playerId ==
-                                    controller.currentObservedPlayerId.value
-                                ? null
-                                : () {
-                                    controller.currentObservedPlayerId.value =
-                                        playerId;
-                                  },
-                            icon: const Icon(Icons.remove_red_eye_outlined),
-                            label: const Text('Observer'))),
-                        isBot
-                            ? ElevatedButton.icon(
-                                onPressed: () {},
-                                icon: const Icon(Icons.find_replace),
-                                label: const Text('Remplacer'))
-                            : SizedBox(),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Obx(() => ElevatedButton.icon(
+                                onPressed: playerId ==
+                                        controller.currentObservedPlayerId.value
+                                    ? null
+                                    : () {
+                                        controller.currentObservedPlayerId
+                                            .value = playerId;
+                                      },
+                                icon: const Icon(Icons.remove_red_eye_outlined),
+                                label: const Text('Observer'))),
+                            Gap(5),
+                            isBot
+                                ? ElevatedButton.icon(
+                                    onPressed: () {},
+                                    icon: const Icon(Icons.change_circle),
+                                    label: const Text('Remplacer'))
+                                : SizedBox(),
+                          ],
+                        ),
+                        // isBot
+                        //     ? ElevatedButton.icon(
+                        //         onPressed: () {},
+                        //         icon: const Icon(Icons.find_replace),
+                        //         label: const Text('Remplacer'))
+                        //     : SizedBox(),
                       ],
                     ),
                   )
