@@ -1,0 +1,104 @@
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 20px 0;
+  }
+  
+  .form-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .mat-form-field {
+    width: 100%;
+  }
+  
+  button[type="submit"] {
+    margin-top: 10px;
+    background-color: #2e2e48;
+    color: #fff;
+    transition: background-color 0.3s ease;
+  }
+  
+  button[type="submit"]:hover {
+    background-color: #1c1c32;
+  }
+  
+  .hr-line {
+    margin: 20px 0;
+    border: none;
+    border-top: 1px solid #ccc;
+    width: 100%;
+  }
+  
+  .avatar-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .avatar-options {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 20px;
+  }
+  
+  .avatar-preview {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  
+  .avatar-preview img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+  }
+  
+  .avatar-button {
+    background-color: #2e2e48;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .avatar-button:hover {
+    background-color: #1c1c32;
+  }
+  
+  button[type="button"] {
+    font-size: 16px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    background-color: #4CAF50;
+    color: #fff;
+    margin: 8px;
+    cursor: pointer;
+  }
+  
+  button[type="button"]:hover {
+    background-color: #3e8e41;
+  }
+  
+  button[type="button"]:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.2);
+  }
+  

@@ -1,4 +1,5 @@
 import { Component, OnInit } from "@angular/core";
+import { Route, Router } from "@angular/router";
 import { CommunicationService } from "@app/services/communication/communication.service";
 import { UserService } from "@app/services/user/user.service";
 import { User } from "@app/utils/interfaces/user";
@@ -17,26 +18,12 @@ export class ProfilePageComponent implements OnInit {
   user!: BehaviorSubject<User>;
   screen = "Modifier mon profil";
   screens = ["Modifier mon profil", "Historique", "Activité"];
-  constructor(private communicationService: CommunicationService, private userService: UserService) {
+  constructor(private communicationService: CommunicationService, private userService: UserService, private router: Router) {
     this.user = this.userService.subjectUser;
   }
 
   ngOnInit() {
     this.user.subscribe();
-  }
-
-  onFileSelected(event: any): void {
-    this.selectedFile = event.target.files[0] ?? null;
-  }
-
-  async submit(): Promise<void> {
-    if (this.selectedFile.name != "") {
-      await this.communicationService.uploadAvatar(this.selectedFile, this.userService.currentUserValue).then((res) => {
-        this.userService.subjectUser.next({...this.userService.subjectUser.value, avatar: res})
-        document.getElementById("avatar")?.setAttribute("src", res.url);
-      });
-    }
-    
   }
 
   isLoggedIn(): boolean {
@@ -53,7 +40,7 @@ export class ProfilePageComponent implements OnInit {
 
   getWonOrLost(gameWon: boolean): string {
     return gameWon ? "Partie gagné" : "Partie perdu";
-  } 
+  }
 
   selectNavButton(index: number): void {
     this.screen = this.screens[index];
@@ -65,5 +52,8 @@ export class ProfilePageComponent implements OnInit {
         navButtons[i].setAttribute("style", "background-color: #424260; outline-color: #66678e; outline-width: 1px; outline-style: solid;");
       }
     }
+  }
+  modifyProfile(): void {
+    this.router.navigate(["profilModification"]);
   }
 }

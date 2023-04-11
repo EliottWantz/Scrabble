@@ -1,6 +1,7 @@
 <div class="content">
   <div class="nav">
-    <div class="nav-text" (click)="selectNavButton(0)" style="background-color: #424260; outline-color: #66678e; outline-width: 1px; outline-style: solid;">
+    <div class="nav-text" (click)="selectNavButton(0)"
+      style="background-color: #424260; outline-color: #66678e; outline-width: 1px; outline-style: solid;">
       <mat-icon>person</mat-icon>
       {{'profile-page.modify-profile' | translate}}
     </div>
@@ -15,54 +16,61 @@
   </div>
 
   <div class="context">
-    <div *ngIf="screen === 'Modifier mon profil'">
-      <h2>{{'profile-page.avatar' | translate}}</h2>
-      <div>
-        <img id="avatar" width="30%" src="{{user.value.avatar.url}}">
-        <button id="upload-button" type="button" mat-raised-button (click)="fileInput.click()">{{'profile-page.modify-avatar' | translate}}</button>
-            <input hidden (change)="onFileSelected($event)" #fileInput type="file">
-            <span class="file-name">{{selectedFile.name}}</span>
-            <button mat-raised-button type="submit">{{'profile-page.submit' | translate}}</button>
+    <div *ngIf="screen === 'Modifier mon profil'" class="profile-container">
+      <div class="profile-header">
+        <img class="avatar" src="{{user.value.avatar.url}}">
+        <div class="profile-info">
+          <p class="username">{{user.value.username}}</p>
+          <p class="email">{{user.value.email}}</p>
+        </div>
       </div>
-
-      <h2>{{'profile-page.modify-info' | translate}}</h2>
-        <div>
-          <h4>{{'profile-page.modify-username' | translate}}</h4>
-          <div class="">{{'profile-page.username' | translate}}{{user.value.username}}</div>
-          <div class="form">
-            <mat-form-field appearance="fill">
-              <mat-label>{{'login-component.username' | translate}}</mat-label>
-              <input matInput placeholder="{{'login-component.username' | translate}}" name="usename" [(ngModel)] ="username">
-            </mat-form-field>
-            <button mat-raised-button type="submit">{{'profile-page.submit' | translate}}</button>
-          </div>
+    
+      <div class="stats-container">
+        <div class="stat">
+          <mat-icon>format_list_numbered</mat-icon>
+          <span>{{'profile-page.games-played' | translate}}</span>
+          <span>{{ user.value.summary.userStats.nbGamesPlayed ? user.value.summary.userStats.nbGamesPlayed : '--' }}</span>
         </div>
-
-        <div class="stats">
-          <div class="stat">
-            <mat-icon>format_list_numbered</mat-icon>
-            {{'profile-page.games-played' | translate}}{{user.value.summary.userStats.nbGamesPlayed}}
-          </div>
-          <div class="stat">
-            <mat-icon>check_circle</mat-icon>
-            {{'profile-page.games-won' | translate}}{{user.value.summary.userStats.nbGamesWon}}
-          </div>
-          <div class="stat">
-            <mat-icon>scoreboard</mat-icon>
-            {{'profile-page.average-points' | translate}}{{user.value.summary.userStats.averagePointsPerGame}}
-          </div>
-          <div class="stat">
-            <mat-icon>timelapse</mat-icon>
-            {{'profile-page.average-time' | translate}}{{user.value.summary.userStats.averageTimePlayed / 1000}} {{'profile-page.seconds' | translate}}
-          </div>
+    
+        <div class="stat">
+          <mat-icon>check_circle</mat-icon>
+          <span>{{'profile-page.games-won' | translate}}</span>
+          <span>{{user.value.summary.userStats.nbGamesWon ? user.value.summary.userStats.nbGamesWon : '--'}}</span>
         </div>
+    
+        <div class="stat">
+          <mat-icon>scoreboard</mat-icon>
+          <span>{{'profile-page.average-points' | translate}}</span>
+          <span>{{user.value.summary.userStats.averagePointsPerGame ? user.value.summary.userStats.averagePointsPerGame : '--'}}</span>
+        </div>
+    
+        <div class="stat">
+          <mat-icon>timelapse</mat-icon>
+          <span>{{'profile-page.average-time' | translate}} </span>
+          <span>{{(user.value.summary.userStats.averageTimePlayed / 1000) ? (user.value.summary.userStats.averageTimePlayed / 1000) : 0}}{{'profile-page.minutes' | translate}}</span>
+        </div>
+      </div>
+    
+      <div class="edit-profile">
+        <button (click)="modifyProfile()">
+          <mat-icon>camera_front</mat-icon>
+          <span>{{'Modifier mon profil' | translate}}</span>
+        </button>
+      </div>
     </div>
+    
 
     <div *ngIf="screen === 'Historique'" class="history">
       <mat-grid-list cols="3" rowHeight="20px" class="grid">
-        <mat-grid-tile><h3>{{"profile-page.type-event" | translate}}</h3></mat-grid-tile>
-        <mat-grid-tile><h3>{{"profile-page.startDate" | translate}}</h3></mat-grid-tile>
-        <mat-grid-tile><h3>{{"profile-page.endDate" | translate}}</h3></mat-grid-tile>
+        <mat-grid-tile>
+          <h3>{{"profile-page.type-event" | translate}}</h3>
+        </mat-grid-tile>
+        <mat-grid-tile>
+          <h3>{{"profile-page.startDate" | translate}}</h3>
+        </mat-grid-tile>
+        <mat-grid-tile>
+          <h3>{{"profile-page.endDate" | translate}}</h3>
+        </mat-grid-tile>
         <mat-grid-tile [colspan]="3"><mat-divider></mat-divider></mat-grid-tile>
         <div *ngFor="let game of user.value.summary.gamesStats; let last = last">
           <mat-grid-tile>{{getWonOrLost(game.gameWon)}}</mat-grid-tile>
@@ -75,9 +83,15 @@
 
     <div *ngIf="screen === 'Activité'" class="history">
       <mat-grid-list cols="3" rowHeight="20px">
-        <mat-grid-tile><h3>{{"profile-page.type-event" | translate}}</h3></mat-grid-tile>
-        <mat-grid-tile><h3>{{"profile-page.date" | translate}}</h3></mat-grid-tile>
-        <mat-grid-tile><h3>{{"profile-page.hour" | translate}}</h3></mat-grid-tile>
+        <mat-grid-tile>
+          <h3>{{"profile-page.type-event" | translate}}</h3>
+        </mat-grid-tile>
+        <mat-grid-tile>
+          <h3>{{"profile-page.date" | translate}}</h3>
+        </mat-grid-tile>
+        <mat-grid-tile>
+          <h3>{{"profile-page.hour" | translate}}</h3>
+        </mat-grid-tile>
         <mat-grid-tile [colspan]="3"><mat-divider></mat-divider></mat-grid-tile>
         <div *ngFor="let activity of user.value.summary.networkLogs; let last = last">
           <mat-grid-tile>{{activity.eventType}}</mat-grid-tile>

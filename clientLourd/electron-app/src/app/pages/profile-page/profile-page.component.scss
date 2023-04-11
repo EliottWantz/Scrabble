@@ -79,3 +79,77 @@ mat-divider {
   width: 100%;
   height: 100%;
 }
+
+
+
+.profile-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 2% 5%;
+}
+
+.profile-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar {
+  width: 15vw;
+  height: 15vw;
+  border-radius: 50%;
+  margin: 2% 0;
+}
+
+.profile-info {
+  text-align: center;
+  margin-top: 2%;
+}
+
+.username {
+  font-size: 2.5vh;
+  font-weight: bold;
+  margin-bottom: 0.5vh;
+}
+
+.email {
+  font-size: 2vh;
+  font-weight: lighter;
+}
+
+.stats-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 4% 0;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  font-size: 2.2vh;
+  margin-bottom: 3vh;
+}
+
+.stat mat-icon {
+  margin-right: 1vw;
+}
+
+.edit-profile {
+  margin-top: 4%;
+}
+
+.edit-profile button {
+  background-color: #2e2e48;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 2% 4%;
+  font-size: 2.5vh;
+}

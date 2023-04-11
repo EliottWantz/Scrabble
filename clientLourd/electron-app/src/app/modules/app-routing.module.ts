@@ -12,6 +12,7 @@ import { WaitRoomPageComponent } from '@app/pages/waiting-room-page/waiting-room
 import { FindGamePageComponent } from '@app/pages/find-game-page/find-game-page.component';
 import { ChatBoxComponent } from '@app/components/chat-box/chat-box.component';
 import { GameObservePageComponent } from '@app/pages/game-observe-page/game-observe-page.component';
+import { ProfilModificationComponent } from '@app/components/profil-modification/profil-modification.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' },
@@ -27,6 +28,7 @@ const routes: Routes = [
   { path: 'waitingRoom', component: WaitRoomPageComponent },
   { path: 'find-game', component: FindGamePageComponent },
   { path: 'chatbox', component: ChatBoxComponent },
+  {path: 'profilModification', component: ProfilModificationComponent},
 ];
 
 @NgModule({
