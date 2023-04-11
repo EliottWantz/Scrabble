@@ -868,4 +868,12 @@ class WebsocketService extends GetxService {
         payload: joinGameAsObserverPayload);
     socket.sink.add(joinGameAsObserverRequest.toRawJson());
   }
+
+  void replaceBotByObserver(String gameId) {
+    final joinGameAsObserverPayload = JoinGamePayload(gameId: gameId);
+    final joinGameAsObserverRequest = JoinGameAsObserverRequest(
+        event: ClientEventReplaceBotByObserver,
+        payload: joinGameAsObserverPayload);
+    socket.sink.add(joinGameAsObserverRequest.toRawJson());
+  }
 }
