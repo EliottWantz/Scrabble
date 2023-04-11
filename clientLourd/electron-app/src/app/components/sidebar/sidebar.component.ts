@@ -151,15 +151,23 @@ export class SidebarComponent implements OnInit {
 
   selectNav(index: number): void {
     const navButtons = document.getElementsByClassName('nav-button');
+    let wasThere = false;
     for (let i = 0; i < navButtons.length; i++) {
       if (i != index) {
         navButtons[i].setAttribute('style', '');
       } else {
+        wasThere = true;
         navButtons[i].setAttribute(
           'style',
           'background-color: #424260; outline-color: #66678e; outline-width: 1px; outline-style: solid;'
         );
       }
+    }
+    if (!wasThere) {
+      navButtons[navButtons.length - 1].setAttribute(
+        'style',
+        'background-color: #424260; outline-color: #66678e; outline-width: 1px; outline-style: solid;'
+      );
     }
   }
 }

@@ -161,5 +161,13 @@
 	"invite-component.password-required": "Veuillez entrer un mot de passe",
 	"invite-component.password-mismatch": "Mot de passe incorrect",
 	"invite-component.game-not-found": "La partie n'existe plus",
-	"waiting-room-page.friends": "Amis"
+	"waiting-room-page.friends": "Amis",
+	"sidebar-component.rules": "Règles",
+	"rules-slider-page.basic": "Bases",
+	"rules-slider-page.move": "Placement",
+	"rules-slider-page.multiplier": "Multiplicateurs",
+	"rules-slider-page.exchange": "Échange",
+	"rules-slider-page.hint": "Indice",
+	"rules-slider-page.click": "Cliquer",
+	"rules-slider-page.finish": "Finir"
 }

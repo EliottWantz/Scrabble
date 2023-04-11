@@ -1,10 +1,14 @@
 <div class="container">
-  <button mat-fab color="accent" class="home-button" routerLink="/home" routerLinkActive="router-link-active">
-    <mat-icon>home</mat-icon>
-  </button>
-  <button id="next-page-button" type="button" mat-raised-button (click)="previousPage()">Previous Page</button>
-  <div *ngIf="page==0">Texte 1</div>
-  <div *ngIf="page==1">Texte 2</div>
-  <div *ngIf="page==2">Texte 3</div>
-  <button id="next-page-button" type="button" mat-raised-button (click)="nextPage()">Next Page</button>
+  <mat-stepper>
+    <mat-step *ngFor="let item of titles; let i = index; let first = first; let last = last">
+      <ng-template matStepLabel>{{"rules-slider-page." + item | translate}}</ng-template>
+      <img *ngIf="isFrench()" [src]="frenchImages[i]">
+      <img *ngIf="!isFrench()" [src]="englishImages[i]">
+      <div class="step-buttons">
+        <button *ngIf="!first" mat-raised-button color="primary" matStepperPrevious class="left">{{"customize-avatar-component.back" | translate}}</button>
+        <button *ngIf="!last" mat-raised-button color="primary" matStepperNext>{{"customize-avatar-component.next" | translate}}</button>
+        <button *ngIf="last" mat-raised-button color="primary" matStepperNext routerLink="/home">{{"rules-slider-page.finish" | translate}}</button>
+      </div>
+    </mat-step>
+  </mat-stepper>
 </div>
