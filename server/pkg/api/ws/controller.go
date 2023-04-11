@@ -191,6 +191,12 @@ type GetUserResponse struct {
 func (m *Manager) GetFriendById(c *fiber.Ctx) error {
 	id := c.Params("id")
 	friendId := c.Params("friendId")
+	if id == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "id is required")
+	}
+	if friendId == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "friendId is required")
+	}
 	friend, err := m.GetFriendlistById(id, friendId)
 	if err != nil {
 		return err
