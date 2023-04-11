@@ -148,7 +148,6 @@ func (ctrl *Controller) GetUser(c *fiber.Ctx) error {
 }
 
 type UploadAvatarResquest struct {
-	ID        string `json:"id,omitempty"`
 	AvatarURL string `json:"avatarUrl,omitempty"`
 	FileID    string `json:"fileId,omitempty"`
 }
@@ -162,7 +161,8 @@ func (ctrl *Controller) UploadAvatar(c *fiber.Ctx) error {
 	if err := c.BodyParser(&req); err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, "decode req: "+err.Error())
 	}
-	if req.ID == "" {
+	ID := c.Params("id")
+	if ID == "" {
 		return fiber.NewError(fiber.StatusBadRequest, "no user id given")
 	}
 
@@ -170,7 +170,7 @@ func (ctrl *Controller) UploadAvatar(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	avatar, err := ctrl.svc.UploadAvatar(req, strategy)
+	avatar, err := ctrl.svc.UploadAvatar(ID, req, strategy)
 	if err != nil {
 		return err
 	}
