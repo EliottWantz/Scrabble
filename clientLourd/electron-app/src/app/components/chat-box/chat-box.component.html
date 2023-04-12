@@ -28,6 +28,10 @@
           </mat-form-field>
         </div>
       </form>
+      <button color="primary" mat-mini-fab *ngIf="showbutton" (click)="this.createNewDmRoom()"
+        [ngStyle]="{transform: 'scale(0.8)'}" class="close-pop" type="button">
+        <mat-icon>add_box</mat-icon>
+      </button>
       <button color="primary" mat-mini-fab *ngIf="showbutton" (click)="this.chatService.openChat()"
         [ngStyle]="{transform: 'scale(0.8)'}" class="close-pop" type="button">
         <mat-icon>open_in_new</mat-icon>

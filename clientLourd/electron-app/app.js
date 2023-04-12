@@ -92,6 +92,6 @@ ipcMain.on("open-chat", (event, data) => {
 ipcMain.on("request-user-data", (event, data) => {
   const allWindows = BrowserWindow.getAllWindows();
   console.log(allWindows);
-  if (allWindows < 1) return;
+  if (allWindows < 2) return;
   chatWindow.webContents.send("user-data", userData);
 });

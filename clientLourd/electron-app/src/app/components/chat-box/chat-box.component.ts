@@ -22,6 +22,7 @@ import { MatSelectChange } from '@angular/material/select';
 import { Subscription } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { GifComponent } from '@app/components/gif/gif.component';
+import { NewDmRoomComponent } from '../new-dm-room/new-dm-room.component';
 
 const electron = (window as any).require('electron');
 
@@ -173,6 +174,19 @@ export class ChatBoxComponent implements AfterViewInit {
       }
     }
     return [messageNoUrl, gif];
+  }
+
+  createNewDmRoom() {
+    const dialogRef = this.dialog.open(NewDmRoomComponent, {
+      width: "40vw",
+      height: "30vh",
+      data: { username: this.userService.currentUserValue.username }
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.roomService.changeRoom(result);
+      }
+    });
   }
 
   private subscribeToRoom(): void {

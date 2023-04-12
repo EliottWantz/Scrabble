@@ -22,6 +22,7 @@ import { MatSelectChange } from '@angular/material/select';
 import { Subscription } from 'rxjs';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { GifComponent } from '@app/components/gif/gif.component';
+import { NewDmRoomComponent } from '../new-dm-room/new-dm-room.component';
 
 const electron = (window as any).require('electron');
 
@@ -89,7 +90,7 @@ export class ChatBoxButtonComponent implements AfterViewInit {
     console.log(event);
     if (event.target.id === "submitBtn" || event.target.id === "close-icon" || document.getElementById("chatBox")?.contains(event.target))
       return;
-    const elem = document.elementFromPoint(event.x,event.y);
+    const elem = document.elementFromPoint(event.x, event.y);
     if (!document.getElementById("chatBox")?.contains(elem)) {
       this.opened = false;
     }
@@ -110,7 +111,7 @@ export class ChatBoxButtonComponent implements AfterViewInit {
 
   toggleChat() {
     this.opened = !this.opened;
-        this.scrollToBottom();
+    this.scrollToBottom();
   }
 
   send(event: Event): void {
@@ -174,7 +175,7 @@ export class ChatBoxButtonComponent implements AfterViewInit {
   }
 
   openGifMenu(): void {
-        this.dialog.open(GifComponent, {});
+    this.dialog.open(GifComponent, {});
   }
 
   containsGifURL(message: string): boolean {
@@ -196,6 +197,19 @@ export class ChatBoxButtonComponent implements AfterViewInit {
       }
     }
     return [messageNoUrl, gif];
+  }
+
+  createNewDmRoom() {
+    const dialogRef = this.dialog.open(NewDmRoomComponent, {
+      width: "40vw",
+      height: "30vh",
+      data: { username: this.userService.currentUserValue.username }
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.roomService.changeRoom(result);
+      }
+    });
   }
 
   private subscribeToRoom(): void {
