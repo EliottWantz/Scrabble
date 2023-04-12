@@ -31,11 +31,11 @@ export class CommunicationService {
         return this.http.post<{ user: User }>(`${this.baseUrl}/signup`, data).pipe(catchError(this.handleError<{ user: User }>("register")));
     }
 
-    requestUploadAvatar(file: File): Observable<{ url: string, fileId: string }> {
+    requestUploadAvatar(id: string, file: File): Observable<{ url: string, fileId: string }> {
         console.log("file", file)
         const formData = new FormData();
         formData.append('avatar', file);
-        return this.http.post<{ url: string, fileId: string }>(`${this.baseUrl}/user/avatar`, formData).pipe(catchError(this.handleError<{ url: string, fileId: string }>("uploadAvatar")));
+        return this.http.post<{ url: string, fileId: string }>(`${this.baseUrl}/user/avatar/${id}`, formData).pipe(catchError(this.handleError<{ url: string, fileId: string }>("uploadAvatar")));
     }
 
     async getDefaultAvatars(): Promise<{ avatars: [{ url: string, fileId: string }] }> {
