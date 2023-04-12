@@ -67,7 +67,6 @@
         }}</mat-label>
       <input #chatBoxInput type="text" id="chatBoxInput" autocomplete="off" matInput name="password"
         [(ngModel)]="message" />
-      <!-- <mat-error *ngIf="input.hasError('maxlength')">Votre message <strong>excède</strong> la limite de charactères</mat-error> -->
     </mat-form-field>
     <button #submitBtn mat-mini-fab color="primary" [disabled]="false" id="submitBtn" type="submit"
       (click)="send($event)">

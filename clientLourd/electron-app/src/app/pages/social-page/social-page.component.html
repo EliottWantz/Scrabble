@@ -1,8 +1,8 @@
 <mat-drawer-container>
 
-  <mat-drawer opened="true" disableClose="true" mode="side">
+  <mat-drawer opened="true" disableClose="true" mode="side" class="mat_drawer" position="end">
     <div class="box">
-      <div id="title">
+      <div id="title" (click)="this.chatFriend = false">
         <div class="mat-icon-button">
           <mat-icon inline="true">people</mat-icon>
         </div>
@@ -12,36 +12,24 @@
         <hr>
       </div>
 
-      <div *ngFor="let friend of this.socialService.onlineFriends$.value; let i = index" class="friends">
-        <div class="friend" (click)="chatFriendPage(i)">
-          <div class="mat-icon-button">
-            <img class="avatar" src="{{friend.avatar.url}}" alt="avatar">
+      <div *ngFor="let friend of this.socialService.onlineFriends$.value; let i = index" class="friends" (click)="chatFriendPage(i)">
+        <div class="friend">
+          <div class="avatar">
+            <img class="avatar-img" src="{{friend.avatar.url}}" alt="avatar">
+            <span class='avatar-status'></span>
           </div>
-          <div class="text">{{getUsernameFriend(i)}}</div>
+          <span class="text">{{getUsernameFriend(i)}}</span>
         </div>
       </div>
-
+      
     </div>
   </mat-drawer>
 
-  <mat-drawer-content>
+  <mat-drawer-content >
     <app-social *ngIf="!chatFriend"></app-social>
     <div class="content" *ngIf="chatFriend">
-      <div class="nav">
-        <div class="nav-text" (click)="selectNavButton(0)">
-          {{'social-component.online' | translate}}
-        </div>
-        <div class="nav-text" (click)="selectNavButton(1)">
-          {{'social-component.all' | translate}}
-        </div>
-        <div class="nav-text" (click)="selectNavButton(2)">
-          {{'social-component.waiting' | translate}}
-        </div>
-        <div class="nav-text" (click)="selectNavButton(3)">
-          {{'social-component.add' | translate}}
-        </div>
-      </div>
       <app-chat-box class="chat"></app-chat-box>
     </div>
+
   </mat-drawer-content>
 </mat-drawer-container>

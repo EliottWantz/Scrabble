@@ -33,7 +33,7 @@ export class SocialPageComponent {
   chatFriendPage(index: number): void {
     this.chatFriend = true;
     document.getElementById('add-friend')?.setAttribute("style", "");
-    const friends = document.getElementsByClassName('friend');
+    const friends = document.getElementsByClassName('friends');
     for (let i = 0; i < friends.length; i++) {
       if (i != index) {
         friends[i].setAttribute("style", "");
@@ -53,7 +53,6 @@ export class SocialPageComponent {
     }
 
     const friend = this.socialService.onlineFriends$.value[index];
-    console.log('friend', friend)
     if (friend) {
       this.friendUsername = friend.username;
       const payload: CreateDMRoomPayload = {

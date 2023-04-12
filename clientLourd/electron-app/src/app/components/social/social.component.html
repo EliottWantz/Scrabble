@@ -1,46 +1,5 @@
 <div id="container">
-    <div class="nav">
-        <div class="nav-text" (click)="selectNavButton(0)">
-            {{'social-component.online' | translate}}
-        </div>
-        <div class="nav-text" (click)="selectNavButton(1)">
-            {{'social-component.all' | translate}}
-        </div>
-        <div class="nav-text" (click)="selectNavButton(2)">
-            {{'social-component.waiting' | translate}}
-        </div>
-        <div class="nav-text" (click)="selectNavButton(3)">
-            {{'social-component.add' | translate}}
-        </div>
-    </div>
     <div class="content">
-
-        <div *ngIf="getScreen() === 'En ligne'" class="screen">
-            <div class="form">
-                <form>
-                    <mat-form-field appearance="fill">
-                        <mat-label for="username">{{'social-component.search-friend' | translate}}</mat-label>
-                        <input #usernameInput matInput placeholder="{{'social-component.search-friend' | translate}}"
-                            name="username" [(ngModel)]="onlineFriendUserNameSearch"
-                            (input)="onSeachChangeOnlineFriend(usernameInput.value)">
-                    </mat-form-field>
-                </form>
-            </div>
-            <div class="users">
-                <div *ngFor="let user of this.listOnlineFriendsDisplay" class="user">
-                    <div>
-                        <img src="{{user.avatar.url}}" class="avatar">
-                        <h3>{{user.username}}</h3>
-                    </div>
-                    <div>
-                        <button (click)="goToFriendStats(user)">
-                            <mat-icon>poll</mat-icon>
-                            voir les stats
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <div *ngIf="getScreen() === 'Tous'" class="screen">
             <div class="form">
@@ -57,8 +16,13 @@
                 <div *ngFor="let user of listFriendsDisplay" class="user">
                     <img src="{{user.avatar.url}}" class="avatar">
                     <h3>{{user.username}}</h3>
+                    <button (click)="goToFriendStats(user)">
+                        <mat-icon>poll</mat-icon>
+                        voir les stats
+                    </button>
                 </div>
             </div>
+
         </div>
 
         <div *ngIf="getScreen() === 'Ajouter un ami'" class="add-friend">
@@ -98,5 +62,18 @@
             </div>
         </div>
     </div>
-    <app-chat-box-button></app-chat-box-button>
+    <div class="nav">
+        <div class="nav-text" (click)="selectNavButton(0)">
+            <mat-icon class="icon">people</mat-icon>
+            <p>{{'social-component.all' | translate}}</p>
+        </div>
+        <div class="nav-text" (click)="selectNavButton(1)">
+            <mat-icon class="icon">check</mat-icon>
+            <p>{{'social-component.waiting' | translate}}</p>
+        </div>
+        <div class="nav-text" (click)="selectNavButton(2)">
+            <mat-icon class="icon">person_add</mat-icon>
+            <p>{{'social-component.add' | translate}} </p>
+        </div>
+    </div>
 </div>

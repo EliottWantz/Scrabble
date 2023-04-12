@@ -15,16 +15,16 @@ export class SocialService {
   public pendingFriendRequest$ = new BehaviorSubject<User[]>([]);
 
   currentMessage = this.onlineFriends$.asObservable();
-  activeScreen = 'En ligne';
-  screens = ['En ligne', 'Tous', 'En attente', 'Ajouter un ami'];
+  activeScreen = 'Tous';
+  screens = ['Tous', 'En attente', 'Ajouter un ami'];
   constructor(
     private comSvc: CommunicationService,
     private userSvc: UserService
   ) {
-    if (this.userSvc.currentUserValue.id !=  "0") {
+    if (this.userSvc.currentUserValue.id != "0") {
       this.comSvc.getOnlineFriends(this.userSvc.currentUserValue.id).subscribe((users) => {
         this.onlineFriends$.next(users.friends);
-      }); 
+      });
 
       this.comSvc.getAddList(this.userSvc.currentUserValue.id).subscribe((users) => {
         this.addFriendList$.next(users.users);
@@ -46,7 +46,7 @@ export class SocialService {
       this.onlineFriends$.next(users.friends);
     });
   }
-  
+
   public updatedAddList() {
     this.comSvc.getAddList(this.userSvc.currentUserValue.id).subscribe((users) => {
       this.addFriendList$.next(users.users);

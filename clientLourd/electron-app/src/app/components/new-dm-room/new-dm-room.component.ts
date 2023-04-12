@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
-import { CommunicationService } from '@app/services/communication/communication.service';
 import { StorageService } from '@app/services/storage/storage.service';
 import { UserService } from '@app/services/user/user.service';
 import { WebSocketService } from '@app/services/web-socket/web-socket.service';
