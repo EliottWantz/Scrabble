@@ -2,23 +2,23 @@
     <p>{{'register-component.text' | translate}}</p>
 
     <div id="info">
-        <form id="form">
+        <form id="form" [formGroup]="userEmails">
             <div class="form-group">
                 <mat-form-field class="fields" appearance="outline">
                     <mat-label for="email">{{'register-component.email' | translate}}</mat-label>
-                    <input matInput placeholder="{{'register-component.email' | translate}}" name="email" type="email" [(ngModel)]= "email" required>
+                    <input matInput placeholder="{{'register-component.email' | translate}}" name="email" type="email" email="true" required formControlName="primaryEmail">
                 </mat-form-field>
             </div>
             <div class="form-group">
                 <mat-form-field class="fields" appearance="outline">
                     <mat-label for="username">{{'register-component.username' | translate}}</mat-label>
-                    <input matInput placeholder="{{'register-component.username' | translate}}" name="usename" [(ngModel)] ="username" required>
+                    <input matInput placeholder="{{'register-component.username' | translate}}" name="usename" required formControlName="username">
                 </mat-form-field>
             </div>
             <div class="form-group">
                 <mat-form-field class="fields" appearance="outline">
                     <mat-label for="password">{{'register-component.password' | translate}}</mat-label>
-                    <input matInput placeholder="{{'register-component.password' | translate}}" name="password" type="password" [(ngModel)]= "password" required>
+                    <input matInput placeholder="{{'register-component.password' | translate}}" name="password" type="password" required formControlName="password">
                 </mat-form-field>
             </div>
         

@@ -161,5 +161,13 @@
 	"invite-component.password-required": "Please enter a password",
 	"invite-component.password-mismatch": "The password is incorrect",
 	"invite-component.game-not-found": "The game does not exist anymore",
-	"waiting-room-page.friends": "Friends"
+	"waiting-room-page.friends": "Friends",
+	"sidebar-component.rules": "Rules",
+	"rules-slider-page.basic": "Basics",
+	"rules-slider-page.move": "Placement",
+	"rules-slider-page.multiplier": "Multipliers",
+	"rules-slider-page.exchange": "Exchange",
+	"rules-slider-page.hint": "Hint",
+	"rules-slider-page.click": "Click",
+	"rules-slider-page.finish": "Finish"
 }
