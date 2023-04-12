@@ -188,6 +188,9 @@ type GetAddFriendListResponse struct {
 
 func (m *Manager) GetAddFriendList(c *fiber.Ctx) error {
 	id := c.Params("id")
+	if id == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "no id provided")
+	}
 	usr, err := m.UserSvc.GetUser(id)
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, "no user found")
