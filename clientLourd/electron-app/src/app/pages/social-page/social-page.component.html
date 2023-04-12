@@ -1,52 +1,47 @@
+<mat-drawer-container>
 
-  <mat-drawer-container>
+  <mat-drawer opened="true" disableClose="true" mode="side">
+    <div class="box">
+      <div id="title">
+        <div class="mat-icon-button">
+          <mat-icon inline="true">people</mat-icon>
+        </div>
+        <div class="text">{{'social-page.friends' | translate}}</div>
+      </div>
+      <div id="break">
+        <hr>
+      </div>
 
-    <mat-drawer opened="true" disableClose="true" mode="side">
-      <div class="box">
-        <div id="title">
+      <div *ngFor="let friend of this.socialService.onlineFriends$.value; let i = index" class="friends">
+        <div class="friend" (click)="chatFriendPage(i)">
           <div class="mat-icon-button">
-            <mat-icon inline="true">people</mat-icon>
+            <img class="avatar" src="{{friend.avatar.url}}" alt="avatar">
           </div>
-          <div class="text">{{'social-page.friends' | translate}}</div>
+          <div class="text">{{getUsernameFriend(i)}}</div>
         </div>
-        <div id="break">
-          <hr>
+      </div>
+
+    </div>
+  </mat-drawer>
+
+  <mat-drawer-content>
+    <app-social *ngIf="!chatFriend"></app-social>
+    <div class="content" *ngIf="chatFriend">
+      <div class="nav">
+        <div class="nav-text" (click)="selectNavButton(0)">
+          {{'social-component.online' | translate}}
         </div>
-
-        <div *ngFor="let friend of this.socialService.onlineFriends$.value; let i = index" class="friends">
-          <div class="friend" (click)="chatFriendPage(i)">
-            <div class="mat-icon-button">
-              <mat-icon inline="true" >person</mat-icon>
-            </div>
-            <div class="text">{{getUsernameFriend(i)}}</div>
-          </div> 
+        <div class="nav-text" (click)="selectNavButton(1)">
+          {{'social-component.all' | translate}}
         </div>
-
+        <div class="nav-text" (click)="selectNavButton(2)">
+          {{'social-component.waiting' | translate}}
+        </div>
+        <div class="nav-text" (click)="selectNavButton(3)">
+          {{'social-component.add' | translate}}
+        </div>
       </div>
-    </mat-drawer>
-
-    <mat-drawer-content>
-      <app-social *ngIf="!chatFriend"></app-social>
-      <div class="content" *ngIf="chatFriend">
-        <div class="nav">
-          <div class="nav-text" (click)="selectNavButton(0)">
-              {{'social-component.online' | translate}}
-          </div>
-          <div class="nav-text" (click)="selectNavButton(1)">
-            {{'social-component.all' | translate}}
-          </div>
-          <div class="nav-text" (click)="selectNavButton(2)">
-              {{'social-component.waiting' | translate}}
-          </div>
-          <div class="nav-text" (click)="selectNavButton(3)">
-              {{'social-component.add' | translate}}
-          </div>
-      </div>
-      <div class="chat">
-        <app-chat-box class="chat-box"></app-chat-box>
-      </div>
-      </div>
-    </mat-drawer-content>
-  </mat-drawer-container>
-
-      
+      <app-chat-box class="chat"></app-chat-box>
+    </div>
+  </mat-drawer-content>
+</mat-drawer-container>

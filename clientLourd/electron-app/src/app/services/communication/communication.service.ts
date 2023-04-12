@@ -32,7 +32,6 @@ export class CommunicationService {
     }
 
     requestUploadAvatar(id: string, file: File): Observable<{ url: string, fileId: string }> {
-        console.log("file", file)
         const formData = new FormData();
         formData.append('avatar', file);
         return this.http.post<{ url: string, fileId: string }>(`${this.baseUrl}/user/avatar/${id}`, formData).pipe(catchError(this.handleError<{ url: string, fileId: string }>("uploadAvatar")));

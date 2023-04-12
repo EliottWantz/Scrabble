@@ -80,6 +80,7 @@ app.on("activate", function () {
 });
 
 ipcMain.on("open-chat", (event, data) => {
+  console.log("we need to open the chat");
   appWindow.webContents.send("open-chat");
   if (chatWindow == null) {
     openChatwindow();
@@ -89,5 +90,8 @@ ipcMain.on("open-chat", (event, data) => {
 });
 
 ipcMain.on("request-user-data", (event, data) => {
+  const allWindows = BrowserWindow.getAllWindows();
+  console.log(allWindows);
+  if (allWindows < 1) return;
   chatWindow.webContents.send("user-data", userData);
 });
