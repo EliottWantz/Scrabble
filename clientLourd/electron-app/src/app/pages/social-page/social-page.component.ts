@@ -19,7 +19,7 @@ import { BehaviorSubject } from "rxjs";
 })
 export class SocialPageComponent {
   public user: BehaviorSubject<User>;
-  public inDM:boolean;
+  public inDM: boolean;
   chatFriend = false;
   friendUsername = '';
   addFriendErrorMessage = '';
@@ -33,7 +33,7 @@ export class SocialPageComponent {
   chatFriendPage(index: number): void {
     this.chatFriend = true;
     document.getElementById('add-friend')?.setAttribute("style", "");
-    const friends = document.getElementsByClassName('friend');
+    const friends = document.getElementsByClassName('friends');
     for (let i = 0; i < friends.length; i++) {
       if (i != index) {
         friends[i].setAttribute("style", "");
@@ -46,14 +46,13 @@ export class SocialPageComponent {
       const usersInRoom = room.name.split("/");
       console.log(usersInRoom);
       if (usersInRoom[0] == this.user.value.username && usersInRoom[1] == this.getUsernameFriend(index) ||
-         usersInRoom[0] == this.getUsernameFriend(index) && usersInRoom[1] == this.user.value.username) {
-          this.roomService.currentRoomChat.next(room);
-          return;
+        usersInRoom[0] == this.getUsernameFriend(index) && usersInRoom[1] == this.user.value.username) {
+        this.roomService.currentRoomChat.next(room);
+        return;
       }
     }
 
     const friend = this.socialService.onlineFriends$.value[index];
-    console.log('friend', friend)
     if (friend) {
       this.friendUsername = friend.username;
       const payload: CreateDMRoomPayload = {
@@ -70,7 +69,7 @@ export class SocialPageComponent {
     return this.socialService.onlineFriends$.value[index].username;
   }
 
-  
+
   isLoggedIn(): boolean {
     return this.userService.isLoggedIn;
   }

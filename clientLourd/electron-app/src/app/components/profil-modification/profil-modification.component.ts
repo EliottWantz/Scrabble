@@ -38,7 +38,7 @@ export class ProfilModificationComponent implements OnInit {
   submitAvatar(): void {
     if (this.selectedFile.name != '') {
       this.comSvc
-        .requestUploadAvatar(this.selectedFile)
+        .requestUploadAvatar(this.userSvc.subjectUser.value.id, this.selectedFile)
         .subscribe((res) => {
           this.userSvc.subjectUser.next({
             ...this.userSvc.subjectUser.value,

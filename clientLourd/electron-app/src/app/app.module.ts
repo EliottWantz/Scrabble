@@ -66,6 +66,8 @@ import { InviteComponent } from '@app/components/invite/invite.component';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { ChatBoxButtonComponent } from '@app/components/chat-box-button/chat-box-button.component';
 import { FriendStatsComponent } from './components/friend-stats/friend-stats.component';
+import { NewDmRoomComponent } from './components/new-dm-room/new-dm-room.component';
+import { MatBadgeModule } from '@angular/material/badge';
 
 @NgModule({
   declarations: [
@@ -106,6 +108,7 @@ import { FriendStatsComponent } from './components/friend-stats/friend-stats.com
     InviteComponent,
     ChatBoxButtonComponent,
     FriendStatsComponent,
+    NewDmRoomComponent,
   ],
   imports: [
     BrowserModule,
@@ -118,6 +121,7 @@ import { FriendStatsComponent } from './components/friend-stats/friend-stats.com
     MatCardModule,
     AppMaterialModule,
     MatIconModule,
+    MatBadgeModule,
     MatDividerModule,
     DragDropModule,
     MatSidenavModule,
@@ -152,7 +156,7 @@ import { FriendStatsComponent } from './components/friend-stats/friend-stats.com
   ],
   bootstrap: [AppComponent],
 })
-export class AppModule {}
+export class AppModule { }
 
 export function HttpLoaderFactory(http: HttpClient): TranslateHttpLoader {
   return new TranslateHttpLoader(http);

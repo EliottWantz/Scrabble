@@ -6,7 +6,7 @@
     <form class="password"  *ngIf="gameType === 'Protected'">
         <mat-label>{{"create-game-component.add-password" | translate}}</mat-label>
         <div class="form-group">
-            <mat-form-field appearance="fill">
+            <mat-form-field appearance="outline">
                 <mat-label for="password">{{"create-game-component.password" | translate}}</mat-label>
                 <input type="password" matInput placeholder="{{'create-game-component.password' | translate}}" name="password" [(ngModel)] ="password" required>
             </mat-form-field>

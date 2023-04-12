@@ -343,6 +343,7 @@ export class WebSocketService {
       case 'friendRequest': {
         const payloadFriendRequest = packet.payload as FriendRequestPayload;
         this.userService.addFriendRequest(payloadFriendRequest.fromId);
+        this.socialService.updatedPendingFriendRequest();
         break;
       }
 
@@ -402,7 +403,7 @@ export class WebSocketService {
           this.gameService.game.value.id == payload.gameId &&
           this.gameService.game.value.userIds.length < 4 &&
           this.gameService.game.value.creatorId ==
-            this.userService.currentUserValue.id
+          this.userService.currentUserValue.id
         ) {
           this.gameService.usersWaiting.next([
             ...this.gameService.usersWaiting.value,

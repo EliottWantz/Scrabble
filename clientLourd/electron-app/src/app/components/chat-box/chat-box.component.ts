@@ -20,8 +20,9 @@ import { ClientEvent } from '@app/utils/events/client-events';
 import { LeaveRoomPayload } from '@app/utils/interfaces/packet';
 import { MatSelectChange } from '@angular/material/select';
 import { Subscription } from 'rxjs';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { GifComponent } from '@app/components/gif/gif.component';
+import { NewDmRoomComponent } from '../new-dm-room/new-dm-room.component';
 
 const electron = (window as any).require('electron');
 
@@ -77,6 +78,7 @@ export class ChatBoxComponent implements AfterViewInit {
     });
     electron.ipcRenderer.on('close-chat', async () => {
       this.ngZone.run(() => {
+
         this.fenetrer = false;
         this.subscribeToRoom();
       });
@@ -84,10 +86,10 @@ export class ChatBoxComponent implements AfterViewInit {
   }
 
   async ngAfterViewInit(): Promise<void> {
-      setTimeout(() => {
-        this.chatBoxInput.nativeElement.focus();
-        this.scrollToBottom();
-      });
+    setTimeout(() => {
+      this.chatBoxInput.nativeElement.focus();
+      this.scrollToBottom();
+    });
 
     this.room$.subscribe(() => {
       this.scrollToBottom();
@@ -96,7 +98,6 @@ export class ChatBoxComponent implements AfterViewInit {
 
   send(event: Event): void {
     event.preventDefault();
-    //console.log(document.getElementById('selectionElem'));
     if (!this.message || !this.message.replace(/\s/g, '')) return;
 
     this.chatService.send(this.message, this.roomService.currentRoomChat.value);
@@ -123,8 +124,6 @@ export class ChatBoxComponent implements AfterViewInit {
   }
 
   changeRoom(event: MatSelectChange): void {
-    //console.log(this.getRoomName(this.currentRoomId));
-    //console.log(event.value.id);
     this.roomService.changeRoom(this.currentRoomId);
   }
 
@@ -149,13 +148,11 @@ export class ChatBoxComponent implements AfterViewInit {
     this.roomService.currentRoomChat.next(
       this.roomService.listJoinedChatRooms.value[0]
     );
-    //console.log(this.roomService.currentRoomChat.value);
     this.socketService.send(event, payload);
-    //console.log(this.roomService.listJoinedChatRooms.value);
   }
 
   openGifMenu(): void {
-        this.dialog.open(GifComponent, {});
+    this.dialog.open(GifComponent, {});
   }
 
   containsGifURL(message: string): boolean {
@@ -177,6 +174,19 @@ export class ChatBoxComponent implements AfterViewInit {
       }
     }
     return [messageNoUrl, gif];
+  }
+
+  createNewDmRoom() {
+    const dialogRef = this.dialog.open(NewDmRoomComponent, {
+      width: "40vw",
+      height: "30vh",
+      data: { username: this.userService.currentUserValue.username }
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.roomService.changeRoom(result);
+      }
+    });
   }
 
   private subscribeToRoom(): void {

@@ -325,10 +325,9 @@ func (m *Manager) RemoveClient(c *Client) error {
 			slog.Error("get room", err)
 			continue
 		}
-		if err := r.RemoveClient(c.ID); err != nil {
-			slog.Error("removeClient from room", err)
-			continue
-		}
+		r.Clients.Del(c.ID)
+		r.logger.Info("client removed from room", "client", c.ID)
+
 		userLeftRoomPacket, err := NewUserLeftRoomPacket(UserLeftRoomPayload{
 			RoomID: r.ID,
 			UserID: c.UserId,
@@ -344,10 +343,9 @@ func (m *Manager) RemoveClient(c *Client) error {
 			slog.Error("get room", err)
 			continue
 		}
-		if err := r.RemoveClient(c.ID); err != nil {
-			slog.Error("removeClient from room", err)
-			continue
-		}
+		r.Clients.Del(c.ID)
+		r.logger.Info("client removed from room", "client", c.ID)
+
 		userLeftDMRoomPacket, err := NewUserLeftDMRoomPacket(UserLeftDMRoomPayload{
 			RoomID: r.ID,
 			UserID: c.UserId,

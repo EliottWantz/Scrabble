@@ -8,6 +8,7 @@ import { UserService } from "@app/services/user/user.service";
 import { WebSocketService } from "@app/services/web-socket/web-socket.service";
 import { User } from "@app/utils/interfaces/user";
 import { BehaviorSubject } from "rxjs";
+import { MatBadgeModule } from '@angular/material/badge';
 
 @Component({
   selector: "app-social",
@@ -37,13 +38,24 @@ export class SocialComponent implements AfterViewInit, OnInit {
     this.listUserDisplay = this.socialService.addFriendList$.value;
     this.listFriendsDisplay = this.socialService.friendsList$.value;
     this.listOnlineFriendsDisplay = this.socialService.onlineFriends$.value;
+    this.socialService.updatedPendingFriendRequest();
+    this.socialService.pendingFriendRequest$.subscribe((list) => {
+      console.log("we have updated the pending friend request list")
+      const icon = document.getElementById('check') as HTMLElement;
+      if (list && list.length > 0) {
+        icon.classList.add('mat-badge-glow');
+      }
+      else {
+        icon.classList.remove('mat-badge-glow');
+      }
+    });
 
   }
 
   ngAfterViewInit(): void {
     const index = this.socialService.screens.indexOf(this.socialService.activeScreen);
     const navButtons = document.getElementsByClassName('nav-text');
-    navButtons[index].setAttribute("style", "background-color: #424260; outline-color: #66678e; outline-width: 1px; outline-style: solid;");
+    navButtons[index].classList.add('active');
   }
 
   sendFriendRequest(id: string): void {
@@ -54,31 +66,18 @@ export class SocialComponent implements AfterViewInit, OnInit {
 
   selectNavButton(index: number): void {
     this.socialService.activeScreen = this.socialService.screens[index];
-    const navButtons = document.getElementsByClassName('nav-text');
-    for (let i = 0; i < navButtons.length; i++) {
-      if (i != index) {
-        navButtons[i].setAttribute("style", "");
-      } else {
-        navButtons[i].setAttribute("style", "background-color: #424260; outline-color: #66678e; outline-width: 1px; outline-style: solid; max-height: 30px");
-      }
-    }
+    this.updateNav(index);
     switch (index) {
       case 0:
-        this.socialService.updatedOnlineFriends();
-        this.socialService.onlineFriends$.subscribe((list) => {
-          this.listOnlineFriendsDisplay = list;
-        });
-        break;
-      case 1:
         this.socialService.updatedFriendsList();
         this.socialService.friendsList$.subscribe((list) => {
           this.listFriendsDisplay = list;
         });
         break;
-      case 2:
+      case 1:
         this.socialService.updatedPendingFriendRequest();
         break;
-      case 3:
+      case 2:
         this.socialService.updatedAddList();
         this.socialService.addFriendList$.subscribe((list) => {
           this.listUserDisplay = list;
@@ -88,6 +87,8 @@ export class SocialComponent implements AfterViewInit, OnInit {
         break;
     }
   }
+
+
 
   getScreen(): string {
     return this.socialService.activeScreen;
@@ -139,5 +140,15 @@ export class SocialComponent implements AfterViewInit, OnInit {
   goToFriendStats(user: User): void {
     console.log("main user", user);
     this.router.navigate(["/friendStats"], { queryParams: { data: JSON.stringify(user) } });
+  }
+  private updateNav(index: number): void {
+    const navButtons = document.getElementsByClassName('nav-text');
+    for (let i = 0; i < navButtons.length; i++) {
+      if (i !== index) {
+        navButtons[i].classList.remove('active');
+      } else {
+        navButtons[i].classList.add('active');
+      }
+    }
   }
 }
