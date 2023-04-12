@@ -7,7 +7,7 @@
     <div class="header-content">
       <form class="room-form">
         <div class="room-form-field">
-          <mat-form-field appearance="fill">
+          <mat-form-field appearance="outline">
             <mat-label>{{ "chat-box-component.label" | translate }}</mat-label>
             <mat-select (selectionChange)="changeRoom($event)" [(value)]="currentRoomId" id="selectionElem">
               <mat-select-trigger *ngIf="room$.value.name !== 'Global Room'">{{
@@ -70,7 +70,7 @@
   </div>
 
   <form #chatForm id="chatBoxForm" (ngSubmit)="send($event)">
-    <mat-form-field appearance="fill">
+    <mat-form-field appearance="outline">
       <mat-label for="message">{{
         "chat-box-component.enter-message" | translate
         }}</mat-label>

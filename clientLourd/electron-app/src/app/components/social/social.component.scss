@@ -9,17 +9,16 @@
 
 .nav {
     position: sticky;
-    max-height: 4vh;
     width: 100%;
     justify-content: space-evenly;
     border-top: 1px solid #999999;
     color: #fff;
     display: flex;
     font: 500 20px/32px Roboto, "Helvetica Neue", sans-serif;
-    z-index: 9999;
 }
 
 .nav-text {
+    padding-top: 1hv;
     display: grid;
     flex-direction: column;
     height: fit-content;
@@ -28,7 +27,6 @@
 }
  
 .nav-text.active span {
-    height: 1vh;
     font-size: 12px;
     color: orange;
     margin-bottom: -1hv;
@@ -123,4 +121,23 @@ mat-form-field {
 .icon{
     font-size: larger;
     color: rgb(139, 226, 9);
+    border-radius:100%;
+    
 }
+  
+.mat-badge-glow {
+    animation: badge-glow 1.5s ease-in-out infinite;
+  }
+  
+  @keyframes badge-glow {
+    0% {
+      box-shadow: 0 0 0 0 rgba(41, 219, 17, 0.7);
+    }
+    50% {
+      box-shadow: 0 0 0 10px rgba(237, 231, 61, 0.336);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+    }
+  }
+  

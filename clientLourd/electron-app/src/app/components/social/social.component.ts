@@ -8,6 +8,7 @@ import { UserService } from "@app/services/user/user.service";
 import { WebSocketService } from "@app/services/web-socket/web-socket.service";
 import { User } from "@app/utils/interfaces/user";
 import { BehaviorSubject } from "rxjs";
+import { MatBadgeModule } from '@angular/material/badge';
 
 @Component({
   selector: "app-social",
@@ -37,6 +38,17 @@ export class SocialComponent implements AfterViewInit, OnInit {
     this.listUserDisplay = this.socialService.addFriendList$.value;
     this.listFriendsDisplay = this.socialService.friendsList$.value;
     this.listOnlineFriendsDisplay = this.socialService.onlineFriends$.value;
+    this.socialService.updatedPendingFriendRequest();
+    this.socialService.pendingFriendRequest$.subscribe((list) => {
+      console.log("we have updated the pending friend request list")
+      const icon = document.getElementById('check') as HTMLElement;
+      if (list && list.length > 0) {
+        icon.classList.add('mat-badge-glow');
+      }
+      else {
+        icon.classList.remove('mat-badge-glow');
+      }
+    });
 
   }
 

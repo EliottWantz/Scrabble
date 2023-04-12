@@ -1,10 +1,10 @@
 <div id="container">
     <div class="content">
-
         <div *ngIf="getScreen() === 'Tous'" class="screen">
             <div class="form">
                 <form>
-                    <mat-form-field appearance="fill">
+                    <mat-form-field appearance="outline">
+                        <mat-icon matSuffix>search</mat-icon>
                         <mat-label for="username">{{'social-component.search-friend' | translate}}</mat-label>
                         <input #usernameInput matInput placeholder="{{'social-component.search-friend' | translate}}"
                             name="username" [(ngModel)]="allFriendUserNameSearch"
@@ -28,7 +28,8 @@
         <div *ngIf="getScreen() === 'Ajouter un ami'" class="add-friend">
             <div class="form">
                 <form>
-                    <mat-form-field appearance="fill">
+                    <mat-form-field appearance="outline">
+                        <mat-icon matSuffix>search</mat-icon>
                         <mat-label for="username">{{'social-component.search-user' | translate}}</mat-label>
                         <input #usernameInput matInput placeholder="{{'social-component.search-user' | translate}}"
                             name="username" [(ngModel)]="addFriendUserName" type="text"
@@ -68,11 +69,13 @@
             <span> {{'social-component.all' | translate}} </span>
         </div>
         <div class="nav-text" (click)="selectNavButton(1)">
-            <mat-icon class="icon">check</mat-icon>
+            <mat-icon class="icon" id="check">check</mat-icon>
             <span>{{'social-component.waiting' | translate}}</span>
         </div>
         <div class="nav-text" (click)="selectNavButton(2)">
-            <mat-icon class="icon">person_add</mat-icon>
+            <mat-icon class="icon">
+                person_add
+            </mat-icon>
             <span>{{'social-component.add' | translate}} </span>
         </div>
     </div>

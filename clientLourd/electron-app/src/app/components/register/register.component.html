@@ -4,19 +4,19 @@
     <div id="info">
         <form id="form">
             <div class="form-group">
-                <mat-form-field class="fields" appearance="fill">
+                <mat-form-field class="fields" appearance="outline">
                     <mat-label for="email">{{'register-component.email' | translate}}</mat-label>
                     <input matInput placeholder="{{'register-component.email' | translate}}" name="email" type="email" [(ngModel)]= "email" required>
                 </mat-form-field>
             </div>
             <div class="form-group">
-                <mat-form-field class="fields" appearance="fill">
+                <mat-form-field class="fields" appearance="outline">
                     <mat-label for="username">{{'register-component.username' | translate}}</mat-label>
                     <input matInput placeholder="{{'register-component.username' | translate}}" name="usename" [(ngModel)] ="username" required>
                 </mat-form-field>
             </div>
             <div class="form-group">
-                <mat-form-field class="fields" appearance="fill">
+                <mat-form-field class="fields" appearance="outline">
                     <mat-label for="password">{{'register-component.password' | translate}}</mat-label>
                     <input matInput placeholder="{{'register-component.password' | translate}}" name="password" type="password" [(ngModel)]= "password" required>
                 </mat-form-field>
@@ -29,37 +29,3 @@
         <p *ngIf="errorMessage !== ''" style="color: red; text-align: center; width: 100%; margin-top: 2%;">{{'register-component.error' | translate}}</p>
     </div>
 </div>
-
-<!--
-    <mat-card-subtitle>Choisir une image de profil</mat-card-subtitle>
-<div class="imgs">
-    <img *ngFor="let defaultAvatar of defaultAvatars; let i = index" width="10%" class="avatar" src="{{defaultAvatar.url}}" (click)="selectAvatar(i)">
-    
-</div>
-<small>Enregistrer votre propre image de profil</small>
-<button id="upload-button" type="button" mat-raised-button (click)="fileInput.click()">Choose File</button>
-<input hidden (change)="onFileSelected($event)" #fileInput type="file">
-<span class="file-name">{{selectedFile?.name}}</span>
-
-<mat-divider></mat-divider>
-<mat-card-subtitle>Entrez vos informations</mat-card-subtitle>
-<div class="form-group">
-    <mat-form-field class="fields" appearance="fill">
-        <mat-label for="email">Email</mat-label>
-        <input matInput placeholder="Entrez votre email" name="email" type="email" [(ngModel)]= "email" required>
-    </mat-form-field>
-</div>
-<div class="form-group">
-    <mat-form-field class="fields" appearance="fill">
-        <mat-label for="username">Nom d'utilisateur</mat-label>
-        <input matInput placeholder="Entrez votre nom d'utilisateur" name="usename" [(ngModel)] ="username" required>
-    </mat-form-field>
-</div>
-<div class="form-group">
-    <mat-form-field class="fields" appearance="fill">
-        <mat-label for="password">Mot de passe</mat-label>
-        <input matInput placeholder="Entrez votre mot de passe" name="password" type="password" [(ngModel)]= "password" required>
-    </mat-form-field>
-</div>
-<mat-divider></mat-divider>
--->

@@ -343,6 +343,7 @@ export class WebSocketService {
       case 'friendRequest': {
         const payloadFriendRequest = packet.payload as FriendRequestPayload;
         this.userService.addFriendRequest(payloadFriendRequest.fromId);
+        this.socialService.updatedPendingFriendRequest();
         break;
       }
 
