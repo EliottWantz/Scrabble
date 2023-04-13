@@ -391,12 +391,8 @@ func (move *PassMove) IsValid(game *Game) bool {
 }
 
 func (move *PassMove) Apply(game *Game) error {
-	// Reset the counter of consecutive exchanges moves
-	player := game.PlayerToMove()
-	if !player.IsBot {
-		player.ConsecutiveSkip = 0
-	}
 	// Increment the number of consecutive exchange moves
+	player := game.PlayerToMove()
 	if !player.IsBot {
 		player.ConsecutiveSkip++
 	}
