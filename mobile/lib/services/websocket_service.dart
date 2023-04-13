@@ -444,6 +444,7 @@ class WebsocketService extends GetxService {
     gameService.currentGameId = '';
     gameService.currentGameTimer.value = null;
     gameService.currentGameInfo = null;
+    gameService.currentGameInfoInitialized = false;
     gameService.currentGameRoomUserIds.value = [];
     if (gameService.currentGame.value == null) {
       // Get.toNamed(Routes.HOME + Routes.GAME_START + Routes.LOBBY);
@@ -454,6 +455,7 @@ class WebsocketService extends GetxService {
   void handleEventJoinedGame(JoinedGameResponse joinedGameResponse) {
     // gameService.currentGameRoom.value = joinedGameRoomResponse.gam
     gameService.currentGameId = joinedGameResponse.payload.id;
+    gameService.currentGameInfoInitialized = true;
     gameService.currentGameInfo = joinedGameResponse.payload;
     gameService.currentGameRoomUserIds!.add(userService.user.value!.id);
     Room gameRoom = Room(
@@ -475,6 +477,7 @@ class WebsocketService extends GetxService {
   void handleEventJoinedGameAsObserver(
       JoinedGameAsObserverResponse joinedGameAsObserverResponse) {
     gameService.currentGameId = joinedGameAsObserverResponse.payload.game.id;
+    gameService.currentGameInfoInitialized = true;
     gameService.currentGameInfo = joinedGameAsObserverResponse.payload.game;
     gameService.currentGameRoomObserverIds!.add(userService.user.value!.id);
     Room gameRoom = Room(
@@ -834,6 +837,7 @@ class WebsocketService extends GetxService {
     gameService.currentGameId = '';
     gameService.currentGameTimer.value = null;
     gameService.currentGameInfo = null;
+    gameService.currentGameInfoInitialized = false;
     gameService.currentGameRoomUserIds.value = [];
     roomService.removeRoom(gameId);
     final leaveGamePayload = StartGamePayload(gameId: gameId);
