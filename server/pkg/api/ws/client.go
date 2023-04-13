@@ -561,6 +561,13 @@ func (c *Client) HandleStartGameRequest(p *Packet) error {
 		}
 		r.Broadcast(gamePacket)
 
+		if g.ScrabbleGame.IsOver() {
+			if err := c.Manager.HandleGameOver(g); err != nil {
+				slog.Error("failed to handle game over", err)
+				return
+			}
+		}
+
 		// Make bots move if applicable
 		go c.Manager.MakeBotMoves(g.ID)
 	})
@@ -907,6 +914,13 @@ func (c *Client) HandleStartTournamentRequest(p *Packet) error {
 					return
 				}
 				gameRoom.Broadcast(gamePacket)
+
+				if g.ScrabbleGame.IsOver() {
+					if err := c.Manager.HandleGameOver(g); err != nil {
+						slog.Error("failed to handle game over", err)
+						return
+					}
+				}
 
 				// Make bots move if applicable
 				go c.Manager.MakeBotMoves(g.ID)

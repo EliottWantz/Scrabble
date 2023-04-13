@@ -563,15 +563,7 @@ func (m *Manager) RemoveClientFromTournament(c *Client, tID string) error {
 			return err
 		}
 
-		var winnerID string
-		if c.ID == g.UserIDs[0] {
-			winnerID = g.UserIDs[1]
-		} else {
-			winnerID = g.UserIDs[0]
-		}
-		g.WinnerID = winnerID
-		err = m.HandleGameOver(g)
-		if err != nil {
+		if err := m.HandleGameOver(g); err != nil {
 			return err
 		}
 	}
@@ -803,11 +795,26 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 		if err != nil {
 			continue
 		}
+		client, err := m.getClientByUserID(p.ID)
+		if err != nil {
+			slog.Error("get client", err)
+			continue
+		}
 		if err := m.UserSvc.AddGameStats(u, g.StartTime, time.Now().UnixMilli(), winnerID == p.ID); err != nil {
 			slog.Error("failed to update user stats", err)
 		}
 		if err := m.UserSvc.UpdateUserStats(u, winnerID == p.ID, p.Score, time.Now().UnixMilli()-g.StartTime); err != nil {
 			slog.Error("failed to update user stats", err)
+		}
+		if err := m.UserSvc.Repo.UnSetJoinedGame(client.UserId); err != nil {
+			slog.Error("remove user from game room", err)
+		}
+		if err := gameRoom.RemoveClient(client.ID); err != nil {
+			slog.Error("remove client from ws room", err)
+			continue
+		}
+		if err := gameRoom.BroadcastLeaveGamePackets(client, g.ID); err != nil {
+			slog.Error("broadcast leave game packets", err)
 		}
 	}
 
@@ -829,25 +836,6 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 				return err
 			}
 			tournamentRoom.Broadcast(p)
-		}
-
-		// Leave old game
-		for _, playerID := range g.UserIDs {
-			client, err := m.getClientByUserID(playerID)
-			if err != nil {
-				slog.Error("get client", err)
-				continue
-			}
-			if err := m.UserSvc.Repo.UnSetJoinedGame(client.UserId); err != nil {
-				slog.Error("remove user from game room", err)
-			}
-			if err := gameRoom.RemoveClient(client.ID); err != nil {
-				slog.Error("remove client from ws room", err)
-				continue
-			}
-			if err := gameRoom.BroadcastLeaveGamePackets(client, g.ID); err != nil {
-				slog.Error("broadcast leave game packets", err)
-			}
 		}
 
 		if t.IsOver {
