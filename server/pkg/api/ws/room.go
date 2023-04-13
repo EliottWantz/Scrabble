@@ -363,14 +363,13 @@ func (r *Room) BroadcastLeaveGamePackets(c *Client, gID string) error {
 
 func (r *Room) BroadcastObserverLeaveGamePacket(c *Client, gID string) error {
 	{
-		p, err := NewUserLeftGamePacket(UserLeftGamePayload{
+		p, err := NewLeftGamePacket(LeftGamePayload{
 			GameID: gID,
-			UserID: c.UserId,
 		})
 		if err != nil {
 			return err
 		}
-		r.BroadcastSkipSelf(p, c.ID)
+		c.send(p)
 	}
 
 	return nil
