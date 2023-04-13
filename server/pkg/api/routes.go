@@ -96,7 +96,7 @@ func (api *API) setupRoutes(cfg *config.Config) {
 	r.Patch("game/revoke/:id/:gameId", api.Ctrls.WebSocketManager.RevokeRequestToJoinGame)
 	r.Delete("game/accept/:id/:requestorId/:gameId", api.Ctrls.WebSocketManager.RejectJoinGameRequest)
 
-	r.Post("/game/tournament/accept/:id/:requestorId/:gameId", api.Ctrls.WebSocketManager.AcceptJoinTournamentRequest)
-	r.Patch("/game/tournament/revoke/:id/:gameId", api.Ctrls.WebSocketManager.RevokeRequestToJoinTournament)
-	r.Delete("/game/tournament/accept/:id/:requestorId/:gameId", api.Ctrls.WebSocketManager.RejectJoinTournamentRequest)
+	r.Post("/tournament/accept/:id/:requestorId/:tID", api.Ctrls.WebSocketManager.AcceptJoinTournamentRequest)
+	r.Patch("/tournament/revoke/:id/:tID", api.Ctrls.WebSocketManager.RevokeRequestToJoinTournament)
+	r.Delete("/tournament/accept/:id/:requestorId/:tID", api.Ctrls.WebSocketManager.RejectJoinTournamentRequest)
 }

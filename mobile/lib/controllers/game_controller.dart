@@ -154,7 +154,7 @@ class GameController extends GetxController {
   }
 
   Widget getEaselChildToDisplay(Tile tile, int index, bool isObserving) {
-    if (!isClientTurn() || isObserving == true) {
+    if (!isClientTurn() || (isObserving == true && isObserverSwitched.isFalse)) {
       return SizedBox(
           height: 70,
           width: 70,
