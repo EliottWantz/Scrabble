@@ -563,15 +563,7 @@ func (m *Manager) RemoveClientFromTournament(c *Client, tID string) error {
 			return err
 		}
 
-		var winnerID string
-		if c.ID == g.UserIDs[0] {
-			winnerID = g.UserIDs[1]
-		} else {
-			winnerID = g.UserIDs[0]
-		}
-		g.WinnerID = winnerID
-		err = m.HandleGameOver(g)
-		if err != nil {
+		if err := m.HandleGameOver(g); err != nil {
 			return err
 		}
 	}
