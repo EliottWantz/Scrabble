@@ -469,6 +469,14 @@ class WebsocketService extends GetxService {
         } else {
           gameService.leftGame();
         }
+      } else if (gameService
+          .currentTournament.value!.poolGames[1].id == gameService.currentGameId) {
+        if (!gameService.isCurrentPlayer(gameService.currentGameWinner)) {
+          gameController.showPoolGameLoserDialog(
+              gameService.currentTournament.value!.poolGames[0].id);
+        } else {
+          gameService.leftGame();
+        }
       } else {
         gameController.showPoolGameLoserDialog(
             gameService.currentTournament.value!.poolGames[0].id);
