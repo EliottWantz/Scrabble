@@ -901,6 +901,7 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 
 				// Start game timer
 				t.Finale.ScrabbleGame.Timer.OnTick(func() {
+					slog.Info("timer tick:", "gameID", g.ID, "timeRemaining", g.ScrabbleGame.Timer.TimeRemaining())
 					timerPacket, err := NewTimerUpdatePacket(TimerUpdatePayload{
 						Timer: t.Finale.ScrabbleGame.Timer.TimeRemaining(),
 					})
