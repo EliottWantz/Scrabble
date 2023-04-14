@@ -962,16 +962,6 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 				if err := otherGameRoom.AddClient(winnerClient.ID); err != nil {
 					return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 				}
-				// Send game update packet to the winner
-				{
-					p, err := NewGameUpdatePacket(GameUpdatePayload{
-						Game: makeGameUpdatePayload(otherGame),
-					})
-					if err != nil {
-						return fiber.NewError(fiber.StatusInternalServerError, err.Error())
-					}
-					winnerClient.send(p)
-				}
 				return otherGameRoom.BroadcastObserverJoinGamePacket(winnerClient, otherGame)
 
 			}
