@@ -42,6 +42,9 @@ class GameController extends GetxController {
   final dropdownFormKey = GlobalKey<FormState>();
 
   bool isClientTurn() {
+    if (gameService.currentGame.value == null) {
+      return false;
+    }
     return gameService.currentGame.value!.turn == userService.user.value!.id;
   }
 

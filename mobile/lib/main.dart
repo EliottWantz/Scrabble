@@ -63,8 +63,8 @@ Future<void> initGlobalServices() async {
   Get.put(ApiProvider(), permanent: true);
   Get.put(ApiRepository(apiProvider: Get.find()), permanent: true);
   Get.put(UsersService());
-  Get.put(GameService());
   Get.put(RoomService());
+  Get.put(GameService());
   Get.put(GameService());
   Get.put(
       WebsocketService(

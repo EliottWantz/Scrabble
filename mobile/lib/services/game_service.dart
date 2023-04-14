@@ -4,6 +4,8 @@ import 'package:client_leger/models/rack.dart';
 import 'package:client_leger/models/requests/accept_join_game_request.dart';
 import 'package:client_leger/models/tournament.dart';
 import 'package:client_leger/models/user.dart';
+import 'package:client_leger/routes/app_routes.dart';
+import 'package:client_leger/services/room_service.dart';
 import 'package:client_leger/services/user_service.dart';
 import 'package:get/get.dart';
 
@@ -16,6 +18,7 @@ import '../models/room.dart';
 
 class GameService extends GetxService {
   final UserService userService = Get.find();
+  final RoomService roomService = Get.find();
   final ApiRepository apiRepository = Get.find();
 
   final joinableGames = Rxn<List<Game>>();
@@ -50,6 +53,9 @@ class GameService extends GetxService {
   final RxBool gameInviteSent = false.obs;
 
   Player? getPlayer() {
+    if (currentGame.value == null) {
+      return null;
+    }
     for (final player in currentGame.value!.players) {
       if (player.id == userService.user.value!.id) return player;
     }
@@ -107,6 +113,22 @@ class GameService extends GetxService {
         return tournament;
       }
     }
+  }
+
+  void leftGame() {
+    currentGame.value = null;
+    roomService.roomsMap.remove(currentGameId);
+    currentGameId = '';
+    currentGameTimer.value = null;
+    currentGameInfo = null;
+    currentGameInfoInitialized = false;
+    currentGameRoomUserIds.value = [];
+    // if (currentGame.value == null) {
+    //   // Get.toNamed(Routes.HOME + Routes.GAME_START + Routes.LOBBY);
+    //   // Get.back();
+    //   // Get.back();
+    //   Get.offAllNamed(Routes.HOME);
+    // }
   }
 
   Future<bool?> acceptJoinGameRequest(String userId) async {

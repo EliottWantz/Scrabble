@@ -440,16 +440,19 @@ class WebsocketService extends GetxService {
   }
 
   void handleEventLeftGame(LeftGameResponse leftGameResponse) {
-    gameService.currentGame.value = null;
-    gameService.currentGameId = '';
-    gameService.currentGameTimer.value = null;
-    gameService.currentGameInfo = null;
-    gameService.currentGameInfoInitialized = false;
-    gameService.currentGameRoomUserIds.value = [];
-    if (gameService.currentGame.value == null) {
-      // Get.toNamed(Routes.HOME + Routes.GAME_START + Routes.LOBBY);
-      Get.back();
-    }
+    // gameService.currentGame.value = null;
+    // roomService.roomsMap.remove(gameService.currentGameId);
+    // gameService.currentGameId = '';
+    // gameService.currentGameTimer.value = null;
+    // gameService.currentGameInfo = null;
+    // gameService.currentGameInfoInitialized = false;
+    // gameService.currentGameRoomUserIds.value = [];
+    // if (gameService.currentGame.value == null) {
+    //   // Get.toNamed(Routes.HOME + Routes.GAME_START + Routes.LOBBY);
+    //   // Get.back();
+    //   // Get.back();
+    //   Get.offAllNamed(Routes.HOME);
+    // }
   }
 
   void handleEventJoinedGame(JoinedGameResponse joinedGameResponse) {
