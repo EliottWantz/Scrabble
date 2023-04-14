@@ -563,7 +563,15 @@ func (m *Manager) RemoveClientFromTournament(c *Client, tID string) error {
 			return err
 		}
 
-		if err := m.HandleGameOver(g); err != nil {
+		var winnerID string
+		if c.UserId == g.UserIDs[0] {
+			winnerID = g.UserIDs[1]
+		} else {
+			winnerID = g.UserIDs[0]
+		}
+		g.WinnerID = winnerID
+		err = m.HandleGameOver(g)
+		if err != nil {
 			return err
 		}
 	}
@@ -770,8 +778,10 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 		return err
 	}
 
-	winnerID := g.ScrabbleGame.Winner().ID
-	g.WinnerID = winnerID
+	if g.WinnerID == "" {
+		winnerID := g.ScrabbleGame.Winner().ID
+		g.WinnerID = winnerID
+	}
 
 	gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
 		Game: makeGameUpdatePayload(g),
@@ -782,7 +792,7 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 	gameRoom.Broadcast(gamePacket)
 
 	gameOverPacket, err := NewGameOverPacket(GameOverPayload{
-		WinnerID: winnerID,
+		WinnerID: g.WinnerID,
 	})
 	if err != nil {
 		return err
@@ -801,10 +811,10 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 			slog.Error("get client", err)
 			continue
 		}
-		if err := m.UserSvc.AddGameStats(u, g.StartTime, time.Now().UnixMilli(), winnerID == p.ID); err != nil {
+		if err := m.UserSvc.AddGameStats(u, g.StartTime, time.Now().UnixMilli(), g.WinnerID == p.ID); err != nil {
 			slog.Error("failed to update user stats", err)
 		}
-		if err := m.UserSvc.UpdateUserStats(u, winnerID == p.ID, p.Score, time.Now().UnixMilli()-g.StartTime); err != nil {
+		if err := m.UserSvc.UpdateUserStats(u, g.WinnerID == p.ID, p.Score, time.Now().UnixMilli()-g.StartTime); err != nil {
 			slog.Error("failed to update user stats", err)
 		}
 		if err := m.UserSvc.Repo.UnSetJoinedGame(client.UserId); err != nil {
