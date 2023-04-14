@@ -8,6 +8,7 @@ import 'package:client_leger/routes/app_routes.dart';
 import 'package:client_leger/services/room_service.dart';
 import 'package:client_leger/services/user_service.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 
 import '../models/chat_message_payload.dart';
 import '../models/game.dart';
@@ -42,8 +43,16 @@ class GameService extends GetxService {
   final sentGameInvitesUsernames = <String>[].obs;
 
   final currentGame = Rxn<GameUpdatePayload>();
+  final currentTournament = Rxn<Tournament>();
+
+  late String currentGameWinner;
+
+  late String loserObservableGameId;
+
   final currentGameTimer = Rxn<int>();
+
   bool currentGameInfoInitialized = false;
+
   late Game? currentGameInfo;
   late Tournament? currentTournamentInfo;
 
@@ -112,6 +121,16 @@ class GameService extends GetxService {
       if (tournament.id == tournamentId) {
         return tournament;
       }
+    }
+  }
+
+  void updateLoserObservableGameId() {
+    if (currentTournament.value!.finale != null) {
+      loserObservableGameId = currentTournament.value!.finale!.id;
+    } else if (currentTournament.value!.poolGames[0].winnerId!.isNotEmpty) {
+      loserObservableGameId = currentTournament.value!.poolGames[0].id;
+    } else {
+      loserObservableGameId = currentTournament.value!.poolGames[1].id;
     }
   }
 

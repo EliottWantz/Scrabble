@@ -156,9 +156,9 @@ class GameLobbyScreen extends StatelessWidget {
 
   Widget _buildPendingJoinGameRequests() {
     if (gameMode == 'tournoi') {
-      if (!_gameService.currentTournamentInfo!.isPrivate) {
+      if (!_gameService.currentTournament.value!.isPrivate) {
         return const CircularProgressIndicator();
-      } else if (_gameService.currentTournamentInfo!.creatorId != _userService.user.value!.id) {
+      } else if (_gameService.currentTournament.value!.creatorId != _userService.user.value!.id) {
         return const CircularProgressIndicator();
       } else if (_gameService.pendingJoinTournamentRequestUserIds.value!.isEmpty) {
         return const CircularProgressIndicator();

@@ -927,7 +927,7 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 					otherGame = t.PoolGames[0]
 				}
 
-				g, err := m.GameSvc.AddObserverToGame(otherGame.ID, g.WinnerID)
+				_, err := m.GameSvc.AddObserverToGame(otherGame.ID, g.WinnerID)
 				if err != nil {
 					return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 				}

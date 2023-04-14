@@ -5,6 +5,7 @@ class Game {
   List<String> observateurIds;
   bool isPrivateGame;
   bool isProtected;
+  String? winnerId;
 
   Game(
       {required this.id,
@@ -12,7 +13,8 @@ class Game {
         required this.userIds,
         required this.observateurIds,
         required this.isPrivateGame,
-        required this.isProtected
+        required this.isProtected,
+        this.winnerId
       });
 
   factory Game.fromJson(Map<String, dynamic> json) {
@@ -29,7 +31,8 @@ class Game {
                 (userId) => json["observateurIds"][observateurIdsIndex++]
         )),
         isPrivateGame: json["isPrivateGame"],
-        isProtected: json["isProtected"]
+        isProtected: json["isProtected"],
+        winnerId: json["winnerId"]
     );
   }
 
@@ -39,6 +42,7 @@ class Game {
     "userIds": userIds,
     "observateurIds": observateurIds,
     "isPrivateGame": isPrivateGame,
-    "isProtected": isProtected
+    "isProtected": isProtected,
+    "winnerId": winnerId
   };
 }

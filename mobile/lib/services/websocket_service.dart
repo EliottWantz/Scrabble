@@ -137,7 +137,7 @@ class WebsocketService extends GetxService {
       case ServerEventListOnlineUsers:
         {
           ListUsersResponse listUsersResponse =
-            ListUsersResponse.fromRawJson(data);
+              ListUsersResponse.fromRawJson(data);
           handleEventListOnlineUsers(listUsersResponse);
         }
         break;
@@ -221,14 +221,14 @@ class WebsocketService extends GetxService {
       case ServerEventJoinedTournament:
         {
           JoinedTournamentResponse joinedTournamentResponse =
-          JoinedTournamentResponse.fromRawJson(data);
+              JoinedTournamentResponse.fromRawJson(data);
           handleEventJoinedTournament(joinedTournamentResponse);
         }
         break;
       case ServerEventUserJoinedTournament:
         {
           UserJoinedTournamentResponse userJoinedTournamentResponse =
-          UserJoinedTournamentResponse.fromRawJson(data);
+              UserJoinedTournamentResponse.fromRawJson(data);
           handleEventUserJoinedTournament(userJoinedTournamentResponse);
         }
         break;
@@ -285,7 +285,7 @@ class WebsocketService extends GetxService {
       case ServerEventTournamentUpdate:
         {
           TournamentUpdateResponse tournamentUpdateResponse =
-            TournamentUpdateResponse.fromRawJson(data);
+              TournamentUpdateResponse.fromRawJson(data);
           handleServerEventTournamentUpdate(tournamentUpdateResponse);
         }
         break;
@@ -369,7 +369,8 @@ class WebsocketService extends GetxService {
         break;
       case ServerEventInvitedToGame:
         {
-          InvitedToGameResponse invitedToGameResponse = InvitedToGameResponse.fromRawJson(data);
+          InvitedToGameResponse invitedToGameResponse =
+              InvitedToGameResponse.fromRawJson(data);
           handleInvitedToGameResponse(invitedToGameResponse);
         }
         break;
@@ -453,10 +454,35 @@ class WebsocketService extends GetxService {
     //   // Get.back();
     //   Get.offAllNamed(Routes.HOME);
     // }
+    GameController gameController = Get.find();
+    if (gameService.currentTournament.value != null) {
+      // if in tournament
+      if (gameService.currentTournament.value!.finale != null) {
+        // if finale has started
+        gameController.showGameOverDialog(gameService.currentGameWinner);
+      } else if (gameService
+          .currentTournament.value!.poolGames[0].id == gameService.currentGameId) {
+        // if 1st pool game has finished
+        if (!gameService.isCurrentPlayer(gameService.currentGameWinner)) {
+          gameController.showPoolGameLoserDialog(
+              gameService.currentTournament.value!.poolGames[1].id);
+        } else {
+          gameService.leftGame();
+        }
+      } else {
+        gameController.showPoolGameLoserDialog(
+            gameService.currentTournament.value!.poolGames[0].id);
+      }
+    } else {
+      gameController.showGameOverDialog(gameService.currentGameWinner);
+    }
   }
 
   void handleEventJoinedGame(JoinedGameResponse joinedGameResponse) {
     // gameService.currentGameRoom.value = joinedGameRoomResponse.gam
+    if (gameService.currentTournament.value != null) {
+
+    }
     gameService.currentGameId = joinedGameResponse.payload.id;
     gameService.currentGameInfoInitialized = true;
     gameService.currentGameInfo = joinedGameResponse.payload;
@@ -472,9 +498,7 @@ class WebsocketService extends GetxService {
     if (currentGame != null) {
       gameService.currentGameRoomUserIds.addAll(currentGame!.userIds);
     }
-    Get.toNamed(
-        Routes.HOME + Routes.GAME_START + Routes.LOBBY,
-        arguments: '');
+    Get.toNamed(Routes.HOME + Routes.GAME_START + Routes.LOBBY, arguments: '');
   }
 
   void handleEventJoinedGameAsObserver(
@@ -526,35 +550,39 @@ class WebsocketService extends GetxService {
     }
   }
 
-  void handleEventJoinedTournament(JoinedTournamentResponse joinedTournamentResponse) {
+  void handleEventJoinedTournament(
+      JoinedTournamentResponse joinedTournamentResponse) {
     gameService.currentTournamentId = joinedTournamentResponse.payload.id;
-    gameService.currentTournamentInfo = joinedTournamentResponse.payload;
+    // gameService.currentTournamentInfo = joinedTournamentResponse.payload;
+    gameService.currentTournament.value = joinedTournamentResponse.payload;
     gameService.currentTournamentUserIds!.add(userService.user.value!.id);
     Room tournamentRoom = Room(
         roomId: joinedTournamentResponse.payload.id,
         roomName: 'Tournament Room',
         userIds: joinedTournamentResponse.payload.userIds,
-        messages: <ChatMessagePayload>[]
-    );
+        messages: <ChatMessagePayload>[]);
     roomService.addRoom(joinedTournamentResponse.payload.id, tournamentRoom);
-    final currentTournament = gameService.getJoinableTournamentById(gameService.currentTournamentId);
+    final currentTournament =
+        gameService.getJoinableTournamentById(gameService.currentTournamentId);
     if (currentTournament != null) {
       gameService.currentTournamentUserIds.addAll(currentTournament!.userIds);
     }
-    Get.toNamed(
-        Routes.HOME + Routes.GAME_START + Routes.LOBBY,
+    Get.toNamed(Routes.HOME + Routes.GAME_START + Routes.LOBBY,
         arguments: 'tournoi');
   }
 
-  void handleEventUserJoinedTournament(UserJoinedTournamentResponse userJoinedTournamentResponse) {
+  void handleEventUserJoinedTournament(
+      UserJoinedTournamentResponse userJoinedTournamentResponse) {
     gameService.currentTournamentUserIds!
         .add(userJoinedTournamentResponse.payload.userId);
 
-    if (gameService.currentTournamentInfo!.isPrivate) {
-      if (gameService.currentTournamentInfo!.creatorId != userService.user.value!.id) {
+    if (gameService.currentTournament.value!.isPrivate) {
+      if (gameService.currentTournament.value!.creatorId !=
+          userService.user.value!.id) {
         return;
       }
-      gameService.pendingJoinTournamentRequestUserIds.remove(userJoinedTournamentResponse.payload.userId);
+      gameService.pendingJoinTournamentRequestUserIds
+          .remove(userJoinedTournamentResponse.payload.userId);
     }
   }
 
@@ -595,8 +623,10 @@ class WebsocketService extends GetxService {
     // print(listJoinableGamesResponse.payload.games[0].usersIds.toString());
   }
 
-  void handleServerEventJoinableTournaments(JoinableTournamentsResponse joinableTournamentsResponse) {
-    gameService.joinableTournaments.value = joinableTournamentsResponse.payload.tournaments;
+  void handleServerEventJoinableTournaments(
+      JoinableTournamentsResponse joinableTournamentsResponse) {
+    gameService.joinableTournaments.value =
+        joinableTournamentsResponse.payload.tournaments;
   }
 
   void handleServerEventObservableGames(
@@ -631,15 +661,38 @@ class WebsocketService extends GetxService {
     }
   }
 
-  void handleServerEventTournamentUpdate(TournamentUpdateResponse tournamentUpdateResponse) {}
+  void handleServerEventTournamentUpdate(
+      TournamentUpdateResponse tournamentUpdateResponse) {
+    gameService.currentTournament.value = tournamentUpdateResponse.payload;
+    gameService.updateLoserObservableGameId();
+  }
 
   void handleServerEventTimerUpdate(TimerResponse timerResponse) {
     gameService.currentGameTimer.value = timerResponse.payload.timer;
   }
 
   void handleServerEventGameOver(GameOverResponse gameOverResponse) {
-    GameController gameController = Get.find();
-    gameController.showGameOverDialog(gameOverResponse.payload.winnerId);
+    // GameController gameController = Get.find();
+    // if (gameService.currentTournament.value != null) {
+    //   // if in tournament
+    //   if (gameService.currentTournament.value!.finale != null) {
+    //     // if finale has started
+    //     gameController.showGameOverDialog(gameOverResponse.payload.winnerId);
+    //   } else if (gameService
+    //       .currentTournament.value!.poolGames[0].winnerId!.isNotEmpty) {
+    //     // if 1st pool game has finished
+    //     if (!gameService.isCurrentPlayer(gameOverResponse.payload.winnerId)) {
+    //       gameController.showPoolGameLoserDialog(
+    //           gameService.currentTournament.value!.poolGames[1].id);
+    //     }
+    //   } else {
+    //     gameController.showPoolGameLoserDialog(
+    //         gameService.currentTournament.value!.poolGames[0].id);
+    //   }
+    // } else {
+    //   gameController.showGameOverDialog(gameOverResponse.payload.winnerId);
+    // }
+    gameService.currentGameWinner = gameOverResponse.payload.winnerId;
   }
 
   void handleFriendRequest(FriendRequestResponse friendRequestResponse) {
@@ -699,21 +752,29 @@ class WebsocketService extends GetxService {
     gameService.indices.addAll(indiceResponse.payload);
   }
 
-  void handleInvitedToGameResponse(InvitedToGameResponse invitedToGameResponse) {
-    notificationService.gameInviteNotifications.add(invitedToGameResponse.payload!);
-    DialogHelper.showInvitedToGameDialog(invitedToGameResponse.payload.inviterId, invitedToGameResponse.payload.game.id);
+  void handleInvitedToGameResponse(
+      InvitedToGameResponse invitedToGameResponse) {
+    notificationService.gameInviteNotifications
+        .add(invitedToGameResponse.payload!);
+    DialogHelper.showInvitedToGameDialog(
+        invitedToGameResponse.payload.inviterId,
+        invitedToGameResponse.payload.game.id);
   }
 
   void handleErrorResponse(ErrorResponse errorResponse) {
-    switch(errorResponse.payload.error) {
-      case JoinGamePasswordMismatch: {
-        DialogHelper.showErrorDialog(description: JoinGamePasswordMismatchMessage);
-      }
-      break;
-      default: {
-        print('error treated by default case');
-        DialogHelper.showErrorDialog(description: errorResponse.payload.error);
-      }
+    switch (errorResponse.payload.error) {
+      case JoinGamePasswordMismatch:
+        {
+          DialogHelper.showErrorDialog(
+              description: JoinGamePasswordMismatchMessage);
+        }
+        break;
+      default:
+        {
+          print('error treated by default case');
+          DialogHelper.showErrorDialog(
+              description: errorResponse.payload.error);
+        }
     }
   }
 
@@ -746,13 +807,12 @@ class WebsocketService extends GetxService {
     socket.sink.add(createGameRoomRequest.toRawJson());
   }
 
-  void createTournament({List<String> userIds = const [], bool isPrivate = false}) {
-    final createTournamentPayload = CreateTournamentPayload(
-      isPrivate: isPrivate,
-      withUserIds: userIds
-    );
+  void createTournament(
+      {List<String> userIds = const [], bool isPrivate = false}) {
+    final createTournamentPayload =
+        CreateTournamentPayload(isPrivate: isPrivate, withUserIds: userIds);
     final createTournamentRequest = CreateTournamentRequest(
-      event: ClientEventCreateTournament, payload: createTournamentPayload);
+        event: ClientEventCreateTournament, payload: createTournamentPayload);
     socket.sink.add(createTournamentRequest.toRawJson());
   }
 
@@ -787,9 +847,10 @@ class WebsocketService extends GetxService {
   }
 
   void joinTournament(String tournamentId, {String password = ''}) {
-    final joinTournamentPayload = JoinTournamentPayload(tournamentId: tournamentId, password: password);
+    final joinTournamentPayload =
+        JoinTournamentPayload(tournamentId: tournamentId, password: password);
     final joinTournamentRequest = JoinTournamentRequest(
-      event: ClientEventJoinTournament, payload: joinTournamentPayload);
+        event: ClientEventJoinTournament, payload: joinTournamentPayload);
     socket.sink.add(joinTournamentRequest.toRawJson());
   }
 
@@ -850,7 +911,8 @@ class WebsocketService extends GetxService {
   }
 
   void startTournament(String tournamentId) {
-    final startTournamentPayload = StartTournamentPayload(tournamentId: tournamentId);
+    final startTournamentPayload =
+        StartTournamentPayload(tournamentId: tournamentId);
     final startTournamentRequest = StartTournamentRequest(
         event: ClientEventStartTournament, payload: startTournamentPayload);
     socket.sink.add(startTournamentRequest.toRawJson());
