@@ -248,8 +248,7 @@ class DialogHelper {
               const Gap(20),
               ElevatedButton(
                 onPressed: () {
-                  Get.offAllNamed(Routes.HOME + Routes.GAME_START,
-                      arguments: 'classique');
+                  Get.offAllNamed(Routes.HOME);
                   DialogHelper()._gameService.leftGame();
                 },
                 child: const Text('Retourner au menu principal'),
