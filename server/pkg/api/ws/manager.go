@@ -912,6 +912,8 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 					finaleRoom.Broadcast(timerPacket)
 				})
 				t.Finale.ScrabbleGame.Timer.OnDone(func() {
+					slog.Info("timer done:", "gameID", g.ID)
+					g.ScrabbleGame.SkipTurn()
 					t.Finale.ScrabbleGame.SkipTurn()
 					GamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
 						Game: makeGameUpdatePayload(t.Finale),
@@ -921,6 +923,13 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 						return
 					}
 					finaleRoom.Broadcast(GamePacket)
+
+					if g.ScrabbleGame.IsOver() {
+						if err := m.HandleGameOver(g); err != nil {
+							slog.Error("failed to handle game over", err)
+							return
+						}
+					}
 
 					// Make bots move if applicable
 					go m.MakeBotMoves(t.Finale.ID)
