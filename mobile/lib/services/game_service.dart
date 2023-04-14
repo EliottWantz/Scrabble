@@ -26,6 +26,7 @@ class GameService extends GetxService {
   final observableGames = Rxn<List<Game>>();
 
   final joinableTournaments = Rxn<List<Tournament>>();
+  final observableTournaments = Rxn<List<Tournament>>();
 
   late String currentGameId;
   String currentTournamentId = "";
@@ -83,7 +84,7 @@ class GameService extends GetxService {
     return currentGame.value!.turn == userService.user.value!.id;
   }
 
-  bool isCurrentPlayer(String playerId) {
+  bool isCurrentPlayerTurn(String playerId) {
     return currentGame.value!.turn == playerId;
   }
 

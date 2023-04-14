@@ -41,6 +41,7 @@ import 'package:client_leger/models/response/joined_tournament_response.dart';
 import 'package:client_leger/models/response/left_game_response.dart';
 import 'package:client_leger/models/response/list_joinable_tournaments_response.dart';
 import 'package:client_leger/models/response/list_observable_games_response.dart';
+import 'package:client_leger/models/response/list_observable_tournaments_response.dart';
 import 'package:client_leger/models/response/list_users_response.dart';
 import 'package:client_leger/models/response/send_friend_response.dart';
 import 'package:client_leger/models/response/server_error_response.dart';
@@ -273,6 +274,13 @@ class WebsocketService extends GetxService {
           handleServerEventObservableGames(observableGamesResponse);
         }
         break;
+      case ServerEventObservableTournaments:
+        {
+          ObservableTournamentsResponse observableTournamentsResponse =
+              ObservableTournamentsResponse.fromRawJson(data);
+          handleServerEventObservableTournaments(observableTournamentsResponse);
+        }
+        break;
       case ServerEventGameUpdate:
         {
           print('received game update');
@@ -461,22 +469,47 @@ class WebsocketService extends GetxService {
         // if finale has started
         gameController.showGameOverDialog(gameService.currentGameWinner);
       } else if (gameService
-          .currentTournament.value!.poolGames[0].id == gameService.currentGameId) {
-        // if 1st pool game has finished
-        if (!gameService.isCurrentPlayer(gameService.currentGameWinner)) {
+          .currentTournament.value!.poolGames[0].id == gameService.currentGameId
+          && gameService.currentTournament.value!.poolGames[1].winnerId == "") {
+        // if 1st pool game has finished and 2nd is still in play
+        if (!userService.isCurrentUser(gameService.currentGameWinner)) {
           gameController.showPoolGameLoserDialog(
               gameService.currentTournament.value!.poolGames[1].id);
         } else {
           gameService.leftGame();
         }
       } else if (gameService
-          .currentTournament.value!.poolGames[1].id == gameService.currentGameId) {
-        if (!gameService.isCurrentPlayer(gameService.currentGameWinner)) {
+          .currentTournament.value!.poolGames[0].id == gameService.currentGameId
+          && gameService.currentTournament.value!.poolGames[1].winnerId != "") {
+        // if 1st pool game has finished and 2nd has finished
+        if (!userService.isCurrentUser(gameService.currentGameWinner)) {
+          gameController.showPoolGameLoserDialog(
+              gameService.currentTournament.value!.finale!.id);
+        } else {
+          gameService.leftGame();
+        }
+      } else if (gameService
+          .currentTournament.value!.poolGames[1].id == gameService.currentGameId
+          && gameService.currentTournament.value!.poolGames[0].winnerId == "") {
+        // if 2nd pool game has finished and 1st is still in play
+        if (!userService.isCurrentUser(gameService.currentGameWinner)) {
           gameController.showPoolGameLoserDialog(
               gameService.currentTournament.value!.poolGames[0].id);
         } else {
           gameService.leftGame();
         }
+
+      } else if (gameService
+          .currentTournament.value!.poolGames[1].id == gameService.currentGameId
+          && gameService.currentTournament.value!.poolGames[0].winnerId != "") {
+        // if 2nd pool game has finished and 1st is still in play
+        if (!userService.isCurrentUser(gameService.currentGameWinner)) {
+          gameController.showPoolGameLoserDialog(
+              gameService.currentTournament.value!.finale!.id);
+        } else {
+          gameService.leftGame();
+        }
+
       } else {
         gameController.showPoolGameLoserDialog(
             gameService.currentTournament.value!.poolGames[0].id);
@@ -640,6 +673,11 @@ class WebsocketService extends GetxService {
   void handleServerEventObservableGames(
       ObservableGamesResponse observableGamesResponse) {
     gameService.observableGames.value = observableGamesResponse.payload.games;
+  }
+
+  void handleServerEventObservableTournaments(
+      ObservableTournamentsResponse observableTournamentsResponse) {
+    gameService.observableTournaments.value = observableTournamentsResponse.payload.tournaments;
   }
 
   void handleServerEventGameUpdate(GameUpdateResponse gameUpdateResponse) {

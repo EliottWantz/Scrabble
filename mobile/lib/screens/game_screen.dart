@@ -550,7 +550,7 @@ class GameScreen extends GetView<GameController> {
       playerInfoPanels.add(PlayerInfo(
           playerName: player.username,
           isObserving: isObserving,
-          isPlayerTurn: _gameService.isCurrentPlayer(player.id),
+          isPlayerTurn: _gameService.isCurrentPlayerTurn(player.id),
           playerId: player.id,
           score: player.score,
           isBot: player.isBot));

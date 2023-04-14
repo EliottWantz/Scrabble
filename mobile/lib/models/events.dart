@@ -14,6 +14,7 @@ const String ServerEventChatMessage = "chat-message";
 const String ServerEventJoinableGames = "joinableGames";
 const String ServerEventJoinableTournaments = "joinableTournaments";
 const String ServerEventObservableGames = "observableGames";
+const String ServerEventObservableTournaments = "observableTournaments";
 const String ServerEventJoinedGame           = "joinedGame";
 const String ServerEventJoinedGameAsObserver = "joinedGameAsObserver";
 const String ServerEventLeftGame = "leftGame";
