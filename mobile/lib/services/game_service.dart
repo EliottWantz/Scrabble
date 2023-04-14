@@ -28,7 +28,7 @@ class GameService extends GetxService {
   final joinableTournaments = Rxn<List<Tournament>>();
 
   late String currentGameId;
-  late String currentTournamentId;
+  String currentTournamentId = "";
   final currentRoomMessages = <ChatMessagePayload>[].obs;
 
   final currentGameRoomUserIds = <String>[].obs;
@@ -137,6 +137,10 @@ class GameService extends GetxService {
   void leftGame() {
     currentGame.value = null;
     roomService.roomsMap.remove(currentGameId);
+    if (currentTournamentId != "") {
+      roomService.roomsMap.remove(currentTournamentId);
+      currentTournamentId = "";
+    }
     currentGameId = '';
     currentGameTimer.value = null;
     currentGameInfo = null;
