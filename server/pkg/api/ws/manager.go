@@ -972,7 +972,7 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 					}
 					winnerClient.send(p)
 				}
-				return otherGameRoom.BroadcastObserverJoinGamePacket(winnerClient, g)
+				return otherGameRoom.BroadcastObserverJoinGamePacket(winnerClient, otherGame)
 
 			}
 		}
