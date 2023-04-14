@@ -923,7 +923,6 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 				})
 				t.Finale.ScrabbleGame.Timer.OnDone(func() {
 					slog.Info("timer done:", "gameID", g.ID)
-					g.ScrabbleGame.SkipTurn()
 					t.Finale.ScrabbleGame.SkipTurn()
 					GamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
 						Game: makeGameUpdatePayload(t.Finale),
