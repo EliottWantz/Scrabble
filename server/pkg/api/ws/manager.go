@@ -790,6 +790,7 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 
 	gameRoom.Broadcast(gameOverPacket)
 
+	// Make all players leave the game
 	for _, p := range g.ScrabbleGame.Players {
 		u, err := m.UserSvc.GetUser(p.ID)
 		if err != nil {
@@ -814,6 +815,22 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 			continue
 		}
 		if err := gameRoom.BroadcastLeaveGamePackets(client, g.ID); err != nil {
+			slog.Error("broadcast leave game packets", err)
+		}
+	}
+
+	// Make all observators leave the game
+	for _, o := range g.ObservateurIDs {
+		client, err := m.getClientByUserID(o)
+		if err != nil {
+			slog.Error("get client", err)
+			continue
+		}
+		if err := gameRoom.RemoveClient(client.ID); err != nil {
+			slog.Error("remove client from ws room", err)
+			continue
+		}
+		if err := gameRoom.BroadcastObserverLeaveGamePacket(client, g.ID); err != nil {
 			slog.Error("broadcast leave game packets", err)
 		}
 	}
@@ -884,6 +901,7 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 
 				// Start game timer
 				t.Finale.ScrabbleGame.Timer.OnTick(func() {
+					slog.Info("timer tick:", "gameID", g.ID, "timeRemaining", g.ScrabbleGame.Timer.TimeRemaining())
 					timerPacket, err := NewTimerUpdatePacket(TimerUpdatePayload{
 						Timer: t.Finale.ScrabbleGame.Timer.TimeRemaining(),
 					})
