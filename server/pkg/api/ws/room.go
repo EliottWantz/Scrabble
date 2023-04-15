@@ -2,7 +2,6 @@ package ws
 
 import (
 	"errors"
-	"fmt"
 
 	"scrabble/pkg/api/game"
 
@@ -83,9 +82,6 @@ func (r *Room) RemoveClient(cID string) error {
 		if err := r.Manager.RemoveRoom(r.ID); err != nil {
 			return err
 		}
-		if err := r.Manager.RoomSvc.Repo.Delete(r.ID); err != nil {
-			return err
-		}
 	}
 
 	return nil
@@ -110,7 +106,7 @@ func (r *Room) BroadcastJoinRoomPackets(c *Client) error {
 		payload := JoinedRoomPayload{
 			RoomID:   r.ID,
 			RoomName: r.Name,
-			UserIDs:  r.ListUsers(),
+			UserIDs:  r.ListUsersIds(),
 		}
 		msgs, err := r.Manager.MessageRepo.LatestMessage(r.ID)
 		if err != nil || len(msgs) == 0 {
@@ -170,7 +166,7 @@ func (r *Room) BroadcastJoinDMRoomPackets(c *Client) error {
 		payload := JoinedDMRoomPayload{
 			RoomID:   r.ID,
 			RoomName: r.Name,
-			UserIDs:  r.ListUsers(),
+			UserIDs:  r.ListUsersIds(),
 		}
 		msgs, err := r.Manager.MessageRepo.LatestMessage(r.ID)
 		if err != nil || len(msgs) == 0 {
@@ -423,22 +419,10 @@ func (r *Room) BroadcastLeaveTournamentPackets(c *Client, tID string) error {
 	return c.Manager.BroadcastJoinableTournaments()
 }
 
-func (r *Room) ListUsers() []string {
-	UserIds := make([]string, 0, r.Clients.Len())
-	r.Clients.ForEach(func(cID string, c *Client) bool {
-		UserIds = append(UserIds, c.UserId)
-		return true
-	})
-	fmt.Println(UserIds)
-	return UserIds
-}
-
-func (r *Room) ListClientIDs() []string {
-	clientIDs := make([]string, 0, r.Clients.Len())
-	r.Clients.ForEach(func(cID string, c *Client) bool {
-		clientIDs = append(clientIDs, c.ID)
-		return true
-	})
-
-	return clientIDs
+func (r *Room) ListUsersIds() []string {
+	dbRoom, err := r.Manager.RoomSvc.Repo.Find(r.ID)
+	if err != nil {
+		return make([]string, 0)
+	}
+	return dbRoom.UserIDs
 }
