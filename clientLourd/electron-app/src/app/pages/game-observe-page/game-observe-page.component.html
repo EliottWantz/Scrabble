@@ -1,6 +1,6 @@
 <div class="container">
   <div class="left">
-    <button mat-flat-button color="primary" (click)="leaveGame()">
+    <button mat-flat-button color="primary" (click)="leave()">
       <mat-icon>input</mat-icon>
       {{'game-page.leave' | translate}}
     </button>
@@ -56,5 +56,18 @@
       <h3>{{getTileCount()}}</h3>
     </div>
   </div>
+  <mat-card id="indice" *ngIf="isOver">
+    <mat-card-content>
+      <p>{{"game-page-tournament.over" | translate}}</p>
+      <button mat-flat-button color="primary" (click)="leaveTournament()">
+        <mat-icon>input</mat-icon>
+        {{'game-page.leave' | translate}}
+      </button>
+      <button mat-flat-button color="primary" (click)="leaveTournament()">
+        <mat-icon>input</mat-icon>
+        {{'game-page-tournament.observe' | translate}}
+      </button>
+    </mat-card-content>
+  </mat-card>
   <app-chat-box></app-chat-box>
 </div>

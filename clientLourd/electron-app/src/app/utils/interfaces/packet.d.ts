@@ -25,6 +25,7 @@ export type ClientPayload = ChatMessage
 | CreateGamePayload
 | JoinGamePayload
 | LeaveGamePayload
+| LeaveTournamentPayload
 | StartGamePayload
 | PlayMovePayload
 | IndicePayload
@@ -88,6 +89,10 @@ export interface LeaveGamePayload {
     gameId: string;
 }
 
+export interface LeaveTournamentPayload {
+    tournamentId: string;
+}
+
 export interface JoinGameAsObserverPayload {
     gameId: string;
     password: string;
@@ -97,6 +102,10 @@ export interface JoinGameAsObserverPayload {
 
 export interface LeaveGameAsObserverPayload {
     gameId: string;
+}
+
+export interface LeaveTournamentAsObserverPayload {
+    tournamentId: string;
 }
 
 export interface StartGamePayload {

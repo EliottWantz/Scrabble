@@ -6,7 +6,7 @@ import { UserService } from "@app/services/user/user.service";
 import { MoveService } from "@app/services/game/move.service";
 import { MoveInfo } from "@app/utils/interfaces/game/move";
 import { StorageService } from "@app/services/storage/storage.service";
-import { JoinTournamentAsObserverPayload, LeaveGamePayload } from "@app/utils/interfaces/packet";
+import { JoinTournamentAsObserverPayload, LeaveGamePayload, LeaveTournamentPayload } from "@app/utils/interfaces/packet";
 import { WebSocketService } from "@app/services/web-socket/web-socket.service";
 import { Router } from "@angular/router";
 import { ThemeService } from "@app/services/theme/theme.service";
@@ -118,6 +118,15 @@ export class GamePageComponent implements OnInit {
         return "";
     }
 
+    leave(): void {
+        if (this.gameService.tournament.value) {
+            this.leaveTournament();
+        }
+        else{
+            this.leaveGame();
+        }
+    }
+
     leaveGame(): void {
         if (this.game.value) {
             const payload: LeaveGamePayload = {
@@ -125,6 +134,19 @@ export class GamePageComponent implements OnInit {
             };
             this.socketService.send("leave-game", payload);
             this.gameService.game.next(undefined);
+            this.gameService.scrabbleGame.next(undefined);
+            this.router.navigate(["/home"]);
+        }
+    }
+
+    leaveTournament(): void {
+        if(this.gameService.tournament.value){
+            const payload: LeaveTournamentPayload = {
+                tournamentId: this.gameService.tournament.value?.id
+            };
+            this.socketService.send("leave-tournament", payload);
+            this.gameService.game.next(undefined);
+            this.gameService.tournament.next(undefined);
             this.gameService.scrabbleGame.next(undefined);
             this.router.navigate(["/home"]);
         }
