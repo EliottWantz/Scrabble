@@ -24,6 +24,7 @@ class RoomService extends GetxService {
   void updateCurrentRoomId(String newCurrentRoomId) {
     currentRoomId = newCurrentRoomId;
     print('Current room id is $currentRoomId');
+    print('Current room name is ${getRoomNameByRoomId(currentRoomId)}');
   }
 
   void updateCurrentRoomMessages() {
@@ -84,6 +85,16 @@ class RoomService extends GetxService {
       }
     });
     return roomId;
+  }
+
+  String getRoomNameByRoomId(String chatRoomId) {
+    String roomName = '';
+    roomsMap.forEach((roomId, room) {
+      if (room.roomId == chatRoomId) {
+        roomName = room.roomName;
+      }
+    });
+    return roomName;
   }
 
   List<String> getListedChatRoomNames() {

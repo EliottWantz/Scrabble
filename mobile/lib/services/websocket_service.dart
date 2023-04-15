@@ -67,6 +67,7 @@ import 'package:client_leger/services/notification_service.dart';
 import 'package:client_leger/services/room_service.dart';
 import 'package:client_leger/services/users_service.dart';
 import 'package:client_leger/utils/dialog_helper.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 // import 'package:socket_io_client/socket_io_client.dart' as IO;
@@ -562,6 +563,7 @@ class WebsocketService extends GetxService {
 
   void handleEventLeftRoom(LeftRoomResponse leftRoomResponse) {
     roomService.removeRoom(leftRoomResponse.payload.roomId);
+    DialogHelper.showLeftRoomDialog();
   }
 
   void handleEventJoinedGame(JoinedGameResponse joinedGameResponse) {

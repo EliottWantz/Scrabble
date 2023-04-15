@@ -51,6 +51,7 @@ class ChatScreen extends GetView<ChatController> {
     });
 
     return Obx(() => Column(children: [
+          _buildChatScreenHeader(),
           Expanded(
               child: Center(
                   child: ListView.builder(
@@ -75,13 +76,13 @@ class ChatScreen extends GetView<ChatController> {
                                   : Alignment.topLeft),
                               child: Row(
                                   textDirection: controller.isCurrentUser(
-                                  controller
-                                      .roomService
-                                      .currentRoomMessages
-                                      .value![index]
-                                      .fromId)
-                                  ? TextDirection.rtl
-                                  : TextDirection.ltr,
+                                          controller
+                                              .roomService
+                                              .currentRoomMessages
+                                              .value![index]
+                                              .fromId)
+                                      ? TextDirection.rtl
+                                      : TextDirection.ltr,
                                   // mainAxisAlignment: controller.isCurrentUser(
                                   //         controller
                                   //             .roomService
@@ -95,10 +96,10 @@ class ChatScreen extends GetView<ChatController> {
                                     circularImageWithBorder(controller
                                         .usersService
                                         .getUserById(controller
-                                        .roomService
-                                        .currentRoomMessages
-                                        .value![index]
-                                        .fromId)!
+                                            .roomService
+                                            .currentRoomMessages
+                                            .value![index]
+                                            .fromId)!
                                         .avatar
                                         .url),
                                     Column(
@@ -117,7 +118,8 @@ class ChatScreen extends GetView<ChatController> {
                                             .value![index]
                                             .from),
                                         Container(
-                                          constraints: BoxConstraints(maxWidth: 810),
+                                          constraints:
+                                              BoxConstraints(maxWidth: 810),
                                           decoration: BoxDecoration(
                                               borderRadius:
                                                   BorderRadius.circular(20),
@@ -172,6 +174,29 @@ class ChatScreen extends GetView<ChatController> {
             ),
           )
         ]));
+  }
+
+  Widget _buildChatScreenHeader() {
+    if (controller.roomService
+        .getRoomNameByRoomId(controller.roomService.currentRoomId)
+        .contains('/') || controller.roomService.currentRoomId == 'global') {
+      return const SizedBox(height: 0, width: 0);
+    } else {
+      return Row(
+        children: [
+          Padding(
+            padding: EdgeInsets.all(16),
+            child: ElevatedButton.icon(
+                onPressed: () {
+                  controller.websocketService.leaveChatRoom(controller.roomService.currentRoomId);
+                },
+                icon: const Icon(Icons.exit_to_app,size: 50),
+                label: Text('Quitter le canal'),
+            ),
+          )
+        ],
+      );
+    }
   }
 
   Widget circularImageWithBorder(String imgPath) {

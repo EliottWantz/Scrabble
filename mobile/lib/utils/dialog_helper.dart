@@ -229,6 +229,31 @@ class DialogHelper {
     if (Get.isDialogOpen!) Get.back();
   }
 
+  static void showLeftRoomDialog() {
+    Get.dialog(
+      Dialog(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text("Vous avez quitté le canal!",
+                style: Get.textTheme.headline4,
+              ),
+              const Gap(20),
+              ElevatedButton(
+                onPressed: () {
+                  DialogHelper.hideLoading();
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          )
+        )
+      )
+    );
+  }
+
   static void showGameOverDialog(String winnerId) {
     Get.dialog(
       Dialog(
