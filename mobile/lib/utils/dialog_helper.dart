@@ -300,6 +300,45 @@ class DialogHelper {
     );
   }
 
+  static void showTournamentObserverPoolGameOverDialog(String observableGameId) {
+    Get.dialog(
+      Dialog(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text("La partie est finie!",
+                style: Get.textTheme.headline4,
+              ),
+              const Gap(20),
+              Row(
+                children: [
+                  ElevatedButton(
+                    onPressed: () async {
+                      DialogHelper()._gameService.leftGame();
+                      DialogHelper()._websocketService.joinGameAsObserver(observableGameId);
+                    },
+                    child: const Text('Observez la partie en cours'),
+                  ),
+                  Spacer(),
+                  ElevatedButton(
+                    onPressed: () {
+                      Get.offAllNamed(Routes.HOME);
+                      DialogHelper()._gameService.leftGame();
+                    },
+                    child: const Text('Retourner au menu principal'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+      barrierDismissible: false,
+    );
+  }
+
   static void showJoinGameRequestRejected() {
     Get.dialog(
       Dialog(

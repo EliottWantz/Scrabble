@@ -472,21 +472,34 @@ class WebsocketService extends GetxService {
           .currentTournament.value!.poolGames[0].id == gameService.currentGameId
           && gameService.currentTournament.value!.poolGames[1].winnerId == "") {
         // if 1st pool game has finished and 2nd is still in play
-        if (!userService.isCurrentUser(gameService.currentGameWinner)) {
+        if (!userService.isCurrentUser(gameService.currentGameWinner)
+          && gameService.currentTournament.value!.userIds.contains(userService.user.value!.id)) {
+          // Loser of game and observing
           gameController.showPoolGameLoserDialog(
               gameService.currentTournament.value!.poolGames[1].id);
-        } else {
+        } else if (userService.isCurrentUser(gameService.currentGameWinner)) {
+          // Winner of game
           gameService.leftGame();
+        } else {
+          // Observer of game and didn't play
+          gameController.showTournamentObserverPoolGameOverDialog(
+              gameService.currentTournament.value!.poolGames[1].id);
         }
       } else if (gameService
           .currentTournament.value!.poolGames[0].id == gameService.currentGameId
           && gameService.currentTournament.value!.poolGames[1].winnerId != "") {
         // if 1st pool game has finished and 2nd has finished
-        if (!userService.isCurrentUser(gameService.currentGameWinner)) {
+        if (!userService.isCurrentUser(gameService.currentGameWinner)
+            && gameService.currentTournament.value!.userIds.contains(userService.user.value!.id)) {
           gameController.showPoolGameLoserDialog(
               gameService.currentTournament.value!.finale!.id);
-        } else {
+        } else if (userService.isCurrentUser(gameService.currentGameWinner)) {
+          // Winner of game
           gameService.leftGame();
+        } else {
+          // Observer of game and didn't play
+          gameController.showTournamentObserverPoolGameOverDialog(
+              gameService.currentTournament.value!.poolGames[1].id);
         }
       } else if (gameService
           .currentTournament.value!.poolGames[1].id == gameService.currentGameId

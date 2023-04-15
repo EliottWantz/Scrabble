@@ -685,7 +685,7 @@ class GameStartScreen extends StatelessWidget {
     } else {
       return ElevatedButton(
           onPressed: () {
-            game.winnerId != "" ? Get.back() : null;
+            game.winnerId != "" ? null : _websocketService.joinGameAsObserver(game.id);
           },
           child: const Text('Observer'),
           style: ElevatedButton.styleFrom(

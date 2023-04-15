@@ -160,6 +160,10 @@ class GameController extends GetxController {
     DialogHelper.showPoolGameLoserDialog(observableGameId);
   }
 
+  void showTournamentObserverPoolGameOverDialog(String observableGameId) {
+    DialogHelper.showTournamentObserverPoolGameOverDialog(observableGameId);
+  }
+
   Widget getEaselChildToDisplay(Tile tile, int index, bool isObserving) {
     if (!isClientTurn() || (isObserving == true && isObserverSwitched.isFalse)) {
       return SizedBox(
