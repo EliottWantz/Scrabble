@@ -538,6 +538,7 @@ class GameStartScreen extends StatelessWidget {
                         ElevatedButton.icon(
                           onPressed: () {
                             // show tournament state
+                            _showTournamentStateDialog(tournament);
                           },
                           icon: const Icon(
                             // <-- Icon
@@ -586,6 +587,111 @@ class GameStartScreen extends StatelessWidget {
       return [
         const DataRow(cells: [DataCell(Text('')), DataCell(Text(''))])
       ];
+    }
+  }
+
+  Future _showTournamentStateDialog(Tournament tournament) {
+    return Get.dialog(Dialog(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Choisissez la partie que vous voulez observer',
+                style: Get.textTheme.headlineSmall),
+            const Gap(20),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Column(
+                  children: [
+                    _buildTournamentGame(
+                        'Semie-finale 1', tournament.poolGames[0]),
+                    const Gap(24),
+                    _buildTournamentGame(
+                        'Semie-finale 2', tournament.poolGames[1])
+                  ],
+                ),
+                const Gap(6),
+                Column(
+                  children: [
+                    _buildJoinTournamentGameButton(tournament.poolGames[0]),
+                    Gap(12),
+                    _buildJoinTournamentGameButton(tournament.poolGames[1])
+                  ],
+                ),
+                const Gap(48),
+                _buildTournamentGame('Finale', tournament.finale),
+                const Gap(6),
+                _buildJoinTournamentGameButton(tournament.finale)
+              ],
+            )
+          ],
+        ),
+      ),
+    ));
+  }
+
+  Widget _buildTournamentGame(String title, Game? game) {
+    String player1;
+    String player2;
+    if (game == null) {
+      player1 = 'À déterminer';
+      player2 = 'À déterminer';
+    } else {
+      player1 = _usersService.getUserUsername(game.userIds[0]);
+      player2 = _usersService.getUserUsername(game.userIds[1]);
+    }
+
+    return Row(
+      children: [
+        Column(children: [
+          Text(title, style: Get.textTheme.titleLarge),
+          Gap(6),
+          Row(
+            children: [
+              Text('${player1}',
+                  style: game == null
+                      ? Get.textTheme.headlineSmall
+                      : _buildBracketUsername(game, 0)),
+              Text(' VS ', style: Get.textTheme.headlineSmall),
+              Text('${player2}',
+                  style: game == null
+                      ? Get.textTheme.headlineSmall
+                      : _buildBracketUsername(game, 1)),
+            ],
+          ),
+        ]),
+        Gap(6),
+      ],
+    );
+  }
+
+  TextStyle _buildBracketUsername(Game game, int playerIndex) {
+    if (game.userIds[playerIndex] == game.winnerId) {
+      return const TextStyle(
+          decoration: TextDecoration.lineThrough, fontSize: 24);
+    } else {
+      return const TextStyle(fontSize: 24);
+    }
+  }
+
+  Widget _buildJoinTournamentGameButton(Game? game) {
+    if (game == null) {
+      return ElevatedButton(
+          onPressed: () {},
+          child: const Text('Observer'),
+          style: ElevatedButton.styleFrom(backgroundColor: Colors.grey));
+    } else {
+      return ElevatedButton(
+          onPressed: () {
+            game.winnerId != "" ? Get.back() : null;
+          },
+          child: const Text('Observer'),
+          style: ElevatedButton.styleFrom(
+              backgroundColor: game.winnerId != ""
+                  ? Colors.grey
+                  : Color.fromARGB(255, 98, 0, 238)));
     }
   }
 
