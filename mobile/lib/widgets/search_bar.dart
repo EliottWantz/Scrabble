@@ -29,7 +29,7 @@ class SearchBar extends StatelessWidget {
     // final style = widget.text.isEmpty ? styleHint : styleActive;
 
     return Container(
-      margin: const EdgeInsets.all(8),
+      // margin: const EdgeInsets.all(8),
       padding: const EdgeInsets.all(8),
       child: Obx(() => TextField(
           controller: controller,
@@ -43,7 +43,7 @@ class SearchBar extends StatelessWidget {
             messageInputFocusNode.requestFocus();
           },
           decoration: InputDecoration(
-              hintText: "Recherchez",
+              hintText: "Recherchez vos amis",
               suffixIcon: _input.value == ''
               ? IconButton(
                   onPressed: () {},

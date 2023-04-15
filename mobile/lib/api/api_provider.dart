@@ -43,7 +43,7 @@ class ApiProvider extends BaseProvider {
   }
 
   Future<Response> acceptFriendRequest(String path) {
-    return patch(path, {});
+    return post(path, {});
   }
 
   Future<Response> deleteFriendRequest(String path) {

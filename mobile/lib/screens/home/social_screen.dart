@@ -1,6 +1,7 @@
 import 'package:client_leger/controllers/chatbox_controller.dart';
 import 'package:client_leger/controllers/friends_controller.dart';
 import 'package:client_leger/screens/chat_screen.dart';
+import 'package:client_leger/screens/home/create_room_screen.dart';
 import 'package:client_leger/screens/home/profile_screen.dart';
 import 'package:client_leger/widgets/chatbox.dart';
 import 'package:client_leger/widgets/friends_sidebar.dart';
@@ -48,7 +49,9 @@ class SocialScreen extends GetView<FriendsController> {
         builder: (context, child) {
           switch (friendSidebarController.selectedIndex) {
             case 0:
-              return const FriendsScreen();
+                return const FriendsScreen();
+            case 1:
+                return CreateRoomScreen();
             default:
               // return ChatScreen(controller.roomService.currentRoomId);
               return ChatScreen();

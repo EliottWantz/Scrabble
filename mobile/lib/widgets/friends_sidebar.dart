@@ -74,6 +74,10 @@ class FriendsSideBar extends GetView<FriendsSideBarController> {
           icon: Icons.people_alt,
           label: 'Friends',
         ),
+        const SidebarXItem(
+          icon: Icons.add,
+          label: 'NewServer',
+        ),
     ];
     for (int i = 0; i < this._items.length; i++) {
       SidebarXItem item = SidebarXItem(

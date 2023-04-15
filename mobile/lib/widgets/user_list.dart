@@ -1,7 +1,9 @@
 import 'package:client_leger/api/api_repository.dart';
+import 'package:client_leger/controllers/create_room_controller.dart';
 import 'package:client_leger/models/requests/game_invite_request.dart';
 import 'package:client_leger/models/user.dart';
 import 'package:client_leger/services/game_service.dart';
+import 'package:client_leger/services/room_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -31,11 +33,15 @@ class UserList extends StatelessWidget {
   final UsersService _usersService = Get.find();
   final GameService _gameService = Get.find();
   final ApiRepository _apiRepository = Get.find();
+  final RoomService _roomService = Get.find();
 
   final RxString _inputSearch;
 
   final String _mode;
 
+  RxBool isChecked = false.obs;
+
+  final RxList<dynamic> _itemsObs = <dynamic>[].obs;
   final List<dynamic> _items; // = [
   //   'Friend1',
   //   'Friend2',
@@ -87,7 +93,7 @@ class UserList extends StatelessWidget {
           // if (_items[index].startsWith(_inputSearch.value)) {
           //   return _buildRow(_items[index]);
           // }
-          return _buildRow(filteredItems[index]);
+          return _buildRow(filteredItems[index], index);
           // return _buildRow(_randomWordPairs[index]);
           // return _buildRow(_userService.friends.value![index]);
           // return _buildRow(_items[index]);
@@ -95,7 +101,24 @@ class UserList extends StatelessWidget {
     );
   }
 
-  Widget _buildRow(dynamic username) {
+  Widget _buildRow(dynamic username, int index) {
+    if (_mode == 'checkList') {
+      return Column(
+        children: [
+          const Divider(),
+          ListTile(
+              title: Text(username, style: TextStyle(fontSize: 18.0)),
+              trailing:
+                Obx(() => _buildTrailingButton(username, index)),
+              onTap: () {
+
+              }
+          ),
+          // trailing: Icon(alreadySaved ? Icons.favorite : Icons.favorite_border,
+          //     color: alreadySaved ? Colors.red : null),
+        ],
+      );
+    }
     return Column(
       children: [
         const Divider(),
@@ -123,7 +146,7 @@ class UserList extends StatelessWidget {
     return filteredUserList;
   }
 
-  Widget _buildTrailingButton(dynamic username) {
+  Widget _buildTrailingButton(dynamic username, [int? index]) {
     if (_mode == 'gameInvite') {
       return IconButton(
             onPressed: () async {
@@ -151,6 +174,47 @@ class UserList extends StatelessWidget {
           },
           icon: const Icon(Icons.close)
       );
+    } else if (_mode == 'checkList') {
+      // return IconButton(
+      //           onPressed: () {
+      //             if (Get.isRegistered<CreateRoomController>()) {
+      //               CreateRoomController createRoomController = Get.find();
+      //               createRoomController.newRoomUserIds.add(_usersService.getUserId(username));
+      //             }
+      //           },
+      //           icon: _buildCheckmark(username)
+      // );
+      return Checkbox(
+        checkColor: Colors.white,
+        fillColor: MaterialStateProperty.resolveWith(getColor),
+        value: _itemsObs.value.contains(username),
+        onChanged: (bool? value) {
+          if (_itemsObs.value.contains(username)) {
+            _itemsObs.remove(username);
+            _roomService.newRoomUserIds.clear();
+            _roomService.newRoomUserIds.addAll(_itemsObs.value);
+            print(_roomService.newRoomUserIds);
+          } else {
+            _itemsObs.add(username);
+            _roomService.newRoomUserIds.clear();
+            _roomService.newRoomUserIds.addAll(_itemsObs.value);
+            print(_roomService.newRoomUserIds);
+          }
+          // isChecked.value = value!;
+          // if (Get.isRegistered<CreateRoomController>()) {
+          //   CreateRoomController createRoomController = Get.find();
+          //   if (!createRoomController.newRoomUserIds.contains(_usersService.getUserId(username))) {
+          //     createRoomController.newRoomUserIds.add(_usersService.getUserId(username));
+          //     _itemsObs.add(username);
+          //     print('1');
+          //   } else {
+          //     createRoomController.newRoomUserIds.remove(_usersService.getUserId(username));
+          //     _itemsObs.remove(username);
+          //     print('2');
+          //   }
+          // }
+        },
+      );
     } else {
       return IconButton(
           onPressed: () async {
@@ -163,6 +227,18 @@ class UserList extends StatelessWidget {
           icon: const Icon(Icons.close)
       );
     }
+  }
+
+  Color getColor(Set<MaterialState> states) {
+    const Set<MaterialState> interactiveStates = <MaterialState>{
+      MaterialState.pressed,
+      MaterialState.hovered,
+      MaterialState.focused,
+    };
+    if (states.any(interactiveStates.contains)) {
+      return Color.fromARGB(255,98,0,238);
+    }
+    return Color.fromARGB(255,98,0,238);
   }
 
   Widget _buildTrailingIcon(String username) {

@@ -16,6 +16,8 @@ class RoomService extends GetxService {
   var currentRoomId = 'global';
   final currentFloatingChatRoomId = Rxn<String>();
 
+  List<dynamic> newRoomUserIds = [];
+
   void updateCurrentRoomId(String newCurrentRoomId) {
     currentRoomId = newCurrentRoomId;
     print('Current room id is $currentRoomId');
