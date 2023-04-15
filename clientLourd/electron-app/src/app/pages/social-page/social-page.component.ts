@@ -36,16 +36,6 @@ export class SocialPageComponent {
 
   chatFriendPage(index: number): void {
     this.chatFriend = true;
-    document.getElementById('add-friend')?.setAttribute("style", "");
-    const friends = document.getElementsByClassName('friends');
-    for (let i = 0; i < friends.length; i++) {
-      if (i != index) {
-        friends[i].setAttribute("style", "");
-      } else {
-        friends[i].setAttribute("style", "background-color: #424260; outline-color: #66678e; outline-width: 1px; outline-style: solid;");
-      }
-    }
-
     for (const room of this.roomService.listJoinedChatRooms.value) {
       const usersInRoom = room.name.split("/");
       console.log(usersInRoom);
@@ -67,6 +57,17 @@ export class SocialPageComponent {
       const event: ClientEvent = 'create-dm-room';
       this.socketService.send(event, payload);
     }
+  }
+
+  chatFriendGroupPage(idx: number): void {
+    this.chatFriend = true;
+    document.getElementById('add-friend')?.setAttribute("style", "");
+    const friends = document.getElementsByClassName('friends');
+    for (let i = 0; i < friends.length; i++) {
+      friends[i].setAttribute("style", "");
+    }
+
+    this.roomService.currentRoomChat.next(this.findRoomWithoutFriend()[idx]);
   }
 
   getUsernameFriend(index: number): string {
@@ -111,10 +112,24 @@ export class SocialPageComponent {
   }
 
   findRoomWithoutFriend(): Room[] {
+    // Récupérer la liste des amis à l'avance
+    const listeAmis = this.socialService.friendsList$.value;
+    if (!listeAmis) {
+      return this.roomService.listJoinedChatRooms.value;
+    }
     const salles = this.roomService.listJoinedChatRooms.value.filter((salle) => {
       const usersInRoom = salle.name.split("/");
-      return usersInRoom[0] != this.user.value.username && usersInRoom[1] != this.user.value.username;
+
+      const roomWithoutFriend = !listeAmis.some((friend) => {
+        return (
+          (usersInRoom[0] == this.user.value.username && usersInRoom[1] == friend.username) ||
+          (usersInRoom[0] == friend.username && usersInRoom[1] == this.user.value.username)
+        );
+      });
+
+      return roomWithoutFriend;
     });
+
     console.log(salles);
     return salles;
   }

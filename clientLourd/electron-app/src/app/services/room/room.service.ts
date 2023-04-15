@@ -79,9 +79,9 @@ export class RoomService {
     for (const room of this.listJoinedChatRooms.value) {
       if (
         room.name ==
-          this.userService.currentUserValue.username + '/' + friendName ||
+        this.userService.currentUserValue.username + '/' + friendName ||
         room.name ==
-          friendName + '/' + this.userService.currentUserValue.username
+        friendName + '/' + this.userService.currentUserValue.username
       ) {
         console.log('changed room to dm');
         this.currentRoomChat.next(room);
@@ -116,6 +116,15 @@ export class RoomService {
     return undefined;
   }
 
+  getRoom(roomIdTocHeck: string): Room | undefined {
+    for (let i = 0; i < this.listJoinedChatRooms.value.length; i++) {
+      if (this.listJoinedChatRooms.value[i].id == roomIdTocHeck)
+
+        return this.listJoinedChatRooms.value[i];
+    }
+    return undefined;
+  }
+
   addUser(roomId: string, userId: string): void {
     if (roomId == this.currentRoomChat.value.id) {
       const currentRoom = this.currentRoomChat.value;
@@ -131,22 +140,6 @@ export class RoomService {
       }
     }
   }
-
-  /*addUserDM(roomId: string, userId: string): void {
-        if (roomId == this.currentRoomChat.value.id) {
-            const currentRoom = this.currentRoomChat.value;
-            currentRoom.userIds = [...currentRoom.userIds, userId]
-            this.currentRoomChat.next(currentRoom);
-        } else {
-            const rooms = this.listJoinedDMRooms.value;
-            for (let i = 0; i < this.listJoinedDMRooms.value.length; i++) {
-                if (rooms[i].id == roomId) {
-                    rooms[i].userIds = [...rooms[i].userIds, userId];
-                    this.listJoinedDMRooms.next(rooms);
-                }
-            }
-        }
-    }*/
 
   removeUser(roomId: string, userId: string): void {
     if (roomId == this.currentRoomChat.value.id) {

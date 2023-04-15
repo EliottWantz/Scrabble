@@ -26,7 +26,13 @@
         <div id="break">
           <hr>
         </div>
+        <div *ngFor="let canal of this.findRoomWithoutFriend(); let i = index" class="friends"
+        (click)="chatFriendGroupPage(i)">
+          <span class="text">
+              {{canal.name}}
+          </span>
 
+        </div>
         <div *ngFor="let friend of this.socialService.friendsList$.value; let i = index" class="friends"
           (click)="chatFriendPage(i)">
           <div class="friend">
@@ -38,14 +44,6 @@
             <span class="text">{{getUsernameFriend(i)}}</span>
           </div>
         </div>
-        <div *ngFor="let canal of this.findRoomWithoutFriend(); let i = index" class="friends"
-        (click)="chatFriendPage(i)">
-          <span class="text">
-              {{canal.name}}
-          </span>
-
-        </div>
-
       </div>
     </div>
   </mat-drawer>
