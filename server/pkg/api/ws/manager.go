@@ -983,8 +983,8 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 					}
 					finaleRoom.Broadcast(GamePacket)
 
-					if g.ScrabbleGame.IsOver() {
-						if err := m.HandleGameOver(g); err != nil {
+					if t.Finale.ScrabbleGame.IsOver() {
+						if err := m.HandleGameOver(t.Finale); err != nil {
 							slog.Error("failed to handle game over", err)
 							return
 						}
