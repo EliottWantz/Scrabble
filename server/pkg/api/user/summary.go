@@ -30,6 +30,9 @@ func (s *Service) AddNetworkingLog(u *User, eventType string, eventTime int64) e
 		EventType: eventType,
 		EventTime: eventTime,
 	})
+	if eventType == "Logout" {
+		u.IsConnected = false
+	}
 	return s.Repo.Update(u)
 }
 
