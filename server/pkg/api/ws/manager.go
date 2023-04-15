@@ -413,11 +413,15 @@ func (m *Manager) RemoveClient(c *Client) error {
 		}
 	}
 
-	if err := c.Conn.Close(); err != nil {
-		slog.Error("close connection #1", err)
+	if c.Conn != nil {
+		if err := c.Conn.Close(); err != nil {
+			slog.Error("close connection #1", err)
+		}
 	}
-	if err := otherWsClient.Conn.Close(); err != nil {
-		slog.Error("close connection #2", err)
+	if otherWsClient != nil && otherWsClient.Conn != nil {
+		if err := otherWsClient.Conn.Close(); err != nil {
+			slog.Error("close connection #2", err)
+		}
 	}
 
 	m.Clients.Del(c.ID)
