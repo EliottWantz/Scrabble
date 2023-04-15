@@ -6,12 +6,13 @@ import { UserService } from "@app/services/user/user.service";
 import { MoveService } from "@app/services/game/move.service";
 import { MoveInfo } from "@app/utils/interfaces/game/move";
 import { StorageService } from "@app/services/storage/storage.service";
-import { LeaveGamePayload } from "@app/utils/interfaces/packet";
+import { JoinTournamentAsObserverPayload, LeaveGamePayload } from "@app/utils/interfaces/packet";
 import { WebSocketService } from "@app/services/web-socket/web-socket.service";
 import { Router } from "@angular/router";
 import { ThemeService } from "@app/services/theme/theme.service";
 import { MatBottomSheet } from "@angular/material/bottom-sheet";
 import { AdviceComponent } from "@app/components/advice/advice.component";
+import { Tournament } from "@app/utils/interfaces/game/tournament";
 
 @Component({
     selector: "app-game-page",
@@ -20,12 +21,15 @@ import { AdviceComponent } from "@app/components/advice/advice.component";
 })
 export class GamePageComponent implements OnInit {
     game!: BehaviorSubject<ScrabbleGame | undefined>;
+    //tournament!:BehaviorSubject<Tournament | undefined>;
     //moves!: BehaviorSubject<MoveInfo[]>
     private darkThemeIcon = 'wb_sunny';
     private lightThemeIcon = 'nightlight_round';
     public lightDarkToggleIcon = this.lightThemeIcon;
     language: BehaviorSubject<string>;
     public gameWinner = '';
+    public tournamentWinner = '';
+    public isLoser = false;
     
     constructor(private gameService: GameService, private userService: UserService, private moveService: MoveService, private storageService: StorageService,
         private socketService: WebSocketService, private router: Router, private themeService: ThemeService) {
@@ -39,6 +43,35 @@ export class GamePageComponent implements OnInit {
             if(gameWinner==undefined){return}
             else{
                 this.gameWinner = String(gameWinner);
+            }
+        })
+        this.gameService.tournamentWinner.subscribe((tournamentWinner) => {
+            if(tournamentWinner==undefined){return}
+            else{
+                this.tournamentWinner = String(tournamentWinner);
+            }
+        })
+        this.gameService.tournament.subscribe((tournament) => {
+            if(tournament?.games[0].id===this.gameService.game.value?.id)
+            {
+                if(tournament?.games[0].winnerId){
+                    const loser = tournament?.games[0].userIds.splice(tournament?.games[0].userIds.indexOf(tournament.games[0].winnerId))[0];
+                    if(loser === this.userService.subjectUser.value.id)
+                    {
+                        this.isLoser = true;
+                        console.log("bruh");
+                    }
+                }
+            }
+            else{
+                if(tournament?.games[1].winnerId){
+                    const loser = tournament?.games[1].userIds.splice(tournament?.games[1].userIds.indexOf(tournament.games[1].winnerId))[0];
+                    if(loser === this.userService.subjectUser.value.id)
+                    {
+                        this.isLoser = true;
+                        console.log("bruh");
+                    }
+                }
             }
         })
         this.themeService.theme.subscribe((theme) => {
@@ -94,6 +127,18 @@ export class GamePageComponent implements OnInit {
             this.gameService.game.next(undefined);
             this.gameService.scrabbleGame.next(undefined);
             this.router.navigate(["/home"]);
+        }
+    }
+
+    joinOthereGameAsObserver(): void {
+        if(this.gameService.tournament.value){
+            const payload: JoinTournamentAsObserverPayload = {
+                tournamentId: this.gameService.tournament.value?.id
+            };
+            this.socketService.send("join-tournament-as-observateur", payload);
+            // this.gameService.game.next(undefined);
+            // this.gameService.scrabbleGame.next(undefined);
+            // this.router.navigate(["/home"]);
         }
     }
 

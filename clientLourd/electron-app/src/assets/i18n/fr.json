@@ -69,6 +69,7 @@
 	"game-page.skip": "Passer",
 	"game-page.submit": "Envoyer",
 	"game-page.win": "a gagné!",
+	"game-page-tournament.win":"a gagné le tournoi!",
 	"login-component.connect": "Se connecter",
 	"login-component.error": "Le mot de passe ou nom d'utilisateur est incorrect",
 	"login-component.password": "Veuillez entrer votre mot de passe",

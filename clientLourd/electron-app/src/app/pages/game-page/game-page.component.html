@@ -60,12 +60,35 @@
       {{"game-page.skip" | translate}}
     </button>
   </div>
+  <mat-card id="indice" *ngIf="tournamentWinner !=='' ">
+    <mat-card-content>
+      <p>{{tournamentWinner}} {{"game-page-tournament.win" | translate}}</p>
+      <button mat-flat-button color="primary" (click)="leaveGame()">
+        <mat-icon>input</mat-icon>
+        {{'game-page.leave' | translate}}
+      </button>
+    </mat-card-content>
+  </mat-card>
   <mat-card id="indice" *ngIf="gameWinner !=='' ">
     <mat-card-content>
       <p>{{gameWinner}} {{"game-page.win" | translate}}</p>
       <button mat-flat-button color="primary" (click)="leaveGame()">
         <mat-icon>input</mat-icon>
         {{'game-page.leave' | translate}}
+      </button>
+    </mat-card-content>
+  </mat-card>
+  <app-chat-box></app-chat-box>
+  <mat-card id="indice" *ngIf="isLoser">
+    <mat-card-content>
+      <p>{{"game-page-tournament.lost" | translate}}</p>
+      <button mat-flat-button color="primary" (click)="leaveGame()">
+        <mat-icon>input</mat-icon>
+        {{'game-page.leave' | translate}}
+      </button>
+      <button mat-flat-button color="primary" (click)="leaveGame()">
+        <mat-icon>input</mat-icon>
+        {{'game-page-tournament.observe' | translate}}
       </button>
     </mat-card-content>
   </mat-card>

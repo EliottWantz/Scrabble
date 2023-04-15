@@ -69,6 +69,7 @@
 	"game-page.skip": "Skip",
 	"game-page.submit": "Submit",
 	"game-page.win": "won!",
+	"game-page-tournament.win":"won the tournament!",
 	"login-component.connect": "Log in",
 	"login-component.error": "The password or username is incorrect",
 	"login-component.password": "Please enter your password",

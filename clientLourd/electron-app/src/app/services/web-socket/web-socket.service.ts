@@ -21,6 +21,7 @@ import {
   LeftDMRoomPayload,
   LeftGamePayload,
   LeftRoomPayload,
+  LeftTournamentPayload,
   ListChatRoomsPayload,
   ListJoinableGamesPayload,
   ListJoinableTournamentsPayload,
@@ -31,6 +32,7 @@ import {
   RevokeJoinGameRequestPayload,
   ServerIndicePayload,
   TimerUpdatePayload,
+  TournamentUpdatePayload,
   UserJoinedDMRoomPayload,
   UserJoinedGamePayload,
   UserJoinedRoomPayload,
@@ -38,6 +40,7 @@ import {
   UserLeftDMRoomPayload,
   UserLeftGamePayload,
   UserLeftRoomPayload,
+  UserLeftTournamentPayload,
   UserRequestToJoinGamePayload,
 } from '@app/utils/interfaces/packet';
 import { RoomService } from '@app/services/room/room.service';
@@ -308,11 +311,30 @@ export class WebSocketService {
         break;
       }
 
+      case "leftTournament": {
+        const leftTournamentPayload = packet.payload as LeftTournamentPayload;
+        this.roomService.removeRoom(leftTournamentPayload.tournamentId);
+        //this.gameService.removeUser(leftGamePayload.gameId, this.userService.currentUserValue.id);
+        this.gameService.tournament.next(undefined);
+        // this.gameService.game.next(undefined);
+        this.gameService.isObserving = false;
+
+        // check if tournament
+        this.router.navigate(['/home']);
+        break;
+      }
+
       case "userLeftGame": {
           const userLeftGamePayload = packet.payload as UserLeftGamePayload;
           this.gameService.removeUser(userLeftGamePayload.gameId, userLeftGamePayload.userId);
           break;
       }
+
+      case "userLeftTournament": {
+        const userLeftTournamentPayload = packet.payload as UserLeftTournamentPayload;
+        this.gameService.removeUserTournament(userLeftTournamentPayload.tournamentId, userLeftTournamentPayload.userId);
+        break;
+    }
 
       case "gameUpdate": {
           const payloadUpdateGame = packet.payload as GameUpdatePayload;
@@ -338,7 +360,14 @@ export class WebSocketService {
         break;
       }
 
-      case 'timerUpdate': {
+       case "tournamentUpdate":{
+        const payloadUpdateTournament = packet.payload as TournamentUpdatePayload;
+        this.gameService.tournament.next(payloadUpdateTournament.tournament);
+        //currentTournmant.tournament.games[0].winnerId
+        break;
+      }
+
+     case 'timerUpdate': {
         const payloadTimer = packet.payload as TimerUpdatePayload;
         this.gameService.updateTimer(payloadTimer.timer);
         break;
@@ -347,6 +376,12 @@ export class WebSocketService {
       case 'gameOver': {
         const payloadGameOver = packet.payload as GameOverPayload;
         this.gameService.gameOverPopup(payloadGameOver.winnerId);
+        break;
+      }
+
+      case 'tournamentOver': {
+        const payloadGameOver = packet.payload as GameOverPayload;
+        this.gameService.gameOverPopupTournament(payloadGameOver.winnerId);
         break;
       }
 

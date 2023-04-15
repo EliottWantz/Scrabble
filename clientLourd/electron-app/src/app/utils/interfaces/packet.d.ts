@@ -136,10 +136,13 @@ export type ServerPayload = JoinedRoomPayload
 | JoinedTournamentPayload
 | UserJoinedGamePayload
 | LeftGamePayload
+| LeftTournamentPayload
 | UserLeftGamePayload
+| UserLeftTournamentPayload
 | GameUpdatePayload
 | TimerUpdatePayload
 | GameOverPayload
+| TournamentOverPayload
 | FriendRequestPayload
 | ServerIndicePayload
 | ErrorPayload
@@ -239,8 +242,17 @@ export interface LeftGamePayload {
     gameId: string;
 }
 
+export interface LeftTournamentPayload {
+    tournamentId: string;
+}
+
 export interface UserLeftGamePayload {
     gameId: string;
+    userId: string;
+}
+
+export interface UserLeftTournamentPayload {
+    tournamentId: string;
     userId: string;
 }
 
@@ -248,11 +260,19 @@ export interface GameUpdatePayload {
     game: ScrabbleGame;
 }
 
+export interface TournamentUpdatePayload {
+    tournament: Tournament;
+}
+
 export interface TimerUpdatePayload {
     timer: number;
 }
 
 export interface GameOverPayload {
+    winnerId: string;
+}
+
+export interface TournamentOverPayload {
     winnerId: string;
 }
 

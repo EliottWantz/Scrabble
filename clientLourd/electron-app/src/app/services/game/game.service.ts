@@ -8,7 +8,7 @@ import { Game, ScrabbleGame } from "@app/utils/interfaces/game/game";
 import { MoveInfo } from "@app/utils/interfaces/game/move";
 import { Tile } from "@app/utils/interfaces/game/tile";
 import { Tournament } from "@app/utils/interfaces/game/tournament";
-import { GameUpdatePayload } from "@app/utils/interfaces/packet";
+import { StorageService } from "@app/services/storage/storage.service";
 import { BehaviorSubject } from "rxjs";
 
 @Injectable({
@@ -23,6 +23,7 @@ export class GameService {
     joinableGames!: BehaviorSubject<Game[]>;
     joinableTournaments!: BehaviorSubject<Tournament[]>;
     gameWinner!:BehaviorSubject<string | undefined>
+    tournamentWinner!:BehaviorSubject<string | undefined>
     observableGames!: BehaviorSubject<Game[]>;
     observableTournaments!: BehaviorSubject<Tournament[]>;
     isObserving = false;
@@ -32,7 +33,7 @@ export class GameService {
     placedTiles = 0;
     oldGame!: ScrabbleGame;
     dragging = new BehaviorSubject<boolean>(false);
-    constructor(private router: Router, private _bottomSheet: MatBottomSheet, private _bottomSheetSpecialLetter: MatBottomSheet) {
+    constructor(private router: Router, private _bottomSheet: MatBottomSheet, private _bottomSheetSpecialLetter: MatBottomSheet, private storageService: StorageService ){
         this.scrabbleGame = new BehaviorSubject<ScrabbleGame | undefined>(undefined);
         this.game = new BehaviorSubject<Game | undefined>(undefined);
         this.tournament = new BehaviorSubject<Tournament | undefined>(undefined);
@@ -45,6 +46,7 @@ export class GameService {
         this.usersWaiting = new BehaviorSubject<{userId: string, username: string}[]>([]);
         this.wasDeclined = new BehaviorSubject<boolean>(false);
         this.gameWinner = new BehaviorSubject<string | undefined>(undefined);
+        this.tournamentWinner = new BehaviorSubject<string | undefined>(undefined);
     }
 
     indice(moves: MoveInfo[]): void {
@@ -143,6 +145,35 @@ export class GameService {
             }
         }
     }
+
+    removeUserTournament(tournamentId: string, userId: string): void {
+        if (this.tournament.value && this.tournament.value.id == tournamentId) {
+            const users = this.tournament.value.userIds;
+            const indexUser = this.tournament.value.userIds.indexOf(userId, 0);
+            if (indexUser > -1) {
+                this.tournament.value.userIds.splice(indexUser, 1);
+            }
+            this.tournament.next({...this.tournament.value, userIds: users});
+            if (this.tournament.value.userIds.length == 0) {
+                this.tournament.next({...this.tournament.value, id: "0"});
+            }
+        } else {
+            for (let i = 0; i < this.joinableTournaments.value.length; i++) {
+                if (this.joinableTournaments.value[i].id == tournamentId) {
+                    const tournaments = this.joinableTournaments.value;
+                    const indexUser = tournaments[i].userIds.indexOf(userId, 0);
+                    if (indexUser > -1) {
+                        tournaments[i].userIds.splice(indexUser, 1);
+                        if (tournaments[i].userIds.length == 0) {
+                            tournaments.splice(i, 1);
+                        }
+                    }
+                    this.joinableTournaments.next(tournaments);
+                }
+            }
+        }
+    }
+
     gameOverPopup(winId : string){
         let winner = undefined;
         if(!this.scrabbleGame.value){
@@ -154,5 +185,11 @@ export class GameService {
             }
         }
         this.gameWinner.next(winner);
+    }
+
+    gameOverPopupTournament(winId : string){
+        let winner = undefined;
+        winner = this.storageService.getUserFromId(winId)?.username;
+        this.tournamentWinner.next(winner);
     }
 }
