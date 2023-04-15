@@ -561,7 +561,7 @@ class WebsocketService extends GetxService {
   }
 
   void handleEventLeftRoom(LeftRoomResponse leftRoomResponse) {
-    roomService.roomsMap.remove(leftRoomResponse.payload.roomId);
+    roomService.removeRoom(leftRoomResponse.payload.roomId);
   }
 
   void handleEventJoinedGame(JoinedGameResponse joinedGameResponse) {

@@ -243,7 +243,7 @@ class UserList extends StatelessWidget {
 
   Widget _buildServerTrailingIcon(String roomName) {
     if (_roomService.roomsMap.containsKey(_roomService.getListedChatRoomIdByName(roomName))) {
-      return const Icon(Icons.remove);
+      return const Icon(Icons.exit_to_app);
     } else {
       return const Icon(Icons.add);
     }

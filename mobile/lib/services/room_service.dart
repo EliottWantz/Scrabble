@@ -151,8 +151,10 @@ class RoomService extends GetxService {
     roomsMap[roomId] = room;
   }
 
-  void removeRoom(String roomId) {
-    roomsMap.value!.remove(roomId);
+  void removeRoom(String roomIdToRemove) {
+    // roomsMap.value!.remove(roomId);
+    roomsMap.value!.removeWhere((roomId, room) => roomId == roomIdToRemove);
+    roomsMap.refresh();
   }
 
   bool roomMapContains(String roomName) {
