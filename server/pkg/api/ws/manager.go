@@ -425,7 +425,9 @@ func (m *Manager) RemoveClient(c *Client) error {
 	}
 
 	m.Clients.Del(c.ID)
-	m.Clients.Del(otherWsClient.ID)
+	if otherWsClient != nil {
+		m.Clients.Del(otherWsClient.ID)
+	}
 
 	{
 		// List all users online
