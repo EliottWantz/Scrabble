@@ -990,7 +990,14 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 		return err
 	}
 
-	return m.BroadcastObservableGames()
+	if err := m.BroadcastObservableGames(); err != nil {
+		slog.Error("broadcast observable games", err)
+	}
+	if err := m.BroadcastObservableTournaments(); err != nil {
+		slog.Error("broadcast observable tournaments", err)
+	}
+
+	return nil
 }
 
 func (m *Manager) ListNewUser() {
