@@ -247,9 +247,13 @@ func (c *Client) HandleJoinRoomRequest(p *Packet) error {
 
 	r, err := c.Manager.GetRoom(payload.RoomID)
 	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+		dbRoom, err := c.Manager.RoomSvc.Repo.Find(payload.RoomID)
+		if err != nil {
+			return fiber.NewError(fiber.StatusBadRequest, "room does not exist")
+		}
+		r = c.Manager.AddRoom(dbRoom.ID, dbRoom.Name)
 	}
-	if err := c.Manager.RoomSvc.Repo.AddUser(payload.RoomID, c.ID); err != nil {
+	if err := c.Manager.RoomSvc.Repo.AddUser(payload.RoomID, c.UserId); err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, "failed to join room: "+err.Error())
 	}
 	if err := c.Manager.UserSvc.Repo.AddJoinedRoom(payload.RoomID, c.UserId); err != nil {

@@ -137,6 +137,10 @@ func (s *Service) Login(username, password string) (*User, error) {
 		return nil, fiber.NewError(fiber.StatusNotFound, "user not found")
 	}
 
+	if u.IsConnected {
+		return nil, fiber.NewError(fiber.StatusForbidden, "user already connected")
+	}
+
 	if !auth.PasswordsMatch(password, u.HashedPassword) {
 		return nil, fiber.NewError(fiber.StatusUnauthorized, "password mismatch")
 	}
