@@ -18,7 +18,7 @@ export class CreateTournamentComponent {
     tournaments: BehaviorSubject<Tournament[]>;
     password = "";
     gameType = "Public";
-    gameTypes = ["Public", "Protected", "Private"];
+    gameTypes = ["Public", "Private"];
     constructor(public dialogRef: MatDialogRef<CreateTournamentComponent>, private gameService: GameService, private webSocketService: WebSocketService, private storageService: StorageService) {
         this.tournaments = this.gameService.joinableTournaments;
     }

@@ -20,6 +20,7 @@ import { JoinPrivateTournamentComponent } from "../join-private-tournament/join-
 })
 export class JoinTournamentComponent implements OnInit {
     tournaments: Tournament[] = [];
+    tournamentToObserve: Tournament | undefined = undefined;
     constructor(public dialogRef: MatDialogRef<JoinTournamentComponent>, public dialog: MatDialog, @Inject(MAT_DIALOG_DATA) public data: {isObserver: boolean}, private gameService: GameService,
     private webSocketService: WebSocketService, private storageService: StorageService, private router: Router) {
         
@@ -38,7 +39,6 @@ export class JoinTournamentComponent implements OnInit {
                 }
             });
         } else {
-            const oberIds = [];
             for (const tournament of this.gameService.observableTournaments.value) {
                 this.tournaments.push(tournament);
             }
@@ -51,7 +51,6 @@ export class JoinTournamentComponent implements OnInit {
 
             this.gameService.observableTournaments.subscribe(() => {
                 this.tournaments = [];
-                const oberIds = [];
                 for (const tournament of this.gameService.observableTournaments.value) {
                     this.tournaments.push(tournament);
                 }
@@ -103,7 +102,7 @@ export class JoinTournamentComponent implements OnInit {
     }
 
     joinGame(tournament: Tournament): void {
-        if (tournament.isPrivateGame) {
+        if (tournament.isPrivate) {
             this.openDialogJoinPrivateGame(tournament);
             const payload: JoinTournamentPayload = {
                 tournamentId: tournament.id,
@@ -121,8 +120,9 @@ export class JoinTournamentComponent implements OnInit {
                 const event : ClientEvent = "join-tournament-as-observateur";
                 this.webSocketService.send(event, payload);
                 this.gameService.isObserving = true;
+                this.tournamentToObserve = tournament;
                 this.close();
-                this.router.navigate(["/gameObserve"]);
+                //this.router.navigate(["/gameObserve"]);
             } else {
                 const payload: JoinTournamentPayload = {
                     tournamentId: tournament.id,
@@ -137,5 +137,17 @@ export class JoinTournamentComponent implements OnInit {
 
     close() {
         this.dialogRef.close();
+    }
+
+    joinGameAsObserver(game: Game): void {
+        const payload: JoinGameAsObserverPayload = {
+            gameId: game.id,
+            password: ""
+        }
+        const event : ClientEvent = "join-game-as-observateur";
+        this.webSocketService.send(event, payload);
+        this.gameService.isObserving = true;
+        this.close();
+        this.router.navigate(["/gameObserve"]);
     }
 }

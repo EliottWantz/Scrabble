@@ -28,8 +28,8 @@
                 </div>
             </mat-grid-tile>
             <mat-grid-tile [colspan]="1" [rowspan]="1">
-                <mat-icon *ngIf="!tournament.isPrivateGame">check</mat-icon>
-                <mat-icon *ngIf="tournament.isPrivateGame">clear</mat-icon>
+                <mat-icon *ngIf="!tournament.isPrivate">check</mat-icon>
+                <mat-icon *ngIf="tournament.isPrivate">clear</mat-icon>
             </mat-grid-tile>
             <mat-grid-tile [colspan]="1" [rowspan]="1">
                 <button (click)="joinGame(tournament)" class="join-button">
@@ -42,5 +42,21 @@
             </mat-grid-tile>
         </div>
     </mat-grid-list>
+    <div *ngIf="tournamentToObserve">
+        <div *ngFor="let players of tournamentToObserve.games[0].userIds">
+            <div>{{players}}</div>
+            <button (click)="joinGameAsObserver(tournamentToObserve.games[0])" class="join-button" disabled="{{tournamentToObserve.games[0].winnerId}}"></button>
+        </div>
+        <div *ngFor="let players of tournamentToObserve.games[1].userIds">
+            <div>{{players}}</div>
+            <button (click)="joinGameAsObserver(tournamentToObserve.games[1])" class="join-button" disabled="{{tournamentToObserve.games[1].winnerId}}"></button>
+        </div>
+        <div *ngIf="tournamentToObserve.games[1].winnerId && tournamentToObserve.games[0].winnerId">
+            <div *ngFor="let players of tournamentToObserve.finale!.userIds">
+                <div>{{players}}</div>
+                <button (click)="joinGameAsObserver(tournamentToObserve.finale!)" class="join-button"></button>
+            </div>
+        </div>
+    </div>
     <button (click)="close()" id="close-button">{{"join-game-component.close" | translate}}</button>
 </mat-dialog-content>

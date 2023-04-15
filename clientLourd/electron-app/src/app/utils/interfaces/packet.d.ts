@@ -157,6 +157,7 @@ export type ServerPayload = JoinedRoomPayload
 | ErrorPayload
 | ListUsersOnlinePayload
 | ListObservableGamesPayload
+| ListObservableTournamentsPayload
 | UserRequestToJoinGamePayload
 | UserRequestToJoinTournamentPayload
 | VerdictJoinGameRequestPayload
@@ -304,6 +305,10 @@ export interface ListUsersOnlinePayload {
 
 export interface ListObservableGamesPayload {
     games: Game[];
+}
+
+export interface ListObservableTournamentsPayload {
+    tournaments: Tournament[];
 }
 
 export interface UserRequestToJoinGamePayload {

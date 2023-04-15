@@ -6,12 +6,13 @@ import { UserService } from "@app/services/user/user.service";
 import { MoveService } from "@app/services/game/move.service";
 import { MoveInfo } from "@app/utils/interfaces/game/move";
 import { StorageService } from "@app/services/storage/storage.service";
-import { LeaveGamePayload, LeaveTournamentAsObserverPayload, ReplaceBotByObserverPayload } from "@app/utils/interfaces/packet";
+import { JoinGameAsObserverPayload, LeaveGamePayload, LeaveTournamentAsObserverPayload, ReplaceBotByObserverPayload } from "@app/utils/interfaces/packet";
 import { WebSocketService } from "@app/services/web-socket/web-socket.service";
 import { Router } from "@angular/router";
 import { ThemeService } from "@app/services/theme/theme.service";
 import { Rack } from "@app/utils/interfaces/game/rack";
 import { Tile } from "@app/utils/interfaces/game/tile";
+import { ClientEvent } from "@app/utils/events/client-events";
 
 @Component({
     selector: "app-game-observe-page",
@@ -95,6 +96,16 @@ export class GameObservePageComponent implements OnInit {
             this.gameService.scrabbleGame.next(undefined);
             this.router.navigate(["/home"]);
         }
+    }
+
+    joinOtherGameAsObserver(): void {
+        const payload: JoinGameAsObserverPayload = {
+            gameId: this.gameService.tournament.value?.games.splice(this.gameService.tournament.value?.games.indexOf(this.gameService.game.value as Game), 1)[0].id as string,
+            password: ""
+        }
+        this.socketService.send("join-game-as-observateur", payload);
+        this.gameService.isObserving = true;
+        this.router.navigate(["/gameObserve"]);
     }
 
     leaveTournament(): void {

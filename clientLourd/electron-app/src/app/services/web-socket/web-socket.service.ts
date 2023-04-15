@@ -26,6 +26,7 @@ import {
   ListJoinableGamesPayload,
   ListJoinableTournamentsPayload,
   ListObservableGamesPayload,
+  ListObservableTournamentsPayload,
   ListUsersPayload,
   NewUserPayload,
   Packet,
@@ -362,6 +363,7 @@ export class WebSocketService {
 
        case "tournamentUpdate":{
         const payloadUpdateTournament = packet.payload as TournamentUpdatePayload;
+        console.log(payloadUpdateTournament, "tournUpdate", this.gameService.tournament)
         this.gameService.tournament.next(payloadUpdateTournament.tournament);
         //currentTournmant.tournament.games[0].winnerId
         break;
@@ -382,6 +384,7 @@ export class WebSocketService {
       case 'tournamentOver': {
         const payloadGameOver = packet.payload as GameOverPayload;
         this.gameService.gameOverPopupTournament(payloadGameOver.winnerId);
+        this.gameService.tournament.next(undefined);
         break;
       }
 
@@ -437,6 +440,13 @@ export class WebSocketService {
       case 'observableGames': {
         const payload = packet.payload as ListObservableGamesPayload;
         this.gameService.observableGames.next(payload.games);
+        break;
+      }
+
+      case 'observableTournaments': {
+        const payload = packet.payload as ListObservableTournamentsPayload;
+        this.gameService.observableTournaments.next(payload.tournaments);
+        console.log(payload, "herebruh");
         break;
       }
 

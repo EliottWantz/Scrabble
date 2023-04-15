@@ -6,7 +6,7 @@ import { UserService } from "@app/services/user/user.service";
 import { MoveService } from "@app/services/game/move.service";
 import { MoveInfo } from "@app/utils/interfaces/game/move";
 import { StorageService } from "@app/services/storage/storage.service";
-import { JoinTournamentAsObserverPayload, LeaveGamePayload, LeaveTournamentPayload } from "@app/utils/interfaces/packet";
+import { JoinGameAsObserverPayload, JoinTournamentAsObserverPayload, LeaveGamePayload, LeaveTournamentPayload } from "@app/utils/interfaces/packet";
 import { WebSocketService } from "@app/services/web-socket/web-socket.service";
 import { Router } from "@angular/router";
 import { ThemeService } from "@app/services/theme/theme.service";
@@ -40,7 +40,7 @@ export class GamePageComponent implements OnInit {
         this.game = this.gameService.scrabbleGame;
         this.game.subscribe();
         this.gameService.gameWinner.subscribe((gameWinner) => {
-            if(gameWinner==undefined){return}
+            if(gameWinner==undefined && this.gameService.tournament){return}
             else{
                 this.gameWinner = String(gameWinner);
             }
@@ -52,10 +52,11 @@ export class GamePageComponent implements OnInit {
             }
         })
         this.gameService.tournament.subscribe((tournament) => {
-            if(tournament?.games[0].id===this.gameService.game.value?.id)
+            if(!tournament){return}
+            else if(tournament?.games[0].id===this.gameService.game.value?.id)
             {
                 if(tournament?.games[0].winnerId){
-                    const loser = tournament?.games[0].userIds.splice(tournament?.games[0].userIds.indexOf(tournament.games[0].winnerId))[0];
+                    const loser = tournament?.games[0].userIds.splice(tournament?.games[0].userIds.indexOf(tournament.games[0].winnerId), 1)[0];
                     if(loser === this.userService.subjectUser.value.id)
                     {
                         this.isLoser = true;
@@ -65,7 +66,7 @@ export class GamePageComponent implements OnInit {
             }
             else{
                 if(tournament?.games[1].winnerId){
-                    const loser = tournament?.games[1].userIds.splice(tournament?.games[1].userIds.indexOf(tournament.games[1].winnerId))[0];
+                    const loser = tournament?.games[1].userIds.splice(tournament?.games[1].userIds.indexOf(tournament.games[1].winnerId), 1)[0];
                     if(loser === this.userService.subjectUser.value.id)
                     {
                         this.isLoser = true;
@@ -152,15 +153,29 @@ export class GamePageComponent implements OnInit {
         }
     }
 
-    joinOthereGameAsObserver(): void {
+    joinTournamentAsObserver(): void {
         if(this.gameService.tournament.value){
             const payload: JoinTournamentAsObserverPayload = {
                 tournamentId: this.gameService.tournament.value?.id
             };
             this.socketService.send("join-tournament-as-observateur", payload);
-            // this.gameService.game.next(undefined);
-            // this.gameService.scrabbleGame.next(undefined);
-            // this.router.navigate(["/home"]);
+            this.gameService.isObserving = true;
+            if(this.gameService.tournament.value?.games[0].winnerId && this.gameService.tournament.value?.games[1].winnerId)
+            {
+                const payload: JoinGameAsObserverPayload = {
+                    gameId: this.gameService.tournament.value?.finale?.id as string,
+                    password: ""
+                }
+            }
+            else{
+                const payload: JoinGameAsObserverPayload = {
+                    gameId: this.gameService.tournament.value?.games.splice(this.gameService.tournament.value?.games.indexOf(this.gameService.game.value as Game), 1)[0].id as string,
+                    password: ""
+                }
+            }
+            this.socketService.send("join-game-as-observateur", payload);
+            this.gameService.isObserving = true;
+            this.router.navigate(["/gameObserve"]);
         }
     }
 

@@ -59,11 +59,11 @@
   <mat-card id="indice" *ngIf="isOver">
     <mat-card-content>
       <p>{{"game-page-tournament.over" | translate}}</p>
-      <button mat-flat-button color="primary" (click)="leaveTournament()">
+      <button mat-flat-button color="primary" (click)="leave()">
         <mat-icon>input</mat-icon>
         {{'game-page.leave' | translate}}
       </button>
-      <button mat-flat-button color="primary" (click)="leaveTournament()">
+      <button mat-flat-button color="primary" (click)="joinOtherGameAsObserver()">
         <mat-icon>input</mat-icon>
         {{'game-page-tournament.observe' | translate}}
       </button>
