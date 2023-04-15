@@ -112,15 +112,8 @@ export class SocialPageComponent {
 
   findRoomWithoutFriend(): Room[] {
     const salles = this.roomService.listJoinedChatRooms.value.filter((salle) => {
-      const listeAmis = this.socialService.friendsList$.value;
-      const amiTrouveDansSalle = salle.userIds.find((id) => {
-        return listeAmis.find((ami) => ami.id == id);
-      });
-      // Ici, nous avons changé la condition pour retourner true si aucun ami n'est trouvé.
-      if (!amiTrouveDansSalle) {
-        return true;
-      }
-      return false;
+      const usersInRoom = salle.name.split("/");
+      return usersInRoom[0] != this.user.value.username && usersInRoom[1] != this.user.value.username;
     });
     console.log(salles);
     return salles;

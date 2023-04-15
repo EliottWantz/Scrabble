@@ -38,10 +38,11 @@
             <span class="text">{{getUsernameFriend(i)}}</span>
           </div>
         </div>
-        <div *ngFor="let canal of this.findRoomWithoutFriend(); let i = index">
-          <div>
+        <div *ngFor="let canal of this.findRoomWithoutFriend(); let i = index" class="friends"
+        (click)="chatFriendPage(i)">
+          <span class="text">
               {{canal.name}}
-          </div>
+          </span>
 
         </div>
 
