@@ -55,7 +55,7 @@ func (m *Manager) Accept(cID string) fiber.Handler {
 		clients := m.getClientsByUserID(cID)
 		wsID := cID + "#1"
 		if len(clients) > 0 {
-			wsID = cID + "#" + fmt.Sprint(len(clients)+1)
+			wsID = cID + "#2"
 		}
 		c := NewClient(conn, wsID, cID, m)
 		err := m.AddClient(c)
