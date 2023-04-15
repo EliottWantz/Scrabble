@@ -4,6 +4,7 @@ import 'package:client_leger/models/requests/game_invite_request.dart';
 import 'package:client_leger/models/user.dart';
 import 'package:client_leger/services/game_service.dart';
 import 'package:client_leger/services/room_service.dart';
+import 'package:client_leger/services/websocket_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -34,6 +35,7 @@ class UserList extends StatelessWidget {
   final GameService _gameService = Get.find();
   final ApiRepository _apiRepository = Get.find();
   final RoomService _roomService = Get.find();
+  final WebsocketService _websocketService = Get.find();
 
   final RxString _inputSearch;
 
@@ -175,15 +177,6 @@ class UserList extends StatelessWidget {
           icon: const Icon(Icons.close)
       );
     } else if (_mode == 'checkList') {
-      // return IconButton(
-      //           onPressed: () {
-      //             if (Get.isRegistered<CreateRoomController>()) {
-      //               CreateRoomController createRoomController = Get.find();
-      //               createRoomController.newRoomUserIds.add(_usersService.getUserId(username));
-      //             }
-      //           },
-      //           icon: _buildCheckmark(username)
-      // );
       return Checkbox(
         checkColor: Colors.white,
         fillColor: MaterialStateProperty.resolveWith(getColor),
@@ -200,20 +193,18 @@ class UserList extends StatelessWidget {
             _roomService.newRoomUserIds.addAll(_itemsObs.value);
             print(_roomService.newRoomUserIds);
           }
-          // isChecked.value = value!;
-          // if (Get.isRegistered<CreateRoomController>()) {
-          //   CreateRoomController createRoomController = Get.find();
-          //   if (!createRoomController.newRoomUserIds.contains(_usersService.getUserId(username))) {
-          //     createRoomController.newRoomUserIds.add(_usersService.getUserId(username));
-          //     _itemsObs.add(username);
-          //     print('1');
-          //   } else {
-          //     createRoomController.newRoomUserIds.remove(_usersService.getUserId(username));
-          //     _itemsObs.remove(username);
-          //     print('2');
-          //   }
-          // }
         },
+      );
+    } else if (_mode == 'joinRoom') {
+      return IconButton(
+          onPressed: () {
+            if (_roomService.roomsMap.containsKey(_roomService.getListedChatRoomIdByName(username))) {
+              _websocketService.leaveChatRoom(_roomService.getListedChatRoomIdByName(username));
+            } else {
+              _websocketService.joinChatRoom(_roomService.getListedChatRoomIdByName(username));
+            }
+          },
+          icon: Obx(() => _buildServerTrailingIcon(username))
       );
     } else {
       return IconButton(
@@ -222,6 +213,7 @@ class UserList extends StatelessWidget {
             if (res == true) {
               _userService.user.value!.friends.remove(username);
               _userService.friends.remove(username);
+              _roomService.roomsMap.remove(_roomService.getRoomIdByRoomName(username));
             }
           },
           icon: const Icon(Icons.close)
@@ -246,6 +238,14 @@ class UserList extends StatelessWidget {
       return const Icon(Icons.check, color: Colors.green);
     } else {
       return const Icon(Icons.send);
+    }
+  }
+
+  Widget _buildServerTrailingIcon(String roomName) {
+    if (_roomService.roomsMap.containsKey(_roomService.getListedChatRoomIdByName(roomName))) {
+      return const Icon(Icons.remove);
+    } else {
+      return const Icon(Icons.add);
     }
   }
 }

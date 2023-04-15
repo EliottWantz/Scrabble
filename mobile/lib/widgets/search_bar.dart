@@ -4,15 +4,18 @@ import 'package:get/get.dart';
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
 
 class SearchBar extends StatelessWidget {
-  SearchBar(RxString input, {
+  SearchBar(RxString input, String mode, {
     Key? key,
     // required this.text,
     // required this.onChanged,
     // required this.hintText,
   }) : _input = input,
+        _mode = mode,
         super(key: key);
 
   final RxString _input;
+
+  final String? _mode;
   // final String text;
   // final ValueChanged<String> onChanged;
   // final String hintText;
@@ -43,7 +46,7 @@ class SearchBar extends StatelessWidget {
             messageInputFocusNode.requestFocus();
           },
           decoration: InputDecoration(
-              hintText: "Recherchez vos amis",
+              hintText: _buildHintText(),
               suffixIcon: _input.value == ''
               ? IconButton(
                   onPressed: () {},
@@ -63,5 +66,13 @@ class SearchBar extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _buildHintText() {
+    if (_mode == 'rooms') {
+      return "Recherchez les serveurs";
+    } else {
+      return "Recherchez vos amis";
+    }
   }
 }

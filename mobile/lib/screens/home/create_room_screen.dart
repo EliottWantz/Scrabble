@@ -53,7 +53,7 @@ class CreateRoomScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                    SearchBar(searchInput),
+                    SearchBar(searchInput, 'friends'),
                     Expanded(
                         child: Obx(() => UserList(
                             mode: 'checkList',

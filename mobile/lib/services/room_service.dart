@@ -1,6 +1,7 @@
 import 'dart:core';
 import 'dart:math';
 
+import 'package:client_leger/models/chat_room.dart';
 import 'package:get/get.dart';
 
 import '../models/chat_message_payload.dart';
@@ -15,6 +16,8 @@ class RoomService extends GetxService {
 
   var currentRoomId = 'global';
   final currentFloatingChatRoomId = Rxn<String>();
+
+  final RxList<ChatRoom> listedChatRooms = <ChatRoom>[].obs;
 
   List<dynamic> newRoomUserIds = [];
 
@@ -73,6 +76,32 @@ class RoomService extends GetxService {
     return roomIds;
   }
 
+  String getRoomIdByRoomName(String roomName) {
+    String roomId = '';
+    roomsMap.forEach((roomId, room) {
+      if (room.roomName == roomName) {
+        roomId = room.roomId;
+      }
+    });
+    return roomId;
+  }
+
+  List<String> getListedChatRoomNames() {
+    List<String> chatRoomNames = [];
+    listedChatRooms.forEach((room) {
+      chatRoomNames.add(room.name);
+    });
+    return chatRoomNames;
+  }
+
+  List<String> getListedChatRoomIds() {
+    List<String> chatRoomIds = [];
+    listedChatRooms.forEach((room) {
+      chatRoomIds.add(room.id);
+    });
+    return chatRoomIds;
+  }
+
   Room getCurrentRoom() {
     return roomsMap[currentRoomId]!;
   }
@@ -84,6 +113,24 @@ class RoomService extends GetxService {
   Room getRoom(String roomId) {
     Room room = roomsMap[roomId]!;
     return room;
+  }
+
+  String getListedChatRoomNameById(String chatRoomId) {
+    for (ChatRoom chatRoom in listedChatRooms) {
+      if (chatRoom.id == chatRoomId) {
+        return chatRoom.name;
+      }
+    }
+    return '';
+  }
+
+  String getListedChatRoomIdByName(String chatRoomName) {
+    for (ChatRoom chatRoom in listedChatRooms) {
+      if (chatRoom.name == chatRoomName) {
+        return chatRoom.id;
+      }
+    }
+    return '';
   }
 
   List<ChatMessagePayload> getRoomMessagesPayloads(String roomId) {
@@ -106,5 +153,15 @@ class RoomService extends GetxService {
 
   void removeRoom(String roomId) {
     roomsMap.value!.remove(roomId);
+  }
+
+  bool roomMapContains(String roomName) {
+    bool roomMapContainsRoomName = false;
+    roomsMap.forEach((roomId, room) {
+      if (room.roomName == roomName) {
+        roomMapContainsRoomName = true;
+      }
+    });
+    return roomMapContainsRoomName;
   }
 }
