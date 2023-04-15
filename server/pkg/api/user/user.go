@@ -14,4 +14,5 @@ type User struct {
 	Friends          []string    `bson:"friends" json:"friends"`
 	PendingRequests  []string    `bson:"pendingRequests" json:"pendingRequests"`
 	Summary          Summary     `bson:"summary" json:"summary,omitempty"`
+	IsConnected      bool        `bson:"isConnected" json:"isConnected"`
 }
