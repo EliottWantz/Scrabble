@@ -1,5 +1,7 @@
 import { Component } from "@angular/core";
 import { FormBuilder } from "@angular/forms";
+import { MatDialog } from "@angular/material/dialog";
+import { NewDmRoomComponent } from "@app/components/new-dm-room/new-dm-room.component";
 import { CommunicationService } from "@app/services/communication/communication.service";
 import { RoomService } from "@app/services/room/room.service";
 import { SocialService } from "@app/services/social/social.service";
@@ -9,6 +11,7 @@ import { UserService } from "@app/services/user/user.service";
 import { WebSocketService } from "@app/services/web-socket/web-socket.service";
 import { ClientEvent } from "@app/utils/events/client-events";
 import { CreateDMRoomPayload } from "@app/utils/interfaces/packet";
+import { Room } from "@app/utils/interfaces/room";
 import { User } from "@app/utils/interfaces/user";
 import { BehaviorSubject } from "rxjs";
 
@@ -23,9 +26,10 @@ export class SocialPageComponent {
   chatFriend = false;
   friendUsername = '';
   addFriendErrorMessage = '';
+  allFriendUserNameSearch = "";
 
-  constructor(private fb: FormBuilder, private userService: UserService, private socketService: WebSocketService, private communicationService: CommunicationService, private storageService: StorageService,
-    private roomService: RoomService, public socialService: SocialService) {
+  constructor(private fb: FormBuilder, private userService: UserService, private socketService: WebSocketService, private communicationService: CommunicationService, public dialog: MatDialog,
+    public roomService: RoomService, public socialService: SocialService) {
     this.user = this.userService.subjectUser;
     this.inDM = false;
   }
@@ -52,7 +56,7 @@ export class SocialPageComponent {
       }
     }
 
-    const friend = this.socialService.onlineFriends$.value[index];
+    const friend = this.socialService.friendsList$.value[index];
     if (friend) {
       this.friendUsername = friend.username;
       const payload: CreateDMRoomPayload = {
@@ -66,9 +70,32 @@ export class SocialPageComponent {
   }
 
   getUsernameFriend(index: number): string {
-    return this.socialService.onlineFriends$.value[index].username;
+    return this.socialService.friendsList$.value[index].username;
   }
 
+  onSearChangeFriend(input: string): void {
+    this.socialService.friendsList$.value.filter((user) => { return user.username.toLowerCase().includes(input.toLowerCase()) })
+  }
+
+  userOnline(username: string): boolean {
+    if (!this.socialService.onlineFriends$.value) {
+      return false;
+    }
+    return this.socialService.onlineFriends$.value.some((user) => { return user.username == username });
+  }
+
+  createNewDmRoom() {
+    const dialogRef = this.dialog.open(NewDmRoomComponent, {
+      width: "40vw",
+      height: "30vh",
+      data: { username: this.userService.currentUserValue.username }
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.roomService.changeRoom(result);
+      }
+    });
+  }
 
   isLoggedIn(): boolean {
     return this.userService.isLoggedIn;
@@ -81,5 +108,21 @@ export class SocialPageComponent {
     for (let i = 0; i < friends.length; i++) {
       friends[i].setAttribute("style", "");
     }
+  }
+
+  findRoomWithoutFriend(): Room[] {
+    const salles = this.roomService.listJoinedChatRooms.value.filter((salle) => {
+      const listeAmis = this.socialService.friendsList$.value;
+      const amiTrouveDansSalle = salle.userIds.find((id) => {
+        return listeAmis.find((ami) => ami.id == id);
+      });
+      // Ici, nous avons changé la condition pour retourner true si aucun ami n'est trouvé.
+      if (!amiTrouveDansSalle) {
+        return true;
+      }
+      return false;
+    });
+    console.log(salles);
+    return salles;
   }
 }

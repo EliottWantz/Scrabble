@@ -66,17 +66,17 @@
     <div class="nav">
         <div class="nav-text" (click)="selectNavButton(0)">
             <mat-icon class="icon">people</mat-icon>
-            <span> {{'social-component.all' | translate}} </span>
+            <span *ngIf="currentIdx === 0"> {{'social-component.all' | translate}} </span>
         </div>
         <div class="nav-text" (click)="selectNavButton(1)">
             <mat-icon class="icon" id="check">check</mat-icon>
-            <span>{{'social-component.waiting' | translate}}</span>
+            <span *ngIf="currentIdx === 1">{{'social-component.waiting' | translate}}</span>
         </div>
         <div class="nav-text" (click)="selectNavButton(2)">
             <mat-icon class="icon">
                 person_add
             </mat-icon>
-            <span>{{'social-component.add' | translate}} </span>
+            <span *ngIf="currentIdx === 2">{{'social-component.add' | translate}} </span>
         </div>
     </div>
 </div>

@@ -1,14 +1,12 @@
 import { AfterViewInit, Component, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
 import { CommunicationService } from "@app/services/communication/communication.service";
-import { RoomService } from "@app/services/room/room.service";
 import { SocialService } from "@app/services/social/social.service";
 import { StorageService } from "@app/services/storage/storage.service";
 import { UserService } from "@app/services/user/user.service";
 import { WebSocketService } from "@app/services/web-socket/web-socket.service";
 import { User } from "@app/utils/interfaces/user";
 import { BehaviorSubject } from "rxjs";
-import { MatBadgeModule } from '@angular/material/badge';
 
 @Component({
   selector: "app-social",
@@ -24,6 +22,7 @@ export class SocialComponent implements AfterViewInit, OnInit {
   listFriendsDisplay: User[];
   listOnlineFriendsDisplay: User[];
   usernameInput: any;
+  currentIdx = 0;
 
   constructor(private userService: UserService, private websocketService: WebSocketService, private communicationService: CommunicationService,
     private storageService: StorageService, public socialService: SocialService, private router: Router) {
@@ -54,6 +53,7 @@ export class SocialComponent implements AfterViewInit, OnInit {
 
   ngAfterViewInit(): void {
     const index = this.socialService.screens.indexOf(this.socialService.activeScreen);
+    this.socialService.updatedFriendsList();
     const navButtons = document.getElementsByClassName('nav-text');
     navButtons[index].classList.add('active');
   }
@@ -65,6 +65,7 @@ export class SocialComponent implements AfterViewInit, OnInit {
   }
 
   selectNavButton(index: number): void {
+    this.currentIdx = index;
     this.socialService.activeScreen = this.socialService.screens[index];
     this.updateNav(index);
     switch (index) {
@@ -87,8 +88,6 @@ export class SocialComponent implements AfterViewInit, OnInit {
         break;
     }
   }
-
-
 
   getScreen(): string {
     return this.socialService.activeScreen;
@@ -127,6 +126,7 @@ export class SocialComponent implements AfterViewInit, OnInit {
     this.communicationService.requestAcceptFriendRequest(this.userService.currentUserValue.id, id).subscribe(() => {
       this.socialService.updatedOnlineFriends();
       this.socialService.updatedPendingFriendRequest();
+      this.socialService.updatedFriendsList();
     });
   }
 
