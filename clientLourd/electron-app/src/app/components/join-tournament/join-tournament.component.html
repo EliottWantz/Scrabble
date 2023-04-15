@@ -43,15 +43,15 @@
         </div>
     </mat-grid-list>
     <div *ngIf="tournamentToObserve">
-        <div *ngFor="let players of tournamentToObserve.games[0].userIds">
+        <div *ngFor="let players of tournamentToObserve.poolGames[0].userIds">
             <div>{{players}}</div>
-            <button (click)="joinGameAsObserver(tournamentToObserve.games[0])" class="join-button" disabled="{{tournamentToObserve.games[0].winnerId}}"></button>
+            <button (click)="joinGameAsObserver(tournamentToObserve.poolGames[0])" class="join-button" disabled="{{tournamentToObserve.poolGames[0].winnerId}}"></button>
         </div>
-        <div *ngFor="let players of tournamentToObserve.games[1].userIds">
+        <div *ngFor="let players of tournamentToObserve.poolGames[1].userIds">
             <div>{{players}}</div>
-            <button (click)="joinGameAsObserver(tournamentToObserve.games[1])" class="join-button" disabled="{{tournamentToObserve.games[1].winnerId}}"></button>
+            <button (click)="joinGameAsObserver(tournamentToObserve.poolGames[1])" class="join-button" disabled="{{tournamentToObserve.poolGames[1].winnerId}}"></button>
         </div>
-        <div *ngIf="tournamentToObserve.games[1].winnerId && tournamentToObserve.games[0].winnerId">
+        <div *ngIf="tournamentToObserve.poolGames[1].winnerId && tournamentToObserve.poolGames[0].winnerId">
             <div *ngFor="let players of tournamentToObserve.finale!.userIds">
                 <div>{{players}}</div>
                 <button (click)="joinGameAsObserver(tournamentToObserve.finale!)" class="join-button"></button>

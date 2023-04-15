@@ -1,0 +1,8 @@
+<mat-dialog-content id="container">
+    <p *ngIf="data.isWinner">Félicitation</p>
+    <p *ngIf="!data.isWinner">Tournoi est fini</p>
+  <button mat-flat-button color="primary" (click)="close()">
+    <mat-icon>input</mat-icon>
+    retourner menu principal
+  </button>
+</mat-dialog-content>

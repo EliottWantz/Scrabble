@@ -66,6 +66,9 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { CreateTournamentComponent } from './components/create-tournament/create-tournament.component';
 import { JoinTournamentComponent } from './components/join-tournament/join-tournament.component';
 import { JoinPrivateTournamentComponent } from './components/join-private-tournament/join-private-tournament.component';
+import { GameOverComponent } from '@app/components/game-over/game-over.component';
+import { GameOverTournamentComponent } from '@app/components/game-over-tournament/game-over-tournament.component';
+import { TournamentOverComponent } from '@app/components/tournament-over/tournament-over.component';
 
 @NgModule({
   declarations: [
@@ -105,7 +108,10 @@ import { JoinPrivateTournamentComponent } from './components/join-private-tourna
     AdviceComponent,
     ChooseLetterComponent,
     DirectionComponent,
-    InviteComponent
+    InviteComponent,
+    GameOverComponent,
+    GameOverTournamentComponent,
+    TournamentOverComponent
   ],
   imports: [
     BrowserModule,

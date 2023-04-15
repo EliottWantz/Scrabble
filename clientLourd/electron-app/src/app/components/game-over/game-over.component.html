@@ -1,0 +1,19 @@
+<mat-dialog-content id="container">
+    <div *ngIf="!data.isObserving">
+        <p *ngIf="data.isWinner">{{"game-page-tournament.won" | translate}}</p>
+        <p *ngIf="!data.isWinner">{{"game-page-tournament.lost" | translate}}</p>
+        <button mat-flat-button color="primary" (click)="close()">
+            <mat-icon>input</mat-icon>
+            Back to menu
+        </button>
+    </div>
+        
+
+        <div *ngIf="data.isObserving">
+            <p>La partie est finie</p>
+            <button mat-flat-button color="primary" (click)="close()">
+                <mat-icon>input</mat-icon>
+                Retourner menu principal
+            </button>
+        </div>
+</mat-dialog-content>

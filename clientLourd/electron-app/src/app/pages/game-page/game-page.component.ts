@@ -13,6 +13,8 @@ import { ThemeService } from "@app/services/theme/theme.service";
 import { MatBottomSheet } from "@angular/material/bottom-sheet";
 import { AdviceComponent } from "@app/components/advice/advice.component";
 import { Tournament } from "@app/utils/interfaces/game/tournament";
+import { GameOverTournamentComponent } from "@app/components/game-over-tournament/game-over-tournament.component";
+import { MatDialog } from "@angular/material/dialog";
 
 @Component({
     selector: "app-game-page",
@@ -51,7 +53,7 @@ export class GamePageComponent implements OnInit {
                 this.tournamentWinner = String(tournamentWinner);
             }
         })
-        this.gameService.tournament.subscribe((tournament) => {
+        /*this.gameService.tournament.subscribe((tournament) => {
             if(!tournament){return}
             else if(tournament?.games[0].id===this.gameService.game.value?.id)
             {
@@ -59,8 +61,19 @@ export class GamePageComponent implements OnInit {
                     const loser = tournament?.games[0].userIds.splice(tournament?.games[0].userIds.indexOf(tournament.games[0].winnerId), 1)[0];
                     if(loser === this.userService.subjectUser.value.id)
                     {
-                        this.isLoser = true;
+                            this.dialog.open(GameOverTournamentComponent, {width: '80%',
+                            minHeight: '70vh',
+                            height : '50vh',
+                            disableClose: true,
+                            data: {isWinner: false}});
+                        //this.isLoser = true;
                         console.log("bruh");
+                    } else if (this.userService.subjectUser.value.id === tournament?.games[0].winnerId) {
+                        this.dialog.open(GameOverTournamentComponent, {width: '80%',
+                            minHeight: '70vh',
+                            height : '50vh',
+                            disableClose: true,
+                            data: {isWinner: true}});
                     }
                 }
             }
@@ -69,12 +82,16 @@ export class GamePageComponent implements OnInit {
                     const loser = tournament?.games[1].userIds.splice(tournament?.games[1].userIds.indexOf(tournament.games[1].winnerId), 1)[0];
                     if(loser === this.userService.subjectUser.value.id)
                     {
-                        this.isLoser = true;
+                        this.dialog.open(GameOverTournamentComponent, {width: '80%',
+                            minHeight: '70vh',
+                            height : '50vh',
+                            disableClose: true});
+                        //this.isLoser = true;
                         console.log("bruh");
                     }
                 }
             }
-        })
+        })*/
         this.themeService.theme.subscribe((theme) => {
             if (theme == 'dark') {
               this.lightDarkToggleIcon = this.darkThemeIcon;
@@ -150,32 +167,6 @@ export class GamePageComponent implements OnInit {
             this.gameService.tournament.next(undefined);
             this.gameService.scrabbleGame.next(undefined);
             this.router.navigate(["/home"]);
-        }
-    }
-
-    joinTournamentAsObserver(): void {
-        if(this.gameService.tournament.value){
-            const payload: JoinTournamentAsObserverPayload = {
-                tournamentId: this.gameService.tournament.value?.id
-            };
-            this.socketService.send("join-tournament-as-observateur", payload);
-            this.gameService.isObserving = true;
-            if(this.gameService.tournament.value?.games[0].winnerId && this.gameService.tournament.value?.games[1].winnerId)
-            {
-                const payload: JoinGameAsObserverPayload = {
-                    gameId: this.gameService.tournament.value?.finale?.id as string,
-                    password: ""
-                }
-            }
-            else{
-                const payload: JoinGameAsObserverPayload = {
-                    gameId: this.gameService.tournament.value?.games.splice(this.gameService.tournament.value?.games.indexOf(this.gameService.game.value as Game), 1)[0].id as string,
-                    password: ""
-                }
-            }
-            this.socketService.send("join-game-as-observateur", payload);
-            this.gameService.isObserving = true;
-            this.router.navigate(["/gameObserve"]);
         }
     }
 

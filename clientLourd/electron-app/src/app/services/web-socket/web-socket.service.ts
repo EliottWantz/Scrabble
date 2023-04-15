@@ -308,7 +308,8 @@ export class WebSocketService {
         this.gameService.isObserving = false;
 
         // check if tournament
-        this.router.navigate(['/home']);
+        if (this.gameService.tournament.value === undefined)
+          this.router.navigate(['/home']);
         break;
       }
 
@@ -321,6 +322,7 @@ export class WebSocketService {
         this.gameService.isObserving = false;
 
         // check if tournament
+        this.gameService.hasWon = false;
         this.router.navigate(['/home']);
         break;
       }
@@ -385,6 +387,7 @@ export class WebSocketService {
         const payloadGameOver = packet.payload as GameOverPayload;
         this.gameService.gameOverPopupTournament(payloadGameOver.winnerId);
         this.gameService.tournament.next(undefined);
+        this.gameService.hasWon = false;
         break;
       }
 
@@ -502,6 +505,8 @@ export class WebSocketService {
         const payload = packet.payload as JoinedGameAsObserverPayload;
         this.gameService.game.next(payload.game);
         this.gameService.scrabbleGame.next(payload.gameUpdate);
+        this.gameService.isObserving = true;
+        this.router.navigate(["/gameObserve"]);
         break;
       }
 

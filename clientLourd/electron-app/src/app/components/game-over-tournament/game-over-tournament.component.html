@@ -1,0 +1,39 @@
+<mat-dialog-content id="container">
+    <div *ngIf="!data.isWinner && !data.isObserving">
+        <p>{{"game-page-tournament.lost" | translate}}</p>
+      <button mat-flat-button color="primary" (click)="leaveTournament()">
+        <mat-icon>input</mat-icon>
+        {{'game-page.leave' | translate}}
+      </button>
+      <button mat-flat-button color="primary" (click)="joinTournamentAsObserver()">
+        <mat-icon>input</mat-icon>
+        {{'game-page-tournament.observe' | translate}}
+      </button>
+    </div>
+    <div *ngIf="data.isWinner && !data.isObserving">
+        <p>{{"game-page-tournament.won" | translate}}</p>
+        <button mat-flat-button color="primary" (click)="close()">
+            <mat-icon>input</mat-icon>
+            Great
+        </button>
+    </div>
+
+    <div *ngIf="data.isObserving && isTournamentOver()">
+        <p>La partie est terminé</p>
+      <button mat-flat-button color="primary" (click)="leaveTournament()">
+        <mat-icon>input</mat-icon>
+        retourner menu principal
+      </button>
+      <button mat-flat-button color="primary" (click)="joinTournamentAsObserver()">
+        <mat-icon>input</mat-icon>
+        observer
+      </button>
+    </div>
+    <div *ngIf="data.isObserving && !isTournamentOver()">
+        <p>La partie est finie</p>
+        <button mat-flat-button color="primary" (click)="close()">
+            <mat-icon>input</mat-icon>
+            Retourner menu principal
+        </button>
+    </div>
+</mat-dialog-content>

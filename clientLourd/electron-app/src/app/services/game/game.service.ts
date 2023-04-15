@@ -10,6 +10,11 @@ import { Tile } from "@app/utils/interfaces/game/tile";
 import { Tournament } from "@app/utils/interfaces/game/tournament";
 import { StorageService } from "@app/services/storage/storage.service";
 import { BehaviorSubject } from "rxjs";
+import { GameOverTournamentComponent } from "@app/components/game-over-tournament/game-over-tournament.component";
+import { UserService } from "@app/services/user/user.service";
+import { MatDialog } from "@angular/material/dialog";
+import { GameOverComponent } from "@app/components/game-over/game-over.component";
+import { TournamentOverComponent } from "@app/components/tournament-over/tournament-over.component";
 
 @Injectable({
     providedIn: 'root',
@@ -33,7 +38,9 @@ export class GameService {
     placedTiles = 0;
     oldGame!: ScrabbleGame;
     dragging = new BehaviorSubject<boolean>(false);
-    constructor(private router: Router, private _bottomSheet: MatBottomSheet, private _bottomSheetSpecialLetter: MatBottomSheet, private storageService: StorageService ){
+    hasWon = false;
+    constructor(private router: Router, private _bottomSheet: MatBottomSheet, private _bottomSheetSpecialLetter: MatBottomSheet, private storageService: StorageService,
+        private userService: UserService, public dialog: MatDialog){
         this.scrabbleGame = new BehaviorSubject<ScrabbleGame | undefined>(undefined);
         this.game = new BehaviorSubject<Game | undefined>(undefined);
         this.tournament = new BehaviorSubject<Tournament | undefined>(undefined);
@@ -175,7 +182,59 @@ export class GameService {
     }
 
     gameOverPopup(winId : string){
-        let winner = undefined;
+        if (this.tournament.value) {
+            if (this.tournament.value.finale && this.game.value) {
+                if (this.game.value.id === this.tournament.value.finale.id) {
+                    if (winId === this.userService.currentUserValue.id) {
+                        this.dialog.open(TournamentOverComponent, {width: '80%',
+                                minHeight: '70vh',
+                                height : '50vh',
+                                disableClose: true,
+                                data: {isWinner: true}});
+                    } else {
+                        this.dialog.open(TournamentOverComponent, {width: '80%',
+                                minHeight: '70vh',
+                                height : '50vh',
+                                disableClose: true,
+                                data: {isWinner: false}});
+                    }
+                    return;
+                }
+            }
+            if (this.tournament.value.observerIds.indexOf(this.userService.currentUserValue.id) == -1 && this.game.value?.userIds.indexOf(this.userService.currentUserValue.id) == -1 && this.hasWon) {
+                                return;
+            }
+            
+            if (this.game.value && this.userService.currentUserValue.id === winId) {
+                this.hasWon = true;
+                this.dialog.open(GameOverTournamentComponent, {width: '80%',
+                                minHeight: '70vh',
+                                height : '50vh',
+                                disableClose: true,
+                                data: {isWinner: true, isObserving: this.isObserving, oldGameId: this.game.value.id}});
+            } else if (this.game.value) {
+                this.dialog.open(GameOverTournamentComponent, {width: '80%',
+                                minHeight: '70vh',
+                                height : '50vh',
+                                disableClose: true,
+                                data: {isWinner: false, isObserving: this.isObserving, oldGameId: this.game.value.id}});
+            }
+        } else {
+            if (this.game.value && this.userService.currentUserValue.id === winId) {
+                this.dialog.open(GameOverComponent, {width: '80%',
+                                minHeight: '70vh',
+                                height : '50vh',
+                                disableClose: true,
+                                data: {isWinner: true, isObserving: this.isObserving}});
+            } else {
+                this.dialog.open(GameOverComponent, {width: '80%',
+                                minHeight: '70vh',
+                                height : '50vh',
+                                disableClose: true,
+                                data: {isWinner: false, isObserving: this.isObserving}});
+            }
+        }
+        /*let winner = undefined;
         if(!this.scrabbleGame.value){
             return
         }
@@ -184,7 +243,7 @@ export class GameService {
                 winner = user.username
             }
         }
-        this.gameWinner.next(winner);
+        this.gameWinner.next(winner);*/
     }
 
     gameOverPopupTournament(winId : string){

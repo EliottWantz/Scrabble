@@ -124,7 +124,6 @@ export class JoinGameComponent implements OnInit {
                 this.webSocketService.send(event, payload);
                 this.gameService.isObserving = true;
                 this.close();
-                this.router.navigate(["/gameObserve"]);
             } else {
                 const payload: JoinGamePayload = {
                     gameId: game.id,

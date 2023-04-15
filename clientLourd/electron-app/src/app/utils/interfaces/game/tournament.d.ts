@@ -6,7 +6,9 @@ export interface Tournament {
     userIds: string[];
     isPrivate: boolean;
     winnerId: string;
-    games: Game[];
+    poolGames: Game[];
     finale: Game | undefined;
     observerIds: string[];
+    hasStarted: boolean;
+    isOver: boolean;
 }

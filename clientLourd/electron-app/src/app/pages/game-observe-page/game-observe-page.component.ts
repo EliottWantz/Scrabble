@@ -54,15 +54,15 @@ export class GameObservePageComponent implements OnInit {
             }
         });
         this.gameService.tournament.subscribe((tournament) => {
-            if(tournament?.games[0].id===this.gameService.game.value?.id)
+            if(tournament?.poolGames[0].id===this.gameService.game.value?.id)
             {
-                if(tournament?.games[0].winnerId){
+                if(tournament?.poolGames[0].winnerId){
                     this.isOver = true;
                     console.log("bruh");
                 }
             }
             else{
-                if(tournament?.games[1].winnerId){
+                if(tournament?.poolGames[1].winnerId){
                     this.isOver = true;
                     console.log("bruh");
                 }
@@ -87,7 +87,16 @@ export class GameObservePageComponent implements OnInit {
     }
 
     leaveGame(): void {
-        if (this.game.value) {
+        if (this.gameService.tournament.value) {
+            const payload: LeaveTournamentAsObserverPayload = {
+                tournamentId: this.gameService.tournament.value?.id
+            };
+            this.socketService.send("leave-tournament-as-observateur", payload);
+            this.gameService.game.next(undefined);
+            this.gameService.tournament.next(undefined);
+            this.gameService.scrabbleGame.next(undefined);
+            this.router.navigate(["/home"]);
+        } else if (this.game.value) {
             const payload: LeaveGamePayload = {
                 gameId: this.game.value?.id
             };
@@ -98,15 +107,15 @@ export class GameObservePageComponent implements OnInit {
         }
     }
 
-    joinOtherGameAsObserver(): void {
+    /*joinOtherGameAsObserver(): void {
         const payload: JoinGameAsObserverPayload = {
-            gameId: this.gameService.tournament.value?.games.splice(this.gameService.tournament.value?.games.indexOf(this.gameService.game.value as Game), 1)[0].id as string,
+            gameId: this.gameService.tournament.value?.poolGames.splice(this.gameService.tournament.value?.poolGames.indexOf(this.gameService.game.value as Game), 1)[0].id as string,
             password: ""
         }
         this.socketService.send("join-game-as-observateur", payload);
         this.gameService.isObserving = true;
         this.router.navigate(["/gameObserve"]);
-    }
+    }*/
 
     leaveTournament(): void {
         if(this.gameService.tournament.value){
