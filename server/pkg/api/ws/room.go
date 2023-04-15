@@ -363,14 +363,13 @@ func (r *Room) BroadcastLeaveGamePackets(c *Client, gID string) error {
 
 func (r *Room) BroadcastObserverLeaveGamePacket(c *Client, gID string) error {
 	{
-		p, err := NewUserLeftGamePacket(UserLeftGamePayload{
+		p, err := NewLeftGamePacket(LeftGamePayload{
 			GameID: gID,
-			UserID: c.UserId,
 		})
 		if err != nil {
 			return err
 		}
-		r.BroadcastSkipSelf(p, c.ID)
+		c.send(p)
 	}
 
 	return nil
@@ -400,10 +399,10 @@ func (r *Room) BroadcastJoinTournamentPackets(c *Client, t *game.Tournament) err
 	return c.Manager.BroadcastJoinableTournaments()
 }
 
-func (r *Room) BroadcastLeaveTournamentPackets(c *Client, gID string) error {
+func (r *Room) BroadcastLeaveTournamentPackets(c *Client, tID string) error {
 	{
 		p, err := NewUserLeftTournamentPacket(UserLeftTournamentPayload{
-			TournamentID: gID,
+			TournamentID: tID,
 			UserID:       c.UserId,
 		})
 		if err != nil {
@@ -413,7 +412,7 @@ func (r *Room) BroadcastLeaveTournamentPackets(c *Client, gID string) error {
 	}
 	{
 		p, err := NewLeftTournamentPacket(LeftTournamentPayload{
-			TournamentID: gID,
+			TournamentID: tID,
 		})
 		if err != nil {
 			return err
