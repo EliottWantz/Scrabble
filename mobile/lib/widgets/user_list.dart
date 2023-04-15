@@ -187,15 +187,15 @@ class UserList extends StatelessWidget {
       return Checkbox(
         checkColor: Colors.white,
         fillColor: MaterialStateProperty.resolveWith(getColor),
-        value: _itemsObs.value.contains(username),
+        value: _itemsObs.value.contains(_usersService.getUserId(username)),
         onChanged: (bool? value) {
-          if (_itemsObs.value.contains(username)) {
-            _itemsObs.remove(username);
+          if (_itemsObs.value.contains(_usersService.getUserId(username))) {
+            _itemsObs.remove(_usersService.getUserId(username));
             _roomService.newRoomUserIds.clear();
             _roomService.newRoomUserIds.addAll(_itemsObs.value);
             print(_roomService.newRoomUserIds);
           } else {
-            _itemsObs.add(username);
+            _itemsObs.add(_usersService.getUserId(username));
             _roomService.newRoomUserIds.clear();
             _roomService.newRoomUserIds.addAll(_itemsObs.value);
             print(_roomService.newRoomUserIds);

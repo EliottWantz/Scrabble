@@ -1,4 +1,5 @@
 import 'package:client_leger/controllers/create_room_controller.dart';
+import 'package:client_leger/services/room_service.dart';
 import 'package:client_leger/services/user_service.dart';
 import 'package:client_leger/services/websocket_service.dart';
 import 'package:client_leger/widgets/input_field.dart';
@@ -14,6 +15,7 @@ class CreateRoomScreen extends StatelessWidget {
 
   final UserService _userService = Get.find();
   final WebsocketService _websocketService = Get.find();
+  final RoomService roomService = Get.find();
 
   final GlobalKey<FormState> _newRoomFormKey = GlobalKey<FormState>();
 
@@ -62,7 +64,7 @@ class CreateRoomScreen extends StatelessWidget {
                     ElevatedButton.icon(
                       onPressed: () {
                         if (_newRoomFormKey.currentState!.validate()) {
-                          _websocketService.createRoom(newRoomController.text);
+                          _websocketService.createRoom(newRoomController.text, userIds: List<String>.from(roomService.newRoomUserIds));
                           newRoomController.text = '';
                         }
                       },
