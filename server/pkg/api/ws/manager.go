@@ -491,6 +491,9 @@ func (m *Manager) RemoveClientFromGame(c *Client, gID string) error {
 					continue
 				}
 			}
+			if err := m.BroadcastJoinableGames(); err != nil {
+				slog.Error("broadcast joinable games", err)
+			}
 			return m.BroadcastObservableGames()
 		} else {
 			// Remove the user from the game
