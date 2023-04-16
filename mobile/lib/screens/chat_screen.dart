@@ -104,8 +104,8 @@ class ChatScreen extends GetView<ChatController> {
                                                     .currentRoomMessages
                                                     .value![index]
                                                     .fromId)
-                                                ? controller
-                                                    .userService.user.value!.avatar.url
+                                                ? controller.userService.user
+                                                    .value!.avatar.url
                                                 : controller.usersService
                                                     .getUserById(controller
                                                         .roomService
@@ -208,7 +208,8 @@ class ChatScreen extends GetView<ChatController> {
                         );
                         if (gif != null) {
                           // _gif.value = gif;
-                          controller.messageController.text = gif.images.original!.url!;
+                          controller.messageController.text =
+                              gif.images.original!.url!;
                           controller.sendMessage();
                           messageInputFocusNode.requestFocus();
                         }
@@ -261,29 +262,15 @@ class ChatScreen extends GetView<ChatController> {
   }
 
   Widget _buildText(int index) {
-    if (controller.roomService.currentRoomMessages.value![index].message.startsWith('https://')) {
+    if (controller.roomService.currentRoomMessages.value![index].message
+        .startsWith('https://')) {
       return Image.network(
           controller.roomService.currentRoomMessages.value![index].message,
           headers: {'accept': 'image/*'});
     } else {
       return Text(
-        controller
-            .roomService
-            .currentRoomMessages
-            .value![index]
-            .message.startsWith('https://giphy.com/gifs')
-            ? controller
-            .roomService
-            .currentRoomMessages
-            .value![index]
-            .message
-            : controller
-            .roomService
-            .currentRoomMessages
-            .value![index]
-            .message,
-        style:
-        TextStyle(fontSize: 15),
+        controller.roomService.currentRoomMessages.value![index].message,
+        style: TextStyle(fontSize: 15),
       );
     }
   }

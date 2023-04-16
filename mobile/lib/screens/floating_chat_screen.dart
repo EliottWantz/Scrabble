@@ -116,14 +116,15 @@ class FloatingChatScreen extends GetView<ChatController> {
                                         // Text(
                                         //   controller.roomService.currentFloatingRoomMessages.value![index].from
                                         // ),
-                                        Text(
-                                          controller
-                                              .roomService
-                                              .currentFloatingRoomMessages
-                                              .value![index]
-                                              .message,
-                                          style: TextStyle(fontSize: 15),
-                                        )
+                                        _buildText(index),
+                                        // Text(
+                                        //   controller
+                                        //       .roomService
+                                        //       .currentFloatingRoomMessages
+                                        //       .value![index]
+                                        //       .message,
+                                        //   style: TextStyle(fontSize: 15),
+                                        // )
                                       ],
                                     ),
                                   ),
@@ -179,5 +180,18 @@ class FloatingChatScreen extends GetView<ChatController> {
           ),
           borderRadius: const BorderRadius.all(Radius.circular(25.0))),
     );
+  }
+
+  Widget _buildText(int index) {
+    if (controller.roomService.currentFloatingRoomMessages.value![index].message
+        .startsWith('https://')) {
+      return Image.network(
+          controller.roomService.currentFloatingRoomMessages.value![index].message,
+          headers: {'accept': 'image/*'});
+    } else {
+      return Text(controller.roomService.currentRoomMessages.value![index].message,
+        style: TextStyle(fontSize: 15),
+      );
+    }
   }
 }
