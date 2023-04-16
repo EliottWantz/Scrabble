@@ -172,5 +172,11 @@
 	"invite-component.password-required": "Veuillez entrer un mot de passe",
 	"invite-component.password-mismatch": "Mot de passe incorrect",
 	"invite-component.game-not-found": "La partie n'existe plus",
-	"waiting-room-page.friends": "Amis"
+	"waiting-room-page.friends": "Amis",
+	"sidebar.home": "PolyScrabble",
+	"sidebar.login": "Connexion",
+	"sidebar.register": "Inscription",
+	"sidebar.avatar": "Choix de l'avatar",
+	"sidebar.find-game": "Options de jeu",
+	"sidebar.find-tournament": "Options de tournoi"
 }
