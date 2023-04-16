@@ -14,13 +14,13 @@
           <div class="mat-icon-button">
             <mat-icon inline="true">add</mat-icon>
           </div>
-          <div class="text">create dms</div>
+          <div class="text">{{'social-page.create-group' | translate}}</div>
         </div>
 
         <div class="action" (click)="goToExplorePage()">
           <div class="mat-icon-button">
             <mat-icon >search</mat-icon>          </div>
-          <div class="text">explore</div>
+          <div class="text">{{'social-page.explore'| translate}}</div>
         </div>
 
         <div id="break">
@@ -29,6 +29,7 @@
         <div *ngFor="let canal of this.findRoomWithoutFriend(); let i = index" class="friends"
         (click)="chatFriendGroupPage(i)">
           <span class="canal-name">
+            <mat-icon matSuffix class="icon-canal" >group</mat-icon>
               {{canal.name}}
           </span>
 

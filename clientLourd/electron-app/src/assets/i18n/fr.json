@@ -95,6 +95,7 @@
   "profile-page.activity": "Activité de l'utilisateur",
   "profil-page.user-stats": "Statistiques de l'utilisateur",
   "profile-page.submit": "Enregistrer",
+  "profil-page.apply-changes": "Appliquer les changements",
   "profile-page.username": "Pseudonyme : ",
   "profile-page.seconds": " Seconde(s)",
   "profile-page.minutes": " Min",
@@ -170,5 +171,18 @@
   "rules-slider-page.exchange": "Échange",
   "rules-slider-page.hint": "Indice",
   "rules-slider-page.click": "Cliquer",
-  "rules-slider-page.finish": "Finir"
+  "rules-slider-page.finish": "Finir",
+  "social-component.see-friendStats": "Voir les statistiques de l'ami",
+  "social-page.create-group": "Créer un groupe chat",
+  "social-page.explore": "Explorer des serveurs",
+  "explore-component.join": "Rejoindre",
+  "explore-component.leave": "Quitter",
+  "explore-component.join-public-chanel": "Rejoindre un canal public",
+  "explore-component.search-canal": "Rechercher un canal",
+  "new-dm-room-component.create-group-chat": "Créer un groupe chat",
+  "new-dm-room-component.group-chat-name": "Nom du groupe chat",
+  "new-dm-room-component.add-friend": "Ajouter un ami",
+  "new-dm-room-component.add-to-group": "Ajouter au groupe",
+  "new-dm-room-component.added-friends": "Amis ajoutés: ",
+  "new-dm-room-component.remove-friend": "Retirer l'ami"
 }

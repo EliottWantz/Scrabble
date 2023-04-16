@@ -1,11 +1,11 @@
 <div class="container">
-    <h1>Join a Public Channel</h1>
+    <h1>{{'explore-component.join-public-chanel'| translate}}</h1>
     <div class="form">
         <form>
             <mat-form-field appearance="outline">
                 <mat-icon matSuffix>search</mat-icon>
-                <mat-label for="username">{{'social-component.search-friend' | translate}}</mat-label>
-                <input #usernameInput matInput placeholder="{{'social-component.search-friend' | translate}}"
+                <mat-label for="username">{{'explore-component.search-canal' | translate}}</mat-label>
+                <input #usernameInput matInput placeholder="{{'explore-component.search-canal' | translate}}"
                     (input)="searchInput = usernameInput.value">
             </mat-form-field>
         </form>
@@ -15,10 +15,10 @@
                     <p>{{chatroom.name}}</p>
                     <div>
                         <button *ngIf="!isJoined(i)" type="button" class="button-join" (click)="this.joinRoom(chatroom)">
-                            <mat-icon>add</mat-icon> Join
+                            <mat-icon>add</mat-icon> {{'explore-component.join' | translate}} 
                         </button>
                         <button *ngIf="isJoined(i)" type="button" class="button-leave" (click)="this.leaveRoom(chatroom)">
-                            <mat-icon>minus</mat-icon>Leave
+                            <mat-icon>minimize</mat-icon> {{'explore-component.leave' | translate}}
                         </button>
                     </div>
                 </div>

@@ -28,13 +28,16 @@ mat-icon {
   align-self: center;
 }
 
-.canal-name{
+.canal-name {
   display: flex;
-  justify-content: center;
+  align-items: center; 
+  justify-content: flex-start; 
   color: white;
   align-self: center;
   justify-self: center;
+  width: 100%; 
 }
+
 
 .action {
   margin-top: 1vh;
@@ -183,3 +186,10 @@ input::placeholder {
   background-color: rgba(255, 255, 255, 0.8);
 }
 
+.icon-canal {
+  font-size: 1vh;
+  color: #888888;
+  margin-left: 1vh;
+  margin-right: 1vh; 
+  align-self: center;
+}
