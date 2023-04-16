@@ -174,7 +174,7 @@ export class ChatBoxButtonComponent implements AfterViewInit {
   }
 
   containsGifURL(message: string): boolean {
-    if ((message.includes('http://') || message.includes('https://')) && message.endsWith('.gif')) {
+    if (((message.includes('http://') || message.includes('https://')) && message.endsWith('.gif')) || message.includes("giphy.com")) {
       return true;
     }
     return false
@@ -185,7 +185,7 @@ export class ChatBoxButtonComponent implements AfterViewInit {
     let messageNoUrl = "";
     let gif = "";
     for (const word of words) {
-      if ((word.includes('http://') || word.includes('https://')) && message[message.length - 1] == 'f' && message[message.length - 2] == 'i' && message[message.length - 3] == 'g') {
+      if (((word.includes('http://') || word.includes('https://')) && message[message.length - 1] == 'f' && message[message.length - 2] == 'i' && message[message.length - 3] == 'g') || word.includes("giphy.com")) {
         gif = word;
       } else {
         messageNoUrl += word + " ";
