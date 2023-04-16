@@ -1,5 +1,14 @@
 # Scrabble
 
+## Run the application
+
+### From pre-built binary
+
+```bash
+docker compose up -d
+./out
+```
+
 ## Development
 
 ### Install taskfile
@@ -22,7 +31,7 @@ https://watchexec.github.io/
 task dev
 ```
 
-### Start mongodb locally
+### Start mongodb locally using Docker
 
 ```bash
 task mongo:up

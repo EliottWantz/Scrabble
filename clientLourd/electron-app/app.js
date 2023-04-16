@@ -93,3 +93,9 @@ ipcMain.on("request-user-data", (event, data) => {
   if (chatWindow == null) return;
   chatWindow.webContents.send("user-data", userData);
 });
+
+ipcMain.on("logout", (event, data) => {
+  if (chatWindow) {
+    chatWindow.destroy();
+  }
+});

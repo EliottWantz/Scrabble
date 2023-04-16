@@ -176,19 +176,6 @@ export class ChatBoxComponent implements AfterViewInit {
     return [messageNoUrl, gif];
   }
 
-  createNewDmRoom() {
-    const dialogRef = this.dialog.open(NewDmRoomComponent, {
-      width: "40vw",
-      height: "30vh",
-      data: { username: this.userService.currentUserValue.username }
-    });
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.roomService.changeRoom(result);
-      }
-    });
-  }
-
   private subscribeToRoom(): void {
     this.roomSubscription = this.room$.subscribe(() => {
       this.currentRoomId = this.room$.value.id;

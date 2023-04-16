@@ -3,12 +3,13 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 97vh;
+    height: 100vh;
     width: 100%;
 }
 
 .nav {
     position: sticky;
+    min-height: 10vh;
     width: 100%;
     justify-content: space-evenly;
     border-top: 1px solid #999999;

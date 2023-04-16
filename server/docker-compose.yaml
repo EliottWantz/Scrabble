@@ -1,4 +1,4 @@
-name: LOG3900-MongoDB
+name: log3900-mongodb
 
 services:
   mongo:

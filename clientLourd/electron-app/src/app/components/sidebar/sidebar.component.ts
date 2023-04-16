@@ -90,9 +90,6 @@ export class SidebarComponent implements OnInit {
         this.lightDarkToggleIcon = this.lightThemeIcon;
       }
     });
-    /*this.user.subscribe((user) => {
-      this.badgeContent = user.pendingRequests.length;
-    });*/
   }
 
   public doToggleLightDark() {
@@ -110,8 +107,9 @@ export class SidebarComponent implements OnInit {
   logout(): void {
     this.router.navigate(['/home']);
     this.authService.logout();
-    setTimeout(()=>{
+    setTimeout(() => {
       window.location.reload();
+      electron.ipcRenderer.send('logout');
     }, 100);
   }
 
@@ -127,7 +125,7 @@ export class SidebarComponent implements OnInit {
     if (this.isInGameLobby() && this.gameService.game.value) {
       const payload: LeaveGamePayload = {
         gameId: this.gameService.game.value.id
-      } 
+      }
       this.webSocketService.send("leave-game", payload);
       this.gameService.game.next(undefined);
     }

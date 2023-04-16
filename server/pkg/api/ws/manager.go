@@ -55,7 +55,7 @@ func (m *Manager) Accept(cID string) fiber.Handler {
 		clients := m.getClientsByUserID(cID)
 		wsID := cID + "#1"
 		if len(clients) > 0 {
-			wsID = cID + "#" + fmt.Sprint(len(clients)+1)
+			wsID = cID + "#2"
 		}
 		c := NewClient(conn, wsID, cID, m)
 		err := m.AddClient(c)
@@ -312,12 +312,17 @@ func (m *Manager) RemoveClient(c *Client) error {
 	if err := m.UserSvc.AddNetworkingLog(user, "Logout", time.Now().UnixMilli()); err != nil {
 		slog.Error("failed to add networking log", err)
 	}
-	m.logger.Info(
-		"client disconnected",
-		"ws_id", c.ID,
-		"user_id", c.UserId,
-		"total_rooms", m.Rooms.Len(),
-	)
+
+	var otherWsClient *Client
+	clients := m.getClientsByUserID(c.UserId)
+	if len(clients) > 1 {
+		wsID := c.UserId + "#2"
+		otherWsClient, err = m.GetClientByWsID(wsID)
+		if err != nil {
+			slog.Error("failed to get other ws client", err)
+			otherWsClient = nil
+		}
+	}
 
 	for _, chatRoomID := range user.JoinedChatRooms {
 		r, err := m.GetRoom(chatRoomID)
@@ -325,9 +330,16 @@ func (m *Manager) RemoveClient(c *Client) error {
 			slog.Error("get room", err)
 			continue
 		}
-		r.Clients.Del(c.ID)
-		r.logger.Info("client removed from room", "client", c.ID)
-
+		if err := r.RemoveClient(c.ID); err != nil {
+			slog.Error("removeClient from room", err)
+			continue
+		}
+		if otherWsClient != nil {
+			if err := r.RemoveClient(otherWsClient.ID); err != nil {
+				slog.Error("removeClient from room", err)
+				continue
+			}
+		}
 		userLeftRoomPacket, err := NewUserLeftRoomPacket(UserLeftRoomPayload{
 			RoomID: r.ID,
 			UserID: c.UserId,
@@ -343,9 +355,16 @@ func (m *Manager) RemoveClient(c *Client) error {
 			slog.Error("get room", err)
 			continue
 		}
-		r.Clients.Del(c.ID)
-		r.logger.Info("client removed from room", "client", c.ID)
-
+		if otherWsClient != nil {
+			if err := r.RemoveClient(otherWsClient.ID); err != nil {
+				slog.Error("removeClient from room", err)
+				continue
+			}
+		}
+		if err := r.RemoveClient(c.ID); err != nil {
+			slog.Error("removeClient from room", err)
+			continue
+		}
 		userLeftDMRoomPacket, err := NewUserLeftDMRoomPacket(UserLeftDMRoomPayload{
 			RoomID: r.ID,
 			UserID: c.UserId,
@@ -354,6 +373,11 @@ func (m *Manager) RemoveClient(c *Client) error {
 			return fiber.NewError(fiber.StatusInternalServerError, "failed to create packet: "+err.Error())
 		}
 		r.BroadcastSkipSelf(userLeftDMRoomPacket, c.ID)
+	}
+	if otherWsClient != nil {
+		if err := m.GlobalRoom.RemoveClient(otherWsClient.ID); err != nil {
+			slog.Error("removeClient", err)
+		}
 	}
 	if err := m.GlobalRoom.RemoveClient(c.ID); err != nil {
 		slog.Error("removeClient from global room", err)
@@ -369,20 +393,41 @@ func (m *Manager) RemoveClient(c *Client) error {
 		m.GlobalRoom.BroadcastSkipSelf(userLeftGLobalRoomPacket, c.ID)
 	}
 	if user.JoinedGame != "" {
+		if otherWsClient != nil {
+			if err := m.RemoveClientFromGame(otherWsClient, user.JoinedGame); err != nil {
+				slog.Error("removeClient from game", err)
+			}
+		}
 		if err := m.RemoveClientFromGame(c, user.JoinedGame); err != nil {
 			slog.Error("removeClient from game", err)
 		}
 	}
 	if user.JoinedTournament != "" {
+		if otherWsClient != nil {
+			if err := m.RemoveClientFromTournament(otherWsClient, user.JoinedTournament); err != nil {
+				slog.Error("removeClient from tournament", err)
+			}
+		}
 		if err := m.RemoveClientFromTournament(c, user.JoinedTournament); err != nil {
 			slog.Error("removeClient from tournament", err)
 		}
 	}
 
-	if err := c.Conn.Close(); err != nil {
-		slog.Error("close connection", err)
+	if c.Conn != nil {
+		if err := c.Conn.Close(); err != nil {
+			slog.Error("close connection #1", err)
+		}
 	}
+	if otherWsClient != nil && otherWsClient.Conn != nil {
+		if err := otherWsClient.Conn.Close(); err != nil {
+			slog.Error("close connection #2", err)
+		}
+	}
+
 	m.Clients.Del(c.ID)
+	if otherWsClient != nil {
+		m.Clients.Del(otherWsClient.ID)
+	}
 
 	{
 		// List all users online
@@ -396,6 +441,13 @@ func (m *Manager) RemoveClient(c *Client) error {
 		}
 		m.Broadcast(p)
 	}
+
+	m.logger.Info(
+		"client disconnected",
+		"ws_id", c.ID,
+		"user_id", c.UserId,
+		"total_rooms", m.Rooms.Len(),
+	)
 
 	return nil
 }
@@ -562,7 +614,7 @@ func (m *Manager) RemoveClientFromTournament(c *Client, tID string) error {
 		}
 
 		var winnerID string
-		if c.ID == g.UserIDs[0] {
+		if c.UserId == g.UserIDs[0] {
 			winnerID = g.UserIDs[1]
 		} else {
 			winnerID = g.UserIDs[0]
@@ -776,8 +828,10 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 		return err
 	}
 
-	winnerID := g.ScrabbleGame.Winner().ID
-	g.WinnerID = winnerID
+	if g.WinnerID == "" {
+		winnerID := g.ScrabbleGame.Winner().ID
+		g.WinnerID = winnerID
+	}
 
 	gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
 		Game: makeGameUpdatePayload(g),
@@ -788,7 +842,7 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 	gameRoom.Broadcast(gamePacket)
 
 	gameOverPacket, err := NewGameOverPacket(GameOverPayload{
-		WinnerID: winnerID,
+		WinnerID: g.WinnerID,
 	})
 	if err != nil {
 		return err
@@ -796,16 +850,48 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 
 	gameRoom.Broadcast(gameOverPacket)
 
+	// Make all players leave the game
 	for _, p := range g.ScrabbleGame.Players {
 		u, err := m.UserSvc.GetUser(p.ID)
 		if err != nil {
 			continue
 		}
-		if err := m.UserSvc.AddGameStats(u, g.StartTime, time.Now().UnixMilli(), winnerID == p.ID); err != nil {
+		client, err := m.getClientByUserID(p.ID)
+		if err != nil {
+			slog.Error("get client", err)
+			continue
+		}
+		if err := m.UserSvc.AddGameStats(u, g.StartTime, time.Now().UnixMilli(), g.WinnerID == p.ID); err != nil {
 			slog.Error("failed to update user stats", err)
 		}
-		if err := m.UserSvc.UpdateUserStats(u, winnerID == p.ID, p.Score, time.Now().UnixMilli()-g.StartTime); err != nil {
+		if err := m.UserSvc.UpdateUserStats(u, g.WinnerID == p.ID, p.Score, time.Now().UnixMilli()-g.StartTime); err != nil {
 			slog.Error("failed to update user stats", err)
+		}
+		if err := m.UserSvc.Repo.UnSetJoinedGame(client.UserId); err != nil {
+			slog.Error("remove user from game room", err)
+		}
+		if err := gameRoom.RemoveClient(client.ID); err != nil {
+			slog.Error("remove client from ws room", err)
+			continue
+		}
+		if err := gameRoom.BroadcastLeaveGamePackets(client, g.ID); err != nil {
+			slog.Error("broadcast leave game packets", err)
+		}
+	}
+
+	// Make all observators leave the game
+	for _, o := range g.ObservateurIDs {
+		client, err := m.getClientByUserID(o)
+		if err != nil {
+			slog.Error("get client", err)
+			continue
+		}
+		if err := gameRoom.RemoveClient(client.ID); err != nil {
+			slog.Error("remove client from ws room", err)
+			continue
+		}
+		if err := gameRoom.BroadcastObserverLeaveGamePacket(client, g.ID); err != nil {
+			slog.Error("broadcast leave game packets", err)
 		}
 	}
 
@@ -827,25 +913,6 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 				return err
 			}
 			tournamentRoom.Broadcast(p)
-		}
-
-		// Leave old game
-		for _, playerID := range g.UserIDs {
-			client, err := m.getClientByUserID(playerID)
-			if err != nil {
-				slog.Error("get client", err)
-				continue
-			}
-			if err := m.UserSvc.Repo.UnSetJoinedGame(client.UserId); err != nil {
-				slog.Error("remove user from game room", err)
-			}
-			if err := gameRoom.RemoveClient(client.ID); err != nil {
-				slog.Error("remove client from ws room", err)
-				continue
-			}
-			if err := gameRoom.BroadcastLeaveGamePackets(client, g.ID); err != nil {
-				slog.Error("broadcast leave game packets", err)
-			}
 		}
 
 		if t.IsOver {
@@ -894,6 +961,7 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 
 				// Start game timer
 				t.Finale.ScrabbleGame.Timer.OnTick(func() {
+					slog.Info("timer tick:", "gameID", g.ID, "timeRemaining", g.ScrabbleGame.Timer.TimeRemaining())
 					timerPacket, err := NewTimerUpdatePacket(TimerUpdatePayload{
 						Timer: t.Finale.ScrabbleGame.Timer.TimeRemaining(),
 					})
@@ -904,6 +972,7 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 					finaleRoom.Broadcast(timerPacket)
 				})
 				t.Finale.ScrabbleGame.Timer.OnDone(func() {
+					slog.Info("timer done:", "gameID", g.ID)
 					t.Finale.ScrabbleGame.SkipTurn()
 					GamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
 						Game: makeGameUpdatePayload(t.Finale),
@@ -913,6 +982,13 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 						return
 					}
 					finaleRoom.Broadcast(GamePacket)
+
+					if t.Finale.ScrabbleGame.IsOver() {
+						if err := m.HandleGameOver(t.Finale); err != nil {
+							slog.Error("failed to handle game over", err)
+							return
+						}
+					}
 
 					// Make bots move if applicable
 					go m.MakeBotMoves(t.Finale.ID)
@@ -937,7 +1013,7 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 					otherGame = t.PoolGames[0]
 				}
 
-				g, err := m.GameSvc.AddObserverToGame(otherGame.ID, g.WinnerID)
+				_, err := m.GameSvc.AddObserverToGame(otherGame.ID, g.WinnerID)
 				if err != nil {
 					return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 				}
@@ -954,7 +1030,7 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 				if err := otherGameRoom.AddClient(winnerClient.ID); err != nil {
 					return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 				}
-				return otherGameRoom.BroadcastObserverJoinGamePacket(winnerClient, g)
+				return otherGameRoom.BroadcastObserverJoinGamePacket(winnerClient, otherGame)
 
 			}
 		}
@@ -964,7 +1040,14 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 		return err
 	}
 
-	return m.BroadcastObservableGames()
+	if err := m.BroadcastObservableGames(); err != nil {
+		slog.Error("broadcast observable games", err)
+	}
+	if err := m.BroadcastObservableTournaments(); err != nil {
+		slog.Error("broadcast observable tournaments", err)
+	}
+
+	return nil
 }
 
 func (m *Manager) ListNewUser() {

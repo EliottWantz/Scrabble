@@ -155,6 +155,9 @@ type GetFriendsResponse struct {
 
 func (m *Manager) GetFriends(c *fiber.Ctx) error {
 	id := c.Params("id")
+	if id == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "User ID is required")
+	}
 	friends, err := m.GetFriendsList(id)
 	if err != nil {
 		return err
@@ -166,6 +169,9 @@ func (m *Manager) GetFriends(c *fiber.Ctx) error {
 
 func (m *Manager) GetOnlineFriends(c *fiber.Ctx) error {
 	id := c.Params("id")
+	if id == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "User ID is required")
+	}
 	friends, err := m.GetFriendsList(id)
 	if err != nil {
 		return err
@@ -229,6 +235,9 @@ type GetFriendRequestsResponse struct {
 
 func (m *Manager) GetPendingFriendRequests(c *fiber.Ctx) error {
 	id := c.Params("id")
+	if id == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "id is required")
+	}
 	friendRequests, err := m.GetPendingFriendlistRequests(id)
 	if err != nil {
 		return err

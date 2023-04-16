@@ -2,7 +2,6 @@ package ws
 
 import (
 	"errors"
-	"fmt"
 
 	"scrabble/pkg/api/game"
 
@@ -83,9 +82,6 @@ func (r *Room) RemoveClient(cID string) error {
 		if err := r.Manager.RemoveRoom(r.ID); err != nil {
 			return err
 		}
-		if err := r.Manager.RoomSvc.Repo.Delete(r.ID); err != nil {
-			return err
-		}
 	}
 
 	return nil
@@ -110,7 +106,7 @@ func (r *Room) BroadcastJoinRoomPackets(c *Client) error {
 		payload := JoinedRoomPayload{
 			RoomID:   r.ID,
 			RoomName: r.Name,
-			UserIDs:  r.ListUsers(),
+			UserIDs:  r.ListUsersIds(),
 		}
 		msgs, err := r.Manager.MessageRepo.LatestMessage(r.ID)
 		if err != nil || len(msgs) == 0 {
@@ -161,6 +157,20 @@ func (r *Room) BroadcastLeaveRoomPackets(c *Client) error {
 		}
 		c.send(leftRoomPacket)
 	}
+	{
+		// List available chat rooms
+		rooms, err := c.Manager.RoomSvc.Repo.FindAll()
+		if err != nil {
+			c.Manager.logger.Error("list chat rooms", err)
+		}
+		p, err := NewListChatRoomsPacket(ListChatRoomsPayload{
+			Rooms: rooms,
+		})
+		if err != nil {
+			c.Manager.logger.Error("list chat rooms", err)
+		}
+		c.Manager.Broadcast(p)
+	}
 
 	return nil
 }
@@ -170,7 +180,7 @@ func (r *Room) BroadcastJoinDMRoomPackets(c *Client) error {
 		payload := JoinedDMRoomPayload{
 			RoomID:   r.ID,
 			RoomName: r.Name,
-			UserIDs:  r.ListUsers(),
+			UserIDs:  r.ListUsersIds(),
 		}
 		msgs, err := r.Manager.MessageRepo.LatestMessage(r.ID)
 		if err != nil || len(msgs) == 0 {
@@ -363,14 +373,13 @@ func (r *Room) BroadcastLeaveGamePackets(c *Client, gID string) error {
 
 func (r *Room) BroadcastObserverLeaveGamePacket(c *Client, gID string) error {
 	{
-		p, err := NewUserLeftGamePacket(UserLeftGamePayload{
+		p, err := NewLeftGamePacket(LeftGamePayload{
 			GameID: gID,
-			UserID: c.UserId,
 		})
 		if err != nil {
 			return err
 		}
-		r.BroadcastSkipSelf(p, c.ID)
+		c.send(p)
 	}
 
 	return nil
@@ -424,22 +433,10 @@ func (r *Room) BroadcastLeaveTournamentPackets(c *Client, tID string) error {
 	return c.Manager.BroadcastJoinableTournaments()
 }
 
-func (r *Room) ListUsers() []string {
-	UserIds := make([]string, 0, r.Clients.Len())
-	r.Clients.ForEach(func(cID string, c *Client) bool {
-		UserIds = append(UserIds, c.UserId)
-		return true
-	})
-	fmt.Println(UserIds)
-	return UserIds
-}
-
-func (r *Room) ListClientIDs() []string {
-	clientIDs := make([]string, 0, r.Clients.Len())
-	r.Clients.ForEach(func(cID string, c *Client) bool {
-		clientIDs = append(clientIDs, c.ID)
-		return true
-	})
-
-	return clientIDs
+func (r *Room) ListUsersIds() []string {
+	dbRoom, err := r.Manager.RoomSvc.Repo.Find(r.ID)
+	if err != nil {
+		return make([]string, 0)
+	}
+	return dbRoom.UserIDs
 }
