@@ -1,0 +1,8 @@
+<mat-dialog-content id="container">
+    <h1>{{"create-game-component.title" | translate}}</h1>
+    <mat-button-toggle-group [(ngModel)]="gameType">
+        <mat-button-toggle *ngFor="let type of gameTypes" [value]="type">{{"create-game-component." + type | translate}}</mat-button-toggle>
+    </mat-button-toggle-group>
+    <button (click)="createGame()">{{"create-game-component.create" | translate}}</button>
+    <button (click)="close()" id="close-button">{{"create-game-component.close" | translate}}</button>
+</mat-dialog-content>

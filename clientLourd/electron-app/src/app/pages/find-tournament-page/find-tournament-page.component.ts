@@ -5,33 +5,33 @@ import { CreateTournamentComponent } from "@app/components/create-tournament/cre
 import { JoinGameComponent } from "@app/components/join-game/join-game.component";
 import { JoinTournamentComponent } from "@app/components/join-tournament/join-tournament.component";
 @Component({
-    selector: "app-find-game-page",
-    templateUrl: "./find-game-page.component.html",
-    styleUrls: ["./find-game-page.component.scss"],
+    selector: "app-find-tournament-page",
+    templateUrl: "./find-tournament-page.component.html",
+    styleUrls: ["./find-tournament-page.component.scss"],
 })
-export class FindGamePageComponent {
+export class FindTournamentPageComponent {
 
     constructor(public dialog: MatDialog) {}
 
-    openDialogJoinGame(): void {
+    openDialogJoinTournament(): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = true;
-        this.dialog.open(JoinGameComponent, {width: '80%',
+        this.dialog.open(JoinTournamentComponent, {width: '80%',
         minHeight: '70vh',
         height : '50vh',
         data: {isObserver: false}});
     }
 
-    openDialogCreateGame(): void {
+    openDialogCreateTournament(): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = true;
-        this.dialog.open(CreateGameComponent, {});
+        this.dialog.open(CreateTournamentComponent, {});
     }
 
-    openDialogJoinAsObserver(): void {
+    openDialogJoinTournamentAsObserver(): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = true;
-        this.dialog.open(JoinGameComponent, {width: '80%',
+        this.dialog.open(JoinTournamentComponent, {width: '80%',
         minHeight: '70vh',
         height : '50vh',
         data: {isObserver: true}});

@@ -1,5 +1,5 @@
 <div id="container">
-  <img id="scrabble-img" src="../../../assets/scrabble.png">
+  <img id="scrabble-img" src="assets/scrabble.png">
   <h3>{{'waiting-room-page.text' | translate}}</h3>
   <div>
     <h4>{{getNumUsers()}}{{'waiting-room-page.players' | translate}}</h4>
@@ -36,5 +36,8 @@
       </button>
     </div>
   </mat-expansion-panel>
-  <app-chat-box-button *ngIf="isLoggedIn()"></app-chat-box-button>
+  <app-chat-box *ngIf="isLoggedIn()"></app-chat-box>
+  <div *ngIf="getNumUsers() >= 4 && checkIfCreatorTournament()">
+    <button mat-flat-button color="accent" (click)="startTournament()" routerLink="/game">{{'waiting-room-page.start-game' | translate}}</button>
+  </div>
 </div>

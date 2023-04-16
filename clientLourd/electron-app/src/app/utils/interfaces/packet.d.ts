@@ -4,6 +4,7 @@ import { ChatMessage } from "@app/utils/interfaces/chat-message";
 import { Room } from "@app/utils/interfaces/room";
 import { Game, ScrabbleGame } from "@app/utils/interfaces/game/game";
 import { User } from "@app/utils/interfaces/user";
+import { Tournament } from "./game/tournament";
 
 export interface Packet {
     event: Event;
@@ -24,11 +25,17 @@ export type ClientPayload = ChatMessage
 | CreateGamePayload
 | JoinGamePayload
 | LeaveGamePayload
+| LeaveTournamentPayload
 | StartGamePayload
 | PlayMovePayload
 | IndicePayload
 | ReplaceBotByObserverPayload
-| FirstMovePayload;
+| FirstMovePayload
+| CreateTournamentPayload
+| JoinTournamentPayload
+| StartTournamentPayload
+| JoinTournamentAsObserverPayload
+| ListJoinableTournamentsPayload;
 
 export interface CreateRoomPayload {
     roomName: string;
@@ -39,6 +46,10 @@ export interface JoinRoomPayload {
     roomId: string;
 }
 
+export interface JoinTournamentPayload {
+    tournamentId: string;
+    password: string;
+}
 
 export interface LeaveRoomPayload {
     roomId: string;
@@ -60,13 +71,26 @@ export interface CreateGamePayload {
     isPrivate: boolean;
 }
 
+export interface CreateTournamentPayload {
+    userIds: string[];
+    isPrivate: boolean;
+}
 export interface JoinGamePayload {
     gameId: string;
     password: string;
 }
 
+export interface JoinTournamentAsObserverPayload {
+    tournamentId: string;
+    //password: string;
+}
+
 export interface LeaveGamePayload {
     gameId: string;
+}
+
+export interface LeaveTournamentPayload {
+    tournamentId: string;
 }
 
 export interface JoinGameAsObserverPayload {
@@ -74,12 +98,22 @@ export interface JoinGameAsObserverPayload {
     password: string;
 }
 
+
+
 export interface LeaveGameAsObserverPayload {
     gameId: string;
 }
 
+export interface LeaveTournamentAsObserverPayload {
+    tournamentId: string;
+}
+
 export interface StartGamePayload {
     gameId: string;
+}
+
+export interface StartTournamentPayload {
+    tournamentId: string;
 }
 
 export interface PlayMovePayload {
@@ -108,17 +142,22 @@ export type ServerPayload = JoinedRoomPayload
 | ListChatRoomsPayload
 | ListJoinableGamesPayload
 | JoinedGamePayload
+| JoinedTournamentPayload
 | UserJoinedGamePayload
 | LeftGamePayload
+| LeftTournamentPayload
 | UserLeftGamePayload
+| UserLeftTournamentPayload
 | GameUpdatePayload
 | TimerUpdatePayload
 | GameOverPayload
+| TournamentOverPayload
 | FriendRequestPayload
 | ServerIndicePayload
 | ErrorPayload
 | ListUsersOnlinePayload
 | ListObservableGamesPayload
+| ListObservableTournamentsPayload
 | UserRequestToJoinGamePayload
 | UserRequestToJoinTournamentPayload
 | VerdictJoinGameRequestPayload
@@ -126,7 +165,8 @@ export type ServerPayload = JoinedRoomPayload
 | RevokeJoinGameRequestPayload
 | JoinedGameAsObserverPayload
 | FirstMovePayload
-| InvitedToGamePayload;
+| InvitedToGamePayload
+| UserJoinedTournamentPayload;
 
 export interface JoinedRoomPayload {
     roomId: string;
@@ -186,8 +226,16 @@ export interface ListJoinableGamesPayload {
     games: Game[];
 }
 
+export interface ListJoinableTournamentsPayload {
+    tournaments: Tournament[];
+}
+
 export interface JoinedGamePayload {
     game: Game;
+}
+
+export interface JoinedTournamentPayload {
+    tournament: Tournament;
 }
 
 export interface UserJoinedGamePayload {
@@ -195,8 +243,17 @@ export interface UserJoinedGamePayload {
     userId: string;
 }
 
+export interface UserJoinedTournamentPayload {
+    tournamentId: string;
+    userId: string;
+}
+
 export interface LeftGamePayload {
     gameId: string;
+}
+
+export interface LeftTournamentPayload {
+    tournamentId: string;
 }
 
 export interface UserLeftGamePayload {
@@ -204,8 +261,17 @@ export interface UserLeftGamePayload {
     userId: string;
 }
 
+export interface UserLeftTournamentPayload {
+    tournamentId: string;
+    userId: string;
+}
+
 export interface GameUpdatePayload {
     game: ScrabbleGame;
+}
+
+export interface TournamentUpdatePayload {
+    tournament: Tournament;
 }
 
 export interface TimerUpdatePayload {
@@ -213,6 +279,10 @@ export interface TimerUpdatePayload {
 }
 
 export interface GameOverPayload {
+    winnerId: string;
+}
+
+export interface TournamentOverPayload {
     winnerId: string;
 }
 
@@ -235,6 +305,10 @@ export interface ListUsersOnlinePayload {
 
 export interface ListObservableGamesPayload {
     games: Game[];
+}
+
+export interface ListObservableTournamentsPayload {
+    tournaments: Tournament[];
 }
 
 export interface UserRequestToJoinGamePayload {

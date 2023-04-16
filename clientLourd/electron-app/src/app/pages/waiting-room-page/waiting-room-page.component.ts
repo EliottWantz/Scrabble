@@ -10,7 +10,8 @@ import { UserService } from "@app/services/user/user.service";
 import { WebSocketService } from "@app/services/web-socket/web-socket.service";
 import { ClientEvent } from "@app/utils/events/client-events";
 import { Game } from "@app/utils/interfaces/game/game";
-import { StartGamePayload } from "@app/utils/interfaces/packet";
+import { Tournament } from "@app/utils/interfaces/game/tournament";
+import { StartGamePayload, StartTournamentPayload } from "@app/utils/interfaces/packet";
 import { Summary, UserStats } from "@app/utils/interfaces/summary";
 import { User } from "@app/utils/interfaces/user";
 import { BehaviorSubject } from "rxjs";
@@ -22,6 +23,7 @@ import { BehaviorSubject } from "rxjs";
 })
 export class WaitRoomPageComponent implements OnInit {
   gameRoom!: BehaviorSubject<Game | undefined>;
+  tournamentRoom!: BehaviorSubject<Tournament | undefined>;
   users: {userId: string, username: string}[];
   usersWaiting: {userId: string, username: string}[];
   user: User;
@@ -29,6 +31,7 @@ export class WaitRoomPageComponent implements OnInit {
   constructor(private gameService: GameService, private userService: UserService, private socketService: WebSocketService, private storageService: StorageService,
     private commService: CommunicationService, private socialService: SocialService) {
     this.gameRoom = this.gameService.game
+    this.tournamentRoom = this.gameService.tournament
     this.user = this.userService.currentUserValue
     this.users = [];
     this.usersWaiting = [];
@@ -36,6 +39,10 @@ export class WaitRoomPageComponent implements OnInit {
     this.gameService.game.subscribe((game) => {
       if (game)
         this.getPlayers(game);
+    });
+    this.gameService.tournament.subscribe((tournament) => {
+      if (tournament)
+        this.getPlayersTournament(tournament);
     });
 
     this.gameService.usersWaiting.subscribe((users) => {
@@ -71,6 +78,20 @@ export class WaitRoomPageComponent implements OnInit {
       }
   }
 
+  startTournament(): void {
+    //console.log(this.gameRoom.value);
+    if (this.tournamentRoom.value) {
+      if(this.tournamentRoom.value.userIds.length < 4){
+        return;
+      }
+      const payload: StartTournamentPayload = {
+        tournamentId: this.tournamentRoom.value.id
+      }
+      const event : ClientEvent = "start-tournament";
+      this.socketService.send(event, payload);
+    }
+}
+
   getPlayers(game: Game): void {
     this.users = [];
       for (const id of game.userIds) {
@@ -80,15 +101,43 @@ export class WaitRoomPageComponent implements OnInit {
       }
   }
 
+  getPlayersTournament(tournament: Tournament): void {
+    this.users = [];
+      for (const id of tournament.userIds) {
+        const user = this.storageService.getUserFromId(id);
+        if (user && user.id != this.userService.currentUserValue.id)
+          this.users.push({userId: id, username: user.username});
+      }
+  }
+
   getNumUsers(): number {
     if (this.gameRoom.value)
       return this.gameRoom.value.userIds.length;
+    if(this.tournamentRoom.value)
+      return this.tournamentRoom.value.userIds.length;
     return 0;
   }
 
   checkIfCreator(): boolean {
     return this.userService.currentUserValue.id == this.gameRoom.value?.creatorId;
   }
+
+  checkIfCreatorTournament(): boolean {
+    return this.userService.currentUserValue.id == this.tournamentRoom.value?.creatorId;
+  }
+
+  /*getUserNamesAndAvatarUrls(game: Game): string {
+    for (const id of game.userIds) {
+      const user = this.storageService.getUserFromId(id);
+      if (user && user.id != this.userService.currentUserValue.id)
+        return user.username;
+    }
+    const requestUser = this.storageService.getUserFromId(id);
+    if (requestUser) {
+      return requestUser.avatar.url;
+    }
+    return "";
+  }*/
 
   getAvatarUrl(id: string): string {
     const user = this.storageService.getUserFromId(id);

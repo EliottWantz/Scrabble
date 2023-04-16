@@ -14,11 +14,10 @@ function initWindow() {
     },
   });
 
-  // Electron Build Path
-  const path = `http://localhost:4200`;
-  appWindow.loadURL(path);
-
   appWindow.setMenuBarVisibility(false);
+  // Electron Build Path
+  const path = `file://${__dirname}/dist/electron-app/index.html`;
+  appWindow.loadURL(path);
 
   // Initialize the DevTools.
   appWindow.webContents.openDevTools();

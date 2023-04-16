@@ -17,24 +17,31 @@ import {
   JoinedGameAsObserverPayload,
   JoinedGamePayload,
   JoinedRoomPayload,
+  JoinedTournamentPayload,
   LeftDMRoomPayload,
   LeftGamePayload,
   LeftRoomPayload,
+  LeftTournamentPayload,
   ListChatRoomsPayload,
   ListJoinableGamesPayload,
+  ListJoinableTournamentsPayload,
   ListObservableGamesPayload,
+  ListObservableTournamentsPayload,
   ListUsersPayload,
   NewUserPayload,
   Packet,
   RevokeJoinGameRequestPayload,
   ServerIndicePayload,
   TimerUpdatePayload,
+  TournamentUpdatePayload,
   UserJoinedDMRoomPayload,
   UserJoinedGamePayload,
   UserJoinedRoomPayload,
+  UserJoinedTournamentPayload,
   UserLeftDMRoomPayload,
   UserLeftGamePayload,
   UserLeftRoomPayload,
+  UserLeftTournamentPayload,
   UserRequestToJoinGamePayload,
 } from '@app/utils/interfaces/packet';
 import { RoomService } from '@app/services/room/room.service';
@@ -217,66 +224,82 @@ export class WebSocketService {
         break;
       }
 
-      case 'listUsers': {
-        const payloadListUsers = packet.payload as ListUsersPayload;
-        this.storageService.listUsers.next(payloadListUsers.users);
-        for (const user of payloadListUsers.users) {
-          this.storageService.addAvatar(user.id, user.avatar.url);
-        }
+      case "listUsers": {
+          const payloadListUsers = packet.payload as ListUsersPayload;
+          this.storageService.listUsers.next(payloadListUsers.users);
+          for (const user of payloadListUsers.users) {
+              this.storageService.addAvatar(user.id, user.avatar.url);
+          }
+          break;
+      }
+
+      case "newUser": {
+          const newUserPayload = packet.payload as NewUserPayload;
+          this.storageService.listUsers.next([...this.storageService.listUsers.value, newUserPayload.user]);
+          this.storageService.addAvatar(newUserPayload.user.id, newUserPayload.user.avatar.url);
+          break;
+      }
+
+      case "listChatRooms": {
+          const listChatRoomsPayload = packet.payload as ListChatRoomsPayload;
+          this.roomService.listChatRooms.next(listChatRoomsPayload.rooms);
+          break;
+      }
+
+      case "joinableGames": {
+          const listJoinableGamesPayload = packet.payload as ListJoinableGamesPayload;
+          this.gameService.joinableGames.next(listJoinableGamesPayload.games);
+          break;
+      }
+
+      case "joinableTournaments": {
+        const listJoinableGamesPayload = packet.payload as ListJoinableTournamentsPayload;
+        this.gameService.joinableTournaments.next(listJoinableGamesPayload.tournaments);
+        break;
+    }
+
+      case "joinedGame": {
+          const joinedGamePayload = packet.payload as JoinedGamePayload;
+          this.gameService.game.next(joinedGamePayload.game);
+          const newRoom: Room = {
+            id: joinedGamePayload.game.id,
+            name: "Game",
+            userIds: joinedGamePayload.game.userIds,
+            messages: [],
+          } 
+          this.roomService.addRoom(newRoom);
+          //this.roomService.currentRoomChat.next(newRoom);
+          this.router.navigate(["/waitingRoom"]);
+          break;
+      }
+
+      case "joinedTournament":{
+        const joinedTournamentPayload = packet.payload as JoinedTournamentPayload;
+          this.gameService.tournament.next(joinedTournamentPayload.tournament);
+          const newRoom: Room = {
+            id: joinedTournamentPayload.tournament.id,
+            name: "Tournament",
+            userIds: joinedTournamentPayload.tournament.userIds,
+            messages: [],
+          } 
+          this.roomService.addRoom(newRoom);
+          this.router.navigate(["/waitingRoom"]);
         break;
       }
 
-      case 'newUser': {
-        const newUserPayload = packet.payload as NewUserPayload;
-        this.storageService.listUsers.next([
-          ...this.storageService.listUsers.value,
-          newUserPayload.user,
-        ]);
-        this.storageService.addAvatar(
-          newUserPayload.user.id,
-          newUserPayload.user.avatar.url
-        );
-        break;
+      case "userJoinedGame": {
+          const userJoinedGamePayload = packet.payload as UserJoinedGamePayload;
+          this.gameService.addUser(userJoinedGamePayload.gameId, userJoinedGamePayload.userId);
+          break;
       }
 
-      case 'listChatRooms': {
-        const listChatRoomsPayload = packet.payload as ListChatRoomsPayload;
-        this.roomService.listChatRooms.next(listChatRoomsPayload.rooms);
+      case "userJoinedTournament": {
+        const userJoinedGamePayload = packet.payload as UserJoinedTournamentPayload;
+        this.gameService.addUserTournament(userJoinedGamePayload.tournamentId, userJoinedGamePayload.userId);
         break;
-      }
+    }
 
-      case 'joinableGames': {
-        const listJoinableGamesPayload =
-          packet.payload as ListJoinableGamesPayload;
-        this.gameService.joinableGames.next(listJoinableGamesPayload.games);
-        break;
-      }
-
-      case 'joinedGame': {
-        const joinedGamePayload = packet.payload as JoinedGamePayload;
-        this.gameService.game.next(joinedGamePayload.game);
-        const newRoom: Room = {
-          id: joinedGamePayload.game.id,
-          name: 'Game',
-          userIds: joinedGamePayload.game.userIds,
-          messages: [],
-        };
-        this.roomService.addRoom(newRoom);
-        //this.roomService.currentRoomChat.next(newRoom);
-        this.router.navigate(['/waitingRoom']);
-        break;
-      }
-
-      case 'userJoinedGame': {
-        const userJoinedGamePayload = packet.payload as UserJoinedGamePayload;
-        this.gameService.addUser(
-          userJoinedGamePayload.gameId,
-          userJoinedGamePayload.userId
-        );
-        break;
-      }
-
-      case 'leftGame': {
+      case "leftGame": {
         const leftGamePayload = packet.payload as LeftGamePayload;
         this.roomService.removeRoom(leftGamePayload.gameId);
         //this.gameService.removeUser(leftGamePayload.gameId, this.userService.currentUserValue.id);
@@ -285,39 +308,51 @@ export class WebSocketService {
         this.gameService.isObserving = false;
 
         // check if tournament
+        if (this.gameService.tournament.value === undefined)
+          this.router.navigate(['/home']);
+        break;
+      }
+
+      case "leftTournament": {
+        const leftTournamentPayload = packet.payload as LeftTournamentPayload;
+        this.roomService.removeRoom(leftTournamentPayload.tournamentId);
+        //this.gameService.removeUser(leftGamePayload.gameId, this.userService.currentUserValue.id);
+        this.gameService.tournament.next(undefined);
+        // this.gameService.game.next(undefined);
+        this.gameService.isObserving = false;
+
+        // check if tournament
+        this.gameService.hasWon = false;
         this.router.navigate(['/home']);
         break;
       }
 
-      case 'userLeftGame': {
-        const userLeftGamePayload = packet.payload as UserLeftGamePayload;
-        this.gameService.removeUser(
-          userLeftGamePayload.gameId,
-          userLeftGamePayload.userId
-        );
-        break;
+      case "userLeftGame": {
+          const userLeftGamePayload = packet.payload as UserLeftGamePayload;
+          this.gameService.removeUser(userLeftGamePayload.gameId, userLeftGamePayload.userId);
+          break;
       }
 
-      case 'gameUpdate': {
-        const payloadUpdateGame = packet.payload as GameUpdatePayload;
-        const newBoard: Square[][] = payloadUpdateGame.game.board;
-        for (let i = 0; i < payloadUpdateGame.game.board.length; i++) {
-          for (let j = 0; j < payloadUpdateGame.game.board[i].length; j++) {
-            if (payloadUpdateGame.game.board[i][j].tile) {
-              //console.log("allo");
-              console.log(payloadUpdateGame.game.board[i][j].tile);
-              newBoard[i][j].tile = {
-                ...(payloadUpdateGame.game.board[i][j].tile as Tile),
-                disabled: true,
-              };
-            } else {
-              newBoard[i][j].tile = {
-                ...(payloadUpdateGame.game.board[i][j].tile as Tile),
-                disabled: false,
-              };
+      case "userLeftTournament": {
+        const userLeftTournamentPayload = packet.payload as UserLeftTournamentPayload;
+        this.gameService.removeUserTournament(userLeftTournamentPayload.tournamentId, userLeftTournamentPayload.userId);
+        break;
+    }
+
+      case "gameUpdate": {
+          const payloadUpdateGame = packet.payload as GameUpdatePayload;
+          const newBoard: Square[][] = payloadUpdateGame.game.board;
+          for (let i = 0; i < payloadUpdateGame.game.board.length; i++) {
+            for (let j = 0; j < payloadUpdateGame.game.board[i].length; j++) {
+              if (payloadUpdateGame.game.board[i][j].tile) {
+                //console.log("allo");
+                console.log(payloadUpdateGame.game.board[i][j].tile);
+                newBoard[i][j].tile = {...payloadUpdateGame.game.board[i][j].tile as Tile, disabled: true};
+              } else {
+                newBoard[i][j].tile = {...payloadUpdateGame.game.board[i][j].tile as Tile, disabled: false};
+              }
             }
           }
-        }
         this.gameService.placedTiles = 0;
         this.gameService.selectedTiles = [];
         const newGame: ScrabbleGame = {
@@ -328,7 +363,15 @@ export class WebSocketService {
         break;
       }
 
-      case 'timerUpdate': {
+       case "tournamentUpdate":{
+        const payloadUpdateTournament = packet.payload as TournamentUpdatePayload;
+        console.log(payloadUpdateTournament, "tournUpdate", this.gameService.tournament)
+        this.gameService.tournament.next(payloadUpdateTournament.tournament);
+        //currentTournmant.tournament.games[0].winnerId
+        break;
+      }
+
+     case 'timerUpdate': {
         const payloadTimer = packet.payload as TimerUpdatePayload;
         this.gameService.updateTimer(payloadTimer.timer);
         break;
@@ -337,6 +380,14 @@ export class WebSocketService {
       case 'gameOver': {
         const payloadGameOver = packet.payload as GameOverPayload;
         this.gameService.gameOverPopup(payloadGameOver.winnerId);
+        break;
+      }
+
+      case 'tournamentOver': {
+        const payloadGameOver = packet.payload as GameOverPayload;
+        this.gameService.gameOverPopupTournament(payloadGameOver.winnerId);
+        this.gameService.tournament.next(undefined);
+        this.gameService.hasWon = false;
         break;
       }
 
@@ -396,6 +447,13 @@ export class WebSocketService {
         break;
       }
 
+      case 'observableTournaments': {
+        const payload = packet.payload as ListObservableTournamentsPayload;
+        this.gameService.observableTournaments.next(payload.tournaments);
+        console.log(payload, "herebruh");
+        break;
+      }
+
       case 'userRequestToJoinGame': {
         const payload = packet.payload as UserRequestToJoinGamePayload;
         if (
@@ -448,6 +506,8 @@ export class WebSocketService {
         const payload = packet.payload as JoinedGameAsObserverPayload;
         this.gameService.game.next(payload.game);
         this.gameService.scrabbleGame.next(payload.gameUpdate);
+        this.gameService.isObserving = true;
+        this.router.navigate(["/gameObserve"]);
         break;
       }
 

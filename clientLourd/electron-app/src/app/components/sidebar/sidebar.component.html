@@ -14,7 +14,7 @@
                         <div class="mat-icon-button">
                             <mat-icon inline="true" >home</mat-icon>
                         </div>
-                        <div class="text">{{currentRoute | translate}}</div>
+                        <div class="text">{{"sidebar." + currentRoute | translate}}</div>
                     </div> 
                 </div>
 
@@ -60,7 +60,7 @@
                     </div>
                     <div>{{language.value}}</div>
                 </div>
-                <mat-icon *ngIf="currentRoute !== 'PolyScrabble'" (click)="return()">arrow_back</mat-icon>
+                <mat-icon *ngIf="currentRoute !== 'home'" (click)="return()">arrow_back</mat-icon>
                 <mat-icon *ngIf="isConnected()" (click)="logout()">logout</mat-icon>
             </div>
         </div>

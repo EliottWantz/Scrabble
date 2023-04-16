@@ -13,15 +13,16 @@ function initWindow() {
       contextIsolation: false,
     },
   });
+  appWindow.maximize();
 
   // Electron Build Path
-  const path = `http://localhost:4200`;
+  const path = `file://${__dirname}/dist/electron-app/index.html`;
   appWindow.loadURL(path);
 
   appWindow.setMenuBarVisibility(false);
 
   // Initialize the DevTools.
-  appWindow.webContents.openDevTools();
+  //appWindow.webContents.openDevTools();
 
   appWindow.on("closed", function () {
     if (chatWindow) {
