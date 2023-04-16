@@ -53,8 +53,7 @@ class ChatScreen extends GetView<ChatController> {
       scrollDown();
     });
 
-    return _gif.value == null
-        ? Obx(() => Column(children: [
+    return Obx(() => Column(children: [
               _buildChatScreenHeader(),
               Expanded(
                   child: Center(
@@ -141,7 +140,7 @@ class ChatScreen extends GetView<ChatController> {
                                                               .currentRoomMessages
                                                               .value![index]
                                                               .fromId)
-                                                      ? Colors.amber[600]
+                                                      ? Color.fromARGB(255, 98, 0, 238)
                                                       : Colors.grey.shade200)),
                                               padding: EdgeInsets.all(16),
                                               child: Column(
@@ -218,8 +217,8 @@ class ChatScreen extends GetView<ChatController> {
                   ],
                 ),
               )
-            ]))
-        : SizedBox();
+            ])
+    );
   }
 
   Widget _buildChatScreenHeader() {
@@ -270,7 +269,17 @@ class ChatScreen extends GetView<ChatController> {
     } else {
       return Text(
         controller.roomService.currentRoomMessages.value![index].message,
-        style: TextStyle(fontSize: 15),
+        style: TextStyle(
+            fontSize: 15,
+            color: controller.isCurrentUser(
+                controller
+                    .roomService
+                    .currentRoomMessages
+                    .value![index]
+                    .fromId)
+                ? Colors.white
+                : Colors.black
+        ),
       );
     }
   }

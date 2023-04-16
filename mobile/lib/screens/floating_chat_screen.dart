@@ -111,7 +111,7 @@ class FloatingChatScreen extends GetView<ChatController> {
                                                     .currentFloatingRoomMessages
                                                     .value![index]
                                                     .fromId)
-                                            ? Colors.amber[600]
+                                            ? Color.fromARGB(255, 98, 0, 238)
                                             : Colors.grey.shade200)),
                                     padding: EdgeInsets.all(16),
                                     child: Column(
@@ -224,7 +224,17 @@ class FloatingChatScreen extends GetView<ChatController> {
           headers: {'accept': 'image/*'});
     } else {
       return Text(controller.roomService.currentRoomMessages.value![index].message,
-        style: TextStyle(fontSize: 15),
+        style: TextStyle(
+            fontSize: 15,
+            color: controller.isCurrentUser(
+                controller
+                    .roomService
+                    .currentRoomMessages
+                    .value![index]
+                    .fromId)
+                ? Colors.white
+                : Colors.black
+        ),
       );
     }
   }
