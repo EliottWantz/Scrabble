@@ -15,13 +15,13 @@ function initWindow() {
     appWindow.maximize();
 
     // Electron Build Path
-    const path = `file://${__dirname}/dist/electron-app/index.html`;
+    const path = `http://localhost:4200`;
     appWindow.loadURL(path);
 
     appWindow.setMenuBarVisibility(false)
 
     // Initialize the DevTools.
-    //appWindow.webContents.openDevTools()
+    appWindow.webContents.openDevTools()
 
     appWindow.on('closed', function () {
         appWindow = null;

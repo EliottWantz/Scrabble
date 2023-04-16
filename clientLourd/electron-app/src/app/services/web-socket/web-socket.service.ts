@@ -266,8 +266,9 @@ export class WebSocketService {
             name: "Game",
             userIds: joinedGamePayload.game.userIds,
             messages: [],
-          } 
-          this.roomService.addRoom(newRoom);
+          }
+          if (!this.gameService.tournament.value)
+            this.roomService.addRoom(newRoom);
           //this.roomService.currentRoomChat.next(newRoom);
           this.router.navigate(["/waitingRoom"]);
           break;
@@ -512,8 +513,9 @@ export class WebSocketService {
           name: "Game",
           userIds: payload.game.userIds,
           messages: [],
-        } 
-        this.roomService.addRoom(newRoom);
+        }
+        if (!this.gameService.tournament.value)
+          this.roomService.addRoom(newRoom);
         this.router.navigate(["/gameObserve"]);
         break;
       }
