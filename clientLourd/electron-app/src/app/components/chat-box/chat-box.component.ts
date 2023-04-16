@@ -64,10 +64,11 @@ export class ChatBoxComponent implements AfterViewInit {
     this.user = this.userService.currentUserValue;
     this.fenetrer = false;
     this.subscribeToRoom();
-    electron.ipcRenderer.on('user-data', async () => {
+    electron.ipcRenderer.on('user-data', async (_: string, data: { user: User, room: Room }) => {
       this.ngZone.run(() => {
         this.showbutton = false;
       });
+      this.roomService.currentRoomChat.next(data.room);
     });
     electron.ipcRenderer.on('open-chat', async () => {
       this.ngZone.run(() => {

@@ -5,7 +5,7 @@ import { CommunicationService } from '@app/services/communication/communication.
 import { UserService } from '@app/services/user/user.service';
 import { ChatMessage } from '@app/utils/interfaces/chat-message';
 import { User } from '@app/utils/interfaces/user';
-
+const electron = (window as any).require('electron');
 @Injectable({
   providedIn: 'root',
 })
@@ -39,17 +39,13 @@ export class RoomService {
       ...this.userService.subjectUser.value,
       joinedChatRooms: updatedChatRooms,
     });
-    //if (room.id == "global")
     this.currentRoomChat.next(room);
+    electron.ipcRenderer.send('get-room');
+    electron.ipcRenderer.on('get-room-reply', (_: any, data: { _: User, room: Room }) => {
+      console.log("has gotten room", data.room);
+      this.currentRoomChat.next(data.room);
+    });
   }
-
-  /*addDMRoom(room: Room): void {
-        this.listJoinedDMRooms.next([...this.listJoinedDMRooms.value, room]);
-        const updatedDMRooms = this.userService.currentUserValue.joinedDMRooms;
-        updatedDMRooms.push(room.id);
-        this.userService.subjectUser.next({...this.userService.subjectUser.value, joinedDMRooms: updatedDMRooms});
-        this.currentRoomChat.next(room);
-    }*/
 
   removeRoom(roomID: string): void {
     const joinedRooms = this.listJoinedChatRooms.getValue();

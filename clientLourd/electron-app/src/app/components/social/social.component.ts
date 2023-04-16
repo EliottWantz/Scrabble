@@ -47,6 +47,10 @@ export class SocialComponent implements AfterViewInit, OnInit {
       else {
         icon.classList.remove('mat-badge-glow');
       }
+      this.socialService.updatedFriendsList();
+      this.socialService.friendsList$.subscribe((list) => {
+        this.listFriendsDisplay = list;
+      });
     });
 
   }

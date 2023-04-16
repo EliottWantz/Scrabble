@@ -39,7 +39,6 @@ function initWindow() {
 
 function openChatwindow() {
   if (!appWindow) {
-    console.error("appWindow is not defined.");
     return;
   }
   chatWindow = new BrowserWindow({
@@ -81,7 +80,6 @@ app.on("activate", function () {
 });
 
 ipcMain.on("open-chat", (event, data) => {
-  console.log("we need to open the chat");
   appWindow.webContents.send("open-chat");
   if (chatWindow == null) {
     openChatwindow();
@@ -99,4 +97,9 @@ ipcMain.on("logout", (event, data) => {
   if (chatWindow) {
     chatWindow.destroy();
   }
+});
+
+ipcMain.on("get-room", (event, data) => {
+  if (chatWindow == null) return;
+  chatWindow.webContents.send("get-room-reply", userData);
 });

@@ -24,6 +24,7 @@ export class SocialPageComponent {
   public user: BehaviorSubject<User>;
   public inDM: boolean;
   chatFriend = false;
+  explore = false;
   friendUsername = '';
   addFriendErrorMessage = '';
   allFriendUserNameSearch = "";
@@ -36,6 +37,7 @@ export class SocialPageComponent {
 
   chatFriendPage(index: number): void {
     this.chatFriend = true;
+    this.explore = false;
     for (const room of this.roomService.listJoinedChatRooms.value) {
       const usersInRoom = room.name.split("/");
       console.log(usersInRoom);
@@ -61,6 +63,7 @@ export class SocialPageComponent {
 
   chatFriendGroupPage(idx: number): void {
     this.chatFriend = true;
+    this.explore = false;
     document.getElementById('add-friend')?.setAttribute("style", "");
     const friends = document.getElementsByClassName('friends');
     for (let i = 0; i < friends.length; i++) {
@@ -87,13 +90,14 @@ export class SocialPageComponent {
 
   createNewDmRoom() {
     const dialogRef = this.dialog.open(NewDmRoomComponent, {
-      width: "40vw",
-      height: "30vh",
       data: { username: this.userService.currentUserValue.username }
     });
+
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.roomService.changeRoom(result);
+        this.chatFriend = true;
+        this.explore = false;
       }
     });
   }
@@ -132,5 +136,13 @@ export class SocialPageComponent {
 
     console.log(salles);
     return salles;
+  }
+  goToExplorePage(): void {
+    this.explore = true;
+    this.chatFriend = false;
+  }
+  goToFriendPage(): void {
+    this.explore = false;
+    this.chatFriend = false;
   }
 }

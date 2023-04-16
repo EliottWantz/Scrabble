@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
+import { SocialService } from '@app/services/social/social.service';
 import { StorageService } from '@app/services/storage/storage.service';
 import { UserService } from '@app/services/user/user.service';
 import { WebSocketService } from '@app/services/web-socket/web-socket.service';
 import { ClientEvent } from '@app/utils/events/client-events';
-import { CreateDMRoomPayload } from '@app/utils/interfaces/packet';
+import { CreateDMRoomPayload, CreateRoomPayload } from '@app/utils/interfaces/packet';
 import { User } from '@app/utils/interfaces/user';
 
 @Component({
@@ -15,21 +16,49 @@ import { User } from '@app/utils/interfaces/user';
 export class NewDmRoomComponent {
   chatroomName = '';
   friendName = '';
+  errorMessage = '';
+  friendGroup: string[] = []
+  constructor(private socketService: WebSocketService, private userService: UserService, private storageSercice: StorageService, private dialogRef: MatDialogRef<void>
+    , public socialService: SocialService) { }
 
-  constructor(private socketService: WebSocketService, private userService: UserService, private storageSercice: StorageService, private dialogRef: MatDialogRef<void>) { }
   submit() {
-    const friend = this.storageSercice.getUserFromName(this.friendName) as User
-    if (friend) {
-
-      const payload: CreateDMRoomPayload = {
-        username: this.userService.subjectUser.value.username,
-        toId: friend.id,
-        toUsername: this.friendName,
-      };
-      const event: ClientEvent = 'create-dm-room';
-      this.socketService.send(event, payload);
-      this.dialogRef.close();
+    if (this.friendGroup.length === 0) {
+      return;
     }
-  }
-}
+    const payload: CreateRoomPayload = {
+      roomName: this.chatroomName,
+      userIds: this.friendGroup
+    };
 
+    const event: ClientEvent = 'create-room';
+    this.socketService.send(event, payload);
+    this.dialogRef.close();
+  }
+
+  getFriends() {
+    const friend = this.socialService.friendsList$.value.find((friend: User) => friend.username === this.friendName);
+    if (!friend) {
+      this.errorMessage = "This user is not in your friend list.";
+      return;
+    }
+    this.errorMessage = '';
+    this.friendGroup.push(friend.id);
+    this.friendName = '';
+  }
+
+  getAllFriendGroupInfo() {
+    return this.socialService.friendsList$.value.filter((friend: User) => this.friendGroup.includes(friend.id));
+  }
+
+  removeFriend(index: number) {
+    this.friendGroup.splice(index, 1);
+  }
+
+  userOnline(username: string): boolean {
+    if (!this.socialService.onlineFriends$.value) {
+      return false;
+    }
+    return this.socialService.onlineFriends$.value.some((user) => { return user.username == username });
+  }
+
+}

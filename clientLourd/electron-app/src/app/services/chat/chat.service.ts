@@ -24,7 +24,7 @@ export class ChatService {
       electron.ipcRenderer.send('request-user-data');
       electron.ipcRenderer.on(
         'user-data',
-        async (_: string, data: { user: User }) => {
+        async (_: string, data: { user: User, room: Room }) => {
           this.userService.setUser(data.user);
           this.user.next(data.user);
           if (this.user.value.id !== '0') {
@@ -52,12 +52,13 @@ export class ChatService {
     }
   }
 
-  openChat(): any {
+  openChat(room: Room): any {
     const text = 'Hello World';
     const user = this.userService.currentUserValue;
-    electron.ipcRenderer.send('open-chat', { text, user });
+    electron.ipcRenderer.send('open-chat', { text, user, room });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    electron.ipcRenderer.on('open-chat-reply', (_: any, arg: any) => {
+    electron.ipcRenderer.on('open-chat', (_: any, arg: any) => {
+      electron.ipcRenderer.send('get-room');
       console.log(arg);
     });
   }

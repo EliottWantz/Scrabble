@@ -141,4 +141,29 @@ mat-form-field {
       box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
     }
   }
+ 
+  .user-info {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex-grow: 1;
+  }
+  
+  .stats-button {
+    background-color: #3f51b5;
+    border: none;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    padding: 8px 16px;
+    border-radius: 4px;
+  }
+  
+  .stats-button:hover {
+    background-color: #283593;
+  }
   

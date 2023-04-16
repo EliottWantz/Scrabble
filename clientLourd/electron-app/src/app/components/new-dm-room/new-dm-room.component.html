@@ -1,11 +1,32 @@
 <div class="container">
-    <h1>Invite friend to chat</h1>
+    <h1>{{'new-dm-room-component.create-group-chat' | translate}}</h1>
     <form>
         <div class="form-group">
-            <label for="friendName">Friend's Name:</label>
-            <input type="text" id="friendName" name="friendName" [(ngModel)]="friendName"
-                placeholder="Enter your friend's name" required>
+            <label for="chatroomName"> {{'new-dm-room-component.group-chat-name' |translate}}</label>
+            <input type="text" id="chatroomName" name="chatroomName" [(ngModel)]="chatroomName"
+                placeholder="Enter the group chat name" required>
         </div>
-        <button type="submit" (click)="submit()">Invite to chat</button>
+        <div class="form-group">
+            <label for="friendName">{{'new-dm-room-component.add-friend' | translate}}</label>
+            <input type="text" id="friendName" name="friendName" [(ngModel)]="friendName"
+                placeholder="Enter friend's username" required>
+                <span class="error-message" *ngIf="errorMessage">{{errorMessage}}</span>
+            <button type="button" (click)="getFriends()">Add to Group {{'new-dm-room-component.add-to-group'| translate}}</button>
+        </div>
+        <div class="added-friends">
+            <h2>{{'new-dm-room-component.added-friends'| translate}}</h2>
+            <div *ngFor="let friend of getAllFriendGroupInfo(); let i = index" class="friends">
+                <div class="friend">
+                    <div class="avatar">
+                      <img class="avatar-img" src="{{friend.avatar.url}}" alt="avatar">
+                      <span *ngIf="this.userOnline(friend.username)" class='avatar-status-online'></span>
+                      <span *ngIf="!this.userOnline(friend.username)" class='avatar-status-offline'></span>
+                    </div>
+                    <span class="text">{{friend.username}}</span>
+                </div>
+                <button type="button" (click)="removeFriend(i)">{{'new-dm-room-component.remove-friend' |translate}}</button>
+            </div>
+            <button class="create-groupchat" type="submit" (click)="submit()" [disabled]="!friendGroup.length">{{'new-dm-room-component.create-group-chat'| translate}}</button>
+        </div>
     </form>
 </div>
