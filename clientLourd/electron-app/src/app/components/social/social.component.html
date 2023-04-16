@@ -14,9 +14,11 @@
             </div>
             <div class="users">
                 <div *ngFor="let user of listFriendsDisplay" class="user">
-                    <img src="{{user.avatar.url}}" class="avatar">
-                    <h3>{{user.username}}</h3>
-                    <button (click)="goToFriendStats(user)">
+                    <div class="user-info">
+                        <img src="{{user.avatar.url}}" class="avatar">
+                        <h3>{{user.username}}</h3>
+                    </div>
+                    <button class="stats-button" (click)="goToFriendStats(user)">
                         <mat-icon>poll</mat-icon>
                         voir les stats
                     </button>
