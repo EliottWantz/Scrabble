@@ -6,12 +6,11 @@ import 'package:client_leger/models/requests/register_request.dart';
 import 'package:client_leger/routes/app_routes.dart';
 import 'package:client_leger/services/auth_service.dart';
 import 'package:client_leger/services/avatar_service.dart';
+import 'package:client_leger/services/settings_service.dart';
 import 'package:client_leger/utils/app_focus.dart';
 import 'package:client_leger/utils/dialog_helper.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:client_leger/services/settings_service.dart';
 import 'package:sidebarx/sidebarx.dart';
 
 class AuthController extends GetxController {
@@ -52,7 +51,7 @@ class AuthController extends GetxController {
       final request = LoginRequest(
           username: loginUsernameController.text,
           password: loginPasswordController.text);
-      await DialogHelper.showLoading('Connexion au serveur');
+      await DialogHelper.showLoading('connect-server'.tr);
       await authService.login(request);
       if (authService.isUserLoggedIn()) {
         Get.offAllNamed(Routes.HOME);
@@ -68,7 +67,8 @@ class AuthController extends GetxController {
     }
   }
 
-  Future<void> onRegister(List<Avatar> avatars,{String? avatarCustomizedUrl}) async {
+  Future<void> onRegister(List<Avatar> avatars,
+      {String? avatarCustomizedUrl}) async {
     final request = RegisterRequest(
         email: registerEmailController.text,
         username: registerUsernameController.text,
@@ -76,7 +76,7 @@ class AuthController extends GetxController {
         avatar: (avatarService.isAvatar.value && avatarCustomizedUrl == null)
             ? avatars[avatarService.currentAvatarIndex.value]
             : Avatar(url: avatarCustomizedUrl!, fileId: ''));
-    await DialogHelper.showLoading('Connexion au serveur');
+    await DialogHelper.showLoading('connect-server'.tr);
     await authService.register(request,
         imagePath: avatarService.isAvatar.value == false
             ? File(avatarService.image.value!.path)
