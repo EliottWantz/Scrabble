@@ -53,6 +53,7 @@ import 'package:client_leger/models/response/tournament_update_response.dart';
 import 'package:client_leger/models/response/user_joined_game_response.dart';
 import 'package:client_leger/models/response/user_joined_room_response.dart';
 import 'package:client_leger/models/response/user_joined_tournament_response.dart';
+import 'package:client_leger/models/response/user_left_game_response.dart';
 import 'package:client_leger/models/response/user_request_to_join_game_accepted_response.dart';
 import 'package:client_leger/models/response/user_request_to_join_game_response.dart';
 import 'package:client_leger/models/start_game_payload.dart';
@@ -227,6 +228,13 @@ class WebsocketService extends GetxService {
           UserJoinedGameResponse userJoinedGameResponse =
               UserJoinedGameResponse.fromRawJson(data);
           handleEventUserJoinedGame(userJoinedGameResponse);
+        }
+        break;
+      case ServerEventUserLeftGame:
+        {
+          UserLeftGameResponse userLeftGameResponse =
+              UserLeftGameResponse.fromRawJson(data);
+          handleEventUserLeftGame(userLeftGameResponse);
         }
         break;
       case ServerEventJoinedTournament:
@@ -650,6 +658,10 @@ class WebsocketService extends GetxService {
       gameService.pendingJoinGameRequestUserIds
           .remove(userJoinedGameResponse.payload.userId);
     }
+  }
+
+  void handleEventUserLeftGame(UserLeftGameResponse userLeftGameResponse) {
+    gameService.currentGameRoomUserIds.remove(userLeftGameResponse.payload.userId);
   }
 
   void handleEventJoinedTournament(

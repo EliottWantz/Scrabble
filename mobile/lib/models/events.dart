@@ -21,6 +21,7 @@ const String ServerEventJoinedGameAsObserver = "joinedGameAsObserver";
 const String ServerEventLeftGame = "leftGame";
 const String ServerEventLeftRoom = "leftRoom";
 const String ServerEventUserJoinedGame       = "userJoinedGame";
+const String ServerEventUserLeftGame         = "userLeftGame";
 const String ServerEventGameUpdate = "gameUpdate";
 const String ServerEventTimerUpdate = "timerUpdate";
 const String ServerEventGameOver = "gameOver";
