@@ -423,6 +423,13 @@ class WebsocketService extends GetxService {
   void handleEventListOnlineUsers(ListUsersResponse listUsersResponse) {
     usersService.onlineUsers.value.clear();
     usersService.onlineUsers.addAll(listUsersResponse.payload.users);
+
+    List<String> onlineFriendUsernames = usersService.getOnlineFriendUsernames();
+    List<String> offlineFriendUsernames = usersService.getOfflineFriendUsernames();
+    onlineFriendUsernames.addAll(offlineFriendUsernames);
+    userService.friends.value.clear();
+    userService.friends.addAll(onlineFriendUsernames);
+    userService.friends.refresh();
   }
 
   void handleEventListChatRooms(ListChatRoomsResponse listChatRoomsResponse) {
@@ -432,6 +439,7 @@ class WebsocketService extends GetxService {
         roomService.listedChatRooms.add(chatRoom);
       }
     }
+    roomService.listedChatRooms.refresh();
   }
 
   void handleEventNewUser(NewUserResponse newUserResponse) {

@@ -4,6 +4,7 @@ import 'package:client_leger/screens/friend_request_screen.dart';
 import 'package:client_leger/services/room_service.dart';
 import 'package:client_leger/services/users_service.dart';
 import 'package:client_leger/services/websocket_service.dart';
+import 'package:client_leger/widgets/friends_list.dart';
 import 'package:client_leger/widgets/pending_requests_list.dart';
 import 'package:client_leger/widgets/search_bar.dart';
 import 'package:client_leger/widgets/user_list.dart';
@@ -47,14 +48,19 @@ class FriendsController extends GetxController {
     print(items);
     widgetOptions = <Widget>[
       // UserList(items: filterUsersListBy(searchInput.value, userService.friends.value)),
+      // Column(children: [
+      //   SearchBar(searchInput, 'friends'),
+      //   Expanded(child: Obx(() => UserList(mode: 'friendList', inputSearch: searchInput, items: usersService.getOnlineFriendUsernames())))
+      //   // Expanded(child: UserList(inputSearch: searchInput, items: usersService.users.value))
+      // ]),
+      // Column(children: [
+      //   SearchBar(searchInput, 'friends'),
+      //   Expanded(child: Obx(() => UserList(mode: 'friendList', inputSearch: searchInput, items: userService.friends.value)))
+      // ]),
       Column(children: [
         SearchBar(searchInput, 'friends'),
-        Expanded(child: Obx(() => UserList(mode: 'friendList', inputSearch: searchInput, items: userService.friends.value)))
+        Expanded(child: Obx(() => FriendsList(inputSearch: searchInput, items: usersService.getOnlineFriendUsernames())))
         // Expanded(child: UserList(inputSearch: searchInput, items: usersService.users.value))
-      ]),
-      Column(children: [
-        SearchBar(searchInput, 'friends'),
-        Expanded(child: UserList(mode: 'friendList', inputSearch: searchInput, items: items2))
       ]),
       // UserList(items: userService.friends.value),
       // UserList(items: items2),
