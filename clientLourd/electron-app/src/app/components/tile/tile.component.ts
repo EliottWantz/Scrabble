@@ -19,7 +19,7 @@ export class TileComponent {
     @ViewChild('elem') element!: ElementRef;
 
     clicked(): void {
-        if (!this.disabled) {
+        if (!this.disabled && this.checkIfTurn()) {
             console.log("clicked");
             if (this.alreadyClicked) {
                 this.renderer.setStyle(this.element.nativeElement, "outline-color", "#e6d9b7");
