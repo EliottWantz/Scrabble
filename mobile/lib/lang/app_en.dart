@@ -174,5 +174,12 @@ const Map<String, String> en_US = {
   "rules-slider-page.exchange": "Exchange",
   "rules-slider-page.hint": "Hint",
   "rules-slider-page.click": "Click",
-  "rules-slider-page.finish": "Finish"
+  "rules-slider-page.finish": "Finish",
+  "create-room-screen.canal": "CREATE A PUBLIC CHANNEL"
+  "create-room-screen.canal-join": "JOIN A PUBLIC CHANNEL"
+  "create-room-screen.create-canal": "Create channel"
+  "create-room-screen.placeholder": "Enter chanel name"
+  "create-room-screen.placeholder-validation": "The field cannot be empty",
+  "chat-screen.message-hint": "Enter a message..."
+  "chat-screen.quit-channel": "Quit the channel"
 };

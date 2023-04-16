@@ -30,21 +30,21 @@ class FriendsScreen extends GetView<FriendsController> {
                   Icons.people_alt,
                   color: Colors.green
               ),
-              label: 'All',
+              label: 'social-component.all'.tr,
             ),
             BottomNavigationBarItem(
               icon: Icon(
                   Icons.check,
                   color: Colors.green
               ),
-              label: 'Pending',
+              label: 'social-component.waiting'.tr,
             ),
             BottomNavigationBarItem(
               icon: Icon(
                   Icons.add,
                   color: Colors.green
               ),
-              label: 'Add Friend',
+              label: 'social-component.add'.tr,
             ),
           ],
           currentIndex: controller.selectedIndex.value,

@@ -25,7 +25,7 @@ class ExploreRoomsScreen extends StatelessWidget {
                 alignment: Alignment.topLeft,
                 child: Padding(
                   padding: EdgeInsets.all(8),
-                  child: Text('REJOINGNEZ UN CANAL PUBLIC',
+                  child: Text('create-room-screen.canal-join'.tr,
                       style:
                       TextStyle(fontWeight: FontWeight.bold, fontSize: 30)),
                 )),

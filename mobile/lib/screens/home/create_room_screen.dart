@@ -35,7 +35,7 @@ class CreateRoomScreen extends StatelessWidget {
                         alignment: Alignment.topLeft,
                         child: Padding(
                           padding: EdgeInsets.all(8),
-                          child: Text('CRÉEZ UN CANAL PUBLIC',
+                          child: Text('create-room-screen.canal'.tr,
                               style:
                               TextStyle(fontWeight: FontWeight.bold, fontSize: 30)),
                         )),
@@ -46,9 +46,9 @@ class CreateRoomScreen extends StatelessWidget {
                         child: InputField(
                             controller: newRoomController,
                             keyboardType: TextInputType.text,
-                            placeholder: 'Entrez le nom du canal',
+                            placeholder: 'create-room-screen.placeholder'.tr,
                             validator: ValidationBuilder(
-                                requiredMessage: 'Le champ ne peut pas être vide')
+                                requiredMessage: 'create-room-screen.placeholder-validation'.tr)
                                 .build()
                         ),
                       ),
@@ -79,7 +79,7 @@ class CreateRoomScreen extends StatelessWidget {
                           size: 50,
                         ),
                       ),
-                      label: const Text('Créer le canal'), // <-- Text
+                      label: const Text('create-room-screen.create-canal'.tr), // <-- Text
                     ),
                     const Gap(20)
                   ],

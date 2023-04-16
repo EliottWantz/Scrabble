@@ -179,5 +179,12 @@ const Map<String, String> fr_FR = {
   "rules-slider-page.exchange": "Échange",
   "rules-slider-page.hint": "Indice",
   "rules-slider-page.click": "Cliquer",
-  "rules-slider-page.finish": "Finir"
+  "rules-slider-page.finish": "Finir",
+  "create-room-screen.canal": "CRÉEZ UN CANAL PUBLIC"
+  "create-room-screen.canal-join": "REJOINGNEZ UN CANAL PUBLIC"
+  "create-room-screen.create-canal": "Créer le canal"
+  "create-room-screen.placeholder": "Entrez le nom du canal"
+  "create-room-screen.placeholder-validation": "Le champ ne peut pas être vide"
+  "chat-screen.message-hint": "Entrez un message...",
+  "chat-screen.quit-channel": "Quitter le canal",
 };
