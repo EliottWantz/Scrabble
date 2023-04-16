@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:client_leger/models/avatar.dart';
 
 class NetworkLogs {
@@ -20,7 +18,7 @@ class NetworkLogs {
 }
 
 class GamesStats {
-  int gameStartTime;
+  int? gameStartTime;
   int gameEndTime;
   bool? gameWon;
 
