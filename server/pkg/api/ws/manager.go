@@ -518,15 +518,18 @@ func (m *Manager) RemoveClientFromGame(c *Client, gID string) error {
 			return nil
 		}
 		// Game has started, replace player with a bot
-		if err := c.Manager.ReplacePlayerWithBot(g.ID, c.UserId); err != nil {
+		if err := m.ReplacePlayerWithBot(g.ID, c.UserId); err != nil {
 			slog.Error("replace player with bot", err)
 		}
-		if err := c.Manager.UserSvc.Repo.UnSetJoinedGame(c.UserId); err != nil {
+		if err := m.UserSvc.Repo.UnSetJoinedGame(c.UserId); err != nil {
 			slog.Error("remove user from game room", err)
 		}
 	}
 	if err := r.BroadcastLeaveGamePackets(c, g.ID); err != nil {
 		slog.Error("broadcast leave game packets", err)
+	}
+	if err := m.BroadcastObservableGames(); err != nil {
+		slog.Error("broadcast observable games", err)
 	}
 
 	return nil
