@@ -12,7 +12,7 @@
         <h3>{{player.username}}</h3>
         <p>Score : {{player.score}}</p>
         <button mat-raised-button color="primary" style="margin-bottom: 1%; margin-right: 1%;" (click)="switchRack(i)" [disabled]="i === currentRack ? true : false">{{"game-observe-page.show" | translate}}</button>
-        <button *ngIf="player.isBot" mat-raised-button color="primary" (click)="takePlace()">{{"game-observe-page.replace" | translate}}</button>
+        <button *ngIf="player.isBot" mat-raised-button color="primary" (click)="takePlace(player.id)">{{"game-observe-page.replace" | translate}}</button>
       </div>
     </div>
   </div>

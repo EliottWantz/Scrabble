@@ -29,11 +29,11 @@ export class GameObservePageComponent implements OnInit {
     racks: Rack[] = [];
     currentRack = 0;
     isOver = false;
-    
+
     constructor(private gameService: GameService, private userService: UserService, private moveService: MoveService, private storageService: StorageService,
         private socketService: WebSocketService, private router: Router, private themeService: ThemeService) {
-            this.language = this.themeService.language;
-        }
+        this.language = this.themeService.language;
+    }
 
     ngOnInit(): void {
         this.game = this.gameService.scrabbleGame;
@@ -48,21 +48,20 @@ export class GameObservePageComponent implements OnInit {
         //this.moves = this.gameService.moves;
         this.themeService.theme.subscribe((theme) => {
             if (theme == 'dark') {
-              this.lightDarkToggleIcon = this.darkThemeIcon;
+                this.lightDarkToggleIcon = this.darkThemeIcon;
             } else {
-              this.lightDarkToggleIcon = this.lightThemeIcon;
+                this.lightDarkToggleIcon = this.lightThemeIcon;
             }
         });
         this.gameService.tournament.subscribe((tournament) => {
-            if(tournament?.poolGames[0].id===this.gameService.game.value?.id)
-            {
-                if(tournament?.poolGames[0].winnerId){
+            if (tournament?.poolGames[0].id === this.gameService.game.value?.id) {
+                if (tournament?.poolGames[0].winnerId) {
                     this.isOver = true;
                     console.log("bruh");
                 }
             }
-            else{
-                if(tournament?.poolGames[1].winnerId){
+            else {
+                if (tournament?.poolGames[1].winnerId) {
                     this.isOver = true;
                     console.log("bruh");
                 }
@@ -76,12 +75,12 @@ export class GameObservePageComponent implements OnInit {
             return avatar;
         return "";
     }
-    
+
     leave(): void {
         if (this.gameService.tournament.value) {
             this.leaveTournament();
         }
-        else{
+        else {
             this.leaveGame();
         }
     }
@@ -118,7 +117,7 @@ export class GameObservePageComponent implements OnInit {
     }*/
 
     leaveTournament(): void {
-        if(this.gameService.tournament.value){
+        if (this.gameService.tournament.value) {
             const payload: LeaveTournamentAsObserverPayload = {
                 tournamentId: this.gameService.tournament.value?.id
             };
@@ -132,13 +131,13 @@ export class GameObservePageComponent implements OnInit {
 
     public doToggleLightDark() {
         this.themeService.switchTheme();
-      }
-    
-      switchLanguage() {
-        this.themeService.switchLanguage();
-      }
+    }
 
-      getASCII(tile: Tile): string {
+    switchLanguage() {
+        this.themeService.switchLanguage();
+    }
+
+    getASCII(tile: Tile): string {
         return String.fromCharCode(tile.letter);
     }
 
@@ -146,11 +145,13 @@ export class GameObservePageComponent implements OnInit {
         this.currentRack = index;
     }
 
-    takePlace(): void {
+    takePlace(botId: string): void {
         if (this.game.value) {
             this.gameService.isObserving = false;
             const payload: ReplaceBotByObserverPayload = {
-                gameId: this.game.value.id
+                gameId: this.game.value.id,
+                botId: botId
+
             };
             this.socketService.send("replace-bot-by-observer", payload);
             this.router.navigate(["/game"]);
