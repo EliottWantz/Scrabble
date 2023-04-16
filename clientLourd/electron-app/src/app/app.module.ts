@@ -69,6 +69,7 @@ import { FriendStatsComponent } from './components/friend-stats/friend-stats.com
 import { NewDmRoomComponent } from './components/new-dm-room/new-dm-room.component';
 import { MatBadgeModule } from '@angular/material/badge';
 import { ExploreComponent } from './components/explore/explore.component';
+import { LoadingScreenComponent } from './components/loading-screen/loading-screen.component';
 
 @NgModule({
   declarations: [
@@ -111,6 +112,7 @@ import { ExploreComponent } from './components/explore/explore.component';
     FriendStatsComponent,
     NewDmRoomComponent,
     ExploreComponent,
+    LoadingScreenComponent,
   ],
   imports: [
     BrowserModule,

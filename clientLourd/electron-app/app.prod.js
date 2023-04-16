@@ -1,45 +1,104 @@
-const { app, BrowserWindow } = require('electron');
-
+const { app, BrowserWindow, ipcMain } = require("electron");
 let appWindow;
+let chatWindow;
+let userData;
 
 function initWindow() {
-    appWindow = new BrowserWindow({
-        // fullscreen: true,
-        height: 800,
-        width: 1000,
-        webPreferences: {
-            nodeIntegration: true,
-        },
-    });
+  appWindow = new BrowserWindow({
+    // fullscreen: true,
+    height: 800,
+    width: 1000,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+    },
+  });
 
-    appWindow.maximize();
+  // Electron Build Path
+  const path = `http://localhost:4200`;
+  appWindow.loadURL(path);
 
-    // Electron Build Path
-    const path = `http://localhost:4200`;
-    appWindow.loadURL(path);
+  appWindow.setMenuBarVisibility(false);
 
-    appWindow.setMenuBarVisibility(false)
+  // Initialize the DevTools.
+  appWindow.webContents.openDevTools();
 
-    // Initialize the DevTools.
-    appWindow.webContents.openDevTools()
-
-    appWindow.on('closed', function () {
-        appWindow = null;
-    });
+  appWindow.on("closed", function () {
+    if (chatWindow) {
+      chatWindow.destroy();
+    }
+    chatWindow = null;
+    if (appWindow) {
+      appWindow.destroy();
+    }
+    appWindow = null;
+    app.quit();
+  });
 }
 
-app.on('ready', initWindow);
+function openChatwindow() {
+  if (!appWindow) {
+    return;
+  }
+  chatWindow = new BrowserWindow({
+    height: 600,
+    width: 800,
+    show: false,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+    },
+  });
+
+  chatWindow.loadURL("http://localhost:4200/chatbox");
+  chatWindow.setMenuBarVisibility(false);
+  chatWindow.webContents.openDevTools();
+
+  chatWindow.on("close", function (event) {
+    event.preventDefault();
+    appWindow.webContents.send("close-chat");
+    chatWindow.hide();
+  });
+}
+
+app.on("ready", initWindow);
 
 // Close when all windows are closed.
-app.on('window-all-closed', function () {
-    // On macOS specific close process
-    if (process.platform !== 'darwin') {
-        app.quit();
-    }
+app.on("window-all-closed", function () {
+  // On macOS specific close process
+  if (process.platform !== "darwin") {
+    app.quit();
+  }
 });
 
-app.on('activate', function () {
-    if (appWindow === null) {
-        initWindow();
-    }
+app.on("activate", function () {
+  if (appWindow === null) {
+    initWindow();
+    openChatwindow();
+  }
+});
+
+ipcMain.on("open-chat", (event, data) => {
+  appWindow.webContents.send("open-chat");
+  if (chatWindow == null) {
+    openChatwindow();
+  }
+  userData = data;
+  chatWindow.show();
+});
+
+ipcMain.on("request-user-data", (event, data) => {
+  if (chatWindow == null) return;
+  chatWindow.webContents.send("user-data", userData);
+});
+
+ipcMain.on("logout", (event, data) => {
+  if (chatWindow) {
+    chatWindow.destroy();
+  }
+});
+
+ipcMain.on("get-room", (event, data) => {
+  if (chatWindow == null) return;
+  chatWindow.webContents.send("get-room-reply", userData);
 });
