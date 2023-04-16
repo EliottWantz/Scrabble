@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
+import 'package:giphy_picker/giphy_picker.dart';
 
 import '../models/chat_message_payload.dart';
 
@@ -12,6 +13,8 @@ class ChatScreen extends GetView<ChatController> {
   ChatScreen({
     Key? key,
   }) : super(key: key);
+
+  Rx<GiphyGif?> _gif = null.obs;
 
   // final List<String> messages = [
   //   'message1',
@@ -50,7 +53,8 @@ class ChatScreen extends GetView<ChatController> {
       scrollDown();
     });
 
-    return Obx(() => Column(children: [
+    return _gif.value == null
+        ? Obx(() => Column(children: [
           _buildChatScreenHeader(),
           Expanded(
               child: Center(
@@ -159,35 +163,68 @@ class ChatScreen extends GetView<ChatController> {
             padding: const EdgeInsets.all(8),
             // color: Colors.amber,
             // child: const Center(child: Text('Your super cool Footer')),
-            child: TextField(
-              controller: controller.messageController,
-              keyboardType: TextInputType.text,
-              focusNode: messageInputFocusNode,
-              onSubmitted: (_) {
-                controller.sendMessage();
-                messageInputFocusNode.requestFocus();
-              },
-              decoration: InputDecoration(
-                  hintText: "Entrez un message...",
-                  suffixIcon: IconButton(
-                      icon: Icon(Icons.send),
-                      onPressed: () {
-                        controller.sendMessage();
-                        messageInputFocusNode.requestFocus();
-                      },
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 845,
+                  child: TextField(
+                    controller: controller.messageController,
+                    keyboardType: TextInputType.text,
+                    focusNode: messageInputFocusNode,
+                    onSubmitted: (_) {
+                      controller.sendMessage();
+                      messageInputFocusNode.requestFocus();
+                    },
+                    decoration: InputDecoration(
+                        hintText: "Entrez un message...",
+                        suffixIcon: IconButton(
+                          icon: Icon(Icons.send),
+                          onPressed: () {
+                            controller.sendMessage();
+                            messageInputFocusNode.requestFocus();
+                          },
+                        ),
+                        suffixIconColor: Color.fromARGB(255, 98, 0, 238),
+                        border: OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(8)))),
                   ),
-                  suffixIconColor: Color.fromARGB(255,98,0,238),
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(8)))),
+                ),
+                IconButton(
+                  icon: Icon(Icons.gif_box, size: 50),
+                  color: Color.fromARGB(255, 98, 0, 238),
+                  onPressed: () async {
+                    final gif = await GiphyPicker.pickGif(
+                      context: context,
+                      fullScreenDialog: false,
+                      apiKey: 'xTfFWsRO0C50ULkBM1LYJ1aLk8olttNV',
+                      showPreviewPage: true,
+                      // decorator: GiphyDecorator(
+                      //   showAppBar: false,
+                      //   searchElevation: 4,
+                      //   giphyTheme: ThemeData.dark(),
+                      // ),
+                    );
+                    if(gif != null){
+                      // _gif.value = gif;
+                      // controller.messageController.text = gif;
+                      controller.sendMessage();
+                      messageInputFocusNode.requestFocus();
+                    }
+                  },
+                )
+              ],
             ),
           )
-        ]));
+        ]))
+        : SizedBox();
   }
 
   Widget _buildChatScreenHeader() {
     if (controller.roomService
-        .getRoomNameByRoomId(controller.roomService.currentRoomId)
-        .contains('/') || controller.roomService.currentRoomId == 'global') {
+            .getRoomNameByRoomId(controller.roomService.currentRoomId)
+            .contains('/') ||
+        controller.roomService.currentRoomId == 'global') {
       return const SizedBox(height: 0, width: 0);
     } else {
       return Row(
@@ -195,11 +232,12 @@ class ChatScreen extends GetView<ChatController> {
           Padding(
             padding: EdgeInsets.all(16),
             child: ElevatedButton.icon(
-                onPressed: () {
-                  controller.websocketService.leaveChatRoom(controller.roomService.currentRoomId);
-                },
-                icon: const Icon(Icons.exit_to_app,size: 50),
-                label: Text('Quitter le canal'),
+              onPressed: () {
+                controller.websocketService
+                    .leaveChatRoom(controller.roomService.currentRoomId);
+              },
+              icon: const Icon(Icons.exit_to_app, size: 50),
+              label: Text('Quitter le canal'),
             ),
           )
         ],
