@@ -1,8 +1,7 @@
 <mat-dialog-content id="container">
     <p *ngIf="data.isWinner">{{"tournament-over-component.congrats" | translate}}</p>
     <p *ngIf="!data.isWinner">{{"tournament-over-component.over" | translate}}</p>
-  <button mat-flat-button color="primary" (click)="close()">
-    <mat-icon>input</mat-icon>
+  <button color="primary" (click)="close()">
     {{"game-page-tournament.menu" | translate}}
   </button>
 </mat-dialog-content>

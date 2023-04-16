@@ -1,18 +1,16 @@
 <mat-dialog-content id="container">
-    <div *ngIf="!data.isObserving">
+    <div *ngIf="!data.isObserving" id="container">
         <p *ngIf="data.isWinner">{{"game-page-tournament.won" | translate}}</p>
         <p *ngIf="!data.isWinner">{{"game-page-tournament.lost" | translate}}</p>
-        <button mat-flat-button color="primary" (click)="close()">
-            <mat-icon>input</mat-icon>
+        <button color="primary" (click)="close()">
             {{"game-page-tournament.menu" | translate}}
         </button>
     </div>
         
 
-        <div *ngIf="data.isObserving">
+        <div *ngIf="data.isObserving"  id="container">
             <p>{{"game-page-tournament.observe" | translate}}</p>
-            <button mat-flat-button color="primary" (click)="close()">
-                <mat-icon>input</mat-icon>
+            <button color="primary" (click)="close()">
                 {{"game-page-tournament.menu" | translate}}
             </button>
         </div>
