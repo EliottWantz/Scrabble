@@ -191,6 +191,8 @@
   "rules-slider-page.hint": "Hint",
   "rules-slider-page.click": "Click",
   "rules-slider-page.finish": "Finish",
+  "join-game-component.virtual": "Number of virtual players",
+  "join-game-component.observers": "Number of spectators",
   "social-component.see-friendStats": "See friend stats",
   "social-page.create-group": "Create a group Chat",
   "social-page.explore": "Explore groups",

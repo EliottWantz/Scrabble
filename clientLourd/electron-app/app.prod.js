@@ -16,7 +16,7 @@ function initWindow() {
 
   appWindow.setMenuBarVisibility(false);
   // Electron Build Path
-  const path = `file://${__dirname}/dist/electron-app/index.html`;
+  const path = `http://localhost:4200`;
   appWindow.loadURL(path);
 
   // Initialize the DevTools.

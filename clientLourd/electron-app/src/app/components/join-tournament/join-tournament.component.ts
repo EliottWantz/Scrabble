@@ -65,6 +65,10 @@ export class JoinTournamentComponent implements OnInit {
         }
     }
 
+    getNumberOfObservers(tournament: Tournament): number {
+        return tournament.observerIds.length;
+    }
+
     getUserNames(ids: string[]): string[] {
         const names = [];
         for (const id of ids) {
@@ -108,7 +112,7 @@ export class JoinTournamentComponent implements OnInit {
                 tournamentId: tournament.id,
                 password: ""
             }
-            const event : ClientEvent = "join-game";
+            const event : ClientEvent = "join-tournament";
             this.webSocketService.send(event, payload);
             this.close();
         } else {

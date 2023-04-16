@@ -64,6 +64,18 @@ export class JoinGameComponent implements OnInit {
         }
     }
 
+    getNumberOfBots(game: Game): number {
+        if (game.botNames)
+            return game.botNames.length;
+        return 0;
+    }
+
+    getNumberOfObservers(game: Game): number {
+        if (game.observateurIds)
+            return game.observateurIds.length;
+        return 0;
+    }
+
     getUserNames(ids: string[]): string[] {
         const names = [];
         for (const id of ids) {

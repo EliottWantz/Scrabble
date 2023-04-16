@@ -100,14 +100,12 @@ export class CommunicationService {
 
   requestUploadAvatar(
     id: string,
-    file: File
+    avatar: FormData
   ): Observable<{ url: string; fileId: string }> {
-    const formData = new FormData();
-    formData.append('avatar', file);
     return this.http
       .post<{ url: string; fileId: string }>(
         `${this.baseUrl}/user/avatar/${id}`,
-        formData
+        avatar
       )
       .pipe(
         catchError(

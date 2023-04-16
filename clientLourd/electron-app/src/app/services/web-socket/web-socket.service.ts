@@ -43,6 +43,7 @@ import {
   UserLeftRoomPayload,
   UserLeftTournamentPayload,
   UserRequestToJoinGamePayload,
+  UserRequestToJoinTournamentPayload,
 } from '@app/utils/interfaces/packet';
 import { RoomService } from '@app/services/room/room.service';
 import { ChatMessage } from '@app/utils/interfaces/chat-message';
@@ -266,8 +267,9 @@ export class WebSocketService {
             name: "Game",
             userIds: joinedGamePayload.game.userIds,
             messages: [],
-          } 
-          this.roomService.addRoom(newRoom);
+          }
+          if (!this.gameService.tournament.value)
+            this.roomService.addRoom(newRoom);
           //this.roomService.currentRoomChat.next(newRoom);
           this.router.navigate(["/waitingRoom"]);
           break;
@@ -471,6 +473,23 @@ export class WebSocketService {
         break;
       }
 
+      case 'userRequestToJoinTournament': {
+        const payload = packet.payload as UserRequestToJoinTournamentPayload;
+        if (
+          this.gameService.tournament.value &&
+          this.gameService.tournament.value.id == payload.tournamentId &&
+          this.gameService.tournament.value.userIds.length < 4 &&
+          this.gameService.tournament.value.creatorId ==
+          this.userService.currentUserValue.id
+        ) {
+          this.gameService.usersWaiting.next([
+            ...this.gameService.usersWaiting.value,
+            { userId: payload.userId, username: payload.username },
+          ]);
+        }
+        break;
+      }
+
       case 'userRequestToJoinGameAccepted': {
         break;
       }
@@ -507,6 +526,14 @@ export class WebSocketService {
         this.gameService.game.next(payload.game);
         this.gameService.scrabbleGame.next(payload.gameUpdate);
         this.gameService.isObserving = true;
+        const newRoom: Room = {
+          id: payload.game.id,
+          name: "Game",
+          userIds: payload.game.userIds,
+          messages: [],
+        }
+        if (!this.gameService.tournament.value)
+          this.roomService.addRoom(newRoom);
         this.router.navigate(["/gameObserve"]);
         break;
       }

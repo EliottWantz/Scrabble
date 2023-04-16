@@ -28,17 +28,42 @@ export class ProfilModificationComponent implements OnInit {
     this.user.subscribe(() => {
       this.user = this.userSvc.subjectUser;
     });
+
+    this.userSvc.tempAvatar.subscribe((formData) => {
+      if (formData.has("avatarUrl")) {
+        document.getElementById('avatar')?.setAttribute('src', formData.get("avatarUrl") as string);
+      }
+    });
   }
 
   onFileSelected(event: any): void {
     this.selectedFile = event.target.files[0] ?? null;
     document.getElementById('avatar')?.setAttribute('src', URL.createObjectURL(this.selectedFile));
+    if (this.userSvc.tempAvatar.value.has("avatarUrl")) {
+      const newAvatar = this.userSvc.tempAvatar.value;
+      newAvatar.delete("avatarUrl");
+      this.userSvc.tempAvatar.next(newAvatar);
+    }
+      
+    if (this.userSvc.tempAvatar.value.has("fileId")) {
+      const newAvatar = this.userSvc.tempAvatar.value;
+      newAvatar.delete("fileId");
+      this.userSvc.tempAvatar.next(newAvatar);
+    }
+
+    if (this.selectedFile['type'] != "image/png" && this.selectedFile['type'] != "image/jpeg" && this.selectedFile['type'] != "image/jpg") {
+      console.log("wrong type");
+    } else {
+      const newAvatar = this.userSvc.tempAvatar.value;
+      newAvatar.set("avatar", this.selectedFile);
+      this.userSvc.tempAvatar.next(newAvatar);
+    }
   }
 
   submitAvatar(): void {
-    if (this.selectedFile.name != '') {
+    if (this.userSvc.tempAvatar.value.has("avatar") || this.userSvc.tempAvatar.value.has("avatarUrl")) {
       this.comSvc
-        .requestUploadAvatar(this.userSvc.subjectUser.value.id, this.selectedFile)
+        .requestUploadAvatar(this.userSvc.subjectUser.value.id, this.userSvc.tempAvatar.value)
         .subscribe((res) => {
           this.userSvc.subjectUser.next({
             ...this.userSvc.subjectUser.value,

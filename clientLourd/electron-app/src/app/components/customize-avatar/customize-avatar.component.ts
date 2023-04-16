@@ -10,6 +10,7 @@ import { ClientEvent } from "@app/utils/events/client-events";
 import { Game } from "@app/utils/interfaces/game/game";
 import { JoinGamePayload } from "@app/utils/interfaces/packet";
 import { BehaviorSubject } from "rxjs";
+import { UserService } from "@app/services/user/user.service";
 
 @Component({
     selector: "app-customize-avatar",
@@ -64,7 +65,8 @@ export class CustomizeAvatarComponent {
         ninthCtrl: ['', Validators.required],
     });
     error = false;
-    constructor(public dialogRef: MatDialogRef<CustomizeAvatarComponent>, private formBuilder: FormBuilder, private communicationService: CommunicationService, private authService: AuthenticationService) {
+    constructor(public dialogRef: MatDialogRef<CustomizeAvatarComponent>, private formBuilder: FormBuilder, private communicationService: CommunicationService,
+        private authService: AuthenticationService, private userService: UserService) {
     }
 
     chooseSkinColor(index: number): void {
@@ -78,7 +80,7 @@ export class CustomizeAvatarComponent {
     async submitAvatar(): Promise<void> {
         const res = this.communicationService.getCustomAvatar(this.gender, this.skinColors[this.selectedSkinColor], this.hairType, this.hairColor, this.accessories, this.eyebrows, this.facialHair, this.eyes, this.facialHairColor, this.mouth, this.backgroundColors[this.selectedBackgroundColor]).subscribe({
             error: (err) => {
-                if (err.status == 200) {
+                if (err.url) {
                     this.error = false;
                     //console.log(err);
                     const formData = this.authService.tempUserLogin.value;
@@ -88,6 +90,7 @@ export class CustomizeAvatarComponent {
                         formData.delete("fileId");
                     formData.set("avatarUrl", err.url);
                     this.authService.tempUserLogin.next(formData);
+                    this.userService.tempAvatar.next(formData);
                     this.dialogRef.close();
                 } else {
                     this.error = true;
