@@ -111,7 +111,6 @@ type CreateTournamentPayload struct {
 
 type JoinTournamentPayload struct {
 	TournamentID string `json:"tournamentId"`
-	Password     string `json:"password,omitempty"`
 }
 
 type JoinTournamentAsObserverPayload struct {

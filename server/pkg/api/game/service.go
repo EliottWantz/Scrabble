@@ -148,7 +148,7 @@ func (s *Service) AddUserToGame(gID, userID, password string) (*Game, error) {
 	return g, nil
 }
 
-func (s *Service) AddUserToTournament(tID, userID, password string) (*Tournament, error) {
+func (s *Service) AddUserToTournament(tID, userID string) (*Tournament, error) {
 	t, err := s.Repo.FindTournament(tID)
 	if err != nil {
 		return nil, err
@@ -327,6 +327,16 @@ func (s *Service) ReplacePlayerWithBot(gID, pID string) (*Game, error) {
 
 	p.IsBot = true
 	p.Username = "Bot " + p.Username
+
+	userIdx := 0
+	for i, userID := range g.UserIDs {
+		if userID == pID {
+			userIdx = i
+			break
+		}
+	}
+	g.UserIDs = append(g.UserIDs, g.UserIDs[:userIdx]...)
+	g.BotNames = append(g.BotNames, p.Username)
 
 	return g, nil
 }

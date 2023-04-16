@@ -524,6 +524,17 @@ func (m *Manager) RemoveClientFromGame(c *Client, gID string) error {
 		if err := m.UserSvc.Repo.UnSetJoinedGame(c.UserId); err != nil {
 			slog.Error("remove user from game room", err)
 		}
+		{
+			// Broadcast update game packet
+			p, err := NewGameUpdatePacket(GameUpdatePayload{
+				Game: makeGameUpdatePayload(g),
+			})
+			if err != nil {
+				slog.Error("create update game packet", err)
+			} else {
+				r.Broadcast(p)
+			}
+		}
 	}
 	if err := r.BroadcastLeaveGamePackets(c, g.ID); err != nil {
 		slog.Error("broadcast leave game packets", err)
