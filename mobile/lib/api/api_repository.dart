@@ -12,8 +12,6 @@ import 'package:client_leger/models/requests/upload_avatar_request.dart';
 import 'package:client_leger/models/response/login_response.dart';
 import 'package:client_leger/models/response/register_response.dart';
 import 'package:client_leger/models/user.dart';
-import 'package:client_leger/services/game_service.dart';
-import 'package:client_leger/services/storage_service.dart';
 import 'package:client_leger/services/user_service.dart';
 import 'package:get/get.dart';
 
@@ -184,7 +182,8 @@ class ApiRepository {
     return null;
   }
 
-  Future<bool?> declineJoinGameRequest(AcceptJoinGameRequest requestData) async {
+  Future<bool?> declineJoinGameRequest(
+      AcceptJoinGameRequest requestData) async {
     final res = await apiProvider.declineJoinGameRequest(
       '/game/accept/${userService.user.value!.id}/${requestData.userId}/${requestData.gameId}',
       // headers
@@ -207,7 +206,8 @@ class ApiRepository {
   }
 
   Future<List<User>?> onlineFriends() async {
-    final res = await apiProvider.onlineFriends('/user/friends/online/${userService.user.value!.id}');
+    final res = await apiProvider
+        .onlineFriends('/user/friends/online/${userService.user.value!.id}');
     if (res.statusCode == 200) {
       return List<User>.from(
           (res.body['friends'] as List).map((user) => User.fromJson(user)));
@@ -224,7 +224,8 @@ class ApiRepository {
   }
 
   Future<bool?> acceptGameInvite(GameInviteRequest data) async {
-    final res = await apiProvider.acceptGameInvite('/user/friends/game/accept-invite', data);
+    final res = await apiProvider.acceptGameInvite(
+        '/user/friends/game/accept-invite', data);
     if (res.statusCode == 200) {
       return true;
     }
