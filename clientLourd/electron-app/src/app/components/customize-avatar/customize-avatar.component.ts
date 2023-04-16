@@ -90,7 +90,7 @@ export class CustomizeAvatarComponent {
                         formData.delete("fileId");
                     formData.set("avatarUrl", err.url);
                     this.authService.tempUserLogin.next(formData);
-                    this.userService.tempAvatar = formData;
+                    this.userService.tempAvatar.next(formData);
                     this.dialogRef.close();
                 } else {
                     this.error = true;
