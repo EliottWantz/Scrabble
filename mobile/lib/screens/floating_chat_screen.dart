@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:giphy_picker/giphy_picker.dart';
 
 import '../controllers/chat_controller.dart';
 import '../services/room_service.dart';
@@ -14,6 +15,8 @@ class FloatingChatScreen extends GetView<ChatController> {
     Key? key,
   })  : _selectedChatRoom = selectedChatRoom,
         super(key: key);
+
+  Rx<GiphyGif?> _gif = null.obs;
 
   final RoomService _roomService = Get.find();
 
@@ -141,26 +144,57 @@ class FloatingChatScreen extends GetView<ChatController> {
               child: Padding(
                 padding: EdgeInsets.only(
                     bottom: MediaQuery.of(context).viewInsets.bottom),
-                child: TextField(
-                  controller: controller.messageController,
-                  keyboardType: TextInputType.text,
-                  focusNode: messageInputFocusNode,
-                  onSubmitted: (_) {
-                    controller.sendMessageToCurrentFloatingChatRoom();
-                    messageInputFocusNode.requestFocus();
-                  },
-                  decoration: InputDecoration(
-                      hintText: "Entrez un message...",
-                      suffixIcon: IconButton(
-                        icon: Icon(Icons.send),
-                        onPressed: () {
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 220,
+                      child: TextField(
+                        controller: controller.messageController,
+                        keyboardType: TextInputType.text,
+                        focusNode: messageInputFocusNode,
+                        onSubmitted: (_) {
                           controller.sendMessageToCurrentFloatingChatRoom();
                           messageInputFocusNode.requestFocus();
                         },
+                        decoration: InputDecoration(
+                            hintText: "Entrez un message...",
+                            suffixIcon: IconButton(
+                              icon: Icon(Icons.send),
+                              onPressed: () {
+                                controller.sendMessageToCurrentFloatingChatRoom();
+                                messageInputFocusNode.requestFocus();
+                              },
+                            ),
+                            suffixIconColor: Color.fromARGB(255, 98, 0, 238),
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.all(Radius.circular(8)))),
                       ),
-                      suffixIconColor: Color.fromARGB(255, 98, 0, 238),
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(8)))),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.gif_box, size: 40),
+                      color: Color.fromARGB(255, 98, 0, 238),
+                      onPressed: () async {
+                        final gif = await GiphyPicker.pickGif(
+                          context: context,
+                          fullScreenDialog: false,
+                          apiKey: 'xTfFWsRO0C50ULkBM1LYJ1aLk8olttNV',
+                          showPreviewPage: true,
+                          // decorator: GiphyDecorator(
+                          //   showAppBar: false,
+                          //   searchElevation: 4,
+                          //   giphyTheme: ThemeData.dark(),
+                          // ),
+                        );
+                        if (gif != null) {
+                          // _gif.value = gif;
+                          controller.messageController.text =
+                          gif.images.original!.url!;
+                          controller.sendMessageToCurrentFloatingChatRoom();
+                          messageInputFocusNode.requestFocus();
+                        }
+                      },
+                    )
+                  ],
                 ),
               ),
             )
