@@ -205,7 +205,7 @@ func (s *Service) StartGame(g *Game) error {
 	if humanPlayers < 2 {
 		return errors.New("must have at least 2 players")
 	}
-	slog.Info("Starting game", "ID", g.ID, "human", humanPlayers, "ai", len(g.BotNames))
+	slog.Info("Starting game", "ID", g.ID, "human", humanPlayers, "ai", 4-humanPlayers)
 
 	g.ScrabbleGame = scrabble.NewGame(s.DAWG, &scrabble.HighScore{})
 	for _, uID := range g.UserIDs {
@@ -215,8 +215,8 @@ func (s *Service) StartGame(g *Game) error {
 		}
 		g.ScrabbleGame.AddPlayer(scrabble.NewPlayer(u.ID, u.Username, g.ScrabbleGame.Bag))
 	}
-	for _, botName := range g.BotNames {
-		g.ScrabbleGame.AddPlayer(scrabble.NewBot(uuid.NewString(), botName, g.ScrabbleGame.Bag))
+	for i := 0; i < 4-humanPlayers; i++ {
+		g.ScrabbleGame.AddPlayer(scrabble.NewBot(uuid.NewString(), botNames[i], g.ScrabbleGame.Bag))
 	}
 	g.ScrabbleGame.Turn = g.ScrabbleGame.PlayerToMove().ID
 

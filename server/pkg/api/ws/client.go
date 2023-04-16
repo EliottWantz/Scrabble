@@ -224,7 +224,6 @@ func (c *Client) HandleCreateRoomRequest(p *Packet) error {
 		}
 		if err := r.AddClient(client.ID); err != nil {
 			slog.Error("add client to ws room", err)
-			continue
 		}
 		if err := r.BroadcastJoinRoomPackets(client); err != nil {
 			slog.Error("broadcast join room packets", err)
@@ -333,7 +332,6 @@ func (c *Client) HandleCreateDMRoomRequest(p *Packet) error {
 		}
 		if err := r.AddClient(client.ID); err != nil {
 			slog.Error("add client to ws room", err)
-			continue
 		}
 		if err := r.BroadcastJoinDMRoomPackets(client); err != nil {
 			slog.Error("broadcast join room packets", err)
@@ -401,15 +399,12 @@ func (c *Client) HandleCreateGameRequest(p *Packet) error {
 
 		if err := r.AddClient(client.ID); err != nil {
 			slog.Error("add client to ws room", err)
-			continue
 		}
 		if err := c.Manager.UserSvc.Repo.SetJoinedGame(g.ID, client.UserId); err != nil {
 			slog.Error("add user to room", err)
-			continue
 		}
 		if err := r.BroadcastJoinGamePackets(client, g); err != nil {
 			slog.Error("broadcast join room packets", err)
-			continue
 		}
 	}
 
@@ -700,7 +695,6 @@ func (c *Client) HandleGamePrivateRequest(p *Packet) error {
 		}
 		if err := r.RemoveClient(client.ID); err != nil {
 			slog.Error("remove spectator from game room", err)
-			continue
 		}
 
 	}
@@ -762,15 +756,12 @@ func (c *Client) HandleCreateTournamentRequest(p *Packet) error {
 		}
 		if err := r.AddClient(client.ID); err != nil {
 			slog.Error("add client to room", err)
-			continue
 		}
 		if err := c.Manager.UserSvc.Repo.SetJoinedTournament(t.ID, client.UserId); err != nil {
 			slog.Error("set joined tournament", err)
-			continue
 		}
 		if err := r.BroadcastJoinTournamentPackets(client, t); err != nil {
 			slog.Error("broadcast join tournament packets", err)
-			continue
 		}
 	}
 
@@ -883,15 +874,12 @@ func (c *Client) HandleStartTournamentRequest(p *Packet) error {
 
 				if err := gameRoom.AddClient(player.ID); err != nil {
 					slog.Error("add client to room", err)
-					continue
 				}
 				if err := c.Manager.UserSvc.Repo.SetJoinedGame(g.ID, player.UserId); err != nil {
 					slog.Error("set joined game", err)
-					continue
 				}
 				if err := gameRoom.BroadcastJoinGamePackets(player, g); err != nil {
 					slog.Error("broadcast join game packets", err)
-					continue
 				}
 			}
 
