@@ -207,5 +207,9 @@ const Map<String, String> fr_FR = {
   "field-empty": "Le champ ne peut pas être vide",
   "connect-server": "Connexion au serveur",
   "classic-mode": "Mode classique",
-  "tournament-mode": "Mode Tournoi"
+  "tournament-mode": "Mode Tournoi",
+  "profile-screen.user-profile": "Profile utilisateur",
+  "profile-screen.history": "Historique des parties",
+  "profile-screen.user-activity": "Activité de l\'utilisateur",
+  "profile-screen.data-collection": "Collecte des données",
 };

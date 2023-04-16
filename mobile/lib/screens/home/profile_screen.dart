@@ -54,10 +54,10 @@ class ProfileScreen extends StatelessWidget {
             toolbarHeight: 0,
             bottom: const TabBar(
               tabs: [
-                Tab(text: 'Profil utilisateur', icon: Icon(Icons.person)),
-                Tab(text: 'Historique des parties', icon: Icon(Icons.list_alt)),
+                Tab(text: 'profile-screen.user-profile'.tr, icon: Icon(Icons.person)),
+                Tab(text: 'profile-screen.history'.tr, icon: Icon(Icons.list_alt)),
                 Tab(
-                    text: 'Activité de l\'utilisateur',
+                    text: 'profile-screen.user-activity'.tr,
                     icon: Icon(Icons.access_time)),
               ],
             ),
@@ -86,7 +86,7 @@ class ProfileScreen extends StatelessWidget {
                   children: const [
                     CircularProgressIndicator(),
                     Gap(8),
-                    Text('Collecte des données'),
+                    Text('profile-screen.data-collection'.tr),
                   ],
                 ),
               );

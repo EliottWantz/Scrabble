@@ -202,5 +202,9 @@ const Map<String, String> en_US = {
   "email-empty": "Enter a valid email",
   "connect-server": "Connection to the server",
   "classic-mode": "Classic mode",
-  "tournament-mode": "Tournament mode"
+  "tournament-mode": "Tournament mode",
+  "profile-screen.user-profile": "User profile",
+  "profile-screen.history": "Game history",
+  "profile-screen.user-activity": "User activity",
+  "profile-screen.data-collection": "Data collection",
 };
