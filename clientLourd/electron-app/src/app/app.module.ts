@@ -69,6 +69,7 @@ import { JoinPrivateTournamentComponent } from './components/join-private-tourna
 import { GameOverComponent } from '@app/components/game-over/game-over.component';
 import { GameOverTournamentComponent } from '@app/components/game-over-tournament/game-over-tournament.component';
 import { TournamentOverComponent } from '@app/components/tournament-over/tournament-over.component';
+import { FindTournamentPageComponent } from './pages/find-tournament-page/find-tournament-page.component';
 
 @NgModule({
   declarations: [
@@ -95,6 +96,7 @@ import { TournamentOverComponent } from '@app/components/tournament-over/tournam
     SocialComponent,
     WaitRoomPageComponent,
     FindGamePageComponent,
+    FindTournamentPageComponent,
     JoinGameComponent,
     JoinTournamentComponent,
     CreateGameComponent,

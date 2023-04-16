@@ -4,16 +4,16 @@
         <p *ngIf="!data.isWinner">{{"game-page-tournament.lost" | translate}}</p>
         <button mat-flat-button color="primary" (click)="close()">
             <mat-icon>input</mat-icon>
-            Back to menu
+            {{"game-page-tournament.menu" | translate}}
         </button>
     </div>
         
 
         <div *ngIf="data.isObserving">
-            <p>La partie est finie</p>
+            <p>{{"game-page-tournament.observe" | translate}}</p>
             <button mat-flat-button color="primary" (click)="close()">
                 <mat-icon>input</mat-icon>
-                Retourner menu principal
+                {{"game-page-tournament.menu" | translate}}
             </button>
         </div>
 </mat-dialog-content>

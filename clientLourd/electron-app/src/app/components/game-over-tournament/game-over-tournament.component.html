@@ -14,26 +14,26 @@
         <p>{{"game-page-tournament.won" | translate}}</p>
         <button mat-flat-button color="primary" (click)="close()">
             <mat-icon>input</mat-icon>
-            Great
+            {{"game-over-tournament.bravo" | translate}}
         </button>
     </div>
 
     <div *ngIf="data.isObserving && isTournamentOver()">
-        <p>La partie est terminé</p>
+        <p>{{"game-page-tournament.observe" | translate}}</p>
       <button mat-flat-button color="primary" (click)="leaveTournament()">
         <mat-icon>input</mat-icon>
-        retourner menu principal
+        {{"game-page-tournament.menu" | translate}}
       </button>
       <button mat-flat-button color="primary" (click)="joinTournamentAsObserver()">
         <mat-icon>input</mat-icon>
-        observer
+        {{'game-over-tournament.observer' | translate}}
       </button>
     </div>
     <div *ngIf="data.isObserving && !isTournamentOver()">
-        <p>La partie est finie</p>
+        <p>{{"game-page-tournament.observe" | translate}}</p>
         <button mat-flat-button color="primary" (click)="close()">
             <mat-icon>input</mat-icon>
-            Retourner menu principal
+            {{"game-page-tournament.menu" | translate}}
         </button>
     </div>
 </mat-dialog-content>
