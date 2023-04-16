@@ -17,25 +17,25 @@ export interface FirstMovePayload {
 }
 
 export type ClientPayload = ChatMessage
-| CreateRoomPayload
-| JoinRoomPayload
-| LeaveRoomPayload
-| CreateDMRoomPayload
-| LeaveDMRoomPayload
-| CreateGamePayload
-| JoinGamePayload
-| LeaveGamePayload
-| LeaveTournamentPayload
-| StartGamePayload
-| PlayMovePayload
-| IndicePayload
-| ReplaceBotByObserverPayload
-| FirstMovePayload
-| CreateTournamentPayload
-| JoinTournamentPayload
-| StartTournamentPayload
-| JoinTournamentAsObserverPayload
-| ListJoinableTournamentsPayload;
+    | CreateRoomPayload
+    | JoinRoomPayload
+    | LeaveRoomPayload
+    | CreateDMRoomPayload
+    | LeaveDMRoomPayload
+    | CreateGamePayload
+    | JoinGamePayload
+    | LeaveGamePayload
+    | LeaveTournamentPayload
+    | StartGamePayload
+    | PlayMovePayload
+    | IndicePayload
+    | ReplaceBotByObserverPayload
+    | FirstMovePayload
+    | CreateTournamentPayload
+    | JoinTournamentPayload
+    | StartTournamentPayload
+    | JoinTournamentAsObserverPayload
+    | ListJoinableTournamentsPayload;
 
 export interface CreateRoomPayload {
     roomName: string;
@@ -127,46 +127,47 @@ export interface IndicePayload {
 
 export interface ReplaceBotByObserverPayload {
     gameId: string;
+    botId: string;
 }
 
 export type ServerPayload = JoinedRoomPayload
-| LeftRoomPayload
-| UserJoinedRoomPayload
-| UserLeftRoomPayload
-| JoinedDMRoomPayload
-| LeftDMRoomPayload
-| UserJoinedDMRoomPayload
-| UserLeftDMRoomPayload
-| ListUsersPayload
-| NewUserPayload
-| ListChatRoomsPayload
-| ListJoinableGamesPayload
-| JoinedGamePayload
-| JoinedTournamentPayload
-| UserJoinedGamePayload
-| LeftGamePayload
-| LeftTournamentPayload
-| UserLeftGamePayload
-| UserLeftTournamentPayload
-| GameUpdatePayload
-| TimerUpdatePayload
-| GameOverPayload
-| TournamentOverPayload
-| FriendRequestPayload
-| ServerIndicePayload
-| ErrorPayload
-| ListUsersOnlinePayload
-| ListObservableGamesPayload
-| ListObservableTournamentsPayload
-| UserRequestToJoinGamePayload
-| UserRequestToJoinTournamentPayload
-| VerdictJoinGameRequestPayload
-| VerdictJoinTournamentRequestPayload
-| RevokeJoinGameRequestPayload
-| JoinedGameAsObserverPayload
-| FirstMovePayload
-| InvitedToGamePayload
-| UserJoinedTournamentPayload;
+    | LeftRoomPayload
+    | UserJoinedRoomPayload
+    | UserLeftRoomPayload
+    | JoinedDMRoomPayload
+    | LeftDMRoomPayload
+    | UserJoinedDMRoomPayload
+    | UserLeftDMRoomPayload
+    | ListUsersPayload
+    | NewUserPayload
+    | ListChatRoomsPayload
+    | ListJoinableGamesPayload
+    | JoinedGamePayload
+    | JoinedTournamentPayload
+    | UserJoinedGamePayload
+    | LeftGamePayload
+    | LeftTournamentPayload
+    | UserLeftGamePayload
+    | UserLeftTournamentPayload
+    | GameUpdatePayload
+    | TimerUpdatePayload
+    | GameOverPayload
+    | TournamentOverPayload
+    | FriendRequestPayload
+    | ServerIndicePayload
+    | ErrorPayload
+    | ListUsersOnlinePayload
+    | ListObservableGamesPayload
+    | ListObservableTournamentsPayload
+    | UserRequestToJoinGamePayload
+    | UserRequestToJoinTournamentPayload
+    | VerdictJoinGameRequestPayload
+    | VerdictJoinTournamentRequestPayload
+    | RevokeJoinGameRequestPayload
+    | JoinedGameAsObserverPayload
+    | FirstMovePayload
+    | InvitedToGamePayload
+    | UserJoinedTournamentPayload;
 
 export interface JoinedRoomPayload {
     roomId: string;
@@ -344,6 +345,6 @@ export interface JoinedGameAsObserverPayload {
 }
 
 export interface InvitedToGamePayload {
-	game: Game;
-	inviterId: string;
+    game: Game;
+    inviterId: string;
 }
