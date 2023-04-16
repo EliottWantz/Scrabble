@@ -189,5 +189,7 @@
   "rules-slider-page.exchange": "Échange",
   "rules-slider-page.hint": "Indice",
   "rules-slider-page.click": "Cliquer",
-  "rules-slider-page.finish": "Finir"
+  "rules-slider-page.finish": "Finir",
+  "join-game-component.virtual": "Nombre de joueurs virtuels",
+  "join-game-component.observers": "Nombre d'observateur"
 }

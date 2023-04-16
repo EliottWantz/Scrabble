@@ -507,6 +507,13 @@ export class WebSocketService {
         this.gameService.game.next(payload.game);
         this.gameService.scrabbleGame.next(payload.gameUpdate);
         this.gameService.isObserving = true;
+        const newRoom: Room = {
+          id: payload.game.id,
+          name: "Game",
+          userIds: payload.game.userIds,
+          messages: [],
+        } 
+        this.roomService.addRoom(newRoom);
         this.router.navigate(["/gameObserve"]);
         break;
       }
