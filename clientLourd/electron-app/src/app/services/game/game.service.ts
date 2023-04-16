@@ -186,15 +186,11 @@ export class GameService {
             if (this.tournament.value.finale && this.game.value) {
                 if (this.game.value.id === this.tournament.value.finale.id) {
                     if (winId === this.userService.currentUserValue.id) {
-                        this.dialog.open(TournamentOverComponent, {width: '80%',
-                                minHeight: '70vh',
-                                height : '50vh',
+                        this.dialog.open(TournamentOverComponent, {width: '75%',
                                 disableClose: true,
                                 data: {isWinner: true}});
                     } else {
-                        this.dialog.open(TournamentOverComponent, {width: '80%',
-                                minHeight: '70vh',
-                                height : '50vh',
+                        this.dialog.open(TournamentOverComponent, {width: '75%',
                                 disableClose: true,
                                 data: {isWinner: false}});
                     }
@@ -207,43 +203,25 @@ export class GameService {
             
             if (this.game.value && this.userService.currentUserValue.id === winId) {
                 this.hasWon = true;
-                this.dialog.open(GameOverTournamentComponent, {width: '80%',
-                                minHeight: '70vh',
-                                height : '50vh',
+                this.dialog.open(GameOverTournamentComponent, {width: '75%',
                                 disableClose: true,
                                 data: {isWinner: true, isObserving: this.isObserving, oldGameId: this.game.value.id}});
             } else if (this.game.value) {
-                this.dialog.open(GameOverTournamentComponent, {width: '80%',
-                                minHeight: '70vh',
-                                height : '50vh',
+                this.dialog.open(GameOverTournamentComponent, {width: '75%',
                                 disableClose: true,
                                 data: {isWinner: false, isObserving: this.isObserving, oldGameId: this.game.value.id}});
             }
         } else {
             if (this.game.value && this.userService.currentUserValue.id === winId) {
-                this.dialog.open(GameOverComponent, {width: '80%',
-                                minHeight: '70vh',
-                                height : '50vh',
+                this.dialog.open(GameOverComponent, {width: '75%',
                                 disableClose: true,
                                 data: {isWinner: true, isObserving: this.isObserving}});
             } else {
-                this.dialog.open(GameOverComponent, {width: '80%',
-                                minHeight: '70vh',
-                                height : '50vh',
+                this.dialog.open(GameOverComponent, {width: '75%',
                                 disableClose: true,
                                 data: {isWinner: false, isObserving: this.isObserving}});
             }
         }
-        /*let winner = undefined;
-        if(!this.scrabbleGame.value){
-            return
-        }
-        for(const user of this.scrabbleGame.value.players){
-            if(user.id === winId){
-                winner = user.username
-            }
-        }
-        this.gameWinner.next(winner);*/
     }
 
     gameOverPopupTournament(winId : string){
