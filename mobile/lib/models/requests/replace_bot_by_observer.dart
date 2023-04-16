@@ -9,7 +9,7 @@ class ReplaceBotPayload {
   factory ReplaceBotPayload.fromJson(Map<String, dynamic> json) =>
       ReplaceBotPayload(gameId: json["gameId"], botId: json["botId"]);
 
-  Map<String, dynamic> toJson() => {"gameId": gameId};
+  Map<String, dynamic> toJson() => {"gameId": gameId, "botId": botId};
 }
 
 class ReplaceBotByObserverRequest {

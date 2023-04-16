@@ -85,9 +85,9 @@ class PlayerInfo extends GetView<GameController> {
                                     onPressed: () {
                                       controller.websocketService
                                           .replaceBotByObserver(
-                                              controller
-                                                  .gameService.currentGameId,
-                                              playerId);
+                                        controller.gameService.currentGameId,
+                                        playerId,
+                                      );
                                       controller
                                               .isObserverSwitchedConfirmation =
                                           true;
