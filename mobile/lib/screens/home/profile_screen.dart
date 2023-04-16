@@ -350,7 +350,7 @@ class ProfileScreen extends StatelessWidget {
     return Column(
       children: [
         ListTile(
-          title: Text(roomName),
+          title: Text(roomName.split('/').first),
           // onTap: () => Get.toNamed(Routes.CHAT, arguments: {'text': 'roomName'}),
           onTap: () {
             selectedChatRoom.value = !selectedChatRoom.value;
