@@ -145,33 +145,42 @@ class GameLobbyScreen extends StatelessWidget {
   }
 
   Widget _buildStartButton(BuildContext context) {
-    if (gameMode != 'tournoi' &&
-            _gameService.currentGameRoomUserIds.value!.length < 2 ||
-        !_gameService.isGameCreator()) {
-      return Text('En attente d\'autre joueurs... Veuillez patientez',
-          style: Theme.of(context).textTheme.headline6);
-    } else if (gameMode == 'tournoi' &&
-            _gameService.currentTournamentUserIds.value!.length < 4 ||
-        !_gameService.isTournamentCreator()) {
-      return Text('En attente d\'autre joueurs... Veuillez patientez',
-          style: Theme.of(context).textTheme.headline6);
+    if (gameMode == 'tournoi') {
+      if (_gameService.currentTournamentUserIds.value!.length >= 4 &&
+          _gameService.isTournamentCreator()) {
+        return ElevatedButton.icon(
+          onPressed: () {
+            _websocketService.startTournament(_gameService.currentTournamentId);
+          },
+          icon: const Icon(
+            // <-- Icon
+            Icons.play_arrow,
+            size: 20,
+          ),
+          label: Text('Démarrer le tournoi'), // <-- Text
+        );
+      } else {
+        return Text('En attente d\'autre joueurs... Veuillez patientez',
+            style: Theme.of(context).textTheme.headline6);
+      }
     } else {
-      return ElevatedButton.icon(
-        onPressed: () {
-          gameMode == 'tournoi'
-              ? _websocketService
-                  .startTournament(_gameService.currentTournamentId)
-              : _websocketService.startGame(_gameService.currentGameId);
-        },
-        icon: const Icon(
-          // <-- Icon
-          Icons.play_arrow,
-          size: 20,
-        ),
-        label: Text(gameMode == 'tournoi'
-            ? 'Démarrer le tournoi'
-            : 'Démarrer la partie'), // <-- Text
-      );
+      if (_gameService.currentGameRoomUserIds.value!.length >= 2 &&
+          _gameService.isGameCreator()) {
+        return ElevatedButton.icon(
+          onPressed: () {
+            _websocketService.startGame(_gameService.currentGameId);
+          },
+          icon: const Icon(
+            // <-- Icon
+            Icons.play_arrow,
+            size: 20,
+          ),
+          label: Text('Démarrer la partie'), // <-- Text
+        );
+      } else {
+        return Text('En attente d\'autre joueurs... Veuillez patientez',
+            style: Theme.of(context).textTheme.headline6);
+      }
     }
   }
 
