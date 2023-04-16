@@ -157,6 +157,20 @@ func (r *Room) BroadcastLeaveRoomPackets(c *Client) error {
 		}
 		c.send(leftRoomPacket)
 	}
+	{
+		// List available chat rooms
+		rooms, err := c.Manager.RoomSvc.Repo.FindAll()
+		if err != nil {
+			c.Manager.logger.Error("list chat rooms", err)
+		}
+		p, err := NewListChatRoomsPacket(ListChatRoomsPayload{
+			Rooms: rooms,
+		})
+		if err != nil {
+			c.Manager.logger.Error("list chat rooms", err)
+		}
+		c.Manager.Broadcast(p)
+	}
 
 	return nil
 }
