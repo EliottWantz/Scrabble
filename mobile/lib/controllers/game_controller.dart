@@ -164,9 +164,13 @@ class GameController extends GetxController {
     DialogHelper.showJoinFinaleDialogForObserverAndLoser();
   }
 
-  void showTournamentObserverPoolGameOverDialog(String observableGameId) {
-    DialogHelper.showTournamentObserverPoolGameOverDialog(observableGameId);
+  void showTournamentObserverPoolGameOverDialog() {
+    DialogHelper.showTournamentObserverPoolGameOverDialog();
   }
+
+   void showTournamentObserverJoinOtherPoolGameDialog(String observableGameId) {
+    DialogHelper.showTournamentObserverJoinOtherPoolGameDialog(observableGameId);
+   }
 
   Widget getEaselChildToDisplay(Tile tile, int index, bool isObserving) {
     if (!isClientTurn() || (isObserving == true && isObserverSwitched.isFalse)) {

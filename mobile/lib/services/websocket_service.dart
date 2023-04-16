@@ -526,25 +526,26 @@ class WebsocketService extends GetxService {
             gameService.leftGame();
           } else {
             // Observer of game and didn't play
-            gameController.showTournamentObserverPoolGameOverDialog(
+            gameController.showTournamentObserverJoinOtherPoolGameDialog(
                 gameService.currentTournament.value!.poolGames[1].id);
           }
         } else if (gameService.currentTournament.value!.poolGames[0].id ==
                 gameService.currentGameId &&
             gameService.currentTournament.value!.poolGames[1].winnerId != "") {
           // if 1st pool game has finished and 2nd has finished
-          if (!userService.isCurrentUser(gameService.currentGameWinner) &&
+          if (userService.isCurrentUser(gameService.currentTournament.value!.poolGames[1].winnerId!)) {
+            gameService.leftGame();
+          }
+          else if (!userService.isCurrentUser(gameService.currentGameWinner) &&
               gameService.currentTournament.value!.userIds
                   .contains(userService.user.value!.id)) {
-            gameController.showPoolGameLoserDialog(
-                gameService.currentTournament.value!.finale!.id);
+            gameController.showJoinFinaleDialogForObserverAndLoser();
           } else if (userService.isCurrentUser(gameService.currentGameWinner)) {
             // Winner of game
             gameService.leftGame();
           } else {
             // Observer of game and didn't play
-            gameController.showTournamentObserverPoolGameOverDialog(
-                gameService.currentTournament.value!.poolGames[1].id);
+            gameController.showTournamentObserverPoolGameOverDialog();
           }
         } else if (gameService.currentTournament.value!.poolGames[1].id ==
                 gameService.currentGameId &&
@@ -560,7 +561,9 @@ class WebsocketService extends GetxService {
                 gameService.currentGameId &&
             gameService.currentTournament.value!.poolGames[0].winnerId != "") {
           // if 2nd pool game has finished and 1st has finished
-          if (!userService.isCurrentUser(gameService.currentGameWinner)) {
+          if (userService.isCurrentUser(gameService.currentTournament.value!.poolGames[0].winnerId!)) {
+            gameService.leftGame();
+          } else if (!userService.isCurrentUser(gameService.currentGameWinner)) {
             gameController.showJoinFinaleDialogForObserverAndLoser();
             // gameController.showPoolGameLoserDialog(
             //     gameService.currentTournament.value!.finale!.id);
