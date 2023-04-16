@@ -5,7 +5,7 @@ import { StorageService } from "@app/services/storage/storage.service";
 import { WebSocketService } from "@app/services/web-socket/web-socket.service";
 import { ClientEvent } from "@app/utils/events/client-events";
 import { Game } from "@app/utils/interfaces/game/game";
-import { CreateGamePayload, JoinGamePayload } from "@app/utils/interfaces/packet";
+import { CreateGamePayload } from "@app/utils/interfaces/packet";
 import { BehaviorSubject } from "rxjs";
 
 @Component({
@@ -40,7 +40,6 @@ export class CreateGameComponent {
             isPrivate: this.gameType === "Public" || this.gameType === "Protected" ? false : true,
         }
         const event : ClientEvent = "create-game";
-        //console.log(payload);
         this.webSocketService.send(event, payload);
         this.close();
     }

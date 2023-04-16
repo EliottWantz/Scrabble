@@ -1,9 +1,8 @@
-import { Component, ElementRef, OnInit, ViewChild } from "@angular/core";
+import { Component } from "@angular/core";
 import { AuthenticationService } from "@app/services/authentication/authentication.service";
 import { Router } from "@angular/router"
 import { MatDialog, MatDialogConfig } from "@angular/material/dialog";
 import { DefaultAvatarSelectionComponent } from "@app/components/default-avatar-selection/default-avatar-selection.component";
-import { BehaviorSubject } from "rxjs";
 import { CustomizeAvatarComponent } from "@app/components/customize-avatar/customize-avatar.component";
 
 @Component({
@@ -72,15 +71,6 @@ export class AvatarSelectionComponent {
         minHeight: '75vh',
         height : '75vh'});
     }
-
-    /*checkIfImage(): boolean {
-        if (!(this.currentImageChosen.value instanceof FormData) && this.currentImageChosen.value.url == "") {
-            return false;
-        } else {
-            return true;
-
-        }
-    }*/
 
     setImagePreview(avatar: FormDataEntryValue): void {
         if (avatar instanceof File) {

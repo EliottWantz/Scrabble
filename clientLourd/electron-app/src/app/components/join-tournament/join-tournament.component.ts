@@ -5,11 +5,8 @@ import { StorageService } from "@app/services/storage/storage.service";
 import { WebSocketService } from "@app/services/web-socket/web-socket.service";
 import { ClientEvent } from "@app/utils/events/client-events";
 import { Game } from "@app/utils/interfaces/game/game";
-import { JoinGameAsObserverPayload, JoinGamePayload, JoinTournamentAsObserverPayload, JoinTournamentPayload } from "@app/utils/interfaces/packet";
-import { BehaviorSubject } from "rxjs";
-import { JoinProtectedGameComponent } from "@app/components/join-protected-game/join-protected-game.component";
+import { JoinGameAsObserverPayload, JoinTournamentAsObserverPayload, JoinTournamentPayload } from "@app/utils/interfaces/packet";
 import { Router } from "@angular/router";
-import { JoinPrivateGameComponent } from "@app/components/join-private-game/join-private-game.component";
 import { Tournament } from "@app/utils/interfaces/game/tournament";
 import { JoinPrivateTournamentComponent } from "../join-private-tournament/join-private-tournament.component";
 
@@ -43,24 +40,11 @@ export class JoinTournamentComponent implements OnInit {
                 this.tournaments.push(tournament);
             }
 
-            /*for (const game of this.gameService.joinableGames.value) {
-                if (oberIds.includes(game.id)) {
-                    this.games.push(game);
-                }
-            }*/
-
             this.gameService.observableTournaments.subscribe(() => {
                 this.tournaments = [];
                 for (const tournament of this.gameService.observableTournaments.value) {
                     this.tournaments.push(tournament);
                 }
-    
-                /*for (const game of this.gameService.joinableGames.value) {
-                    if (oberIds.includes(game.id)) {
-                        this.games.push(game);
-                    }
-                }*/
-                //console.log(this.games);
             });
         }
     }
@@ -87,14 +71,6 @@ export class JoinTournamentComponent implements OnInit {
         }
         return "";
     }
-
-    // openDialogJoinProtectedGame(game: Game): void {
-    //     const dialogConfig = new MatDialogConfig();
-    //     dialogConfig.disableClose = true;
-    //     this.dialog.open(JoinProtectedGameComponent, {
-    //         data: {game: game, isObserver: this.data.isObserver}
-    //     });
-    // }
 
     openDialogJoinPrivateGame(tournament: Tournament): void {
         const dialogConfig = new MatDialogConfig();

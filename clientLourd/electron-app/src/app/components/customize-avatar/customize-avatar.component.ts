@@ -3,13 +3,6 @@ import { FormBuilder, Validators } from "@angular/forms";
 import { MatDialogRef } from "@angular/material/dialog";
 import { CommunicationService } from "@app/services/communication/communication.service";
 import { AuthenticationService } from "@app/services/authentication/authentication.service";
-import { GameService } from "@app/services/game/game.service";
-import { StorageService } from "@app/services/storage/storage.service";
-import { WebSocketService } from "@app/services/web-socket/web-socket.service";
-import { ClientEvent } from "@app/utils/events/client-events";
-import { Game } from "@app/utils/interfaces/game/game";
-import { JoinGamePayload } from "@app/utils/interfaces/packet";
-import { BehaviorSubject } from "rxjs";
 import { UserService } from "@app/services/user/user.service";
 
 @Component({
@@ -82,7 +75,6 @@ export class CustomizeAvatarComponent {
             error: (err) => {
                 if (err.url) {
                     this.error = false;
-                    //console.log(err);
                     const formData = this.authService.tempUserLogin.value;
                     if (formData.has("avatar"))
                         formData.delete("avatar");

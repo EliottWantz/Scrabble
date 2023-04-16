@@ -4,8 +4,7 @@ import {
   ElementRef,
   ViewChild,
   NgZone,
-  ChangeDetectorRef,
-  HostListener,
+  ChangeDetectorRef
 } from '@angular/core';
 import * as forms from '@angular/forms';
 import { ChatService } from '@app/services/chat/chat.service';

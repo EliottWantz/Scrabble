@@ -11,7 +11,7 @@
             <input type="text" id="friendName" name="friendName" [(ngModel)]="friendName"
                 placeholder="Enter friend's username" required>
                 <span class="error-message" *ngIf="errorMessage">{{errorMessage}}</span>
-            <button type="button" (click)="getFriends()">Add to Group {{'new-dm-room-component.add-to-group'| translate}}</button>
+            <button type="button" (click)="getFriends()">{{'new-dm-room-component.add-to-group'| translate}}</button>
         </div>
         <div class="added-friends">
             <h2>{{'new-dm-room-component.added-friends'| translate}}</h2>

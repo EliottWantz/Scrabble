@@ -1,12 +1,11 @@
 import { Component, Inject } from "@angular/core";
-import { MatDialog, MatDialogConfig, MatDialogRef } from "@angular/material/dialog";
+import { MatDialogRef } from "@angular/material/dialog";
 import { GameService } from "@app/services/game/game.service";
 import { StorageService } from "@app/services/storage/storage.service";
 import { WebSocketService } from "@app/services/web-socket/web-socket.service";
 import { ClientEvent } from "@app/utils/events/client-events";
 import { Game } from "@app/utils/interfaces/game/game";
 import { JoinGamePayload } from "@app/utils/interfaces/packet";
-import { BehaviorSubject } from "rxjs";
 import  {MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { NavigationStart, Router } from "@angular/router";
 
@@ -56,7 +55,6 @@ export class JoinProtectedGameComponent {
             this.gameService.isObserving = true;
             this.close();
         }  else {
-            //console.log(this.password);
             const payload: JoinGamePayload = {
                 gameId: this.data.game.id,
                 password: this.password

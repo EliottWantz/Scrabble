@@ -5,7 +5,7 @@ import { StorageService } from '@app/services/storage/storage.service';
 import { UserService } from '@app/services/user/user.service';
 import { WebSocketService } from '@app/services/web-socket/web-socket.service';
 import { ClientEvent } from '@app/utils/events/client-events';
-import { CreateDMRoomPayload, CreateRoomPayload } from '@app/utils/interfaces/packet';
+import { CreateRoomPayload } from '@app/utils/interfaces/packet';
 import { User } from '@app/utils/interfaces/user';
 
 @Component({
@@ -18,7 +18,7 @@ export class NewDmRoomComponent {
   friendName = '';
   errorMessage = '';
   friendGroup: string[] = []
-  constructor(private socketService: WebSocketService, private userService: UserService, private storageSercice: StorageService, private dialogRef: MatDialogRef<void>
+  constructor(private socketService: WebSocketService, private dialogRef: MatDialogRef<void>
     , public socialService: SocialService) { }
 
   submit() {

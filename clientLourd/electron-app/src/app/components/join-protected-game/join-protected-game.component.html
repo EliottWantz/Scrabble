@@ -1,29 +1,5 @@
 <mat-dialog-content id="container">
     <h1>{{"join-protected-game-component.title" | translate}} {{data.game.id}}</h1>
-    <!--
-            <mat-divider></mat-divider>
-    <mat-grid-list cols="2" rowHeight="50px">
-        <mat-grid-tile [colspan]="1" [rowspan]="1">
-            <h4>{{"join-game-component.name-game" | translate}}</h4>
-        </mat-grid-tile>
-        <mat-grid-tile [colspan]="1" [rowspan]="1">
-            <h4>{{"join-game-component.players" | translate}}</h4>
-        </mat-grid-tile>
-        <mat-grid-tile [colspan]="1" [rowspan]="1"></mat-grid-tile>
-
-        <mat-grid-tile [colspan]="2">
-            <mat-divider></mat-divider>
-        </mat-grid-tile>
-
-        <mat-grid-tile [colspan]="1" [rowspan]="1">{{data.game.id}}</mat-grid-tile>
-        <mat-grid-tile [colspan]="1" [rowspan]="1" class="user-ids">
-            <div *ngFor="let playerId of getUserNames(data.game.userIds); let last = last;">
-                <div *ngIf="!last">{{playerId}}{{", "}}</div>
-                <div *ngIf="last">{{playerId}}</div>
-            </div>
-        </mat-grid-tile>
-    </mat-grid-list>
-    -->
     <form id="form">
         <mat-form-field appearance="outline">
             <mat-label for="password">{{"join-protected-game-component.password" | translate}}</mat-label>

@@ -200,10 +200,10 @@
   "explore-component.leave": "Quitter",
   "explore-component.join-public-chanel": "Rejoindre un canal public",
   "explore-component.search-canal": "Rechercher un canal",
-  "new-dm-room-component.create-group-chat": "Créer un groupe chat",
-  "new-dm-room-component.group-chat-name": "Nom du groupe chat",
+  "new-dm-room-component.create-group-chat": "Créer un salon textuel",
+  "new-dm-room-component.group-chat-name": "Nom du salon textuel",
   "new-dm-room-component.add-friend": "Ajouter un ami",
-  "new-dm-room-component.add-to-group": "Ajouter au groupe",
+  "new-dm-room-component.add-to-group": "Ajouter au salon textuel",
   "new-dm-room-component.added-friends": "Amis ajoutés: ",
   "new-dm-room-component.remove-friend": "Retirer l'ami"
 }

@@ -1,7 +1,6 @@
 import { Component } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { CommunicationService } from "@app/services/communication/communication.service";
-import { GameService } from "@app/services/game/game.service";
 import { InviteService } from "@app/services/invite/invite.service";
 import { StorageService } from "@app/services/storage/storage.service";
 import { UserService } from "@app/services/user/user.service";
@@ -21,8 +20,6 @@ export class InviteComponent {
             this.invites = invites;
         });
     }
-
-    //@ViewChildren("password") passwordsElems!: QueryList<ElementRef>;
 
     getAvatarInvite(index: number): string {
         const avatar = this.storageService.getAvatar(this.invites[index].inviterId);

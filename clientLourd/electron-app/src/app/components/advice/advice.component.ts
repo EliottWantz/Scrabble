@@ -15,11 +15,7 @@ import { MAT_BOTTOM_SHEET_DATA } from '@angular/material/bottom-sheet';
 export class AdviceComponent {
     moves: MoveInfo[] = [];
     constructor(private gameService: GameService, private webSocketService: WebSocketService, private _bottomSheetRef: MatBottomSheetRef<AdviceComponent>,
-        private userService: UserService, @Inject(MAT_BOTTOM_SHEET_DATA) public data: {moves: MoveInfo[]}) {
-        /*this.gameService.scrabbleGame.subscribe((scrabbleGame) => {
-            if (scrabbleGame && scrabbleGame.turn != this.userService.currentUserValue.id)
-                this._bottomSheetRef.dismiss();
-        });*/
+        @Inject(MAT_BOTTOM_SHEET_DATA) public data: {moves: MoveInfo[]}) {
     }
 
     playMove(move: MoveInfo): void {
@@ -41,7 +37,6 @@ export class AdviceComponent {
             const tempArray = [];
             for (const key in cover) {
                 tempArray.push(key);
-                //tempArray.set(key, cover[key as keyof Cover]);
             }
             tempArray.sort((a, b) => {
                 const aVal = a.split("/");
