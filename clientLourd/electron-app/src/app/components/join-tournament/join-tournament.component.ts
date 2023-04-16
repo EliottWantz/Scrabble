@@ -65,6 +65,10 @@ export class JoinTournamentComponent implements OnInit {
         }
     }
 
+    getNumberOfObservers(tournament: Tournament): number {
+        return tournament.observerIds.length;
+    }
+
     getUserNames(ids: string[]): string[] {
         const names = [];
         for (const id of ids) {

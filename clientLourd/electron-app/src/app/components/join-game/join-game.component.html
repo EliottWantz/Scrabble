@@ -1,7 +1,8 @@
 <mat-dialog-content id="container">
     <h1>{{"join-game-component.list" | translate}}</h1>
     <mat-divider></mat-divider>
-    <mat-grid-list cols="5" rowHeight="50px">
+
+    <mat-grid-list cols="7" rowHeight="50px">
         <mat-grid-tile [colspan]="1" [rowspan]="1">
             <h4>{{"join-game-component.name-game" | translate}}</h4>
         </mat-grid-tile>
@@ -12,10 +13,16 @@
             <h4>{{"join-game-component.players" | translate}}</h4>
         </mat-grid-tile>
         <mat-grid-tile [colspan]="1" [rowspan]="1">
+            <h4>{{"join-game-component.virtual" | translate}}</h4>
+        </mat-grid-tile>
+        <mat-grid-tile [colspan]="1" [rowspan]="1">
+            <h4>{{"join-game-component.observers" | translate}}</h4>
+        </mat-grid-tile>
+        <mat-grid-tile [colspan]="1" [rowspan]="1">
             <h4>{{"join-game-component.public" | translate}}</h4>
         </mat-grid-tile>
         <mat-grid-tile [colspan]="1" [rowspan]="1"></mat-grid-tile>
-        <mat-grid-tile [colspan]="5">
+        <mat-grid-tile [colspan]="7">
             <mat-divider></mat-divider>
         </mat-grid-tile>
         <div *ngFor="let game of games; let i = index">
@@ -28,6 +35,12 @@
                 </div>
             </mat-grid-tile>
             <mat-grid-tile [colspan]="1" [rowspan]="1">
+                {{getNumberOfBots(game)}}
+            </mat-grid-tile>
+            <mat-grid-tile [colspan]="1" [rowspan]="1">
+                {{getNumberOfObservers(game)}}
+            </mat-grid-tile>
+            <mat-grid-tile [colspan]="1" [rowspan]="1">
                 <mat-icon *ngIf="!game.isPrivateGame">check</mat-icon>
                 <mat-icon *ngIf="game.isPrivateGame">clear</mat-icon>
             </mat-grid-tile>
@@ -37,7 +50,7 @@
                     {{"join-game-component.join" | translate}}
                 </button>
             </mat-grid-tile>
-            <mat-grid-tile [colspan]="5">
+            <mat-grid-tile [colspan]="7">
                 <mat-divider></mat-divider>
             </mat-grid-tile>
         </div>
