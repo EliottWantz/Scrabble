@@ -328,6 +328,16 @@ func (s *Service) ReplacePlayerWithBot(gID, pID string) (*Game, error) {
 	p.IsBot = true
 	p.Username = "Bot " + p.Username
 
+	userIdx := 0
+	for i, userID := range g.UserIDs {
+		if userID == pID {
+			userIdx = i
+			break
+		}
+	}
+	g.UserIDs = append(g.UserIDs, g.UserIDs[:userIdx]...)
+	g.BotNames = append(g.BotNames, p.Username)
+
 	return g, nil
 }
 
