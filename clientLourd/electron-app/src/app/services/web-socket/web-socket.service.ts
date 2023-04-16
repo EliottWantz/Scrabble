@@ -43,6 +43,7 @@ import {
   UserLeftRoomPayload,
   UserLeftTournamentPayload,
   UserRequestToJoinGamePayload,
+  UserRequestToJoinTournamentPayload,
 } from '@app/utils/interfaces/packet';
 import { RoomService } from '@app/services/room/room.service';
 import { ChatMessage } from '@app/utils/interfaces/chat-message';
@@ -462,6 +463,23 @@ export class WebSocketService {
           this.gameService.game.value.id == payload.gameId &&
           this.gameService.game.value.userIds.length < 4 &&
           this.gameService.game.value.creatorId ==
+          this.userService.currentUserValue.id
+        ) {
+          this.gameService.usersWaiting.next([
+            ...this.gameService.usersWaiting.value,
+            { userId: payload.userId, username: payload.username },
+          ]);
+        }
+        break;
+      }
+
+      case 'userRequestToJoinTournament': {
+        const payload = packet.payload as UserRequestToJoinTournamentPayload;
+        if (
+          this.gameService.tournament.value &&
+          this.gameService.tournament.value.id == payload.tournamentId &&
+          this.gameService.tournament.value.userIds.length < 4 &&
+          this.gameService.tournament.value.creatorId ==
           this.userService.currentUserValue.id
         ) {
           this.gameService.usersWaiting.next([

@@ -33,7 +33,7 @@ export class SidebarComponent implements OnInit {
   isJoining = false;
   public user: BehaviorSubject<User>;
   language: BehaviorSubject<string>;
-  currentRoute = "PolyScrabble";
+  currentRoute = "home";
   currentRouteName = "/home";
   previousRouteName: string[] = ["/home"];
   routeIndex = 0;

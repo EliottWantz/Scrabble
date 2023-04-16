@@ -112,7 +112,7 @@ export class JoinTournamentComponent implements OnInit {
                 tournamentId: tournament.id,
                 password: ""
             }
-            const event : ClientEvent = "join-game";
+            const event : ClientEvent = "join-tournament";
             this.webSocketService.send(event, payload);
             this.close();
         } else {
