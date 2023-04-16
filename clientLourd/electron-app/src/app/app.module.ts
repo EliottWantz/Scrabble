@@ -68,6 +68,7 @@ import { ChatBoxButtonComponent } from '@app/components/chat-box-button/chat-box
 import { FriendStatsComponent } from './components/friend-stats/friend-stats.component';
 import { NewDmRoomComponent } from './components/new-dm-room/new-dm-room.component';
 import { MatBadgeModule } from '@angular/material/badge';
+import { ExploreComponent } from './components/explore/explore.component';
 
 @NgModule({
   declarations: [
@@ -109,6 +110,7 @@ import { MatBadgeModule } from '@angular/material/badge';
     ChatBoxButtonComponent,
     FriendStatsComponent,
     NewDmRoomComponent,
+    ExploreComponent,
   ],
   imports: [
     BrowserModule,

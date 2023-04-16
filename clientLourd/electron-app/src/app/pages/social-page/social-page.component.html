@@ -3,7 +3,7 @@
   <mat-drawer opened="true" disableClose="true" mode="side" class="mat_drawer" position="end">
     <div>
       <div class="box">
-        <div class="action" (click)="this.chatFriend = false">
+        <div class="action" (click)="this.goToFriendPage()">
           <div class="mat-icon-button">
             <mat-icon inline="true">people</mat-icon>
           </div>
@@ -17,7 +17,7 @@
           <div class="text">create dms</div>
         </div>
 
-        <div class="action">
+        <div class="action" (click)="goToExplorePage()">
           <div class="mat-icon-button">
             <mat-icon >search</mat-icon>          </div>
           <div class="text">explore</div>
@@ -28,7 +28,7 @@
         </div>
         <div *ngFor="let canal of this.findRoomWithoutFriend(); let i = index" class="friends"
         (click)="chatFriendGroupPage(i)">
-          <span class="text">
+          <span class="canal-name">
               {{canal.name}}
           </span>
 
@@ -49,10 +49,12 @@
   </mat-drawer>
 
   <mat-drawer-content>
-    <app-social *ngIf="!chatFriend"></app-social>
-    <div class="content" *ngIf="chatFriend">
-      <app-chat-box></app-chat-box>
+    <app-social *ngIf="!chatFriend && !explore"></app-social>
+    <div class="content" *ngIf="chatFriend && !explore">
+      <app-chat-box ></app-chat-box>
     </div>
-
+    <div class="content" *ngIf="explore">
+      <app-explore></app-explore>
+    </div>
   </mat-drawer-content>
 </mat-drawer-container>

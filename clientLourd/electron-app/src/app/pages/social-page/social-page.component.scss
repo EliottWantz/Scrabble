@@ -21,8 +21,19 @@ mat-icon {
 }
 
 .text {
+  display: flex;
+  justify-content: center;
+  align-self: center;
   color: white;
   align-self: center;
+}
+
+.canal-name{
+  display: flex;
+  justify-content: center;
+  color: white;
+  align-self: center;
+  justify-self: center;
 }
 
 .action {
@@ -43,10 +54,10 @@ mat-icon {
 
 .friends {
   width: 80%;
+  min-height: 3vh;
   border-radius: 12px;
   padding-top: 2%;
   padding-bottom: 2%;
-  margin-bottom: 8%;
 }
 
 .friends:hover {

@@ -14,6 +14,7 @@ import { ChatBoxComponent } from '@app/components/chat-box/chat-box.component';
 import { GameObservePageComponent } from '@app/pages/game-observe-page/game-observe-page.component';
 import { ProfilModificationComponent } from '@app/components/profil-modification/profil-modification.component';
 import { FriendStatsComponent } from '@app/components/friend-stats/friend-stats.component';
+import { ExploreComponent } from '@app/components/explore/explore.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' },
@@ -30,7 +31,8 @@ const routes: Routes = [
   { path: 'find-game', component: FindGamePageComponent },
   { path: 'chatbox', component: ChatBoxComponent },
   { path: 'profilModification', component: ProfilModificationComponent },
-  { path: 'friendStats', component: FriendStatsComponent }
+  { path: 'friendStats', component: FriendStatsComponent },
+  { path: "explore", component: ExploreComponent },
 ];
 
 @NgModule({

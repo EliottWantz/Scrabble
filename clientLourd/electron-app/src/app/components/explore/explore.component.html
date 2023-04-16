@@ -1,0 +1,28 @@
+<div class="container">
+    <h1>Join a Public Channel</h1>
+    <div class="form">
+        <form>
+            <mat-form-field appearance="outline">
+                <mat-icon matSuffix>search</mat-icon>
+                <mat-label for="username">{{'social-component.search-friend' | translate}}</mat-label>
+                <input #usernameInput matInput placeholder="{{'social-component.search-friend' | translate}}"
+                    (input)="searchInput = usernameInput.value">
+            </mat-form-field>
+        </form>
+        <div class="chatroom-list">
+            <div *ngFor="let chatroom of filterPublicRooms(); let i = index" class="friend">
+                <div class="friend-info">
+                    <p>{{chatroom.name}}</p>
+                    <div>
+                        <button *ngIf="!isJoined(i)" type="button" class="button-join" (click)="this.joinRoom(chatroom)">
+                            <mat-icon>add</mat-icon> Join
+                        </button>
+                        <button *ngIf="isJoined(i)" type="button" class="button-leave" (click)="this.leaveRoom(chatroom)">
+                            <mat-icon>minus</mat-icon>Leave
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
