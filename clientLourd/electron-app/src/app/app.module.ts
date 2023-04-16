@@ -75,6 +75,8 @@ import { ChatBoxButtonComponent } from '@app/components/chat-box-button/chat-box
 import { FriendStatsComponent } from './components/friend-stats/friend-stats.component';
 import { NewDmRoomComponent } from './components/new-dm-room/new-dm-room.component';
 import { MatBadgeModule } from '@angular/material/badge';
+import { ExploreComponent } from './components/explore/explore.component';
+import { LoadingScreenComponent } from './components/loading-screen/loading-screen.component';
 
 export function createTranslateLoader(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -128,6 +130,8 @@ export function createTranslateLoader(http: HttpClient) {
     ChatBoxButtonComponent,
     FriendStatsComponent,
     NewDmRoomComponent,
+    ExploreComponent,
+    LoadingScreenComponent,
   ],
   imports: [
     BrowserModule,

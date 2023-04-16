@@ -114,6 +114,7 @@
   "profile-page.activity": "User activity",
   "profil-page.user-stats": "User statistics",
   "profile-page.submit": "Save",
+  "profil-page.apply-changes": "Sync Change",
   "profile-page.username": "Username : ",
   "profile-page.seconds": " Second(s)",
   "profile-page.minutes": " Min",
@@ -191,5 +192,19 @@
   "rules-slider-page.click": "Click",
   "rules-slider-page.finish": "Finish",
   "join-game-component.virtual": "Number of virtual players",
-  "join-game-component.observers": "Number of spectators"
+  "join-game-component.observers": "Number of spectators",
+  "social-component.see-friendStats": "See friend stats",
+  "social-page.create-group": "Create a group Chat",
+  "social-page.explore": "Explore groups",
+  "explore-component.join": "Join",
+  "explore-component.leave": "Leave",
+  "explore-component.join-public-chanel": "Join public channel",
+  "explore-component.search-canal": "Search a channel",
+  "new-dm-room-component.create-group-chat": "Create a group chat",
+  "new-dm-room-component.group-chat-name": "Group chat name",
+  "new-dm-room-component.add-friend": "Add a friend",
+  "new-dm-room-component.add-to-group": "Add to group",
+  "new-dm-room-component.added-friends": "Added friends: ",
+  "new-dm-room-component.remove-friend": "Remove friend"
+
 }
