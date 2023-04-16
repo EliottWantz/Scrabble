@@ -183,6 +183,7 @@ class DialogHelper {
                           );
                           Get.back();
                           Get.back();
+                          Get.back();
                         }
                       },
                       child: const Text('Oui'),

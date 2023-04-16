@@ -76,8 +76,9 @@ class UserList extends StatelessWidget {
     SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
       scrollDown();
     });
-    
-    List<String> filteredItems = filterUsersListBy(_inputSearch.value, _items);
+
+    List<String> friendListUsernames = _usersService.getUsernamesFromUserIds(_items);
+    List<String> filteredItems = filterUsersListBy(_inputSearch.value, friendListUsernames);
 
     return ListView.builder(
         controller: scrollController,
@@ -171,7 +172,7 @@ class UserList extends StatelessWidget {
             final res = await _usersService.deleteFriend(username);
             if (res == true) {
               _userService.user.value!.friends.remove(username);
-              _userService.friends.remove(username);
+              _userService.friends.remove(_usersService.getUserId(username));
             }
           },
           icon: const Icon(Icons.close)
@@ -212,7 +213,7 @@ class UserList extends StatelessWidget {
             final res = await _usersService.deleteFriend(username);
             if (res == true) {
               _userService.user.value!.friends.remove(username);
-              _userService.friends.remove(username);
+              _userService.friends.remove(_roomService.getRoomIdByRoomName(username));
               _roomService.roomsMap.remove(_roomService.getRoomIdByRoomName(username));
             }
           },

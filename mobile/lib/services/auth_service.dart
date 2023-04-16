@@ -65,7 +65,7 @@ class AuthService extends GetxService {
     // Get.delete<WebsocketService>();
     websocketService.socket.sink.close();
     // websocketService.messages.value = [];
-    userService.friends.value.clear();
+    userService.friends.clear();
     await storageService.remove('token');
     Get.offAllNamed(Routes.AUTH);
   }

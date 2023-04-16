@@ -134,7 +134,7 @@ class FloatingChatScreen extends GetView<ChatController> {
                                   ),
                                   Text(intl.DateFormat("hh:mm:ss").format(controller
                                       .roomService
-                                      .currentRoomMessages
+                                      .currentFloatingRoomMessages
                                       .value![index]
                                       .timestamp!.toLocal())),
                                 ]),
@@ -229,13 +229,13 @@ class FloatingChatScreen extends GetView<ChatController> {
           controller.roomService.currentFloatingRoomMessages.value![index].message,
           headers: {'accept': 'image/*'});
     } else {
-      return Text(controller.roomService.currentRoomMessages.value![index].message,
+      return Text(controller.roomService.currentFloatingRoomMessages.value![index].message,
         style: TextStyle(
             fontSize: 15,
             color: controller.isCurrentUser(
                 controller
                     .roomService
-                    .currentRoomMessages
+                    .currentFloatingRoomMessages
                     .value![index]
                     .fromId)
                 ? Colors.white

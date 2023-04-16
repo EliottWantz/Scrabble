@@ -42,6 +42,28 @@ class UsersService extends GetxService {
     return '';
   }
 
+  List<String> getOnlineFriendIds() {
+    List<String> onlineFriendIds = [];
+    List<String> onlineUserIds = getOnlineUserIds();
+    for (final friendId in userService.friends.value) {
+      if (onlineUserIds.contains(friendId)) {
+        onlineFriendIds.add(friendId);
+      }
+    }
+    return onlineFriendIds;
+  }
+
+  List<String> getOfflineFriendIds() {
+    List<String> offlineFriendIds = [];
+    List<String> onlineUserIds = getOnlineUserIds();
+    for (final friendId in userService.friends.value) {
+      if (!onlineUserIds.contains(friendId)) {
+        offlineFriendIds.add(friendId);
+      }
+    }
+    return offlineFriendIds;
+  }
+
   List<String> getOnlineFriendUsernames() {
     List<String> onlineFriendUsernames = [];
     List<String> onlineUserUsernames = getOnlineUserUsernames();

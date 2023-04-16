@@ -58,7 +58,7 @@ class PendingRequestsList extends StatelessWidget {
                       _userService.pendingRequest.remove(username);
                       _userService.user.value!.pendingRequests.remove(username);
                       // _userService.user.value!.friends.add(username);
-                      _userService.friends.add(username);
+                      _userService.friends.add(_usersService.getUserId(username));
                       String toId = _usersService.getUserId(username);
                       if (!_roomService.roomMapContains('${_userService.user.value!.username}/${username}')) {
                         _websocketService.createDMRoom(toId, username);

@@ -49,8 +49,9 @@ class FriendsList extends StatelessWidget {
       scrollDown();
     });
 
+    List<String> friendListUsernames = _usersService.getUsernamesFromUserIds(_userService.friends.value);
     List<String> filteredItems =
-        filterUsersListBy(_inputSearch.value, _userService.friends.value);
+        filterUsersListBy(_inputSearch.value, friendListUsernames);
 
     return ListView.builder(
       controller: scrollController,
@@ -99,7 +100,6 @@ class FriendsList extends StatelessWidget {
         filteredUserList.add(user);
       }
     }
-    _userService.friends.value.sort();
     return filteredUserList;
   }
 
@@ -109,7 +109,7 @@ class FriendsList extends StatelessWidget {
           final res = await _usersService.deleteFriend(username);
           if (res == true) {
             _userService.user.value!.friends.remove(username);
-            _userService.friends.remove(username);
+            _userService.friends.remove(_usersService.getUserId(username));
           }
         },
         icon: const Icon(Icons.close));
