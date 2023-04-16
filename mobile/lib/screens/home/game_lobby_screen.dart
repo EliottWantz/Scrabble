@@ -193,17 +193,16 @@ class GameLobbyScreen extends StatelessWidget {
   Widget _buildPendingJoinGameRequests() {
     if (gameMode == 'tournoi') {
       if (!_gameService.currentTournament.value!.isPrivate) {
-        return const CircularProgressIndicator();
+        return CircularProgressIndicator(semanticsLabel: _gameService.currentTournament.value!.isPrivate.toString());
       } else if (_gameService.currentTournament.value!.creatorId !=
           _userService.user.value!.id) {
-        return const CircularProgressIndicator();
+        return CircularProgressIndicator(semanticsLabel: _gameService.currentTournament.value!.isPrivate.toString());
       } else
       if (_gameService.pendingJoinTournamentRequestUserIds.value!.isEmpty) {
-        return const CircularProgressIndicator();
+        return CircularProgressIndicator(semanticsLabel: _gameService.currentTournament.value!.isPrivate.toString());
       }
       else {
-        return Obx(() =>
-            Expanded(
+        return Expanded(
               child: ListView.builder(
                   itemCount: _gameService.pendingJoinTournamentRequestUserIds
                       .value!.length,
@@ -214,21 +213,19 @@ class GameLobbyScreen extends StatelessWidget {
                             .value![index]);
                   }
               ),
-            ),
         );
       }
     } else {
       if (!_gameService.currentGameInfo!.isPrivateGame) {
-        return const CircularProgressIndicator();
+        return CircularProgressIndicator(semanticsLabel: _gameService.currentGameInfo!.isPrivateGame.toString());
       } else if (_gameService.currentGameInfo!.creatorId !=
           _userService.user.value!.id) {
-        return const CircularProgressIndicator();
+        return CircularProgressIndicator(semanticsLabel: _gameService.currentGameInfo!.isPrivateGame.toString());
       } else if (_gameService.pendingJoinGameRequestUserIds.value!.isEmpty) {
-        return const CircularProgressIndicator();
+        return CircularProgressIndicator(semanticsLabel: _gameService.currentGameInfo!.isPrivateGame.toString());
       }
       else {
-        return Obx(() =>
-            Expanded(
+        return Expanded(
               child: ListView.builder(
                   itemCount: _gameService.pendingJoinGameRequestUserIds.value!
                       .length,
@@ -239,7 +236,6 @@ class GameLobbyScreen extends StatelessWidget {
                             .value![index]);
                   }
               ),
-            ),
         );
       }
     }
