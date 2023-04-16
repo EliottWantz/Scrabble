@@ -160,6 +160,10 @@ class GameController extends GetxController {
     DialogHelper.showPoolGameLoserDialog(observableGameId);
   }
 
+  void showJoinFinaleDialogForObserverAndLoser() {
+    DialogHelper.showJoinFinaleDialogForObserverAndLoser();
+  }
+
   void showTournamentObserverPoolGameOverDialog(String observableGameId) {
     DialogHelper.showTournamentObserverPoolGameOverDialog(observableGameId);
   }

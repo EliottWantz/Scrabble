@@ -544,10 +544,11 @@ class WebsocketService extends GetxService {
       } else if (gameService
           .currentTournament.value!.poolGames[1].id == gameService.currentGameId
           && gameService.currentTournament.value!.poolGames[0].winnerId != "") {
-        // if 2nd pool game has finished and 1st is still in play
+        // if 2nd pool game has finished and 1st has finished
         if (!userService.isCurrentUser(gameService.currentGameWinner)) {
-          gameController.showPoolGameLoserDialog(
-              gameService.currentTournament.value!.finale!.id);
+          gameController.showJoinFinaleDialogForObserverAndLoser();
+          // gameController.showPoolGameLoserDialog(
+          //     gameService.currentTournament.value!.finale!.id);
         } else {
           gameService.leftGame();
         }
@@ -1044,6 +1045,14 @@ class WebsocketService extends GetxService {
 
   void joinGameAsObserver(String gameId) {
     final joinGameAsObserverPayload = JoinGamePayload(gameId: gameId);
+    final joinGameAsObserverRequest = JoinGameAsObserverRequest(
+        event: ClientEventJoinAsObservateur,
+        payload: joinGameAsObserverPayload);
+    socket.sink.add(joinGameAsObserverRequest.toRawJson());
+  }
+
+  void joinTournamentFinaleAsObserver() {
+    final joinGameAsObserverPayload = JoinGamePayload(gameId: gameService.currentTournament.value!.finale!.id);
     final joinGameAsObserverRequest = JoinGameAsObserverRequest(
         event: ClientEventJoinAsObservateur,
         payload: joinGameAsObserverPayload);

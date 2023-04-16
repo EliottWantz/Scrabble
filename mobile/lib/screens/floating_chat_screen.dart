@@ -140,8 +140,16 @@ class FloatingChatScreen extends GetView<ChatController> {
                     controller.sendMessageToCurrentFloatingChatRoom();
                     messageInputFocusNode.requestFocus();
                   },
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                       hintText: "Entrez un message...",
+                      suffixIcon: IconButton(
+                        icon: Icon(Icons.send),
+                        onPressed: () {
+                          controller.sendMessageToCurrentFloatingChatRoom();
+                          messageInputFocusNode.requestFocus();
+                        },
+                      ),
+                      suffixIconColor: Color.fromARGB(255,98,0,238),
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.all(Radius.circular(8)))),
                 ),

@@ -29,6 +29,7 @@ class Tournament {
     int userIdsIndex = 0;
     int observateurIdsIndex = 0;
     int poolGamesIndex = 0;
+    Game? game = json["finale"] == null ? json["finale"] : Game.fromJson(json["finale"]);
     return Tournament(
         id: json["id"],
         creatorId: json["creatorId"],
@@ -42,7 +43,7 @@ class Tournament {
         poolGames: List<Game>.from((json["poolGames"] as List).map(
             (poolGame) => Game.fromJson(json["poolGames"][poolGamesIndex++])
         )),
-        finale: json["finale"],
+        finale: game,
         isOver: json["isOver"],
         winnerId: json["winnerId"],
         isPrivate: json["isPrivate"],
