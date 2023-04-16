@@ -577,6 +577,10 @@ class WebsocketService extends GetxService {
       } else {
         gameController.showGameOverDialog(gameService.currentGameWinner);
       }
+    } else {
+      gameService.leftGame();
+      Get.back();
+      Get.back();
     }
   }
 
