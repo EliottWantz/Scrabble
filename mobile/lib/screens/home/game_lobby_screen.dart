@@ -147,12 +147,12 @@ class GameLobbyScreen extends StatelessWidget {
 
   Widget _buildStartButton(BuildContext context) {
     if (gameMode != 'tournoi' &&
-        _gameService.currentGameRoomUserIds.value!.length < 2 &&
+        _gameService.currentGameRoomUserIds.value!.length < 2 ||
         !_gameService.isGameCreator()) {
       return Text('En attente d\'autre joueurs... Veuillez patientez',
           style: Theme.of(context).textTheme.headline6);
     } else if (gameMode == 'tournoi' &&
-        _gameService.currentTournamentUserIds.value!.length < 4 &&
+        _gameService.currentTournamentUserIds.value!.length < 4 ||
         !_gameService.isGameCreator()) {
       return Text('En attente d\'autre joueurs... Veuillez patientez',
           style: Theme.of(context).textTheme.headline6);
