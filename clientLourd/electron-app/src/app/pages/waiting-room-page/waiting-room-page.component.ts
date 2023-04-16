@@ -126,6 +126,10 @@ export class WaitRoomPageComponent implements OnInit {
     return this.userService.currentUserValue.id == this.tournamentRoom.value?.creatorId;
   }
 
+  isTournamentWaitingRoom(): boolean {
+    return this.tournamentRoom.value !== undefined;
+  }
+
   /*getUserNamesAndAvatarUrls(game: Game): string {
     for (const id of game.userIds) {
       const user = this.storageService.getUserFromId(id);
