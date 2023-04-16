@@ -649,12 +649,12 @@ func (c *Client) HandleIndiceRequest(p *Packet) error {
 }
 
 func (c *Client) HandleClientEventReplaceBotByObserverRequest(p *Packet) error {
-	payload := JoinGameAsObserverPayload{}
+	payload := ReplaceBotByObserverPayload{}
 	if err := json.Unmarshal(p.Payload, &payload); err != nil {
 		return err
 	}
 
-	g, err := c.Manager.GameSvc.ReplaceBotByObserver(payload.GameID, c.UserId)
+	g, err := c.Manager.GameSvc.ReplaceBotByObserver(payload.GameID, c.UserId, payload.BotID)
 	if err != nil {
 		return err
 	}

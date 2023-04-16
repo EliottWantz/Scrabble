@@ -1,6 +1,7 @@
-import 'dart:async';
 import 'dart:convert';
 
+// import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:client_leger/api/api_constants.dart';
 import 'package:client_leger/controllers/game_controller.dart';
 import 'package:client_leger/models/chat_message_payload.dart';
 import 'package:client_leger/models/chat_room.dart';
@@ -8,27 +9,24 @@ import 'package:client_leger/models/create_room_payload.dart';
 import 'package:client_leger/models/create_tournament_payload.dart';
 import 'package:client_leger/models/events.dart';
 import 'package:client_leger/models/first_square_payload.dart';
-import 'package:client_leger/models/game.dart';
 import 'package:client_leger/models/join_chat_room_payload.dart';
-import 'package:client_leger/models/join_dm_payload.dart';
 import 'package:client_leger/models/join_game_payload.dart';
 import 'package:client_leger/models/join_room_payload.dart';
 import 'package:client_leger/models/join_tournament_payload.dart';
 import 'package:client_leger/models/play_move_payload.dart';
 import 'package:client_leger/models/position.dart';
-import 'package:client_leger/models/requests/accept_friend_request.dart';
 import 'package:client_leger/models/requests/chat_message_request.dart';
 import 'package:client_leger/models/requests/create_dm_room_request.dart';
 import 'package:client_leger/models/requests/create_game_room_request.dart';
-import 'package:client_leger/models/requests/first_square_request.dart';
 import 'package:client_leger/models/requests/create_tournament_request.dart';
+import 'package:client_leger/models/requests/first_square_request.dart';
 import 'package:client_leger/models/requests/indice_request.dart';
 import 'package:client_leger/models/requests/join_chat_room_request.dart';
-import 'package:client_leger/models/requests/join_dm_request.dart';
 import 'package:client_leger/models/requests/join_game_as_observer_request.dart';
 import 'package:client_leger/models/requests/join_room_request.dart';
 import 'package:client_leger/models/requests/join_tournament_request.dart';
 import 'package:client_leger/models/requests/play_move_request.dart';
+import 'package:client_leger/models/requests/replace_bot_by_observer.dart';
 import 'package:client_leger/models/requests/start_tournament_request.dart';
 import 'package:client_leger/models/response/accept_friend_response.dart';
 import 'package:client_leger/models/response/chat_message_response.dart';
@@ -38,6 +36,7 @@ import 'package:client_leger/models/response/game_update_response.dart';
 import 'package:client_leger/models/response/indice_response.dart';
 import 'package:client_leger/models/response/invited_to_game_response.dart';
 import 'package:client_leger/models/response/joined_dm_room_response.dart';
+import 'package:client_leger/models/response/joined_game_as_observer_response.dart';
 import 'package:client_leger/models/response/joined_game_response.dart';
 import 'package:client_leger/models/response/joined_room_response.dart';
 import 'package:client_leger/models/response/joined_tournament_response.dart';
@@ -48,33 +47,24 @@ import 'package:client_leger/models/response/list_joinable_tournaments_response.
 import 'package:client_leger/models/response/list_observable_games_response.dart';
 import 'package:client_leger/models/response/list_observable_tournaments_response.dart';
 import 'package:client_leger/models/response/list_users_response.dart';
-import 'package:client_leger/models/response/send_friend_response.dart';
 import 'package:client_leger/models/response/server_error_response.dart';
 import 'package:client_leger/models/response/timer_response.dart';
-import 'package:client_leger/models/response/joined_game_as_observer_response.dart';
 import 'package:client_leger/models/response/tournament_update_response.dart';
 import 'package:client_leger/models/response/user_joined_game_response.dart';
-import 'package:client_leger/models/response/user_joined_response.dart';
 import 'package:client_leger/models/response/user_joined_room_response.dart';
 import 'package:client_leger/models/response/user_joined_tournament_response.dart';
 import 'package:client_leger/models/response/user_request_to_join_game_accepted_response.dart';
 import 'package:client_leger/models/response/user_request_to_join_game_response.dart';
 import 'package:client_leger/models/start_game_payload.dart';
 import 'package:client_leger/models/start_tournament_payload.dart';
-import 'package:client_leger/models/user.dart';
 import 'package:client_leger/routes/app_routes.dart';
 import 'package:client_leger/services/notification_service.dart';
 import 'package:client_leger/services/room_service.dart';
+import 'package:client_leger/services/user_service.dart';
 import 'package:client_leger/services/users_service.dart';
 import 'package:client_leger/utils/dialog_helper.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-// import 'package:socket_io_client/socket_io_client.dart' as IO;
-import 'package:client_leger/api/api_constants.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
-import 'package:client_leger/services/user_service.dart';
 
 import '../models/create_dm_room_payload.dart';
 import '../models/create_game_room_payload.dart';
@@ -533,10 +523,11 @@ class WebsocketService extends GetxService {
                 gameService.currentGameId &&
             gameService.currentTournament.value!.poolGames[1].winnerId != "") {
           // if 1st pool game has finished and 2nd has finished
-          if (userService.isCurrentUser(gameService.currentTournament.value!.poolGames[1].winnerId!)) {
+          if (userService.isCurrentUser(
+              gameService.currentTournament.value!.poolGames[1].winnerId!)) {
             gameService.leftGame();
-          }
-          else if (!userService.isCurrentUser(gameService.currentGameWinner) &&
+          } else if (!userService
+                  .isCurrentUser(gameService.currentGameWinner) &&
               gameService.currentTournament.value!.userIds
                   .contains(userService.user.value!.id)) {
             gameController.showJoinFinaleDialogForObserverAndLoser();
@@ -561,9 +552,11 @@ class WebsocketService extends GetxService {
                 gameService.currentGameId &&
             gameService.currentTournament.value!.poolGames[0].winnerId != "") {
           // if 2nd pool game has finished and 1st has finished
-          if (userService.isCurrentUser(gameService.currentTournament.value!.poolGames[0].winnerId!)) {
+          if (userService.isCurrentUser(
+              gameService.currentTournament.value!.poolGames[0].winnerId!)) {
             gameService.leftGame();
-          } else if (!userService.isCurrentUser(gameService.currentGameWinner)) {
+          } else if (!userService
+              .isCurrentUser(gameService.currentGameWinner)) {
             gameController.showJoinFinaleDialogForObserverAndLoser();
             // gameController.showPoolGameLoserDialog(
             //     gameService.currentTournament.value!.finale!.id);
@@ -1079,11 +1072,10 @@ class WebsocketService extends GetxService {
     socket.sink.add(joinGameAsObserverRequest.toRawJson());
   }
 
-  void replaceBotByObserver(String gameId) {
-    final joinGameAsObserverPayload = JoinGamePayload(gameId: gameId);
-    final joinGameAsObserverRequest = JoinGameAsObserverRequest(
-        event: ClientEventReplaceBotByObserver,
-        payload: joinGameAsObserverPayload);
+  void replaceBotByObserver(String gameId, String botId) {
+    final payload = ReplaceBotPayload(gameId: gameId, botId: botId);
+    final joinGameAsObserverRequest = ReplaceBotByObserverRequest(
+        event: ClientEventReplaceBotByObserver, payload: payload);
     socket.sink.add(joinGameAsObserverRequest.toRawJson());
   }
 }

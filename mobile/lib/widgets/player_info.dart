@@ -1,6 +1,5 @@
 import 'package:client_leger/controllers/game_controller.dart';
 import 'package:client_leger/services/users_service.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
@@ -25,7 +24,9 @@ class PlayerInfo extends GetView<GameController> {
 
   @override
   Widget build(BuildContext context) {
-    return (isObserving == true && controller.isObserverSwitched.isFalse) ? _buildForObserver() : _buildForPlayer();
+    return (isObserving == true && controller.isObserverSwitched.isFalse)
+        ? _buildForObserver()
+        : _buildForPlayer();
   }
 
   Widget _buildForObserver() {
@@ -82,8 +83,14 @@ class PlayerInfo extends GetView<GameController> {
                             isBot
                                 ? ElevatedButton.icon(
                                     onPressed: () {
-                                      controller.websocketService.replaceBotByObserver(controller.gameService.currentGameId);
-                                      controller.isObserverSwitchedConfirmation = true;
+                                      controller.websocketService
+                                          .replaceBotByObserver(
+                                              controller
+                                                  .gameService.currentGameId,
+                                              playerId);
+                                      controller
+                                              .isObserverSwitchedConfirmation =
+                                          true;
                                     },
                                     icon: const Icon(Icons.change_circle),
                                     label: const Text('Remplacer'))
@@ -103,7 +110,7 @@ class PlayerInfo extends GetView<GameController> {
               )),
         ),
         circularImageWithBorder(isBot
-            ? 'https://ucarecdn.com/43074331-00a7-4096-8d7a-7a2d5a5d85db/'
+            ? 'https://api.dicebear.com/6.x/bottts/png?seed=Felix&scale=70'
             : usersService.getUserById(playerId)!.avatar.url),
       ],
     );
