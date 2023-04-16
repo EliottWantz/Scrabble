@@ -149,15 +149,7 @@ class ChatScreen extends GetView<ChatController> {
                                                   // Text(
                                                   //   controller.roomService.currentRoomMessages.value![index].from
                                                   // ),
-                                                  Text(
-                                                    controller
-                                                        .roomService
-                                                        .currentRoomMessages
-                                                        .value![index]
-                                                        .message,
-                                                    style:
-                                                        TextStyle(fontSize: 15),
-                                                  ),
+                                                  _buildText(index),
                                                   //   Text("implement timestamp function")
                                                 ],
                                               ),
@@ -216,7 +208,7 @@ class ChatScreen extends GetView<ChatController> {
                         );
                         if (gif != null) {
                           // _gif.value = gif;
-                          controller.messageController.text = gif.url!;
+                          controller.messageController.text = gif.images.original!.url!;
                           controller.sendMessage();
                           messageInputFocusNode.requestFocus();
                         }
@@ -266,5 +258,33 @@ class ChatScreen extends GetView<ChatController> {
           ),
           borderRadius: const BorderRadius.all(Radius.circular(25.0))),
     );
+  }
+
+  Widget _buildText(int index) {
+    if (controller.roomService.currentRoomMessages.value![index].message.startsWith('https://')) {
+      return Image.network(
+          controller.roomService.currentRoomMessages.value![index].message,
+          headers: {'accept': 'image/*'});
+    } else {
+      return Text(
+        controller
+            .roomService
+            .currentRoomMessages
+            .value![index]
+            .message.startsWith('https://giphy.com/gifs')
+            ? controller
+            .roomService
+            .currentRoomMessages
+            .value![index]
+            .message
+            : controller
+            .roomService
+            .currentRoomMessages
+            .value![index]
+            .message,
+        style:
+        TextStyle(fontSize: 15),
+      );
+    }
   }
 }
