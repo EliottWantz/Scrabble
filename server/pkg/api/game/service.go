@@ -413,7 +413,7 @@ func (s *Service) RemoveObserverFromGame(gID string, oID string) (*Game, error) 
 	return nil, ErrObserverNotFound
 }
 
-func (s *Service) ReplaceBotByObserver(gID string, oID string) (*Game, error) {
+func (s *Service) ReplaceBotByObserver(gID, oID, botID string) (*Game, error) {
 	g, err := s.Repo.FindGame(gID)
 	if err != nil {
 		return nil, err
@@ -429,17 +429,26 @@ func (s *Service) ReplaceBotByObserver(gID string, oID string) (*Game, error) {
 		return nil, err
 	}
 
-	for i, p := range g.ScrabbleGame.Players {
-		if p.IsBot {
-			g.ScrabbleGame.Players[i].IsBot = false
-			g.ScrabbleGame.Players[i].Username = user.Username
-			g.ScrabbleGame.Players[i].ID = user.ID
+	for _, p := range g.ScrabbleGame.Players {
+		if p.IsBot && p.ID == botID {
+			p.IsBot = false
+			p.Username = user.Username
+			p.ID = user.ID
 			for i, v := range g.ObservateurIDs {
 				if v == oID {
 					g.ObservateurIDs = append(g.ObservateurIDs[:i], g.ObservateurIDs[i+1:]...)
 					break
 				}
 			}
+			g.UserIDs = append(g.UserIDs, oID)
+			botNameIdx := 0
+			for i, v := range g.BotNames {
+				if v == p.Username {
+					botNameIdx = i
+					break
+				}
+			}
+			g.BotNames = append(g.BotNames[:botNameIdx], g.BotNames[botNameIdx+1:]...)
 
 			return g, nil
 		}
