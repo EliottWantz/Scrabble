@@ -9,20 +9,20 @@ import { ThemeService } from "@app/services/theme/theme.service";
 })
 export class RulesSliderPageComponent {
   frenchImages = [
-    "../../../assets/BasicFR.png",
-    "../../../assets/ClickFR.png",
-    "../../../assets/PlayFR.png",
-    "../../../assets/MultiplierFR.png",
-    "../../../assets/ExchangeFR.png",
-    "../../../assets/HintFR.png"
+    "assets/BasicFR.png",
+    "assets/ClickFR.png",
+    "assets/PlayFR.png",
+    "assets/MultiplierFR.png",
+    "assets/ExchangeFR.png",
+    "assets/HintFR.png"
   ];
   englishImages = [
-    "../../../assets/BasicEN.png",
-    "../../../assets/ClickEN.png",
-    "../../../assets/PlayEN.png",
-    "../../../assets/MultiplierEN.png",
-    "../../../assets/ExchangeEN.png",
-    "../../../assets/HintEN.png"
+    "assets/BasicEN.png",
+    "assets/ClickEN.png",
+    "assets/PlayEN.png",
+    "assets/MultiplierEN.png",
+    "assets/ExchangeEN.png",
+    "assets/HintEN.png"
   ];
   titles = ["basic", "click", "move", "multiplier", "exchange", "hint"];
   constructor(private themeService: ThemeService) {}
