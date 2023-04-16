@@ -560,18 +560,28 @@ class WebsocketService extends GetxService {
                 gameService.currentGameId &&
             gameService.currentTournament.value!.poolGames[0].winnerId != "") {
           // if 2nd pool game has finished and 1st has finished
+          print("if 2nd pool game has finished and 1st has finished");
           if (userService.isCurrentUser(
               gameService.currentTournament.value!.poolGames[0].winnerId!)) {
+            print("winner of game 0");
             gameService.leftGame();
           } else if (!userService
-              .isCurrentUser(gameService.currentGameWinner)) {
+                  .isCurrentUser(gameService.currentGameWinner) &&
+              gameService.currentTournament.value!.userIds
+                  .contains(userService.user.value!.id)) {
+            print("loser of game 1");
             gameController.showJoinFinaleDialogForObserverAndLoser();
-            // gameController.showPoolGameLoserDialog(
-            //     gameService.currentTournament.value!.finale!.id);
-          } else {
+          } else if (userService.isCurrentUser(gameService.currentGameWinner)) {
+            // Winner of game
+            print("winner of game 1");
             gameService.leftGame();
+          } else {
+            print("observer of game 1");
+            // Observer of game and didn't play
+            gameController.showTournamentObserverPoolGameOverDialog();
           }
         } else {
+          print("not good");
           gameController.showPoolGameLoserDialog(
               gameService.currentTournament.value!.poolGames[0].id);
         }
@@ -661,7 +671,8 @@ class WebsocketService extends GetxService {
   }
 
   void handleEventUserLeftGame(UserLeftGameResponse userLeftGameResponse) {
-    gameService.currentGameRoomUserIds.remove(userLeftGameResponse.payload.userId);
+    gameService.currentGameRoomUserIds
+        .remove(userLeftGameResponse.payload.userId);
   }
 
   void handleEventJoinedTournament(
