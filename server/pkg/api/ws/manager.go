@@ -332,12 +332,10 @@ func (m *Manager) RemoveClient(c *Client) error {
 		}
 		if err := r.RemoveClient(c.ID); err != nil {
 			slog.Error("removeClient from room", err)
-			continue
 		}
 		if otherWsClient != nil {
 			if err := r.RemoveClient(otherWsClient.ID); err != nil {
 				slog.Error("removeClient from room", err)
-				continue
 			}
 		}
 		userLeftRoomPacket, err := NewUserLeftRoomPacket(UserLeftRoomPayload{
@@ -358,12 +356,10 @@ func (m *Manager) RemoveClient(c *Client) error {
 		if otherWsClient != nil {
 			if err := r.RemoveClient(otherWsClient.ID); err != nil {
 				slog.Error("removeClient from room", err)
-				continue
 			}
 		}
 		if err := r.RemoveClient(c.ID); err != nil {
 			slog.Error("removeClient from room", err)
-			continue
 		}
 		userLeftDMRoomPacket, err := NewUserLeftDMRoomPacket(UserLeftDMRoomPayload{
 			RoomID: r.ID,
@@ -484,11 +480,9 @@ func (m *Manager) RemoveClientFromGame(c *Client, gID string) error {
 				}
 				if err := r.RemoveClient(client.ID); err != nil {
 					slog.Error("remove user from game room", err)
-					continue
 				}
 				if err := r.BroadcastLeaveGamePackets(client, g.ID); err != nil {
 					slog.Error("broadcast leave game packets", err)
-					continue
 				}
 			}
 			if err := m.BroadcastJoinableGames(); err != nil {
@@ -570,11 +564,9 @@ func (m *Manager) RemoveClientFromTournament(c *Client, tID string) error {
 				}
 				if err := tournamentRoom.RemoveClient(client.ID); err != nil {
 					slog.Error("remove user from tournament room", err)
-					continue
 				}
 				if err := tournamentRoom.BroadcastLeaveTournamentPackets(client, t.ID); err != nil {
 					slog.Error("broadcast leave tournament packets", err)
-					continue
 				}
 			}
 			return m.BroadcastObservableTournaments()
@@ -802,7 +794,12 @@ func (m *Manager) ReplacePlayerWithBot(gID, pID string) error {
 	}
 	if len(g.ScrabbleGame.Players) == g.ScrabbleGame.NumberOfBots() {
 		// Everyone left, delete the game, don't continue
-		return m.GameSvc.DeleteGame(gID)
+		if err := m.GameSvc.DeleteGame(gID); err != nil {
+			return err
+		}
+		m.BroadcastJoinableGames()
+		m.BroadcastObservableGames()
+		return nil
 	}
 
 	gamePacket, err := NewGameUpdatePacket(GameUpdatePayload{
@@ -875,7 +872,6 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 		}
 		if err := gameRoom.RemoveClient(client.ID); err != nil {
 			slog.Error("remove client from ws room", err)
-			continue
 		}
 		if err := gameRoom.BroadcastLeaveGamePackets(client, g.ID); err != nil {
 			slog.Error("broadcast leave game packets", err)
@@ -891,7 +887,6 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 		}
 		if err := gameRoom.RemoveClient(client.ID); err != nil {
 			slog.Error("remove client from ws room", err)
-			continue
 		}
 		if err := gameRoom.BroadcastObserverLeaveGamePacket(client, g.ID); err != nil {
 			slog.Error("broadcast leave game packets", err)
@@ -950,15 +945,12 @@ func (m *Manager) HandleGameOver(g *game.Game) error {
 					}
 					if err := finaleRoom.AddClient(player.ID); err != nil {
 						slog.Error("add client to room", err)
-						continue
 					}
 					if err := m.UserSvc.Repo.SetJoinedGame(t.Finale.ID, playerID); err != nil {
 						slog.Error("set joined game", err)
-						continue
 					}
 					if err := finaleRoom.BroadcastJoinGamePackets(player, t.Finale); err != nil {
 						slog.Error("broadcast join game packets", err)
-						continue
 					}
 				}
 
