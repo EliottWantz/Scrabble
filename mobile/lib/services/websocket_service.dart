@@ -151,7 +151,7 @@ class WebsocketService extends GetxService {
       case ServerEventListChatRooms:
         {
           ListChatRoomsResponse listChatRoomsResponse =
-          ListChatRoomsResponse.fromRawJson(data);
+              ListChatRoomsResponse.fromRawJson(data);
           handleEventListChatRooms(listChatRoomsResponse);
         }
         break;
@@ -209,7 +209,7 @@ class WebsocketService extends GetxService {
       case ServerEventLeftRoom:
         {
           LeftRoomResponse leftRoomResponse =
-          LeftRoomResponse.fromRawJson(data);
+              LeftRoomResponse.fromRawJson(data);
           handleEventLeftRoom(leftRoomResponse);
         }
         break;
@@ -423,6 +423,17 @@ class WebsocketService extends GetxService {
   void handleEventListOnlineUsers(ListUsersResponse listUsersResponse) {
     usersService.onlineUsers.value.clear();
     usersService.onlineUsers.addAll(listUsersResponse.payload.users);
+
+    // List<String> friendUsernames = usersService.getUsernamesFromUserIds(userService.friends.value);
+
+    List<String> onlineFriendIds = usersService.getOnlineFriendIds();
+    onlineFriendIds.sort();
+    List<String> offlineFriendIds = usersService.getOfflineFriendIds();
+    offlineFriendIds.sort();
+    onlineFriendIds.addAll(offlineFriendIds);
+    userService.friends.value.clear();
+    userService.friends.addAll(onlineFriendIds);
+    userService.friends.refresh();
   }
 
   void handleEventListChatRooms(ListChatRoomsResponse listChatRoomsResponse) {
@@ -432,6 +443,7 @@ class WebsocketService extends GetxService {
         roomService.listedChatRooms.add(chatRoom);
       }
     }
+    roomService.listedChatRooms.refresh();
   }
 
   void handleEventNewUser(NewUserResponse newUserResponse) {
@@ -491,74 +503,77 @@ class WebsocketService extends GetxService {
     //   // Get.back();
     //   Get.offAllNamed(Routes.HOME);
     // }
-    GameController gameController = Get.find();
-    if (gameService.currentTournament.value != null) {
-      // if in tournament
-      if (gameService.currentTournament.value!.finale != null) {
-        // if finale has started
-        gameController.showGameOverDialog(gameService.currentGameWinner);
-      } else if (gameService
-          .currentTournament.value!.poolGames[0].id == gameService.currentGameId
-          && gameService.currentTournament.value!.poolGames[1].winnerId == "") {
-        // if 1st pool game has finished and 2nd is still in play
-        if (!userService.isCurrentUser(gameService.currentGameWinner)
-          && gameService.currentTournament.value!.userIds.contains(userService.user.value!.id)) {
-          // Loser of game and observing
-          gameController.showPoolGameLoserDialog(
-              gameService.currentTournament.value!.poolGames[1].id);
-        } else if (userService.isCurrentUser(gameService.currentGameWinner)) {
-          // Winner of game
-          gameService.leftGame();
+
+    if (Get.isRegistered<GameController>()) {
+      GameController gameController = Get.find();
+      if (gameService.currentTournament.value != null) {
+        // if in tournament
+        if (gameService.currentTournament.value!.finale != null) {
+          // if finale has started
+          gameController.showGameOverDialog(gameService.currentGameWinner);
+        } else if (gameService.currentTournament.value!.poolGames[0].id ==
+                gameService.currentGameId &&
+            gameService.currentTournament.value!.poolGames[1].winnerId == "") {
+          // if 1st pool game has finished and 2nd is still in play
+          if (!userService.isCurrentUser(gameService.currentGameWinner) &&
+              gameService.currentTournament.value!.userIds
+                  .contains(userService.user.value!.id)) {
+            // Loser of game and observing
+            gameController.showPoolGameLoserDialog(
+                gameService.currentTournament.value!.poolGames[1].id);
+          } else if (userService.isCurrentUser(gameService.currentGameWinner)) {
+            // Winner of game
+            gameService.leftGame();
+          } else {
+            // Observer of game and didn't play
+            gameController.showTournamentObserverPoolGameOverDialog(
+                gameService.currentTournament.value!.poolGames[1].id);
+          }
+        } else if (gameService.currentTournament.value!.poolGames[0].id ==
+                gameService.currentGameId &&
+            gameService.currentTournament.value!.poolGames[1].winnerId != "") {
+          // if 1st pool game has finished and 2nd has finished
+          if (!userService.isCurrentUser(gameService.currentGameWinner) &&
+              gameService.currentTournament.value!.userIds
+                  .contains(userService.user.value!.id)) {
+            gameController.showPoolGameLoserDialog(
+                gameService.currentTournament.value!.finale!.id);
+          } else if (userService.isCurrentUser(gameService.currentGameWinner)) {
+            // Winner of game
+            gameService.leftGame();
+          } else {
+            // Observer of game and didn't play
+            gameController.showTournamentObserverPoolGameOverDialog(
+                gameService.currentTournament.value!.poolGames[1].id);
+          }
+        } else if (gameService.currentTournament.value!.poolGames[1].id ==
+                gameService.currentGameId &&
+            gameService.currentTournament.value!.poolGames[0].winnerId == "") {
+          // if 2nd pool game has finished and 1st is still in play
+          if (!userService.isCurrentUser(gameService.currentGameWinner)) {
+            gameController.showPoolGameLoserDialog(
+                gameService.currentTournament.value!.poolGames[0].id);
+          } else {
+            gameService.leftGame();
+          }
+        } else if (gameService.currentTournament.value!.poolGames[1].id ==
+                gameService.currentGameId &&
+            gameService.currentTournament.value!.poolGames[0].winnerId != "") {
+          // if 2nd pool game has finished and 1st has finished
+          if (!userService.isCurrentUser(gameService.currentGameWinner)) {
+            gameController.showJoinFinaleDialogForObserverAndLoser();
+            // gameController.showPoolGameLoserDialog(
+            //     gameService.currentTournament.value!.finale!.id);
+          } else {
+            gameService.leftGame();
+          }
         } else {
-          // Observer of game and didn't play
-          gameController.showTournamentObserverPoolGameOverDialog(
-              gameService.currentTournament.value!.poolGames[1].id);
-        }
-      } else if (gameService
-          .currentTournament.value!.poolGames[0].id == gameService.currentGameId
-          && gameService.currentTournament.value!.poolGames[1].winnerId != "") {
-        // if 1st pool game has finished and 2nd has finished
-        if (!userService.isCurrentUser(gameService.currentGameWinner)
-            && gameService.currentTournament.value!.userIds.contains(userService.user.value!.id)) {
-          gameController.showPoolGameLoserDialog(
-              gameService.currentTournament.value!.finale!.id);
-        } else if (userService.isCurrentUser(gameService.currentGameWinner)) {
-          // Winner of game
-          gameService.leftGame();
-        } else {
-          // Observer of game and didn't play
-          gameController.showTournamentObserverPoolGameOverDialog(
-              gameService.currentTournament.value!.poolGames[1].id);
-        }
-      } else if (gameService
-          .currentTournament.value!.poolGames[1].id == gameService.currentGameId
-          && gameService.currentTournament.value!.poolGames[0].winnerId == "") {
-        // if 2nd pool game has finished and 1st is still in play
-        if (!userService.isCurrentUser(gameService.currentGameWinner)) {
           gameController.showPoolGameLoserDialog(
               gameService.currentTournament.value!.poolGames[0].id);
-        } else {
-          gameService.leftGame();
         }
-
-      } else if (gameService
-          .currentTournament.value!.poolGames[1].id == gameService.currentGameId
-          && gameService.currentTournament.value!.poolGames[0].winnerId != "") {
-        // if 2nd pool game has finished and 1st has finished
-        if (!userService.isCurrentUser(gameService.currentGameWinner)) {
-          gameController.showJoinFinaleDialogForObserverAndLoser();
-          // gameController.showPoolGameLoserDialog(
-          //     gameService.currentTournament.value!.finale!.id);
-        } else {
-          gameService.leftGame();
-        }
-
       } else {
-        gameController.showPoolGameLoserDialog(
-            gameService.currentTournament.value!.poolGames[0].id);
+        gameController.showGameOverDialog(gameService.currentGameWinner);
       }
-    } else {
-      gameController.showGameOverDialog(gameService.currentGameWinner);
     }
   }
 
@@ -569,9 +584,7 @@ class WebsocketService extends GetxService {
 
   void handleEventJoinedGame(JoinedGameResponse joinedGameResponse) {
     // gameService.currentGameRoom.value = joinedGameRoomResponse.gam
-    if (gameService.currentTournament.value != null) {
-
-    }
+    if (gameService.currentTournament.value != null) {}
     gameService.currentGameId = joinedGameResponse.payload.id;
     gameService.currentGameInfoInitialized = true;
     gameService.currentGameInfo = joinedGameResponse.payload;
@@ -725,7 +738,8 @@ class WebsocketService extends GetxService {
 
   void handleServerEventObservableTournaments(
       ObservableTournamentsResponse observableTournamentsResponse) {
-    gameService.observableTournaments.value = observableTournamentsResponse.payload.tournaments;
+    gameService.observableTournaments.value =
+        observableTournamentsResponse.payload.tournaments;
   }
 
   void handleServerEventGameUpdate(GameUpdateResponse gameUpdateResponse) {
@@ -799,7 +813,7 @@ class WebsocketService extends GetxService {
     userService.user.value!.pendingRequests
         .remove(acceptFriendRequest.payload!.fromUsername);
     userService.user.value!.friends.add(acceptFriendRequest.payload!.fromId);
-    userService.friends.add(acceptFriendRequest.payload!.fromUsername);
+    userService.friends.add(acceptFriendRequest.payload!.fromId);
     // createDMRoom(acceptFriendRequest.payload!.fromId, acceptFriendRequest.payload!.fromUsername);
   }
 
@@ -941,10 +955,9 @@ class WebsocketService extends GetxService {
   }
 
   void joinChatRoom(String roomId) {
-    final joinChatRoomPayload =
-        JoinChatRoomPayload(roomId: roomId);
+    final joinChatRoomPayload = JoinChatRoomPayload(roomId: roomId);
     final joinChatRoomRequest = JoinChatRoomRequest(
-      event: ClientEventJoinRoom, payload: joinChatRoomPayload);
+        event: ClientEventJoinRoom, payload: joinChatRoomPayload);
     socket.sink.add(joinChatRoomRequest.toRawJson());
   }
 
@@ -1013,8 +1026,7 @@ class WebsocketService extends GetxService {
   }
 
   void leaveChatRoom(String roomId) {
-    final joinChatRoomPayload =
-    JoinChatRoomPayload(roomId: roomId);
+    final joinChatRoomPayload = JoinChatRoomPayload(roomId: roomId);
     final joinChatRoomRequest = JoinChatRoomRequest(
         event: ClientEventLeaveRoom, payload: joinChatRoomPayload);
     socket.sink.add(joinChatRoomRequest.toRawJson());
@@ -1052,7 +1064,8 @@ class WebsocketService extends GetxService {
   }
 
   void joinTournamentFinaleAsObserver() {
-    final joinGameAsObserverPayload = JoinGamePayload(gameId: gameService.currentTournament.value!.finale!.id);
+    final joinGameAsObserverPayload = JoinGamePayload(
+        gameId: gameService.currentTournament.value!.finale!.id);
     final joinGameAsObserverRequest = JoinGameAsObserverRequest(
         event: ClientEventJoinAsObservateur,
         payload: joinGameAsObserverPayload);

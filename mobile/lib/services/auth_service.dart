@@ -36,6 +36,7 @@ class AuthService extends GetxService {
     var res = await apiRepository.login(loginRequest);
     if (res == null) return;
     userService.user.value = res.user;
+    userService.friends.addAll(res.user.friends);
     Get.changeTheme(res.user.preferences.theme == 'light'
         ? ThemeConfig.lightTheme
         : ThemeConfig.darkTheme);
@@ -55,6 +56,7 @@ class AuthService extends GetxService {
     var res = await apiRepository.signup(registerRequest, imagePath: imagePath);
     if (res == null) return;
     userService.user.value = res.user;
+    userService.friends.addAll(res.user.friends);
     await _setSession(res.token);
     websocketService.connect();
   }
@@ -63,6 +65,7 @@ class AuthService extends GetxService {
     // Get.delete<WebsocketService>();
     websocketService.socket.sink.close();
     // websocketService.messages.value = [];
+    userService.friends.clear();
     await storageService.remove('token');
     Get.offAllNamed(Routes.AUTH);
   }

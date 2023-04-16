@@ -86,7 +86,9 @@ class FriendsSideBar extends GetView<FriendsSideBarController> {
     for (int i = 0; i < this._items.length; i++) {
       SidebarXItem item = SidebarXItem(
           icon: Icons.people_alt,
-          label: this._items[i].roomName,
+          label: this._items[i].roomName.split('/').length > 1
+                    ? this._items[i].roomName.split('/')[1]
+                    : this._items[i].roomName,
           onTap: () {
             controller.roomService.updateCurrentRoomId(this._items[i].roomId);
             controller.roomService.updateCurrentRoomMessages();

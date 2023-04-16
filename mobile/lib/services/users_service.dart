@@ -42,11 +42,44 @@ class UsersService extends GetxService {
     return '';
   }
 
+  List<String> getOnlineFriendIds() {
+    List<String> onlineFriendIds = [];
+    List<String> onlineUserIds = getOnlineUserIds();
+    for (final friendId in userService.friends.value) {
+      if (onlineUserIds.contains(friendId)) {
+        onlineFriendIds.add(friendId);
+      }
+    }
+    return onlineFriendIds;
+  }
+
+  List<String> getOfflineFriendIds() {
+    List<String> offlineFriendIds = [];
+    List<String> onlineUserIds = getOnlineUserIds();
+    for (final friendId in userService.friends.value) {
+      if (!onlineUserIds.contains(friendId)) {
+        offlineFriendIds.add(friendId);
+      }
+    }
+    return offlineFriendIds;
+  }
+
   List<String> getOnlineFriendUsernames() {
     List<String> onlineFriendUsernames = [];
     List<String> onlineUserUsernames = getOnlineUserUsernames();
     for (final friendUsername in userService.friends.value) {
       if (onlineUserUsernames.contains(friendUsername)) {
+        onlineFriendUsernames.add(friendUsername);
+      }
+    }
+    return onlineFriendUsernames;
+  }
+
+  List<String> getOfflineFriendUsernames() {
+    List<String> onlineFriendUsernames = [];
+    List<String> onlineUserUsernames = getOnlineUserUsernames();
+    for (final friendUsername in userService.friends.value) {
+      if (!onlineUserUsernames.contains(friendUsername)) {
         onlineFriendUsernames.add(friendUsername);
       }
     }
@@ -69,12 +102,33 @@ class UsersService extends GetxService {
     return onlineUserIds;
   }
 
+  bool isOnline(String username) {
+    for (User user in onlineUsers) {
+      if (user.username == username) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   List<String> getUserIdsFromUserList(List<User> users) {
     List<String> userIds = [];
     for (User user in users) {
       userIds.add(user.id);
     }
     return userIds;
+  }
+
+  List<String> getUsernamesFromUserIds(List<dynamic> userIds) {
+    List<String> usernames = [];
+    for (dynamic userId in userIds) {
+      for (User user in users) {
+        if (user.id == userId) {
+          usernames.add(user.username);
+        }
+      }
+    }
+    return usernames;
   }
 
   Future<void> sendFriendRequest(String friendUsername) async {

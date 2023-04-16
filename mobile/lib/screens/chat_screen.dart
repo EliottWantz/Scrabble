@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
 import 'package:giphy_picker/giphy_picker.dart';
+import 'package:intl/intl.dart' as intl;
 
 import '../models/chat_message_payload.dart';
 
@@ -53,8 +54,7 @@ class ChatScreen extends GetView<ChatController> {
       scrollDown();
     });
 
-    return _gif.value == null
-        ? Obx(() => Column(children: [
+    return Obx(() => Column(children: [
               _buildChatScreenHeader(),
               Expanded(
                   child: Center(
@@ -104,8 +104,8 @@ class ChatScreen extends GetView<ChatController> {
                                                     .currentRoomMessages
                                                     .value![index]
                                                     .fromId)
-                                                ? controller
-                                                    .userService.user.value!.id
+                                                ? controller.userService.user
+                                                    .value!.avatar.url
                                                 : controller.usersService
                                                     .getUserById(controller
                                                         .roomService
@@ -141,7 +141,7 @@ class ChatScreen extends GetView<ChatController> {
                                                               .currentRoomMessages
                                                               .value![index]
                                                               .fromId)
-                                                      ? Colors.amber[600]
+                                                      ? Color.fromARGB(255, 98, 0, 238)
                                                       : Colors.grey.shade200)),
                                               padding: EdgeInsets.all(16),
                                               child: Column(
@@ -149,19 +149,16 @@ class ChatScreen extends GetView<ChatController> {
                                                   // Text(
                                                   //   controller.roomService.currentRoomMessages.value![index].from
                                                   // ),
-                                                  Text(
-                                                    controller
-                                                        .roomService
-                                                        .currentRoomMessages
-                                                        .value![index]
-                                                        .message,
-                                                    style:
-                                                        TextStyle(fontSize: 15),
-                                                  ),
+                                                  _buildText(index),
                                                   //   Text("implement timestamp function")
                                                 ],
                                               ),
-                                            )
+                                            ),
+                                            Text(intl.DateFormat("hh:mm:ss").format(controller
+                                                .roomService
+                                                .currentRoomMessages
+                                                .value![index]
+                                                .timestamp!.toLocal())),
                                           ],
                                         )
                                       ])),
@@ -216,7 +213,8 @@ class ChatScreen extends GetView<ChatController> {
                         );
                         if (gif != null) {
                           // _gif.value = gif;
-                          controller.messageController.text = gif.url!;
+                          controller.messageController.text =
+                              gif.images.original!.url!;
                           controller.sendMessage();
                           messageInputFocusNode.requestFocus();
                         }
@@ -225,8 +223,8 @@ class ChatScreen extends GetView<ChatController> {
                   ],
                 ),
               )
-            ]))
-        : SizedBox();
+            ])
+    );
   }
 
   Widget _buildChatScreenHeader() {
@@ -266,5 +264,29 @@ class ChatScreen extends GetView<ChatController> {
           ),
           borderRadius: const BorderRadius.all(Radius.circular(25.0))),
     );
+  }
+
+  Widget _buildText(int index) {
+    if (controller.roomService.currentRoomMessages.value![index].message
+        .startsWith('https://')) {
+      return Image.network(
+          controller.roomService.currentRoomMessages.value![index].message,
+          headers: {'accept': 'image/*'});
+    } else {
+      return Text(
+        controller.roomService.currentRoomMessages.value![index].message,
+        style: TextStyle(
+            fontSize: 15,
+            color: controller.isCurrentUser(
+                controller
+                    .roomService
+                    .currentRoomMessages
+                    .value![index]
+                    .fromId)
+                ? Colors.white
+                : Colors.black
+        ),
+      );
+    }
   }
 }

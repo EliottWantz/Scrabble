@@ -18,13 +18,13 @@ class FriendsScreen extends GetView<FriendsController> {
               ),
         bottomNavigationBar: BottomNavigationBar(
           items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(
-                  Icons.circle,
-                  color: Colors.green
-              ),
-              label: 'Online',
-            ),
+            // BottomNavigationBarItem(
+            //   icon: Icon(
+            //       Icons.circle,
+            //       color: Colors.green
+            //   ),
+            //   label: 'Online',
+            // ),
             BottomNavigationBarItem(
               icon: Icon(
                   Icons.people_alt,
