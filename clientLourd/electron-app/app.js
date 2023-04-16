@@ -13,15 +13,16 @@ function initWindow() {
       contextIsolation: false,
     },
   });
+  appWindow.maximize();
 
   // Electron Build Path
-  const path = `http://localhost:4200`;
+  const path = `file://${__dirname}/dist/electron-app/index.html`;
   appWindow.loadURL(path);
 
   appWindow.setMenuBarVisibility(false);
 
   // Initialize the DevTools.
-  appWindow.webContents.openDevTools();
+  //appWindow.webContents.openDevTools();
 
   appWindow.on("closed", function () {
     if (chatWindow) {
@@ -80,6 +81,7 @@ app.on("activate", function () {
 });
 
 ipcMain.on("open-chat", (event, data) => {
+  console.log("we need to open the chat");
   appWindow.webContents.send("open-chat");
   if (chatWindow == null) {
     openChatwindow();
@@ -89,5 +91,12 @@ ipcMain.on("open-chat", (event, data) => {
 });
 
 ipcMain.on("request-user-data", (event, data) => {
+  if (chatWindow == null) return;
   chatWindow.webContents.send("user-data", userData);
+});
+
+ipcMain.on("logout", (event, data) => {
+  if (chatWindow) {
+    chatWindow.destroy();
+  }
 });

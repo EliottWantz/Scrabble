@@ -48,7 +48,7 @@ import { JoinProtectedGameComponent } from '@app/components/join-protected-game/
 import { CustomizeAvatarComponent } from '@app/components/customize-avatar/customize-avatar.component';
 import { MatStepperModule } from '@angular/material/stepper';
 import { ColorPickerModule } from 'ngx-color-picker';
-import { GameObservePageComponent } from "@app/pages/game-observe-page/game-observe-page.component";
+import { GameObservePageComponent } from '@app/pages/game-observe-page/game-observe-page.component';
 import { JoinPrivateGameComponent } from '@app/components/join-private-game/join-private-game.component';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { GifComponent } from '@app/components/gif/gif.component';
@@ -61,6 +61,7 @@ import { HttpClient } from '@angular/common/http';
 import { AdviceComponent } from '@app/components/advice/advice.component';
 import { ChooseLetterComponent } from '@app/components/choose-letter/choose-letter.component';
 import { DirectionComponent } from '@app/components/direction/direction.component';
+import { ProfilModificationComponent } from './components/profil-modification/profil-modification.component';
 import { InviteComponent } from '@app/components/invite/invite.component';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { CreateTournamentComponent } from './components/create-tournament/create-tournament.component';
@@ -70,6 +71,14 @@ import { GameOverComponent } from '@app/components/game-over/game-over.component
 import { GameOverTournamentComponent } from '@app/components/game-over-tournament/game-over-tournament.component';
 import { TournamentOverComponent } from '@app/components/tournament-over/tournament-over.component';
 import { FindTournamentPageComponent } from './pages/find-tournament-page/find-tournament-page.component';
+import { ChatBoxButtonComponent } from '@app/components/chat-box-button/chat-box-button.component';
+import { FriendStatsComponent } from './components/friend-stats/friend-stats.component';
+import { NewDmRoomComponent } from './components/new-dm-room/new-dm-room.component';
+import { MatBadgeModule } from '@angular/material/badge';
+
+export function createTranslateLoader(http: HttpClient) {
+  return new TranslateHttpLoader(http, './assets/i18n/', '.json');
+}
 
 @NgModule({
   declarations: [
@@ -113,7 +122,12 @@ import { FindTournamentPageComponent } from './pages/find-tournament-page/find-t
     InviteComponent,
     GameOverComponent,
     GameOverTournamentComponent,
-    TournamentOverComponent
+    TournamentOverComponent,
+    ProfilModificationComponent,
+    InviteComponent,
+    ChatBoxButtonComponent,
+    FriendStatsComponent,
+    NewDmRoomComponent,
   ],
   imports: [
     BrowserModule,
@@ -126,6 +140,7 @@ import { FindTournamentPageComponent } from './pages/find-tournament-page/find-t
     MatCardModule,
     AppMaterialModule,
     MatIconModule,
+    MatBadgeModule,
     MatDividerModule,
     DragDropModule,
     MatSidenavModule,
@@ -145,7 +160,7 @@ import { FindTournamentPageComponent } from './pages/find-tournament-page/find-t
     TranslateModule.forRoot({
       loader: {
         provide: TranslateLoader,
-        useFactory: HttpLoaderFactory,
+        useFactory: (createTranslateLoader),
         deps: [HttpClient],
       },
       defaultLanguage: 'fr',
@@ -160,7 +175,7 @@ import { FindTournamentPageComponent } from './pages/find-tournament-page/find-t
   ],
   bootstrap: [AppComponent],
 })
-export class AppModule {}
+export class AppModule { }
 
 export function HttpLoaderFactory(http: HttpClient): TranslateHttpLoader {
   return new TranslateHttpLoader(http);

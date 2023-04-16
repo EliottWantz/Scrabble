@@ -115,13 +115,16 @@ $dark-theme: mat.define-dark-theme(
 
 .dark-theme {
     @include mat.all-component-colors($dark-theme);
-    //.mat-mdc-input-element {
-      //  margin-top: 5%;
-    //}
+    .mat-mdc-input-element {
+       color: white
+    }
   }
   
   .light-theme {
     @include mat.all-component-themes($light-theme);
+    .mat-mdc-input-element {
+       color: black
+    }
   }
 
 .mat-mdc-form-field-infix {
@@ -143,7 +146,6 @@ $dark-theme: mat.define-dark-theme(
   html,
 body {
     margin: 0;
-    font-family: Roboto, 'Helvetica Neue', sans-serif;
     width: 100%;
     height: 100%;
     padding: 0;
@@ -243,4 +245,8 @@ button:hover {
 
   .dark-theme .mat-expansion-panel-header {
     height: 48px;
+  }
+
+  .mat-mdc-option.mdc-list-item {
+    width: 100%;
   }

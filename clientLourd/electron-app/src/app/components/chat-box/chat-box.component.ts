@@ -20,8 +20,9 @@ import { ClientEvent } from '@app/utils/events/client-events';
 import { LeaveRoomPayload } from '@app/utils/interfaces/packet';
 import { MatSelectChange } from '@angular/material/select';
 import { Subscription } from 'rxjs';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { GifComponent } from '@app/components/gif/gif.component';
+import { NewDmRoomComponent } from '../new-dm-room/new-dm-room.component';
 
 const electron = (window as any).require('electron');
 
@@ -46,7 +47,6 @@ export class ChatBoxComponent implements AfterViewInit {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private scrollTimeoutId: any;
   private roomSubscription!: Subscription;
-  opened = false;
 
   constructor(
     private fb: forms.FormBuilder,
@@ -78,43 +78,26 @@ export class ChatBoxComponent implements AfterViewInit {
     });
     electron.ipcRenderer.on('close-chat', async () => {
       this.ngZone.run(() => {
+
         this.fenetrer = false;
         this.subscribeToRoom();
       });
     });
   }
 
-  @HostListener("document:click", ['$event'])
-  clickout(event: any) {
-    if (event.target.id === "submitBtn")
-      return;
-    const elem = document.elementFromPoint(event.x,event.y);
-    if (!document.getElementById("chatBox")?.contains(elem)) {
-      this.opened = false;
-    }
-  }
-
   async ngAfterViewInit(): Promise<void> {
-    if (this.opened) {
-      setTimeout(() => {
-        this.chatBoxInput.nativeElement.focus();
-        this.scrollToBottom();
-      });
-    }
+    setTimeout(() => {
+      this.chatBoxInput.nativeElement.focus();
+      this.scrollToBottom();
+    });
 
     this.room$.subscribe(() => {
       this.scrollToBottom();
     });
   }
 
-  toggleChat() {
-    this.opened = !this.opened;
-        this.scrollToBottom();
-  }
-
   send(event: Event): void {
     event.preventDefault();
-    //console.log(document.getElementById('selectionElem'));
     if (!this.message || !this.message.replace(/\s/g, '')) return;
 
     this.chatService.send(this.message, this.roomService.currentRoomChat.value);
@@ -141,8 +124,6 @@ export class ChatBoxComponent implements AfterViewInit {
   }
 
   changeRoom(event: MatSelectChange): void {
-    //console.log(this.getRoomName(this.currentRoomId));
-    //console.log(event.value.id);
     this.roomService.changeRoom(this.currentRoomId);
   }
 
@@ -167,13 +148,11 @@ export class ChatBoxComponent implements AfterViewInit {
     this.roomService.currentRoomChat.next(
       this.roomService.listJoinedChatRooms.value[0]
     );
-    //console.log(this.roomService.currentRoomChat.value);
     this.socketService.send(event, payload);
-    //console.log(this.roomService.listJoinedChatRooms.value);
   }
 
   openGifMenu(): void {
-        this.dialog.open(GifComponent, {});
+    this.dialog.open(GifComponent, {});
   }
 
   containsGifURL(message: string): boolean {

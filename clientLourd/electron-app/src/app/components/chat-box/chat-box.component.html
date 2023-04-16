@@ -1,60 +1,10 @@
-<button *ngIf="!opened" mat-fab color="primary" class="placement" (click)="toggleChat()" type="button">
-  <mat-icon>chat</mat-icon>
-</button>
-<mat-card *ngIf="!fenetrer && opened" id="chatBox" class="placement">
+<mat-card *ngIf="!fenetrer" id="chatBox">
   <div class="header">
     <div class="header-content">
-      <form class="room-form">
-        <div class="room-form-field">
-          <mat-form-field appearance="fill">
-            <mat-label>{{ "chat-box-component.label" | translate }}</mat-label>
-            <mat-select
-              (selectionChange)="changeRoom($event)"
-              [(value)]="currentRoomId"
-              id="selectionElem"
-            >
-              <mat-select-trigger *ngIf="room$.value.name !== 'Global Room'">{{
-                room$.value.name
-              }}</mat-select-trigger>
-              <mat-select-trigger *ngIf="room$.value.name === 'Global Room'">{{
-                "chat-box-component.global" | translate
-              }}</mat-select-trigger>
-              <div
-                *ngFor="let room of getRooms(); let last = last; let i = index"
-              >
-                <div class="item">
-                  <mat-option [value]="room.id" *ngIf="room$.value.name !== 'Global Room'">
-                    {{ room.name }}
-                  </mat-option>
-                  <mat-option [value]="room.id" *ngIf="room$.value.name === 'Global Room'">{{
-                    "chat-box-component.global" | translate
-                  }}</mat-option>
-                  <mat-icon
-                    class="close-icon"
-                    (click)="leaveRoom(i)"
-                    *ngIf="room.id !== 'global'"
-                    >close</mat-icon
-                  >
-                </div>
-                <mat-divider *ngIf="!last"></mat-divider>
-              </div>
-            </mat-select>
-          </mat-form-field>
-        </div>
-      </form>
-      <button
-        color="primary"
-        mat-mini-fab
-        *ngIf="showbutton"
-        (click)="this.chatService.openChat()"
-        [ngStyle]="{transform: 'scale(0.8)'}"
-        class="close-pop"
-        type="button"
-      >
+      <h1> {{this.room$.value.name}}</h1>
+      <button color="primary" mat-mini-fab *ngIf="showbutton" (click)="this.chatService.openChat()"
+        [ngStyle]="{transform: 'scale(0.8)'}" class="close-pop" type="button">
         <mat-icon>open_in_new</mat-icon>
-      </button>
-      <button mat-mini-fab color="primary" (click)="toggleChat()" [ngStyle]="{transform: 'scale(0.8)'}" class="close-pop" type="button">
-        <mat-icon>close</mat-icon>
       </button>
     </div>
   </div>
@@ -67,14 +17,11 @@
         </div>
         <div class="message-content">
           <p class="timestamp">{{ msg.timestamp }}</p>
-          <div
-            class="message"
-            [ngClass]="{
+          <div class="message" [ngClass]="{
               sent: msg.from === user.id,
               received: msg.from !== user.id
-            }"
-          >
-            
+            }">
+
             <p>{{getGifMessage(msg.message)[0]}}</p>
             <img *ngIf="containsGifURL(msg.message)" [src]="getGifMessage(msg.message)[1]">
           </div>
@@ -84,30 +31,15 @@
   </div>
 
   <form #chatForm id="chatBoxForm" (ngSubmit)="send($event)">
-    <mat-form-field appearance="fill">
+    <mat-form-field appearance="outline">
       <mat-label for="message">{{
         "chat-box-component.enter-message" | translate
-      }}</mat-label>
-      <input
-        #chatBoxInput
-        type="text"
-        id="chatBoxInput"
-        autocomplete="off"
-        matInput
-        name="password"
-        [(ngModel)]="message"
-      />
-      <!-- <mat-error *ngIf="input.hasError('maxlength')">Votre message <strong>excède</strong> la limite de charactères</mat-error> -->
+        }}</mat-label>
+      <input #chatBoxInput type="text" id="chatBoxInput" autocomplete="off" matInput name="password"
+        [(ngModel)]="message" />
     </mat-form-field>
-    <button
-      #submitBtn
-      mat-mini-fab
-      color="primary"
-      [disabled]="false"
-      id="submitBtn"
-      type="submit"
-      (click)="send($event)"
-    >
+    <button #submitBtn mat-mini-fab color="primary" [disabled]="false" id="submitBtn" type="submit"
+      (click)="send($event)">
       <mat-icon>send</mat-icon>
     </button>
     <button mat-mini-fab color="primary" id="submitBtn" (click)="openGifMenu()" type="button">

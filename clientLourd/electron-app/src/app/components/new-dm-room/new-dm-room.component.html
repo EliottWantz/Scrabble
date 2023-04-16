@@ -1,0 +1,11 @@
+<div class="container">
+    <h1>Invite friend to chat</h1>
+    <form>
+        <div class="form-group">
+            <label for="friendName">Friend's Name:</label>
+            <input type="text" id="friendName" name="friendName" [(ngModel)]="friendName"
+                placeholder="Enter your friend's name" required>
+        </div>
+        <button type="submit" (click)="submit()">Invite to chat</button>
+    </form>
+</div>

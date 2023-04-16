@@ -94,9 +94,6 @@ export class SidebarComponent implements OnInit {
         this.lightDarkToggleIcon = this.lightThemeIcon;
       }
     });
-    /*this.user.subscribe((user) => {
-      this.badgeContent = user.pendingRequests.length;
-    });*/
   }
 
   public doToggleLightDark() {
@@ -114,8 +111,9 @@ export class SidebarComponent implements OnInit {
   logout(): void {
     this.router.navigate(['/home']);
     this.authService.logout();
-    setTimeout(()=>{
+    setTimeout(() => {
       window.location.reload();
+      electron.ipcRenderer.send('logout');
     }, 100);
   }
 
@@ -131,7 +129,7 @@ export class SidebarComponent implements OnInit {
     if (this.isInGameLobby() && this.gameService.game.value) {
       const payload: LeaveGamePayload = {
         gameId: this.gameService.game.value.id
-      } 
+      }
       this.webSocketService.send("leave-game", payload);
       this.gameService.game.next(undefined);
     }
@@ -155,15 +153,23 @@ export class SidebarComponent implements OnInit {
 
   selectNav(index: number): void {
     const navButtons = document.getElementsByClassName('nav-button');
+    let wasThere = false;
     for (let i = 0; i < navButtons.length; i++) {
       if (i != index) {
         navButtons[i].setAttribute('style', '');
       } else {
+        wasThere = true;
         navButtons[i].setAttribute(
           'style',
           'background-color: #424260; outline-color: #66678e; outline-width: 1px; outline-style: solid;'
         );
       }
+    }
+    if (!wasThere) {
+      navButtons[navButtons.length - 1].setAttribute(
+        'style',
+        'background-color: #424260; outline-color: #66678e; outline-width: 1px; outline-style: solid;'
+      );
     }
   }
 }
