@@ -69,6 +69,10 @@ import { FriendStatsComponent } from './components/friend-stats/friend-stats.com
 import { NewDmRoomComponent } from './components/new-dm-room/new-dm-room.component';
 import { MatBadgeModule } from '@angular/material/badge';
 
+export function createTranslateLoader(http: HttpClient) {
+  return new TranslateHttpLoader(http, './assets/i18n/', '.json');
+}
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -141,7 +145,7 @@ import { MatBadgeModule } from '@angular/material/badge';
     TranslateModule.forRoot({
       loader: {
         provide: TranslateLoader,
-        useFactory: HttpLoaderFactory,
+        useFactory: (createTranslateLoader),
         deps: [HttpClient],
       },
       defaultLanguage: 'fr',
