@@ -28,7 +28,7 @@ export class ExploreComponent {
 
 
   joinRoom(room: Room) {
-
+    console.log("Joining room: " + room.id)
     const payload: JoinRoomPayload = {
       roomId: room.id
     };
@@ -38,6 +38,7 @@ export class ExploreComponent {
   }
 
   leaveRoom(room: Room) {
+    console.log("leaving room: " + room.id)
     const payload: LeaveRoomPayload = {
       roomId: room.id
     }
