@@ -64,6 +64,13 @@ import { DirectionComponent } from '@app/components/direction/direction.componen
 import { ProfilModificationComponent } from './components/profil-modification/profil-modification.component';
 import { InviteComponent } from '@app/components/invite/invite.component';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { CreateTournamentComponent } from './components/create-tournament/create-tournament.component';
+import { JoinTournamentComponent } from './components/join-tournament/join-tournament.component';
+import { JoinPrivateTournamentComponent } from './components/join-private-tournament/join-private-tournament.component';
+import { GameOverComponent } from '@app/components/game-over/game-over.component';
+import { GameOverTournamentComponent } from '@app/components/game-over-tournament/game-over-tournament.component';
+import { TournamentOverComponent } from '@app/components/tournament-over/tournament-over.component';
+import { FindTournamentPageComponent } from './pages/find-tournament-page/find-tournament-page.component';
 import { ChatBoxButtonComponent } from '@app/components/chat-box-button/chat-box-button.component';
 import { FriendStatsComponent } from './components/friend-stats/friend-stats.component';
 import { NewDmRoomComponent } from './components/new-dm-room/new-dm-room.component';
@@ -98,16 +105,24 @@ export function createTranslateLoader(http: HttpClient) {
     SocialComponent,
     WaitRoomPageComponent,
     FindGamePageComponent,
+    FindTournamentPageComponent,
     JoinGameComponent,
+    JoinTournamentComponent,
     CreateGameComponent,
+    CreateTournamentComponent,
     JoinProtectedGameComponent,
     CustomizeAvatarComponent,
     GameObservePageComponent,
     JoinPrivateGameComponent,
+    JoinPrivateTournamentComponent,
     GifComponent,
     AdviceComponent,
     ChooseLetterComponent,
     DirectionComponent,
+    InviteComponent,
+    GameOverComponent,
+    GameOverTournamentComponent,
+    TournamentOverComponent,
     ProfilModificationComponent,
     InviteComponent,
     ChatBoxButtonComponent,

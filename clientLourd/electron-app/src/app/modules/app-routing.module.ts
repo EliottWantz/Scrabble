@@ -12,6 +12,7 @@ import { WaitRoomPageComponent } from '@app/pages/waiting-room-page/waiting-room
 import { FindGamePageComponent } from '@app/pages/find-game-page/find-game-page.component';
 import { ChatBoxComponent } from '@app/components/chat-box/chat-box.component';
 import { GameObservePageComponent } from '@app/pages/game-observe-page/game-observe-page.component';
+import { FindTournamentPageComponent } from '@app/pages/find-tournament-page/find-tournament-page.component';
 import { ProfilModificationComponent } from '@app/components/profil-modification/profil-modification.component';
 import { FriendStatsComponent } from '@app/components/friend-stats/friend-stats.component';
 
@@ -28,6 +29,7 @@ const routes: Routes = [
   { path: 'social', component: SocialPageComponent },
   { path: 'waitingRoom', component: WaitRoomPageComponent },
   { path: 'find-game', component: FindGamePageComponent },
+  { path: 'find-tournament', component: FindTournamentPageComponent },
   { path: 'chatbox', component: ChatBoxComponent },
   { path: 'profilModification', component: ProfilModificationComponent },
   { path: 'friendStats', component: FriendStatsComponent }

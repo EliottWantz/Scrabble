@@ -1,0 +1,33 @@
+<mat-dialog-content id="container">
+    <div *ngIf="!data.isWinner && !data.isObserving"  id="container">
+        <p>{{"game-page-tournament.lost" | translate}}</p>
+      <button color="primary" (click)="leaveTournament()">
+        {{'game-page.leave' | translate}}
+      </button>
+      <button color="primary" (click)="joinTournamentAsObserver()">
+        {{'game-page-tournament.observe' | translate}}
+      </button>
+    </div>
+    <div *ngIf="data.isWinner && !data.isObserving">
+        <p>{{"game-page-tournament.won" | translate}}</p>
+        <button color="primary" (click)="close()">
+            {{"game-over-tournament.bravo" | translate}}
+        </button>
+    </div>
+
+    <div *ngIf="data.isObserving && isTournamentOver()"  id="container">
+        <p>{{"game-page-tournament.observe" | translate}}</p>
+      <button color="primary" (click)="leaveTournament()">
+        {{"game-page-tournament.menu" | translate}}
+      </button>
+      <button color="primary" (click)="joinTournamentAsObserver()">
+        {{'game-over-tournament.observer' | translate}}
+      </button>
+    </div>
+    <div *ngIf="data.isObserving && !isTournamentOver()">
+        <p>{{"game-page-tournament.observe" | translate}}</p>
+        <button color="primary" (click)="close()">
+            {{"game-page-tournament.menu" | translate}}
+        </button>
+    </div>
+</mat-dialog-content>

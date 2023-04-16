@@ -5,6 +5,7 @@
 <button *ngIf="!isLoggedIn()" mat-flat-button color="accent" routerLink="/login">{{'main-page.login' | translate}}</button>
     <button *ngIf="!isLoggedIn()" mat-flat-button color="accent" routerLink="/register">{{'main-page.register' | translate}}</button>
     <button *ngIf="isLoggedIn()" mat-flat-button color="accent" routerLink="/find-game">{{'main-page.play' | translate}}</button>
+    <button *ngIf="isLoggedIn()" mat-flat-button color="accent" routerLink="/find-tournament">{{'main-page.tournament' | translate}}</button>
 
     <!--
         <button *ngIf="isLoggedIn()" mat-flat-button color="accent" routerLink="/waitingRoom" (click)="createGame()">Créer une partie</button>

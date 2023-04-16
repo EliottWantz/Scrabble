@@ -54,7 +54,6 @@ export class JoinProtectedGameComponent {
             this.webSocketService.send(event, payload);
             // if password is correct
             this.gameService.isObserving = true;
-            this.router.navigate(["/gameObserve"]);
             this.close();
         }  else {
             //console.log(this.password);

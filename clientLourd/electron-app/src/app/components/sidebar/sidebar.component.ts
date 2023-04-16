@@ -54,26 +54,30 @@ export class SidebarComponent implements OnInit {
         this.currentRouteName = e.url;
         switch (e.url) {
           case "/home":
-            this.currentRoute = "PolyScrabble";
+            this.currentRoute = "home";
             this.selectNav(0);
             this.previousRouteName = ['/home'];
             this.routeIndex = 0;
             break;
 
           case '/login':
-            this.currentRoute = 'Connexion';
+            this.currentRoute = 'login';
             break;
 
           case '/register':
-            this.currentRoute = 'Inscription';
+            this.currentRoute = 'register';
             break;
 
           case '/avatar':
-            this.currentRoute = "Choix de l'avatar";
+            this.currentRoute = "avatar";
             break;
 
           case '/find-game':
-            this.currentRoute = 'Options de jeu';
+            this.currentRoute = 'find-game';
+            break;
+          
+          case '/find-tournament':
+            this.currentRoute = 'find-tournament';
             break;
         }
       }
