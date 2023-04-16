@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:giphy_picker/giphy_picker.dart';
+import 'package:intl/intl.dart' as intl;
 
 import '../controllers/chat_controller.dart';
 import '../services/room_service.dart';
@@ -45,7 +46,7 @@ class FloatingChatScreen extends GetView<ChatController> {
                 child: TextButton(
                     onPressed: () =>
                         {_selectedChatRoom.value = !_selectedChatRoom.value},
-                    child: const Text('Go back'),
+                    child: const Text('Go back', style: TextStyle(color: Colors.white),),
                     style: ButtonStyle(
                       foregroundColor:
                           MaterialStatePropertyAll<Color>(Colors.black),
@@ -131,6 +132,11 @@ class FloatingChatScreen extends GetView<ChatController> {
                                       ],
                                     ),
                                   ),
+                                  Text(intl.DateFormat("hh:mm:ss").format(controller
+                                      .roomService
+                                      .currentRoomMessages
+                                      .value![index]
+                                      .timestamp!.toLocal())),
                                 ]),
                               ])),
                     );

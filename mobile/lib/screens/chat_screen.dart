@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
 import 'package:giphy_picker/giphy_picker.dart';
+import 'package:intl/intl.dart' as intl;
 
 import '../models/chat_message_payload.dart';
 
@@ -152,7 +153,12 @@ class ChatScreen extends GetView<ChatController> {
                                                   //   Text("implement timestamp function")
                                                 ],
                                               ),
-                                            )
+                                            ),
+                                            Text(intl.DateFormat("hh:mm:ss").format(controller
+                                                .roomService
+                                                .currentRoomMessages
+                                                .value![index]
+                                                .timestamp!.toLocal())),
                                           ],
                                         )
                                       ])),
