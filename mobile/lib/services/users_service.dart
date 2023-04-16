@@ -97,6 +97,18 @@ class UsersService extends GetxService {
     return userIds;
   }
 
+  List<String> getUsernamesFromUserIds(List<dynamic> userIds) {
+    List<String> usernames = [];
+    for (dynamic userId in userIds) {
+      for (User user in users) {
+        if (user.id == userId) {
+          usernames.add(user.username);
+        }
+      }
+    }
+    return usernames;
+  }
+
   Future<void> sendFriendRequest(String friendUsername) async {
     String friendId = getUserId(friendUsername);
     final request = SendFriendRequest(friendId: friendId);

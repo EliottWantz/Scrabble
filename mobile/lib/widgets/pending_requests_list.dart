@@ -57,7 +57,7 @@ class PendingRequestsList extends StatelessWidget {
                     if (res == true) {
                       _userService.pendingRequest.remove(username);
                       _userService.user.value!.pendingRequests.remove(username);
-                      _userService.user.value!.friends.add(username);
+                      // _userService.user.value!.friends.add(username);
                       _userService.friends.add(username);
                       String toId = _usersService.getUserId(username);
                       if (!_roomService.roomMapContains('${_userService.user.value!.username}/${username}')) {

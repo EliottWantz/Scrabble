@@ -424,6 +424,9 @@ class WebsocketService extends GetxService {
     usersService.onlineUsers.value.clear();
     usersService.onlineUsers.addAll(listUsersResponse.payload.users);
 
+    List<String> friendUsernames = usersService.getUsernamesFromUserIds(userService.friends.value);
+
+
     List<String> onlineFriendUsernames = usersService.getOnlineFriendUsernames();
     List<String> offlineFriendUsernames = usersService.getOfflineFriendUsernames();
     onlineFriendUsernames.addAll(offlineFriendUsernames);
