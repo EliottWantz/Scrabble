@@ -1,5 +1,4 @@
 import 'package:client_leger/api/api_repository.dart';
-import 'package:client_leger/models/user.dart';
 import 'package:client_leger/screens/floating_chat_screen.dart';
 import 'package:client_leger/services/room_service.dart';
 import 'package:client_leger/services/settings_service.dart';
@@ -147,13 +146,13 @@ class GameLobbyScreen extends StatelessWidget {
 
   Widget _buildStartButton(BuildContext context) {
     if (gameMode != 'tournoi' &&
-        _gameService.currentGameRoomUserIds.value!.length < 2 ||
+            _gameService.currentGameRoomUserIds.value!.length < 2 ||
         !_gameService.isGameCreator()) {
       return Text('En attente d\'autre joueurs... Veuillez patientez',
           style: Theme.of(context).textTheme.headline6);
     } else if (gameMode == 'tournoi' &&
-        _gameService.currentTournamentUserIds.value!.length < 4 ||
-        !_gameService.isGameCreator()) {
+            _gameService.currentTournamentUserIds.value!.length < 4 ||
+        !_gameService.isTournamentCreator()) {
       return Text('En attente d\'autre joueurs... Veuillez patientez',
           style: Theme.of(context).textTheme.headline6);
     } else {

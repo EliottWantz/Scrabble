@@ -1,21 +1,16 @@
 import 'package:client_leger/api/api_repository.dart';
-import 'package:client_leger/models/game_room.dart';
 import 'package:client_leger/models/rack.dart';
 import 'package:client_leger/models/requests/accept_join_game_request.dart';
 import 'package:client_leger/models/tournament.dart';
-import 'package:client_leger/models/user.dart';
-import 'package:client_leger/routes/app_routes.dart';
 import 'package:client_leger/services/room_service.dart';
 import 'package:client_leger/services/user_service.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 
 import '../models/chat_message_payload.dart';
 import '../models/game.dart';
 import '../models/game_update_payload.dart';
 import '../models/move_info.dart';
 import '../models/player.dart';
-import '../models/room.dart';
 
 class GameService extends GetxService {
   final UserService userService = Get.find();
@@ -92,6 +87,11 @@ class GameService extends GetxService {
     return currentGameId == roomId;
   }
 
+  bool isTournamentCreator() {
+    String creatorId = currentTournament!.value!.creatorId.split("#")[0];
+    return creatorId == userService.user.value!.id;
+  }
+
   bool isGameCreator() {
     if (!currentGameInfoInitialized) {
       return false;
@@ -101,9 +101,7 @@ class GameService extends GetxService {
   }
 
   bool isGameObserver() {
-    for (final obervateurId in currentGameInfo!.observateurIds) {
-
-    }
+    for (final obervateurId in currentGameInfo!.observateurIds) {}
     String creatorId = currentGameInfo!.creatorId.split("#")[0];
     return creatorId == userService.user.value!.id;
   }
@@ -156,7 +154,8 @@ class GameService extends GetxService {
   }
 
   Future<bool?> acceptJoinGameRequest(String userId) async {
-    final request = AcceptJoinGameRequest(userId: userId, gameId: currentGameId);
+    final request =
+        AcceptJoinGameRequest(userId: userId, gameId: currentGameId);
     final res = await apiRepository.acceptJoinGameRequest(request);
     if (res == true) {
       return true;
@@ -165,7 +164,8 @@ class GameService extends GetxService {
   }
 
   Future<bool?> declineJoinGameRequest(String userId) async {
-    final request = AcceptJoinGameRequest(userId: userId, gameId: currentGameId);
+    final request =
+        AcceptJoinGameRequest(userId: userId, gameId: currentGameId);
     final res = await apiRepository.declineJoinGameRequest(request);
     if (res == true) {
       return true;
@@ -174,7 +174,8 @@ class GameService extends GetxService {
   }
 
   Future<bool?> revokeJoinGameRequest(String gameId) async {
-    final request = AcceptJoinGameRequest(userId: userService.user.value!.id, gameId: gameId);
+    final request = AcceptJoinGameRequest(
+        userId: userService.user.value!.id, gameId: gameId);
     final res = await apiRepository.revokeJoinGameRequest(request);
     if (res == true) {
       return true;
