@@ -16,6 +16,7 @@ import { User } from '@app/utils/interfaces/user';
 export class NewDmRoomComponent {
   chatroomName = '';
   friendName = '';
+  errorMessage = '';
   friendGroup: string[] = []
   constructor(private socketService: WebSocketService, private userService: UserService, private storageSercice: StorageService, private dialogRef: MatDialogRef<void>
     , public socialService: SocialService) { }
@@ -36,7 +37,11 @@ export class NewDmRoomComponent {
 
   getFriends() {
     const friend = this.socialService.friendsList$.value.find((friend: User) => friend.username === this.friendName);
-    if (!friend) return;
+    if (!friend) {
+      this.errorMessage = "This user is not in your friend list.";
+      return;
+    }
+    this.errorMessage = '';
     this.friendGroup.push(friend.id);
     this.friendName = '';
   }

@@ -10,6 +10,7 @@
             <label for="friendName">Add Friend</label>
             <input type="text" id="friendName" name="friendName" [(ngModel)]="friendName"
                 placeholder="Enter friend's username" required>
+                <span class="error-message" *ngIf="errorMessage">{{errorMessage}}</span>
             <button type="button" (click)="getFriends()">Add to Group</button>
         </div>
         <div class="added-friends">
@@ -25,7 +26,7 @@
                 </div>
                 <button type="button" (click)="removeFriend(i)">Remove</button>
             </div>
-            <button class="create-groupchat" type="submit" (click)="submit()">Create Group Chat</button>
+            <button class="create-groupchat" type="submit" (click)="submit()" [disabled]="!friendGroup.length">Create Group Chat</button>
         </div>
     </form>
 </div>

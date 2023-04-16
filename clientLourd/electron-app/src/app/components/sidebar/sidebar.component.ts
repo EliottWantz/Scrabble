@@ -13,6 +13,7 @@ import { User } from "@app/utils/interfaces/user";
 import { BehaviorSubject } from "rxjs";
 //import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { MatDrawer, MatSidenav } from '@angular/material/sidenav';
+import { Room } from "@app/utils/interfaces/room";
 
 //import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 const electron = (window as any).require('electron');
@@ -24,7 +25,7 @@ const electron = (window as any).require('electron');
 export class SidebarComponent implements OnInit {
   @Input() sidenavHandle!: MatSidenav;
   @ViewChild('drawer') drawer!: MatDrawer;
-
+  modeFenetrer = false;
   private darkThemeIcon = 'wb_sunny';
   private lightThemeIcon = 'nightlight_round';
   public lightDarkToggleIcon = this.lightThemeIcon;
@@ -37,7 +38,7 @@ export class SidebarComponent implements OnInit {
   previousRouteName: string[] = ["/home"];
   routeIndex = 0;
 
-  constructor(private userService: UserService, private authService: AuthenticationService, private gameService: GameService, private themeService: ThemeService, private router: Router,
+  constructor(private userService: UserService, private roomSvc: RoomService, private authService: AuthenticationService, private gameService: GameService, private themeService: ThemeService, private router: Router,
     private webSocketService: WebSocketService) {
     this.user = this.userService.subjectUser;
     document
@@ -81,8 +82,9 @@ export class SidebarComponent implements OnInit {
   }
   ngOnInit(): void {
     electron.ipcRenderer.on('user-data', () => {
-      this.drawer.close();
+      this.modeFenetrer = true;
     });
+
     this.themeService.theme.subscribe((theme) => {
       if (theme == 'dark') {
         this.lightDarkToggleIcon = this.darkThemeIcon;
@@ -90,6 +92,7 @@ export class SidebarComponent implements OnInit {
         this.lightDarkToggleIcon = this.lightThemeIcon;
       }
     });
+
   }
 
   public doToggleLightDark() {

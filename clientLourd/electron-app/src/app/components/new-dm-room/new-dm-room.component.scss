@@ -57,6 +57,12 @@ button:hover {
   background-color: #3a3a3a;
 }
 
+button:disabled {
+  background-color: #cccccc;
+  color: #888888;
+  cursor: not-allowed;
+}
+
 .added-friends {
   margin-top: 1rem;
   display: flex;
@@ -133,4 +139,11 @@ button:hover {
   justify-content: center;
   margin-top: 5vh;
   justify-content: space-between;
+}
+
+.error-message {
+  color: red;
+  font-size: 12px;
+  display: block;
+  margin-top: 5px;
 }
