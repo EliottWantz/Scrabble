@@ -1,8 +1,25 @@
 const Map<String, String> fr_FR = {
+  "authEmailPlaceholder": "Veuillez entrer votre adresse courriel",
+  "authEmailLabel": "Adresse courriel",
+  "authPasswordLabel": "Mot de passe",
+  "authPasswordPlaceholder": "Veuillez entrer votre mot de passe",
+  "authUsernameLabel": "Pseudonyme",
+  "authUsernamePlaceholder": "Veuillez entrer votre pseudonyme",
+  "authWelcome": "Bienvenue à PolyScrabble",
+  "authLoginWelcome": "Content de vous revoir, veuillez vous connecter",
+  "authRegisterWelcome": "Bienvenue parmis nous, veuillez vous inscrire",
+  "authLoginAppBar": "Connexion à PolyScrabble",
+  "authRegisterAppBar": "Inscription à PolyScrabble",
+  "authStart": "Commençons",
+  "authLoginBtn": "Se connecter",
+  "authRegisterBtn": "S'inscrire",
+  "email-empty": "Entrer un courriel valide",
+  "avatar-fetching": "Récupération des avatars",
   "avatar-selection-component.bouton-custom": "Choisir votre propre avatar",
   "avatar-selection-component.bouton-defaults": "Choisir un avatar",
   "avatar-selection-component.bouton-personalize": "Personnaliser votre avatar",
   "avatar-selection-component.error": "Veuillez choisir un avatar",
+  "avatar-selection-component.picture": "Prenez votre avatar en photo",
   "avatar-selection-component.error-type":
       "Veuillez choisir un fichier de type .jpg, .jpeg or .png",
   "avatar-selection-component.next-page": "Continuer vers le menu principal",
@@ -186,5 +203,9 @@ const Map<String, String> fr_FR = {
   "create-room-screen.placeholder": "Entrez le nom du canal"
   "create-room-screen.placeholder-validation": "Le champ ne peut pas être vide"
   "chat-screen.message-hint": "Entrez un message...",
-  "chat-screen.quit-channel": "Quitter le canal",
+  "chat-screen.quit-channel": "Quitter le canal",,
+  "field-empty": "Le champ ne peut pas être vide",
+  "connect-server": "Connexion au serveur",
+  "classic-mode": "Mode classique",
+  "tournament-mode": "Mode Tournoi"
 };

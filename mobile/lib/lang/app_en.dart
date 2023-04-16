@@ -1,4 +1,19 @@
 const Map<String, String> en_US = {
+  "authEmailPlaceholder": "Please enter your email address",
+  "authEmailLabel": "Email address",
+  "authPasswordLabel": "Password",
+  "authPasswordPlaceholder": "Please enter your password",
+  "authUsernameLabel": "Username",
+  "authUsernamePlaceholder": "Please enter your username",
+  "authWelcome": "Welcome to PolyScrabble",
+  "authLoginWelcome": "Glad to see you again, please log in",
+  "authRegisterWelcome": "Welcome aboard, please register",
+  "authLoginAppBar": "Login to PolyScrabble",
+  "authRegisterAppBar": "Register to PolyScrabble",
+  "authStart": "Let's start",
+  "authLoginBtn": "Login",
+  "authRegisterBtn": "Register",
+  "avatar-fetching": "Fetching avatars",
   "avatar-selection-component.bouton-custom": "Choose your own avatar",
   "avatar-selection-component.bouton-defaults": "Choose an Avatar",
   "avatar-selection-component.bouton-personalize": "Customize your avatar",
@@ -9,6 +24,7 @@ const Map<String, String> en_US = {
   "avatar-selection-component.text": "Photos make your profile more attractive",
   "avatar-selection-component.title": "Choose an avatar that suits you",
   "avatar-selection-component.or": "Or",
+  "avatar-selection-component.picture": "Take a picture of your avatar",
   "chat-box-component.enter-message": "Enter your message",
   "chat-box-component.global": "Global room",
   "chat-box-component.label": "Room",
@@ -181,5 +197,10 @@ const Map<String, String> en_US = {
   "create-room-screen.placeholder": "Enter chanel name"
   "create-room-screen.placeholder-validation": "The field cannot be empty",
   "chat-screen.message-hint": "Enter a message..."
-  "chat-screen.quit-channel": "Quit the channel"
+  "chat-screen.quit-channel": "Quit the channel",
+  "field-empty": "The field cannot be empty",
+  "email-empty": "Enter a valid email",
+  "connect-server": "Connection to the server",
+  "classic-mode": "Classic mode",
+  "tournament-mode": "Tournament mode"
 };

@@ -1,10 +1,8 @@
-import 'package:client_leger/controllers/chatbox_controller.dart';
 import 'package:client_leger/controllers/home_controller.dart';
 import 'package:client_leger/routes/app_routes.dart';
 import 'package:client_leger/screens/floating_chat_screen.dart';
 import 'package:client_leger/services/room_service.dart';
 import 'package:client_leger/services/settings_service.dart';
-import 'package:client_leger/widgets/chatbox.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
@@ -29,7 +27,7 @@ class MainMenuScreen extends GetView<HomeController> {
         onPressed: () {
           _scaffoldKey.currentState?.openEndDrawer();
         },
-        backgroundColor: Color.fromARGB(255,98,0,238),
+        backgroundColor: Color.fromARGB(255, 98, 0, 238),
         foregroundColor: Colors.white,
         autofocus: true,
         focusElevation: 5,
@@ -51,7 +49,7 @@ class MainMenuScreen extends GetView<HomeController> {
                 image: _settingsService.getLogo(),
               ),
               const Gap(20),
-              Text('Choisissez votre mode de jeu',
+              Text('find-game-page.option'.tr,
                   style: Theme.of(context).textTheme.headline6),
               Gap(Get.height / 9),
               SizedBox(
@@ -68,25 +66,7 @@ class MainMenuScreen extends GetView<HomeController> {
                       size: 50,
                     ),
                   ),
-                  label: const Text('Mode classique'), // <-- Text
-                ),
-              ),
-              const Gap(40),
-              SizedBox(
-                width: 210,
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    Get.toNamed(Routes.HOME + Routes.GAME_START,
-                        arguments: 'coop');
-                  },
-                  icon: const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Icon(
-                      MdiIcons.crownCircleOutline,
-                      size: 50,
-                    ),
-                  ),
-                  label: const Text('Mode Coopératif'), // <-- Text
+                  label: Text('classic-mode'.tr), // <-- Text
                 ),
               ),
               const Gap(40),
@@ -104,7 +84,7 @@ class MainMenuScreen extends GetView<HomeController> {
                       size: 50,
                     ),
                   ),
-                  label: const Text('Mode Tournoi'), // <-- Text
+                  label: Text('tournament-mode'.tr), // <-- Text
                 ),
               ),
             ],
@@ -121,30 +101,27 @@ class MainMenuScreen extends GetView<HomeController> {
       return Column(
         children: [
           Container(
-            color: Color.fromARGB(255,98,0,238),
+            color: Color.fromARGB(255, 98, 0, 238),
             height: 60,
             width: double.infinity,
             child: const DrawerHeader(
               child: Text(
-                  'Chats',
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.white
-                  ),
+                'Chats',
+                style: TextStyle(fontSize: 20, color: Colors.white),
               ),
             ),
           ),
           Expanded(
               child: ListView.builder(
-                // padding: const EdgeInsets.all(16.0),
-                padding: EdgeInsets.zero,
-                itemCount: _roomService.getRooms().length,
-                itemBuilder: (context, item) {
-                  final index = item;
-                  return _buildChatRoomRow(_roomService.getRooms()[index].roomName,
-                      _roomService.getRooms()[index].roomId);
-                },
-              ))
+            // padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.zero,
+            itemCount: _roomService.getRooms().length,
+            itemBuilder: (context, item) {
+              final index = item;
+              return _buildChatRoomRow(_roomService.getRooms()[index].roomName,
+                  _roomService.getRooms()[index].roomId);
+            },
+          ))
         ],
       );
     } else {

@@ -1,26 +1,18 @@
-import 'package:client_leger/controllers/auth_controller.dart';
-import 'package:client_leger/controllers/home_controller.dart';
 import 'package:client_leger/models/game.dart';
-import 'package:client_leger/models/game_room.dart';
 import 'package:client_leger/models/tournament.dart';
-import 'package:client_leger/routes/app_routes.dart';
 import 'package:client_leger/screens/floating_chat_screen.dart';
 import 'package:client_leger/services/game_service.dart';
 import 'package:client_leger/services/room_service.dart';
 import 'package:client_leger/services/settings_service.dart';
-import 'package:client_leger/services/user_service.dart';
 import 'package:client_leger/services/users_service.dart';
 import 'package:client_leger/services/websocket_service.dart';
-import 'package:client_leger/utils/constants/game.dart';
 import 'package:client_leger/utils/dialog_helper.dart';
-import 'package:client_leger/widgets/custom_button.dart';
 import 'package:client_leger/widgets/app_sidebar.dart';
 import 'package:client_leger/widgets/input_field.dart';
 import 'package:flutter/material.dart';
 import 'package:form_validator/form_validator.dart';
 import 'package:gap/gap.dart';
-import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
+import 'package:get/getet_storage/get_storage.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:sidebarx/sidebarx.dart';
 
@@ -101,7 +93,7 @@ class GameStartScreen extends StatelessWidget {
                     image: _settingsService.getLogo(),
                   ),
                   const Gap(20),
-                  Text('Choisissez une option de jeu',
+                  Text('find-game-page.option'.tr,
                       style: Theme.of(context).textTheme.headline6),
                   Gap(Get.height / 8),
                   SizedBox(
@@ -685,7 +677,9 @@ class GameStartScreen extends StatelessWidget {
     } else {
       return ElevatedButton(
           onPressed: () {
-            game.winnerId != "" ? null : _websocketService.joinGameAsObserver(game.id);
+            game.winnerId != ""
+                ? null
+                : _websocketService.joinGameAsObserver(game.id);
           },
           child: const Text('Observer'),
           style: ElevatedButton.styleFrom(
@@ -851,41 +845,43 @@ class GameStartScreen extends StatelessWidget {
   }
 
   void _showWaitingForCreatorApprovalDialog(String gameId) {
-    Get.dialog(Dialog(
-      child: SizedBox(
-        height: 225,
-        width: 300,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text('En attente de la réponse du créateur de la partie',
-                  style: Get.textTheme.headlineSmall),
-              Gap(20),
-              const CircularProgressIndicator(),
-              Gap(20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  TextButton(
-                      style: TextButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              side: const BorderSide(color: Colors.black))),
-                      onPressed: () async {
-                        final res =
-                            await _gameService.revokeJoinGameRequest(gameId);
-                      },
-                      child: const Text('Annuler')),
-                ],
-              ),
-            ],
+    Get.dialog(
+      Dialog(
+        child: SizedBox(
+          height: 225,
+          width: 300,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('En attente de la réponse du créateur de la partie',
+                    style: Get.textTheme.headlineSmall),
+                Gap(20),
+                const CircularProgressIndicator(),
+                Gap(20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    TextButton(
+                        style: TextButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                side: const BorderSide(color: Colors.black))),
+                        onPressed: () async {
+                          final res =
+                              await _gameService.revokeJoinGameRequest(gameId);
+                        },
+                        child: const Text('Annuler')),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
-    ), barrierDismissible: false,
+      barrierDismissible: false,
     );
   }
 
