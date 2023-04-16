@@ -37,6 +37,7 @@ export class SocialPageComponent {
 
   chatFriendPage(index: number): void {
     this.chatFriend = true;
+    this.explore = false;
     for (const room of this.roomService.listJoinedChatRooms.value) {
       const usersInRoom = room.name.split("/");
       console.log(usersInRoom);
