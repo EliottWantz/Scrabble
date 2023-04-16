@@ -148,7 +148,7 @@ func (s *Service) AddUserToGame(gID, userID, password string) (*Game, error) {
 	return g, nil
 }
 
-func (s *Service) AddUserToTournament(tID, userID, password string) (*Tournament, error) {
+func (s *Service) AddUserToTournament(tID, userID string) (*Tournament, error) {
 	t, err := s.Repo.FindTournament(tID)
 	if err != nil {
 		return nil, err

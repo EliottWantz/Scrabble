@@ -774,7 +774,15 @@ func (c *Client) HandleJoinTournamentRequest(p *Packet) error {
 		return err
 	}
 
-	t, err := c.Manager.GameSvc.AddUserToTournament(payload.TournamentID, c.UserId, payload.Password)
+	t, err := c.Manager.GameSvc.Repo.FindTournament(payload.TournamentID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusNotFound, "tournament not found")
+	}
+	if t.IsPrivate {
+		return fiber.NewError(fiber.StatusForbidden, "tournament is private")
+	}
+
+	_, err = c.Manager.GameSvc.AddUserToTournament(payload.TournamentID, c.UserId)
 	if err != nil {
 		if err == game.ErrPrivateTournament {
 			t.JoinTournamentRequestUserIds = append(t.JoinTournamentRequestUserIds, c.UserId)
