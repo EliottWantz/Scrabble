@@ -105,7 +105,7 @@ class ChatScreen extends GetView<ChatController> {
                                                     .value![index]
                                                     .fromId)
                                                 ? controller
-                                                    .userService.user.value!.id
+                                                    .userService.user.value!.avatar.url
                                                 : controller.usersService
                                                     .getUserById(controller
                                                         .roomService

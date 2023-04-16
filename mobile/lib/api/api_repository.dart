@@ -116,7 +116,8 @@ class ApiRepository {
         'fileId': data.fileId,
       });
     }
-    final res = await apiProvider.upload('/user/avatar', formData);
+    final res = await apiProvider.upload(
+        '/user/avatar/${userService.user.value!.id}', formData);
     if (res.statusCode == 201) {
       final newUser = await user();
       if (newUser != null) {

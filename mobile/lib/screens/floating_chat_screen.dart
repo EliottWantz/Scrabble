@@ -37,16 +37,16 @@ class FloatingChatScreen extends GetView<ChatController> {
               width: double.infinity,
               child: DrawerHeader(
                 decoration: const BoxDecoration(
-                  color: Color.fromARGB(255,98,0,238),
+                  color: Color.fromARGB(255, 98, 0, 238),
                 ),
                 child: TextButton(
-                  onPressed: () =>
-                      {_selectedChatRoom.value = !_selectedChatRoom.value},
-                  child: const Text('Go back'),
+                    onPressed: () =>
+                        {_selectedChatRoom.value = !_selectedChatRoom.value},
+                    child: const Text('Go back'),
                     style: ButtonStyle(
-                        foregroundColor: MaterialStatePropertyAll<Color>(Colors.black),
-                    )
-                ),
+                      foregroundColor:
+                          MaterialStatePropertyAll<Color>(Colors.black),
+                    )),
               ),
             ),
             Expanded(
@@ -76,14 +76,22 @@ class FloatingChatScreen extends GetView<ChatController> {
                                   ? TextDirection.rtl
                                   : TextDirection.ltr,
                               children: [
-                                circularImageWithBorder(controller.usersService
-                                    .getUserById(controller
-                                        .roomService
-                                        .currentFloatingRoomMessages
-                                        .value![index]
-                                        .fromId)!
-                                    .avatar
-                                    .url),
+                                circularImageWithBorder(
+                                    controller.isCurrentUser(controller
+                                            .roomService
+                                            .currentFloatingRoomMessages
+                                            .value![index]
+                                            .fromId)
+                                        ? controller
+                                            .userService.user.value!.avatar.url
+                                        : controller.usersService
+                                            .getUserById(controller
+                                                .roomService
+                                                .currentFloatingRoomMessages
+                                                .value![index]
+                                                .fromId)!
+                                            .avatar
+                                            .url),
                                 Column(children: [
                                   Text(controller
                                       .roomService
@@ -149,7 +157,7 @@ class FloatingChatScreen extends GetView<ChatController> {
                           messageInputFocusNode.requestFocus();
                         },
                       ),
-                      suffixIconColor: Color.fromARGB(255,98,0,238),
+                      suffixIconColor: Color.fromARGB(255, 98, 0, 238),
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.all(Radius.circular(8)))),
                 ),
