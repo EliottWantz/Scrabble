@@ -76,7 +76,7 @@
   "customize-avatar-component.mouth-types.vomit": "Vomis",
   "customize-avatar-component.background-color": "Couleur de l'arrière plan",
   "customize-avatar-component.generate": "Générer mon avatar",
-  "customize-avatar-component.error": "Une erreur c'est produite, veuillez réessayer",
+  "customize-avatar-component.error": "Une erreur s'est produite, veuillez réessayer",
   "default-avatar-selection-component.cancel": "Annuler",
   "default-avatar-selection-component.confirm": "Confirmer",
   "default-avatar-selection-component.error": "Veuillez sélectionner un avatar ou appuyer sur Annuler",

@@ -33,12 +33,22 @@ export class ProfilModificationComponent implements OnInit {
   onFileSelected(event: any): void {
     this.selectedFile = event.target.files[0] ?? null;
     document.getElementById('avatar')?.setAttribute('src', URL.createObjectURL(this.selectedFile));
+    if (this.userSvc.tempAvatar.has("avatarUrl"))
+      this.userSvc.tempAvatar.delete("avatarUrl");
+    if (this.userSvc.tempAvatar.has("fileId"))
+    this.userSvc.tempAvatar.delete("fileId");
+
+    if (this.selectedFile['type'] != "image/png" && this.selectedFile['type'] != "image/jpeg" && this.selectedFile['type'] != "image/jpg") {
+      console.log("wrong type");
+    } else {
+      this.userSvc.tempAvatar.set("avatar", this.selectedFile);
+    }
   }
 
   submitAvatar(): void {
-    if (this.selectedFile.name != '') {
+    if (this.userSvc.tempAvatar.has("avatar") || this.userSvc.tempAvatar.has("avatarUrl")) {
       this.comSvc
-        .requestUploadAvatar(this.userSvc.subjectUser.value.id, this.selectedFile)
+        .requestUploadAvatar(this.userSvc.subjectUser.value.id, this.userSvc.tempAvatar)
         .subscribe((res) => {
           this.userSvc.subjectUser.next({
             ...this.userSvc.subjectUser.value,

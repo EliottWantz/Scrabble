@@ -9,6 +9,7 @@ import { Summary, UserStats } from "@app/utils/interfaces/summary";
 })
 export class UserService {
     subjectUser: BehaviorSubject<User>;
+    tempAvatar: FormData = new FormData();
     constructor(private storageService: StorageService) {
         const userStats: UserStats = {
             nbGamesPlayed: 0,
