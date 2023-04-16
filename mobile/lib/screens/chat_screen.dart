@@ -55,168 +55,177 @@ class ChatScreen extends GetView<ChatController> {
 
     return _gif.value == null
         ? Obx(() => Column(children: [
-          _buildChatScreenHeader(),
-          Expanded(
-              child: Center(
-                  child: ListView.builder(
-                      controller: scrollController,
-                      itemCount: controller
-                          .roomService.currentRoomMessages.value!.length,
-                      padding: const EdgeInsets.all(8),
-                      itemBuilder: (context, index) {
-                        return Container(
-                          margin: EdgeInsets.only(bottom: 10),
-                          padding: EdgeInsets.all(10),
-                          // height: 50,
-                          // color: Colors.amber[600],
-                          // child: Center(child: Text(controller.roomService.currentRoomMessages.value![index].message)),
-                          child: Align(
-                              alignment: (controller.isCurrentUser(controller
-                                      .roomService
-                                      .currentRoomMessages
-                                      .value![index]
-                                      .fromId)
-                                  ? Alignment.topRight
-                                  : Alignment.topLeft),
-                              child: Row(
-                                  textDirection: controller.isCurrentUser(
+              _buildChatScreenHeader(),
+              Expanded(
+                  child: Center(
+                      child: ListView.builder(
+                          controller: scrollController,
+                          itemCount: controller
+                              .roomService.currentRoomMessages.value!.length,
+                          padding: const EdgeInsets.all(8),
+                          itemBuilder: (context, index) {
+                            return Container(
+                              margin: EdgeInsets.only(bottom: 10),
+                              padding: EdgeInsets.all(10),
+                              // height: 50,
+                              // color: Colors.amber[600],
+                              // child: Center(child: Text(controller.roomService.currentRoomMessages.value![index].message)),
+                              child: Align(
+                                  alignment: (controller.isCurrentUser(
                                           controller
                                               .roomService
                                               .currentRoomMessages
                                               .value![index]
                                               .fromId)
-                                      ? TextDirection.rtl
-                                      : TextDirection.ltr,
-                                  // mainAxisAlignment: controller.isCurrentUser(
-                                  //         controller
-                                  //             .roomService
-                                  //             .currentRoomMessages
-                                  //             .value![index]
-                                  //             .fromId)
-                                  //     ? MainAxisAlignment.end
-                                  //     : MainAxisAlignment.start,
-                                  // crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    circularImageWithBorder(controller
-                                        .usersService
-                                        .getUserById(controller
-                                            .roomService
-                                            .currentRoomMessages
-                                            .value![index]
-                                            .fromId)!
-                                        .avatar
-                                        .url),
-                                    Column(
-                                      // crossAxisAlignment:
-                                      //     controller.isCurrentUser(controller
+                                      ? Alignment.topRight
+                                      : Alignment.topLeft),
+                                  child: Row(
+                                      textDirection: controller.isCurrentUser(
+                                              controller
+                                                  .roomService
+                                                  .currentRoomMessages
+                                                  .value![index]
+                                                  .fromId)
+                                          ? TextDirection.rtl
+                                          : TextDirection.ltr,
+                                      // mainAxisAlignment: controller.isCurrentUser(
+                                      //         controller
                                       //             .roomService
                                       //             .currentRoomMessages
                                       //             .value![index]
                                       //             .fromId)
-                                      //         ? CrossAxisAlignment.end
-                                      //         : CrossAxisAlignment.start,
+                                      //     ? MainAxisAlignment.end
+                                      //     : MainAxisAlignment.start,
+                                      // crossAxisAlignment: CrossAxisAlignment.end,
                                       children: [
-                                        Text(controller
-                                            .roomService
-                                            .currentRoomMessages
-                                            .value![index]
-                                            .from),
-                                        Container(
-                                          constraints:
-                                              BoxConstraints(maxWidth: 810),
-                                          decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(20),
-                                              color: (controller.isCurrentUser(
-                                                      controller
-                                                          .roomService
-                                                          .currentRoomMessages
-                                                          .value![index]
-                                                          .fromId)
-                                                  ? Colors.amber[600]
-                                                  : Colors.grey.shade200)),
-                                          padding: EdgeInsets.all(16),
-                                          child: Column(
-                                            children: [
-                                              // Text(
-                                              //   controller.roomService.currentRoomMessages.value![index].from
-                                              // ),
-                                              Text(
-                                                controller
+                                        circularImageWithBorder(
+                                            controller.isCurrentUser(controller
                                                     .roomService
                                                     .currentRoomMessages
                                                     .value![index]
-                                                    .message,
-                                                style: TextStyle(fontSize: 15),
+                                                    .fromId)
+                                                ? controller
+                                                    .userService.user.value!.id
+                                                : controller.usersService
+                                                    .getUserById(controller
+                                                        .roomService
+                                                        .currentRoomMessages
+                                                        .value![index]
+                                                        .fromId)!
+                                                    .avatar
+                                                    .url),
+                                        Column(
+                                          // crossAxisAlignment:
+                                          //     controller.isCurrentUser(controller
+                                          //             .roomService
+                                          //             .currentRoomMessages
+                                          //             .value![index]
+                                          //             .fromId)
+                                          //         ? CrossAxisAlignment.end
+                                          //         : CrossAxisAlignment.start,
+                                          children: [
+                                            Text(controller
+                                                .roomService
+                                                .currentRoomMessages
+                                                .value![index]
+                                                .from),
+                                            Container(
+                                              constraints:
+                                                  BoxConstraints(maxWidth: 810),
+                                              decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(20),
+                                                  color: (controller.isCurrentUser(
+                                                          controller
+                                                              .roomService
+                                                              .currentRoomMessages
+                                                              .value![index]
+                                                              .fromId)
+                                                      ? Colors.amber[600]
+                                                      : Colors.grey.shade200)),
+                                              padding: EdgeInsets.all(16),
+                                              child: Column(
+                                                children: [
+                                                  // Text(
+                                                  //   controller.roomService.currentRoomMessages.value![index].from
+                                                  // ),
+                                                  Text(
+                                                    controller
+                                                        .roomService
+                                                        .currentRoomMessages
+                                                        .value![index]
+                                                        .message,
+                                                    style:
+                                                        TextStyle(fontSize: 15),
+                                                  ),
+                                                  //   Text("implement timestamp function")
+                                                ],
                                               ),
-                                              //   Text("implement timestamp function")
-                                            ],
-                                          ),
+                                            )
+                                          ],
                                         )
-                                      ],
-                                    )
-                                  ])),
+                                      ])),
+                            );
+                          }))),
+              Container(
+                margin: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(8),
+                // color: Colors.amber,
+                // child: const Center(child: Text('Your super cool Footer')),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 845,
+                      child: TextField(
+                        controller: controller.messageController,
+                        keyboardType: TextInputType.text,
+                        focusNode: messageInputFocusNode,
+                        onSubmitted: (_) {
+                          controller.sendMessage();
+                          messageInputFocusNode.requestFocus();
+                        },
+                        decoration: InputDecoration(
+                            hintText: "Entrez un message...",
+                            suffixIcon: IconButton(
+                              icon: Icon(Icons.send),
+                              onPressed: () {
+                                controller.sendMessage();
+                                messageInputFocusNode.requestFocus();
+                              },
+                            ),
+                            suffixIconColor: Color.fromARGB(255, 98, 0, 238),
+                            border: OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(8)))),
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.gif_box, size: 50),
+                      color: Color.fromARGB(255, 98, 0, 238),
+                      onPressed: () async {
+                        final gif = await GiphyPicker.pickGif(
+                          context: context,
+                          fullScreenDialog: false,
+                          apiKey: 'xTfFWsRO0C50ULkBM1LYJ1aLk8olttNV',
+                          showPreviewPage: true,
+                          // decorator: GiphyDecorator(
+                          //   showAppBar: false,
+                          //   searchElevation: 4,
+                          //   giphyTheme: ThemeData.dark(),
+                          // ),
                         );
-                      }))),
-          Container(
-            margin: const EdgeInsets.all(8),
-            padding: const EdgeInsets.all(8),
-            // color: Colors.amber,
-            // child: const Center(child: Text('Your super cool Footer')),
-            child: Row(
-              children: [
-                SizedBox(
-                  width: 845,
-                  child: TextField(
-                    controller: controller.messageController,
-                    keyboardType: TextInputType.text,
-                    focusNode: messageInputFocusNode,
-                    onSubmitted: (_) {
-                      controller.sendMessage();
-                      messageInputFocusNode.requestFocus();
-                    },
-                    decoration: InputDecoration(
-                        hintText: "Entrez un message...",
-                        suffixIcon: IconButton(
-                          icon: Icon(Icons.send),
-                          onPressed: () {
-                            controller.sendMessage();
-                            messageInputFocusNode.requestFocus();
-                          },
-                        ),
-                        suffixIconColor: Color.fromARGB(255, 98, 0, 238),
-                        border: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(8)))),
-                  ),
+                        if (gif != null) {
+                          // _gif.value = gif;
+                          controller.messageController.text = gif.url!;
+                          controller.sendMessage();
+                          messageInputFocusNode.requestFocus();
+                        }
+                      },
+                    )
+                  ],
                 ),
-                IconButton(
-                  icon: Icon(Icons.gif_box, size: 50),
-                  color: Color.fromARGB(255, 98, 0, 238),
-                  onPressed: () async {
-                    final gif = await GiphyPicker.pickGif(
-                      context: context,
-                      fullScreenDialog: false,
-                      apiKey: 'xTfFWsRO0C50ULkBM1LYJ1aLk8olttNV',
-                      showPreviewPage: true,
-                      // decorator: GiphyDecorator(
-                      //   showAppBar: false,
-                      //   searchElevation: 4,
-                      //   giphyTheme: ThemeData.dark(),
-                      // ),
-                    );
-                    if(gif != null){
-                      // _gif.value = gif;
-                      // controller.messageController.text = gif;
-                      controller.sendMessage();
-                      messageInputFocusNode.requestFocus();
-                    }
-                  },
-                )
-              ],
-            ),
-          )
-        ]))
+              )
+            ]))
         : SizedBox();
   }
 
