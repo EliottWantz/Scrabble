@@ -885,7 +885,8 @@ class GameStartScreen extends StatelessWidget {
           ),
         ),
       ),
-    ));
+    ), barrierDismissible: false,
+    );
   }
 
   void _showProtectedGamePasswordDialog(Game game) {

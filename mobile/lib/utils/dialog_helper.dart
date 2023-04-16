@@ -127,6 +127,7 @@ class DialogHelper {
                           DialogHelper()._websocketService.leaveGame(
                               DialogHelper()._gameService.currentGameId
                           );
+                          DialogHelper()._gameService.pendingJoinGameRequestUserIds.clear();
                           Get.back();
                           Get.back();
                         }
