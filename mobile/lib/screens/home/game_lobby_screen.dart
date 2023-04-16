@@ -20,7 +20,7 @@ class GameLobbyScreen extends StatelessWidget {
   GameLobbyScreen({Key? key}) : super(key: key);
 
   final sideBarController =
-  SidebarXController(selectedIndex: 0, extended: true);
+      SidebarXController(selectedIndex: 0, extended: true);
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -38,12 +38,11 @@ class GameLobbyScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Builder(
-        builder: (BuildContext context) =>
-            Scaffold(
+        builder: (BuildContext context) => Scaffold(
               resizeToAvoidBottomInset: true,
               drawerScrimColor: Colors.transparent,
               floatingActionButton: Wrap(
-                // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   spacing: 800,
                   children: [
                     FloatingActionButton.extended(
@@ -55,14 +54,12 @@ class GameLobbyScreen extends StatelessWidget {
                       foregroundColor: Colors.white,
                       autofocus: true,
                       focusElevation: 5,
-                      label: Row(
-                          children: const [
-                            Icon(
-                              Icons.people_alt,
-                            ),
-                            Text("Inviter un ami")
-                          ]
-                      ),
+                      label: Row(children: const [
+                        Icon(
+                          Icons.people_alt,
+                        ),
+                        Text("Inviter un ami")
+                      ]),
                     ),
                     FloatingActionButton(
                       heroTag: null,
@@ -77,8 +74,7 @@ class GameLobbyScreen extends StatelessWidget {
                         Icons.question_answer_rounded,
                       ),
                     ),
-                  ]
-              ),
+                  ]),
               key: _scaffoldKey,
               endDrawer: Drawer(child: Obx(() => _buildChatRoomsList())),
               body: Row(
@@ -103,29 +99,24 @@ class GameLobbyScreen extends StatelessWidget {
               child: SizedBox(
                   height: 610,
                   width: 600,
-                  child: Column(
-                    children: [
-                      Image(
-                        image: _settingsService.getLogo(),
-                      ),
-                      const Gap(20),
-                      Obx(() => _buildStartButton(context)),
-                      Obx(() => _buildUpperGap()),
-                      Obx(() => _buildPendingJoinGameRequests()),
-                      Obx(() => _buildLowerGap()),
-                      Obx(() =>
-                          Text(
-                              gameMode == 'tournoi'
-                                  ? '${_gameService.currentTournamentUserIds
-                                  .value!.length}/4 joueurs présents'
-                                  : '${_gameService.currentGameRoomUserIds
-                                  .value!.length}/4 joueurs présents',
-                              style: Theme
-                                  .of(context)
-                                  .textTheme
-                                  .headline6
-                          )),
-                    ],
+                  child: Obx(
+                    () => Column(
+                      children: [
+                        Image(
+                          image: _settingsService.getLogo(),
+                        ),
+                        const Gap(20),
+                        _buildStartButton(context),
+                        _buildUpperGap(),
+                        _buildPendingJoinGameRequests(),
+                        _buildLowerGap(),
+                        Text(
+                            gameMode == 'tournoi'
+                                ? '${_gameService.currentTournamentUserIds.value!.length}/4 joueurs présents'
+                                : '${_gameService.currentGameRoomUserIds.value!.length}/4 joueurs présents',
+                            style: Theme.of(context).textTheme.headline6),
+                      ],
+                    ),
                   )),
             ),
           );
@@ -133,18 +124,22 @@ class GameLobbyScreen extends StatelessWidget {
   }
 
   Widget _buildUpperGap() {
-    if (gameMode == 'tournoi' && _gameService.pendingJoinTournamentRequestUserIds.value.isEmpty) {
+    if (gameMode == 'tournoi' &&
+        _gameService.pendingJoinTournamentRequestUserIds.value.isEmpty) {
       return Gap(Get.height / 5);
-    } else if (gameMode != 'tournoi' && _gameService.pendingJoinGameRequestUserIds.value.isEmpty) {
+    } else if (gameMode != 'tournoi' &&
+        _gameService.pendingJoinGameRequestUserIds.value.isEmpty) {
       return Gap(Get.height / 5);
     }
     return SizedBox();
   }
 
   Widget _buildLowerGap() {
-    if (gameMode == 'tournoi' && _gameService.pendingJoinTournamentRequestUserIds.value.isEmpty) {
+    if (gameMode == 'tournoi' &&
+        _gameService.pendingJoinTournamentRequestUserIds.value.isEmpty) {
       return Gap(200);
-    }else if (gameMode != 'tournoi' && _gameService.pendingJoinGameRequestUserIds.value.isEmpty) {
+    } else if (gameMode != 'tournoi' &&
+        _gameService.pendingJoinGameRequestUserIds.value.isEmpty) {
       return Gap(200);
     }
     return SizedBox();
@@ -155,25 +150,18 @@ class GameLobbyScreen extends StatelessWidget {
         _gameService.currentGameRoomUserIds.value!.length < 2 &&
         !_gameService.isGameCreator()) {
       return Text('En attente d\'autre joueurs... Veuillez patientez',
-          style: Theme
-              .of(context)
-              .textTheme
-              .headline6);
+          style: Theme.of(context).textTheme.headline6);
     } else if (gameMode == 'tournoi' &&
         _gameService.currentTournamentUserIds.value!.length < 4 &&
         !_gameService.isGameCreator()) {
       return Text('En attente d\'autre joueurs... Veuillez patientez',
-          style: Theme
-              .of(context)
-              .textTheme
-              .headline6);
-    }
-    else {
+          style: Theme.of(context).textTheme.headline6);
+    } else {
       return ElevatedButton.icon(
         onPressed: () {
           gameMode == 'tournoi'
-              ? _websocketService.startTournament(
-              _gameService.currentTournamentId)
+              ? _websocketService
+                  .startTournament(_gameService.currentTournamentId)
               : _websocketService.startGame(_gameService.currentGameId);
         },
         icon: const Icon(
@@ -181,11 +169,9 @@ class GameLobbyScreen extends StatelessWidget {
           Icons.play_arrow,
           size: 20,
         ),
-        label: Text(
-            gameMode == 'tournoi'
-                ? 'Démarrer le tournoi'
-                : 'Démarrer la partie'
-        ), // <-- Text
+        label: Text(gameMode == 'tournoi'
+            ? 'Démarrer le tournoi'
+            : 'Démarrer la partie'), // <-- Text
       );
     }
   }
@@ -193,49 +179,55 @@ class GameLobbyScreen extends StatelessWidget {
   Widget _buildPendingJoinGameRequests() {
     if (gameMode == 'tournoi') {
       if (!_gameService.currentTournament.value!.isPrivate) {
-        return CircularProgressIndicator(semanticsLabel: _gameService.currentTournament.value!.isPrivate.toString());
+        return CircularProgressIndicator(
+            semanticsLabel:
+                _gameService.currentTournament.value!.isPrivate.toString());
       } else if (_gameService.currentTournament.value!.creatorId !=
           _userService.user.value!.id) {
-        return CircularProgressIndicator(semanticsLabel: _gameService.currentTournament.value!.isPrivate.toString());
-      } else
-      if (_gameService.pendingJoinTournamentRequestUserIds.value!.isEmpty) {
-        return CircularProgressIndicator(semanticsLabel: _gameService.currentTournament.value!.isPrivate.toString());
-      }
-      else {
+        return CircularProgressIndicator(
+            semanticsLabel:
+                _gameService.currentTournament.value!.isPrivate.toString());
+      } else if (_gameService
+          .pendingJoinTournamentRequestUserIds.value!.isEmpty) {
+        return CircularProgressIndicator(
+            semanticsLabel:
+                _gameService.currentTournament.value!.isPrivate.toString());
+      } else {
         return Expanded(
-              child: ListView.builder(
-                  itemCount: _gameService.pendingJoinTournamentRequestUserIds
-                      .value!.length,
-                  itemBuilder: (context, item) {
-                    final index = item;
-                    return _buildPendingRequest(
-                        _gameService.pendingJoinTournamentRequestUserIds
-                            .value![index]);
-                  }
-              ),
+          child: ListView.builder(
+              itemCount: _gameService
+                  .pendingJoinTournamentRequestUserIds.value!.length,
+              itemBuilder: (context, item) {
+                final index = item;
+                return _buildPendingRequest(_gameService
+                    .pendingJoinTournamentRequestUserIds.value![index]);
+              }),
         );
       }
     } else {
       if (!_gameService.currentGameInfo!.isPrivateGame) {
-        return CircularProgressIndicator(semanticsLabel: _gameService.currentGameInfo!.isPrivateGame.toString());
+        return CircularProgressIndicator(
+            semanticsLabel:
+                _gameService.currentGameInfo!.isPrivateGame.toString());
       } else if (_gameService.currentGameInfo!.creatorId !=
           _userService.user.value!.id) {
-        return CircularProgressIndicator(semanticsLabel: _gameService.currentGameInfo!.isPrivateGame.toString());
+        return CircularProgressIndicator(
+            semanticsLabel:
+                _gameService.currentGameInfo!.isPrivateGame.toString());
       } else if (_gameService.pendingJoinGameRequestUserIds.value!.isEmpty) {
-        return CircularProgressIndicator(semanticsLabel: _gameService.currentGameInfo!.isPrivateGame.toString());
-      }
-      else {
+        return CircularProgressIndicator(
+            semanticsLabel:
+                _gameService.currentGameInfo!.isPrivateGame.toString());
+      } else {
         return Expanded(
-              child: ListView.builder(
-                  itemCount: _gameService.pendingJoinGameRequestUserIds.value!
-                      .length,
-                  itemBuilder: (context, item) {
-                    final index = item;
-                    return _buildPendingRequest(
-                        _gameService.pendingJoinGameRequestUserIds
-                            .value![index]);
-                  }
-              ),
+          child: ListView.builder(
+              itemCount:
+                  _gameService.pendingJoinGameRequestUserIds.value!.length,
+              itemBuilder: (context, item) {
+                final index = item;
+                return _buildPendingRequest(
+                    _gameService.pendingJoinGameRequestUserIds.value![index]);
+              }),
         );
       }
     }
@@ -248,48 +240,43 @@ class GameLobbyScreen extends StatelessWidget {
         ListTile(
             title: Text(_usersService.getUserUsername(userId),
                 style: TextStyle(fontSize: 18.0)),
-            trailing:
-            SizedBox(
+            trailing: SizedBox(
               height: 100,
               width: 250,
-              child: Row(
-                  children: [
-                    ElevatedButton.icon(
-                      onPressed: () async {
-                        final res = await _gameService.acceptJoinGameRequest(
-                            userId);
-                      },
-                      icon: const Icon(
-                        Icons.check,
-                        size: 20,
-                      ),
-                      label: const Text('Accepter'),
-                    ),
-                    Gap(16),
-                    ElevatedButton.icon(
-                      onPressed: () async {
-                        final res = await _gameService.declineJoinGameRequest(
-                            userId);
-                        if (res == true) {
-                          _gameService.pendingJoinGameRequestUserIds.remove(
-                              userId);
-                        } else {
-                          DialogHelper.showErrorDialog(
-                              title: "Erreur dans la demande",
-                              description: "La demande de refus du joueur n'a pas été accomplie."
-                          );
-                        }
-                      },
-                      icon: const Icon(
-                        Icons.close,
-                        size: 20,
-                      ),
-                      label: const Text('Refuser'),
-                    )
-                  ]
-              ),
-            )
-        ),
+              child: Row(children: [
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    final res =
+                        await _gameService.acceptJoinGameRequest(userId);
+                  },
+                  icon: const Icon(
+                    Icons.check,
+                    size: 20,
+                  ),
+                  label: const Text('Accepter'),
+                ),
+                Gap(16),
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    final res =
+                        await _gameService.declineJoinGameRequest(userId);
+                    if (res == true) {
+                      _gameService.pendingJoinGameRequestUserIds.remove(userId);
+                    } else {
+                      DialogHelper.showErrorDialog(
+                          title: "Erreur dans la demande",
+                          description:
+                              "La demande de refus du joueur n'a pas été accomplie.");
+                    }
+                  },
+                  icon: const Icon(
+                    Icons.close,
+                    size: 20,
+                  ),
+                  label: const Text('Refuser'),
+                )
+              ]),
+            )),
         // trailing: Icon(alreadySaved ? Icons.favorite : Icons.favorite_border,
         //     color: alreadySaved ? Colors.red : null),
       ],
@@ -319,8 +306,7 @@ class GameLobbyScreen extends StatelessWidget {
             ),
           ),
         ),
-        barrierDismissible: false
-    );
+        barrierDismissible: false);
   }
 
   Widget _buildOnlineFriendsList() {
@@ -330,9 +316,7 @@ class GameLobbyScreen extends StatelessWidget {
         child: UserList(
             mode: 'gameInvite',
             inputSearch: ''.obs,
-            items: _usersService.getOnlineFriendUsernames()
-        )
-    );
+            items: _usersService.getOnlineFriendUsernames()));
   }
 
   // Widget _buildOnlineFriendsList() {
@@ -373,27 +357,21 @@ class GameLobbyScreen extends StatelessWidget {
             child: const DrawerHeader(
               child: Text(
                 'Chats',
-                style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.white
-                ),
+                style: TextStyle(fontSize: 20, color: Colors.white),
               ),
             ),
           ),
           Expanded(
               child: ListView.builder(
-                // padding: const EdgeInsets.all(16.0),
-                padding: EdgeInsets.zero,
-                itemCount: _roomService
-                    .getRooms()
-                    .length,
-                itemBuilder: (context, item) {
-                  final index = item;
-                  return _buildChatRoomRow(
-                      _roomService.getRooms()[index].roomName,
-                      _roomService.getRooms()[index].roomId);
-                },
-              ))
+            // padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.zero,
+            itemCount: _roomService.getRooms().length,
+            itemBuilder: (context, item) {
+              final index = item;
+              return _buildChatRoomRow(_roomService.getRooms()[index].roomName,
+                  _roomService.getRooms()[index].roomId);
+            },
+          ))
         ],
       );
     } else {
@@ -407,9 +385,7 @@ class GameLobbyScreen extends StatelessWidget {
     return Column(
       children: [
         ListTile(
-          title: Text(roomName
-              .split('/')
-              .length > 1
+          title: Text(roomName.split('/').length > 1
               ? roomName.split('/')[1]
               : roomName),
           // onTap: () => Get.toNamed(Routes.CHAT, arguments: {'text': 'roomName'}),
