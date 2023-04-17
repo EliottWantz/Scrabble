@@ -48,23 +48,23 @@
   </mat-expansion-panel>
   <app-chat-box-button *ngIf="isLoggedIn()"></app-chat-box-button>
   <div *ngIf="tournamentRoom.value && isObserving()" class="players">
-    <div style="display: flex;  width: 100%;">
-        <div *ngFor="let players of tournamentRoom.value.poolGames[0].userIds; let last = last" style="display: inline-block;">
+    <div style="display: flex;  width: 100%; flex-direction: row;">
+        <div *ngFor="let players of tournamentRoom.value.poolGames[0].userIds; let last = last">
           {{getUserName(players)}}
           <p *ngIf="!last"> vs </p>
         </div>
         <button (click)="joinGameAsObserver(tournamentRoom.value.poolGames[0])" class="join-button" disabled="{{tournamentRoom.value.poolGames[0].winnerId}}">{{"join-game-component.join" | translate}}</button>
     </div>
-    <div style="display: flex; width: 100%;">
-        <div *ngFor="let players of tournamentRoom.value.poolGames[1].userIds; let last = last" style="display: inline-block;">
+    <div style="display: flex; width: 100%; flex-direction: row;">
+        <div *ngFor="let players of tournamentRoom.value.poolGames[1].userIds; let last = last">
           {{getUserName(players)}}
           <p *ngIf="!last"> vs </p>
         </div>
         <button (click)="joinGameAsObserver(tournamentRoom.value.poolGames[1])" class="join-button" disabled="{{tournamentRoom.value.poolGames[1].winnerId}}">{{"join-game-component.join" | translate}}</button>
     </div>
 
-    <div *ngIf="tournamentRoom.value.poolGames[1].winnerId && tournamentRoom.value.poolGames[0].winnerId" style="display: flex;  width: 100%;">
-        <div *ngFor="let players of tournamentRoom.value.finale!.userIds; let last = last" style="display: inline-block;">
+    <div *ngIf="tournamentRoom.value.poolGames[1].winnerId && tournamentRoom.value.poolGames[0].winnerId" style="display: flex;  width: 100%; flex-direction: row;">
+        <div *ngFor="let players of tournamentRoom.value.finale!.userIds; let last = last">
             {{getUserName(players)}}
             <p *ngIf="!last"> vs </p>
         </div>
