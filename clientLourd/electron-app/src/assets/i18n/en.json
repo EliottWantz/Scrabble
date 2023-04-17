@@ -183,7 +183,7 @@
   "invite-component.password-mismatch": "The password is incorrect",
   "invite-component.game-not-found": "The game does not exist anymore",
   "waiting-room-page.friends": "Friends",
-  "sidebar-component.rules": "Rules",
+  "sidebar-component.rules": "Tutorial",
   "rules-slider-page.basic": "Basics",
   "rules-slider-page.move": "Placement",
   "rules-slider-page.multiplier": "Multipliers",
