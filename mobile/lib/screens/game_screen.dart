@@ -21,7 +21,9 @@ class GameScreen extends GetView<GameController> {
   final GameService _gameService = Get.find();
   final RoomService _roomService = Get.find();
   final SettingsService _settingsService = Get.find();
-  final bool isObserving = Get.arguments;
+  var argumentsData = Get.arguments;
+  final bool isObserving = Get.arguments[0];
+  final bool isTournamentGame = Get.arguments[1];
 
   final isDialOpen = ValueNotifier(false);
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -92,7 +94,11 @@ class GameScreen extends GetView<GameController> {
             padding: const EdgeInsets.only(top: 5),
             child: ElevatedButton.icon(
               onPressed: () {
-                controller.onLeaveGame();
+                if (isTournamentGame) {
+                  controller.onLeaveTournament();
+                } else {
+                  controller.onLeaveGame();
+                }
               },
               icon: const Icon(
                 Icons.exit_to_app_rounded,

@@ -97,7 +97,7 @@ class DialogHelper {
     );
   }
 
-  static Future<void> showLobbyCreatorQuitDialog() async {
+  static Future<void> showLobbyCreatorQuitDialog(isTournament) async {
     Get.dialog(
       Dialog(
         child: Padding(
@@ -106,12 +106,16 @@ class DialogHelper {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Annuler la création de la partie',
+                isTournament
+                  ? 'Annuler la création du tournoi'
+                  : 'Annuler la création de la partie',
                 style: Get.textTheme.headline4,
               ),
               const Gap(20),
               Text(
-                'Êtes-vous sûr de vouloir annuler la création de cette partie',
+                isTournament
+                  ? 'Êtes-vous sûr de vouloir annuler la création du tournoi'
+                  : 'Êtes-vous sûr de vouloir annuler la création de cette partie',
                 style: Get.textTheme.headline6,
               ),
               const Gap(20),
@@ -124,9 +128,15 @@ class DialogHelper {
                     ElevatedButton(
                       onPressed: () {
                         if (Get.isDialogOpen!) {
-                          DialogHelper()._websocketService.leaveGame(
-                              DialogHelper()._gameService.currentGameId
-                          );
+                          if (isTournament) {
+                            DialogHelper()._websocketService.leaveTournament(
+                                DialogHelper()._gameService.currentTournamentId
+                            );
+                          } else {
+                            DialogHelper()._websocketService.leaveGame(
+                                DialogHelper()._gameService.currentGameId
+                            );
+                          }
                           DialogHelper()._gameService.pendingJoinGameRequestUserIds.clear();
                           Get.back();
                           Get.back();

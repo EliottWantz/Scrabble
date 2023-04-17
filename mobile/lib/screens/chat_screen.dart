@@ -268,7 +268,7 @@ class ChatScreen extends GetView<ChatController> {
 
   Widget _buildText(int index) {
     if (controller.roomService.currentRoomMessages.value![index].message
-        .startsWith('https://')) {
+        .contains('giphy.com')) {
       return Image.network(
           controller.roomService.currentRoomMessages.value![index].message,
           headers: {'accept': 'image/*'});

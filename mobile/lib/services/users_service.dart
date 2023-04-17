@@ -24,6 +24,15 @@ class UsersService extends GetxService {
     return null;
   }
 
+  User? getUserByUsername(String username) {
+    for (User user in users) {
+      if (user.username == username) {
+        return user;
+      }
+    }
+    return null;
+  }
+
   String getUserId(String username) {
     for (User user in users) {
       if (user.username == username) {

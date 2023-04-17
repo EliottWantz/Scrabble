@@ -8,6 +8,7 @@ import 'package:client_leger/services/websocket_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 
@@ -110,7 +111,13 @@ class UserList extends StatelessWidget {
         children: [
           const Divider(),
           ListTile(
-              title: Text(username, style: TextStyle(fontSize: 18.0)),
+              title: Row(
+                children: [
+                  circularImageWithBorder(_usersService.getUserByUsername(username)!.avatar.url),
+                  Gap(6),
+                  Text(username, style: TextStyle(fontSize: 18.0)),
+                ],
+              ),
               trailing:
                 Obx(() => _buildTrailingButton(username, index)),
               onTap: () {
@@ -136,6 +143,25 @@ class UserList extends StatelessWidget {
           // trailing: Icon(alreadySaved ? Icons.favorite : Icons.favorite_border,
           //     color: alreadySaved ? Colors.red : null),
       ],
+    );
+  }
+
+  Widget circularImageWithBorder(String imgPath) {
+    return Container(
+      width: 50.0,
+      height: 50.0,
+      decoration: BoxDecoration(
+        color: const Color(0xff7c94b6),
+        image: DecorationImage(
+          image: NetworkImage(imgPath),
+          fit: BoxFit.cover,
+        ),
+        borderRadius: const BorderRadius.all(Radius.circular(25.0)),
+        border: Border.all(
+          color: Colors.black,
+          width: 2.0,
+        ),
+      ),
     );
   }
 

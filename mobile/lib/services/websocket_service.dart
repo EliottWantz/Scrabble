@@ -13,6 +13,7 @@ import 'package:client_leger/models/join_chat_room_payload.dart';
 import 'package:client_leger/models/join_game_payload.dart';
 import 'package:client_leger/models/join_room_payload.dart';
 import 'package:client_leger/models/join_tournament_payload.dart';
+import 'package:client_leger/models/leave_tournament_payload.dart';
 import 'package:client_leger/models/play_move_payload.dart';
 import 'package:client_leger/models/position.dart';
 import 'package:client_leger/models/requests/chat_message_request.dart';
@@ -25,6 +26,7 @@ import 'package:client_leger/models/requests/join_chat_room_request.dart';
 import 'package:client_leger/models/requests/join_game_as_observer_request.dart';
 import 'package:client_leger/models/requests/join_room_request.dart';
 import 'package:client_leger/models/requests/join_tournament_request.dart';
+import 'package:client_leger/models/requests/leave_tournament_request.dart';
 import 'package:client_leger/models/requests/play_move_request.dart';
 import 'package:client_leger/models/requests/replace_bot_by_observer.dart';
 import 'package:client_leger/models/requests/start_tournament_request.dart';
@@ -65,6 +67,7 @@ import 'package:client_leger/services/user_service.dart';
 import 'package:client_leger/services/users_service.dart';
 import 'package:client_leger/utils/dialog_helper.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../models/create_dm_room_payload.dart';
@@ -102,7 +105,7 @@ class WebsocketService extends GetxService {
     socket = WebSocketChannel.connect(Uri(
         scheme: ApiConstants.wsScheme,
         host: ApiConstants.wsHost,
-        port: ApiConstants.wsPort,
+        // port: ApiConstants.wsPort,
         path: ApiConstants.wsPath,
         queryParameters: {
           'id': userService.user.value!.id,
@@ -249,6 +252,13 @@ class WebsocketService extends GetxService {
           UserJoinedTournamentResponse userJoinedTournamentResponse =
               UserJoinedTournamentResponse.fromRawJson(data);
           handleEventUserJoinedTournament(userJoinedTournamentResponse);
+        }
+        break;
+      case ServerEventLeftTournament:
+        {
+          UserJoinedTournamentResponse userJoinedTournamentResponse =
+              UserJoinedTournamentResponse.fromRawJson(data);
+          handleEventUserLeftTournament(userJoinedTournamentResponse);
         }
         break;
       case ServerEventChatMessage:
@@ -424,7 +434,8 @@ class WebsocketService extends GetxService {
   }
 
   void handleEventListUsers(ListUsersResponse listUsersResponse) {
-    usersService.users.addAll(listUsersResponse.payload.users);
+    usersService.users.value = listUsersResponse.payload.users;
+    // usersService.users.addAll(listUsersResponse.payload.users);
   }
 
   void handleEventListOnlineUsers(ListUsersResponse listUsersResponse) {
@@ -434,13 +445,16 @@ class WebsocketService extends GetxService {
     // List<String> friendUsernames = usersService.getUsernamesFromUserIds(userService.friends.value);
 
     List<String> onlineFriendIds = usersService.getOnlineFriendIds();
+    print(onlineFriendIds);
     onlineFriendIds.sort();
     List<String> offlineFriendIds = usersService.getOfflineFriendIds();
+    print(offlineFriendIds);
     offlineFriendIds.sort();
     onlineFriendIds.addAll(offlineFriendIds);
     userService.friends.value.clear();
     userService.friends.addAll(onlineFriendIds);
     userService.friends.refresh();
+    print(userService.friends.value);
   }
 
   void handleEventListChatRooms(ListChatRoomsResponse listChatRoomsResponse) {
@@ -569,21 +583,35 @@ class WebsocketService extends GetxService {
                 gameService.currentGameId &&
             gameService.currentTournament.value!.poolGames[0].winnerId != "") {
           // if 2nd pool game has finished and 1st has finished
+          print("if 2nd pool game has finished and 1st has finished");
           if (userService.isCurrentUser(
               gameService.currentTournament.value!.poolGames[0].winnerId!)) {
+            print("winner of game 0");
             gameService.leftGame();
           } else if (!userService
-              .isCurrentUser(gameService.currentGameWinner)) {
+                  .isCurrentUser(gameService.currentGameWinner) &&
+              gameService.currentTournament.value!.userIds
+                  .contains(userService.user.value!.id)) {
+            print("loser of game 1");
             gameController.showJoinFinaleDialogForObserverAndLoser();
-            // gameController.showPoolGameLoserDialog(
-            //     gameService.currentTournament.value!.finale!.id);
-          } else {
+          } else if (userService.isCurrentUser(gameService.currentGameWinner)) {
+            // Winner of game
+            print("winner of game 1");
             gameService.leftGame();
+          } else {
+            print("observer of game 1");
+            // Observer of game and didn't play
+            gameController.showTournamentObserverPoolGameOverDialog();
           }
         } else {
+          print("not good");
           gameController.showPoolGameLoserDialog(
               gameService.currentTournament.value!.poolGames[0].id);
         }
+      } else if (gameService.currentGameWinner == null) {
+        gameService.leftGame();
+        Get.back();
+        Get.back();
       } else {
         gameController.showGameOverDialog(gameService.currentGameWinner);
       }
@@ -638,7 +666,11 @@ class WebsocketService extends GetxService {
     gameService.currentGame.value =
         joinedGameAsObserverResponse.payload.gameUpdate;
     bool isObserving = true;
-    Get.offAllNamed(Routes.GAME, arguments: isObserving);
+    bool isTournamentGame = false;
+    if (gameService.currentTournament.value != null) {
+      isTournamentGame = true;
+    }
+    Get.offAllNamed(Routes.GAME, arguments: [isObserving, isTournamentGame]);
   }
 
   // void handleEventUserJoined(UserJoinedResponse userJoinedResponse) {
@@ -710,6 +742,12 @@ class WebsocketService extends GetxService {
     }
   }
 
+  void handleEventUserLeftTournament(
+      UserJoinedTournamentResponse userJoinedTournamentResponse) {
+    Get.back();
+    Get.back();
+  }
+
   void handleServerEventChatMessage(ChatMessageResponse chatMessageResponse) {
     // if (gameService.currentGameRoom.value != null) {
     //   if (chatMessageResponse.payload!.roomId ==
@@ -769,7 +807,11 @@ class WebsocketService extends GetxService {
       gameService.currentGame.value = gameUpdateResponse.payload;
       bool isObserving = false;
       getIndices();
-      Get.offAllNamed(Routes.GAME, arguments: isObserving);
+      bool isTournamentGame = false;
+      if (gameService.currentTournament.value != null) {
+        isTournamentGame = true;
+      }
+      Get.offAllNamed(Routes.GAME, arguments: [isObserving, isTournamentGame]);
     } else if (Get.isRegistered<GameController>()) {
       gameService.currentGame.value = gameUpdateResponse.payload;
       GameController gameController = Get.find();
@@ -1047,6 +1089,21 @@ class WebsocketService extends GetxService {
     final leaveGameRequest = StartGameRequest(
         event: ClientEventLeaveGame, payload: leaveGamePayload);
     socket.sink.add(leaveGameRequest.toRawJson());
+  }
+
+  void leaveTournament(String tournamentId) {
+    // gameService.currentGame.value = null;
+    // gameService.currentGameId = '';
+    // gameService.currentGameTimer.value = null;
+    // gameService.currentGameInfo = null;
+    // gameService.currentGameInfoInitialized = false;
+    // gameService.currentGameRoomUserIds.value = [];
+    roomService.removeRoom(tournamentId);
+    final leaveTournamentPayload =
+        LeaveTournamentPayload(tournamentId: tournamentId);
+    final leaveTournamentRequest = LeaveTournamentRequest(
+        event: ClientEventLeaveTournament, payload: leaveTournamentPayload);
+    socket.sink.add(leaveTournamentRequest.toRawJson());
   }
 
   void leaveChatRoom(String roomId) {
