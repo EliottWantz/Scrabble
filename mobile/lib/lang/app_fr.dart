@@ -137,6 +137,7 @@ const Map<String, String> fr_FR = {
   "register-component.username": "Veuillez entrer votre pseudonyme",
   "sidebar-component.avatar": "Choix de l'avatar",
   "sidebar-component.connect": "Connexion",
+  "sidebar-component.disconnect": "Déconnexion",
   "sidebar-component.profile": "Profil",
   "sidebar-component.register": "Inscription",
   "sidebar-component.social": "Social",
@@ -197,13 +198,13 @@ const Map<String, String> fr_FR = {
   "rules-slider-page.hint": "Indice",
   "rules-slider-page.click": "Cliquer",
   "rules-slider-page.finish": "Finir",
-  "create-room-screen.canal": "CRÉEZ UN CANAL PUBLIC"
-  "create-room-screen.canal-join": "REJOINGNEZ UN CANAL PUBLIC"
-  "create-room-screen.create-canal": "Créer le canal"
-  "create-room-screen.placeholder": "Entrez le nom du canal"
-  "create-room-screen.placeholder-validation": "Le champ ne peut pas être vide"
+  "create-room-screen.canal": "CRÉEZ UN CANAL PUBLIC",
+  "create-room-screen.canal-join": "REJOINGNEZ UN CANAL PUBLIC",
+  "create-room-screen.create-canal": "Créer le canal",
+  "create-room-screen.placeholder": "Entrez le nom du canal",
+  "create-room-screen.placeholder-validation": "Le champ ne peut pas être vide",
   "chat-screen.message-hint": "Entrez un message...",
-  "chat-screen.quit-channel": "Quitter le canal",,
+  "chat-screen.quit-channel": "Quitter le canal",
   "field-empty": "Le champ ne peut pas être vide",
   "connect-server": "Connexion au serveur",
   "classic-mode": "Mode classique",
@@ -217,7 +218,7 @@ const Map<String, String> fr_FR = {
   "profile-screen.mean-points-game": "Moyenne de points par partie",
   "profile-screen.mean-game-time": "Moyenne de temps de jeu",
   "profile-screen.modif-profil": "Modifier mon profil",
-  "profile-screen.event-type": "Type de l\'évènement",
-  "profile-screen.date": "Date",
-  "profile-screen.hour": "Heure",
+  "profile-screen.partie": "Partie",
+  "profile-screen-won": "gagnée",
+  "profile-screen-lost": "perdue",
 };

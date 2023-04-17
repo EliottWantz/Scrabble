@@ -131,6 +131,7 @@ const Map<String, String> en_US = {
   "register-component.username": "Please enter your username",
   "sidebar-component.avatar": "Choice of avatar",
   "sidebar-component.connect": "Log In",
+  "sidebar-component.disconnect": "Log Out",
   "sidebar-component.profile": "Profile",
   "sidebar-component.register": "Register",
   "sidebar-component.social": "Social",
@@ -191,12 +192,12 @@ const Map<String, String> en_US = {
   "rules-slider-page.hint": "Hint",
   "rules-slider-page.click": "Click",
   "rules-slider-page.finish": "Finish",
-  "create-room-screen.canal": "CREATE A PUBLIC CHANNEL"
-  "create-room-screen.canal-join": "JOIN A PUBLIC CHANNEL"
-  "create-room-screen.create-canal": "Create channel"
-  "create-room-screen.placeholder": "Enter chanel name"
+  "create-room-screen.canal": "CREATE A PUBLIC CHANNEL",
+  "create-room-screen.canal-join": "JOIN A PUBLIC CHANNEL",
+  "create-room-screen.create-canal": "Create channel",
+  "create-room-screen.placeholder": "Enter chanel name",
   "create-room-screen.placeholder-validation": "The field cannot be empty",
-  "chat-screen.message-hint": "Enter a message..."
+  "chat-screen.message-hint": "Enter a message...",
   "chat-screen.quit-channel": "Quit the channel",
   "field-empty": "The field cannot be empty",
   "email-empty": "Enter a valid email",
@@ -212,4 +213,7 @@ const Map<String, String> en_US = {
   "profile-screen.mean-points-game": "Mean points per game",
   "profile-screen.mean-game-time": "Mean game time",
   "profile-screen.modif-profil": "Modify profile",
+    "profile-screen.partie": "Game",
+  "profile-screen-won": "won",
+  "profile-screen-lost": "lost",
 };

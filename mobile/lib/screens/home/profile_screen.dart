@@ -220,7 +220,7 @@ class ProfileScreen extends StatelessWidget {
                       ])
                     : Center(
                         child: Text(
-                          'Aucune données disponible',
+                          'profile-screen.no-data'.tr,
                           style: Get.context!.textTheme.headline6,
                         ),
                       );
@@ -231,9 +231,9 @@ class ProfileScreen extends StatelessWidget {
 
   List<DataColumn> _createColumns() {
     return [
-      const DataColumn(label: Text('Type de l\'évènement')),
-      const DataColumn(label: Text('Date')),
-      const DataColumn(label: Text('Heure')),
+      const DataColumn(label: Text('profile-page.type-event'.tr)),
+      const DataColumn(label: Text('profile-page.date'.tr)),
+      const DataColumn(label: Text('profile-page.hour'.tr)),
     ];
   }
 
@@ -242,8 +242,8 @@ class ProfileScreen extends StatelessWidget {
       for (final networkLogs in user.summary.networkLogs!.reversed)
         DataRow(cells: [
           DataCell(Text(networkLogs.eventType.toLowerCase() == 'login'
-              ? 'Connexion'
-              : 'Déconnexion')),
+              ? 'sidebar-component.connect'.tr
+              : 'sidebar-component.disconnect'.tr)),
           DataCell(Text(DateFormat('yyyy-MM-dd').format(tz.TZDateTime.from(
               DateTime.fromMillisecondsSinceEpoch(networkLogs.eventTime),
               montreal)))),
@@ -266,7 +266,7 @@ class ProfileScreen extends StatelessWidget {
                   children: const [
                     CircularProgressIndicator(),
                     Gap(8),
-                    Text('Collecte des données'),
+                    Text('profile-screen.data-collection'.tr),
                   ],
                 ),
               );
@@ -284,7 +284,7 @@ class ProfileScreen extends StatelessWidget {
                       ])
                     : Center(
                         child: Text(
-                          'Aucune données disponible',
+                          'profile-screen.no-data'.tr,
                           style: Get.context!.textTheme.headline6,
                         ),
                       );
@@ -298,7 +298,7 @@ class ProfileScreen extends StatelessWidget {
       for (final gameStats in user.summary.gamesStats!.reversed)
         DataRow(cells: [
           DataCell(Text(
-              'Partie ${gameStats.gameWon != null ? 'gagnée' : 'perdue'}')),
+              'profile-screen.partie'.tr + ' ${gameStats.gameWon != null ? 'profile-screen-won'.tr : 'profile-screen-lost'.tr}')),
           DataCell(Text(DateFormat('yyyy-MM-dd').format(tz.TZDateTime.from(
               DateTime.fromMillisecondsSinceEpoch(gameStats.gameEndTime),
               montreal)))),
