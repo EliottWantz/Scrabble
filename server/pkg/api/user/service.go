@@ -57,14 +57,6 @@ func NewService(cfg *config.Config, repo *Repository, roomSvc *room.Service) (*S
 		NewUserChan: make(chan *User, 10),
 		DefaultAvatars: []*Avatar{
 			{
-				URL:    "https://ucarecdn.com/fedc92a0-681f-4258-a01c-84e6d980956f/",
-				FileID: "fedc92a0-681f-4258-a01c-84e6d980956f",
-			},
-			{
-				URL:    "https://ucarecdn.com/0e3fe0e9-c2b2-46b3-ad78-2f4a99288189/",
-				FileID: "0e3fe0e9-c2b2-46b3-ad78-2f4a99288189",
-			},
-			{
 				URL:    "https://ucarecdn.com/fd170930-3817-4867-804d-cceefce3018f/",
 				FileID: "fd170930-3817-4867-804d-cceefce3018f/",
 			},
