@@ -44,6 +44,22 @@
     </div>
   </mat-expansion-panel>
   <app-chat-box-button *ngIf="isLoggedIn()"></app-chat-box-button>
+  <div *ngIf="tournamentRoom.value && isObserving()">
+    <div *ngFor="let players of tournamentRoom.value.poolGames[0].userIds">
+        <div>{{players}}</div>
+        <button (click)="joinGameAsObserver(tournamentRoom.value.poolGames[0])" class="join-button" disabled="{{tournamentRoom.value.poolGames[0].winnerId}}"></button>
+    </div>
+    <div *ngFor="let players of tournamentRoom.value.poolGames[1].userIds">
+        <div>{{players}}</div>
+        <button (click)="joinGameAsObserver(tournamentRoom.value.poolGames[1])" class="join-button" disabled="{{tournamentRoom.value.poolGames[1].winnerId}}"></button>
+    </div>
+    <div *ngIf="tournamentRoom.value.poolGames[1].winnerId && tournamentRoom.value.poolGames[0].winnerId">
+        <div *ngFor="let players of tournamentRoom.value.finale!.userIds">
+            <div>{{players}}</div>
+            <button (click)="joinGameAsObserver(tournamentRoom.value.finale!)" class="join-button"></button>
+        </div>
+    </div>
+</div>
   <div *ngIf="getNumUsers() >= 4 && checkIfCreatorTournament()">
     <button mat-flat-button color="accent" (click)="startTournament()" routerLink="/game">{{'waiting-room-page.start-game' | translate}}</button>
   </div>

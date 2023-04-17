@@ -132,7 +132,7 @@ export class SidebarComponent implements OnInit {
   }
 
   return(): void {
-    if (this.isInGameLobby() && (this.gameService.game.value || this.gameService.tournament.value)) {
+    if (this.gameService.game.value || this.gameService.tournament.value) {
       if (this.gameService.tournament.value) {
         const payload = {
           tournamentId: this.gameService.tournament.value.id

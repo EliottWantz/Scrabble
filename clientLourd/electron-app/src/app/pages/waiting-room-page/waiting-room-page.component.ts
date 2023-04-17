@@ -11,7 +11,7 @@ import { WebSocketService } from "@app/services/web-socket/web-socket.service";
 import { ClientEvent } from "@app/utils/events/client-events";
 import { Game } from "@app/utils/interfaces/game/game";
 import { Tournament } from "@app/utils/interfaces/game/tournament";
-import { StartGamePayload, StartTournamentPayload } from "@app/utils/interfaces/packet";
+import { JoinGameAsObserverPayload, StartGamePayload, StartTournamentPayload } from "@app/utils/interfaces/packet";
 import { Summary, UserStats } from "@app/utils/interfaces/summary";
 import { User } from "@app/utils/interfaces/user";
 import { BehaviorSubject } from "rxjs";
@@ -57,11 +57,24 @@ export class WaitRoomPageComponent implements OnInit {
     
   }
 
+  joinGameAsObserver(game: Game): void {
+    const payload: JoinGameAsObserverPayload = {
+        gameId: game.id,
+        password: ""
+    }
+    const event : ClientEvent = "join-game-as-observateur";
+    this.socketService.send(event, payload);
+    this.gameService.isObserving = true;
+}
   ngOnInit(): void {
     //this.socialService.updatedOnlineFriends();
     this.socialService.onlineFriends$.subscribe((users) => {
       this.onlineFriends = users;
     });
+  }
+
+  isObserving(): boolean {
+    return this.gameService.isObserving;
   }
 
   getUserName(id: string): string {
