@@ -1,5 +1,5 @@
 <mat-drawer-container *ngIf="!isInGame()">
-    <mat-drawer #drawer opened="true" disableClose="false" mode="side">
+    <mat-drawer #drawer opened="true" disableClose="false" mode="side" *ngIf="!modeFenetrer">
         <div class="box">
             <mat-icon *ngIf="user.value.id === '0'">account_circle</mat-icon>
             <img *ngIf="user.value.id !== '0'" src="{{user.value.avatar.url}}" class="avatar">
@@ -9,12 +9,12 @@
             </div>
      
             <div class="nav">
-                <div class="nav-button" (click)="selectNav(0)" routerLink="/home">
+                <div class="nav-button" (click)="selectNav(0)" (click)="navigateHome()">
                     <div class="nav-button-div">
                         <div class="mat-icon-button">
                             <mat-icon inline="true" >home</mat-icon>
                         </div>
-                        <div class="text">{{currentRoute | translate}}</div>
+                        <div class="text">{{"sidebar." + currentRoute | translate}}</div>
                     </div> 
                 </div>
 
@@ -35,6 +35,15 @@
                         <div class="text">{{'sidebar-component.social' | translate}}</div>
                     </div> 
                 </div>
+
+                <div class="nav-button" (click)="selectNav(3)" routerLink="/rules-slider" *ngIf="!isInGameLobby()">
+                    <div class="nav-button-div">
+                        <div class="mat-icon-button">
+                            <mat-icon inline="true" >rule</mat-icon>
+                        </div>
+                        <div class="text">{{'sidebar-component.rules' | translate}}</div>
+                    </div> 
+                </div>
             </div>
 
             <div id="theme" class="nav">
@@ -51,15 +60,17 @@
                     </div>
                     <div>{{language.value}}</div>
                 </div>
-                <mat-icon *ngIf="currentRoute !== 'PolyScrabble'" (click)="return()">arrow_back</mat-icon>
+                <mat-icon *ngIf="currentRoute !== 'home'" (click)="return()">arrow_back</mat-icon>
                 <mat-icon *ngIf="isConnected()" (click)="logout()">logout</mat-icon>
             </div>
         </div>
     </mat-drawer>
     <mat-drawer-content>
+        <app-invite></app-invite>
         <router-outlet></router-outlet>
     </mat-drawer-content>
 </mat-drawer-container>
 <div *ngIf="isInGame()">
-    <router-outlet></router-outlet>
+    <router-outlet>
+    </router-outlet>
 </div>

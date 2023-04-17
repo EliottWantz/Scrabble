@@ -1,0 +1,161 @@
+#chatBox {
+  height: 65%;
+  width: 25%;
+  display: flex;
+  flex-direction: column;
+  z-index: 2;
+}
+
+.placement {
+  position: absolute;
+  right: 2vw;
+  bottom: 2vh;
+}
+
+.header {
+  width: 100%;
+}
+
+.header-content {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  width: 100%;
+}
+
+mat-form-field {
+  width: 100%;
+}
+.room-form-field {
+  flex-grow: 1;
+  margin-right: 15px; 
+}
+
+
+.room-form {
+  width: calc(100% - 50px); 
+}
+
+
+
+.open-new-button {
+
+  width: 3em;
+  height: 3em;
+  cursor: pointer;
+  text-decoration: none;
+  border-radius: 70%;
+  transition: all 0.2s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+}
+
+.open-new-button:hover {
+  color: rgb(41, 41, 41);
+  transform: translateY(-2px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2);
+}
+
+.open-new-button:active {
+  transform: translateY(0);
+  box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+}
+
+
+#chatBoxBody {
+  flex-grow: 1;
+  overflow: scroll;
+}
+
+#chatBoxMessages {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.message-container {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 1rem;
+  align-items: flex-start;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  margin-right: 1rem;
+  align-items: center;
+}
+
+.avatar {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+}
+
+.message-content {
+  flex-grow: 1;
+}
+
+.timestamp {
+  font-size: 0.75rem;
+  color: #999;
+  margin-bottom: 0.25rem;
+}
+
+.message {
+  word-wrap: break-word;
+  font-size: 1rem;
+  line-height: 1.4;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  max-width: 80%;
+}
+
+.message.sent {
+  background-color: #bae0ff;
+  align-self: flex-end;
+}
+
+.message.received {
+  background-color: #f0f0f0;
+  color: rgb(41, 41, 41);
+  box-shadow: 0.25rem 0.25rem 1.5rem rgba(0, 0, 0, 0.05);
+}
+
+#chatBoxForm {
+  padding: 0.75rem;
+  display: flex;
+  align-items: center;
+}
+
+#chatBoxForm > mat-form-field {
+  margin-right: 0.5rem;
+  flex-grow: 1;
+}
+
+#submitBtn {
+  margin-bottom: 0.5rem;
+  transform: scale(0.8);
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.close-icon {
+  cursor: pointer;
+}
+
+.close-pop {
+
+}
+
+img {
+  width: 100%;
+}

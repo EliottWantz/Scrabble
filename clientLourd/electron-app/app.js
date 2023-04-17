@@ -13,6 +13,7 @@ function initWindow() {
       contextIsolation: false,
     },
   });
+  appWindow.maximize();
 
   // Electron Build Path
   const path = `http://localhost:4200`;
@@ -38,7 +39,6 @@ function initWindow() {
 
 function openChatwindow() {
   if (!appWindow) {
-    console.error("appWindow is not defined.");
     return;
   }
   chatWindow = new BrowserWindow({
@@ -89,5 +89,17 @@ ipcMain.on("open-chat", (event, data) => {
 });
 
 ipcMain.on("request-user-data", (event, data) => {
+  if (chatWindow == null) return;
   chatWindow.webContents.send("user-data", userData);
+});
+
+ipcMain.on("logout", (event, data) => {
+  if (chatWindow) {
+    chatWindow.destroy();
+  }
+});
+
+ipcMain.on("get-room", (event, data) => {
+  if (chatWindow == null) return;
+  chatWindow.webContents.send("get-room-reply", userData);
 });

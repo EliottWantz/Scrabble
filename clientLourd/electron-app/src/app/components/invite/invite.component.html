@@ -1,0 +1,28 @@
+<div class="content" *ngIf="invites.length > 0">
+    <mat-card *ngFor="let invite of invites; let i = index" class="invite">
+        <mat-card-header>
+            <div class="info">
+                <img class="avatar" [src]="getAvatarInvite(i)">
+                <mat-card-title>{{getInviterName(i)}}{{"invite-component.title" | translate}}</mat-card-title>
+            </div>
+        </mat-card-header>
+        <mat-card-content>
+            <form *ngIf="invite.game.isProtected">
+                <mat-form-field>
+                    <input matInput placeholder="{{'join-protected-game-component.password' | translate}}" [(ngModel)]="invite.password" name="password" required type="password">
+                </mat-form-field>
+            </form>
+            <strong *ngIf="invite.error.length > 0" style="color: red;">{{"invite-component." + invite.error | translate}}</strong>
+            <div class="info">
+                <button mat-raised-button class="accept-button" color="primary" (click)="acceptInvite(i)" [ngStyle]="{transform: 'scale(0.8)'}" type="submit">
+                    <mat-icon>check</mat-icon>
+                    {{"invite-component.accept" | translate}}
+                </button>
+                <button mat-raised-button class="deny-button" color="primary" (click)="denyInvite(i)" [ngStyle]="{transform: 'scale(0.8)'}" type="button">
+                    <mat-icon>close</mat-icon>
+                    {{"invite-component.deny" | translate}}
+                </button>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>

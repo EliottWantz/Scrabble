@@ -1,15 +1,9 @@
 #chatBox {
-  height: 65%;
-  width: 25%;
+  height: 100%;
+  width: 100%;
   display: flex;
   flex-direction: column;
   z-index: 2;
-}
-
-.placement {
-  position: absolute;
-  right: 1%;
-  bottom: 1%;
 }
 
 .header {
@@ -19,7 +13,6 @@
 .header-content {
   display: flex;
   align-items: baseline;
-  justify-content: space-between;
   width: 100%;
 }
 
@@ -154,4 +147,16 @@ mat-form-field {
 
 .close-pop {
 
+  margin-right: 10px;
+
+}
+
+h1 {
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+img {
+  width: 100%;
 }

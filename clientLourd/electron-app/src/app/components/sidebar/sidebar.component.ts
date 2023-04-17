@@ -13,6 +13,7 @@ import { User } from "@app/utils/interfaces/user";
 import { BehaviorSubject } from "rxjs";
 //import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { MatDrawer, MatSidenav } from '@angular/material/sidenav';
+import { Room } from "@app/utils/interfaces/room";
 
 //import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 const electron = (window as any).require('electron');
@@ -24,7 +25,7 @@ const electron = (window as any).require('electron');
 export class SidebarComponent implements OnInit {
   @Input() sidenavHandle!: MatSidenav;
   @ViewChild('drawer') drawer!: MatDrawer;
-
+  modeFenetrer = false;
   private darkThemeIcon = 'wb_sunny';
   private lightThemeIcon = 'nightlight_round';
   public lightDarkToggleIcon = this.lightThemeIcon;
@@ -32,12 +33,12 @@ export class SidebarComponent implements OnInit {
   isJoining = false;
   public user: BehaviorSubject<User>;
   language: BehaviorSubject<string>;
-  currentRoute = "PolyScrabble";
+  currentRoute = "home";
   currentRouteName = "/home";
   previousRouteName: string[] = ["/home"];
   routeIndex = 0;
 
-  constructor(private userService: UserService, private authService: AuthenticationService, private gameService: GameService, private themeService: ThemeService, private router: Router,
+  constructor(private userService: UserService, private roomSvc: RoomService, private authService: AuthenticationService, private gameService: GameService, private themeService: ThemeService, private router: Router,
     private webSocketService: WebSocketService) {
     this.user = this.userService.subjectUser;
     document
@@ -54,26 +55,33 @@ export class SidebarComponent implements OnInit {
         this.currentRouteName = e.url;
         switch (e.url) {
           case "/home":
-            this.currentRoute = "PolyScrabble";
+            this.currentRoute = "home";
             this.selectNav(0);
             this.previousRouteName = ['/home'];
             this.routeIndex = 0;
+            this.gameService.game.next(undefined);
+            this.gameService.tournament.next(undefined);
+            this.gameService.scrabbleGame.next(undefined);
             break;
 
           case '/login':
-            this.currentRoute = 'Connexion';
+            this.currentRoute = 'login';
             break;
 
           case '/register':
-            this.currentRoute = 'Inscription';
+            this.currentRoute = 'register';
             break;
 
           case '/avatar':
-            this.currentRoute = "Choix de l'avatar";
+            this.currentRoute = "avatar";
             break;
 
           case '/find-game':
-            this.currentRoute = 'Options de jeu';
+            this.currentRoute = 'find-game';
+            break;
+          
+          case '/find-tournament':
+            this.currentRoute = 'find-tournament';
             break;
         }
       }
@@ -81,8 +89,9 @@ export class SidebarComponent implements OnInit {
   }
   ngOnInit(): void {
     electron.ipcRenderer.on('user-data', () => {
-      this.drawer.close();
+      this.modeFenetrer = true;
     });
+
     this.themeService.theme.subscribe((theme) => {
       if (theme == 'dark') {
         this.lightDarkToggleIcon = this.darkThemeIcon;
@@ -90,9 +99,7 @@ export class SidebarComponent implements OnInit {
         this.lightDarkToggleIcon = this.lightThemeIcon;
       }
     });
-    /*this.user.subscribe((user) => {
-      this.badgeContent = user.pendingRequests.length;
-    });*/
+
   }
 
   public doToggleLightDark() {
@@ -110,8 +117,9 @@ export class SidebarComponent implements OnInit {
   logout(): void {
     this.router.navigate(['/home']);
     this.authService.logout();
-    setTimeout(()=>{
+    setTimeout(() => {
       window.location.reload();
+      electron.ipcRenderer.send('logout');
     }, 100);
   }
 
@@ -124,12 +132,20 @@ export class SidebarComponent implements OnInit {
   }
 
   return(): void {
-    if (this.isInGameLobby() && this.gameService.game.value) {
-      const payload: LeaveGamePayload = {
-        gameId: this.gameService.game.value.id
-      } 
-      this.webSocketService.send("leave-game", payload);
-      this.gameService.game.next(undefined);
+    if (this.gameService.game.value || this.gameService.tournament.value) {
+      if (this.gameService.tournament.value) {
+        const payload = {
+          tournamentId: this.gameService.tournament.value.id
+        }
+        this.webSocketService.send("leave-tournament", payload);
+        this.gameService.tournament.next(undefined);
+      } else if (this.gameService.game.value) {
+        const payload: LeaveGamePayload = {
+          gameId: this.gameService.game.value.id
+        }
+        this.webSocketService.send("leave-game", payload);
+        this.gameService.game.next(undefined);
+      }
     }
     if (this.previousRouteName[this.previousRouteName.length - 1] == '/home') {
       this.previousRouteName = ['/home'];
@@ -144,17 +160,30 @@ export class SidebarComponent implements OnInit {
     return this.user.value.friends;
   }
 
+  navigateHome(): void {
+    if (this.router.url !== '/waitingRoom')
+      this.router.navigate(['/home']);
+  }
+
   selectNav(index: number): void {
     const navButtons = document.getElementsByClassName('nav-button');
+    let wasThere = false;
     for (let i = 0; i < navButtons.length; i++) {
       if (i != index) {
         navButtons[i].setAttribute('style', '');
       } else {
+        wasThere = true;
         navButtons[i].setAttribute(
           'style',
           'background-color: #424260; outline-color: #66678e; outline-width: 1px; outline-style: solid;'
         );
       }
+    }
+    if (!wasThere) {
+      navButtons[navButtons.length - 1].setAttribute(
+        'style',
+        'background-color: #424260; outline-color: #66678e; outline-width: 1px; outline-style: solid;'
+      );
     }
   }
 }

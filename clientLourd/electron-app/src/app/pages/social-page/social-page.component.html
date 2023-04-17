@@ -1,50 +1,61 @@
+<mat-drawer-container class="container">
 
-  <mat-drawer-container>
-
-    <mat-drawer opened="true" disableClose="true" mode="side">
+  <mat-drawer opened="true" disableClose="true" mode="side" class="mat_drawer" position="end">
+    <div>
       <div class="box">
-        <div id="title">
+        <div class="action" (click)="this.goToFriendPage()">
           <div class="mat-icon-button">
             <mat-icon inline="true">people</mat-icon>
           </div>
           <div class="text">{{'social-page.friends' | translate}}</div>
         </div>
+
+        <div class="action" (click)="this.createNewDmRoom()">
+          <div class="mat-icon-button">
+            <mat-icon inline="true">add</mat-icon>
+          </div>
+          <div class="text">{{'social-page.create-group' | translate}}</div>
+        </div>
+
+        <div class="action" (click)="goToExplorePage()">
+          <div class="mat-icon-button">
+            <mat-icon >search</mat-icon>          </div>
+          <div class="text">{{'social-page.explore'| translate}}</div>
+        </div>
+
         <div id="break">
           <hr>
         </div>
+        <div *ngFor="let canal of this.findRoomWithoutFriend(); let i = index" class="friends"
+        (click)="chatFriendGroupPage(i)">
+          <span class="canal-name">
+            <mat-icon matSuffix class="icon-canal" >group</mat-icon>
+              {{canal.name}}
+          </span>
 
-        <div *ngFor="let friend of this.socialService.onlineFriends$.value; let i = index" class="friends">
-          <div class="friend" (click)="chatFriendPage(i)">
-            <div class="mat-icon-button">
-              <mat-icon inline="true" >person</mat-icon>
-            </div>
-            <div class="text">{{getUsernameFriend(i)}}</div>
-          </div> 
         </div>
-
+        <div *ngFor="let friend of this.socialService.friendsList$.value; let i = index" class="friends"
+          (click)="chatFriendPage(i)">
+          <div class="friend">
+            <div class="avatar">
+              <img class="avatar-img" src="{{friend.avatar.url}}" alt="avatar">
+              <span *ngIf="this.userOnline(friend.username)" class='avatar-status-online'></span>
+              <span *ngIf="!this.userOnline(friend.username)" class='avatar-status-offline'></span>
+            </div>
+            <span class="text">{{getUsernameFriend(i)}}</span>
+          </div>
+        </div>
       </div>
-    </mat-drawer>
+    </div>
+  </mat-drawer>
 
-    <mat-drawer-content>
-      <app-social *ngIf="!chatFriend"></app-social>
-      <div class="content" *ngIf="chatFriend">
-        <div class="nav">
-          <div class="nav-text" (click)="selectNavButton(0)">
-              {{'social-component.online' | translate}}
-          </div>
-          <div class="nav-text" (click)="selectNavButton(1)">
-            {{'social-component.all' | translate}}
-          </div>
-          <div class="nav-text" (click)="selectNavButton(2)">
-              {{'social-component.waiting' | translate}}
-          </div>
-          <div class="nav-text" (click)="selectNavButton(3)">
-              {{'social-component.add' | translate}}
-          </div>
-      </div>
-        <app-chat-box class="chat-box"></app-chat-box>
-      </div>
-    </mat-drawer-content>
-  </mat-drawer-container>
-
-      
+  <mat-drawer-content>
+    <app-social *ngIf="!chatFriend && !explore"></app-social>
+    <div class="content" *ngIf="chatFriend && !explore">
+      <app-chat-box ></app-chat-box>
+    </div>
+    <div class="content" *ngIf="explore">
+      <app-explore></app-explore>
+    </div>
+  </mat-drawer-content>
+</mat-drawer-container>

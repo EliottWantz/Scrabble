@@ -1,13 +1,13 @@
 <div class="container">
   <div class="left">
-    <button mat-flat-button color="primary" (click)="leaveGame()">
+    <button mat-flat-button color="primary" (click)="leave()">
       <mat-icon>input</mat-icon>
       {{'game-page.leave' | translate}}
     </button>
 
     <div *ngFor="let player of game.value?.players" class="player" [class.light]="game.value?.turn !== player.id && !isDarkTheme()" [class.dark]="game.value?.turn !== player.id && isDarkTheme()" [class.isTurnLight]="game.value?.turn === player.id && !isDarkTheme()" [class.isTurnDark]="game.value?.turn === player.id && isDarkTheme()">
       <img *ngIf="!player.isBot" src="{{getPlayerAvatar(player.id)}}">
-      <img *ngIf="player.isBot" src="https://ucarecdn.com/43074331-00a7-4096-8d7a-7a2d5a5d85db/">
+      <img *ngIf="player.isBot" src="https://ucarecdn.com/455a7a35-8cc9-4163-815a-5f9e56dc0273/">
       <div class="playerInfo">
         <h3>{{player.username}}</h3>
         <p>Score : {{player.score}}</p>
@@ -60,16 +60,7 @@
       {{"game-page.skip" | translate}}
     </button>
   </div>
-  <mat-card id="indice" *ngIf="gameWinner !=='' ">
-    <mat-card-content>
-      <p>{{gameWinner}} {{"game-page.win" | translate}}</p>
-      <button mat-flat-button color="primary" (click)="leaveGame()">
-        <mat-icon>input</mat-icon>
-        {{'game-page.leave' | translate}}
-      </button>
-    </mat-card-content>
-  </mat-card>
-  <app-chat-box></app-chat-box>
+  <app-chat-box-button></app-chat-box-button>
     <!--
       <mat-card id="indice" *ngIf="moves.value.length > 0">
       <mat-card-content>

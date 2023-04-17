@@ -5,7 +5,7 @@ import { CommunicationService } from '@app/services/communication/communication.
 import { UserService } from '@app/services/user/user.service';
 import { ChatMessage } from '@app/utils/interfaces/chat-message';
 import { User } from '@app/utils/interfaces/user';
-
+const electron = (window as any).require('electron');
 @Injectable({
   providedIn: 'root',
 })
@@ -39,17 +39,13 @@ export class RoomService {
       ...this.userService.subjectUser.value,
       joinedChatRooms: updatedChatRooms,
     });
-    //if (room.id == "global")
     this.currentRoomChat.next(room);
+    electron.ipcRenderer.send('get-room');
+    electron.ipcRenderer.on('get-room-reply', (_: any, data: { _: User, room: Room }) => {
+      console.log("has gotten room", data.room);
+      this.currentRoomChat.next(data.room);
+    });
   }
-
-  /*addDMRoom(room: Room): void {
-        this.listJoinedDMRooms.next([...this.listJoinedDMRooms.value, room]);
-        const updatedDMRooms = this.userService.currentUserValue.joinedDMRooms;
-        updatedDMRooms.push(room.id);
-        this.userService.subjectUser.next({...this.userService.subjectUser.value, joinedDMRooms: updatedDMRooms});
-        this.currentRoomChat.next(room);
-    }*/
 
   removeRoom(roomID: string): void {
     const joinedRooms = this.listJoinedChatRooms.getValue();
@@ -79,9 +75,9 @@ export class RoomService {
     for (const room of this.listJoinedChatRooms.value) {
       if (
         room.name ==
-          this.userService.currentUserValue.username + '/' + friendName ||
+        this.userService.currentUserValue.username + '/' + friendName ||
         room.name ==
-          friendName + '/' + this.userService.currentUserValue.username
+        friendName + '/' + this.userService.currentUserValue.username
       ) {
         console.log('changed room to dm');
         this.currentRoomChat.next(room);
@@ -116,6 +112,15 @@ export class RoomService {
     return undefined;
   }
 
+  getRoom(roomIdTocHeck: string): Room | undefined {
+    for (let i = 0; i < this.listJoinedChatRooms.value.length; i++) {
+      if (this.listJoinedChatRooms.value[i].id == roomIdTocHeck)
+
+        return this.listJoinedChatRooms.value[i];
+    }
+    return undefined;
+  }
+
   addUser(roomId: string, userId: string): void {
     if (roomId == this.currentRoomChat.value.id) {
       const currentRoom = this.currentRoomChat.value;
@@ -131,22 +136,6 @@ export class RoomService {
       }
     }
   }
-
-  /*addUserDM(roomId: string, userId: string): void {
-        if (roomId == this.currentRoomChat.value.id) {
-            const currentRoom = this.currentRoomChat.value;
-            currentRoom.userIds = [...currentRoom.userIds, userId]
-            this.currentRoomChat.next(currentRoom);
-        } else {
-            const rooms = this.listJoinedDMRooms.value;
-            for (let i = 0; i < this.listJoinedDMRooms.value.length; i++) {
-                if (rooms[i].id == roomId) {
-                    rooms[i].userIds = [...rooms[i].userIds, userId];
-                    this.listJoinedDMRooms.next(rooms);
-                }
-            }
-        }
-    }*/
 
   removeUser(roomId: string, userId: string): void {
     if (roomId == this.currentRoomChat.value.id) {

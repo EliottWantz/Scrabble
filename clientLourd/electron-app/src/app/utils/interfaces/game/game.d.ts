@@ -20,4 +20,6 @@ export interface Game {
     isPrivateGame: boolean;
     winnerId: string;
     tournamentId: string;
+    botNames: string[];
+    observateurIds: string[];
 }

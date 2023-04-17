@@ -1,27 +1,77 @@
 <div id="container">
-  <img id="scrabble-img" src="../../../assets/scrabble.png">
-  <!--
-    <mat-spinner color="primary"></mat-spinner>
-  -->
-  <h3>{{'waiting-room-page.text' | translate}}</h3>
-  <div>
-    <h4>{{getNumUsers()}}{{'waiting-room-page.players' | translate}}</h4>
+  <img id="scrabble-img" src="assets/scrabble.png">
+  <div *ngIf="!isObserving()">
+    <h3>{{'waiting-room-page.text' | translate}}</h3>
+    <div>
+      <h4>{{getNumUsers()}}{{'waiting-room-page.players' | translate}}</h4>
+    </div>
+  </div>
+  
+  <div class="players">
+    <h3>{{"waiting-room-page.users-in-lobby" | translate}}</h3>
+    <div *ngFor="let userInLobby of usersInLobby" class="player">
+      <img src="{{getAvatarUrl(userInLobby)}}" class="avatar">
+      <h3>{{getUserName(userInLobby)}}</h3>
+    </div>
   </div>
   <div class="players" *ngIf="gameRoom.value && gameRoom.value.isPrivateGame && user.id === gameRoom.value.creatorId">
     <h3>{{"waiting-room-page.request-join" | translate}}</h3>
     <div *ngFor="let userWaiting of usersWaiting" class="player">
       <img src="{{getAvatarUrl(userWaiting.userId)}}" class="avatar">
       <h3>{{userWaiting.username}}</h3>
-      <button mat-fab class="accept-button" (click)="acceptPlayer(userWaiting.userId)">
+      <button mat-raised-button color="primary" class="accept-button" (click)="acceptPlayer(userWaiting.userId)">
         <mat-icon>check</mat-icon>
+        {{"invite-component.accept" | translate}}
       </button>
-      <button mat-fab class="deny-button" (click)="denyPlayer(userWaiting.userId)">
+      <button mat-raised-button color="primary" (click)="denyPlayer(userWaiting.userId)">
         <mat-icon>close</mat-icon>
+        {{"invite-component.deny" | translate}}
       </button>
     </div>
   </div>
   <div *ngIf="getNumUsers() >= 2 && checkIfCreator()">
     <button mat-flat-button color="accent" (click)="startGame()" routerLink="/game">{{'waiting-room-page.start-game' | translate}}</button>
   </div>
-  <app-chat-box *ngIf="isLoggedIn()"></app-chat-box>
+  <mat-expansion-panel id="friend-list" (opened)="onOpenPanel()" *ngIf="!isTournamentWaitingRoom()">
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        {{"waiting-room-page.friends" | translate}}
+      </mat-panel-title>
+    </mat-expansion-panel-header>
+    <div class="friend" *ngFor="let friend of getFriends()">
+      <img class="avatar" [src]="getAvatarUrl(friend.id)">
+      {{friend.username}}
+      <button mat-mini-fab class="send-request" (click)="inviteFriend(friend.id)">
+        <mat-icon>send</mat-icon>
+      </button>
+    </div>
+  </mat-expansion-panel>
+  <app-chat-box-button *ngIf="isLoggedIn()"></app-chat-box-button>
+  <div *ngIf="tournamentRoom.value && isObserving()" class="players">
+    <div style="display: flex;  width: 100%;">
+        <div *ngFor="let players of tournamentRoom.value.poolGames[0].userIds; let last = last" style="display: inline-block;">
+          {{getUserName(players)}}
+          <p *ngIf="!last"> vs </p>
+        </div>
+        <button (click)="joinGameAsObserver(tournamentRoom.value.poolGames[0])" class="join-button" disabled="{{tournamentRoom.value.poolGames[0].winnerId}}">{{"join-game-component.join" | translate}}</button>
+    </div>
+    <div style="display: flex; width: 100%;">
+        <div *ngFor="let players of tournamentRoom.value.poolGames[1].userIds; let last = last" style="display: inline-block;">
+          {{getUserName(players)}}
+          <p *ngIf="!last"> vs </p>
+        </div>
+        <button (click)="joinGameAsObserver(tournamentRoom.value.poolGames[1])" class="join-button" disabled="{{tournamentRoom.value.poolGames[1].winnerId}}">{{"join-game-component.join" | translate}}</button>
+    </div>
+
+    <div *ngIf="tournamentRoom.value.poolGames[1].winnerId && tournamentRoom.value.poolGames[0].winnerId" style="display: flex;  width: 100%;">
+        <div *ngFor="let players of tournamentRoom.value.finale!.userIds; let last = last" style="display: inline-block;">
+            {{getUserName(players)}}
+            <p *ngIf="!last"> vs </p>
+        </div>
+        <button (click)="joinGameAsObserver(tournamentRoom.value.finale!)" class="join-button">{{"join-game-component.join" | translate}}</button>
+    </div>
+</div>
+  <div *ngIf="getNumUsers() >= 4 && checkIfCreatorTournament()">
+    <button mat-flat-button color="accent" (click)="startTournament()" routerLink="/game">{{'waiting-room-page.start-game' | translate}}</button>
+  </div>
 </div>

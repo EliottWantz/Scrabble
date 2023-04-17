@@ -1,10 +1,11 @@
 <div id="container">
-    <img id="scrabble-img" src="../../../assets/scrabble.png">
+    <img id="scrabble-img" src="assets/scrabble.png">
     <p>{{'main-page.text1' | translate}}</p>
     <p>{{'main-page.text2' | translate}}</p>
 <button *ngIf="!isLoggedIn()" mat-flat-button color="accent" routerLink="/login">{{'main-page.login' | translate}}</button>
     <button *ngIf="!isLoggedIn()" mat-flat-button color="accent" routerLink="/register">{{'main-page.register' | translate}}</button>
     <button *ngIf="isLoggedIn()" mat-flat-button color="accent" routerLink="/find-game">{{'main-page.play' | translate}}</button>
+    <button *ngIf="isLoggedIn()" mat-flat-button color="accent" routerLink="/find-tournament">{{'main-page.tournament' | translate}}</button>
 
     <!--
         <button *ngIf="isLoggedIn()" mat-flat-button color="accent" routerLink="/waitingRoom" (click)="createGame()">Créer une partie</button>
@@ -17,5 +18,5 @@
             </div>
         </div>
     -->
-    <app-chat-box *ngIf="isLoggedIn()"></app-chat-box>
+    <app-chat-box-button *ngIf="isLoggedIn()"></app-chat-box-button>
 </div>

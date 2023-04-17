@@ -1,8 +1,6 @@
-import { Component, ElementRef, Inject, OnInit, ViewChild } from "@angular/core";
-import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
-import { AuthenticationService } from "@app/services/authentication/authentication.service";
+import { Component } from "@angular/core";
+import { MatDialogRef } from "@angular/material/dialog";
 import { ChatService } from "@app/services/chat/chat.service";
-import { CommunicationService } from "@app/services/communication/communication.service";
 import { RoomService } from "@app/services/room/room.service";
 import { BehaviorSubject } from "rxjs";
 import { environment } from "src/environments/environment";
@@ -55,19 +53,6 @@ export class GifComponent {
         // Parse the JSON response
         const response_objects = JSON.parse(responsetext);
 
-        //console.log(this.gifs);
-
-        //this.gifs = response_objects["results"];
-
-        // load the GIFs -- for our example we will load the first GIFs preview size (nanogif) and share size (gif)
-        /*for (let i = 0; i < this.gifs.length; i++) {
-            document.getElementsByClassName("gif")[i].setAttribute("src", this.gifs[i]["media_formats"]["nanogif"]["url"]);
-        }*/
-
-        //document.getElementById("preview_gif")?.setAttribute("src", top_10_gifs[0]["media_formats"]["nanogif"]["url"]);
-
-        //document.getElementById("share_gif").src = top_10_gifs[0]["media_formats"]["gif"]["url"];
-
         return response_objects["results"];
 
     }
@@ -84,10 +69,8 @@ export class GifComponent {
         // test search term
         const search_term = "excited";
 
-        //console.log(this.searchText);
         // using default locale of en_US
         const search_url = "https://tenor.googleapis.com/v2/search?q=" + this.searchText + "&key=" + apikey +"&client_key=" + clientkey +  "&limit=" + lmt;
-        //const share_url = "https://tenor.googleapis.com/v2/registershare?id=" + this.shared_gifs_id + "&key=" + apikey + "&client_key=" + clientkey + "&q=" + search_term;
 
         this.httpGetAsync(search_url,this.tenorCallback_search);
 

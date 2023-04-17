@@ -6,7 +6,6 @@ import { WebSocketService } from "@app/services/web-socket/web-socket.service";
 import { ClientEvent } from "@app/utils/events/client-events";
 import { Game } from "@app/utils/interfaces/game/game";
 import { JoinGameAsObserverPayload, JoinGamePayload } from "@app/utils/interfaces/packet";
-import { BehaviorSubject } from "rxjs";
 import { JoinProtectedGameComponent } from "@app/components/join-protected-game/join-protected-game.component";
 import { Router } from "@angular/router";
 import { JoinPrivateGameComponent } from "@app/components/join-private-game/join-private-game.component";
@@ -19,7 +18,7 @@ import { JoinPrivateGameComponent } from "@app/components/join-private-game/join
 export class JoinGameComponent implements OnInit {
     games: Game[] = [];
     constructor(public dialogRef: MatDialogRef<JoinGameComponent>, public dialog: MatDialog, @Inject(MAT_DIALOG_DATA) public data: {isObserver: boolean}, private gameService: GameService,
-    private webSocketService: WebSocketService, private storageService: StorageService, private router: Router) {
+    private webSocketService: WebSocketService, private storageService: StorageService) {
         
     }
 
@@ -36,32 +35,29 @@ export class JoinGameComponent implements OnInit {
                 }
             });
         } else {
-            const oberIds = [];
             for (const game of this.gameService.observableGames.value) {
                 this.games.push(game);
             }
 
-            /*for (const game of this.gameService.joinableGames.value) {
-                if (oberIds.includes(game.id)) {
-                    this.games.push(game);
-                }
-            }*/
-
             this.gameService.observableGames.subscribe(() => {
                 this.games = [];
-                const oberIds = [];
                 for (const game of this.gameService.observableGames.value) {
                     this.games.push(game);
                 }
-    
-                /*for (const game of this.gameService.joinableGames.value) {
-                    if (oberIds.includes(game.id)) {
-                        this.games.push(game);
-                    }
-                }*/
-                //console.log(this.games);
             });
         }
+    }
+
+    getNumberOfBots(game: Game): number {
+        if (game.botNames)
+            return game.botNames.length;
+        return 0;
+    }
+
+    getNumberOfObservers(game: Game): number {
+        if (game.observateurIds)
+            return game.observateurIds.length;
+        return 0;
     }
 
     getUserNames(ids: string[]): string[] {
@@ -101,7 +97,6 @@ export class JoinGameComponent implements OnInit {
     }
 
     joinGame(game: Game): void {
-        //this.stepper.selectedIndex = STEPPER_PAGE_IDX.confirmationPage;
         if (game.isProtected) {
             this.openDialogJoinProtectedGame(game);
             this.close();
@@ -124,7 +119,6 @@ export class JoinGameComponent implements OnInit {
                 this.webSocketService.send(event, payload);
                 this.gameService.isObserving = true;
                 this.close();
-                this.router.navigate(["/gameObserve"]);
             } else {
                 const payload: JoinGamePayload = {
                     gameId: game.id,

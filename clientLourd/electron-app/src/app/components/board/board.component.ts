@@ -108,7 +108,7 @@ export class BoardComponent implements OnInit {
   @HostListener("document:click", ['$event'])
   clickout(event: any) {
     const elem = document.elementFromPoint(event.x,event.y);
-    if (!document.getElementById("board")?.contains(elem) && this.direction) {
+    if (!document.getElementById("board")?.contains(elem) && this.direction && this.gameService.scrabbleGame.value?.turn === this.userService.currentUserValue.id) {
       if (this.moveService.firstX !== -1 && this.moveService.firstY !== -1) {
         this.moveService.removedFirstTile();
       }
@@ -165,9 +165,11 @@ export class BoardComponent implements OnInit {
           if (newBoard[y][x].tile) {
             const oldTile = newBoard[y][x].tile as Tile;
             if (oldTile.letter >= 97) {
-              newPlayers[i].rack.tiles.push({letter: oldTile.letter, value: oldTile.value, disabled: false});
+              if (newPlayers[i].rack.tiles.length < 7)
+                newPlayers[i].rack.tiles.push({letter: oldTile.letter, value: oldTile.value, disabled: false});
             } else {
-              newPlayers[i].rack.tiles.push({letter: 42, value: 0, disabled: false});
+              if (newPlayers[i].rack.tiles.length < 7)
+                newPlayers[i].rack.tiles.push({letter: 42, value: 0, disabled: false});
             }
           }
           newBoard[y][x].tile = undefined;
@@ -205,7 +207,7 @@ export class BoardComponent implements OnInit {
       for (let i = 0; i < newPlayers.length; i++) {
         if (newPlayers[i].id == this.userService.currentUserValue.id) {
           for (let j = 0; j < newPlayers[i].rack.tiles.length; j++) {
-            if (newPlayers[i].rack.tiles[j].letter === letterToSearch) {
+            if (newBoard[y][x] && newPlayers[i].rack.tiles[j].letter === letterToSearch) {
               newBoard[y][x].tile = {value: newPlayers[i].rack.tiles[j].value, letter: letterToAdd, x: x, y: y, disabled: false};
               newPlayers[i].rack.tiles.splice(j, 1);
               this.gameService.scrabbleGame.next({...this.gameService.scrabbleGame.value, board: newBoard, players: newPlayers});
