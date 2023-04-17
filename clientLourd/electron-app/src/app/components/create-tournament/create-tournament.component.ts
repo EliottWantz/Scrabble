@@ -36,7 +36,7 @@ export class CreateTournamentComponent {
     createGame(): void {
         const payload: CreateTournamentPayload = {
             userIds: [],
-            isPrivate: this.gameType === "Public" || this.gameType === "Protected" ? false : true,
+            isPrivate: this.gameType === "Public",
         }
         const event : ClientEvent = "create-tournament";
         this.webSocketService.send(event, payload);

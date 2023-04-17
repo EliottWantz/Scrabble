@@ -132,14 +132,14 @@ export class SidebarComponent implements OnInit {
   }
 
   return(): void {
-    if (this.isInGameLobby() && this.gameService.game.value) {
+    if (this.isInGameLobby() && (this.gameService.game.value || this.gameService.tournament.value)) {
       if (this.gameService.tournament.value) {
         const payload = {
           tournamentId: this.gameService.tournament.value.id
         }
         this.webSocketService.send("leave-tournament", payload);
         this.gameService.tournament.next(undefined);
-      } else {
+      } else if (this.gameService.game.value) {
         const payload: LeaveGamePayload = {
           gameId: this.gameService.game.value.id
         }
