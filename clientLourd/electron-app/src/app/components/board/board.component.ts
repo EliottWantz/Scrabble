@@ -165,9 +165,11 @@ export class BoardComponent implements OnInit {
           if (newBoard[y][x].tile) {
             const oldTile = newBoard[y][x].tile as Tile;
             if (oldTile.letter >= 97) {
-              newPlayers[i].rack.tiles.push({letter: oldTile.letter, value: oldTile.value, disabled: false});
+              if (newPlayers[i].rack.tiles.length < 7)
+                newPlayers[i].rack.tiles.push({letter: oldTile.letter, value: oldTile.value, disabled: false});
             } else {
-              newPlayers[i].rack.tiles.push({letter: 42, value: 0, disabled: false});
+              if (newPlayers[i].rack.tiles.length < 7)
+                newPlayers[i].rack.tiles.push({letter: 42, value: 0, disabled: false});
             }
           }
           newBoard[y][x].tile = undefined;
