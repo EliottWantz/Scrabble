@@ -1,9 +1,12 @@
 <div id="container">
   <img id="scrabble-img" src="assets/scrabble.png">
-  <h3>{{'waiting-room-page.text' | translate}}</h3>
-  <div>
-    <h4>{{getNumUsers()}}{{'waiting-room-page.players' | translate}}</h4>
+  <div *ngIf="!isObserving()">
+    <h3>{{'waiting-room-page.text' | translate}}</h3>
+    <div>
+      <h4>{{getNumUsers()}}{{'waiting-room-page.players' | translate}}</h4>
+    </div>
   </div>
+  
   <div class="players">
     <h3>{{"waiting-room-page.users-in-lobby" | translate}}</h3>
     <div *ngFor="let userInLobby of usersInLobby" class="player">
@@ -45,19 +48,20 @@
   </mat-expansion-panel>
   <app-chat-box-button *ngIf="isLoggedIn()"></app-chat-box-button>
   <div *ngIf="tournamentRoom.value && isObserving()">
-    <div *ngFor="let players of tournamentRoom.value.poolGames[0].userIds">
-        <div>{{players}}</div>
-        <button (click)="joinGameAsObserver(tournamentRoom.value.poolGames[0])" class="join-button" disabled="{{tournamentRoom.value.poolGames[0].winnerId}}"></button>
+    <div>
+        <div *ngFor="let players of tournamentRoom.value.poolGames[0].userIds">{{getUserName(players)}}</div>
+        <button (click)="joinGameAsObserver(tournamentRoom.value.poolGames[0])" class="join-button" disabled="{{tournamentRoom.value.poolGames[0].winnerId}}">{{"join-game-component.join" | translate}}</button>
     </div>
-    <div *ngFor="let players of tournamentRoom.value.poolGames[1].userIds">
-        <div>{{players}}</div>
-        <button (click)="joinGameAsObserver(tournamentRoom.value.poolGames[1])" class="join-button" disabled="{{tournamentRoom.value.poolGames[1].winnerId}}"></button>
+    <div>
+        <div *ngFor="let players of tournamentRoom.value.poolGames[1].userIds">{{getUserName(players)}}</div>
+        <button (click)="joinGameAsObserver(tournamentRoom.value.poolGames[1])" class="join-button" disabled="{{tournamentRoom.value.poolGames[1].winnerId}}">{{"join-game-component.join" | translate}}</button>
     </div>
+
     <div *ngIf="tournamentRoom.value.poolGames[1].winnerId && tournamentRoom.value.poolGames[0].winnerId">
         <div *ngFor="let players of tournamentRoom.value.finale!.userIds">
-            <div>{{players}}</div>
-            <button (click)="joinGameAsObserver(tournamentRoom.value.finale!)" class="join-button"></button>
+            <div>{{getUserName(players)}}</div>
         </div>
+        <button (click)="joinGameAsObserver(tournamentRoom.value.finale!)" class="join-button">{{"join-game-component.join" | translate}}</button>
     </div>
 </div>
   <div *ngIf="getNumUsers() >= 4 && checkIfCreatorTournament()">

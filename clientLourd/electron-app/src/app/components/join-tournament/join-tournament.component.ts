@@ -119,15 +119,5 @@ export class JoinTournamentComponent implements OnInit {
         this.dialogRef.close();
     }
 
-    joinGameAsObserver(game: Game): void {
-        const payload: JoinGameAsObserverPayload = {
-            gameId: game.id,
-            password: ""
-        }
-        const event : ClientEvent = "join-game-as-observateur";
-        this.webSocketService.send(event, payload);
-        this.gameService.isObserving = true;
-        this.close();
-        this.router.navigate(["/gameObserve"]);
-    }
+    
 }
