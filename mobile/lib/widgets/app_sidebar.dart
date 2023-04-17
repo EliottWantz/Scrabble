@@ -230,7 +230,7 @@ class AppSideBar extends StatelessWidget {
               const Gap(40),
               InkWell(
                 onTap: () async {
-                  if (gameService.isGameCreator()) {
+                  if (gameService.isGameCreator() || gameService.isTournamentCreator()) {
                     await DialogHelper.showLobbyCreatorQuitDialog();
                   } else {
                     await DialogHelper.showLobbyQuitDialog();

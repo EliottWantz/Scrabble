@@ -53,6 +53,11 @@ class GameController extends GetxController {
     Get.offAllNamed(Routes.HOME);
   }
 
+  void onLeaveTournament() {
+    websocketService.leaveTournament(gameService.currentTournamentId);
+    Get.offAllNamed(Routes.HOME);
+  }
+
   void exchangeLetters() {
     if (!isClientTurn()) {
       return;

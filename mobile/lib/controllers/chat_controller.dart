@@ -20,17 +20,23 @@ class ChatController extends GetxController {
   late RxList<ChatMessagePayload> messages = <ChatMessagePayload>[].obs;
 
   void sendMessage() {
-    websocketService.sendMessage(roomService.currentRoomId, messageController.text);
+    if (!messageController.text.trim().isEmpty) {
+      websocketService.sendMessage(roomService.currentRoomId, messageController.text);
+    }
     messageController.text = '';
   }
 
   void sendMessageToCurrentFloatingChatRoom() {
-    websocketService.sendMessage(roomService.currentFloatingChatRoomId.value!, messageController.text);
+    if (!messageController.text.trim().isEmpty) {
+      websocketService.sendMessage(roomService.currentFloatingChatRoomId.value!, messageController.text);
+    }
     messageController.text = '';
   }
 
   void sendMessageToGameRoom() {
-    websocketService.sendMessage(gameService.currentGameId, messageController.text);
+    if (!messageController.text.trim().isEmpty) {
+      websocketService.sendMessage(gameService.currentGameId, messageController.text);
+    }
     messageController.text = '';
   }
 

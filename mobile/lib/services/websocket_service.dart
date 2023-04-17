@@ -13,6 +13,7 @@ import 'package:client_leger/models/join_chat_room_payload.dart';
 import 'package:client_leger/models/join_game_payload.dart';
 import 'package:client_leger/models/join_room_payload.dart';
 import 'package:client_leger/models/join_tournament_payload.dart';
+import 'package:client_leger/models/leave_tournament_payload.dart';
 import 'package:client_leger/models/play_move_payload.dart';
 import 'package:client_leger/models/position.dart';
 import 'package:client_leger/models/requests/chat_message_request.dart';
@@ -25,6 +26,7 @@ import 'package:client_leger/models/requests/join_chat_room_request.dart';
 import 'package:client_leger/models/requests/join_game_as_observer_request.dart';
 import 'package:client_leger/models/requests/join_room_request.dart';
 import 'package:client_leger/models/requests/join_tournament_request.dart';
+import 'package:client_leger/models/requests/leave_tournament_request.dart';
 import 'package:client_leger/models/requests/play_move_request.dart';
 import 'package:client_leger/models/requests/replace_bot_by_observer.dart';
 import 'package:client_leger/models/requests/start_tournament_request.dart';
@@ -102,7 +104,7 @@ class WebsocketService extends GetxService {
     socket = WebSocketChannel.connect(Uri(
         scheme: ApiConstants.wsScheme,
         host: ApiConstants.wsHost,
-        port: ApiConstants.wsPort,
+        // port: ApiConstants.wsPort,
         path: ApiConstants.wsPath,
         queryParameters: {
           'id': userService.user.value!.id,
@@ -249,6 +251,13 @@ class WebsocketService extends GetxService {
           UserJoinedTournamentResponse userJoinedTournamentResponse =
               UserJoinedTournamentResponse.fromRawJson(data);
           handleEventUserJoinedTournament(userJoinedTournamentResponse);
+        }
+        break;
+      case ServerEventLeftTournament:
+        {
+          UserJoinedTournamentResponse userJoinedTournamentResponse =
+              UserJoinedTournamentResponse.fromRawJson(data);
+          handleEventUserLeftTournament(userJoinedTournamentResponse);
         }
         break;
       case ServerEventChatMessage:
@@ -639,7 +648,8 @@ class WebsocketService extends GetxService {
     gameService.currentGame.value =
         joinedGameAsObserverResponse.payload.gameUpdate;
     bool isObserving = true;
-    Get.offAllNamed(Routes.GAME, arguments: isObserving);
+    bool isTournamentGame = true;
+    Get.offAllNamed(Routes.GAME, arguments: [isObserving, isTournamentGame]);
   }
 
   // void handleEventUserJoined(UserJoinedResponse userJoinedResponse) {
@@ -709,6 +719,12 @@ class WebsocketService extends GetxService {
       gameService.pendingJoinTournamentRequestUserIds
           .remove(userJoinedTournamentResponse.payload.userId);
     }
+  }
+
+  void handleEventUserLeftTournament(
+      UserJoinedTournamentResponse userJoinedTournamentResponse) {
+    Get.back();
+    Get.back();
   }
 
   void handleServerEventChatMessage(ChatMessageResponse chatMessageResponse) {
@@ -1046,6 +1062,21 @@ class WebsocketService extends GetxService {
     final leaveGameRequest = StartGameRequest(
         event: ClientEventLeaveGame, payload: leaveGamePayload);
     socket.sink.add(leaveGameRequest.toRawJson());
+  }
+
+  void leaveTournament(String tournamentId) {
+    // gameService.currentGame.value = null;
+    // gameService.currentGameId = '';
+    // gameService.currentGameTimer.value = null;
+    // gameService.currentGameInfo = null;
+    // gameService.currentGameInfoInitialized = false;
+    // gameService.currentGameRoomUserIds.value = [];
+    roomService.removeRoom(tournamentId);
+    final leaveTournamentPayload =
+        LeaveTournamentPayload(tournamentId: tournamentId);
+    final leaveTournamentRequest = LeaveTournamentRequest(
+        event: ClientEventLeaveTournament, payload: leaveTournamentPayload);
+    socket.sink.add(leaveTournamentRequest.toRawJson());
   }
 
   void leaveChatRoom(String roomId) {

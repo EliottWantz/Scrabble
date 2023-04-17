@@ -16,6 +16,8 @@ class DialogHelper {
   final ApiRepository _apiRepository = Get.find();
   final UserService _userService = Get.find();
 
+  final String gameMode = Get.arguments;
+
   static void showErrorDialog(
       {String title = 'Error', String? description = 'Something went wrong'}) {
     Get.dialog(
@@ -106,12 +108,16 @@ class DialogHelper {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Annuler la création de la partie',
+                DialogHelper().gameMode == 'tournoi'
+                  ? 'Annuler la création du tournoi'
+                  : 'Annuler la création de la partie',
                 style: Get.textTheme.headline4,
               ),
               const Gap(20),
               Text(
-                'Êtes-vous sûr de vouloir annuler la création de cette partie',
+                DialogHelper().gameMode == 'tournoi'
+                  ? 'Êtes-vous sûr de vouloir annuler la création du tournoi'
+                  : 'Êtes-vous sûr de vouloir annuler la création de cette partie',
                 style: Get.textTheme.headline6,
               ),
               const Gap(20),
@@ -124,9 +130,15 @@ class DialogHelper {
                     ElevatedButton(
                       onPressed: () {
                         if (Get.isDialogOpen!) {
-                          DialogHelper()._websocketService.leaveGame(
-                              DialogHelper()._gameService.currentGameId
-                          );
+                          if (DialogHelper().gameMode == 'tournoi') {
+                            DialogHelper()._websocketService.leaveTournament(
+                                DialogHelper()._gameService.currentTournamentId
+                            );
+                          } else {
+                            DialogHelper()._websocketService.leaveGame(
+                                DialogHelper()._gameService.currentGameId
+                            );
+                          }
                           DialogHelper()._gameService.pendingJoinGameRequestUserIds.clear();
                           Get.back();
                           Get.back();
