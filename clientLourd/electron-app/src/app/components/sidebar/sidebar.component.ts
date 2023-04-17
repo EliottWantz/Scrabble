@@ -61,6 +61,7 @@ export class SidebarComponent implements OnInit {
             this.routeIndex = 0;
             this.gameService.game.next(undefined);
             this.gameService.tournament.next(undefined);
+            this.gameService.scrabbleGame.next(undefined);
             break;
 
           case '/login':
@@ -132,11 +133,19 @@ export class SidebarComponent implements OnInit {
 
   return(): void {
     if (this.isInGameLobby() && this.gameService.game.value) {
-      const payload: LeaveGamePayload = {
-        gameId: this.gameService.game.value.id
+      if (this.gameService.tournament.value) {
+        const payload = {
+          tournamentId: this.gameService.tournament.value.id
+        }
+        this.webSocketService.send("leave-tournament", payload);
+        this.gameService.tournament.next(undefined);
+      } else {
+        const payload: LeaveGamePayload = {
+          gameId: this.gameService.game.value.id
+        }
+        this.webSocketService.send("leave-game", payload);
+        this.gameService.game.next(undefined);
       }
-      this.webSocketService.send("leave-game", payload);
-      this.gameService.game.next(undefined);
     }
     if (this.previousRouteName[this.previousRouteName.length - 1] == '/home') {
       this.previousRouteName = ['/home'];
