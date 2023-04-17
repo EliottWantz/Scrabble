@@ -104,7 +104,7 @@ class GameScreen extends GetView<GameController> {
                 Icons.exit_to_app_rounded,
                 size: 20,
               ),
-              label: const Text('Quitter la partie'), // <-- Text
+              label: Text('game-page.leave'.tr), // <-- Text
             ),
           ),
         ).inGridArea('leave'),
@@ -119,11 +119,11 @@ class GameScreen extends GetView<GameController> {
                     style: Theme.of(context).textTheme.button,
                     items: const [
                       DropdownMenuItem(
-                        child: Center(child: Text('Français')),
+                        child: Center(child: Text('language-french'.tr)),
                         value: 'fr',
                       ),
                       DropdownMenuItem(
-                          child: Center(child: Text('Anglais')), value: 'en')
+                          child: Center(child: Text('language-english.tr')), value: 'en')
                     ],
                     onChanged: (String? value) async {
                       await _settingsService.switchLang(value!);
@@ -166,7 +166,7 @@ class GameScreen extends GetView<GameController> {
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Obx(() => Text(
-                        'Lettres en réserve \n ${controller.gameService.currentGame.value!.tileCount ?? 0}',
+                        'game-page.reserve'.tr + '\n ${controller.gameService.currentGame.value!.tileCount ?? 0}',
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.headline6,
                       )),
@@ -227,7 +227,7 @@ class GameScreen extends GetView<GameController> {
                   Icons.exit_to_app_rounded,
                   size: 20,
                 ),
-                label: const Text('Quitter la partie'), // <-- Text
+                label: Text('game-page.leave'.tr), // <-- Text
               ),
             ),
           ).inGridArea('leave'),
@@ -246,11 +246,11 @@ class GameScreen extends GetView<GameController> {
                           .button,
                       items: const [
                         DropdownMenuItem(
-                          child: Center(child: Text('Français')),
+                          child: Center(child: Text('language-french'.tr)),
                           value: 'fr',
                         ),
                         DropdownMenuItem(
-                            child: Center(child: Text('Anglais')), value: 'en')
+                            child: Center(child: Text('language-english'.tr)), value: 'en')
                       ],
                       onChanged: (String? value) async {
                         await _settingsService.switchLang(value!);
@@ -297,7 +297,7 @@ class GameScreen extends GetView<GameController> {
                     padding: const EdgeInsets.all(8.0),
                     child: Obx(() =>
                         Text(
-                          'Lettres en réserve \n ${
+                          'game-page.reserve'.tr + '\n ${
                               controller.gameService.currentGame.value == null
                                   ? 0
                                   : controller.gameService.currentGame.value!
@@ -337,7 +337,7 @@ class GameScreen extends GetView<GameController> {
                                       alignment: AlignmentDirectional
                                           .bottomCenter,
                                       hint: Text(
-                                        'Choisissez un placement',
+                                        'game_screen.choos-placement'.tr,
                                         style: Get.textTheme.button,
                                       ),
                                       decoration: InputDecoration(
@@ -367,7 +367,7 @@ class GameScreen extends GetView<GameController> {
                                       validator: (value) =>
                                       value ==
                                           null
-                                          ? "Choisissez un placement"
+                                          ? "game_screen.choos-placement".tr
                                           : null,
                                       dropdownColor:
                                       Get.theme.primaryColor,
@@ -398,7 +398,7 @@ class GameScreen extends GetView<GameController> {
                                         Get.back();
                                       },
                                       icon: const Icon(Icons.check),
-                                      label: const Text('Confirmer'))
+                                      label: Text('default-avatar-selection-component.confirm'.tr))
                                 ],
                               ),
                             ),
@@ -408,8 +408,8 @@ class GameScreen extends GetView<GameController> {
                           enableDrag: false,
                         )
                             : Get.snackbar(
-                          "Pas d'indices disponible pour l'instant!",
-                          "Veuillez échanger vos lettres ou passer votre tour!",
+                          "game_screen.no-placement".tr,
+                          "game_screen.no-placement-next".tr,
                           icon: const Icon(Icons.warning),
                           shouldIconPulse: true,
                           barBlur: 20,
@@ -422,7 +422,7 @@ class GameScreen extends GetView<GameController> {
                         Icons.lightbulb,
                         size: 30,
                       ),
-                      label: const Text('Indices'),
+                      label: Text('game_screen.indices'.tr),
                     )),
               ],
             ),
@@ -469,7 +469,7 @@ class GameScreen extends GetView<GameController> {
                         Icons.check,
                         size: 20,
                       ),
-                      label: const Text('Placer'),
+                      label: Text('game_screen.place'.tr),
                     ),
                     ElevatedButton.icon(
                       onPressed: controller.isClientTurn()
@@ -481,7 +481,7 @@ class GameScreen extends GetView<GameController> {
                         Icons.change_circle,
                         size: 20,
                       ),
-                      label: const Text('Échanger'), // <-- Text
+                      label: Text('game_screen.exchange'.tr), // <-- Text
                     ),
                   ],
                 ),
@@ -499,7 +499,7 @@ class GameScreen extends GetView<GameController> {
                       Icons.double_arrow,
                       size: 20,
                     ),
-                    label: const Text('Passer'), // <-- Text
+                    label: Text('game_screen.pass'.tr), // <-- Text
                   ))).inGridArea('passer'),
         ],
       );
@@ -513,7 +513,7 @@ class GameScreen extends GetView<GameController> {
       return [
         Center(
             child: Text(
-          'Veuillez choisir un joueur à observer',
+          'game_screen.observe-choose'.tr,
           style: Get.textTheme.headline6,
         ))
       ];
@@ -524,7 +524,7 @@ class GameScreen extends GetView<GameController> {
       return [
         Center(
             child: Text(
-          'Plus de lettres disponibles :(',
+          'game_screen.nol-letters'.tr,
           style: Get.textTheme.headline6,
         ))
       ];
@@ -585,7 +585,7 @@ class GameScreen extends GetView<GameController> {
             Icons.check,
             size: 20,
           ),
-          label: const Text('Placer'),
+          label: Text('game_screen.place'.tr),
         ),
       ],
     );
