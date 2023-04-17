@@ -57,28 +57,28 @@ func NewService(cfg *config.Config, repo *Repository, roomSvc *room.Service) (*S
 		NewUserChan: make(chan *User, 10),
 		DefaultAvatars: []*Avatar{
 			{
-				URL:    "https://ucarecdn.com/3dfe6a52-849b-4a64-85c6-1274731595ac/",
-				FileID: "3dfe6a52-849b-4a64-85c6-1274731595ac",
+				URL:    "https://ucarecdn.com/fedc92a0-681f-4258-a01c-84e6d980956f/",
+				FileID: "fedc92a0-681f-4258-a01c-84e6d980956f",
 			},
 			{
-				URL:    "https://ucarecdn.com/add70d69-c5c0-46b3-9a36-10c62fb0bf61/",
-				FileID: "add70d69-c5c0-46b3-9a36-10c62fb0bf61",
+				URL:    "https://ucarecdn.com/0e3fe0e9-c2b2-46b3-ad78-2f4a99288189/",
+				FileID: "0e3fe0e9-c2b2-46b3-ad78-2f4a99288189",
 			},
 			{
-				URL:    "https://ucarecdn.com/a706a6af-c90b-4e81-99d6-e990386952a4/",
-				FileID: "a706a6af-c90b-4e81-99d6-e990386952a4",
+				URL:    "https://ucarecdn.com/fd170930-3817-4867-804d-cceefce3018f/",
+				FileID: "fd170930-3817-4867-804d-cceefce3018f/",
 			},
 			{
-				URL:    "https://ucarecdn.com/ed62dd60-3d8c-4d3d-8e55-54005ecbdf20/",
-				FileID: "ed62dd60-3d8c-4d3d-8e55-54005ecbdf20",
+				URL:    "https://ucarecdn.com/92cb19a9-c28a-47c1-8760-24cafe3d87cb/",
+				FileID: "92cb19a9-c28a-47c1-8760-24cafe3d87cb",
 			},
 			{
-				URL:    "https://ucarecdn.com/4341937c-287d-44bb-bde0-6d4e504fa0ad/",
-				FileID: "4341937c-287d-44bb-bde0-6d4e504fa0ad",
+				URL:    "https://ucarecdn.com/5112aefb-526b-4549-ba33-b0c0e45e035b/",
+				FileID: "5112aefb-526b-4549-ba33-b0c0e45e035b",
 			},
 			{
-				URL:    "https://ucarecdn.com/80833b00-3529-47a5-afa1-0e7c694524d5/",
-				FileID: "80833b00-3529-47a5-afa1-0e7c694524d5",
+				URL:    "https://ucarecdn.com/98251cca-131b-4c58-b8c7-04c62472daea/",
+				FileID: "98251cca-131b-4c58-b8c7-04c62472daea",
 			},
 		},
 	}, nil
