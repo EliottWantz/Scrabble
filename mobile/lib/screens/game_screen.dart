@@ -168,7 +168,7 @@ class GameScreen extends GetView<GameController> {
                   padding: const EdgeInsets.all(8.0),
                   child: Obx(() => Text(
                         'game-page.reserve'.tr +
-                            '\n ${controller.gameService.currentGame.value!.tileCount ?? 0}',
+                            '\n ${controller.gameService.currentGame.value!.tileCount != null ? controller.gameService.currentGame.value!.tileCount : 0}',
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.headline6,
                       )),

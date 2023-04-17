@@ -107,15 +107,15 @@ class DialogHelper {
             children: [
               Text(
                 isTournament
-                  ? 'Annuler la création du tournoi'
-                  : 'Annuler la création de la partie',
+                    ? 'Annuler la création du tournoi'
+                    : 'Annuler la création de la partie',
                 style: Get.textTheme.headline4,
               ),
               const Gap(20),
               Text(
                 isTournament
-                  ? 'Êtes-vous sûr de vouloir annuler la création du tournoi'
-                  : 'Êtes-vous sûr de vouloir annuler la création de cette partie',
+                    ? 'Êtes-vous sûr de vouloir annuler la création du tournoi'
+                    : 'Êtes-vous sûr de vouloir annuler la création de cette partie',
                 style: Get.textTheme.headline6,
               ),
               const Gap(20),
@@ -130,14 +130,17 @@ class DialogHelper {
                         if (Get.isDialogOpen!) {
                           if (isTournament) {
                             DialogHelper()._websocketService.leaveTournament(
-                                DialogHelper()._gameService.currentTournamentId
-                            );
+                                DialogHelper()
+                                    ._gameService
+                                    .currentTournamentId);
                           } else {
                             DialogHelper()._websocketService.leaveGame(
-                                DialogHelper()._gameService.currentGameId
-                            );
+                                DialogHelper()._gameService.currentGameId);
                           }
-                          DialogHelper()._gameService.pendingJoinGameRequestUserIds.clear();
+                          DialogHelper()
+                              ._gameService
+                              .pendingJoinGameRequestUserIds
+                              .clear();
                           Get.back();
                           Get.back();
                         }
@@ -190,8 +193,7 @@ class DialogHelper {
                       onPressed: () {
                         if (Get.isDialogOpen!) {
                           DialogHelper()._websocketService.leaveGame(
-                              DialogHelper()._gameService.currentGameId
-                          );
+                              DialogHelper()._gameService.currentGameId);
                           Get.back();
                           Get.back();
                           Get.back();
@@ -242,28 +244,25 @@ class DialogHelper {
   }
 
   static void showLeftRoomDialog() {
-    Get.dialog(
-      Dialog(
+    Get.dialog(Dialog(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text("Vous avez quitté le canal!",
-                style: Get.textTheme.headline4,
-              ),
-              const Gap(20),
-              ElevatedButton(
-                onPressed: () {
-                  DialogHelper.hideLoading();
-                },
-                child: const Text('OK'),
-              ),
-            ],
-          )
-        )
-      )
-    );
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  "Vous avez quitté le canal!",
+                  style: Get.textTheme.headline4,
+                ),
+                const Gap(20),
+                ElevatedButton(
+                  onPressed: () {
+                    DialogHelper.hideLoading();
+                  },
+                  child: const Text('OK'),
+                ),
+              ],
+            ))));
   }
 
   static void showGameOverDialog(String winnerId) {
@@ -274,12 +273,15 @@ class DialogHelper {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("La partie est terminé!",
+              Text(
+                "La partie est terminé!",
                 style: Get.textTheme.headline4,
               ),
               const Gap(20),
               Text(
-                "Le gagnant est ${DialogHelper()._usersService.getUserUsername(winnerId)}",
+                DialogHelper()._usersService.getUserUsername(winnerId) != ''
+                    ? "Le gagnant est ${DialogHelper()._usersService.getUserUsername(winnerId)}"
+                    : "Vous avez perdu!",
                 style: Get.textTheme.headline6,
               ),
               const Gap(20),
@@ -306,7 +308,8 @@ class DialogHelper {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("Vous avez été éliminé du tournoi!",
+              Text(
+                "Vous avez été éliminé du tournoi!",
                 style: Get.textTheme.headline4,
               ),
               const Gap(20),
@@ -315,7 +318,9 @@ class DialogHelper {
                   ElevatedButton(
                     onPressed: () async {
                       DialogHelper()._gameService.leftGame();
-                      DialogHelper()._websocketService.joinGameAsObserver(observableGameId);
+                      DialogHelper()
+                          ._websocketService
+                          .joinGameAsObserver(observableGameId);
                     },
                     child: const Text('Observez la partie en cours'),
                   ),
@@ -338,41 +343,42 @@ class DialogHelper {
   }
 
   static void showJoinFinaleDialogForObserverAndLoser() {
-    Get.dialog(
-      Dialog(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text("La partie est finie!",
-                style: Get.textTheme.headline4,
-              ),
-              const Gap(20),
-              Row(
-                children: [
-                  ElevatedButton(
-                    onPressed: () async {
-                      DialogHelper()._gameService.leftGame();
-                      DialogHelper()._websocketService.joinTournamentFinaleAsObserver();
-                    },
-                    child: const Text('Observez la partie en cours'),
-                  ),
-                  Spacer(),
-                  ElevatedButton(
-                    onPressed: () {
-                      Get.offAllNamed(Routes.HOME);
-                      DialogHelper()._gameService.leftGame();
-                    },
-                    child: const Text('Retourner au menu principal'),
-                  ),
-                ],
-              ),
-            ],
-          ),
+    Get.dialog(Dialog(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              "La partie est finie!",
+              style: Get.textTheme.headline4,
+            ),
+            const Gap(20),
+            Row(
+              children: [
+                ElevatedButton(
+                  onPressed: () async {
+                    DialogHelper()._gameService.leftGame();
+                    DialogHelper()
+                        ._websocketService
+                        .joinTournamentFinaleAsObserver();
+                  },
+                  child: const Text('Observez la partie en cours'),
+                ),
+                Spacer(),
+                ElevatedButton(
+                  onPressed: () {
+                    Get.offAllNamed(Routes.HOME);
+                    DialogHelper()._gameService.leftGame();
+                  },
+                  child: const Text('Retourner au menu principal'),
+                ),
+              ],
+            ),
+          ],
         ),
-      )
-    );
+      ),
+    ));
   }
 
   static void showTournamentObserverPoolGameOverDialog() {
@@ -383,7 +389,8 @@ class DialogHelper {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("La partie est finie!",
+              Text(
+                "La partie est finie!",
                 style: Get.textTheme.headline4,
               ),
               const Gap(20),
@@ -393,7 +400,9 @@ class DialogHelper {
                     onPressed: () async {
                       DialogHelper()._gameService.leftGame();
                       // DialogHelper()._websocketService.joinGameAsObserver(observableGameId);
-                      DialogHelper()._websocketService.joinTournamentFinaleAsObserver();
+                      DialogHelper()
+                          ._websocketService
+                          .joinTournamentFinaleAsObserver();
                     },
                     child: const Text('Observez la partie en cours'),
                   ),
@@ -415,7 +424,8 @@ class DialogHelper {
     );
   }
 
-  static void showTournamentObserverJoinOtherPoolGameDialog(String observableGameId) {
+  static void showTournamentObserverJoinOtherPoolGameDialog(
+      String observableGameId) {
     Get.dialog(
       Dialog(
         child: Padding(
@@ -423,7 +433,8 @@ class DialogHelper {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("La partie est finie!",
+              Text(
+                "La partie est finie!",
                 style: Get.textTheme.headline4,
               ),
               const Gap(20),
@@ -432,7 +443,9 @@ class DialogHelper {
                   ElevatedButton(
                     onPressed: () async {
                       DialogHelper()._gameService.leftGame();
-                      DialogHelper()._websocketService.joinGameAsObserver(observableGameId);
+                      DialogHelper()
+                          ._websocketService
+                          .joinGameAsObserver(observableGameId);
                     },
                     child: const Text('Observez la partie en cours'),
                   ),
@@ -462,7 +475,8 @@ class DialogHelper {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("Le créateur a rejeté votre demande de rejoindre la partie",
+              Text(
+                "Le créateur a rejeté votre demande de rejoindre la partie",
                 style: Get.textTheme.headline4,
               ),
               const Gap(20),
@@ -488,7 +502,8 @@ class DialogHelper {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("${DialogHelper()._usersService.getUserUsername(userId)} vous invite à rejoindre une partie.",
+              Text(
+                "${DialogHelper()._usersService.getUserUsername(userId)} vous invite à rejoindre une partie.",
                 style: Get.textTheme.headline4,
               ),
               const Gap(20),
@@ -500,7 +515,9 @@ class DialogHelper {
                           invitedId: DialogHelper()._userService.user.value!.id,
                           inviterId: userId,
                           gameId: DialogHelper()._gameService.currentGameId);
-                      DialogHelper()._apiRepository.acceptGameInvite(gameInviteAccepted);
+                      DialogHelper()
+                          ._apiRepository
+                          .acceptGameInvite(gameInviteAccepted);
                       DialogHelper.hideLoading();
                     },
                     child: const Text('Accepter'),
