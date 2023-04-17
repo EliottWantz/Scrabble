@@ -1,19 +1,17 @@
 import 'dart:math';
-import 'package:client_leger/screens/floating_chat_screen.dart';
-import 'package:client_leger/services/room_service.dart';
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:timezone/timezone.dart' as tz;
+
 import 'package:client_leger/api/api_repository.dart';
-import 'package:client_leger/models/avatar.dart';
 import 'package:client_leger/models/user.dart';
 import 'package:client_leger/routes/app_routes.dart';
+import 'package:client_leger/screens/floating_chat_screen.dart';
+import 'package:client_leger/services/room_service.dart';
 import 'package:client_leger/services/user_service.dart';
-import 'package:client_leger/widgets/profile_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:intl/intl.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 class ProfileScreen extends StatelessWidget {
   ProfileScreen({Key? key}) : super(key: key);
@@ -52,10 +50,14 @@ class ProfileScreen extends StatelessWidget {
           appBar: AppBar(
             elevation: 0,
             toolbarHeight: 0,
-            bottom: const TabBar(
+            bottom: TabBar(
               tabs: [
-                Tab(text: 'profile-screen.user-profile'.tr, icon: Icon(Icons.person)),
-                Tab(text: 'profile-screen.history'.tr, icon: Icon(Icons.list_alt)),
+                Tab(
+                    text: 'profile-screen.user-profile'.tr,
+                    icon: Icon(Icons.person)),
+                Tab(
+                    text: 'profile-screen.history'.tr,
+                    icon: Icon(Icons.list_alt)),
                 Tab(
                     text: 'profile-screen.user-activity'.tr,
                     icon: Icon(Icons.access_time)),
@@ -83,7 +85,7 @@ class ProfileScreen extends StatelessWidget {
               return Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  children: const [
+                  children: [
                     CircularProgressIndicator(),
                     Gap(8),
                     Text('profile-screen.data-collection'.tr),
@@ -140,7 +142,8 @@ class ProfileScreen extends StatelessWidget {
                               const Icon(Icons.check_circle_sharp),
                               const Gap(5),
                               Text(
-                                  'profile-screen.nb-games-won'.tr + ' : ${user.summary.userStats?.nbGamesWon ?? '--'}',
+                                  'profile-screen.nb-games-won'.tr +
+                                      ' : ${user.summary.userStats?.nbGamesWon ?? '--'}',
                                   style: Get.context!.textTheme.button)
                             ],
                           ),
@@ -151,7 +154,8 @@ class ProfileScreen extends StatelessWidget {
                               const Icon(Icons.scoreboard_sharp),
                               const Gap(5),
                               Text(
-                                  'profile-screen.mean-points-game'.tr + ' : ${user.summary.userStats?.averagePointsPerGame ?? '--'}',
+                                  'profile-screen.mean-points-game'.tr +
+                                      ' : ${user.summary.userStats?.averagePointsPerGame ?? '--'}',
                                   style: Get.context!.textTheme.button)
                             ],
                           ),
@@ -162,7 +166,8 @@ class ProfileScreen extends StatelessWidget {
                               const Icon(Icons.timelapse),
                               const Gap(5),
                               Text(
-                                  'profile-screen.mean-game-time'.tr + ': ${user.summary.userStats!.averageTimePlayed != null ? user.summary.userStats!.averageTimePlayed! ~/ pow(10, 5) : '0'} min',
+                                  'profile-screen.mean-game-time'.tr +
+                                      ': ${user.summary.userStats!.averageTimePlayed != null ? user.summary.userStats!.averageTimePlayed! ~/ pow(10, 5) : '0'} min',
                                   style: Get.context!.textTheme.button)
                             ],
                           )
@@ -180,7 +185,7 @@ class ProfileScreen extends StatelessWidget {
                             size: 40,
                           ),
                         ),
-                        label: const Text('profile-screen.modif-profil'.tr),
+                        label: Text('profile-screen.modif-profil'.tr),
                       ),
                     ],
                   ),
@@ -199,7 +204,7 @@ class ProfileScreen extends StatelessWidget {
               return Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  children: const [
+                  children: [
                     CircularProgressIndicator(),
                     Gap(8),
                     Text('profile-screen.data-collection'.tr),
@@ -231,9 +236,9 @@ class ProfileScreen extends StatelessWidget {
 
   List<DataColumn> _createColumns() {
     return [
-      const DataColumn(label: Text('profile-page.type-event'.tr)),
-      const DataColumn(label: Text('profile-page.date'.tr)),
-      const DataColumn(label: Text('profile-page.hour'.tr)),
+      DataColumn(label: Text('profile-page.type-event'.tr)),
+      DataColumn(label: Text('profile-page.date'.tr)),
+      DataColumn(label: Text('profile-page.hour'.tr)),
     ];
   }
 
@@ -263,7 +268,7 @@ class ProfileScreen extends StatelessWidget {
               return Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  children: const [
+                  children: [
                     CircularProgressIndicator(),
                     Gap(8),
                     Text('profile-screen.data-collection'.tr),
@@ -297,8 +302,8 @@ class ProfileScreen extends StatelessWidget {
     return [
       for (final gameStats in user.summary.gamesStats!.reversed)
         DataRow(cells: [
-          DataCell(Text(
-              'profile-screen.partie'.tr + ' ${gameStats.gameWon != null ? 'profile-screen-won'.tr : 'profile-screen-lost'.tr}')),
+          DataCell(Text('profile-screen.partie'.tr +
+              ' ${gameStats.gameWon != null ? 'profile-screen-won'.tr : 'profile-screen-lost'.tr}')),
           DataCell(Text(DateFormat('yyyy-MM-dd').format(tz.TZDateTime.from(
               DateTime.fromMillisecondsSinceEpoch(gameStats.gameEndTime),
               montreal)))),
@@ -351,8 +356,8 @@ class ProfileScreen extends StatelessWidget {
       children: [
         ListTile(
           title: Text(roomName.split('/').length > 1
-                  ? roomName.split('/')[1]
-                  : roomName),
+              ? roomName.split('/')[1]
+              : roomName),
           // onTap: () => Get.toNamed(Routes.CHAT, arguments: {'text': 'roomName'}),
           onTap: () {
             selectedChatRoom.value = !selectedChatRoom.value;
