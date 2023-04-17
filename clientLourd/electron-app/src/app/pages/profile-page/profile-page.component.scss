@@ -1,203 +1,81 @@
-/**
-  Styling for Scrabble Title
-**/
-.scrabble {
-  margin-top: 4vh;
-  display: inline-flex;
-  text-transform: uppercase;
-  font-family: monospace;
-  font-weight: bold;
-  text-align: center;
-  font-size: 60px;
-  border: 5px solid;
-  border-width: 0 5px 5px 0;
-  border-image: linear-gradient(
-      45deg,
-      #0000 6px,
-      #d0cfcd 0 calc(100% - 0.707 * (1ch + 4px + 1em)),
-      #b1b1b1 0 calc(100% - 6px),
-      #0000 0
-    )
-    5;
-}
-
-.scrabble span {
-  padding-top: 4vh;
-  height: 7vh;
-  clip-path: inset(0 calc(0.5em - 2px) 0 0);
-  margin-right: calc(2px - 0.5em);
-  letter-spacing: 1em;
-  background: linear-gradient(#dedddb 0 0) bottom/100% 2px no-repeat,
-    conic-gradient(from 90deg at 2px 2px, #0000 90deg, #dedddb 0) 0 0 /
-      calc(1ch + 1em) 100%,
-    #f6f4f0;
-  padding-left: 0.5em;
-}
-
-.animate span {
-  animation: t calc(0.25s * var(--n)) steps(var(--n));
-  width: calc(var(--n) * (1ch + 1em));
-}
-
-@keyframes t {
-  from {
-    width: 0;
-  }
-}
-
-.container {
-  width: 100vw;
-  height: 100vh;
-  background: rgb(208, 144, 90);
-  background: linear-gradient(
-    150deg,
-    rgba(208, 143, 90, 0.65) 0%,
-    rgba(159, 205, 110, 0.3) 35%,
-    rgb(52, 75, 138) 100%
-  );
-  display: inline-flex;
-  justify-content: center;
+.nav {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  background-color: #2e2e48;
+  color: #fff;
+  display: flex;
+  //padding: 0 16px;
   align-items: center;
+  height: 120px;
+  font: 500 20px/32px Roboto, "Helvetica Neue", sans-serif;
+  justify-content: space-evenly;
 }
 
-/**
+.nav-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  color: white;
+  padding-left: 2%;
+  padding-right: 2%;
+  padding-top: 1%;
+  padding-bottom: 1%;
+  border-radius: 12px;
+}
 
-Style for welcome-button
-**/
+.nav-text:hover {
+  cursor: pointer;
+}
 
-.justifiediv {
-  margin-top: 4vh;
+.content {
+  //margin-left: 5%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    width: 100%;
+    height: 100vh;
+}
+
+.context {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  height: 98%;
+  margin-top: 2%;
+}
+
+.grid {
+  width: 100%;
+  height: 100%;
+}
+
+.history {
+  width: 100%;
+  height: 100%;
+}
+
+mat-divider {
+  width: 100%;
+}
+
+.stat {
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
   align-items: center;
-}
-
-/**
-
-Position for div of the login-button
-**/
-
-#rightdiv {
-  width: 100vw;
-  position: absolute;
-  top: 50%;
-}
-
-/**
-
-Position for login-button
-**/
-
-#main {
-  height: 100%;
+  justify-content: center;
   width: 100%;
-  display: grid;
-  grid-template-rows: auto 1fr;
 }
 
-nav {
-  padding: 1rem;
-}
-
-/**
-
-Style for Header
-**/
-#header {
-  position: relative;
-  display: inline-flex;
-  justify-content: center;
-}
-
-/**
-Style Footer
-**/
-
-.footer-item {
-  text-align: center;
-}
-
-.team-name {
-  margin-top: 0.25em;
-  margin-bottom: 0.25em;
-  color: green;
-}
-
-.footer-item p :nth-child(even) {
-  color: orange;
-}
-.footer-item p :nth-child(odd) {
-  color: blue;
-}
-
-.team-img {
-  height: 7vh;
-  width: 5w;
-  margin-bottom: 1vh;
-}
-
-.team-img:hover {
-  cursor: pointer;
-  transform: scale(1.3);
-} 
-
-
-
-
-
-.row {
-  height: 90vh;
-  width: 95vw;
+.stats {
   display: flex;
-  margin-top: 5%;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-}
-
-.column {
-  float: left;
-  width: 31.3%;
-  height: 98%;
-  margin-left: 1.5%;
-  margin-top: 1%;
-}
-
-/* Clear floats after the columns */
-.row:after {
-  content: "";
-  display: table;
-  clear: both;
+  justify-content: space-evenly;
+  width: 100%;
   height: 100%;
-}
-
-.center {
-  float: middle;
-}
-
-.card {
-  height:95%
-}
-
-.form {
-  margin-top: 1%;
-}
-
-.home-button {
-  position: absolute;
-  top: 2%;
-  left: 2%;
-}
-
-.file-name {
-  margin-top: 1%;
-}
-
-#upload-button {
-  margin-bottom: 3%;
-  margin-right: 3%;
-}
-
-mat-card-content {
-  overflow: auto;
 }

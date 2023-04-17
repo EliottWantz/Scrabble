@@ -1,4 +1,37 @@
-<mat-card-subtitle>Choisir une image de profil</mat-card-subtitle>
+<div id="container">
+    <p>{{'register-component.text' | translate}}</p>
+
+    <div id="info">
+        <form id="form">
+            <div class="form-group">
+                <mat-form-field class="fields" appearance="fill">
+                    <mat-label for="email">{{'register-component.email' | translate}}</mat-label>
+                    <input matInput placeholder="{{'register-component.email' | translate}}" name="email" type="email" [(ngModel)]= "email" required>
+                </mat-form-field>
+            </div>
+            <div class="form-group">
+                <mat-form-field class="fields" appearance="fill">
+                    <mat-label for="username">{{'register-component.username' | translate}}</mat-label>
+                    <input matInput placeholder="{{'register-component.username' | translate}}" name="usename" [(ngModel)] ="username" required>
+                </mat-form-field>
+            </div>
+            <div class="form-group">
+                <mat-form-field class="fields" appearance="fill">
+                    <mat-label for="password">{{'register-component.password' | translate}}</mat-label>
+                    <input matInput placeholder="{{'register-component.password' | translate}}" name="password" type="password" [(ngModel)]= "password" required>
+                </mat-form-field>
+            </div>
+        
+            <button mat-flat-button type="submit" color="accent" id="btn-submit" (click)="onSubmit()">{{'register-component.register' | translate}}</button>
+        </form>
+        
+    
+        <p *ngIf="errorMessage !== ''" style="color: red; text-align: center; width: 100%; margin-top: 2%;">{{'register-component.error' | translate}}</p>
+    </div>
+</div>
+
+<!--
+    <mat-card-subtitle>Choisir une image de profil</mat-card-subtitle>
 <div class="imgs">
     <img *ngFor="let defaultAvatar of defaultAvatars; let i = index" width="10%" class="avatar" src="{{defaultAvatar.url}}" (click)="selectAvatar(i)">
     
@@ -29,8 +62,4 @@
     </mat-form-field>
 </div>
 <mat-divider></mat-divider>
-<button mat-raised-button color="primary" id="btn-submit" (click)="onSubmit()">Créer un compte</button>
-
-<div *ngIf="isRegisterFailed" id="error">
-    <strong style="color: red;">Le nom d'utilisateur n'est pas disponible</strong>
-</div>
+-->

@@ -1,0 +1,60 @@
+<div class="container">
+  <div class="left">
+    <button mat-flat-button color="primary" (click)="leaveGame()">
+      <mat-icon>input</mat-icon>
+      {{'game-page.leave' | translate}}
+    </button>
+
+    <div *ngFor="let player of game.value?.players; let i = index" class="player" [class.light]="game.value?.turn !== player.id && !isDarkTheme()" [class.dark]="game.value?.turn !== player.id && isDarkTheme()" [class.isTurnLight]="game.value?.turn === player.id && !isDarkTheme()" [class.isTurnDark]="game.value?.turn === player.id && isDarkTheme()">
+      <div class="playerInfo">
+        <img *ngIf="!player.isBot" src="{{getPlayerAvatar(player.id)}}">
+        <img *ngIf="player.isBot" src="https://ucarecdn.com/43074331-00a7-4096-8d7a-7a2d5a5d85db/">
+        <h3>{{player.username}}</h3>
+        <p>Score : {{player.score}}</p>
+        <button mat-raised-button color="primary" style="margin-bottom: 1%; margin-right: 1%;" (click)="switchRack(i)" [disabled]="i === currentRack ? true : false">{{"game-observe-page.show" | translate}}</button>
+        <button *ngIf="player.isBot" mat-raised-button color="primary" (click)="takePlace()">{{"game-observe-page.replace" | translate}}</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="middle">
+    <div class="board">
+      <app-board></app-board>
+    </div>
+
+    <mat-card class="mat-card-rack">
+      <mat-card-content class="mat-card-content-rack">
+      <div *ngFor="let tile of racks[currentRack].tiles" #elem id="ship-box" class="tile">
+        <div class="content">
+          <div class="letter">
+            {{getASCII(tile)}}
+        </div>
+        <div class="value">
+            {{tile.value}}
+        </div>
+        </div>
+      </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+  <div class="right">
+    <div class="config">
+      <div class="language" (click)="switchLanguage()">
+        <div class="language-icon">
+            <mat-icon inline="true">language</mat-icon>
+        </div>
+        <div>{{language.value}}</div>
+      </div>
+      <div>
+        <mat-icon (click)="doToggleLightDark()">{{lightDarkToggleIcon}}</mat-icon>
+      </div>
+    </div>
+    <app-timer id="timer"></app-timer>
+
+    <div class="reserve" [class.dark]="isDarkTheme()" [class.light]="!isDarkTheme()">
+      <h3>{{'game-page.reserve' | translate}}</h3>
+      <h3>{{getTileCount()}}</h3>
+    </div>
+  </div>
+  <app-chat-box></app-chat-box>
+</div>

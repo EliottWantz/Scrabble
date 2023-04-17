@@ -20,6 +20,11 @@ func (r *Repository) Insert(room *Room) error {
 	return err
 }
 
+func (r *Repository) Update(room *Room) error {
+	_, err := r.coll.UpdateByID(context.Background(), room.ID, bson.M{"$set": room})
+	return err
+}
+
 func (r *Repository) Find(ID string) (*Room, error) {
 	var roomDB Room
 	err := r.coll.FindOne(
@@ -66,12 +71,31 @@ func (r *Repository) AddUser(roomID, userID string) error {
 }
 
 func (r *Repository) RemoveUser(roomID, userID string) error {
-	_, err := r.coll.UpdateByID(
-		context.Background(),
-		roomID,
-		bson.M{"$pull": bson.M{"userIds": userID}},
-	)
-	return err
+	room, err := r.Find(roomID)
+	if err != nil {
+		return err
+	}
+
+	// Remove user from room
+	for i, id := range room.UserIDs {
+		if id == userID {
+			room.UserIDs = append(room.UserIDs[:i], room.UserIDs[i+1:]...)
+			break
+		}
+	}
+
+	// Delete room if no user left
+	if room.UserIDs == nil || len(room.UserIDs) == 0 {
+		if err := r.Delete(roomID); err != nil {
+			return err
+		}
+	}
+
+	// Update room
+	if err := r.Update(room); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (r *Repository) Delete(ID string) error {

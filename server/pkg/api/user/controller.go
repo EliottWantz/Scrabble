@@ -4,7 +4,6 @@ import (
 	"scrabble/pkg/api/auth"
 
 	"github.com/gofiber/fiber/v2"
-	"golang.org/x/exp/slog"
 )
 
 type Controller struct {
@@ -68,65 +67,6 @@ func (ctrl *Controller) SignUp(c *fiber.Ctx) error {
 	)
 }
 
-type LoginRequest struct {
-	Username string `json:"username,omitempty"`
-	Password string `json:"password,omitempty"`
-	Token    string `json:"token,omitempty"`
-}
-
-type LoginResponse struct {
-	User  *User  `json:"user,omitempty"`
-	Token string `json:"token,omitempty"`
-}
-
-func (ctrl *Controller) Login(c *fiber.Ctx) error {
-	var req LoginRequest
-	err := c.BodyParser(&req)
-	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, err.Error())
-	}
-	slog.Info("login request", "req", req)
-
-	var (
-		u     *User
-		token string
-	)
-
-	if req.Username != "" && req.Password != "" {
-		// Login with username and password
-		if u, err = ctrl.svc.Login(req.Username, req.Password); err != nil {
-			return err
-		}
-
-		token, err = ctrl.authSvc.GenerateJWT(u.ID)
-		if err != nil {
-			return fiber.NewError(fiber.StatusInternalServerError, "failed to generate token")
-		}
-	} else if req.Token != "" {
-		// Login with token
-		claims, err := ctrl.authSvc.VerifyJWT(req.Token)
-		if err != nil {
-			return fiber.NewError(fiber.StatusUnauthorized, "invalid token")
-		}
-
-		// Refresh token
-		if token, err = ctrl.authSvc.RefreshJWT(req.Token, claims); err != nil {
-			return fiber.NewError(fiber.StatusInternalServerError, "failed to refresh token")
-		}
-
-		if u, err = ctrl.svc.GetUser(claims.UserID); err != nil {
-			return err
-		}
-	}
-
-	slog.Info("response", "user", u, "token", token)
-
-	return c.JSON(LoginResponse{
-		User:  u,
-		Token: token,
-	})
-}
-
 type GetUserResponse struct {
 	User *User `json:"user,omitempty"`
 }
@@ -148,7 +88,6 @@ func (ctrl *Controller) GetUser(c *fiber.Ctx) error {
 }
 
 type UploadAvatarResquest struct {
-	ID        string `json:"id,omitempty"`
 	AvatarURL string `json:"avatarUrl,omitempty"`
 	FileID    string `json:"fileId,omitempty"`
 }
@@ -162,7 +101,8 @@ func (ctrl *Controller) UploadAvatar(c *fiber.Ctx) error {
 	if err := c.BodyParser(&req); err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, "decode req: "+err.Error())
 	}
-	if req.ID == "" {
+	ID := c.Params("id")
+	if ID == "" {
 		return fiber.NewError(fiber.StatusBadRequest, "no user id given")
 	}
 
@@ -170,7 +110,7 @@ func (ctrl *Controller) UploadAvatar(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	avatar, err := ctrl.svc.UploadAvatar(req, strategy)
+	avatar, err := ctrl.svc.UploadAvatar(ID, req, strategy)
 	if err != nil {
 		return err
 	}
@@ -180,94 +120,6 @@ func (ctrl *Controller) UploadAvatar(c *fiber.Ctx) error {
 			avatar,
 		},
 	)
-}
-
-func (ctrl *Controller) SendFriendRequest(c *fiber.Ctx) error {
-	id := c.Params("id")
-	friendId := c.Params("friendId")
-
-	err := ctrl.svc.sendFriendRequest(id, friendId)
-	if err != nil {
-		return err
-	}
-
-	return c.SendStatus(fiber.StatusOK)
-}
-
-func (ctrl *Controller) AcceptFriendRequest(c *fiber.Ctx) error {
-	id := c.Params("id")
-	friendId := c.Params("friendId")
-
-	err := ctrl.svc.acceptFriendRequest(id, friendId)
-	if err != nil {
-		return err
-	}
-	return c.SendStatus(fiber.StatusOK)
-}
-
-func (ctrl *Controller) RejectFriendRequest(c *fiber.Ctx) error {
-	id := c.Params("id")
-	friendId := c.Params("friendId")
-
-	err := ctrl.svc.rejectFriendRequest(id, friendId)
-	if err != nil {
-		return err
-	}
-	return c.SendStatus(fiber.StatusOK)
-}
-
-type GetFriendsResponse struct {
-	Friends []*User `json:"friends,omitempty"`
-}
-
-func (ctrl *Controller) GetFriends(c *fiber.Ctx) error {
-	id := c.Params("id")
-	friends, err := ctrl.svc.GetFriends(id)
-	if err != nil {
-		return err
-	}
-	return c.JSON(GetFriendsResponse{
-		Friends: friends,
-	})
-}
-
-func (ctrl *Controller) GetFriendById(c *fiber.Ctx) error {
-	id := c.Params("id")
-	friendId := c.Params("friendId")
-	friend, err := ctrl.svc.GetFriendById(id, friendId)
-	if err != nil {
-		return err
-	}
-	return c.JSON(GetUserResponse{
-		User: friend,
-	})
-}
-
-func (ctrl *Controller) RemoveFriend(c *fiber.Ctx) error {
-	id := c.Params("id")
-	friendId := c.Params("friendId")
-
-	err := ctrl.svc.RemoveFriend(id, friendId)
-	if err != nil {
-		return err
-	}
-	return c.SendStatus(fiber.StatusOK)
-}
-
-type GetFriendRequestsResponse struct {
-	FriendRequests []*User `json:"friendRequests,omitempty"`
-}
-
-func (ctrl *Controller) GetPendingFriendRequests(c *fiber.Ctx) error {
-
-	id := c.Params("id")
-	friendRequests, err := ctrl.svc.GetPendingFriendRequests(id)
-	if err != nil {
-		return err
-	}
-	return c.JSON(GetFriendRequestsResponse{
-		FriendRequests: friendRequests,
-	})
 }
 
 type PreferencesRequest struct {
@@ -311,7 +163,9 @@ func (ctrl *Controller) UpdatePreferences(c *fiber.Ctx) error {
 		}
 	}
 
-	ctrl.svc.UpdatePreferences(user, preference)
+	if err := ctrl.svc.UpdatePreferences(user, preference); err != nil {
+		return err
+	}
 	return c.SendStatus(fiber.StatusOK)
 }
 
@@ -322,4 +176,32 @@ func (ctrl *Controller) GetDefaultAvatars(c *fiber.Ctx) error {
 	return c.JSON(GetDefaultAvatarsResponse{
 		Avatars: ctrl.svc.DefaultAvatars,
 	})
+}
+
+type UpdateUsernameRequest struct {
+	ID       string `json:"id,omitempty"`
+	Username string `json:"username,omitempty"`
+}
+
+func (ctrl *Controller) UpdateUsername(c *fiber.Ctx) error {
+	req := UpdateUsernameRequest{}
+	if err := c.BodyParser(&req); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "decode req: "+err.Error())
+	}
+	if req.ID == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "no user id given")
+	}
+	user, err := ctrl.svc.GetUser(req.ID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "no user found")
+	}
+	if _, err := ctrl.svc.Repo.FindByUsername(req.Username); err == nil {
+		return fiber.NewError(fiber.StatusUnprocessableEntity, "username already exists")
+	}
+	user.Username = req.Username
+
+	if err := ctrl.svc.Repo.Update(user); err != nil {
+		return err
+	}
+	return c.SendStatus(fiber.StatusOK)
 }

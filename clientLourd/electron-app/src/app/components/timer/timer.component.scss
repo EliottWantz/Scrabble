@@ -4,12 +4,15 @@
   width: 100px;
   text-align: center;
   font-weight: 600;
-  background-color: rgb(92, 40, 40);
+  //background-color: white;
+  border-color: #1b355e;
+  border-width: 8px;
+  border-style: solid;
   border-radius: 50%;
 }
 
 #timer-num {
-  color: #fff;
+  //color: #fff;
   display: inline-block;
   line-height: 100px;
   letter-spacing: 2px;

@@ -1,0 +1,12 @@
+<mat-dialog-content class="container">
+    <h2>{{'default-avatar-selection-component.title' | translate}}</h2>
+    <div class="flexy">
+        <div *ngFor="let avatar of defaultAvatars; let i = index" class="card" (click)="select(i)">
+            <img class="avatar" src="{{defaultAvatars[i].url}}">
+        </div>
+    </div>
+    
+    <strong *ngIf="error" style="color: red; width: 100%; text-align: center;">{{'default-avatar-selection-component.error' | translate}}</strong>
+    <button color="accent" (click)="save()">{{'default-avatar-selection-component.confirm' | translate}}</button>
+    <button color="accent" (click)="close()">{{'default-avatar-selection-component.cancel' | translate}}</button>
+</mat-dialog-content>

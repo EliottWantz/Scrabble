@@ -8,40 +8,48 @@ type Summary struct {
 
 type NetworkLog struct {
 	EventType string `bson:"eventType" json:"eventType,omitempty"`
-	EvenTime  int64  `bson:"evenTime" json:"evenTime,omitempty"`
+	EventTime int64  `bson:"eventTime" json:"eventTime,omitempty"`
 }
 type GameStats struct {
-	EventDate int64 `bson:"eventDate" json:"eventDate,omitempty"`
-	GameWon   bool  `bson:"gameWon" json:"gameWon,omitempty"`
+	GameStartTime int64 `bson:"gameStartTime" json:"gameStartTime,omitempty"`
+	GameEndTime   int64 `bson:"gameEndTime" json:"gameEndTime,omitempty"`
+	GameWon       bool  `bson:"gameWon" json:"gameWon,omitempty"`
 }
 
 type UserStats struct {
 	NbGamesPlayed        int   `bson:"nbGamesPlayed" json:"nbGamesPlayed,omitempty"`
 	NbGamesWon           int   `bson:"nbGamesWon" json:"nbGamesWon,omitempty"`
+	NbTournamentsWon     int   `bson:"nbTournamentsWon" json:"nbTournamentsWon,omitempty"`
 	AveragePointsPerGame int   `bson:"averagePointsPerGame" json:"averagePointsPerGame,omitempty"`
 	AverageTimePlayed    int64 `bson:"averageTimePlayed" json:"averageTimePlayed,omitempty"`
 }
 
-func (s *Service) AddNetworkingLog(u *User, eventType string, eventTime int64) {
+func (s *Service) AddNetworkingLog(u *User, eventType string, eventTime int64) error {
 	networkLogs := &u.Summary.NetworkLogs
 	*networkLogs = append(*networkLogs, NetworkLog{
 		EventType: eventType,
-		EvenTime:  eventTime,
+		EventTime: eventTime,
 	})
-	s.Repo.Update(u)
+	if eventType == "Login" {
+		u.IsConnected = true
+	}
+	if eventType == "Logout" {
+		u.IsConnected = false
+	}
+	return s.Repo.Update(u)
 }
 
-func (s *Service) AddGameStats(u *User, eventDate int64, gameWon bool) {
+func (s *Service) AddGameStats(u *User, eventStartTime, eventEndTime int64, gameWon bool) error {
 	gamesStats := &u.Summary.GamesStats
 	*gamesStats = append(*gamesStats, GameStats{
-		EventDate: eventDate,
-		GameWon:   gameWon,
+		GameStartTime: eventStartTime,
+		GameEndTime:   eventEndTime,
+		GameWon:       gameWon,
 	})
-	s.Repo.Update(u)
-
+	return s.Repo.Update(u)
 }
 
-func (s *Service) UpdateUserStats(u *User, gameWon bool, points int, timePlayed int64) {
+func (s *Service) UpdateUserStats(u *User, gameWon bool, points int, timePlayed int64) error {
 	userStats := &u.Summary.UserStats
 	userStats.NbGamesPlayed++
 	if gameWon {
@@ -49,5 +57,5 @@ func (s *Service) UpdateUserStats(u *User, gameWon bool, points int, timePlayed 
 	}
 	userStats.AveragePointsPerGame = (userStats.AveragePointsPerGame + points) / userStats.NbGamesPlayed
 	userStats.AverageTimePlayed = (userStats.AverageTimePlayed + timePlayed) / int64(userStats.NbGamesPlayed)
-	s.Repo.Update(u)
+	return s.Repo.Update(u)
 }

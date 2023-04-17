@@ -1,0 +1,61 @@
+#container {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  flex-wrap: wrap;
+  flex-direction: column;
+  height: 100vh;
+}
+
+#scrabble-img {
+  width: 50%;
+  padding-top: 5%;
+}
+
+.bottom {
+  height: 50%;
+  width: 25%;
+  margin-left: auto;
+}
+
+.avatar {
+  border-radius: 50%;
+  width: 70px;
+  margin-right: 5%;
+}
+
+.players {
+  width: 75%;
+}
+
+.player {
+  display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: nowrap;
+    background-color: #dcdcdc;
+    outline-width: 1px;
+    outline-style: solid;
+    outline-color: #999999;
+    border-radius: 12px;
+    width: 50%;
+    padding: 2%;
+    margin-bottom: 2%;
+    justify-content: space-evenly;
+}
+
+.deny-button {
+  margin-left: 5%;
+}
+
+.deny-button:hover {
+  color: red;
+}
+
+.accept-button {
+  margin-left: auto;
+}
+
+.accept-button:hover {
+  color: green;
+}

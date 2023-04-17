@@ -11,6 +11,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/monitor"
+	"github.com/gofiber/fiber/v2/middleware/recover"
 	jwtware "github.com/gofiber/jwt/v3"
 	"github.com/golang-jwt/jwt/v4"
 )
@@ -30,6 +31,7 @@ func (api *API) setupRoutes(cfg *config.Config) {
 				TimeFormat: "2006/01/02 15:04:05",
 			},
 		),
+		recover.New(),
 	)
 	api.App.Get("/metrics", monitor.New(monitor.Config{Title: "Scrabble Server Metrics"}))
 
@@ -48,7 +50,7 @@ func (api *API) setupRoutes(cfg *config.Config) {
 		return c.SendString("Hello api")
 	})
 	r.Post("/signup", api.Ctrls.UserCtrl.SignUp)
-	r.Post("/login", api.Ctrls.UserCtrl.Login)
+	r.Post("/login", api.Ctrls.WebSocketManager.LoginRoute)
 	r.Get("/avatar/defaults", api.Ctrls.UserCtrl.GetDefaultAvatars)
 
 	// Proctected routes
@@ -69,20 +71,34 @@ func (api *API) setupRoutes(cfg *config.Config) {
 	r.Patch("/user/:id/config", api.Ctrls.UserCtrl.UpdatePreferences)
 	r.Get("/user/:id", api.Ctrls.UserCtrl.GetUser)
 
-	r.Get("/user/friends/:id", api.Ctrls.UserCtrl.GetFriends)
-	r.Get("/user/friends/:id/:friendId", api.Ctrls.UserCtrl.GetFriendById)
-	r.Delete("/user/friends/:id/:friendId", api.Ctrls.UserCtrl.RemoveFriend)
+	r.Get("/user/friends/:id", api.Ctrls.WebSocketManager.GetFriends)
+	r.Get("/user/friends/online/:id", api.Ctrls.WebSocketManager.GetOnlineFriends)
+	r.Get("/user/friends/addList/:id", api.Ctrls.WebSocketManager.GetAddFriendList)
+	r.Get("/user/friends/requests/:id", api.Ctrls.WebSocketManager.GetPendingFriendRequests)
+	r.Get("/user/friends/:id/:friendId", api.Ctrls.WebSocketManager.GetFriendById)
+	r.Delete("/user/friends/:id/:friendId", api.Ctrls.WebSocketManager.RemoveFriend)
 
-	r.Get("/user/friends/requests/:id", api.Ctrls.UserCtrl.GetPendingFriendRequests)
+	r.Post("/user/friends/request/:id/:friendId", api.Ctrls.WebSocketManager.SendFriendRequest)
+	r.Post("/user/friends/accept/:id/:friendId", api.Ctrls.WebSocketManager.AcceptFriendRequest)
+	r.Delete("/user/friends/accept/:id/:friendId", api.Ctrls.WebSocketManager.RejectFriendRequest)
 
-	r.Post("/user/friends/request/:id/:friendId", api.Ctrls.UserCtrl.SendFriendRequest)
-	r.Patch("/user/friends/accept/:id/:friendId", api.Ctrls.UserCtrl.AcceptFriendRequest)
-	r.Delete("/user/friends/accept/:id/:friendId", api.Ctrls.UserCtrl.RejectFriendRequest)
+	r.Post("/user/friends/game/invite", api.Ctrls.WebSocketManager.InviteFriendToGame)
+	r.Post("/user/friends/game/accept-invite", api.Ctrls.WebSocketManager.AcceptFriendInvitationToGame)
+	r.Post("/user/friends/game/reject-invite", api.Ctrls.WebSocketManager.RejectFriendInvitationToGame)
 
-	r.Post("/avatar", api.Ctrls.UserCtrl.UploadAvatar)
+	r.Post("/user/avatar/:id", api.Ctrls.UserCtrl.UploadAvatar)
+	r.Patch("/user/updateUsername", api.Ctrls.UserCtrl.UpdateUsername)
 
-	// r.Post("/room/join", api.Ctrls.WebSocketManager.JoinRoom)
-	// r.Post("/room/joindm", api.Ctrls.WebSocketManager.JoinDMRoom)
-	// r.Post("/room/leave", api.Ctrls.WebSocketManager.LeaveRoom)
 	r.Get("/room/:id/messages", api.Ctrls.WebSocketManager.GetMessages)
+
+	r.Patch("/game/:id/protectGame", api.Ctrls.WebSocketManager.ProtectGame)
+	r.Patch("/game/:id/unprotectGame", api.Ctrls.WebSocketManager.UnprotectGame)
+
+	r.Post("game/accept/:id/:requestorId/:gameId", api.Ctrls.WebSocketManager.AcceptJoinGameRequest)
+	r.Patch("game/revoke/:id/:gameId", api.Ctrls.WebSocketManager.RevokeRequestToJoinGame)
+	r.Delete("game/accept/:id/:requestorId/:gameId", api.Ctrls.WebSocketManager.RejectJoinGameRequest)
+
+	r.Post("/tournament/accept/:id/:requestorId/:tID", api.Ctrls.WebSocketManager.AcceptJoinTournamentRequest)
+	r.Patch("/tournament/revoke/:id/:tID", api.Ctrls.WebSocketManager.RevokeRequestToJoinTournament)
+	r.Delete("/tournament/accept/:id/:requestorId/:tID", api.Ctrls.WebSocketManager.RejectJoinTournamentRequest)
 }

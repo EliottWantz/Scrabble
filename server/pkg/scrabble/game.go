@@ -5,17 +5,17 @@ import (
 	"fmt"
 	"sort"
 	"time"
+
+	"golang.org/x/exp/slog"
 )
 
 const (
-	MaxPassMoves                 int = 6
-	MaxHumanConsecutivePassMoves int = 2
+	MaxConsecutiveSkip int = 2
 )
 
 var ErrPlayerNotFound = errors.New("player not found")
 
 type Game struct {
-	ID           string
 	Players      []*Player
 	Board        *Board
 	Bag          *Bag
@@ -56,9 +56,8 @@ type MoveItem struct {
 	Move       Move
 }
 
-func NewGame(ID string, dawg *DAWG, botStrategy Strategy) *Game {
+func NewGame(dawg *DAWG, botStrategy Strategy) *Game {
 	g := &Game{
-		ID:       ID,
 		Players:  []*Player{},
 		Board:    NewBoard(),
 		Bag:      NewBag(DefaultTileSet),
@@ -78,17 +77,19 @@ func (g *Game) AddPlayer(p *Player) {
 
 // PlayerToMove returns the player which player's move it is
 func (g *Game) PlayerToMove() *Player {
-	return g.Players[len(g.MoveList)%4]
+	return g.Players[len(g.MoveList)%len(g.Players)]
 }
 
 // Returns the player that just played his move. Must be called after the move has been applied.
 func (g *Game) PlayerThatPlayed() *Player {
-	return g.Players[(len(g.MoveList)-1)%4]
+	return g.Players[(len(g.MoveList)-1)%len(g.Players)]
 }
 
 func (g *Game) SkipTurn() {
 	move := NewPassMove()
-	g.ApplyValid(move)
+	if err := g.ApplyValid(move); err != nil {
+		slog.Error("failed to skip turn", err)
+	}
 }
 
 func (g *Game) GetPlayer(pID string) (*Player, error) {
@@ -98,6 +99,17 @@ func (g *Game) GetPlayer(pID string) (*Player, error) {
 		}
 	}
 	return nil, ErrPlayerNotFound
+}
+
+func (g *Game) NumberOfBots() int {
+	count := 0
+	for _, p := range g.Players {
+		if p.IsBot {
+			count++
+		}
+	}
+
+	return count
 }
 
 // PlayTile moves a tile from the player's rack to the board
@@ -178,20 +190,19 @@ func (g *Game) IsOver() bool {
 		// No moves yet: cannot be over
 		return false
 	}
-	// TODO: Check for resignation
-	if g.NumPassMoves == MaxPassMoves {
-		return true
-	}
 
 	lastPlayer := g.PlayerThatPlayed()
-	if lastPlayer.ConsecutiveExchanges >= MaxHumanConsecutivePassMoves {
-		return true
-	}
 	if lastPlayer.Rack.IsEmpty() {
 		return true
 	}
 
-	return false
+	for _, p := range g.Players {
+		if !p.IsBot && p.ConsecutiveSkip < MaxConsecutiveSkip {
+			return false
+		}
+	}
+	// Every human player has 2 consecutive skip
+	return true
 }
 
 func (g *Game) Winner() *Player {

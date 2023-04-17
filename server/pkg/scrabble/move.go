@@ -286,7 +286,7 @@ func (move *TileMove) Apply(game *Game) error {
 	rack.Fill(game.Bag)
 	// Reset the counter of consecutive pass moves
 	game.NumPassMoves = 0
-	player.ConsecutiveExchanges = 0
+	player.ConsecutiveSkip = 0
 	return nil
 }
 
@@ -391,13 +391,11 @@ func (move *PassMove) IsValid(game *Game) bool {
 }
 
 func (move *PassMove) Apply(game *Game) error {
-	// Reset the counter of consecutive exchanges moves
+	// Increment the number of consecutive exchange moves
 	player := game.PlayerToMove()
 	if !player.IsBot {
-		player.ConsecutiveExchanges = 0
+		player.ConsecutiveSkip++
 	}
-	// Increment the number of consecutive pass moves
-	game.NumPassMoves++
 	return nil
 }
 
@@ -468,10 +466,6 @@ func (move *ExchangeMove) Apply(game *Game) error {
 	// ...before returning the exchanged tiles to the Bag
 	for _, tile := range tiles {
 		game.Bag.ReturnTile(tile)
-	}
-	// Increment the number of consecutive exchange moves
-	if !player.IsBot {
-		player.ConsecutiveExchanges++
 	}
 	return nil
 }

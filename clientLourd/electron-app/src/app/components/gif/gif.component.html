@@ -1,0 +1,15 @@
+<mat-dialog-content class="container">
+    <form class="form">
+        <mat-form-field>
+            <mat-label for="searchText">{{"gif-component.search-gif" | translate}}</mat-label>
+            <input matInput name="searchText" type="text" [value]="searchText" [(ngModel)]="searchText" placeholder="{{'gif-component.search-gif' | translate}}">
+        </mat-form-field>
+        <button class="submit-button" mat-raised-button type="submit" (click)="grab_data()">{{'gif-component.search' | translate}}</button>
+    </form>
+    <mat-grid-list [cols]="2" rowHeight="100px">
+        <mat-grid-tile *ngFor="let gif of gifs">
+            <img class="gif" [src]="gif" (click)="submit(gif)">
+        </mat-grid-tile>
+    </mat-grid-list>
+    <button class="cancel-button" color="accent" (click)="close()">{{'default-avatar-selection-component.cancel' | translate}}</button>
+</mat-dialog-content>

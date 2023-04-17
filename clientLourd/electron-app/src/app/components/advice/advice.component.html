@@ -1,0 +1,7 @@
+<mat-list class="advice-list">
+    <mat-list-item *ngFor="let advice of data.moves; let last = last" (click)="playMove(advice)" class="list-item">
+        <span matListItemTitle>{{advice.letters}}</span>
+        <span matListItemLine>{{getCoversText(advice.covers)}} Score: {{advice.score}}</span>
+        <span *ngIf="!last" matListItemLine><mat-divider></mat-divider></span>
+    </mat-list-item>
+</mat-list>  

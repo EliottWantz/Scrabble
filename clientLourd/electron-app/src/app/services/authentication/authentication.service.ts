@@ -4,6 +4,8 @@ import { CommunicationService } from "@app/services/communication/communication.
 import { StorageService } from "../storage/storage.service";
 import { UserService } from "@app/services/user/user.service";
 import { WebSocketService } from "@app/services/web-socket/web-socket.service";
+import { BehaviorSubject } from "rxjs";
+import { ThemeService } from "@app/services/theme/theme.service";
 
 @Injectable({
     providedIn: 'root',
@@ -13,7 +15,11 @@ export class AuthenticationService {
     password = "";
     isLoginFailed = false;
     errorMessage = '';
-    constructor(private commService: CommunicationService, private storageService: StorageService, private userService: UserService, private socketService: WebSocketService) {}
+    tempUserLogin: BehaviorSubject<FormData>;
+    constructor(private commService: CommunicationService, private storageService: StorageService, private userService: UserService, private socketService: WebSocketService,
+        private themeService: ThemeService) {
+        this.tempUserLogin = new BehaviorSubject<FormData>(new FormData());
+    }
 
     async login(username: string, password: string): Promise<boolean> {
         return await this.commService.login(username, password).then((res) => {
@@ -28,15 +34,17 @@ export class AuthenticationService {
         });
     }
 
-    async register(username: string, password: string, email: string, avatarURL: string, fileID: string): Promise<boolean> {
-        return await this.commService.register(username, password, email, avatarURL, fileID).then((res) => {
+    async register(): Promise<boolean> {
+        return await this.commService.register(this.tempUserLogin.value).then((res) => {
             this.setUser(res);
             this.socketService.connect();
+            this.tempUserLogin = new BehaviorSubject<FormData>(new FormData());
             return true;
         })
         .catch((err) => {
             this.errorMessage = err.message;
             this.isLoginFailed = true;
+            this.tempUserLogin = new BehaviorSubject<FormData>(new FormData());
             return false;
         });
     }
@@ -49,6 +57,8 @@ export class AuthenticationService {
             avatar: res.user.avatar,
             preferences: res.user.preferences,
             joinedChatRooms: res.user.joinedChatRooms,
+            joinedDMRooms: res.user.joinedDMRooms,
+            joinedGame: res.user.joinedGame,
             friends: res.user.friends,
             pendingRequests: res.user.pendingRequests,
             summary: res.user.summary

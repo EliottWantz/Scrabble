@@ -6,8 +6,9 @@ import { BehaviorSubject } from 'rxjs';
 import { WebSocketService } from '@app/services/web-socket/web-socket.service';
 import { Room } from '@app/utils/interfaces/room';
 import { RoomService } from '@app/services/room/room.service';
-import { CreateGameRoomPayload, JoinGameRoomPayload, StartGame } from '@app/utils/interfaces/packet';
 import { ClientEvent } from '@app/utils/events/client-events';
+import { Game } from '@app/utils/interfaces/game/game';
+import { CreateGamePayload, JoinGamePayload, StartGamePayload } from '@app/utils/interfaces/packet';
 
 @Component({    
     selector: 'app-parameters',
@@ -22,10 +23,10 @@ export class ParametersComponent implements OnInit {
     minValue: boolean;
     formPageButtonActive: boolean;
     name: FormControl;
-    games$: BehaviorSubject<Room[]>;
+    games$: BehaviorSubject<Game[]>;
     waiting: boolean;
     created: boolean;
-    currentGameRoom: BehaviorSubject<Room>;
+    currentGameRoom: BehaviorSubject<Game | undefined>;
 
     constructor(
         private matDialog: MatDialog,
@@ -41,8 +42,8 @@ export class ParametersComponent implements OnInit {
         this.waiting = false;
         this.formPageButtonActive = true;
         // this.gameService.init();
-        this.games$ = this.roomService.joinableGames;
-        this.currentGameRoom = this.roomService.currentGameRoom;
+        this.games$ = this.gameService.joinableGames;
+        this.currentGameRoom = this.gameService.game;
         //console.log(this.games$.value);
         this.created = false;
     }
@@ -88,13 +89,14 @@ export class ParametersComponent implements OnInit {
     }
 
     async createGame(): Promise<void> {
-        const payload: CreateGameRoomPayload = {
+        /*const payload: CreateGamePayload = {
+            password: "",
             userIds: []
           }
-          const event : ClientEvent = "create-game-room";
+          const event : ClientEvent = "create-game";
           this.webSocketService.send(event, payload);
           this.waiting = true;
-        this.created = true;
+        this.created = true;*/
     }
     // listOfGame(): void {
     //     if (!this.name.errors) {
@@ -106,12 +108,13 @@ export class ParametersComponent implements OnInit {
     //     }
     //     this.gameService.viewGames(this.name.value);
     // }
-    joinGame(gameId: string): void {
+    joinGame(gameId: string, password: string): void {
         //this.stepper.selectedIndex = STEPPER_PAGE_IDX.confirmationPage;
-        const payload: JoinGameRoomPayload = {
-            roomId: gameId,
+        const payload: JoinGamePayload = {
+            gameId: gameId,
+            password: password
           }
-          const event : ClientEvent = "join-game-room";
+          const event : ClientEvent = "join-game";
           this.webSocketService.send(event, payload);
     }
 
@@ -125,19 +128,16 @@ export class ParametersComponent implements OnInit {
             }
         }*/
         console.log(this.currentGameRoom.value);
-        if(this.currentGameRoom.value.userIds.length < 2){
-            return;
+        if (this.currentGameRoom.value) {
+            if(this.currentGameRoom.value.userIds.length < 2){
+                return;
+            }
+            const payload: StartGamePayload = {
+                gameId: this.currentGameRoom.value.id
+              }
+              const event : ClientEvent = "start-game";
+              this.webSocketService.send(event, payload);
+              this.waiting = true;
         }
-        const payload: StartGame = {
-            roomId: this.currentGameRoom.value.id
-          }
-          const event : ClientEvent = "start-game";
-          this.webSocketService.send(event, payload);
-          this.waiting = true;
     }
-
-    async console():Promise<void>{
-        console.log(this.games$);
-        this.games$ = this.roomService.rooms;
-      }
 }

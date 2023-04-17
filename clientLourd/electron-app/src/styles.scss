@@ -1,71 +1,112 @@
 // Custom Theming for Angular Material
 // For more information: https://material.angular.io/guide/theming
 @use '@angular/material' as mat;
-// Plus imports for other components in your app.
-
-// Include the common styles for Angular Material. We include this here so that you only
-// have to load a single css file for Angular Material in your app.
-// Be sure that you only ever include this mixin once!
 @include mat.core();
+// Define default light theme
 
-$indigo-pink-theme: mat.define-light-theme(
+$my-palette-accent: (
+ 50: #f9f9f9,
+ 100: #f3f3f3,
+ 200: #ebebeb,
+ 300: #dcdcdc,
+ 400: #b9b9b9,
+ 500: #999999,
+ 600: #707070,
+ 700: #5d5d5d,
+ 800: #3e3e3e,
+ 900: #1d1d1d,
+ contrast: (
+    50: #000000,
+    100: #000000,
+    200: #000000,
+    300: #ffffff,
+    400: #ffffff,
+    500: #ffffff,
+    600: #ffffff,
+    700: #ffffff,
+    800: #ffffff,
+    900: #ffffff
+ )
+);
+
+$my-palette-primary: (
+ 50: #f1ebff,
+ 100: #d2d5f2,
+ 200: #b9b9da,
+ 300: #9e9ec2,
+ 400: #8a89b0,
+ 500: #76759f,
+ 600: #66678e,
+ 700: #545476,
+ 800: #424260,
+ 900: #2e2e48,
+ contrast: (
+    50: #000000,
+    100: #000000,
+    200: #000000,
+    300: #000000,
+    400: #ffffff,
+    500: #ffffff,
+    600: #ffffff,
+    700: #ffffff,
+    800: #ffffff,
+    900: #ffffff
+ )
+);
+
+$light-theme: mat.define-light-theme(
     (
         color: (
-            primary: mat.define-palette(mat.$indigo-palette),
-            accent: mat.define-palette(mat.$pink-palette, A200, A100, A400),
+            primary: mat.define-palette($my-palette-primary, 800),
+            //primary: mat.define-palette(mat.$indigo-palette, 500),
+            accent: mat.define-palette($my-palette-accent, 300),
             warn: mat.define-palette(mat.$red-palette),
         ),
     )
 );
 
-// Include theme styles for core and each component used in your app.
-// Alternatively, you can import and @include the theme mixins for each component
-// that you are using.
-@include mat.all-component-themes($indigo-pink-theme);
-
-.indigo-pink-theme {
-    // Nothing to do. This is the default theme
-}
-
-.deeppurple-amber-theme {
-    $deeppurple-amber-theme: mat.define-light-theme(
-        (
-            color: (
-                primary: mat.define-palette(mat.$deep-purple-palette),
-                accent: mat.define-palette(mat.$amber-palette, A200, A100, A400),
-            ),
+$dark-theme: mat.define-dark-theme(
+    (
+        color: (
+            primary: mat.define-palette($my-palette-primary, 100),
+            accent: mat.define-palette(mat.$pink-palette, A200, A100, A400),
+            warn: mat.define-palette(mat.$red-palette),
         )
-    );
-    @include mat.all-component-colors($deeppurple-amber-theme);
+    )
+);
+
+
+// Define a dark theme
+//@include angular-material-theme($fleet-light-theme);
+
+.dark-theme {
+    @include mat.all-component-colors($dark-theme);
+    //.mat-mdc-input-element {
+      //  margin-top: 5%;
+    //}
+  }
+  
+  .light-theme {
+    @include mat.all-component-themes($light-theme);
+  }
+
+.mat-mdc-form-field-infix {
+  display: flex;
+  flex-direction: column;
+  
+    min-width: 0;
+    width: 180px;
+    position: relative;
+    box-sizing: border-box;
+    min-height: 56px;
 }
 
-.pink-bluegrey-theme {
-    $pink-bluegrey-theme: mat.define-dark-theme(
-        (
-            color: (
-                primary: mat.define-palette(mat.$pink-palette, 700, 500, 900),
-                accent: mat.define-palette(mat.$blue-grey-palette, A200, A100, A400),
-            ),
-        )
-    );
-    @include mat.all-component-colors($pink-bluegrey-theme);
+.dark-theme .mat-mdc-text-field-wrapper:not(.mdc-text-field--outlined) .mat-mdc-form-field-infix {
+    padding-top: 24px;
+    padding-bottom: 8px;
 }
 
-.purple-green-theme {
-    $purple-green-theme: mat.define-dark-theme(
-        (
-            color: (
-                primary: mat.define-palette(mat.$purple-palette, 700, 500, 800),
-                accent: mat.define-palette(mat.$green-palette, A200, A100, A400),
-            ),
-        )
-    );
-    @include mat.all-component-colors($purple-green-theme);
-}
-
-/* You can add global styles to this file, and also import other style files */
-
-html,
+  html,
 body {
     margin: 0;
     font-family: Roboto, 'Helvetica Neue', sans-serif;
@@ -118,3 +159,42 @@ button:hover {
     font-size: 26px;
     font-family: Georgia, 'Times New Roman', Times, serif;
 }
+
+.mat-mdc-select-panel {
+    border: 1px solid #dcdcdc !important ;
+    background: #dcdcdc;
+    height: auto !important;
+}
+
+.dark-theme .mat-stepper-vertical-line::before {
+    top: -16px;
+    bottom: -16px;
+}
+
+.dark-theme .mat-vertical-stepper-header {
+    padding: 24px 24px;
+}
+
+.dark-theme .mat-step-header .mat-step-icon-selected {
+    background-color: #d2d5f2;
+    color: black;
+}
+
+.dark-theme .mat-step-header .mat-step-label.mat-step-label-active {
+    color: white;
+  }
+
+  .mat-vertical-stepper-header .mat-step-icon {
+    margin-right: 12px;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.54);
+  }
+
+  .mat-step-icon-state-done {
+    background-color: #424260;
+    color: white;
+  }
+
+  .mat-button-toggle-checked {
+    background-color: #e0e0e0;
+  }

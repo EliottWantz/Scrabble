@@ -46,31 +46,83 @@ type ChatMessage struct {
 	Timestamp time.Time `json:"timestamp" bson:"timestamp"`
 }
 
-type JoinRoomPayload struct {
-	RoomID string `json:"roomId"`
-}
-
-type JoinDMPayload struct {
-	Username   string `json:"username"`
-	ToID       string `json:"toId"`
-	ToUsername string `json:"toUsername"`
-}
-
-type JoinGameRoomPayload struct {
-	RoomID string `json:"roomId"`
-}
-
 type CreateRoomPayload struct {
 	RoomName string   `json:"roomName"`
 	UserIDs  []string `json:"userIds"`
 }
 
-type CreateGameRoomPayload struct {
-	UserIDs []string `json:"userIds"`
+type JoinRoomPayload struct {
+	RoomID string `json:"roomId"`
 }
 
 type LeaveRoomPayload struct {
 	RoomID string `json:"roomId"`
+}
+
+type CreateDMRoomPayload struct {
+	Username   string `json:"username"`
+	ToID       string `json:"toId"`
+	ToUsername string `json:"toUsername"`
+}
+
+type LeaveDMRoomPayload struct {
+	RoomID string `json:"roomId"`
+}
+
+type CreateGamePayload struct {
+	IsPrivate   bool     `json:"isPrivate"`
+	Password    string   `json:"password,omitempty"`
+	WithUserIDs []string `json:"withUserIds"`
+}
+
+type JoinGamePayload struct {
+	GameID   string `json:"gameId"`
+	Password string `json:"password,omitempty"`
+}
+
+type JoinGameAsObserverPayload struct {
+	GameID string `json:"gameId"`
+}
+type ReplaceBotByObserverPayload struct {
+	GameID string `json:"gameId"`
+	BotID  string `json:"botId"`
+}
+
+type MakeGamePrivatePayload struct {
+	GameID string `json:"gameId"`
+}
+
+type MakeGamePublicPayload struct {
+	GameID string `json:"gameId"`
+}
+
+type LeaveGamePayload struct {
+	GameID string `json:"gameId"`
+}
+
+type StartGamePayload struct {
+	GameID string `json:"gameId"`
+}
+
+type CreateTournamentPayload struct {
+	IsPrivate   bool     `json:"isPrivate"`
+	WithUserIDs []string `json:"withUserIds"`
+}
+
+type JoinTournamentPayload struct {
+	TournamentID string `json:"tournamentId"`
+}
+
+type JoinTournamentAsObserverPayload struct {
+	TournamentID string `json:"tournamentId"`
+}
+
+type LeaveTournamentPayload struct {
+	TournamentID string `json:"tournamentId"`
+}
+
+type StartTournamentPayload struct {
+	TournamentID string `json:"tournamentId"`
 }
 
 type PlayMovePayload struct {
@@ -78,22 +130,22 @@ type PlayMovePayload struct {
 	MoveInfo game.MoveInfo `json:"moveInfo"`
 }
 
-type StartGamePayload struct {
-	RoomID string `json:"roomId"`
-}
-
 type IndicePayload struct {
 	GameID string `json:"gameId"`
 }
 
+type FirstSquarePayload struct {
+	GameID      string            `json:"gameId"`
+	Coordinates scrabble.Position `json:"coordinates"`
+}
+type RemoveFirstSquarePayload = FirstSquarePayload
+
 // Server events payloads
 type JoinedRoomPayload struct {
-	RoomID     string        `json:"roomId"`
-	RoomName   string        `json:"roomName"`
-	CreatorID  string        `json:"creatorId"`
-	Users      []*user.User  `json:"users"`
-	Messages   []ChatMessage `json:"messages"`
-	IsGameRoom bool          `json:"isGameRoom"`
+	RoomID   string        `json:"roomId"`
+	RoomName string        `json:"roomName"`
+	UserIDs  []string      `json:"userIds"`
+	Messages []ChatMessage `json:"messages"`
 }
 
 func NewJoinedRoomPacket(payload JoinedRoomPayload) (*Packet, error) {
@@ -108,13 +160,59 @@ func NewLeftRoomPacket(payload LeftRoomPayload) (*Packet, error) {
 	return NewPacket(ServerEventLeftRoom, payload)
 }
 
-type UserJoinedPayload struct {
-	RoomID string     `json:"roomId"`
-	User   *user.User `json:"user"`
+type UserJoinedRoomPayload struct {
+	RoomID string `json:"roomId"`
+	UserID string `json:"userId"`
 }
 
-func NewUserJoinedPacket(payload UserJoinedPayload) (*Packet, error) {
-	return NewPacket(ServerEventUserJoined, payload)
+func NewUserJoinedRoomPacket(payload UserJoinedRoomPayload) (*Packet, error) {
+	return NewPacket(ServerEventUserJoinedRoom, payload)
+}
+
+type UserLeftRoomPayload struct {
+	RoomID string `json:"roomId"`
+	UserID string `json:"userId"`
+}
+
+func NewUserLeftRoomPacket(payload UserLeftRoomPayload) (*Packet, error) {
+	return NewPacket(ServerEventUserLeftRoom, payload)
+}
+
+type JoinedDMRoomPayload struct {
+	RoomID   string        `json:"roomId"`
+	RoomName string        `json:"roomName"`
+	UserIDs  []string      `json:"userIds"`
+	Messages []ChatMessage `json:"messages"`
+}
+
+func NewJoinedDMRoomPacket(payload JoinedDMRoomPayload) (*Packet, error) {
+	return NewPacket(ServerEventJoinedDMRoom, payload)
+}
+
+type LeftDMRoomPayload struct {
+	RoomID string `json:"roomId"`
+}
+
+func NewLeftDMRoomPacket(payload LeftDMRoomPayload) (*Packet, error) {
+	return NewPacket(ServerEventLeftDMRoom, payload)
+}
+
+type UserJoinedDMRoomPayload struct {
+	RoomID string `json:"roomId"`
+	UserID string `json:"userId"`
+}
+
+func NewUserJoinedDMRoomPacket(payload UserJoinedDMRoomPayload) (*Packet, error) {
+	return NewPacket(ServerEventUserJoinedDMRoom, payload)
+}
+
+type UserLeftDMRoomPayload struct {
+	RoomID string `json:"roomId"`
+	UserID string `json:"userId"`
+}
+
+func NewUserLeftDMRoomPacket(payload UserLeftDMRoomPayload) (*Packet, error) {
+	return NewPacket(ServerEventUserLeftDMRoom, payload)
 }
 
 type ListUsersPayload struct {
@@ -123,6 +221,14 @@ type ListUsersPayload struct {
 
 func NewListUsersPacket(payload ListUsersPayload) (*Packet, error) {
 	return NewPacket(ServerEventListUsers, payload)
+}
+
+type ListOnlineUsersPayload struct {
+	Users []user.User `json:"users"`
+}
+
+func NewListOnlineUsersPacket(payload ListOnlineUsersPayload) (*Packet, error) {
+	return NewPacket(ServerEventListOnlineUsers, payload)
 }
 
 type NewUserPayload struct {
@@ -142,37 +248,116 @@ func NewListChatRoomsPacket(payload ListChatRoomsPayload) (*Packet, error) {
 }
 
 type ListJoinableGamesPayload struct {
-	Games []room.Room `json:"games"`
+	Games []*game.Game `json:"games"`
 }
 
-func NewJoinableGamesPacket(payload ListJoinableGamesPayload) (*Packet, error) {
+func NewListJoinableGamesPacket(payload ListJoinableGamesPayload) (*Packet, error) {
 	return NewPacket(ServerEventJoinableGames, payload)
 }
 
-type Game struct {
-	ID           string                  `json:"id"`
-	Players      []*scrabble.Player      `json:"players"`
-	Board        [15][15]scrabble.Square `json:"board"`
-	Finished     bool                    `json:"finished"`
-	NumPassMoves int                     `json:"numPassMoves"`
-	Turn         string                  `json:"turn"`
-	Timer        time.Duration           `json:"timer"`
+type ListJoinableTournamentsPayload struct {
+	Tournaments []*game.Tournament `json:"tournaments"`
 }
 
-func makeGamePayload(g *scrabble.Game) *Game {
-	return &Game{
-		ID:           g.ID,
-		Players:      g.Players,
-		Board:        g.Board.Squares,
-		Finished:     g.Finished,
-		NumPassMoves: g.NumPassMoves,
-		Turn:         g.Turn,
-		Timer:        g.Timer.TimeRemaining(),
-	}
+func NewListJoinableTournamentsPacket(payload ListJoinableTournamentsPayload) (*Packet, error) {
+	return NewPacket(ServerEventJoinableTournaments, payload)
+}
+
+type ListObservableGamesPayload struct {
+	Games []*game.Game `json:"games"`
+}
+
+func NewListObservableGamesPacket(payload ListObservableGamesPayload) (*Packet, error) {
+	return NewPacket(ServerEventObservableGames, payload)
+}
+
+type ListObservableTournamentsPayload struct {
+	Tournaments []*game.Tournament `json:"tournaments"`
+}
+
+func NewListObservableTournamentsPacket(payload ListObservableTournamentsPayload) (*Packet, error) {
+	return NewPacket(ServerEventObservableTournaments, payload)
+}
+
+type JoinedGamePayload struct {
+	Game *game.Game `json:"game"`
+}
+
+func NewJoinedGamePacket(payload JoinedGamePayload) (*Packet, error) {
+	return NewPacket(ServerEventJoinedGame, payload)
+}
+
+type JoinedGameAsObserverPayload struct {
+	Game       *game.Game         `json:"game"`
+	GameUpdate *gameUpdatePayload `json:"gameUpdate"`
+}
+
+func NewJoinedGameAsObserverPacket(payload JoinedGameAsObserverPayload) (*Packet, error) {
+	return NewPacket(ServerEventJoinedGameAsObserver, payload)
+}
+
+type UserJoinedGamePayload struct {
+	GameID string `json:"gameId"`
+	UserID string `json:"userId"`
+}
+
+func NewUserJoinedGamePacket(payload UserJoinedGamePayload) (*Packet, error) {
+	return NewPacket(ServerEventUserJoinedGame, payload)
+}
+
+type LeftGamePayload struct {
+	GameID string `json:"gameId"`
+}
+
+func NewLeftGamePacket(payload LeftGamePayload) (*Packet, error) {
+	return NewPacket(ServerEventLeftGame, payload)
+}
+
+type UserLeftGamePayload struct {
+	GameID string `json:"gameId"`
+	UserID string `json:"userId"`
+}
+
+func NewUserLeftGamePacket(payload UserLeftGamePayload) (*Packet, error) {
+	return NewPacket(ServerEventUserLeftGame, payload)
 }
 
 type GameUpdatePayload struct {
-	Game *Game `json:"game"`
+	Game *gameUpdatePayload `json:"game"`
+}
+
+type gameUpdatePayload struct {
+	ID           string                  `json:"id"`
+	Players      []*scrabble.Player      `json:"players,omitempty"`
+	Board        [15][15]scrabble.Square `json:"board,omitempty"`
+	TileCount    int                     `json:"tileCount,omitempty"`
+	Finished     bool                    `json:"finished,omitempty"`
+	NumPassMoves int                     `json:"numPassMoves,omitempty"`
+	Turn         string                  `json:"turn,omitempty"`
+	Timer        time.Duration           `json:"timer,omitempty"`
+	WinnerID     string                  `json:"winnerId,omitempty"`
+}
+
+func makeGameUpdatePayload(g *game.Game) *gameUpdatePayload {
+	if g == nil {
+		return nil
+	}
+	if g.ScrabbleGame == nil {
+		return &gameUpdatePayload{
+			ID: g.ID,
+		}
+	}
+	return &gameUpdatePayload{
+		ID:           g.ID,
+		Players:      g.ScrabbleGame.Players,
+		Board:        g.ScrabbleGame.Board.Squares,
+		TileCount:    g.ScrabbleGame.Bag.TileCount(),
+		Finished:     g.ScrabbleGame.Finished,
+		NumPassMoves: g.ScrabbleGame.NumPassMoves,
+		Turn:         g.ScrabbleGame.Turn,
+		Timer:        g.ScrabbleGame.Timer.TimeRemaining(),
+		WinnerID:     g.WinnerID,
+	}
 }
 
 func NewGameUpdatePacket(payload GameUpdatePayload) (*Packet, error) {
@@ -220,9 +405,146 @@ func NewServerIndicePacket(payload ServerIndicePayload) (*Packet, error) {
 	return NewPacket(ServerEventIndice, payload)
 }
 
+type JoinedTournamentPayload struct {
+	Tournament *game.Tournament `json:"tournament"`
+}
+
+func NewJoinedTournamentPacket(payload JoinedTournamentPayload) (*Packet, error) {
+	return NewPacket(ServerEventJoinedTournament, payload)
+}
+
+type UserJoinedTournamentPayload struct {
+	TournamentID string `json:"tournamentId"`
+	UserID       string `json:"userId"`
+}
+
+func NewUserJoinedTournamentPacket(payload UserJoinedTournamentPayload) (*Packet, error) {
+	return NewPacket(ServerEventUserJoinedTournament, payload)
+}
+
+type LeftTournamentPayload struct {
+	TournamentID string `json:"tournamentId"`
+}
+
+func NewLeftTournamentPacket(payload LeftTournamentPayload) (*Packet, error) {
+	return NewPacket(ServerEventLeftTournament, payload)
+}
+
+type UserLeftTournamentPayload struct {
+	TournamentID string `json:"tournamentId"`
+	UserID       string `json:"userId"`
+}
+
+func NewUserLeftTournamentPacket(payload UserLeftTournamentPayload) (*Packet, error) {
+	return NewPacket(ServerEventUserLeftTournament, payload)
+}
+
+type TournamentUpdatePayload struct {
+	Tournament *game.Tournament `json:"tournament"`
+}
+
+func NewTournamentUpdatePacket(payload TournamentUpdatePayload) (*Packet, error) {
+	return NewPacket(ServerEventTournamentUpdate, payload)
+}
+
+type TournamentOverPayload struct {
+	TournamentID string `json:"tournamentId"`
+	WinnerID     string `json:"winnerId"`
+}
+
+func NewTournamentOverPacket(payload TournamentOverPayload) (*Packet, error) {
+	return NewPacket(ServerEventTournamentOver, payload)
+}
+
 func NewErrorPacket(err error) (*Packet, error) {
 	type ErrorPayload struct {
 		Error string `json:"error"`
 	}
 	return NewPacket(ServerEventError, ErrorPayload{err.Error()})
+}
+
+type UserRequestToJoinGamePayload struct {
+	GameID   string `json:"gameId"`
+	UserID   string `json:"userId"`
+	Username string `json:"username"`
+}
+
+func NewUserRequestToJoinGamePacket(payload UserRequestToJoinGamePayload) (*Packet, error) {
+	return NewPacket(ServerEventUserRequestToJoinGame, payload)
+}
+
+type UserRequestToJoinTournamentPayload struct {
+	TournamentID string `json:"tournamentId"`
+	UserID       string `json:"userId"`
+	Username     string `json:"username"`
+}
+
+func NewUserRequestToJoinTournamentPacket(payload UserRequestToJoinTournamentPayload) (*Packet, error) {
+	return NewPacket(ServerEventUserRequestToJoinTournament, payload)
+}
+
+type VerdictJoinGameRequestPayload struct {
+	GameID string `json:"gameId"`
+	UserID string `json:"userId"`
+}
+
+func NewAcceptJoinGameRequestPacket(payload VerdictJoinGameRequestPayload) (*Packet, error) {
+	return NewPacket(ServerEventUserRequestToJoinGameAccepted, payload)
+}
+
+func NewDeclineJoinGameRequestPacket(payload VerdictJoinGameRequestPayload) (*Packet, error) {
+	return NewPacket(ServerEventUserRequestToJoinGameDeclined, payload)
+}
+
+type VerdictJoinTournamentRequestPayload struct {
+	TournamentID string `json:"tournamentId"`
+	UserID       string `json:"userId"`
+}
+
+func NewAcceptJoinTournamentRequestPacket(payload VerdictJoinTournamentRequestPayload) (*Packet, error) {
+	return NewPacket(ServerEventUserRequestToJoinTournamentAccepted, payload)
+}
+
+func NewDeclineJoinTournamentRequestPacket(payload VerdictJoinTournamentRequestPayload) (*Packet, error) {
+	return NewPacket(ServerEventUserRequestToJoinTournamentDeclined, payload)
+}
+
+type RevokeRequestToJoinGamePayload struct {
+	GameID string `json:"gameId"`
+	UserID string `json:"userId"`
+}
+
+func NewRevokeRequestToJoinGamePacket(payload RevokeRequestToJoinGamePayload) (*Packet, error) {
+	return NewPacket(ServerEventRevokeRequestToJoinGame, payload)
+}
+
+type RevokeRequestToJoinTournamentPayload struct {
+	TournamentID string `json:"tournamentId"`
+	UserID       string `json:"userId"`
+}
+
+func NewRevokeRequestToJoinTournamentPacket(payload RevokeRequestToJoinTournamentPayload) (*Packet, error) {
+	return NewPacket(ServerEventRevokeRequestToJoinTournament, payload)
+}
+
+type InvitedToGamePayload struct {
+	Game      *game.Game `json:"game"`
+	InviterID string     `json:"inviterId"`
+}
+
+func NewInvitedToGamePacket(payload InvitedToGamePayload) (*Packet, error) {
+	return NewPacket(ServerEventInvitedToGame, payload)
+}
+
+type InviteToGamePayload struct {
+	GameID    string `json:"gameId"`
+	InvitedID string `json:"invitedId"`
+}
+
+func NewAcceptedInviteToGamePacket(payload InviteToGamePayload) (*Packet, error) {
+	return NewPacket(ServerEventAcceptedInviteToGame, payload)
+}
+
+func NewRejectInviteToGamePacket(payload InviteToGamePayload) (*Packet, error) {
+	return NewPacket(ServerEventRejectInviteToGame, payload)
 }

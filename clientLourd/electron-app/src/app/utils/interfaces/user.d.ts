@@ -5,9 +5,16 @@ export interface User {
     username: string;
     email: string;
     avatar: {url: string, fileId: string};
-    preferences: {theme: string};
+    preferences: Preferences;
     joinedChatRooms: string[];
+    joinedDMRooms: string[];
+    joinedGame: string;
 	friends: string[];
 	pendingRequests: string[];
 	summary: Summary;
+}
+
+export interface Preferences {
+    theme: string;
+    language: string;
 }

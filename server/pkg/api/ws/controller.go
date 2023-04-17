@@ -1,14 +1,18 @@
 package ws
 
 import (
-	"strconv"
+	"fmt"
+	"time"
+
+	"scrabble/pkg/api/auth"
+	"scrabble/pkg/api/user"
 
 	"github.com/gofiber/fiber/v2"
+	"golang.org/x/exp/slices"
+	"golang.org/x/exp/slog"
 )
 
 type GetMessagesResponse struct {
-	NextSkip int           `json:"nextSkip,omitempty"`
-	HasMore  bool          `json:"hasMore"`
 	Messages []ChatMessage `json:"messages,omitempty"`
 }
 
@@ -17,26 +21,661 @@ func (m *Manager) GetMessages(c *fiber.Ctx) error {
 	if roomID == "" {
 		return fiber.NewError(fiber.StatusBadRequest, "Room ID is required")
 	}
-	skip, err := strconv.Atoi(c.Query("skip", "0"))
+
+	msgs, err := m.MessageRepo.LatestMessage(roomID)
 	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, "Invalid bucket skip value")
+		return fiber.NewError(fiber.StatusInternalServerError, "Failed to get messages: "+err.Error())
 	}
 
-	hasMore := true
-	msgs, err := m.MessageRepo.LatestMessage(roomID, skip)
+	return c.Status(fiber.StatusOK).JSON(GetMessagesResponse{
+		Messages: msgs,
+	})
+}
+
+type LoginRequest struct {
+	Username string `json:"username,omitempty"`
+	Password string `json:"password,omitempty"`
+	Token    string `json:"token,omitempty"`
+}
+
+type LoginResponse struct {
+	User  *user.User `json:"user,omitempty"`
+	Token string     `json:"token,omitempty"`
+}
+
+func (m *Manager) LoginRoute(c *fiber.Ctx) error {
+	var req LoginRequest
+	err := c.BodyParser(&req)
 	if err != nil {
-		skip--
-		hasMore = false
-		msgs, err = m.MessageRepo.LatestMessage(roomID, skip)
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	slog.Info("login request", "req", req)
+
+	var (
+		u     *user.User
+		token string
+	)
+
+	if req.Username != "" && req.Password != "" {
+		// Login with username and password
+		if u, err = m.Login(req.Username, req.Password); err != nil {
+			return err
+		}
+
+		token, err = m.authSvc.GenerateJWT(u.ID)
 		if err != nil {
-			return fiber.NewError(fiber.StatusInternalServerError, "Failed to get messages: "+err.Error())
+			return fiber.NewError(fiber.StatusInternalServerError, "failed to generate token")
+		}
+	} else if req.Token != "" {
+		// Login with token
+		claims, err := m.authSvc.VerifyJWT(req.Token)
+		if err != nil {
+			return fiber.NewError(fiber.StatusUnauthorized, "invalid token")
+		}
+
+		// Refresh token
+		if token, err = m.authSvc.RefreshJWT(req.Token, claims); err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, "failed to refresh token")
+		}
+
+		if u, err = m.UserSvc.GetUser(claims.UserID); err != nil {
+			return err
 		}
 	}
 
-	skip++
-	return c.Status(fiber.StatusOK).JSON(GetMessagesResponse{
-		NextSkip: skip,
-		HasMore:  hasMore,
-		Messages: msgs,
+	slog.Info("response", "user", u, "token", token)
+
+	return c.JSON(LoginResponse{
+		User:  u,
+		Token: token,
 	})
+}
+
+func (m *Manager) Login(username, password string) (*user.User, error) {
+	u, err := m.UserSvc.Repo.FindByUsername(username)
+	if err != nil {
+		return nil, fiber.NewError(fiber.StatusNotFound, "user not found")
+	}
+
+	clients := m.getClientsByUserID(u.ID)
+	if len(clients) == 0 {
+		u.IsConnected = false
+	}
+
+	if u.IsConnected {
+		return nil, fiber.NewError(fiber.StatusForbidden, "user already connected")
+	}
+
+	if !auth.PasswordsMatch(password, u.HashedPassword) {
+		return nil, fiber.NewError(fiber.StatusUnauthorized, "password mismatch")
+	}
+	return u, m.UserSvc.AddNetworkingLog(u, "Login", time.Now().UnixMilli())
+}
+
+type ProtectedGameRequest struct {
+	Password string `json:"password,omitempty"`
+}
+
+func (m *Manager) ProtectGame(c *fiber.Ctx) error {
+	req := ProtectedGameRequest{}
+	if err := c.BodyParser(&req); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "decode req: "+err.Error())
+	}
+
+	gameID := c.Params("id")
+	if gameID == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "Game ID is required")
+	}
+
+	_, err := m.GameSvc.ProtectGame(gameID, req.Password)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	if err := m.BroadcastJoinableGames(); err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+	return c.SendStatus(fiber.StatusOK)
+}
+
+func (m *Manager) UnprotectGame(c *fiber.Ctx) error {
+	gameID := c.Params("id")
+	if gameID == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "Game ID is required")
+	}
+
+	if _, err := m.GameSvc.UnprotectGame(gameID); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	if err := m.BroadcastJoinableGames(); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	return c.SendStatus(fiber.StatusOK)
+}
+
+func (m *Manager) SendFriendRequest(c *fiber.Ctx) error {
+	id := c.Params("id")
+	friendId := c.Params("friendId")
+
+	err := m.sendFriendRequest(id, friendId)
+	if err != nil {
+		return err
+	}
+	user, _ := m.UserSvc.GetUser(id)
+	friendRequestPayload := FriendRequestPayload{
+		FromID:       id,
+		FromUsername: user.Username,
+	}
+	p, err := NewFriendRequestPacket(friendRequestPayload)
+	if err != nil {
+		m.logger.Error("failed to create friend request packet", err)
+	}
+	client, err := m.getClientByUserID(friendId)
+	if err != nil {
+		m.logger.Info("Client with id %s is not connected", friendId)
+		return c.SendStatus(fiber.StatusAccepted)
+	}
+	client.send(p)
+	return c.SendStatus(fiber.StatusOK)
+}
+
+func (m *Manager) AcceptFriendRequest(c *fiber.Ctx) error {
+	id := c.Params("id")
+	friendId := c.Params("friendId")
+
+	err := m.acceptFriendRequest(id, friendId)
+	if err != nil {
+		return err
+	}
+	user, _ := m.UserSvc.GetUser(friendId)
+	friendRequestPayload := FriendRequestPayload{
+		FromID:       friendId,
+		FromUsername: user.Username,
+	}
+	p, err := AcceptFRiendRequestPacket(friendRequestPayload)
+	if err != nil {
+		m.logger.Error("failed to create friend request packet", err)
+	}
+	client, err := m.getClientByUserID(friendId)
+	if err != nil {
+
+		m.logger.Info("Client with id %s is not connected", friendId)
+		return c.SendStatus(fiber.StatusAccepted)
+	}
+	client.send(p)
+	return c.SendStatus(fiber.StatusOK)
+}
+
+func (m *Manager) RejectFriendRequest(c *fiber.Ctx) error {
+	id := c.Params("id")
+	friendId := c.Params("friendId")
+
+	err := m.rejectFriendRequest(id, friendId)
+	if err != nil {
+		return err
+	}
+	user, _ := m.UserSvc.GetUser(id)
+	friendRequestPayload := FriendRequestPayload{
+		FromID:       friendId,
+		FromUsername: user.Username,
+	}
+	p, err := DeclineFriendRequestPacket(friendRequestPayload)
+	if err != nil {
+		m.logger.Error("failed to create friend request packet", err)
+	}
+	client, err := m.getClientByUserID(friendId)
+	if err != nil {
+		m.logger.Info("Client with id %s is not connected", friendId)
+		return c.SendStatus(fiber.StatusAccepted)
+	}
+	client.send(p)
+	return c.SendStatus(fiber.StatusOK)
+}
+
+type GetFriendsResponse struct {
+	Friends []*user.User `json:"friends,omitempty"`
+}
+
+func (m *Manager) GetFriends(c *fiber.Ctx) error {
+	id := c.Params("id")
+	if id == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "User ID is required")
+	}
+	friends, err := m.GetFriendsList(id)
+	if err != nil {
+		return err
+	}
+	return c.JSON(GetFriendsResponse{
+		Friends: friends,
+	})
+}
+
+func (m *Manager) GetOnlineFriends(c *fiber.Ctx) error {
+	id := c.Params("id")
+	if id == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "User ID is required")
+	}
+	friends, err := m.GetFriendsList(id)
+	if err != nil {
+		return err
+	}
+	online := m.ListOnlineUsers()
+	res := make([]*user.User, 0)
+	for _, u := range online {
+		for _, f := range friends {
+			if f.ID == u.ID {
+				res = append(res, f)
+			}
+		}
+	}
+	return c.JSON(GetFriendsResponse{
+		Friends: res,
+	})
+}
+
+type GetUserResponse struct {
+	User *user.User `json:"user,omitempty"`
+}
+
+func (m *Manager) GetFriendById(c *fiber.Ctx) error {
+	id := c.Params("id")
+	friendId := c.Params("friendId")
+	if id == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "id is required")
+	}
+	if friendId == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "friendId is required")
+	}
+	friend, err := m.GetFriendlistById(id, friendId)
+	if err != nil {
+		return err
+	}
+	return c.JSON(GetUserResponse{
+		User: friend,
+	})
+}
+
+func (m *Manager) RemoveFriend(c *fiber.Ctx) error {
+	id := c.Params("id")
+	friendId := c.Params("friendId")
+	if id == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "id is required")
+	}
+	if friendId == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "friendId is required")
+	}
+
+	err := m.RemoveFriendFromList(id, friendId)
+	if err != nil {
+		return err
+	}
+	return c.SendStatus(fiber.StatusOK)
+}
+
+type GetFriendRequestsResponse struct {
+	FriendRequests []*user.User `json:"friendRequests,omitempty"`
+}
+
+func (m *Manager) GetPendingFriendRequests(c *fiber.Ctx) error {
+	id := c.Params("id")
+	if id == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "id is required")
+	}
+	friendRequests, err := m.GetPendingFriendlistRequests(id)
+	if err != nil {
+		return err
+	}
+	return c.JSON(GetFriendRequestsResponse{
+		FriendRequests: friendRequests,
+	})
+}
+
+func (m *Manager) AcceptJoinGameRequest(c *fiber.Ctx) error {
+	id := c.Params("id")
+	if id == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "id is required")
+	}
+	requestorId := c.Params("requestorId")
+	if requestorId == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "requestorId is required")
+	}
+	gId := c.Params("gameId")
+	if gId == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "gameId is required")
+	}
+	g, err := m.GameSvc.Repo.FindGame(gId)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	g.UserIDs = append(g.UserIDs, requestorId)
+	if !slices.Contains(g.JoinGameRequestUserIds, requestorId) {
+		return fiber.NewError(fiber.StatusBadRequest, "The user has revoked the request to join the game")
+	}
+
+	if g.CreatorID != id {
+		return fiber.NewError(fiber.StatusBadRequest, "You are not the creator of the game")
+	}
+	r, err := m.GetRoom(gId)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	client, err := m.getClientByUserID(requestorId)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+
+	if err := r.AddClient(client.ID); err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+	if err := m.UserSvc.Repo.SetJoinedGame(g.ID, requestorId); err != nil {
+		return err
+	}
+
+	if err := r.SendVerdictJoinGameRequest(client, g, Accepted); err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+	return r.BroadcastJoinGamePackets(client, g)
+}
+
+func (m *Manager) RevokeRequestToJoinGame(c *fiber.Ctx) error {
+	id := c.Params("id")
+	if id == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "id is required")
+	}
+	gId := c.Params("gameId")
+	if gId == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "gameId is required")
+	}
+	g, err := m.GameSvc.Repo.FindGame(gId)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	for i, pendingJoinGameRequestId := range g.JoinGameRequestUserIds {
+		if pendingJoinGameRequestId == id {
+			g.JoinGameRequestUserIds = append(g.JoinGameRequestUserIds[:i], g.JoinGameRequestUserIds[i+1:]...)
+		}
+	}
+
+	r, err := m.GetRoom(gId)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	client, err := m.getClientByUserID(g.CreatorID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	return r.RevokeRequestToJoinGameRequest(client, g, id)
+}
+
+func (m *Manager) RejectJoinGameRequest(c *fiber.Ctx) error {
+	id := c.Params("id")
+	if id == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "id is required")
+	}
+	requestorId := c.Params("requestorId")
+	if requestorId == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "requestorId is required")
+	}
+	gId := c.Params("gameId")
+	if gId == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "gameId is required")
+	}
+	g, err := m.GameSvc.Repo.FindGame(gId)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+
+	if !slices.Contains(g.JoinGameRequestUserIds, requestorId) {
+		return fiber.NewError(fiber.StatusBadRequest, "The user has revoked the request to join the game")
+	}
+
+	if g.CreatorID != id {
+		return fiber.NewError(fiber.StatusBadRequest, "You are not the creator of the game")
+	}
+	r, err := m.GetRoom(gId)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	client, err := m.getClientByUserID(requestorId)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	return r.SendVerdictJoinGameRequest(client, g, Declined)
+}
+
+func (m *Manager) AcceptJoinTournamentRequest(c *fiber.Ctx) error {
+	id := c.Params("id")
+	if id == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "id is required")
+	}
+	requestorId := c.Params("requestorId")
+	if requestorId == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "requestorId is required")
+	}
+	tId := c.Params("tID")
+	if tId == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "tID is required")
+	}
+	t, err := m.GameSvc.Repo.FindTournament(tId)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	t.UserIDs = append(t.UserIDs, requestorId)
+	if !slices.Contains(t.JoinTournamentRequestUserIds, requestorId) {
+		return fiber.NewError(fiber.StatusBadRequest, "The user has revoked the request to join the game")
+	}
+	if t.CreatorID != id {
+		return fiber.NewError(fiber.StatusBadRequest, "You are not the creator of the tournament")
+	}
+	r, err := m.GetRoom(tId)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	client, err := m.getClientByUserID(requestorId)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+
+	if err := r.AddClient(client.ID); err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+	if err := m.UserSvc.Repo.SetJoinedTournament(t.ID, requestorId); err != nil {
+		return err
+	}
+
+	if err := r.SendVerdictJoinTournamentRequest(client, t, Accepted); err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+	return r.BroadcastJoinTournamentPackets(client, t)
+}
+
+func (m *Manager) RevokeRequestToJoinTournament(c *fiber.Ctx) error {
+	id := c.Params("id")
+	if id == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "id is required")
+	}
+	tId := c.Params("tID")
+	if tId == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "tID is required")
+	}
+	t, err := m.GameSvc.Repo.FindTournament(tId)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+
+	for i, pendingJoinTournamentRequestId := range t.JoinTournamentRequestUserIds {
+		if pendingJoinTournamentRequestId == id {
+			t.JoinTournamentRequestUserIds = append(t.JoinTournamentRequestUserIds[:i], t.JoinTournamentRequestUserIds[i+1:]...)
+		}
+	}
+
+	r, err := m.GetRoom(tId)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	client, err := m.getClientByUserID(t.CreatorID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	return r.RevokeRequestToJoinTournamentRequest(client, t, id)
+}
+
+func (m *Manager) RejectJoinTournamentRequest(c *fiber.Ctx) error {
+	id := c.Params("id")
+	if id == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "id is required")
+	}
+	tId := c.Params("tID")
+	if tId == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "tID is required")
+	}
+	requestorId := c.Params("requestorId")
+	if requestorId == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "requestorId is required")
+	}
+	t, err := m.GameSvc.Repo.FindTournament(tId)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	if !slices.Contains(t.JoinTournamentRequestUserIds, id) {
+		return fiber.NewError(fiber.StatusBadRequest, "The user revoked is request to join the Tournament")
+	}
+	if t.CreatorID != id {
+		return fiber.NewError(fiber.StatusBadRequest, "You are not the creator of the tournament")
+	}
+	r, err := m.GetRoom(tId)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	client, err := m.getClientByUserID(requestorId)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	return r.SendVerdictJoinTournamentRequest(client, t, Declined)
+}
+
+type InviteFriendToGameRequest struct {
+	InvitedID string `json:"invitedId"`
+	InviterID string `json:"inviterId"`
+	GameID    string `json:"gameId"`
+}
+
+func (m *Manager) InviteFriendToGame(c *fiber.Ctx) error {
+	req := &InviteFriendToGameRequest{}
+	if err := c.BodyParser(req); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	g, err := m.GameSvc.Repo.FindGame(req.GameID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	invitedClient, err := m.getClientByUserID(req.InvitedID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+
+	p, err := NewInvitedToGamePacket(InvitedToGamePayload{
+		Game:      g,
+		InviterID: req.InviterID,
+	})
+	if err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+	invitedClient.send(p)
+
+	return c.SendStatus(fiber.StatusOK)
+}
+
+type FriendInvitationToGameRequest struct {
+	InviterID    string `json:"inviterId"`
+	InvitedID    string `json:"invitedId"`
+	GameID       string `json:"gameId"`
+	GamePassword string `json:"gamePassword"`
+}
+
+func (m *Manager) AcceptFriendInvitationToGame(c *fiber.Ctx) error {
+	req := &FriendInvitationToGameRequest{}
+	if err := c.BodyParser(req); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	gameToJoin, err := m.GameSvc.Repo.FindGame(req.GameID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	// Inviter that sent the invite
+	inviterClient, err := m.getClientByUserID(req.InviterID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	// Invited user that received the invite
+	invitedUser, err := m.UserSvc.Repo.Find(req.InvitedID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	invitedClient, err := m.getClientByUserID(req.InvitedID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	if invitedUser.JoinedGame != "" { // leave old game
+		// Before leaving old game, check if password is correct
+		if gameToJoin.IsProtected && !auth.PasswordsMatch(req.GamePassword, gameToJoin.HashedPassword) {
+			return fmt.Errorf("password mismatch")
+		}
+
+		m.GameSvc.RemoveUserFromGame(invitedUser.JoinedGame, invitedUser.ID)
+		r, err := m.GetRoom(invitedUser.JoinedGame)
+		if err != nil {
+			return fiber.NewError(fiber.StatusBadRequest, err.Error())
+		}
+		if err := r.BroadcastLeaveGamePackets(invitedClient, invitedUser.JoinedGame); err != nil {
+			m.logger.Error("broadcast leave game packets", err)
+		}
+	}
+
+	{
+		p, err := NewAcceptedInviteToGamePacket(InviteToGamePayload{
+			GameID:    req.GameID,
+			InvitedID: req.InvitedID,
+		})
+		if err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+		}
+		inviterClient.send(p)
+	}
+
+	// Make the player that accepted the invitation join the game
+	if err := invitedClient.JoinGame(JoinGamePayload{
+		GameID:   req.GameID,
+		Password: req.GamePassword,
+	}); err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+
+	return c.SendStatus(fiber.StatusOK)
+}
+
+func (m *Manager) RejectFriendInvitationToGame(c *fiber.Ctx) error {
+	req := &FriendInvitationToGameRequest{}
+	if err := c.BodyParser(req); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	_, err := m.GameSvc.Repo.FindGame(req.GameID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	inviterClient, err := m.getClientByUserID(req.InviterID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	{
+		p, err := NewRejectInviteToGamePacket(InviteToGamePayload{
+			GameID:    req.GameID,
+			InvitedID: req.InvitedID,
+		})
+		if err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+		}
+		inviterClient.send(p)
+	}
+
+	return c.SendStatus(fiber.StatusOK)
 }
