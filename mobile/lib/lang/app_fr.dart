@@ -238,4 +238,7 @@ const Map<String, String> fr_FR = {
   "game_screen.pass": "Passer",
   "game_screen.observe-choose": "Veuillez choisir un joueur à observer",
   "game_screen.nol-letters": "Plus de lettres disponibles",
+  "sidebar-game-options": "Options de jeu",
+  "sidebar-game-avatar-choice": "Choix de l\'avatar",
+  "modify-profil": "Moficiation du profil",
 };

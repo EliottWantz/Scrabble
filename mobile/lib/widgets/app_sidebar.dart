@@ -90,11 +90,11 @@ class AppSideBar extends StatelessWidget {
                     dropdownColor: Color(0xFF2E2E48),
                     items: const [
                       DropdownMenuItem(
-                        child: Center(child: Text('Français')),
+                        child: Center(child: Text('language-french'.tr)),
                         value: 'fr',
                       ),
                       DropdownMenuItem(
-                          child: Center(child: Text('Anglais')), value: 'en')
+                          child: Center(child: Text('language-english'.tr)), value: 'en')
                     ],
                     onChanged: (String? value) async {
                       await settingsService.switchLang(value!);
@@ -151,11 +151,11 @@ class AppSideBar extends StatelessWidget {
                     dropdownColor: Color(0xFF2E2E48),
                     items: const [
                       DropdownMenuItem(
-                        child: Center(child: Text('Français')),
+                        child: Center(child: Text('language-french'.tr)),
                         value: 'fr',
                       ),
                       DropdownMenuItem(
-                          child: Center(child: Text('Anglais')), value: 'en')
+                          child: Center(child: Text('language-english'.tr)), value: 'en')
                     ],
                     onChanged: (String? value) async {
                       await settingsService.switchLang(value!);
@@ -201,11 +201,11 @@ class AppSideBar extends StatelessWidget {
                     dropdownColor: Color(0xFF2E2E48),
                     items: const [
                       DropdownMenuItem(
-                        child: Center(child: Text('Français')),
+                        child: Center(child: Text('language-french'.tr)),
                         value: 'fr',
                       ),
                       DropdownMenuItem(
-                          child: Center(child: Text('Anglais')), value: 'en')
+                          child: Center(child: Text('language-english'.tr)), value: 'en')
                     ],
                     onChanged: (String? value) async {
                       await settingsService.switchLang(value!);
@@ -266,11 +266,11 @@ class AppSideBar extends StatelessWidget {
                     dropdownColor: Color(0xFF2E2E48),
                     items: const [
                       DropdownMenuItem(
-                        child: Center(child: Text('Français')),
+                        child: Center(child: Text('language-french'.tr)),
                         value: 'fr',
                       ),
                       DropdownMenuItem(
-                          child: Center(child: Text('Anglais')), value: 'en')
+                          child: Center(child: Text('language-english'.tr)), value: 'en')
                     ],
                     onChanged: (String? value) async {
                       await settingsService.switchLang(value!);
@@ -327,11 +327,11 @@ class AppSideBar extends StatelessWidget {
                     dropdownColor: Color(0xFF2E2E48),
                     items: const [
                       DropdownMenuItem(
-                        child: Center(child: Text('Français')),
+                        child: Center(child: Text('language-french'.tr)),
                         value: 'fr',
                       ),
                       DropdownMenuItem(
-                          child: Center(child: Text('Anglais')), value: 'en')
+                          child: Center(child: Text('language-english'.tr)), value: 'en')
                     ],
                     onChanged: (String? value) async {
                       await settingsService.switchLang(value!);
@@ -423,49 +423,49 @@ class AppSideBar extends StatelessWidget {
           label: 'PolyScrabble',
           onTap: () {},
         ),
-        const SidebarXItem(
+        SidebarXItem(
           icon: Icons.person,
-          label: 'Profile',
+          label: 'sidebar-component.profile'.tr,
         ),
-        const SidebarXItem(
+        SidebarXItem(
           icon: Icons.people_alt,
-          label: 'Social',
+          label: 'sidebar-component.social'.tr,
         ),
       ];
     } else if (ModalRoute.of(context)!.settings.name == '/auth/login') {
       return [
-        const SidebarXItem(
+        SidebarXItem(
           icon: Icons.home,
-          label: 'Connexion',
+          label: 'sidebar-component.connect'.tr,
         ),
       ];
     } else if (ModalRoute.of(context)!.settings.name == '/auth/register') {
       return [
-        const SidebarXItem(
+        SidebarXItem(
           icon: Icons.home,
-          label: 'Inscription',
+          label: 'sidebar-component.register'.tr,
         ),
       ];
     } else if (ModalRoute.of(context)!.settings.name == '/home/game-start') {
       return [
-        const SidebarXItem(
+        SidebarXItem(
           icon: Icons.settings,
-          label: 'Options de Jeu',
+          label: 'sidebar-game-options'.tr,
         ),
       ];
     } else if (ModalRoute.of(context)!.settings.name ==
         '/auth/register/avatar-selection') {
       return [
-        const SidebarXItem(
+        SidebarXItem(
           icon: Icons.home,
-          label: 'Choix de l\'avatar',
+          label: 'sidebar-game-avatar-choice'.tr,
         ),
       ];
     } else if (ModalRoute.of(context)!.settings.name == '/home/profile-edit') {
       return [
-        const SidebarXItem(
+        SidebarXItem(
           icon: Icons.change_circle,
-          label: 'Édition du profil',
+          label: 'modify-profil'.tr,
         ),
       ];
     } else {

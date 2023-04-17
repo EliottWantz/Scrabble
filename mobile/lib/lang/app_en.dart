@@ -234,4 +234,7 @@ const Map<String, String> en_US = {
   "game_screen.pass": "Pass",
   "game_screen.observe-choose": "Please choose a player to observe",
   "game_screen.nol-letters": "No more letters available",
+  "sidebar-game-options": "Game options",
+  "sidebar-game-avatar-choice": "Choose an avatar",
+  "modify-profil": "Modify profile",
 };
