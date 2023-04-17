@@ -103,7 +103,8 @@ class ProfileEditScreen extends GetView<AvatarController> {
                                     Icons.change_circle,
                                     size: 20,
                                   ),
-                                  label: Text('profile-screen-edit-pseudonyme'.tr),
+                                  label:
+                                      Text('profile-screen-edit-pseudonyme'.tr),
                                 ),
                               ],
                             ),
@@ -296,7 +297,8 @@ class ProfileEditScreen extends GetView<AvatarController> {
                       controller.isAvatarCustomizable.value = false;
                     },
                     icon: const Icon(Icons.check),
-                    label: Text('default-avatar-selection-component.confirm'.tr),
+                    label:
+                        Text('default-avatar-selection-component.confirm'.tr),
                   ),
                 ],
               ),
@@ -345,11 +347,14 @@ class ProfileEditScreen extends GetView<AvatarController> {
                                       controller.isAvatarCustomizable.value =
                                           true;
                                     },
-                                    child: Text('customize-avatar-component.generate'.tr),
+                                    child: Text(
+                                        'customize-avatar-component.generate'
+                                            .tr),
                                   )
                                 : ElevatedButton(
                                     onPressed: controls.onStepContinue,
-                                    child: Text('customize-avatar-component.next'.tr),
+                                    child: Text(
+                                        'customize-avatar-component.next'.tr),
                                   ),
                             if (controller.currentStep != 0)
                               TextButton(
@@ -375,13 +380,16 @@ class ProfileEditScreen extends GetView<AvatarController> {
           content: Obx(() => DropdownButton<String>(
                 menuMaxHeight: 150,
                 value: controller.gender.value,
-                items: const [
+                items: [
                   DropdownMenuItem(
                     value: 'Baby',
-                    child: Center(child: Text('customize-avatar-component.male'.tr)),
+                    child: Center(
+                        child: Text('customize-avatar-component.male'.tr)),
                   ),
                   DropdownMenuItem(
-                      value: 'Annie', child: Center(child: Text('customize-avatar-component.female'.tr))),
+                      value: 'Annie',
+                      child: Center(
+                          child: Text('customize-avatar-component.female'.tr))),
                 ],
                 onChanged: (String? value) {
                   controller.gender.value = value!;
@@ -420,25 +428,38 @@ class ProfileEditScreen extends GetView<AvatarController> {
           content: Obx(() => DropdownButton<String>(
                 menuMaxHeight: 150,
                 value: controller.hairType.value,
-                items: const [
+                items: [
                   DropdownMenuItem(
                     value: 'straightAndStrand',
-                    child: Center(child: Text('customize-avatar-component.hair-types.straightAndStrand'.tr)),
+                    child: Center(
+                        child: Text(
+                            'customize-avatar-component.hair-types.straightAndStrand'
+                                .tr)),
                   ),
                   DropdownMenuItem(
                       value: 'longButNotTooLong',
-                      child: Center(child: Text('customize-avatar-component.hair-types.longButNotTooLong'.tr))),
+                      child: Center(
+                          child: Text(
+                              'customize-avatar-component.hair-types.longButNotTooLong'
+                                  .tr))),
                   DropdownMenuItem(
                     value: 'shortFlat',
-                    child: Center(child: Text('customize-avatar-component.hair-types.shortFlat'.tr)),
+                    child: Center(
+                        child: Text(
+                            'customize-avatar-component.hair-types.shortFlat'
+                                .tr)),
                   ),
                   DropdownMenuItem(
                     value: 'fro',
-                    child: Center(child: Text('customize-avatar-component.hair-types.fro'.tr)),
+                    child: Center(
+                        child: Text(
+                            'customize-avatar-component.hair-types.fro'.tr)),
                   ),
                   DropdownMenuItem(
                     value: 'dreads',
-                    child: Center(child: Text('customize-avatar-component.hair-types.dreads'.tr)),
+                    child: Center(
+                        child: Text(
+                            'customize-avatar-component.hair-types.dreads'.tr)),
                   ),
                 ],
                 onChanged: (String? value) {
@@ -471,24 +492,36 @@ class ProfileEditScreen extends GetView<AvatarController> {
           content: Obx(() => DropdownButton<String>(
                 menuMaxHeight: 150,
                 value: controller.eyeType.value,
-                items: const [
+                items: [
                   DropdownMenuItem(
                     value: 'closed',
-                    child: Center(child: Text('customize-avatar-component.eye-types.closed'.tr)),
+                    child: Center(
+                        child: Text(
+                            'customize-avatar-component.eye-types.closed'.tr)),
                   ),
                   DropdownMenuItem(
-                      value: 'cry', child: Center(child: Text('customize-avatar-component.eye-types.cry'.tr))),
+                      value: 'cry',
+                      child: Center(
+                          child: Text(
+                              'customize-avatar-component.eye-types.cry'.tr))),
                   DropdownMenuItem(
                     value: 'default',
-                    child: Center(child: Text('customize-avatar-component.eye-types.default'.tr)),
+                    child: Center(
+                        child: Text(
+                            'customize-avatar-component.eye-types.default'.tr)),
                   ),
                   DropdownMenuItem(
                     value: 'hearts',
-                    child: Center(child: Text('customize-avatar-component.eye-types.hearts'.tr)),
+                    child: Center(
+                        child: Text(
+                            'customize-avatar-component.eye-types.hearts'.tr)),
                   ),
                   DropdownMenuItem(
                     value: 'surprised',
-                    child: Center(child: Text('customize-avatar-component.eye-types.surprised'.tr)),
+                    child: Center(
+                        child: Text(
+                            'customize-avatar-component.eye-types.surprised'
+                                .tr)),
                   ),
                 ],
                 onChanged: (String? value) {
@@ -505,21 +538,33 @@ class ProfileEditScreen extends GetView<AvatarController> {
           content: Obx(() => DropdownButton<String>(
                 menuMaxHeight: 150,
                 value: controller.eyeBrows.value,
-                items: const [
+                items: [
                   DropdownMenuItem(
                     value: 'angry',
-                    child: Center(child: Text('customize-avatar-component.eyebrows-types.angry'.tr)),
+                    child: Center(
+                        child: Text(
+                            'customize-avatar-component.eyebrows-types.angry'
+                                .tr)),
                   ),
                   DropdownMenuItem(
                       value: 'sadConcerned',
-                      child: Center(child: Text('customize-avatar-component.eyebrows-types.sadConcerned'.tr))),
+                      child: Center(
+                          child: Text(
+                              'customize-avatar-component.eyebrows-types.sadConcerned'
+                                  .tr))),
                   DropdownMenuItem(
                     value: 'default',
-                    child: Center(child: Text('customize-avatar-component.eyebrows-types.default'.tr)),
+                    child: Center(
+                        child: Text(
+                            'customize-avatar-component.eyebrows-types.default'
+                                .tr)),
                   ),
                   DropdownMenuItem(
                     value: 'unibrowNatural',
-                    child: Center(child: Text('customize-avatar-component.eyebrows-types.unibrowNatural'.tr)),
+                    child: Center(
+                        child: Text(
+                            'customize-avatar-component.eyebrows-types.unibrowNatural'
+                                .tr)),
                   ),
                 ],
                 onChanged: (String? value) {
@@ -536,25 +581,40 @@ class ProfileEditScreen extends GetView<AvatarController> {
           content: Obx(() => DropdownButton<String>(
                 menuMaxHeight: 150,
                 value: controller.facialHair.value,
-                items: const [
+                items: [
                   DropdownMenuItem(
                     value: 'none',
-                    child: Center(child: Text('customize-avatar-component.facialHair-types.none'.tr)),
+                    child: Center(
+                        child: Text(
+                            'customize-avatar-component.facialHair-types.none'
+                                .tr)),
                   ),
                   DropdownMenuItem(
                     value: 'beardLight',
-                    child: Center(child: Text('customize-avatar-component.facialHair-types.beardLight'.tr)),
+                    child: Center(
+                        child: Text(
+                            'customize-avatar-component.facialHair-types.beardLight'
+                                .tr)),
                   ),
                   DropdownMenuItem(
                       value: 'beardMajestic',
-                      child: Center(child: Text('customize-avatar-component.facialHair-types.beardMajestic'.tr))),
+                      child: Center(
+                          child: Text(
+                              'customize-avatar-component.facialHair-types.beardMajestic'
+                                  .tr))),
                   DropdownMenuItem(
                     value: 'moustacheFancy',
-                    child: Center(child: Text('customize-avatar-component.facialHair-types.moustacheFancy'.tr)),
+                    child: Center(
+                        child: Text(
+                            'customize-avatar-component.facialHair-types.moustacheFancy'
+                                .tr)),
                   ),
                   DropdownMenuItem(
                     value: 'moustacheMagnum',
-                    child: Center(child: Text('customize-avatar-component.facialHair-types.moustacheMagnum'.tr)),
+                    child: Center(
+                        child: Text(
+                            'customize-avatar-component.facialHair-types.moustacheMagnum'
+                                .tr)),
                   ),
                 ],
                 onChanged: (String? value) {
@@ -587,28 +647,44 @@ class ProfileEditScreen extends GetView<AvatarController> {
           content: Obx(() => DropdownButton<String>(
                 menuMaxHeight: 150,
                 value: controller.mouth.value,
-                items: const [
+                items: [
                   DropdownMenuItem(
                     value: 'default',
-                    child: Center(child: Text('customize-avatar-component.mouth-types.default'.tr)),
+                    child: Center(
+                        child: Text(
+                            'customize-avatar-component.mouth-types.default'
+                                .tr)),
                   ),
                   DropdownMenuItem(
-                      value: 'grimace', child: Center(child: Text('customize-avatar-component.mouth-types.grimace'.tr))),
+                      value: 'grimace',
+                      child: Center(
+                          child: Text(
+                              'customize-avatar-component.mouth-types.grimace'
+                                  .tr))),
                   DropdownMenuItem(
                     value: 'sad',
-                    child: Center(child: Text('customize-avatar-component.mouth-types.sad'.tr)),
+                    child: Center(
+                        child: Text(
+                            'customize-avatar-component.mouth-types.sad'.tr)),
                   ),
                   DropdownMenuItem(
                     value: 'smile',
-                    child: Center(child: Text('customize-avatar-component.mouth-types.smile'.tr)),
+                    child: Center(
+                        child: Text(
+                            'customize-avatar-component.mouth-types.smile'.tr)),
                   ),
                   DropdownMenuItem(
                     value: 'screamOpen',
-                    child: Center(child: Text('customize-avatar-component.mouth-types.screamOpen'.tr)),
+                    child: Center(
+                        child: Text(
+                            'customize-avatar-component.mouth-types.screamOpen'
+                                .tr)),
                   ),
                   DropdownMenuItem(
                     value: 'vomit',
-                    child: Center(child: Text('customize-avatar-component.mouth-types.vomit'.tr)),
+                    child: Center(
+                        child: Text(
+                            'customize-avatar-component.mouth-types.vomit'.tr)),
                   ),
                 ],
                 onChanged: (String? value) {
@@ -625,21 +701,33 @@ class ProfileEditScreen extends GetView<AvatarController> {
           content: Obx(() => DropdownButton<String>(
                 menuMaxHeight: 150,
                 value: controller.accessories.value,
-                items: const [
+                items: [
                   DropdownMenuItem(
                     value: 'eyepatch',
-                    child: Center(child: Text('customize-avatar-component.accessories-types.eyepatch'.tr)),
+                    child: Center(
+                        child: Text(
+                            'customize-avatar-component.accessories-types.eyepatch'
+                                .tr)),
                   ),
                   DropdownMenuItem(
                       value: 'sunglasses',
-                      child: Center(child: Text('customize-avatar-component.accessories-types.sunglasses'.tr))),
+                      child: Center(
+                          child: Text(
+                              'customize-avatar-component.accessories-types.sunglasses'
+                                  .tr))),
                   DropdownMenuItem(
                     value: 'round',
-                    child: Center(child: Text('customize-avatar-component.accessories-types.round'.tr)),
+                    child: Center(
+                        child: Text(
+                            'customize-avatar-component.accessories-types.round'
+                                .tr)),
                   ),
                   DropdownMenuItem(
                     value: 'none',
-                    child: Center(child: Text('customize-avatar-component.accessories-types.none'.tr)),
+                    child: Center(
+                        child: Text(
+                            'customize-avatar-component.accessories-types.none'
+                                .tr)),
                   ),
                 ],
                 onChanged: (String? value) {

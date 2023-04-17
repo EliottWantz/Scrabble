@@ -130,7 +130,8 @@ class ProfileScreen extends StatelessWidget {
                               const Icon(Icons.format_list_numbered),
                               const Gap(5),
                               Text(
-                                'Nombre de parties jouées : ${user.summary.userStats?.nbGamesPlayed ?? '--'}',
+                                'profile-screen.nb-games-played'.tr +
+                                    ': ${user.summary.userStats?.nbGamesPlayed ?? '--'}',
                                 style: Get.context!.textTheme.button,
                               )
                             ],

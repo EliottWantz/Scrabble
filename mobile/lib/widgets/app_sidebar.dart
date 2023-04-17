@@ -1,5 +1,4 @@
 import 'package:client_leger/api/api_repository.dart';
-import 'package:client_leger/routes/app_routes.dart';
 import 'package:client_leger/services/auth_service.dart';
 import 'package:client_leger/services/avatar_service.dart';
 import 'package:client_leger/services/game_service.dart';
@@ -10,7 +9,6 @@ import 'package:client_leger/utils/sidebar_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:sidebarx/sidebarx.dart';
 
 class AppSideBar extends StatelessWidget {
@@ -88,13 +86,14 @@ class AppSideBar extends StatelessWidget {
                     value: settingsService.currentLangValue.value,
                     style: TextStyle(color: Colors.white),
                     dropdownColor: Color(0xFF2E2E48),
-                    items: const [
+                    items: [
                       DropdownMenuItem(
                         child: Center(child: Text('language-french'.tr)),
                         value: 'fr',
                       ),
                       DropdownMenuItem(
-                          child: Center(child: Text('language-english'.tr)), value: 'en')
+                          child: Center(child: Text('language-english'.tr)),
+                          value: 'en')
                     ],
                     onChanged: (String? value) async {
                       await settingsService.switchLang(value!);
@@ -149,13 +148,14 @@ class AppSideBar extends StatelessWidget {
                     value: settingsService.currentLangValue.value,
                     style: TextStyle(color: Colors.white),
                     dropdownColor: Color(0xFF2E2E48),
-                    items: const [
+                    items: [
                       DropdownMenuItem(
                         child: Center(child: Text('language-french'.tr)),
                         value: 'fr',
                       ),
                       DropdownMenuItem(
-                          child: Center(child: Text('language-english'.tr)), value: 'en')
+                          child: Center(child: Text('language-english'.tr)),
+                          value: 'en')
                     ],
                     onChanged: (String? value) async {
                       await settingsService.switchLang(value!);
@@ -199,13 +199,14 @@ class AppSideBar extends StatelessWidget {
                     value: settingsService.currentLangValue.value,
                     style: TextStyle(color: Colors.white),
                     dropdownColor: Color(0xFF2E2E48),
-                    items: const [
+                    items: [
                       DropdownMenuItem(
                         child: Center(child: Text('language-french'.tr)),
                         value: 'fr',
                       ),
                       DropdownMenuItem(
-                          child: Center(child: Text('language-english'.tr)), value: 'en')
+                          child: Center(child: Text('language-english'.tr)),
+                          value: 'en')
                     ],
                     onChanged: (String? value) async {
                       await settingsService.switchLang(value!);
@@ -264,13 +265,14 @@ class AppSideBar extends StatelessWidget {
                     value: settingsService.currentLangValue.value,
                     style: TextStyle(color: Colors.white),
                     dropdownColor: Color(0xFF2E2E48),
-                    items: const [
+                    items: [
                       DropdownMenuItem(
                         child: Center(child: Text('language-french'.tr)),
                         value: 'fr',
                       ),
                       DropdownMenuItem(
-                          child: Center(child: Text('language-english'.tr)), value: 'en')
+                          child: Center(child: Text('language-english'.tr)),
+                          value: 'en')
                     ],
                     onChanged: (String? value) async {
                       await settingsService.switchLang(value!);
@@ -325,13 +327,14 @@ class AppSideBar extends StatelessWidget {
                     value: settingsService.currentLangValue.value,
                     style: TextStyle(color: Colors.white),
                     dropdownColor: Color(0xFF2E2E48),
-                    items: const [
+                    items: [
                       DropdownMenuItem(
                         child: Center(child: Text('language-french'.tr)),
                         value: 'fr',
                       ),
                       DropdownMenuItem(
-                          child: Center(child: Text('language-english'.tr)), value: 'en')
+                          child: Center(child: Text('language-english'.tr)),
+                          value: 'en')
                     ],
                     onChanged: (String? value) async {
                       await settingsService.switchLang(value!);
@@ -430,6 +433,10 @@ class AppSideBar extends StatelessWidget {
         SidebarXItem(
           icon: Icons.people_alt,
           label: 'sidebar-component.social'.tr,
+        ),
+        SidebarXItem(
+          icon: Icons.question_mark,
+          label: 'tuto'.tr,
         ),
       ];
     } else if (ModalRoute.of(context)!.settings.name == '/auth/login') {

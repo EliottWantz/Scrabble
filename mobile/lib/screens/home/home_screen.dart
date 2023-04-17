@@ -1,8 +1,8 @@
 import 'package:client_leger/controllers/home_controller.dart';
-import 'package:client_leger/screens/home/social_screen.dart';
 import 'package:client_leger/screens/home/main_menu_screen.dart';
 import 'package:client_leger/screens/home/profile_screen.dart';
-import 'package:client_leger/utils/dialog_helper.dart';
+import 'package:client_leger/screens/home/social_screen.dart';
+import 'package:client_leger/screens/rules_screen.dart';
 import 'package:client_leger/widgets/app_sidebar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -11,7 +11,8 @@ import 'package:sidebarx/sidebarx.dart';
 class HomeScreen extends GetView<HomeController> {
   HomeScreen({Key? key}) : super(key: key);
 
-  final sidebarController = SidebarXController(selectedIndex: 0, extended: true);
+  final sidebarController =
+      SidebarXController(selectedIndex: 0, extended: true);
   final _key = GlobalKey<ScaffoldState>();
 
   @override
@@ -47,6 +48,8 @@ class HomeScreen extends GetView<HomeController> {
               return ProfileScreen();
             case 2:
               return SocialScreen();
+            case 3:
+              return RulesScreen();
             default:
               return Text(
                 pageTitle,
