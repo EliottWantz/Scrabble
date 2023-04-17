@@ -231,7 +231,11 @@ class AppSideBar extends StatelessWidget {
               InkWell(
                 onTap: () async {
                   if (gameService.isGameCreator() || gameService.isTournamentCreator()) {
-                    await DialogHelper.showLobbyCreatorQuitDialog();
+                    bool isTournament = false;
+                    if (gameService.currentTournament.value != null) {
+                      isTournament = true;
+                    }
+                    await DialogHelper.showLobbyCreatorQuitDialog(isTournament);
                   } else {
                     await DialogHelper.showLobbyQuitDialog();
                   }

@@ -16,8 +16,6 @@ class DialogHelper {
   final ApiRepository _apiRepository = Get.find();
   final UserService _userService = Get.find();
 
-  final String gameMode = Get.arguments;
-
   static void showErrorDialog(
       {String title = 'Error', String? description = 'Something went wrong'}) {
     Get.dialog(
@@ -99,7 +97,7 @@ class DialogHelper {
     );
   }
 
-  static Future<void> showLobbyCreatorQuitDialog() async {
+  static Future<void> showLobbyCreatorQuitDialog(isTournament) async {
     Get.dialog(
       Dialog(
         child: Padding(
@@ -108,14 +106,14 @@ class DialogHelper {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                DialogHelper().gameMode == 'tournoi'
+                isTournament
                   ? 'Annuler la création du tournoi'
                   : 'Annuler la création de la partie',
                 style: Get.textTheme.headline4,
               ),
               const Gap(20),
               Text(
-                DialogHelper().gameMode == 'tournoi'
+                isTournament
                   ? 'Êtes-vous sûr de vouloir annuler la création du tournoi'
                   : 'Êtes-vous sûr de vouloir annuler la création de cette partie',
                 style: Get.textTheme.headline6,
@@ -130,7 +128,7 @@ class DialogHelper {
                     ElevatedButton(
                       onPressed: () {
                         if (Get.isDialogOpen!) {
-                          if (DialogHelper().gameMode == 'tournoi') {
+                          if (isTournament) {
                             DialogHelper()._websocketService.leaveTournament(
                                 DialogHelper()._gameService.currentTournamentId
                             );

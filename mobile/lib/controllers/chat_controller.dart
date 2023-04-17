@@ -22,22 +22,22 @@ class ChatController extends GetxController {
   void sendMessage() {
     if (!messageController.text.trim().isEmpty) {
       websocketService.sendMessage(roomService.currentRoomId, messageController.text);
+      messageController.text = '';
     }
-    messageController.text = '';
   }
 
   void sendMessageToCurrentFloatingChatRoom() {
     if (!messageController.text.trim().isEmpty) {
       websocketService.sendMessage(roomService.currentFloatingChatRoomId.value!, messageController.text);
+      messageController.text = '';
     }
-    messageController.text = '';
   }
 
   void sendMessageToGameRoom() {
     if (!messageController.text.trim().isEmpty) {
       websocketService.sendMessage(gameService.currentGameId, messageController.text);
+      messageController.text = '';
     }
-    messageController.text = '';
   }
 
   bool isCurrentUser(String userId) {
