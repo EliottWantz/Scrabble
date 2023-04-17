@@ -50,7 +50,7 @@ func (api *API) setupRoutes(cfg *config.Config) {
 		return c.SendString("Hello api")
 	})
 	r.Post("/signup", api.Ctrls.UserCtrl.SignUp)
-	r.Post("/login", api.Ctrls.UserCtrl.Login)
+	r.Post("/login", api.Ctrls.WebSocketManager.LoginRoute)
 	r.Get("/avatar/defaults", api.Ctrls.UserCtrl.GetDefaultAvatars)
 
 	// Proctected routes

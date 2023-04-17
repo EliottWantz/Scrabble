@@ -2,12 +2,14 @@ package ws
 
 import (
 	"fmt"
+	"time"
 
 	"scrabble/pkg/api/auth"
 	"scrabble/pkg/api/user"
 
 	"github.com/gofiber/fiber/v2"
 	"golang.org/x/exp/slices"
+	"golang.org/x/exp/slog"
 )
 
 type GetMessagesResponse struct {
@@ -28,6 +30,86 @@ func (m *Manager) GetMessages(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(GetMessagesResponse{
 		Messages: msgs,
 	})
+}
+
+type LoginRequest struct {
+	Username string `json:"username,omitempty"`
+	Password string `json:"password,omitempty"`
+	Token    string `json:"token,omitempty"`
+}
+
+type LoginResponse struct {
+	User  *user.User `json:"user,omitempty"`
+	Token string     `json:"token,omitempty"`
+}
+
+func (m *Manager) LoginRoute(c *fiber.Ctx) error {
+	var req LoginRequest
+	err := c.BodyParser(&req)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	slog.Info("login request", "req", req)
+
+	var (
+		u     *user.User
+		token string
+	)
+
+	if req.Username != "" && req.Password != "" {
+		// Login with username and password
+		if u, err = m.Login(req.Username, req.Password); err != nil {
+			return err
+		}
+
+		token, err = m.authSvc.GenerateJWT(u.ID)
+		if err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, "failed to generate token")
+		}
+	} else if req.Token != "" {
+		// Login with token
+		claims, err := m.authSvc.VerifyJWT(req.Token)
+		if err != nil {
+			return fiber.NewError(fiber.StatusUnauthorized, "invalid token")
+		}
+
+		// Refresh token
+		if token, err = m.authSvc.RefreshJWT(req.Token, claims); err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, "failed to refresh token")
+		}
+
+		if u, err = m.UserSvc.GetUser(claims.UserID); err != nil {
+			return err
+		}
+	}
+
+	slog.Info("response", "user", u, "token", token)
+
+	return c.JSON(LoginResponse{
+		User:  u,
+		Token: token,
+	})
+}
+
+func (m *Manager) Login(username, password string) (*user.User, error) {
+	u, err := m.UserSvc.Repo.FindByUsername(username)
+	if err != nil {
+		return nil, fiber.NewError(fiber.StatusNotFound, "user not found")
+	}
+
+	clients := m.getClientsByUserID(u.ID)
+	if len(clients) == 0 {
+		u.IsConnected = false
+	}
+
+	if u.IsConnected {
+		return nil, fiber.NewError(fiber.StatusForbidden, "user already connected")
+	}
+
+	if !auth.PasswordsMatch(password, u.HashedPassword) {
+		return nil, fiber.NewError(fiber.StatusUnauthorized, "password mismatch")
+	}
+	return u, m.UserSvc.AddNetworkingLog(u, "Login", time.Now().UnixMilli())
 }
 
 type ProtectedGameRequest struct {

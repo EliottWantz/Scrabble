@@ -93,7 +93,7 @@ func New(cfg *config.Config) (*API, error) {
 
 	var controllers Controllers
 	{
-		wsManager, err := ws.NewManager(repositories.MessageRepo, services.RoomSvc, services.UserSvc, services.GameSvc)
+		wsManager, err := ws.NewManager(repositories.MessageRepo, services.RoomSvc, services.UserSvc, services.GameSvc, services.AuthSvc)
 		if err != nil {
 			return nil, err
 		}

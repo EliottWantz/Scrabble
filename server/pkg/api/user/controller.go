@@ -4,7 +4,6 @@ import (
 	"scrabble/pkg/api/auth"
 
 	"github.com/gofiber/fiber/v2"
-	"golang.org/x/exp/slog"
 )
 
 type Controller struct {
@@ -66,65 +65,6 @@ func (ctrl *Controller) SignUp(c *fiber.Ctx) error {
 			Token: token,
 		},
 	)
-}
-
-type LoginRequest struct {
-	Username string `json:"username,omitempty"`
-	Password string `json:"password,omitempty"`
-	Token    string `json:"token,omitempty"`
-}
-
-type LoginResponse struct {
-	User  *User  `json:"user,omitempty"`
-	Token string `json:"token,omitempty"`
-}
-
-func (ctrl *Controller) Login(c *fiber.Ctx) error {
-	var req LoginRequest
-	err := c.BodyParser(&req)
-	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, err.Error())
-	}
-	slog.Info("login request", "req", req)
-
-	var (
-		u     *User
-		token string
-	)
-
-	if req.Username != "" && req.Password != "" {
-		// Login with username and password
-		if u, err = ctrl.svc.Login(req.Username, req.Password); err != nil {
-			return err
-		}
-
-		token, err = ctrl.authSvc.GenerateJWT(u.ID)
-		if err != nil {
-			return fiber.NewError(fiber.StatusInternalServerError, "failed to generate token")
-		}
-	} else if req.Token != "" {
-		// Login with token
-		claims, err := ctrl.authSvc.VerifyJWT(req.Token)
-		if err != nil {
-			return fiber.NewError(fiber.StatusUnauthorized, "invalid token")
-		}
-
-		// Refresh token
-		if token, err = ctrl.authSvc.RefreshJWT(req.Token, claims); err != nil {
-			return fiber.NewError(fiber.StatusInternalServerError, "failed to refresh token")
-		}
-
-		if u, err = ctrl.svc.GetUser(claims.UserID); err != nil {
-			return err
-		}
-	}
-
-	slog.Info("response", "user", u, "token", token)
-
-	return c.JSON(LoginResponse{
-		User:  u,
-		Token: token,
-	})
 }
 
 type GetUserResponse struct {
