@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:client_leger/api/api_repository.dart';
 import 'package:client_leger/models/user.dart';
 import 'package:client_leger/routes/app_routes.dart';
@@ -168,7 +166,7 @@ class ProfileScreen extends StatelessWidget {
                               const Gap(5),
                               Text(
                                   'profile-screen.mean-game-time'.tr +
-                                      ': ${user.summary.userStats!.averageTimePlayed != null ? user.summary.userStats!.averageTimePlayed! ~/ pow(10, 5) : '0'} min',
+                                      ': ${user.summary.userStats!.averageTimePlayed != null ? user.summary.userStats!.averageTimePlayed! ~/ (60 * 1000) : '0'} min',
                                   style: Get.context!.textTheme.button)
                             ],
                           )
