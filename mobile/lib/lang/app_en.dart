@@ -207,4 +207,9 @@ const Map<String, String> en_US = {
   "profile-screen.history": "Game history",
   "profile-screen.user-activity": "User activity",
   "profile-screen.data-collection": "Data collection",
+  "profile-screen.no-data": "No data available",
+  "profile-screen.nb-games-won": "Number of games won",
+  "profile-screen.mean-points-game": "Mean points per game",
+  "profile-screen.mean-game-time": "Mean game time",
+  "profile-screen.modif-profil": "Modify profile",
 };

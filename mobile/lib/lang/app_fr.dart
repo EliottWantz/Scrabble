@@ -212,4 +212,12 @@ const Map<String, String> fr_FR = {
   "profile-screen.history": "Historique des parties",
   "profile-screen.user-activity": "Activité de l\'utilisateur",
   "profile-screen.data-collection": "Collecte des données",
+  "profile-screen.no-data": "Aucune données disponible",
+  "profile-screen.nb-games-won": "Nombre de parties gagnées",
+  "profile-screen.mean-points-game": "Moyenne de points par partie",
+  "profile-screen.mean-game-time": "Moyenne de temps de jeu",
+  "profile-screen.modif-profil": "Modifier mon profil",
+  "profile-screen.event-type": "Type de l\'évènement",
+  "profile-screen.date": "Date",
+  "profile-screen.hour": "Heure",
 };

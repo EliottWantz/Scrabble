@@ -140,7 +140,7 @@ class ProfileScreen extends StatelessWidget {
                               const Icon(Icons.check_circle_sharp),
                               const Gap(5),
                               Text(
-                                  'Nombre de parties gagnées : ${user.summary.userStats?.nbGamesWon ?? '--'}',
+                                  'profile-screen.nb-games-won'.tr + ' : ${user.summary.userStats?.nbGamesWon ?? '--'}',
                                   style: Get.context!.textTheme.button)
                             ],
                           ),
@@ -151,7 +151,7 @@ class ProfileScreen extends StatelessWidget {
                               const Icon(Icons.scoreboard_sharp),
                               const Gap(5),
                               Text(
-                                  'Moyenne de points par partie : ${user.summary.userStats?.averagePointsPerGame ?? '--'}',
+                                  'profile-screen.mean-points-game'.tr + ' : ${user.summary.userStats?.averagePointsPerGame ?? '--'}',
                                   style: Get.context!.textTheme.button)
                             ],
                           ),
@@ -162,7 +162,7 @@ class ProfileScreen extends StatelessWidget {
                               const Icon(Icons.timelapse),
                               const Gap(5),
                               Text(
-                                  'Moyenne de temps de jeu : ${user.summary.userStats!.averageTimePlayed != null ? user.summary.userStats!.averageTimePlayed! ~/ pow(10, 5) : '0'} min',
+                                  'profile-screen.mean-game-time'.tr + ': ${user.summary.userStats!.averageTimePlayed != null ? user.summary.userStats!.averageTimePlayed! ~/ pow(10, 5) : '0'} min',
                                   style: Get.context!.textTheme.button)
                             ],
                           )
@@ -180,7 +180,7 @@ class ProfileScreen extends StatelessWidget {
                             size: 40,
                           ),
                         ),
-                        label: const Text('Modifier mon profil'),
+                        label: const Text('profile-screen.modif-profil'.tr),
                       ),
                     ],
                   ),
@@ -202,7 +202,7 @@ class ProfileScreen extends StatelessWidget {
                   children: const [
                     CircularProgressIndicator(),
                     Gap(8),
-                    Text('Collecte des données'),
+                    Text('profile-screen.data-collection'.tr),
                   ],
                 ),
               );
