@@ -2,14 +2,9 @@
 
 ## Run the application
 
-### From pre-built binary
+### Install Golang
 
-```bash
-docker compose up -d
-./out
-```
-
-## Development
+https://go.dev/dl
 
 ### Install taskfile
 
@@ -19,7 +14,19 @@ Run
 go install github.com/go-task/task/v3/cmd/task@latest
 ```
 
+or
+
 https://taskfile.dev/installation/
+
+### Run the server
+
+```bash
+task mongo:up
+task build
+task start
+```
+
+## Development
 
 ### Install watchexec to watch for file changes
 
