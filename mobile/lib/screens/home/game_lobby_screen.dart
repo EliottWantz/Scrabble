@@ -44,22 +44,22 @@ class GameLobbyScreen extends StatelessWidget {
                   // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   spacing: 800,
                   children: [
-                    FloatingActionButton.extended(
-                      heroTag: null,
-                      onPressed: () {
-                        _buildInviteFriendDialog();
-                      },
-                      backgroundColor: Color.fromARGB(255, 98, 0, 238),
-                      foregroundColor: Colors.white,
-                      autofocus: true,
-                      focusElevation: 5,
-                      label: Row(children: const [
-                        Icon(
-                          Icons.people_alt,
-                        ),
-                        Text("Inviter un ami")
-                      ]),
-                    ),
+                    // FloatingActionButton.extended(
+                    //   heroTag: null,
+                    //   onPressed: () {
+                    //     _buildInviteFriendDialog();
+                    //   },
+                    //   backgroundColor: Color.fromARGB(255, 98, 0, 238),
+                    //   foregroundColor: Colors.white,
+                    //   autofocus: true,
+                    //   focusElevation: 5,
+                    //   label: Row(children: const [
+                    //     Icon(
+                    //       Icons.people_alt,
+                    //     ),
+                    //     Text("Inviter un ami")
+                    //   ]),
+                    // ),
                     FloatingActionButton(
                       heroTag: null,
                       onPressed: () {
