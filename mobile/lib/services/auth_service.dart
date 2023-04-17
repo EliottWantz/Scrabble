@@ -12,9 +12,11 @@ import 'package:client_leger/services/avatar_service.dart';
 import 'package:client_leger/services/settings_service.dart';
 import 'package:client_leger/services/storage_service.dart';
 import 'package:client_leger/services/user_service.dart';
+import 'package:client_leger/services/users_service.dart';
 import 'package:client_leger/services/websocket_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 
 class AuthService extends GetxService {
@@ -24,6 +26,7 @@ class AuthService extends GetxService {
   final UserService userService;
   final AvatarService avatarService;
   final SettingsService settingsService = Get.find();
+  final UsersService usersService = Get.find();
 
   AuthService(
       {required this.storageService,
@@ -36,7 +39,13 @@ class AuthService extends GetxService {
     var res = await apiRepository.login(loginRequest);
     if (res == null) return;
     userService.user.value = res.user;
-    userService.friends.addAll(res.user.friends);
+    for (String id in res.user.friends) {
+      if (!userService.friends.value.contains(id)) {
+        userService.friends.add(id);
+      }
+    }
+    print(userService.friends);
+    // userService.friends.addAll(res.user.friends);
     Get.changeTheme(res.user.preferences.theme == 'light'
         ? ThemeConfig.lightTheme
         : ThemeConfig.darkTheme);
@@ -65,7 +74,9 @@ class AuthService extends GetxService {
     // Get.delete<WebsocketService>();
     websocketService.socket.sink.close();
     // websocketService.messages.value = [];
-    userService.friends.clear();
+    userService.friends.value.clear();
+    usersService.users.value.clear();
+    userService.friends.refresh();
     await storageService.remove('token');
     Get.offAllNamed(Routes.AUTH);
   }

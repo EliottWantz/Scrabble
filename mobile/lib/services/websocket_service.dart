@@ -67,6 +67,7 @@ import 'package:client_leger/services/user_service.dart';
 import 'package:client_leger/services/users_service.dart';
 import 'package:client_leger/utils/dialog_helper.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../models/create_dm_room_payload.dart';
@@ -424,7 +425,8 @@ class WebsocketService extends GetxService {
   }
 
   void handleEventListUsers(ListUsersResponse listUsersResponse) {
-    usersService.users.addAll(listUsersResponse.payload.users);
+    usersService.users.value = listUsersResponse.payload.users;
+    // usersService.users.addAll(listUsersResponse.payload.users);
   }
 
   void handleEventListOnlineUsers(ListUsersResponse listUsersResponse) {
@@ -434,13 +436,16 @@ class WebsocketService extends GetxService {
     // List<String> friendUsernames = usersService.getUsernamesFromUserIds(userService.friends.value);
 
     List<String> onlineFriendIds = usersService.getOnlineFriendIds();
+    print(onlineFriendIds);
     onlineFriendIds.sort();
     List<String> offlineFriendIds = usersService.getOfflineFriendIds();
+    print(offlineFriendIds);
     offlineFriendIds.sort();
     onlineFriendIds.addAll(offlineFriendIds);
     userService.friends.value.clear();
     userService.friends.addAll(onlineFriendIds);
     userService.friends.refresh();
+    print(userService.friends.value);
   }
 
   void handleEventListChatRooms(ListChatRoomsResponse listChatRoomsResponse) {
@@ -594,6 +599,10 @@ class WebsocketService extends GetxService {
           gameController.showPoolGameLoserDialog(
               gameService.currentTournament.value!.poolGames[0].id);
         }
+      } else if (gameService.currentGameWinner == null) {
+        gameService.leftGame();
+        Get.back();
+        Get.back();
       } else {
         gameController.showGameOverDialog(gameService.currentGameWinner);
       }

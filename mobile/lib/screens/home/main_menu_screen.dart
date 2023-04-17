@@ -71,25 +71,7 @@ class MainMenuScreen extends GetView<HomeController> {
                   label: const Text('Mode classique'), // <-- Text
                 ),
               ),
-              const Gap(40),
-              SizedBox(
-                width: 210,
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    Get.toNamed(Routes.HOME + Routes.GAME_START,
-                        arguments: 'coop');
-                  },
-                  icon: const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Icon(
-                      MdiIcons.crownCircleOutline,
-                      size: 50,
-                    ),
-                  ),
-                  label: const Text('Mode Coopératif'), // <-- Text
-                ),
-              ),
-              const Gap(40),
+              const Gap(80),
               SizedBox(
                 width: 210,
                 child: ElevatedButton.icon(

@@ -27,8 +27,8 @@ class GameScreen extends GetView<GameController> {
   final GameService _gameService = Get.find();
   final RoomService _roomService = Get.find();
   final SettingsService _settingsService = Get.find();
-  final bool isObserving = Get.arguments;
-  final bool isTournamentGame = Get.arguments;
+  final bool isObserving = Get.arguments[0];
+  final bool isTournamentGame = Get.arguments[1];
 
   final isDialOpen = ValueNotifier(false);
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
