@@ -657,7 +657,10 @@ class WebsocketService extends GetxService {
     gameService.currentGame.value =
         joinedGameAsObserverResponse.payload.gameUpdate;
     bool isObserving = true;
-    bool isTournamentGame = true;
+    bool isTournamentGame = false;
+    if (gameService.currentTournament.value != null) {
+      isTournamentGame = true;
+    }
     Get.offAllNamed(Routes.GAME, arguments: [isObserving, isTournamentGame]);
   }
 
@@ -795,7 +798,11 @@ class WebsocketService extends GetxService {
       gameService.currentGame.value = gameUpdateResponse.payload;
       bool isObserving = false;
       getIndices();
-      Get.offAllNamed(Routes.GAME, arguments: isObserving);
+      bool isTournamentGame = false;
+      if (gameService.currentTournament.value != null) {
+        isTournamentGame = true;
+      }
+      Get.offAllNamed(Routes.GAME, arguments: [isObserving, isTournamentGame]);
     } else if (Get.isRegistered<GameController>()) {
       gameService.currentGame.value = gameUpdateResponse.payload;
       GameController gameController = Get.find();
