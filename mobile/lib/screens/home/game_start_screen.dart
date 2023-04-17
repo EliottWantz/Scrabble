@@ -12,7 +12,7 @@ import 'package:client_leger/widgets/input_field.dart';
 import 'package:flutter/material.dart';
 import 'package:form_validator/form_validator.dart';
 import 'package:gap/gap.dart';
-import 'package:get/getet_storage/get_storage.dart';
+import 'package:get/get.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:sidebarx/sidebarx.dart';
 
