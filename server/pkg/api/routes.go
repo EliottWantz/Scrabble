@@ -14,7 +14,6 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	jwtware "github.com/gofiber/jwt/v3"
 	"github.com/golang-jwt/jwt/v4"
-	"golang.org/x/exp/slog"
 )
 
 func (api *API) setupRoutes(cfg *config.Config) {
@@ -32,13 +31,7 @@ func (api *API) setupRoutes(cfg *config.Config) {
 				TimeFormat: "2006/01/02 15:04:05",
 			},
 		),
-		recover.New(recover.Config{
-			Next: func(c *fiber.Ctx) bool {
-				slog.Info("Server panicked")
-				return false
-			},
-			EnableStackTrace: true,
-		}),
+		recover.New(),
 	)
 	api.App.Get("/metrics", monitor.New(monitor.Config{Title: "Scrabble Server Metrics"}))
 
@@ -59,9 +52,6 @@ func (api *API) setupRoutes(cfg *config.Config) {
 	r.Post("/signup", api.Ctrls.UserCtrl.SignUp)
 	r.Post("/login", api.Ctrls.UserCtrl.Login)
 	r.Get("/avatar/defaults", api.Ctrls.UserCtrl.GetDefaultAvatars)
-	r.Get("/panic", func(c *fiber.Ctx) error {
-		panic("Je vais panic")
-	})
 
 	// Proctected routes
 	r.Use(
