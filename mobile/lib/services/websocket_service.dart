@@ -390,8 +390,17 @@ class WebsocketService extends GetxService {
         {
           if (Get.isRegistered<GameController>()) {
             GameController gameController = Get.find();
-            gameController.currentFirstLetter.value =
-                FirstSquareRequest.fromRawJson(data).payload.coordinates;
+            gameController.currentFirstLetter.value = Position(
+                row: FirstSquareRequest.fromRawJson(data)
+                        .payload
+                        .coordinates
+                        .row +
+                    1,
+                col: FirstSquareRequest.fromRawJson(data)
+                        .payload
+                        .coordinates
+                        .col +
+                    1);
           }
         }
         break;
@@ -1051,8 +1060,10 @@ class WebsocketService extends GetxService {
   }
 
   void placeFirstSquare(String gameId, Position coordinates) {
-    final firstSquarePayload =
-        FirstSquarePayload(gameId: gameId, coordinates: coordinates);
+    final firstSquarePayload = FirstSquarePayload(
+        gameId: gameId,
+        coordinates:
+            Position(row: coordinates.row - 1, col: coordinates.col - 1));
     final firstSquareRequest = FirstSquareRequest(
         event: ClientEventFirstSquare, payload: firstSquarePayload);
     socket.sink.add(firstSquareRequest.toRawJson());

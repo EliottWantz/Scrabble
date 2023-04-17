@@ -1,8 +1,5 @@
 import 'package:client_leger/controllers/auth_controller.dart';
-import 'package:client_leger/routes/app_routes.dart';
-import 'package:client_leger/services/settings_service.dart';
 import 'package:client_leger/widgets/app_sidebar.dart';
-import 'package:client_leger/widgets/custom_button.dart';
 import 'package:client_leger/widgets/input_field.dart';
 import 'package:flutter/material.dart';
 import 'package:form_validator/form_validator.dart';
@@ -45,21 +42,18 @@ class RegisterScreen extends StatelessWidget {
                   width: 600,
                   child: Column(
                     children: [
-                      Text(
-                        'authRegisterWelcome'.tr,
-                          style: Theme.of(context).textTheme.headline6
-                      ),
+                      Text('authRegisterWelcome'.tr,
+                          style: Theme.of(context).textTheme.headline6),
                       const Gap(20.0),
                       InputField(
                         controller: controller.registerEmailController,
                         keyboardType: TextInputType.text,
                         labelText: 'authEmailLabel'.tr,
                         placeholder: 'authEmailPlaceholder'.tr,
-                        validator: ValidationBuilder(
-                                requiredMessage:
-                                    'Le champ ne peut pas être vide')
-                            .email('Entrer un courriel valide')
-                            .build(),
+                        validator:
+                            ValidationBuilder(requiredMessage: 'field-empty'.tr)
+                                .email('email-empty'.tr)
+                                .build(),
                       ),
                       const Gap(20.0),
                       InputField(
@@ -67,11 +61,9 @@ class RegisterScreen extends StatelessWidget {
                         keyboardType: TextInputType.text,
                         labelText: 'authUsernameLabel'.tr,
                         placeholder: 'authUsernamePlaceholder'.tr,
-                        validator: ValidationBuilder(
-                                requiredMessage:
-                                    'Le champ ne peut pas être vide')
-                            .minLength(3, 'trop petit')
-                            .build(),
+                        validator:
+                            ValidationBuilder(requiredMessage: 'field-empty'.tr)
+                                .build(),
                       ),
                       const Gap(20.0),
                       InputField(
@@ -80,21 +72,21 @@ class RegisterScreen extends StatelessWidget {
                         labelText: 'authPasswordLabel'.tr,
                         placeholder: 'authPasswordPlaceholder'.tr,
                         password: true,
-                        validator: ValidationBuilder(
-                                requiredMessage:
-                                    'Le champ ne peut pas être vide')
-                            .regExp(
-                                RegExp(
-                                    r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{3,}$'),
-                                'Veuillez entrez un mot de passe valide')
-                            .build(),
+                        validator:
+                            ValidationBuilder(requiredMessage: 'field-empty'.tr)
+                                .build(),
                       ),
                       const Gap(50.0),
                       ElevatedButton.icon(
                         onPressed: () {
                           controller.onAvatarClick(context);
-                        }, icon: const Icon(Icons.perm_identity_sharp,size: 50,),
-                        label: Text('Choisir son avatar'),
+                        },
+                        icon: const Icon(
+                          Icons.perm_identity_sharp,
+                          size: 50,
+                        ),
+                        label:
+                            Text('avatar-selection-component.bouton-custom'.tr),
                       ),
                       const Gap(50.0),
                     ],

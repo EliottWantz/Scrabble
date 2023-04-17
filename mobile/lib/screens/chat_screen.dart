@@ -182,7 +182,7 @@ class ChatScreen extends GetView<ChatController> {
                           messageInputFocusNode.requestFocus();
                         },
                         decoration: InputDecoration(
-                            hintText: "Entrez un message...",
+                            hintText: "chat-screen.message-hint".tr,
                             suffixIcon: IconButton(
                               icon: Icon(Icons.send),
                               onPressed: () {
@@ -244,7 +244,7 @@ class ChatScreen extends GetView<ChatController> {
                     .leaveChatRoom(controller.roomService.currentRoomId);
               },
               icon: const Icon(Icons.exit_to_app, size: 50),
-              label: Text('Quitter le canal'),
+              label: Text('chat-screen.quit-channel'.tr),
             ),
           )
         ],

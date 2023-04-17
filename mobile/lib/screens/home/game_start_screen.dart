@@ -1,26 +1,18 @@
-import 'package:client_leger/controllers/auth_controller.dart';
-import 'package:client_leger/controllers/home_controller.dart';
 import 'package:client_leger/models/game.dart';
-import 'package:client_leger/models/game_room.dart';
 import 'package:client_leger/models/tournament.dart';
-import 'package:client_leger/routes/app_routes.dart';
 import 'package:client_leger/screens/floating_chat_screen.dart';
 import 'package:client_leger/services/game_service.dart';
 import 'package:client_leger/services/room_service.dart';
 import 'package:client_leger/services/settings_service.dart';
-import 'package:client_leger/services/user_service.dart';
 import 'package:client_leger/services/users_service.dart';
 import 'package:client_leger/services/websocket_service.dart';
-import 'package:client_leger/utils/constants/game.dart';
 import 'package:client_leger/utils/dialog_helper.dart';
-import 'package:client_leger/widgets/custom_button.dart';
 import 'package:client_leger/widgets/app_sidebar.dart';
 import 'package:client_leger/widgets/input_field.dart';
 import 'package:flutter/material.dart';
 import 'package:form_validator/form_validator.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:sidebarx/sidebarx.dart';
 
@@ -101,7 +93,7 @@ class GameStartScreen extends StatelessWidget {
                     image: _settingsService.getLogo(),
                   ),
                   const Gap(20),
-                  Text('Choisissez une option de jeu',
+                  Text('find-game-page.option'.tr,
                       style: Theme.of(context).textTheme.headline6),
                   Gap(Get.height / 8),
                   SizedBox(
@@ -121,7 +113,7 @@ class GameStartScreen extends StatelessWidget {
                         ),
                       ),
                       label: Text(
-                          '${gameMode == 'tournoi' ? 'Créer un tournoi' : 'Créer une partie'}'), // <-- Text
+                          '${gameMode == 'tournoi' ? 'find-tournament-page.create'.tr : 'find-game-page.create'.tr}'), // <-- Text
                     ),
                   ),
                   const Gap(40),
@@ -145,7 +137,7 @@ class GameStartScreen extends StatelessWidget {
                         ),
                       ),
                       label: Text(
-                          '${gameMode == 'tournoi' ? 'Rejoindre un tournoi' : 'Rejoindre une partie'}'), // <-- Text
+                          '${gameMode == 'tournoi' ? 'find-tournament-page.join'.tr : 'find-game-page.join'.tr}'), // <-- Text
                     ),
                   ),
                   const Gap(40),
@@ -169,7 +161,7 @@ class GameStartScreen extends StatelessWidget {
                         ),
                       ),
                       label: Text(
-                          '${gameMode == 'tournoi' ? 'Observer un tournoi' : 'Observer une partie'}'), // <-- Text
+                          '${gameMode == 'tournoi' ? 'find-tournament-page.observe'.tr : 'find-game-page.observe'.tr}'), // <-- Text
                     ),
                   )
                 ],
@@ -191,10 +183,10 @@ class GameStartScreen extends StatelessWidget {
               appBar: AppBar(
                 elevation: 0,
                 toolbarHeight: 0,
-                bottom: const TabBar(
+                bottom: TabBar(
                   tabs: [
-                    Tab(text: 'Parties publiques'),
-                    Tab(text: 'Parties privées'),
+                    Tab(text: 'games-public'.tr),
+                    Tab(text: 'games-private'.tr),
                   ],
                 ),
               ),
@@ -232,7 +224,8 @@ class GameStartScreen extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('Type de la partie', style: Get.textTheme.headlineSmall),
+                  Text('create-game-component.title'.tr,
+                      style: Get.textTheme.headlineSmall),
                   const Gap(20),
                   ToggleButtons(
                       onPressed: (int index) {
@@ -280,15 +273,25 @@ class GameStartScreen extends StatelessWidget {
 
   List<Widget> _buildGameTypeToggleButtons() {
     if (gameMode == 'tournoi') {
-      return const [
-        Padding(padding: EdgeInsets.all(16.0), child: Text('Publique')),
-        Padding(padding: const EdgeInsets.all(16.0), child: Text('Privée'))
+      return [
+        Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Text('create-game-component.Public'.tr)),
+        Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text('create-game-component.Private'.tr))
       ];
     } else {
-      return const [
-        Padding(padding: EdgeInsets.all(16.0), child: Text('Publique')),
-        Padding(padding: const EdgeInsets.all(16.0), child: Text('Protégée')),
-        Padding(padding: const EdgeInsets.all(16.0), child: Text('Privée'))
+      return [
+        Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Text('create-game-component.Public'.tr)),
+        Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text('create-game-component.Protected'.tr)),
+        Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text('create-game-component.Private'.tr))
       ];
     }
   }
@@ -329,7 +332,8 @@ class GameStartScreen extends StatelessWidget {
                       // Get.toNamed(
                       //     Routes.HOME + Routes.GAME_START + Routes.LOBBY);
                     },
-                    child: const Text('Confirmer')),
+                    child:
+                        Text('default-avatar-selection-component.confirm'.tr)),
                 TextButton(
                     style: TextButton.styleFrom(
                         shape: RoundedRectangleBorder(
@@ -339,7 +343,7 @@ class GameStartScreen extends StatelessWidget {
                       DialogHelper.hideLoading();
                       gamePasswordController.text = '';
                     },
-                    child: const Text('Annuler')),
+                    child: Text('join-private-game-component.cancel'.tr)),
               ],
             ),
           ]),
@@ -353,10 +357,9 @@ class GameStartScreen extends StatelessWidget {
       return InputField(
           controller: gamePasswordController,
           keyboardType: TextInputType.text,
-          placeholder: 'Entrez le mot de passe',
-          validator: ValidationBuilder(
-                  requiredMessage: 'Le champ ne peut pas être vide')
-              .build());
+          placeholder: 'login-component.password'.tr,
+          validator:
+              ValidationBuilder(requiredMessage: 'field-empty'.tr).build());
     } else {
       return const SizedBox(height: 0, width: 0);
     }
@@ -378,12 +381,12 @@ class GameStartScreen extends StatelessWidget {
                   tabs: [
                     Tab(
                         text: isTournament
-                            ? 'Tournois publiques'
-                            : 'Parties publiques'),
+                            ? 'tournament-public'.tr
+                            : 'games-public'.tr),
                     Tab(
                         text: isTournament
-                            ? 'Tournois privés'
-                            : 'Parties publiques'),
+                            ? 'tournament-private'.tr
+                            : 'games-private'.tr),
                   ],
                 ),
               ),
@@ -407,32 +410,32 @@ class GameStartScreen extends StatelessWidget {
           () => Expanded(
               child: SingleChildScrollView(
             child: DataTable(
-              columns: const <DataColumn>[
+              columns: <DataColumn>[
                 DataColumn(
                   label: Expanded(
                     child: Text(
-                      'Créateur',
+                      'join-game-component.creator'.tr,
                     ),
                   ),
                 ),
                 DataColumn(
                   label: Expanded(
                     child: Text(
-                      'Joueurs',
+                      'join-game-component.players'.tr,
                     ),
                   ),
                 ),
                 DataColumn(
                   label: Expanded(
                     child: Text(
-                      'Type',
+                      'create-game-component.title'.tr,
                     ),
                   ),
                 ),
                 DataColumn(
                   label: Expanded(
                     child: Text(
-                      'Rejoindre',
+                      'join-game-component.join'.tr,
                     ),
                   ),
                 ),
@@ -453,7 +456,7 @@ class GameStartScreen extends StatelessWidget {
                 onPressed: () {
                   DialogHelper.hideLoading();
                 },
-                child: const Text('Annuler')),
+                child: Text('join-private-game-component.cancel'.tr)),
           ],
         ),
         const Gap(10),
@@ -468,32 +471,32 @@ class GameStartScreen extends StatelessWidget {
           () => Expanded(
               child: SingleChildScrollView(
             child: DataTable(
-              columns: const <DataColumn>[
+              columns: <DataColumn>[
                 DataColumn(
                   label: Expanded(
                     child: Text(
-                      'Créateur',
+                      'join-game-component.creator'.tr,
                     ),
                   ),
                 ),
                 DataColumn(
                   label: Expanded(
                     child: Text(
-                      'Joueurs',
+                      'join-game-component.players'.tr,
                     ),
                   ),
                 ),
                 DataColumn(
                   label: Expanded(
                     child: Text(
-                      'Type',
+                      'create-game-component.title'.tr,
                     ),
                   ),
                 ),
                 DataColumn(
                   label: Expanded(
                     child: Text(
-                      'Rejoindre',
+                      'join-game-component.join'.tr,
                     ),
                   ),
                 ),
@@ -514,7 +517,7 @@ class GameStartScreen extends StatelessWidget {
                 onPressed: () {
                   DialogHelper.hideLoading();
                 },
-                child: const Text('Annuler')),
+                child: Text('join-private-game-component.cancel'.tr)),
           ],
         ),
         const Gap(10),
@@ -545,7 +548,8 @@ class GameStartScreen extends StatelessWidget {
                             Icons.play_arrow,
                             size: 20,
                           ),
-                          label: const Text('Rejoindre'), // <-- Text
+                          label:
+                              Text('join-game-component.join'.tr), // <-- Text
                         ),
                       ),
                     ])
@@ -577,7 +581,8 @@ class GameStartScreen extends StatelessWidget {
                             Icons.play_arrow,
                             size: 20,
                           ),
-                          label: const Text('Rejoindre'), // <-- Text
+                          label:
+                              Text('join-game-component.join'.tr), // <-- Text
                         ),
                       ),
                     ])
@@ -597,8 +602,7 @@ class GameStartScreen extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Choisissez la partie que vous voulez observer',
-                style: Get.textTheme.headlineSmall),
+            Text('games.observe-choose'.tr, style: Get.textTheme.headlineSmall),
             const Gap(20),
             Row(
               mainAxisSize: MainAxisSize.min,
@@ -636,8 +640,8 @@ class GameStartScreen extends StatelessWidget {
     String player1;
     String player2;
     if (game == null) {
-      player1 = 'À déterminer';
-      player2 = 'À déterminer';
+      player1 = 'to-determine'.tr;
+      player2 = 'to-determine'.tr;
     } else {
       player1 = _usersService.getUserUsername(game.userIds[0]);
       player2 = _usersService.getUserUsername(game.userIds[1]);
@@ -680,14 +684,16 @@ class GameStartScreen extends StatelessWidget {
     if (game == null) {
       return ElevatedButton(
           onPressed: () {},
-          child: const Text('Observer'),
+          child: Text('observe'.tr),
           style: ElevatedButton.styleFrom(backgroundColor: Colors.grey));
     } else {
       return ElevatedButton(
           onPressed: () {
-            game.winnerId != "" ? null : _websocketService.joinGameAsObserver(game.id);
+            game.winnerId != ""
+                ? null
+                : _websocketService.joinGameAsObserver(game.id);
           },
-          child: const Text('Observer'),
+          child: Text('observe'.tr),
           style: ElevatedButton.styleFrom(
               backgroundColor: game.winnerId != ""
                   ? Colors.grey
@@ -724,7 +730,8 @@ class GameStartScreen extends StatelessWidget {
                             Icons.play_arrow,
                             size: 20,
                           ),
-                          label: const Text('Rejoindre'), // <-- Text
+                          label:
+                              Text('join-game-component.join'.tr), // <-- Text
                         ),
                       ),
                     ])
@@ -763,7 +770,8 @@ class GameStartScreen extends StatelessWidget {
                             Icons.play_arrow,
                             size: 20,
                           ),
-                          label: const Text('Rejoindre'), // <-- Text
+                          label:
+                              Text('join-game-component.join'.tr), // <-- Text
                         ),
                       ),
                     ])
@@ -834,58 +842,59 @@ class GameStartScreen extends StatelessWidget {
 
   Widget _buildTypeOfTournament(Tournament tournament) {
     if (tournament.isPrivate) {
-      return Text('Privée');
+      return Text('create-game-component.Private'.tr);
     } else {
-      return Text('Ouverte');
+      return Text('create-game-component.Public'.tr);
     }
   }
 
   Widget _buildTypeOfGame(Game game) {
     if (game.isProtected) {
-      return Text('Protégée');
+      return Text('create-game-component.Protected'.tr);
     } else if (game.isPrivateGame) {
-      return Text('Privée');
+      return Text('create-game-component.Private'.tr);
     } else {
-      return Text('Ouverte');
+      return Text('create-game-component.Public'.tr);
     }
   }
 
   void _showWaitingForCreatorApprovalDialog(String gameId) {
-    Get.dialog(Dialog(
-      child: SizedBox(
-        height: 225,
-        width: 300,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text('En attente de la réponse du créateur de la partie',
-                  style: Get.textTheme.headlineSmall),
-              Gap(20),
-              const CircularProgressIndicator(),
-              Gap(20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  TextButton(
-                      style: TextButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              side: const BorderSide(color: Colors.black))),
-                      onPressed: () async {
-                        final res =
-                            await _gameService.revokeJoinGameRequest(gameId);
-                      },
-                      child: const Text('Annuler')),
-                ],
-              ),
-            ],
+    Get.dialog(
+      Dialog(
+        child: SizedBox(
+          height: 225,
+          width: 300,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('waiting'.tr, style: Get.textTheme.headlineSmall),
+                Gap(20),
+                const CircularProgressIndicator(),
+                Gap(20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    TextButton(
+                        style: TextButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                side: const BorderSide(color: Colors.black))),
+                        onPressed: () async {
+                          final res =
+                              await _gameService.revokeJoinGameRequest(gameId);
+                        },
+                        child: Text('join-private-game-component.cancel'.tr)),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
-    ), barrierDismissible: false,
+      barrierDismissible: false,
     );
   }
 
@@ -900,8 +909,7 @@ class GameStartScreen extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('Cette partie est protégée',
-                  style: Get.textTheme.headlineSmall),
+              Text('game-is-protected'.tr, style: Get.textTheme.headlineSmall),
               Gap(20),
               TextField(
                 controller: joinGamePasswordController,
@@ -913,8 +921,8 @@ class GameStartScreen extends StatelessWidget {
                       password: joinGamePasswordController.text);
                   joinGamePasswordInputFocusNode.requestFocus();
                 },
-                decoration: const InputDecoration(
-                    hintText: "Entrez le mot de passe",
+                decoration: InputDecoration(
+                    hintText: "join-protected-game-component.password".tr,
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(8)))),
               ),
@@ -931,7 +939,8 @@ class GameStartScreen extends StatelessWidget {
                         _websocketService.joinGame(game.id,
                             password: joinGamePasswordController.text);
                       },
-                      child: const Text('Confirmer')),
+                      child: Text(
+                          'default-avatar-selection-component.confirm'.tr)),
                   TextButton(
                       style: TextButton.styleFrom(
                           shape: RoundedRectangleBorder(
@@ -941,7 +950,7 @@ class GameStartScreen extends StatelessWidget {
                         DialogHelper.hideLoading();
                         joinGamePasswordController.text = '';
                       },
-                      child: const Text('Annuler')),
+                      child: Text('join-private-game-component.cancel'.tr)),
                 ],
               ),
             ],
