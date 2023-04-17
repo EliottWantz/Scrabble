@@ -170,7 +170,9 @@ func (m *Manager) Accept(cID string) fiber.Handler {
 
 func (m *Manager) Broadcast(p *Packet) {
 	m.Clients.ForEach(func(cID string, c *Client) bool {
-		c.send(p)
+		if c != nil {
+			c.send(p)
+		}
 		return true
 	})
 }
@@ -296,7 +298,7 @@ func (m *Manager) getClientByUserID(userID string) (*Client, error) {
 func (m *Manager) getClientsByUserID(cUserID string) []*Client {
 	clients := []*Client{}
 	m.Clients.ForEach(func(key string, value *Client) bool {
-		if value.UserId == cUserID {
+		if value.UserId == cUserID && value != nil {
 			clients = append(clients, value)
 		}
 		return true
@@ -688,7 +690,9 @@ func (m *Manager) RemoveRoom(rID string) error {
 func (m *Manager) Shutdown() {
 	m.logger.Info("Shutting down manager")
 	m.Clients.ForEach(func(cID string, c *Client) bool {
-		_ = m.RemoveClient(c)
+		if c != nil {
+			_ = m.RemoveClient(c)
+		}
 		return true
 	})
 }

@@ -38,14 +38,16 @@ func NewRoom(m *Manager, ID, name string) *Room {
 
 func (r *Room) Broadcast(p *Packet) {
 	r.Clients.ForEach(func(cID string, c *Client) bool {
-		c.send(p)
+		if c != nil {
+			c.send(p)
+		}
 		return true
 	})
 }
 
 func (r *Room) BroadcastSkipSelf(p *Packet, selfID string) {
 	r.Clients.ForEach(func(cID string, c *Client) bool {
-		if c.ID != selfID {
+		if c.ID != selfID && c != nil {
 			c.send(p)
 		}
 		return true
