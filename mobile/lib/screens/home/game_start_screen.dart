@@ -30,8 +30,8 @@ class GameStartScreen extends StatelessWidget {
 
   final RxList<RxBool> _selectedGameType =
       <RxBool>[true.obs, false.obs, false.obs].obs;
-  final RxList<RxBool> _selectedTournamentType =
-      <RxBool>[true.obs, false.obs].obs;
+  // final RxList<RxBool> _selectedTournamentType =
+  //     <RxBool>[true.obs, false.obs].obs;
   final RxBool _isProtected = false.obs;
   final RxBool selectedChatRoom = false.obs;
 
@@ -204,11 +204,11 @@ class GameStartScreen extends StatelessWidget {
   }
 
   RxList<bool> _getListValues(bool isTournament) {
-    if (isTournament) {
-      return RxList.from(_selectedTournamentType.value.map((e) => e.value));
-    } else {
+    // if (isTournament) {
+    //   return RxList.from(_selectedTournamentType.value.map((e) => e.value));
+    // } else {
       return RxList.from(_selectedGameType.value.map((e) => e.value));
-    }
+    // }
   }
 
   void _showCreateGameOptionsDialog() {
@@ -229,10 +229,11 @@ class GameStartScreen extends StatelessWidget {
                   const Gap(20),
                   ToggleButtons(
                       onPressed: (int index) {
-                        gameMode == 'tournoi'
-                            ? _handleToggleButtonOnPress(
-                                _selectedTournamentType, index)
-                            : _handleToggleButtonOnPress(
+                        // gameMode == 'tournoi'
+                        //     ? _handleToggleButtonOnPress(
+                        //         _selectedTournamentType, index)
+                        //     :
+                        _handleToggleButtonOnPress(
                                 _selectedGameType, index);
                       },
                       isSelected: _getListValues(gameMode == 'tournoi').value,
@@ -277,9 +278,9 @@ class GameStartScreen extends StatelessWidget {
         Padding(
             padding: EdgeInsets.all(16.0),
             child: Text('create-game-component.Public'.tr)),
-        Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text('create-game-component.Private'.tr))
+        // Padding(
+        //     padding: const EdgeInsets.all(16.0),
+        //     child: Text('create-game-component.Private'.tr))
       ];
     } else {
       return [
