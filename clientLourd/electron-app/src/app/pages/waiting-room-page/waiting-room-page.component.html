@@ -4,6 +4,13 @@
   <div>
     <h4>{{getNumUsers()}}{{'waiting-room-page.players' | translate}}</h4>
   </div>
+  <div class="players">
+    <h3>{{"waiting-room-page.users-in-lobby" | translate}}</h3>
+    <div *ngFor="let userInLobby of usersInLobby" class="player">
+      <img src="{{getAvatarUrl(userInLobby)}}" class="avatar">
+      <h3>{{getUserName(userInLobby)}}</h3>
+    </div>
+  </div>
   <div class="players" *ngIf="gameRoom.value && gameRoom.value.isPrivateGame && user.id === gameRoom.value.creatorId">
     <h3>{{"waiting-room-page.request-join" | translate}}</h3>
     <div *ngFor="let userWaiting of usersWaiting" class="player">

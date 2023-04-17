@@ -205,6 +205,6 @@
   "new-dm-room-component.add-friend": "Add a friend",
   "new-dm-room-component.add-to-group": "Add to group",
   "new-dm-room-component.added-friends": "Added friends: ",
-  "new-dm-room-component.remove-friend": "Remove friend"
-
+  "new-dm-room-component.remove-friend": "Remove friend",
+  "waiting-room-page.users-in-lobby": "Users in the lobby"
 }

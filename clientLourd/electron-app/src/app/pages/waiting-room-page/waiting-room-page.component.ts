@@ -28,6 +28,7 @@ export class WaitRoomPageComponent implements OnInit {
   usersWaiting: {userId: string, username: string}[];
   user: User;
   onlineFriends: User[];
+  usersInLobby: string[] = [];
   constructor(private gameService: GameService, private userService: UserService, private socketService: WebSocketService, private storageService: StorageService,
     private commService: CommunicationService, private socialService: SocialService) {
     this.gameRoom = this.gameService.game
@@ -37,12 +38,16 @@ export class WaitRoomPageComponent implements OnInit {
     this.usersWaiting = [];
     this.onlineFriends = [];
     this.gameService.game.subscribe((game) => {
-      if (game)
+      if (game) {
         this.getPlayers(game);
+        this.usersInLobby = game.userIds;
+      }
     });
     this.gameService.tournament.subscribe((tournament) => {
-      if (tournament)
+      if (tournament) {
         this.getPlayersTournament(tournament);
+        this.usersInLobby = tournament.userIds;
+      }
     });
 
     this.gameService.usersWaiting.subscribe((users) => {
@@ -57,6 +62,14 @@ export class WaitRoomPageComponent implements OnInit {
     this.socialService.onlineFriends$.subscribe((users) => {
       this.onlineFriends = users;
     });
+  }
+
+  getUserName(id: string): string {
+    const user = this.storageService.getUserFromId(id);
+    if (user) {
+      return user.username;
+    }
+    return "";
   }
 
 

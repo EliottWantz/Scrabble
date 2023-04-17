@@ -59,6 +59,8 @@ export class SidebarComponent implements OnInit {
             this.selectNav(0);
             this.previousRouteName = ['/home'];
             this.routeIndex = 0;
+            this.gameService.game.next(undefined);
+            this.gameService.tournament.next(undefined);
             break;
 
           case '/login':
