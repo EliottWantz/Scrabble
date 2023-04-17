@@ -47,7 +47,7 @@
     </div>
   </mat-expansion-panel>
   <app-chat-box-button *ngIf="isLoggedIn()"></app-chat-box-button>
-  <div *ngIf="tournamentRoom.value && isObserving()">
+  <div *ngIf="tournamentRoom.value && isObserving()" class="players">
     <div>
         <div *ngFor="let players of tournamentRoom.value.poolGames[0].userIds">{{getUserName(players)}}</div>
         <button (click)="joinGameAsObserver(tournamentRoom.value.poolGames[0])" class="join-button" disabled="{{tournamentRoom.value.poolGames[0].winnerId}}">{{"join-game-component.join" | translate}}</button>
