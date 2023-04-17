@@ -221,4 +221,10 @@ const Map<String, String> fr_FR = {
   "profile-screen.partie": "Partie",
   "profile-screen-won": "gagnée",
   "profile-screen-lost": "perdue",
+  "profile-screen-new-pseudonyme": "Veuillez entrer votre nouveau pseudonyme",
+  "profile-screen-edit-pseudonyme": "Modifier mon pseudonyme",
+  "profile-screen-edit-avatar": "Personaliser votre avatar",
+  "profile-screen-editedit-avatar": "Modifier mon avatar",
+  "profile-screen-select-avatar": "Selection des avatars",
+  "customize-avatar-component.background": "Couleur de l\'arrière plan",
 };
